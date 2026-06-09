@@ -32,7 +32,6 @@ import os
 import shutil
 import subprocess
 from datetime import datetime, timezone
-from email.utils import format_datetime
 
 from feedgen.feed import FeedGenerator
 
@@ -236,7 +235,7 @@ def main() -> int:
         "title": args.title,
         "summary": args.summary,
         "date": args.date,
-        "pub_date": format_datetime(pub_dt),
+        "pub_date": pub_dt.isoformat(),  # ISO; build_feed parses it with fromisoformat
         "mp3_url": mp3_url,
         "bytes": size,
         "duration_seconds": duration,
