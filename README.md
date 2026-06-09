@@ -15,6 +15,8 @@ personal_podcast_generator/
 ├── scripts/fetch_sources.py                   # arXiv + HF Daily Papers + Hacker News
 ├── scripts/make_audio.py                      # Kokoro (local/free) or ElevenLabs (API)
 ├── scripts/publish.py                         # upload MP3 + rebuild feed.xml (github|s3)
+├── scripts/update_history.py                  # maintain history.json (the show's memory)
+├── history.json                               # show memory: 30-day detail + long-term arcs
 ├── run_episode.sh                             # the nightly local entrypoint
 ├── docs/                                       # GitHub Pages: feed.xml + cover.png
 ├── examples/                                   # non–Plan-A entrypoints (Actions, SDK)
@@ -53,6 +55,20 @@ The pipeline deliberately separates **deterministic** work from **agentic** work
 The skill's **grounding rules** are the heart of it: every claim must trace to a fetched
 source, no invented benchmarks/quotes/authors, and "the authors report…" rather than
 "this proves…". A quiet day is fine — the show says so rather than padding.
+
+## Length & memory
+
+- **Length scales with the news.** Episodes run **16–25 minutes**; the skill picks a word
+  target from how many notable items the day actually produced (quiet ~16 min → heavy
+  ~25 min). It never pads a thin day to hit a length.
+- **The show remembers.** `history.json` is the show's memory — the last ~30 days in
+  detail plus a long-term rollup of ongoing storylines, recurring entities, and monthly
+  milestones. Before writing, the skill reads it the way a host recalls their own past
+  episodes: it doesn't re-explain what it's already covered, suppresses true repeats
+  (covering the *update* when a story moves), and picks up ongoing arcs naturally —
+  continuity is felt, not announced with constant callbacks. `update_history.py` keeps
+  the file bounded (rolling episodes past 30 days into the summary). It's committed so
+  the memory persists across nightly runs.
 
 ## Sourcing
 

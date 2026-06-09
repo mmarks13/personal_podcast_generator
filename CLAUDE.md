@@ -23,6 +23,10 @@ to an RSS feed Spotify polls.
 - `scripts/fetch_sources.py` — deterministic pulls (arXiv, HF Daily Papers, HN).
 - `scripts/make_audio.py` — Kokoro/ElevenLabs render + ffmpeg stitch.
 - `scripts/publish.py` — upload MP3 + rebuild iTunes-compatible feed.xml.
+- `scripts/update_history.py` — maintain `history.json` (show memory: 30-day detail +
+  long-term thread/entity/monthly rollup) so episodes don't repeat and arcs build.
+- `history.json` — the show's memory; read before writing each episode, committed so it
+  persists across nightly runs.
 
 ## Run it
 `bash run_episode.sh`  → writes out/episode.json, out/shownotes.md, out/podcast-DATE.mp3,

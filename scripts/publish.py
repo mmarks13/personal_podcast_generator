@@ -36,6 +36,7 @@ from datetime import datetime, timezone
 from feedgen.feed import FeedGenerator
 
 CATALOG_FILE = "episodes.json"   # github: repo root; s3: bucket key
+HISTORY_FILE = "history.json"    # show memory; written by update_history.py, persisted here
 FEED_NAME = "feed.xml"
 DOCS = "docs"                    # GitHub Pages source folder (main branch /docs)
 
@@ -153,7 +154,10 @@ class GitHubBackend:
     def save_catalog(self, catalog: list[dict], message: str) -> None:
         with open(CATALOG_FILE, "w") as f:
             json.dump(catalog, f, indent=2, ensure_ascii=False)
-        subprocess.run(["git", "add", DOCS, CATALOG_FILE], check=True)
+        add = ["git", "add", DOCS, CATALOG_FILE]
+        if os.path.exists(HISTORY_FILE):          # persist the show's memory too
+            add.append(HISTORY_FILE)
+        subprocess.run(add, check=True)
         if subprocess.run(["git", "diff", "--cached", "--quiet"]).returncode != 0:
             subprocess.run(["git", "commit", "-m", message], check=True)
             subprocess.run(["git", "push"], check=True)
@@ -204,6 +208,10 @@ class S3Backend:
         self.s3.put_object(Bucket=self.bucket, Key=CATALOG_FILE,
                            Body=json.dumps(catalog, indent=2).encode(),
                            ContentType="application/json")
+        if os.path.exists(HISTORY_FILE):          # persist the show's memory too
+            with open(HISTORY_FILE, "rb") as f:
+                self.s3.put_object(Bucket=self.bucket, Key=HISTORY_FILE,
+                                   Body=f.read(), ContentType="application/json")
 
 
 # ---------------------------------------------------------------- orchestration
