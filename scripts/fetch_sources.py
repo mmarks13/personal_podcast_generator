@@ -135,7 +135,9 @@ def safe(label: str, fn, *args):
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--hours", type=int, default=28, help="look-back window")
+    ap.add_argument("--hours", type=int, default=48,
+                    help="look-back window. >=48 so arXiv's daily announce gap "
+                         "(newest papers can be ~28h old) doesn't zero out the feed")
     ap.add_argument("--out", default="out/sources.json")
     ap.add_argument("--hf-date", default=None, help="YYYY-MM-DD; default = today")
     args = ap.parse_args()

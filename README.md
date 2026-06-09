@@ -1,21 +1,42 @@
 # Daily AI Podcast
 
-An overnight job that turns the last ~24 hours of AI activity — papers, model
-releases, and top discussion — into a short two-host audio briefing with show notes.
+An overnight job that turns the last ~24–48 hours of AI activity — papers, model
+releases, and top discussion — into a grounded **~15-minute** two-host audio briefing,
+renders it to MP3, and publishes it to an RSS feed Spotify polls.
 
 It's built **Claude Code–native**: a [skill](.claude/skills/daily-ai-podcast/SKILL.md)
-encodes the editorial workflow, deterministic Python handles the feeds and the
-text-to-speech, and a scheduler of your choice fires it every night.
+encodes the editorial workflow, deterministic Python handles the feeds, the
+text-to-speech, and the publish step, and a local scheduler fires it every night.
 
 ```
-daily-ai-podcast/
+personal_podcast_generator/
 ├── .claude/skills/daily-ai-podcast/SKILL.md   # the editor-in-chief brain
+├── config/sources.yaml                        # the source watchlist (Tier 1/2)
 ├── scripts/fetch_sources.py                   # arXiv + HF Daily Papers + Hacker News
-├── scripts/make_audio.py                       # Kokoro (local/free) or ElevenLabs (API)
-├── run_daily.py                                # Agent SDK entrypoint (one of 3 options)
-├── .github/workflows/daily-podcast.yml         # GitHub Actions entrypoint (option 2)
+├── scripts/make_audio.py                      # Kokoro (local/free) or ElevenLabs (API)
+├── scripts/publish.py                         # upload MP3 + rebuild feed.xml (github|s3)
+├── run_episode.sh                             # the nightly local entrypoint
+├── docs/                                       # GitHub Pages: feed.xml + cover.png
+├── examples/                                   # non–Plan-A entrypoints (Actions, SDK)
 └── requirements.txt
 ```
+
+## How this runs (Plan A)
+
+The whole pipeline runs **locally on your machine** and costs ≈ $0 beyond your Claude
+Pro subscription:
+
+- **Claude work** uses the **logged-in Claude Pro CLI** (`claude login` / OAuth) — so it
+  draws on the Pro plan, not the pay-per-token API. **`ANTHROPIC_API_KEY` is never set in
+  the run environment** (`run_episode.sh` explicitly unsets it); setting it would switch
+  billing to the paid API.
+- **Audio** is **local [Kokoro](https://github.com/hexgrad/kokoro)** (open-weight,
+  Apache-2.0, free, CPU-friendly). `ffmpeg` must be on `PATH`.
+- **Hosting** is **GitHub-native**: the MP3 is uploaded as a **GitHub Release asset**,
+  and `feed.xml` + the cover are served from `docs/` via **GitHub Pages**. No object
+  storage or credentials required. (`publish.py` also has an S3/R2 backend behind
+  `PUBLISH_BACKEND=s3` if you'd rather use a bucket.)
+- **Orchestration** is a local **launchd/cron** job that fires `run_episode.sh` nightly.
 
 ## Architecture (and why it's split this way)
 
@@ -27,120 +48,112 @@ The pipeline deliberately separates **deterministic** work from **agentic** work
 | Releases + news | Claude's `WebSearch` / `WebFetch` | Launches and blog posts have no good feed. Multi-step discovery is exactly what an agent is for. |
 | Summarize + script | Claude, via the skill | The judgment step — what matters, how to say it, grounded in only what was gathered. |
 | Audio | `make_audio.py` (Kokoro or ElevenLabs) + ffmpeg | Deterministic render; swap the voice engine without touching anything else. |
+| Publish | `publish.py` (github or s3 backend) | Uploads the MP3 and rebuilds an iTunes-compatible `feed.xml` from the episode catalog. |
 
 The skill's **grounding rules** are the heart of it: every claim must trace to a fetched
 source, no invented benchmarks/quotes/authors, and "the authors report…" rather than
-"this proves…". (If you've built RAG with faithfulness scoring, this is the same
-discipline applied to a generation task — you can even point an NLI check at
-`episode.json` vs. `sources.json` as a nightly guardrail.)
+"this proves…". A quiet day is fine — the show says so rather than padding.
 
 ## Sourcing
 
-- **arXiv API** — `cs.AI`, `cs.CL`, `cs.LG`, newest first. Rock-solid, no key.
-- **Hugging Face Daily Papers** (`/api/daily_papers`) — AK's curated, upvoted feed; the
-  best single signal for "what the field is actually reading today." There's also an
-  official [`huggingface-papers` skill](https://github.com/huggingface/skills) you can
-  drop in if you want richer per-paper metadata.
-- **Hacker News** (Algolia API) — AI-keyword front-page stories by points, for the
-  practitioner pulse and links the curated feeds miss.
+The watchlist lives in [`config/sources.yaml`](config/sources.yaml) (Tier 1 = daily
+core; Tier 2 = optional). `fetch_sources.py` covers the API-backed sources
+deterministically; the skill gathers the rest with web tools.
+
+- **arXiv API** — `cs.AI`, `cs.CL`, `cs.LG`, `cs.MA`, newest first. Rock-solid, no key.
+  (The fetcher defaults to a **48-hour** window because arXiv's daily announcement gap
+  can leave the freshest papers ~28h old — a tighter window intermittently returns zero.)
+- **Hugging Face Daily Papers** (`/api/daily_papers`) — curated, upvoted feed; the best
+  single signal for "what the field is actually reading today."
+- **Hacker News** (Algolia API) — AI-keyword front-page stories by points.
 - **Releases & news** — gathered by the agent from primary sources (Anthropic, OpenAI,
   DeepMind, Meta, Mistral release notes/model cards), aggregators used only for
-  discovery. More robust than hardcoding RSS feeds that rot.
+  discovery, then verified at the primary source.
 
 ## Text-to-speech: pick your engine
 
 `make_audio.py` ships two backends; set `TTS_BACKEND` (or `--backend`).
 
 - **`kokoro`** (default) — open-weight 82M model, **Apache-2.0, free, runs on CPU**.
-  Excellent for informational narration; delivery is a touch flatter and it can't clone
-  voices. Best when you want zero per-episode cost and full local control.
-- **`elevenlabs`** — **ElevenLabs v3** (GA early 2026) leads expressive, multi-speaker
-  narration and handles two-host banter best. Paid API (~$165/1M chars), needs
-  `ELEVENLABS_API_KEY`.
+  Excellent for informational narration; delivery is a touch flatter. The Plan A default.
+- **`elevenlabs`** — more expressive, multi-speaker. Paid API, needs `ELEVENLABS_API_KEY`.
+  Left intact for later; Plan A does not depend on it.
 
-Other reasonable swaps if you want them: **Gemini Flash TTS** (per-speaker scene
-direction), **Fish Audio S2** (~$15/1M chars, cheap hosted), **Chatterbox** (MIT, voice
-cloning, needs a GPU), **VibeVoice** (long-form). If you'd rather not maintain the
-render step at all, [**Podcastfy**](https://github.com/souzatharsis/podcastfy) is a
-batteries-included open-source library that does script→audio across OpenAI/Google/
-ElevenLabs/Edge TTS in one call — but the thin pipeline here matches a
-"no heavy framework" preference and keeps every step inspectable.
-
-## Scheduling: three ways to run it overnight
-
-All three run the *same* skill. Choose by where the audio must be generated and whether
-you want a machine of your own involved.
-
-### Option 1 — Claude Code Routine (cleanest hands-off)
-Anthropic shipped **Routines** (research preview, April 2026): a saved Claude Code
-config that runs in Anthropic's managed cloud on a schedule — **your laptop can be
-closed**. Create one from the CLI:
-
-```
-/schedule every day at 1am: use the daily-ai-podcast skill to produce today's episode
-```
-
-Manage at `claude.ai/code/routines`. Caveats: minimum cadence is **hourly** (daily is
-fine), it runs against a connected repo, and because it's in the cloud you must use an
-**API TTS backend** (set `TTS_BACKEND=elevenlabs`) — local Kokoro needs a machine you
-control. Available on Pro/Max/Team/Enterprise with Claude Code on the web; **not yet on
-Bedrock/Vertex** (use Option 2 there). Have the routine commit the MP3 to the repo or
-push it to S3/email for delivery.
-
-### Option 2 — GitHub Actions (durable, serverless-ish, version-controlled)
-See [`.github/workflows/daily-podcast.yml`](.github/workflows/daily-podcast.yml). A
-`schedule:` cron trigger installs ffmpeg + the Claude Code CLI, runs the skill headless
-with `claude -p`, and uploads the episode as an artifact. Works with Bedrock/Vertex,
-runs local Kokoro on the runner for free, and you can swap the artifact step for a
-commit, an R2/S3 upload, or an RSS-feed update. (Anthropic's official
-`anthropics/claude-code-action@v1` is the alternative if you want the agent to operate
-on the repo itself.)
-
-### Option 3 — OS cron / launchd + `claude -p` (full control, local TTS)
-Best if you want everything on your own box (and free local audio). One crontab line:
-
-```bash
-0 1 * * *  cd /path/to/daily-ai-podcast && TTS_BACKEND=kokoro \
-  claude -p "Use the daily-ai-podcast skill to produce today's episode, following its grounding rules." \
-  --allowedTools "Bash Read Write WebSearch WebFetch Skill" \
-  --permission-mode acceptEdits >> out/cron.log 2>&1
-```
-
-The machine must be awake at fire time (on macOS prefer `launchd`, which can wake the
-machine; on a Mac mini / always-on server this is the sweet spot). `run_daily.py` is the
-same thing via the **Agent SDK** if you'd rather drive it from Python and wrap it in your
-own logging/observability.
-
-> Two more session-scoped primitives exist — `/loop` (polls every few minutes while a
-> session is open) and Claude Desktop scheduled tasks (machine must be on). Neither
-> survives a closed terminal, so they're not the right tool for an unattended nightly
-> job; Routines, Actions, or cron are.
+Voice IDs and the TTS model are at the top of `make_audio.py`.
 
 ## Setup
 
 ```bash
+python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
-sudo apt-get install -y ffmpeg            # or: brew install ffmpeg
-npm install -g @anthropic-ai/claude-code  # needed for claude -p and the Agent SDK
-export ANTHROPIC_API_KEY=sk-ant-...
-# Optional, for higher-quality voices:
-export ELEVENLABS_API_KEY=...  &&  export TTS_BACKEND=elevenlabs
+# ffmpeg is a system dependency:  sudo apt-get install -y ffmpeg   (or: brew install ffmpeg)
+# Claude Code CLI, logged in on this machine:
+claude login          # one-time; the nightly run uses this Pro session
+
+cp .env.example .env  # then fill in SHOW_* / OWNER_EMAIL. Do NOT add ANTHROPIC_API_KEY.
 ```
 
-Test the pieces independently first, then wire up a scheduler:
+Test the pieces independently, then do a full run:
 
 ```bash
-python scripts/fetch_sources.py --hours 28 --out out/sources.json   # 1. sources
-claude -p "Use the daily-ai-podcast skill to produce today's episode." \
-  --allowedTools "Bash Read Write WebSearch WebFetch Skill" --permission-mode acceptEdits
-# 2. full run (writes out/episode.json, out/shownotes.md, out/podcast-*.mp3)
+# 1. deterministic sources only
+python scripts/fetch_sources.py --hours 48 --out out/sources.json
+
+# 2. confirm Pro auth works non-interactively (must print "ok", no API-key prompt)
+claude -p "Reply with the single word: ok" --max-turns 1
+
+# 3. full episode end to end (fetch → gather → script → render → publish)
+bash run_episode.sh
 ```
+
+`run_episode.sh` writes `out/episode.json`, `out/shownotes.md`, and
+`out/podcast-YYYY-MM-DD.mp3`, then calls `publish.py` to upload the MP3 and update the
+feed. Validate the feed (e.g. castfeedvalidator.com / podba.se) and listen before you
+schedule anything.
+
+## Publishing & Spotify
+
+`publish.py` (github backend) uploads the MP3 as a release asset, copies the cover to
+`docs/cover.png`, rebuilds `docs/feed.xml` from `episodes.json`, and commits + pushes
+`docs/`. GitHub Pages then serves the feed at
+`https://<owner>.github.io/<repo>/feed.xml`.
+
+One-time Spotify submission: **Spotify for Creators → Add a new show → host =
+"Somewhere else"** → paste the Pages feed URL → enter the 8-digit code Spotify emails to
+`OWNER_EMAIL`. After approval, new episodes appear automatically within a couple hours of
+each nightly feed update.
+
+## Scheduling (Plan A: local launchd / cron)
+
+The run must execute on the machine where you ran `claude login`, so it uses your Pro
+subscription. Verify auth works non-interactively first (step 2 above), then install a
+schedule.
+
+**Linux (cron):**
+```cron
+30 5 * * *  cd /ABSOLUTE/PATH/personal_podcast_generator && . .venv/bin/activate && ./run_episode.sh >> out/run.log 2>&1
+```
+
+**macOS (launchd):** a `~/Library/LaunchAgents/com.user.dailyaipodcast.plist` with a
+`StartCalendarInterval` — preferred because it can wake the machine. The Mac must be
+awake at fire time. See `PLAN.md` §7 for the full plist.
+
+> One run/night fits comfortably within Pro's normal limits; a heavy Claude Code coding
+> week could occasionally bump a limit, in which case Max helps.
+
+## Other entrypoints
+
+`examples/` holds two **non–Plan-A** alternatives, kept for reference and not wired in:
+
+- `examples/run_daily.py` — the same skill driven via the **Claude Agent SDK** (Python),
+  for wrapping in your own logging/observability.
+- `examples/daily-podcast.yml` — a **GitHub Actions** workflow that runs the skill on
+  GitHub's infrastructure. Note: it sets `ANTHROPIC_API_KEY` (paid API) and renders on
+  the runner — a deliberate deviation from Plan A's local-Pro + local-Kokoro model.
 
 ## Things you'll want to tune
 - Host personas, segment count, and target length — in the skill.
-- arXiv categories, the news source list, HN points threshold — in the skill / fetcher.
-- Voice IDs and the TTS model — top of `make_audio.py` (env vars `ELEVEN_VOICE_A/B`).
-- Delivery: add a step to push to a private podcast RSS feed (e.g. an S3/R2 bucket +
-  a generated `feed.xml`) so it lands in your podcast app each morning.
+- Tier-1/Tier-2 source mix — in `config/sources.yaml`.
+- arXiv categories, HN points threshold, look-back window — in the fetcher / skill.
 - A faithfulness guardrail: a small post-step that scores `episode.json` claims against
   `sources.json` and flags anything unsupported before publish.

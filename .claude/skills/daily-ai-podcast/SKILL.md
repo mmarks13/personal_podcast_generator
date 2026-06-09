@@ -26,7 +26,7 @@ Run these steps in order. Do not skip the grounding rules in step 3.
 Run the fetcher. It writes `out/sources.json` and prints a summary.
 
 ```bash
-python scripts/fetch_sources.py --hours 28 --out out/sources.json
+python scripts/fetch_sources.py --hours 48 --out out/sources.json
 ```
 
 This covers: recent arXiv papers (cs.AI / cs.CL / cs.LG), the Hugging Face Daily Papers
