@@ -33,12 +33,14 @@ import shutil
 import subprocess
 from datetime import datetime, timezone
 
+import markdown as md
 from feedgen.feed import FeedGenerator
 
 CATALOG_FILE = "episodes.json"   # github: repo root; s3: bucket key
 HISTORY_FILE = "history.json"    # show memory; written by update_history.py, persisted here
 FEED_NAME = "feed.xml"
 DOCS = "docs"                    # GitHub Pages source folder (main branch /docs)
+EPISODES_DIR = "episodes"        # per-episode HTML notes pages (under DOCS / bucket)
 
 
 # ---------------------------------------------------------------- shared helpers
@@ -55,6 +57,82 @@ def hhmmss(seconds: int) -> str:
     h, rem = divmod(seconds, 3600)
     m, s = divmod(rem, 60)
     return f"{h:02d}:{m:02d}:{s:02d}"
+
+
+def notes_to_html(notes_md: str) -> str:
+    """Convert shownotes.md to the HTML used in <content:encoded> and the web page.
+
+    The skill writes the notes as: an H1 title, a bold date line, the summary
+    paragraph, then '## Papers / ## Releases / ## Industry & Discussion' sections of
+    linked sources. The H1/date are redundant with the feed's own title/pubDate, so we
+    drop the leading H1 and render from the summary down.
+    """
+    lines = notes_md.splitlines()
+    # Drop a leading H1 (the episode title) if present; keep everything after it.
+    if lines and lines[0].lstrip().startswith("# "):
+        lines = lines[1:]
+    body = "\n".join(lines).strip()
+    return md.markdown(body, output_format="html5")
+
+
+def episode_page_html(title: str, date: str, notes_html: str, mp3_url: str) -> str:
+    """A standalone per-episode notes page for GitHub Pages."""
+    show = os.environ.get("SHOW_TITLE", "AI Daily")
+    return f"""<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{title} — {show}</title>
+<style>
+  body {{ max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }}
+  h1 {{ font-size: 1.5rem; line-height: 1.25; }}
+  .date {{ color: #666; margin-bottom: 1.5rem; }}
+  audio {{ width: 100%; margin: 1rem 0 2rem; }}
+  h2 {{ margin-top: 2rem; font-size: 1.15rem; }}
+  a {{ color: #0b5fff; }}
+  footer {{ margin-top: 3rem; color: #888; font-size: 0.9rem; }}
+</style></head><body>
+<h1>{title}</h1>
+<div class="date">{show} — {date}</div>
+<audio controls preload="none" src="{mp3_url}"></audio>
+{notes_html}
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>"""
+
+
+def index_page_html(catalog: list[dict]) -> str:
+    """A simple episodes index for GitHub Pages, newest first."""
+    show = os.environ.get("SHOW_TITLE", "AI Daily")
+    desc = os.environ.get("SHOW_DESC", "A daily AI news briefing.")
+    rows = []
+    for ep in sorted(catalog, key=lambda e: e["date"], reverse=True):
+        rows.append(
+            f'<li><a href="{EPISODES_DIR}/{ep["date"]}.html">{ep["title"]}</a>'
+            f'<div class="meta">{ep["date"]}</div></li>'
+        )
+    items = "\n".join(rows) or "<li>No episodes yet.</li>"
+    return f"""<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{show}</title>
+<style>
+  body {{ max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }}
+  h1 {{ font-size: 1.6rem; }}
+  ul {{ list-style: none; padding: 0; }}
+  li {{ padding: 0.75rem 0; border-bottom: 1px solid #eee; }}
+  li a {{ font-weight: 600; color: #0b5fff; text-decoration: none; }}
+  .meta {{ color: #777; font-size: 0.9rem; }}
+  .lead {{ color: #555; }}
+</style></head><body>
+<h1>{show}</h1>
+<p class="lead">{desc}</p>
+<ul>
+{items}
+</ul>
+</body></html>"""
 
 
 def build_feed(catalog: list[dict], *, feed_self_url: str, cover_url: str) -> bytes:
@@ -82,7 +160,15 @@ def build_feed(catalog: list[dict], *, feed_self_url: str, cover_url: str) -> by
         fe = fg.add_entry()
         fe.id(ep["guid"])
         fe.title(ep["title"])
-        fe.description(ep.get("summary", ""))
+        # Full show notes (summary + linked sources) as HTML in <description>, which
+        # Spotify/Apple render; the plain summary goes in <itunes:summary>. Fall back
+        # to the plain summary for older episodes with no stored HTML.
+        notes_html = ep.get("summary_html")
+        if notes_html:
+            fe.description(notes_html, isSummary=False)
+        else:
+            fe.description(ep.get("summary", ""))
+        fe.podcast.itunes_summary(ep.get("summary", ""))
         fe.enclosure(ep["mp3_url"], str(ep["bytes"]), "audio/mpeg")
         fe.published(datetime.fromisoformat(ep["pub_date"]))
         fe.podcast.itunes_duration(hhmmss(ep["duration_seconds"]))
@@ -151,6 +237,19 @@ class GitHubBackend:
         with open(os.path.join(DOCS, FEED_NAME), "wb") as f:
             f.write(feed_bytes)
 
+    def publish_pages(self, catalog: list[dict]) -> None:
+        """Write a per-episode notes page + an episodes index into docs/ (Pages)."""
+        ep_dir = os.path.join(DOCS, EPISODES_DIR)
+        os.makedirs(ep_dir, exist_ok=True)
+        for ep in catalog:
+            html = episode_page_html(ep["title"], ep["date"],
+                                     ep.get("summary_html", f"<p>{ep.get('summary','')}</p>"),
+                                     ep["mp3_url"])
+            with open(os.path.join(ep_dir, f"{ep['date']}.html"), "w") as f:
+                f.write(html)
+        with open(os.path.join(DOCS, "index.html"), "w") as f:
+            f.write(index_page_html(catalog))
+
     def save_catalog(self, catalog: list[dict], message: str) -> None:
         with open(CATALOG_FILE, "w") as f:
             json.dump(catalog, f, indent=2, ensure_ascii=False)
@@ -204,6 +303,19 @@ class S3Backend:
         self.s3.put_object(Bucket=self.bucket, Key=FEED_NAME, Body=feed_bytes,
                            ContentType="application/rss+xml")
 
+    def publish_pages(self, catalog: list[dict]) -> None:
+        """Write per-episode notes pages + an index into the bucket."""
+        for ep in catalog:
+            html = episode_page_html(ep["title"], ep["date"],
+                                     ep.get("summary_html", f"<p>{ep.get('summary','')}</p>"),
+                                     ep["mp3_url"])
+            self.s3.put_object(Bucket=self.bucket,
+                               Key=f"{EPISODES_DIR}/{ep['date']}.html",
+                               Body=html.encode(), ContentType="text/html")
+        self.s3.put_object(Bucket=self.bucket, Key="index.html",
+                           Body=index_page_html(catalog).encode(),
+                           ContentType="text/html")
+
     def save_catalog(self, catalog: list[dict], message: str) -> None:
         self.s3.put_object(Bucket=self.bucket, Key=CATALOG_FILE,
                            Body=json.dumps(catalog, indent=2).encode(),
@@ -220,8 +332,14 @@ def main() -> int:
     ap.add_argument("--mp3", required=True)
     ap.add_argument("--title", required=True)
     ap.add_argument("--summary", default="")
+    ap.add_argument("--notes", default="", help="path to shownotes.md (full show notes)")
     ap.add_argument("--date", required=True, help="YYYY-MM-DD")
     args = ap.parse_args()
+
+    summary_html = ""
+    if args.notes and os.path.exists(args.notes):
+        with open(args.notes) as f:
+            summary_html = notes_to_html(f.read())
 
     backend_name = os.environ.get("PUBLISH_BACKEND", "github").lower()
     backend = GitHubBackend() if backend_name == "github" else S3Backend()
@@ -242,6 +360,7 @@ def main() -> int:
         "guid": guid,
         "title": args.title,
         "summary": args.summary,
+        "summary_html": summary_html,   # full show notes (HTML) for the feed + web page
         "date": args.date,
         "pub_date": pub_dt.isoformat(),  # ISO; build_feed parses it with fromisoformat
         "mp3_url": mp3_url,
@@ -252,10 +371,13 @@ def main() -> int:
     feed = build_feed(catalog, feed_self_url=backend.feed_self_url,
                       cover_url=backend.cover_url)
     backend.publish_feed(feed)
+    backend.publish_pages(catalog)
     backend.save_catalog(catalog, f"Publish episode {args.date}")
 
     print(f"Published. Audio: {mp3_url}")
     print(f"Feed: {backend.feed_self_url}  ({len(catalog)} episodes)")
+    print(f"Notes page: {backend.pages_base if hasattr(backend,'pages_base') else backend.base}"
+          f"/{EPISODES_DIR}/{args.date}.html")
     return 0
 
 

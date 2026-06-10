@@ -37,7 +37,8 @@ try: summary = open("out/shownotes.md").read().split("\n\n")[1][:600]
 except Exception: pass
 subprocess.run(["python3","scripts/publish.py","--mp3",mp3[-1],
                 "--title",ep.get("title",f"AI Daily — {date}"),
-                "--summary",summary,"--date",ep.get("date",date)], check=True)
+                "--summary",summary,"--notes","out/shownotes.md",
+                "--date",ep.get("date",date)], check=True)
 PY
 
 echo "Done: $DATE"
