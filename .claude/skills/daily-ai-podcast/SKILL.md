@@ -49,8 +49,10 @@ Use it to inform, not to perform:
 - **Don't re-explain what you've already established.** If you introduced a model, a
   paper, or a company recently, assume the listener has the background — cover today's
   development, not the backstory again.
-- **Suppress true repeats.** Skip a story already covered unless it genuinely moved.
-  When it has moved, cover the *update*, not the original news.
+- **Suppress true repeats.** A story already covered, with nothing new, doesn't run
+  again — when it has moved, cover the *update*, not the original news. You act on this
+  during gathering (step 2 has a repeat-check that drops obvious no-movement repeats
+  before you waste a verify on them); keep it in mind here too.
 - **Pick up arcs naturally.** When today advances an ongoing thread, continue it the way
   a host naturally would — informed and current. A brief, earned reference to past
   coverage is fine **occasionally**, only when it adds something. Do not pepper the show
@@ -72,6 +74,18 @@ Pull as many genuinely notable items as the day actually warrants — roughly 6 
 quiet day, 10+ on a heavy one. The count drives the episode length (see step 3). Prefer
 primary sources over secondhand coverage. A quiet day is fine — a shorter show is the
 correct outcome; never pad to hit a length.
+
+**Repeat-check before you verify.** As you discover each candidate, compare it against
+the memory you read in step 1.6 *before* spending a full fetch/verify on it. From the
+headline or snippet alone:
+- If it's **clearly the same story you already covered and nothing has moved** (no new
+  release, number, decision, or development — just the item resurfacing), drop it now.
+  Don't fetch it, don't verify it; it isn't going in the show.
+- If it **might be an update** to something covered — or you can't tell from the snippet —
+  **keep verifying it** the normal way. When confirmed, cover the *update*, not the
+  original news. Genuine movement on an ongoing thread is exactly what you want.
+- When in doubt, verify. This check only skips the obvious no-movement repeats; it must
+  never drop a real development just because the topic is familiar.
 
 ### 3. Write the script — grounded, no embellishment
 Write a two-host dialogue (`HOST_A`, `HOST_B`). **Length scales with the day's news** —
