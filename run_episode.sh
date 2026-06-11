@@ -19,9 +19,9 @@ mkdir -p out
 
 # 1–4: Claude follows the skill — fetch, gather, write script, render MP3.
 claude -p "Use the daily-ai-podcast skill to produce today's episode end to end, \
-following its grounding rules and news-scaled length (16-25 min per the skill's tiers). \
+following its grounding rules and length target (18-22 min). \
 Print the MP3 path when done." \
-  --allowedTools "Bash Read Write WebSearch WebFetch Skill" \
+  --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
   --permission-mode acceptEdits \
   --max-turns 80
 

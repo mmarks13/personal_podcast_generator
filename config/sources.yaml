@@ -1,88 +1,205 @@
-# Source watchlist. method: api | rss | fetch. tier 1 = daily core; tier 2 = optional.
+# Source watchlist
+# method: api | rss | fetch
+# tier 1 = daily core
+# tier 2 = optional / supporting source
+#
+# Global source rule:
+# Use broad AI newsletters and aggregators for discovery, but rely on primary
+# sources, independent benchmarks, technical blogs, public-sector sources, and
+# credible reporting to decide what deserves coverage. Treat vendor announcements,
+# demos, social posts, and benchmark claims as leads, not conclusions.
+
 sources:
-  # --- Papers ---
-  - name: arXiv (cs.AI/CL/LG/MA)
+  # --- Papers / research discovery ---
+  - name: arXiv Core AI/LLM/Agents
     method: api
-    url: http://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL+OR+cat:cs.LG+OR+cat:cs.MA&sortBy=submittedDate&sortOrder=descending
+    url: "http://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL+OR+cat:cs.LG+OR+cat:cs.MA&sortBy=submittedDate&sortOrder=descending"
     tier: 1
+
+  - name: arXiv Retrieval / Software Engineering / Security
+    method: api
+    url: "http://export.arxiv.org/api/query?search_query=cat:cs.IR+OR+cat:cs.SE+OR+cat:cs.CR&sortBy=submittedDate&sortOrder=descending"
+    tier: 2
+
+  - name: arXiv Vision / Robotics / Earth AI
+    method: api
+    url: "http://export.arxiv.org/api/query?search_query=cat:cs.CV+OR+cat:cs.RO+OR+cat:eess.IV&sortBy=submittedDate&sortOrder=descending"
+    tier: 2
+
   - name: Hugging Face Daily Papers
     method: api
-    url: https://huggingface.co/api/daily_papers
+    url: "https://huggingface.co/api/daily_papers"
     tier: 1
+
   - name: alphaXiv
     method: fetch
-    url: https://www.alphaxiv.org
+    url: "https://www.alphaxiv.org"
     tier: 2
-  # --- Lab / official ---
+
+  # --- Lab / official sources ---
   - name: Anthropic News
     method: fetch
-    url: https://www.anthropic.com/news
+    url: "https://www.anthropic.com/news"
     tier: 1
-  - name: OpenAI News
+
+  - name: Anthropic Engineering
     method: fetch
-    url: https://openai.com/news/
+    url: "https://www.anthropic.com/engineering"
     tier: 1
+
+  - name: OpenAI News RSS
+    method: rss
+    url: "https://openai.com/news/rss.xml"
+    tier: 1
+
+  - name: OpenAI Release Notes
+    method: fetch
+    url: "https://help.openai.com/en/articles/6825453-chatgpt-release-notes"
+    tier: 2
+
   - name: Google DeepMind Blog
     method: fetch
-    url: https://deepmind.google/discover/blog/
+    url: "https://deepmind.google/discover/blog/"
     tier: 1
+
+  - name: Google AI Blog
+    method: fetch
+    url: "https://blog.google/technology/ai/"
+    tier: 2
+
   - name: Hugging Face Blog
     method: fetch
-    url: https://huggingface.co/blog
+    url: "https://huggingface.co/blog"
     tier: 1
+
   - name: Meta AI Blog
     method: fetch
-    url: https://ai.meta.com/blog/
+    url: "https://ai.meta.com/blog/"
     tier: 2
-  # --- News ---
+
+  - name: NVIDIA Developer Blog - Generative AI
+    method: rss
+    url: "https://developer.nvidia.com/blog/category/generative-ai/feed/"
+    tier: 2
+
+  # --- News / reporting ---
   - name: TechCrunch AI
     method: rss
-    url: https://techcrunch.com/category/artificial-intelligence/feed/
-    tier: 2
+    url: "https://techcrunch.com/category/artificial-intelligence/feed/"
+    tier: 1
+
   - name: VentureBeat AI
     method: rss
-    url: https://venturebeat.com/category/ai/feed/
+    url: "https://venturebeat.com/category/ai/feed/"
+    tier: 1
+
+  - name: Reuters AI
+    method: fetch
+    url: "https://www.reuters.com/technology/artificial-intelligence/"
     tier: 2
+
   - name: The Verge AI
-    method: rss
-    url: https://www.theverge.com/rss/index.xml
+    method: fetch
+    url: "https://www.theverge.com/ai-artificial-intelligence"
     tier: 2
-  - name: Ars Technica
-    method: rss
-    url: https://feeds.arstechnica.com/arstechnica/index
+
+  - name: Ars Technica AI
+    method: fetch
+    url: "https://arstechnica.com/ai/"
     tier: 2
+
   # --- Newsletters / curation ---
   - name: TLDR AI
     method: fetch
-    url: https://tldr.tech/ai
+    url: "https://tldr.tech/ai"
     tier: 1
+
   - name: Import AI
     method: rss
-    url: https://importai.substack.com/feed
-    tier: 2
+    url: "https://importai.substack.com/feed"
+    tier: 1
+
   - name: The Batch
     method: fetch
-    url: https://www.deeplearning.ai/the-batch/
-    tier: 2
+    url: "https://www.deeplearning.ai/the-batch/"
+    tier: 1
+
+  - name: Latent Space
+    method: rss
+    url: "https://www.latent.space/feed"
+    tier: 1
+
   - name: Last Week in AI
     method: rss
-    url: https://lastweekin.ai/feed
+    url: "https://lastweekin.ai/feed"
     tier: 2
-  # --- Community ---
-  - name: Hacker News (AI)
-    method: api
-    url: https://hn.algolia.com/api/v1/search_by_date?tags=story
+
+  - name: The Pragmatic Engineer
+    method: rss
+    url: "https://newsletter.pragmaticengineer.com/feed"
+    tier: 2
+
+  - name: SemiAnalysis
+    method: rss
+    url: "https://newsletter.semianalysis.com/feed"
     tier: 1
+
+  # --- Community / weak-signal discovery ---
+  - name: Hacker News - AI filtered
+    method: api
+    url: "https://hn.algolia.com/api/v1/search_by_date?tags=story&query=AI"
+    tier: 2
+
   - name: r/LocalLLaMA
     method: rss
-    url: https://www.reddit.com/r/LocalLLaMA/top/.rss?t=day
-    tier: 1
-  # --- Benchmarks ---
-  - name: LMArena
-    method: fetch
-    url: https://lmarena.ai/leaderboard
+    url: "https://www.reddit.com/r/LocalLLaMA/top/.rss?t=day"
     tier: 2
+
+  # --- Benchmarks / evals / model decision-making ---
   - name: Artificial Analysis
     method: fetch
-    url: https://artificialanalysis.ai/
+    url: "https://artificialanalysis.ai/"
+    tier: 2
+
+  - name: LiveBench
+    method: fetch
+    url: "https://livebench.ai/"
+    tier: 2
+
+  - name: SWE-bench
+    method: fetch
+    url: "https://www.swebench.com/"
+    tier: 2
+
+  - name: LMArena
+    method: fetch
+    url: "https://lmarena.ai/leaderboard"
+    tier: 2
+
+  # --- AI-native software delivery ---
+  - name: GitHub Blog - AI
+    method: fetch
+    url: "https://github.blog/ai-and-ml/generative-ai/"
+    tier: 2
+
+  # --- Security / governance / public sector ---
+  - name: StateScoop AI
+    method: fetch
+    url: "https://statescoop.com/tag/artificial-intelligence/"
+    tier: 2
+
+  - name: GovTech AI
+    method: fetch
+    url: "https://www.govtech.com/artificial-intelligence"
+    tier: 2
+
+  # --- Local LLMs / private inference ---
+  - name: Ollama Blog
+    method: fetch
+    url: "https://ollama.com/blog"
+    tier: 2
+
+  - name: llama.cpp Releases
+    method: api
+    url: "https://api.github.com/repos/ggml-org/llama.cpp/releases"
     tier: 2

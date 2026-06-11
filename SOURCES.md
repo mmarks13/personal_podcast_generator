@@ -54,4 +54,4 @@ where available (deterministic, cheap on tokens) and fall back to web fetch othe
 - **Start lean.** A strong daily set is ~8–9 sources (see Tier 1 in `config/sources.yaml`): arXiv + HF Daily Papers + 3–4 lab blogs + one dense daily newsletter (TLDR AI) + Hacker News + r/LocalLLaMA. Add the rest once the show's voice is dialed in.
 - **Avoid overlap.** The big dailies (TLDR AI, The Rundown, Superhuman AI) repeat ~80% of the same lead stories — pick one, not three.
 - **Primary over secondary.** Use newsletters/aggregators to *discover* items, then verify and quote from the lab's own post or the paper itself.
-- **Respect cadence.** arXiv, HF, HN, news sites, and the big dailies are daily; The Batch / Import AI / Last Week in AI / Interconnects are weekly — weight them accordingly so a quiet weekday doesn't get padded.
+- **Respect cadence.** arXiv, HF, HN, news sites, and the big dailies are daily; The Batch / Import AI / Last Week in AI / Interconnects are weekly — weight them accordingly so a weekly source's items don't resurface as if they were new each day.

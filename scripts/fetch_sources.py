@@ -1,29 +1,38 @@
 #!/usr/bin/env python3
 """Pull the structured AI sources for the daily podcast.
 
-Covers the feeds that have clean, stable APIs:
-  - arXiv recent submissions (cs.AI / cs.CL / cs.LG)
-  - Hugging Face Daily Papers
-  - Hacker News (Algolia) AI-related front-page stories
+Driven by `config/sources.yaml`: every Tier-1 source whose method is `rss` or
+`api` is fetched here, deterministically, every run. These are the feeds with
+clean, stable machine output — no judgment needed to *fetch* them (judgment about
+what's notable happens later, in the skill's writing step).
+
+  - `api`  sources are dispatched by URL shape (arXiv query, HF Daily Papers,
+            Hacker News Algolia, GitHub releases).
+  - `rss`  sources are parsed generically with feedparser and time-windowed.
+  - `fetch` (HTML) sources are intentionally NOT pulled here — they need a browser
+            and interpretation, so the skill's crawl subagent gathers those.
 
 Each source is wrapped in its own try/except so one outage never kills the run.
-Product launches / blog announcements are intentionally NOT here — the agent
-gathers those with its own web tools (see the skill).
+Every item carries the `source` name it came from, so the writer can see when the
+same story shows up across multiple sources.
 
 Usage:
-    python scripts/fetch_sources.py --hours 28 --out out/sources.json
+    python scripts/fetch_sources.py --hours 48 --out out/sources.json
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
-ARXIV_CATEGORIES = ["cs.AI", "cs.CL", "cs.LG"]
+SOURCES_YAML = os.path.join(os.path.dirname(__file__), "..", "config", "sources.yaml")
+ARXIV_MAX_RESULTS = 40
+RSS_MAX_ITEMS = 25  # per feed, after time-windowing
 AI_KEYWORDS = (
     "ai", "llm", "gpt", "claude", "gemini", "model", "agent", "neural",
     "transformer", "diffusion", "openai", "anthropic", "deepmind", "rag",
@@ -37,23 +46,29 @@ def _get(url: str, timeout: int = 30) -> bytes:
         return resp.read()
 
 
-def fetch_arxiv(hours: int, max_results: int = 40) -> list[dict]:
-    """Recent arXiv papers in the target categories, newest first."""
+def _published(entry) -> datetime | None:
+    """Best-effort published time from a feedparser entry, as aware UTC."""
+    for attr in ("published_parsed", "updated_parsed"):
+        t = getattr(entry, attr, None)
+        if t:
+            return datetime(*t[:6], tzinfo=timezone.utc)
+    return None
+
+
+# --- api sources, dispatched by URL shape ---------------------------------
+
+def fetch_arxiv(url: str, hours: int) -> list[dict]:
+    """Recent arXiv papers for the query in `url`, newest first, time-windowed."""
     import feedparser  # lazy import so other sources still work if it's missing
 
-    cat_q = "+OR+".join(f"cat:{c}" for c in ARXIV_CATEGORIES)
-    url = (
-        "http://export.arxiv.org/api/query?"
-        f"search_query={cat_q}"
-        "&sortBy=submittedDate&sortOrder=descending"
-        f"&max_results={max_results}"
-    )
+    if "max_results" not in url:
+        url += ("&" if "?" in url else "?") + f"max_results={ARXIV_MAX_RESULTS}"
     feed = feedparser.parse(_get(url, timeout=40))
     cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
     out = []
     for e in feed.entries:
-        published = datetime(*e.published_parsed[:6], tzinfo=timezone.utc)
-        if published < cutoff:
+        published = _published(e)
+        if published and published < cutoff:
             continue
         out.append(
             {
@@ -61,18 +76,17 @@ def fetch_arxiv(hours: int, max_results: int = 40) -> list[dict]:
                 "authors": [a.name for a in getattr(e, "authors", [])][:8],
                 "summary": e.summary.replace("\n", " ").strip(),
                 "url": e.link,
-                "published": published.isoformat(),
+                "published": published.isoformat() if published else None,
                 "categories": [t.term for t in getattr(e, "tags", [])],
             }
         )
     return out
 
 
-def fetch_hf_daily_papers(date: str | None = None) -> list[dict]:
+def fetch_hf_daily_papers(url: str, date: str | None = None) -> list[dict]:
     """Hugging Face Daily Papers feed (curated, upvoted AI papers)."""
-    url = "https://huggingface.co/api/daily_papers"
     if date:
-        url += "?date=" + urllib.parse.quote(date)
+        url += ("&" if "?" in url else "?") + "date=" + urllib.parse.quote(date)
     data = json.loads(_get(url))
     out = []
     for item in data:
@@ -88,20 +102,16 @@ def fetch_hf_daily_papers(date: str | None = None) -> list[dict]:
                 else item.get("url"),
             }
         )
-    # Most-upvoted first.
     out.sort(key=lambda p: (p.get("upvotes") or 0), reverse=True)
     return out
 
 
-def fetch_hacker_news(hours: int, min_points: int = 40) -> list[dict]:
+def fetch_hacker_news(url: str, hours: int, min_points: int = 40) -> list[dict]:
     """AI-related HN stories from the window, by points."""
     since = int((datetime.now(timezone.utc) - timedelta(hours=hours)).timestamp())
-    url = (
-        "https://hn.algolia.com/api/v1/search_by_date?tags=story"
-        f"&numericFilters=created_at_i>{since},points>{min_points}"
-        "&hitsPerPage=80"
-    )
-    hits = json.loads(_get(url)).get("hits", [])
+    sep = "&" if "?" in url else "?"
+    full = f"{url}{sep}numericFilters=created_at_i>{since},points>{min_points}&hitsPerPage=80"
+    hits = json.loads(_get(full)).get("hits", [])
     out = []
     for h in hits:
         title = (h.get("title") or "").strip()
@@ -123,6 +133,70 @@ def fetch_hacker_news(hours: int, min_points: int = 40) -> list[dict]:
     return out[:15]
 
 
+def fetch_github_releases(url: str, hours: int) -> list[dict]:
+    """GitHub repo releases in the window (e.g. llama.cpp)."""
+    data = json.loads(_get(url))
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
+    out = []
+    for r in data:
+        ts = r.get("published_at") or r.get("created_at")
+        published = (
+            datetime.fromisoformat(ts.replace("Z", "+00:00")) if ts else None
+        )
+        if published and published < cutoff:
+            continue
+        out.append(
+            {
+                "title": (r.get("name") or r.get("tag_name") or "").strip(),
+                "tag": r.get("tag_name"),
+                "summary": (r.get("body") or "").replace("\r\n", " ").strip()[:1000],
+                "url": r.get("html_url"),
+                "published": published.isoformat() if published else None,
+            }
+        )
+    return out
+
+
+def dispatch_api(url: str, hours: int, hf_date: str | None) -> list[dict]:
+    """Route an `api` source to the right fetcher by its URL shape."""
+    if "export.arxiv.org" in url:
+        return fetch_arxiv(url, hours)
+    if "huggingface.co/api/daily_papers" in url:
+        return fetch_hf_daily_papers(url, hf_date)
+    if "hn.algolia.com" in url:
+        return fetch_hacker_news(url, hours)
+    if "api.github.com" in url and "/releases" in url:
+        return fetch_github_releases(url, hours)
+    raise ValueError(f"no api handler for URL shape: {url}")
+
+
+# --- rss sources, generic --------------------------------------------------
+
+def fetch_rss(url: str, hours: int) -> list[dict]:
+    """Parse an RSS/Atom feed, keep items inside the time window, newest first."""
+    import feedparser
+
+    feed = feedparser.parse(_get(url, timeout=40))
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
+    out = []
+    for e in feed.entries:
+        published = _published(e)
+        if published and published < cutoff:
+            continue
+        summary = (getattr(e, "summary", "") or "").replace("\n", " ").strip()
+        out.append(
+            {
+                "title": (getattr(e, "title", "") or "").replace("\n", " ").strip(),
+                "summary": summary[:1000],
+                "url": getattr(e, "link", ""),
+                "published": published.isoformat() if published else None,
+            }
+        )
+    # Newest first when we have dates; otherwise feed order.
+    out.sort(key=lambda i: i.get("published") or "", reverse=True)
+    return out[:RSS_MAX_ITEMS]
+
+
 def safe(label: str, fn, *args):
     try:
         result = fn(*args)
@@ -131,6 +205,19 @@ def safe(label: str, fn, *args):
     except Exception as exc:  # noqa: BLE001 - we want every source isolated
         print(f"  [WARN] {label} failed: {exc}", file=sys.stderr)
         return [], f"{label}: {exc}"
+
+
+def load_tier1_structured() -> list[dict]:
+    """Tier-1 sources from the watchlist with method rss|api (fetch is agent-side)."""
+    import yaml
+
+    with open(SOURCES_YAML) as f:
+        cfg = yaml.safe_load(f)
+    out = []
+    for s in cfg.get("sources", []):
+        if s.get("tier") == 1 and s.get("method") in ("rss", "api"):
+            out.append(s)
+    return out
 
 
 def main() -> int:
@@ -142,31 +229,40 @@ def main() -> int:
     ap.add_argument("--hf-date", default=None, help="YYYY-MM-DD; default = today")
     args = ap.parse_args()
 
-    print("Fetching structured sources...", file=sys.stderr)
-    arxiv, e1 = safe("arXiv", fetch_arxiv, args.hours)
-    time.sleep(1)  # be polite to arXiv
-    hf, e2 = safe("HF Daily Papers", fetch_hf_daily_papers, args.hf_date)
-    hn, e3 = safe("Hacker News", fetch_hacker_news, args.hours)
+    print("Fetching structured sources (Tier-1 rss/api from sources.yaml)...",
+          file=sys.stderr)
+    sources = load_tier1_structured()
+
+    feeds: dict[str, list[dict]] = {}
+    errors: list[str] = []
+    for s in sources:
+        name, method, url = s["name"], s["method"], s["url"]
+        if method == "api":
+            items, err = safe(name, dispatch_api, url, args.hours, args.hf_date)
+            time.sleep(1)  # be polite to APIs (esp. arXiv)
+        else:  # rss
+            items, err = safe(name, fetch_rss, url, args.hours)
+        for it in items:
+            it["source"] = name
+        feeds[name] = items
+        if err:
+            errors.append(err)
 
     bundle = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "window_hours": args.hours,
-        "papers_arxiv": arxiv,
-        "papers_hf": hf,
-        "hn_stories": hn,
-        "errors": [e for e in (e1, e2, e3) if e],
+        "feeds": feeds,
+        "errors": errors,
     }
-
-    import os
 
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     with open(args.out, "w") as f:
         json.dump(bundle, f, indent=2, ensure_ascii=False)
 
-    total = len(arxiv) + len(hf) + len(hn)
+    total = sum(len(v) for v in feeds.values())
     print(
-        f"Wrote {args.out}: {len(arxiv)} arXiv, {len(hf)} HF, {len(hn)} HN "
-        f"({total} total). Errors: {len(bundle['errors'])}",
+        f"Wrote {args.out}: {len(feeds)} feeds, {total} items total. "
+        f"Errors: {len(errors)}",
         file=sys.stderr,
     )
     return 0

@@ -1,7 +1,7 @@
 # Daily AI Podcast
 
 An overnight job that turns the last ~24–48 hours of AI activity — papers, model
-releases, and top discussion — into a grounded **~15-minute** two-host audio briefing,
+releases, and top discussion — into a grounded **18–22 minute** two-host audio briefing,
 renders it to MP3, and publishes it to an RSS feed Spotify polls.
 
 It's built **Claude Code–native**: a [skill](.claude/skills/daily-ai-podcast/SKILL.md)
@@ -12,18 +12,18 @@ text-to-speech, and the publish step, and a local scheduler fires it every night
 personal_podcast_generator/
 ├── .claude/skills/daily-ai-podcast/SKILL.md   # the editor-in-chief brain
 ├── config/sources.yaml                        # the source watchlist (Tier 1/2)
-├── scripts/fetch_sources.py                   # arXiv + HF Daily Papers + Hacker News
+├── scripts/fetch_sources.py                   # deterministic pull of Tier-1 rss/api feeds
 ├── scripts/make_audio.py                      # Kokoro (local/free) or ElevenLabs (API)
 ├── scripts/publish.py                         # upload MP3 + rebuild feed.xml (github|s3)
 ├── scripts/update_history.py                  # maintain history.json (the show's memory)
 ├── history.json                               # show memory: 30-day detail + long-term arcs
 ├── run_episode.sh                             # the nightly local entrypoint
 ├── docs/                                       # GitHub Pages: feed.xml + cover.png
-├── examples/                                   # non–Plan-A entrypoints (Actions, SDK)
+├── examples/                                   # alternative entrypoints (Actions, SDK)
 └── requirements.txt
 ```
 
-## How this runs (Plan A)
+## How this runs
 
 The whole pipeline runs **locally on your machine** and costs ≈ $0 beyond your Claude
 Pro subscription:
@@ -46,21 +46,19 @@ The pipeline deliberately separates **deterministic** work from **agentic** work
 
 | Stage | How | Why |
 |---|---|---|
-| Papers + HN | `fetch_sources.py` (plain HTTP) | These have clean, stable APIs. No LLM needed; cheaper and reproducible. |
-| Releases + news | Claude's `WebSearch` / `WebFetch` | Launches and blog posts have no good feed. Multi-step discovery is exactly what an agent is for. |
-| Summarize + script | Claude, via the skill | The judgment step — what matters, how to say it, grounded in only what was gathered. |
+| Structured feeds | `fetch_sources.py` (all Tier-1 `rss`/`api` from `sources.yaml`) | Clean, stable machine feeds — arXiv, HF, lab/news/newsletter RSS. No LLM needed; deterministic, cheap, every item tagged with its source. |
+| HTML sources | one crawl subagent (via the skill) | Lab blogs, release-note pages, and leaderboards have no good feed and need a browser. The subagent returns a traceable candidate list; importance isn't judged here. |
+| Select + verify + script | the main agent, via the skill | The judgment step — merge everything, decide what matters (topic priorities), verify at primary sources, write, grounded in only what was gathered. |
 | Audio | `make_audio.py` (Kokoro or ElevenLabs) + ffmpeg | Deterministic render; swap the voice engine without touching anything else. |
 | Publish | `publish.py` (github or s3 backend) | Uploads the MP3 and rebuilds an iTunes-compatible `feed.xml` from the episode catalog. |
 
 The skill's **grounding rules** are the heart of it: every claim must trace to a fetched
 source, no invented benchmarks/quotes/authors, and "the authors report…" rather than
-"this proves…". A quiet day is fine — the show says so rather than padding.
+"this proves…".
 
 ## Length & memory
 
-- **Length scales with the news.** Episodes run **16–25 minutes**; the skill picks a word
-  target from how many notable items the day actually produced (quiet ~16 min → heavy
-  ~25 min). It never pads a thin day to hit a length.
+- **Length.** Episodes run **18–22 minutes** (~2,700–3,300 spoken words).
 - **The show remembers.** `history.json` is the show's memory — the last ~30 days in
   detail plus a long-term rollup of ongoing storylines, recurring entities, and monthly
   milestones. Before writing, the skill reads it the way a host recalls their own past
@@ -73,27 +71,34 @@ source, no invented benchmarks/quotes/authors, and "the authors report…" rathe
 ## Sourcing
 
 The watchlist lives in [`config/sources.yaml`](config/sources.yaml) (Tier 1 = daily
-core; Tier 2 = optional). `fetch_sources.py` covers the API-backed sources
-deterministically; the skill gathers the rest with web tools.
+core; Tier 2 = optional), keyed by `method`: `rss` | `api` | `fetch`. The split is by
+*how* a source is gathered, not how important it is:
 
-- **arXiv API** — `cs.AI`, `cs.CL`, `cs.LG`, `cs.MA`, newest first. Rock-solid, no key.
-  (The fetcher defaults to a **48-hour** window because arXiv's daily announcement gap
-  can leave the freshest papers ~28h old — a tighter window intermittently returns zero.)
-- **Hugging Face Daily Papers** (`/api/daily_papers`) — curated, upvoted feed; the best
-  single signal for "what the field is actually reading today."
-- **Hacker News** (Algolia API) — AI-keyword front-page stories by points.
-- **Releases & news** — gathered by the agent from primary sources (Anthropic, OpenAI,
-  DeepMind, Meta, Mistral release notes/model cards), aggregators used only for
-  discovery, then verified at the primary source.
+- **`rss` / `api` (Tier 1) → `fetch_sources.py`.** Pulled deterministically every run and
+  written to `out/sources.json`, each item tagged with its source so cross-source pickup
+  is visible. Covers:
+  - **arXiv API** — `cs.AI`, `cs.CL`, `cs.LG`, `cs.MA`, newest first. Rock-solid, no key.
+    (The fetcher defaults to a **48-hour** window because arXiv's daily announcement gap
+    can leave the freshest papers ~28h old — a tighter window intermittently returns zero.)
+  - **Hugging Face Daily Papers** (`/api/daily_papers`) — curated, upvoted feed; the best
+    single signal for "what the field is actually reading today."
+  - **The lab / news / newsletter RSS feeds** (OpenAI, TechCrunch, VentureBeat, Import AI,
+    Latent Space, SemiAnalysis, …).
+- **`fetch` (HTML) → a crawl subagent (via the skill).** Lab blogs, release-note pages,
+  leaderboards, and news sections that have no clean feed. One subagent crawls them
+  (Tier-1 and Tier-2) and returns a traceable candidate list. Aggregators are used only
+  for discovery; every claim is verified at the primary source before it goes in the show.
+
+The main agent then merges both, decides what matters (topic priorities), and writes.
 
 ## Text-to-speech: pick your engine
 
 `make_audio.py` ships two backends; set `TTS_BACKEND` (or `--backend`).
 
 - **`kokoro`** (default) — open-weight 82M model, **Apache-2.0, free, runs on CPU**.
-  Excellent for informational narration; delivery is a touch flatter. The Plan A default.
+  Excellent for informational narration; delivery is a touch flatter. This is the default.
 - **`elevenlabs`** — more expressive, multi-speaker. Paid API, needs `ELEVENLABS_API_KEY`.
-  Left intact for later; Plan A does not depend on it.
+  Left intact for later; the default pipeline does not depend on it.
 
 Voice IDs and the TTS model are at the top of `make_audio.py`.
 
@@ -118,7 +123,7 @@ python scripts/fetch_sources.py --hours 48 --out out/sources.json
 # 2. confirm Pro auth works non-interactively (must print "ok", no API-key prompt)
 claude -p "Reply with the single word: ok" --max-turns 1
 
-# 3. full episode end to end (fetch → gather → script → render → publish)
+# 3. full episode end to end (fetch → crawl → select/write → render → publish)
 bash run_episode.sh
 ```
 
@@ -139,7 +144,7 @@ One-time Spotify submission: **Spotify for Creators → Add a new show → host 
 `OWNER_EMAIL`. After approval, new episodes appear automatically within a couple hours of
 each nightly feed update.
 
-## Scheduling (Plan A: local launchd / cron)
+## Scheduling (local launchd / cron)
 
 The run must execute on the machine where you ran `claude login`, so it uses your Pro
 subscription. Verify auth works non-interactively first (step 2 above), then install a
@@ -159,17 +164,18 @@ awake at fire time. See `PLAN.md` §7 for the full plist.
 
 ## Other entrypoints
 
-`examples/` holds two **non–Plan-A** alternatives, kept for reference and not wired in:
+`examples/` holds two alternatives, kept for reference and not wired in:
 
 - `examples/run_daily.py` — the same skill driven via the **Claude Agent SDK** (Python),
   for wrapping in your own logging/observability.
 - `examples/daily-podcast.yml` — a **GitHub Actions** workflow that runs the skill on
   GitHub's infrastructure. Note: it sets `ANTHROPIC_API_KEY` (paid API) and renders on
-  the runner — a deliberate deviation from Plan A's local-Pro + local-Kokoro model.
+  the runner — a deliberate deviation from the local-Pro + local-Kokoro setup.
 
 ## Things you'll want to tune
 - Host personas, segment count, and target length — in the skill.
 - Tier-1/Tier-2 source mix — in `config/sources.yaml`.
-- arXiv categories, HN points threshold, look-back window — in the fetcher / skill.
+- arXiv categories and which feeds are pulled deterministically — in `config/sources.yaml`
+  (Tier-1 `rss`/`api`); HN points threshold and look-back window — in the fetcher.
 - A faithfulness guardrail: a small post-step that scores `episode.json` claims against
   `sources.json` and flags anything unsupported before publish.
