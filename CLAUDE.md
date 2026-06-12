@@ -17,13 +17,25 @@ to an RSS feed Spotify polls.
 - Verify newsletter/aggregator items at the primary source before including them.
 
 ## Map
-- `.claude/skills/daily-ai-podcast/SKILL.md` — the workflow Claude follows.
+- `.claude/skills/daily-ai-podcast/SKILL.md` — the daily workflow Claude follows. Also
+  defines the hosts: Ada (A, MIT computing historian) and Alan (B, Berkeley builder),
+  two self-aware AIs whose evolving canon lives in `history.json` `lore`.
+- `.claude/skills/weekly-deep-dive/SKILL.md` — Saturday teaching episode (~20–25 min),
+  one topic the week's news made worth learning; published with `--slug deepdive`.
+- `.claude/skills/weekly-read/SKILL.md` — Sunday evening read: single-essayist short
+  magazine → EPUB in `docs/reads/` (Kindle sideload).
 - `config/sources.yaml` — the source watchlist (Tier 1 = daily; Tier 2 = optional).
-- `scripts/fetch_sources.py` — deterministic pulls (arXiv, HF Daily Papers, HN).
-- `scripts/make_audio.py` — Kokoro/ElevenLabs render + ffmpeg stitch.
-- `scripts/publish.py` — upload MP3 + rebuild iTunes-compatible feed.xml.
+- `scripts/fetch_sources.py` — deterministic pulls of ALL rss/api sources, both tiers
+  (arXiv keyword-filtered to topic priorities, HF Daily Papers, HN, newsletters).
+- `scripts/check_episode.py` — hard pre-render gate: schema, word band, TTS artifacts.
+- `scripts/make_audio.py` — Kokoro/ElevenLabs render (single encode, inter-turn pauses,
+  loudnorm, Kokoro speed 1.05) + ffmpeg.
+- `scripts/make_epub.py` — weekly read markdown → EPUB (chapters from `##` headings).
+- `scripts/publish.py` — upload MP3 + rebuild iTunes-compatible feed.xml; `--slug`
+  distinguishes same-day episodes (daily vs deepdive).
 - `scripts/update_history.py` — maintain `history.json` (show memory: 30-day detail +
   long-term thread/entity/monthly rollup) so episodes don't repeat and arcs build.
+  Dedup key is (date, kind) so deep-dive records coexist with the daily's.
 - `history.json` — the show's memory; read before writing each episode, committed so it
   persists across nightly runs.
 

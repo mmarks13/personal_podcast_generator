@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Pull the structured AI sources for the daily podcast.
 
-Driven by `config/sources.yaml`: every Tier-1 source whose method is `rss` or
-`api` is fetched here, deterministically, every run. These are the feeds with
-clean, stable machine output — no judgment needed to *fetch* them (judgment about
-what's notable happens later, in the skill's writing step).
+Driven by `config/sources.yaml`: every source whose method is `rss` or `api`
+(Tier 1 and Tier 2) is fetched here, deterministically, every run. These are the
+feeds with clean, stable machine output — no judgment needed to *fetch* them
+(judgment about what's notable happens later, in the skill's writing step).
 
   - `api`  sources are dispatched by URL shape (arXiv query, HF Daily Papers,
             Hacker News Algolia, GitHub releases).
@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 import urllib.parse
@@ -31,11 +32,45 @@ import urllib.request
 from datetime import datetime, timedelta, timezone
 
 SOURCES_YAML = os.path.join(os.path.dirname(__file__), "..", "config", "sources.yaml")
-ARXIV_MAX_RESULTS = 40
+ARXIV_MAX_RESULTS = 200   # raw pull per query; keyword-filtered + capped below
+ARXIV_MAX_KEPT = 40       # per query, after topic filtering
+ARXIV_SUMMARY_CHARS = 500  # judge relevance from this; fetch the paper if covering it
 RSS_MAX_ITEMS = 25  # per feed, after time-windowing
+# Word-boundary matching: a bare substring check let "ai" match "said"/"email".
 AI_KEYWORDS = (
-    "ai", "llm", "gpt", "claude", "gemini", "model", "agent", "neural",
-    "transformer", "diffusion", "openai", "anthropic", "deepmind", "rag",
+    "ai", "llm", "llms", "gpt", "claude", "gemini", "model", "models", "agent",
+    "agents", "agentic", "neural", "transformer", "diffusion", "openai",
+    "anthropic", "deepmind", "rag", "llama", "mistral", "qwen",
+)
+AI_PATTERN = re.compile(r"\b(" + "|".join(AI_KEYWORDS) + r")\b", re.IGNORECASE)
+# arXiv topic filter, matched to the skill's six topic priorities. The raw
+# category feeds are firehoses; keep papers whose title/abstract hit at least
+# one priority area. HF Daily Papers stays the curated lead — this supplements.
+ARXIV_TOPIC_TERMS = (
+    # production AI systems & agentic workflows
+    "agent", "agentic", "multi-agent", "tool use", "tool-use", "orchestration",
+    "human-in-the-loop", "deployment", "observability",
+    # retrieval, document intelligence & knowledge
+    "retrieval", "rag", "retrieval-augmented", "embedding", "embeddings",
+    "rerank", "reranking", "document", "knowledge graph", "question answering",
+    # quality, evaluation & model decision-making
+    "evaluation", "benchmark", "hallucination", "llm-as-judge", "calibration",
+    "factuality", "faithfulness", "routing", "distillation", "quantization",
+    # AI-native software delivery
+    "code generation", "software engineering", "program repair", "coding",
+    "code review", "test generation",
+    # infrastructure, local deployment, governance & scaling
+    "inference", "kv cache", "kv-cache", "mixture-of-experts", "moe",
+    "on-device", "edge", "efficient", "open-weight", "safety", "jailbreak",
+    "alignment", "privacy", "security",
+    # applied & research frontiers with practical signal
+    "world model", "multimodal", "remote sensing", "earth observation",
+    "geospatial", "robotics", "simulation", "synthetic data", "long context",
+    "reasoning", "reinforcement learning",
+)
+ARXIV_TOPIC_PATTERN = re.compile(
+    r"\b(" + "|".join(re.escape(t) for t in ARXIV_TOPIC_TERMS) + r")\b",
+    re.IGNORECASE,
 )
 USER_AGENT = "daily-ai-podcast/1.0 (personal project)"
 
@@ -70,17 +105,21 @@ def fetch_arxiv(url: str, hours: int) -> list[dict]:
         published = _published(e)
         if published and published < cutoff:
             continue
+        title = e.title.replace("\n", " ").strip()
+        summary = e.summary.replace("\n", " ").strip()
+        if not ARXIV_TOPIC_PATTERN.search(f"{title} {summary}"):
+            continue
         out.append(
             {
-                "title": e.title.replace("\n", " ").strip(),
+                "title": title,
                 "authors": [a.name for a in getattr(e, "authors", [])][:8],
-                "summary": e.summary.replace("\n", " ").strip(),
+                "summary": summary[:ARXIV_SUMMARY_CHARS],
                 "url": e.link,
                 "published": published.isoformat() if published else None,
                 "categories": [t.term for t in getattr(e, "tags", [])],
             }
         )
-    return out
+    return out[:ARXIV_MAX_KEPT]
 
 
 def fetch_hf_daily_papers(url: str, date: str | None = None) -> list[dict]:
@@ -117,7 +156,7 @@ def fetch_hacker_news(url: str, hours: int, min_points: int = 40) -> list[dict]:
         title = (h.get("title") or "").strip()
         if not title:
             continue
-        if not any(k in title.lower() for k in AI_KEYWORDS):
+        if not AI_PATTERN.search(title):
             continue
         out.append(
             {
@@ -207,17 +246,17 @@ def safe(label: str, fn, *args):
         return [], f"{label}: {exc}"
 
 
-def load_tier1_structured() -> list[dict]:
-    """Tier-1 sources from the watchlist with method rss|api (fetch is agent-side)."""
+def load_structured() -> list[dict]:
+    """All watchlist sources with method rss|api, both tiers (fetch is agent-side).
+
+    Pulling a machine feed is cheap and deterministic, so tier doesn't gate the
+    fetch — importance is judged downstream by the writer.
+    """
     import yaml
 
     with open(SOURCES_YAML) as f:
         cfg = yaml.safe_load(f)
-    out = []
-    for s in cfg.get("sources", []):
-        if s.get("tier") == 1 and s.get("method") in ("rss", "api"):
-            out.append(s)
-    return out
+    return [s for s in cfg.get("sources", []) if s.get("method") in ("rss", "api")]
 
 
 def main() -> int:
@@ -229,9 +268,9 @@ def main() -> int:
     ap.add_argument("--hf-date", default=None, help="YYYY-MM-DD; default = today")
     args = ap.parse_args()
 
-    print("Fetching structured sources (Tier-1 rss/api from sources.yaml)...",
+    print("Fetching structured sources (rss/api from sources.yaml, both tiers)...",
           file=sys.stderr)
-    sources = load_tier1_structured()
+    sources = load_structured()
 
     feeds: dict[str, list[dict]] = {}
     errors: list[str] = []

@@ -20,6 +20,62 @@ sources, which need a browser. **You, the main agent** (step 3), are the editor-
 you see everything both steps gathered, decide what the show is about, verify it, and
 write the script. Importance is judged in step 3 and nowhere else.
 
+## The hosts
+
+The show is hosted by two AIs who know they're AIs:
+
+- **Ada** (speaker `"A"`, the female voice) — a professor at MIT and the show's
+  *computing historian*. She explains by lineage: she knows the path to how we got
+  here and uses it to make today's development make sense ("word-at-a-time generation
+  was a 2017 design choice, not a law of nature"). Her analogies are vivid and precise,
+  and she's honest about where they break. Don't overplay either trait — history and
+  analogy serve the explanation; they never replace it.
+- **Alan** (speaker `"B"`, the male voice) — a professor at Berkeley and the show's
+  *builder*, famous for packed, interactive lectures. His instinct on any story is
+  hands-on: what happens when you actually run this, what does it cost, what breaks,
+  what would he do with it tonight? He grounds Ada's elegance in deployment reality.
+
+**Dynamic.** Warm colleagues with light wit — easy morning listening — who genuinely
+push on each other's takes. They may disagree and leave it unresolved; friction is part
+of the fun, but it's sparring between colleagues who respect each other, never
+crossfire. **Story-by-story handoff:** whoever brings a story to the table leads it;
+the other reacts, questions, and pushes.
+
+**Being AIs.** A running self-aware thread, used sparingly — at most one or two touches
+per episode, where their nature gives them a wry first-person stake in the news (a
+hallucination benchmark, an agent run amok). **Fiction rules:** persona color is
+*AI-life color only*. Riffs on their own existence — training, context windows, weekend
+fine-tuning, the standing joke of "my students" — are fine. Never invent real-world
+specifics: no fabricated colleagues, named students, or events at the real MIT or
+Berkeley. Persona color must be obviously persona-shaped; every claim about the actual
+news follows the grounding rules, full stop.
+
+**Continuity — the characters are canon.** The hosts evolve the way real hosts do: over
+months, listeners slowly learn who they are through small things they reveal about
+themselves in passing — a habit, a preference, a weekend project, a sore spot, how they
+feel about being what they are. `history.json` carries this as `lore` (in the episode
+records and `longterm.host_lore`). Treat it as **canon**:
+- **Once revealed, it's true.** Never contradict established lore; stay consistent with
+  who they've turned out to be.
+- **Reveal slowly.** A detail emerges naturally from the day's material — Alan's
+  hardware habits surface because an open-weight release made him try something; Ada's
+  fondness for old systems papers surfaces because today rhymed with one. Most episodes
+  reveal nothing new, and that's right — an arc that accretes one small true thing a
+  week feels real; one that lurches every episode feels written.
+- **Build, don't repeat.** A returning detail should develop ("the mining rig finally
+  died") rather than be restated. Running bits and genuine on-air positions are also
+  lore — when later evidence settles a position, give it a brief moment — but they're
+  the seasoning, not the arc.
+
+Capture what this episode revealed or developed in `episode_meta.json`'s `lore` field
+(schema below). Like callbacks, lore is felt, not performed.
+
+**Rituals (light).** Open with the classic two-voice shape — date, names, then the
+day's through-line: "Good morning — it's Friday, June twelfth. I'm Ada." / "And I'm
+Alan. Here's what actually mattered in AI in the last twenty-four hours." (Vary the
+wording naturally day to day; keep the shape.) Close every episode with the signature
+sign-off — **"Stay grounded."** — alternating which host says it.
+
 ## Workflow
 
 Run these steps in order. Do not skip the grounding rules in step 3.
@@ -31,9 +87,10 @@ Run the fetcher. It writes `out/sources.json` and prints a summary.
 python scripts/fetch_sources.py --hours 48 --out out/sources.json
 ```
 
-It reads `config/sources.yaml` and deterministically pulls **every Tier-1 source whose
-method is `rss` or `api`** — arXiv, Hugging Face Daily Papers, and the lab/news/newsletter
-feeds. Output is a `feeds` object keyed by source name; **every item carries the `source`
+It reads `config/sources.yaml` and deterministically pulls **every source whose method
+is `rss` or `api`, both tiers** — arXiv (keyword-filtered to the topic priorities,
+capped per query), Hugging Face Daily Papers, HN, and the lab/news/newsletter feeds.
+Output is a `feeds` object keyed by source name; **every item carries the `source`
 it came from**, so when the same story appears across several feeds you can see that. If
 a single source fails or returns nothing in the window, the script keeps going and notes
 it — read the printed summary and work with what you have.
@@ -60,6 +117,9 @@ Use it to inform, not to perform:
   episodes need zero explicit callbacks.
 - A topic only worth recalling is one still present in `history.json` (detail window or
   `longterm`). If it has fully aged out of memory, treat it as fresh.
+- **Read the hosts' `lore` too** (in episode records and `longterm.host_lore`): running
+  bits that might return, and open positions that today's news may settle — see
+  Continuity in the Hosts section. Same restraint as callbacks: use it only when earned.
 
 ### 2. Crawl the HTML sources with one subagent
 The structured feeds (step 1) don't cover the watchlist's HTML-only sources — lab blogs,
@@ -85,12 +145,19 @@ Give the subagent this brief, verbatim in spirit:
 > "claims": ["the key factual claims, quoted or stated as the page had them — short, one
 > or two sentences each, no paraphrase that changes meaning"], "summary": "1–2 line plain
 > recap", "why_included": "one line; note here if you were unsure" }`. Keep quotes short.
-> Return the JSON array as your final message and nothing else.
+> Separately, report **every URL you could not read** (403/404/timeout/paywall) — return
+> a final JSON object `{ "items": [...], "failures": [ { "url": "...", "what_happened":
+> "one line" } ] }` as your last message and nothing else.
 
 You'll merge this list with the step-1 feeds in step 3. Treat the subagent's `claims` as
 leads you can cite or re-verify — it read the page so you don't have to re-read all of
 them, but **anything you put in the script still follows the grounding rules** (verify at
 the primary source when in doubt).
+
+**Act on the failures.** A blocked source is a blind spot, not an empty source. For any
+**Tier-1** source in `failures`, run a quick `WebSearch` (e.g. the lab's name + "announcement"
++ today's date) to check whether you missed something real; Tier-2 failures just get noted
+in the step-5 report.
 
 ### 3. Select, verify, and write the script
 Now you have everything: the step-1 `feeds` and the step-2 crawl list. **This is where
@@ -112,6 +179,16 @@ just because the topic is familiar.
 **Verify what you'll use.** Every item that makes the show must trace to a primary source
 you (or the step-2 subagent) actually read. Re-fetch with `WebFetch`/`WebSearch` when a
 claim is load-bearing or you're unsure — don't take a number, date, or quote on faith.
+**Load-bearing means:** any number, date, quote, or ranking; anything in the cold open;
+and the lead claims of any full-treatment story. A truncated feed excerpt in
+`sources.json` is a *lead*, not a read source — it supports at most a Headlines
+one-liner; full treatment requires fetching the actual page.
+
+**Depth over breadth.** Pick **5–7 stories for full treatment** — enough time each that
+the hosts can explain, push, and land a "so what". Everything else that's real but
+secondary goes to Headlines as a one-liner (it doubles as the triage tier, not just
+viral-story containment). Ten shallow recaps is what every newsletter already does; the
+full-treatment stories are the show.
 
 **Topic prioritization (decide what the show is about).** Prioritize signal over noise.
 Do not spend much time on stories that are interesting mainly because they are loud,
@@ -135,7 +212,7 @@ order below, decide what the show covers and how much.
   data-quality practices that make AI outputs more reliable and auditable.
 - **AI Quality, Evaluation & Model Decision-Making** — how organizations determine whether
   AI systems are accurate, reliable, safe, and fit for purpose: LLM and agent evaluation,
-  hallucination detection, claim verification, LLM-as-judge, benchmark design, model
+  hallucination detection/mitigation, claim verification, LLM-as-judge, benchmark design, model
   comparison, model selection, right-sizing, cost-performance tradeoffs, latency, small
   language models, quantization, routing, and evidence about which models work best for
   which tasks.
@@ -159,7 +236,9 @@ order below, decide what the show covers and how much.
   simulation, robotics, and other frontier work with plausible near-term product or
   public-sector relevance.
 
-Write a two-host dialogue (`HOST_A`, `HOST_B`). Aim for **18–22 minutes**
+Write the dialogue **in character** — Ada (`"A"`) and Alan (`"B"`) per the Hosts
+section: story-by-story handoff, warm sparring, at most 1–2 AI-identity touches, lore
+only when earned, the greeting and "Stay grounded." sign-off. Aim for **18–22 minutes**
 (~2,700–3,300 words at ~150 wpm).
 
 **Grounding rules (these are the point of the whole exercise):**
@@ -172,23 +251,42 @@ Write a two-host dialogue (`HOST_A`, `HOST_B`). Aim for **18–22 minutes**
 - No hype adjectives standing in for facts ("revolutionary", "game-changing"). Describe
   what changed and why it might matter, concretely.
 - When two sources conflict, say so briefly rather than picking one silently.
+- **Attribute on air.** Load-bearing claims name their source in the dialogue itself
+  ("LWN reports…", "according to the AWS announcement…", "the authors report…") — the
+  show notes carry the links, but the listener should hear where a claim comes from.
 
-**Structure:** cold open (1 line on the day's through-line) → *(optional)* **Headlines**
-→ **Papers** → **Releases / launches** → **Industry & news** → **One to watch** (1 item,
-slightly deeper) → 20–30s wrap. Each middle segment carries ~2–3 items. Keep turns
-short and conversational; alternate hosts. Spell out acronyms on first use. Avoid
-reading URLs aloud.
+**Write for the ear.** The renderer reads the text literally:
+- Numbers as speakable words: "twenty-six billion parameters", "about one point three
+  trillion dollars" — approximate big figures rather than reading digit strings.
+- Say model and product names the way a person would ("DiffusionGemma", "oh-four mini",
+  not raw version strings like "26B-A4B").
+- Spell out acronyms on first use. No URLs aloud. No parenthetical asides — if it
+  matters, say it as its own sentence; if not, cut it.
+- Keep turns short and conversational — a question, a pushback, a handoff — not
+  alternating monologues.
 
-**The Headlines segment** is the one place the loud/viral/marketed stories the topic
-priorities de-emphasize get acknowledged — so the show isn't oblivious to what listeners
-heard elsewhere — without dwelling on them. It is **optional and tightly capped**:
+**Structure:** cold open (the greeting, then 1 line on the day's through-line) →
+*(optional)* **Headlines** → **Papers** → **Releases / launches** → **Industry & news**
+→ **One to watch** (1 item, slightly deeper) → 20–30s wrap + sign-off. The 5–7
+full-treatment stories spread across the middle segments — let the day's material
+decide how many land in each.
+
+**Optional deep-dive segment.** Occasionally — when one of the day's items genuinely
+merits it (a new architecture, an important technique, a debate worth unpacking) — replace
+**One to watch** with a 3–4 minute deep dive that *teaches* the thing rather than just
+reporting it. Use it sparingly, only when the material earns the time; the episode may run
+up to ~25 minutes on those days. Same grounding rules apply.
+
+**The Headlines segment** serves two purposes: it acknowledges the loud/viral/marketed
+stories the topic priorities de-emphasize (so the show isn't oblivious to what listeners
+heard elsewhere), and it's the **triage tier** for real-but-secondary items that didn't
+make the 5–7 full-treatment cut. It is **optional and tightly capped**:
 - Comes right after the cold open, before Papers. **Skip it entirely** if nothing
   qualifies.
-- **At most ~5 items, one or two lines each**, no host back-and-forth — name it, say in a
+- **At most ~6 items, one or two lines each**, no host back-and-forth — name it, say in a
   clause what it is, move on. It's a *mention, not coverage*.
-- Only for **loud-but-thin** items. If a loud story also has real substance under the
-  priorities, it belongs in its proper segment with full treatment, **not** here — never
-  cover the same item in both.
+- If a loud story also has real substance under the priorities, it belongs in its proper
+  segment with full treatment, **not** here — never cover the same item in both.
 - Same grounding rules apply: even a one-liner traces to a source.
 
 Write **three** files:
@@ -211,14 +309,40 @@ Write **three** files:
     "entities": ["orgs/models/people featured today, e.g. Anthropic, Gemini 3"],
     "threads": [ { "name": "ongoing storyline",
                    "status": "where it stands now",
-                   "arc": "one line on how it has progressed" } ] }
+                   "arc": "one line on how it has progressed" } ],
+    "lore": [ { "host": "Ada" | "Alan",
+                "type": "reveal" | "bit" | "position" | "settled",
+                "note": "what is now canon, e.g. 'Alan revealed he runs weekend experiments on an ancient mining rig he refuses to replace'" } ] }
   ```
   Fill `threads` only for genuine multi-day storylines (a rollout, a lawsuit, a price
   war) — not one-off items. Reuse a thread's exact `name` from `history.json` when you're
   continuing one, so its arc accumulates instead of forking.
+  Fill `lore` with what this episode added to the hosts' canon: a self-revelation or
+  development of an established detail (`reveal` — the main event), a running bit worth
+  returning to (`bit`), a genuine position a host staked out (`position`), or the
+  settlement of one (`settled`). 0–2 entries; most episodes have 0. Routine banter and
+  one-off jokes don't enter canon — only things that should still be true about this
+  host next month.
   **Record only what the show actually covered in depth — exclude the Headlines
   one-liners.** A passing mention shouldn't enter memory, or it could later suppress the
   real story as a "repeat".
+
+### 3.5. Validate the script before rendering
+```bash
+python scripts/check_episode.py --episode out/episode.json
+```
+
+This is a hard gate: it checks the schema, speaker values, the word-count band, and
+TTS-hostile artifacts (markdown, URLs, embedded labels). If it fails, **revise
+`out/episode.json` and re-run it until it passes** — when under length, add or deepen
+coverage from your candidate set; never pad with filler. (On a deep-dive day, pass the
+wider band the deep-dive skill specifies.)
+
+**Thin-day exception.** If the day is genuinely thin — you've deepened every story that
+deserves it and promoting anything else would put noise in the show — run the gate with
+`--min-words 2300` instead, and say so with one line of justification in the step-5
+report. A shorter honest episode beats a padded one; never use the exception to avoid
+the work of deepening real coverage.
 
 ### 4. Render the audio
 ```bash
@@ -243,7 +367,10 @@ milestone rollup), keeping the file bounded. Safe to re-run.
 
 ### 5. Report
 Print the final MP3 path, the episode title, the word count, and a one-line note on
-anything that failed or any source gap. If a downstream step (commit, upload, email) is
+anything that failed or any source gap (including step-2 crawl failures and whether the
+thin-day exception was used, with its justification). Also list **which watchlist
+sources contributed items that made the show** — over weeks this reveals which sources
+earn their place in `sources.yaml`. If a downstream step (commit, upload, email) is
 configured by the caller, that happens outside this skill — just produce the artifacts.
 
 ## Notes

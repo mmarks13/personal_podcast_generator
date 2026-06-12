@@ -11,14 +11,18 @@ text-to-speech, and the publish step, and a local scheduler fires it every night
 ```
 personal_podcast_generator/
 ├── .claude/skills/daily-ai-podcast/SKILL.md   # the editor-in-chief brain
+├── .claude/skills/weekly-deep-dive/SKILL.md   # Saturday teaching episode (~20–25 min)
+├── .claude/skills/weekly-read/SKILL.md        # Sunday evening read → EPUB for Kindle
 ├── config/sources.yaml                        # the source watchlist (Tier 1/2)
-├── scripts/fetch_sources.py                   # deterministic pull of Tier-1 rss/api feeds
+├── scripts/fetch_sources.py                   # deterministic pull of all rss/api feeds
+├── scripts/check_episode.py                   # pre-render gate: schema, length, artifacts
 ├── scripts/make_audio.py                      # Kokoro (local/free) or ElevenLabs (API)
+├── scripts/make_epub.py                       # weekly read markdown → EPUB
 ├── scripts/publish.py                         # upload MP3 + rebuild feed.xml (github|s3)
 ├── scripts/update_history.py                  # maintain history.json (the show's memory)
 ├── history.json                               # show memory: 30-day detail + long-term arcs
 ├── run_episode.sh                             # the nightly local entrypoint
-├── docs/                                       # GitHub Pages: feed.xml + cover.png
+├── docs/                                       # GitHub Pages: feed.xml + cover + reads/
 ├── examples/                                   # alternative entrypoints (Actions, SDK)
 └── requirements.txt
 ```
@@ -46,7 +50,7 @@ The pipeline deliberately separates **deterministic** work from **agentic** work
 
 | Stage | How | Why |
 |---|---|---|
-| Structured feeds | `fetch_sources.py` (all Tier-1 `rss`/`api` from `sources.yaml`) | Clean, stable machine feeds — arXiv, HF, lab/news/newsletter RSS. No LLM needed; deterministic, cheap, every item tagged with its source. |
+| Structured feeds | `fetch_sources.py` (all `rss`/`api` from `sources.yaml`, both tiers) | Clean, stable machine feeds — arXiv, HF, lab/news/newsletter RSS. No LLM needed; deterministic, cheap, every item tagged with its source. |
 | HTML sources | one crawl subagent (via the skill) | Lab blogs, release-note pages, and leaderboards have no good feed and need a browser. The subagent returns a traceable candidate list; importance isn't judged here. |
 | Select + verify + script | the main agent, via the skill | The judgment step — merge everything, decide what matters (topic priorities), verify at primary sources, write, grounded in only what was gathered. |
 | Audio | `make_audio.py` (Kokoro or ElevenLabs) + ffmpeg | Deterministic render; swap the voice engine without touching anything else. |
@@ -58,7 +62,14 @@ source, no invented benchmarks/quotes/authors, and "the authors report…" rathe
 
 ## Length & memory
 
-- **Length.** Episodes run **18–22 minutes** (~2,700–3,300 spoken words).
+- **Length.** Episodes run **18–22 minutes** (~2,700–3,300 spoken words), enforced by a
+  deterministic pre-render gate (`scripts/check_episode.py`). Days with a deep-dive
+  segment may run to ~25.
+- **Weekend extras.** Saturday adds a **weekly deep-dive episode** (one topic the week's
+  news made worth learning, taught properly, ~20–25 min — `weekly-deep-dive` skill).
+  Sunday adds the **weekly read**: a single-essayist short magazine (lead essay,
+  explainer, a story revisited) built into an EPUB at `docs/reads/` for Kindle
+  sideloading (`weekly-read` skill + `make_epub.py`).
 - **The show remembers.** `history.json` is the show's memory — the last ~30 days in
   detail plus a long-term rollup of ongoing storylines, recurring entities, and monthly
   milestones. Before writing, the skill reads it the way a host recalls their own past
@@ -74,10 +85,11 @@ The watchlist lives in [`config/sources.yaml`](config/sources.yaml) (Tier 1 = da
 core; Tier 2 = optional), keyed by `method`: `rss` | `api` | `fetch`. The split is by
 *how* a source is gathered, not how important it is:
 
-- **`rss` / `api` (Tier 1) → `fetch_sources.py`.** Pulled deterministically every run and
-  written to `out/sources.json`, each item tagged with its source so cross-source pickup
-  is visible. Covers:
-  - **arXiv API** — `cs.AI`, `cs.CL`, `cs.LG`, `cs.MA`, newest first. Rock-solid, no key.
+- **`rss` / `api` (both tiers) → `fetch_sources.py`.** Pulled deterministically every run
+  and written to `out/sources.json`, each item tagged with its source so cross-source
+  pickup is visible. Covers:
+  - **arXiv API** — the watchlist's category queries, newest first, **keyword-filtered to
+    the show's topic priorities** and capped per query. Rock-solid, no key.
     (The fetcher defaults to a **48-hour** window because arXiv's daily announcement gap
     can leave the freshest papers ~28h old — a tighter window intermittently returns zero.)
   - **Hugging Face Daily Papers** (`/api/daily_papers`) — curated, upvoted feed; the best

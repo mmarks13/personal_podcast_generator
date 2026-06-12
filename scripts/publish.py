@@ -41,9 +41,16 @@ HISTORY_FILE = "history.json"    # show memory; written by update_history.py, pe
 FEED_NAME = "feed.xml"
 DOCS = "docs"                    # GitHub Pages source folder (main branch /docs)
 EPISODES_DIR = "episodes"        # per-episode HTML notes pages (under DOCS / bucket)
+READS_DIR = "reads"              # weekly-read EPUBs (under DOCS), built by make_epub.py
 
 
 # ---------------------------------------------------------------- shared helpers
+def page_name(ep: dict) -> str:
+    """Filename stem for an episode's notes page; daily keeps the bare date."""
+    slug = ep.get("slug", "daily")
+    return ep["date"] if slug == "daily" else f"{ep['date']}-{slug}"
+
+
 def ffprobe_seconds(path: str) -> int:
     out = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration",
@@ -101,17 +108,24 @@ def episode_page_html(title: str, date: str, notes_html: str, mp3_url: str) -> s
 </body></html>"""
 
 
-def index_page_html(catalog: list[dict]) -> str:
+def index_page_html(catalog: list[dict], reads: list[str] | None = None) -> str:
     """A simple episodes index for GitHub Pages, newest first."""
     show = os.environ.get("SHOW_TITLE", "AI Daily")
     desc = os.environ.get("SHOW_DESC", "A daily AI news briefing.")
     rows = []
     for ep in sorted(catalog, key=lambda e: e["date"], reverse=True):
+        kind = "" if ep.get("slug", "daily") == "daily" else f' · {ep["slug"]}'
         rows.append(
-            f'<li><a href="{EPISODES_DIR}/{ep["date"]}.html">{ep["title"]}</a>'
-            f'<div class="meta">{ep["date"]}</div></li>'
+            f'<li><a href="{EPISODES_DIR}/{page_name(ep)}.html">{ep["title"]}</a>'
+            f'<div class="meta">{ep["date"]}{kind}</div></li>'
         )
     items = "\n".join(rows) or "<li>No episodes yet.</li>"
+    reads_html = ""
+    if reads:
+        links = "\n".join(
+            f'<li><a href="{READS_DIR}/{r}">{r}</a></li>' for r in sorted(reads, reverse=True)
+        )
+        reads_html = f"<h2>Weekly reads (EPUB)</h2>\n<ul>\n{links}\n</ul>"
     return f"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
@@ -132,6 +146,7 @@ def index_page_html(catalog: list[dict]) -> str:
 <ul>
 {items}
 </ul>
+{reads_html}
 </body></html>"""
 
 
@@ -156,7 +171,9 @@ def build_feed(catalog: list[dict], *, feed_self_url: str, cover_url: str) -> by
         fg.podcast.itunes_image(cover_url)
         fg.image(url=cover_url, title=fg.title(), link=site_link)
 
-    for ep in sorted(catalog, key=lambda e: e["date"], reverse=True):  # newest first
+    # feedgen prepends each add_entry, so iterate oldest-first to get a
+    # newest-first feed.
+    for ep in sorted(catalog, key=lambda e: e["date"]):
         fe = fg.add_entry()
         fe.id(ep["guid"])
         fe.title(ep["title"])
@@ -245,10 +262,13 @@ class GitHubBackend:
             html = episode_page_html(ep["title"], ep["date"],
                                      ep.get("summary_html", f"<p>{ep.get('summary','')}</p>"),
                                      ep["mp3_url"])
-            with open(os.path.join(ep_dir, f"{ep['date']}.html"), "w") as f:
+            with open(os.path.join(ep_dir, f"{page_name(ep)}.html"), "w") as f:
                 f.write(html)
+        reads_dir = os.path.join(DOCS, READS_DIR)
+        reads = sorted(os.listdir(reads_dir)) if os.path.isdir(reads_dir) else []
+        reads = [r for r in reads if r.endswith(".epub")]
         with open(os.path.join(DOCS, "index.html"), "w") as f:
-            f.write(index_page_html(catalog))
+            f.write(index_page_html(catalog, reads))
 
     def save_catalog(self, catalog: list[dict], message: str) -> None:
         with open(CATALOG_FILE, "w") as f:
@@ -310,7 +330,7 @@ class S3Backend:
                                      ep.get("summary_html", f"<p>{ep.get('summary','')}</p>"),
                                      ep["mp3_url"])
             self.s3.put_object(Bucket=self.bucket,
-                               Key=f"{EPISODES_DIR}/{ep['date']}.html",
+                               Key=f"{EPISODES_DIR}/{page_name(ep)}.html",
                                Body=html.encode(), ContentType="text/html")
         self.s3.put_object(Bucket=self.bucket, Key="index.html",
                            Body=index_page_html(catalog).encode(),
@@ -334,6 +354,9 @@ def main() -> int:
     ap.add_argument("--summary", default="")
     ap.add_argument("--notes", default="", help="path to shownotes.md (full show notes)")
     ap.add_argument("--date", required=True, help="YYYY-MM-DD")
+    ap.add_argument("--slug", default="daily",
+                    help="episode kind; 'daily' (default) or e.g. 'deepdive' so a "
+                         "second same-day episode gets its own guid/tag/page")
     args = ap.parse_args()
 
     summary_html = ""
@@ -347,17 +370,21 @@ def main() -> int:
 
     duration = ffprobe_seconds(args.mp3)
     size = os.path.getsize(args.mp3)
-    tag = f"ep-{args.date}"
+    # Daily keeps the original guid/tag shapes so existing episodes are untouched.
+    if args.slug == "daily":
+        tag, guid = f"ep-{args.date}", f"daily-ai-{args.date}"
+    else:
+        tag, guid = f"ep-{args.date}-{args.slug}", f"{args.slug}-{args.date}"
     pub_dt = datetime.fromisoformat(args.date).replace(tzinfo=timezone.utc)
 
     print(f"Uploading {args.mp3} ({size/1e6:.1f} MB, {hhmmss(duration)})...")
     mp3_url = backend.upload_audio(args.mp3, tag, args.title, args.summary)
 
     catalog = backend.load_catalog()
-    guid = f"daily-ai-{args.date}"
     catalog = [e for e in catalog if e["guid"] != guid]  # idempotent
     catalog.append({
         "guid": guid,
+        "slug": args.slug,
         "title": args.title,
         "summary": args.summary,
         "summary_html": summary_html,   # full show notes (HTML) for the feed + web page
@@ -376,8 +403,9 @@ def main() -> int:
 
     print(f"Published. Audio: {mp3_url}")
     print(f"Feed: {backend.feed_self_url}  ({len(catalog)} episodes)")
+    stem = args.date if args.slug == "daily" else f"{args.date}-{args.slug}"
     print(f"Notes page: {backend.pages_base if hasattr(backend,'pages_base') else backend.base}"
-          f"/{EPISODES_DIR}/{args.date}.html")
+          f"/{EPISODES_DIR}/{stem}.html")
     return 0
 
 

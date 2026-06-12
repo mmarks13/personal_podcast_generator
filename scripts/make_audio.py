@@ -22,7 +22,12 @@ import sys
 import tempfile
 
 # --- Voice config (edit to taste) -------------------------------------------
-KOKORO_VOICES = {"A": "af_heart", "B": "am_michael"}  # see Kokoro's voice list
+KOKORO_VOICES = {"A": "af_heart", "B": "am_michael"}  # A = Ada, B = Alan
+KOKORO_SPEED = 1.05        # Kokoro paces ~143 wpm at 1.0; nudge toward ~150
+KOKORO_SAMPLE_RATE = 24000
+TURN_PAUSE_SECONDS = 0.3   # breathing room at speaker changes
+# Podcast-standard loudness so episodes sit at a consistent level.
+LOUDNORM = "loudnorm=I=-16:TP=-1.5:LRA=11"
 ELEVEN_VOICES = {  # ElevenLabs voice IDs; replace with ones you like
     "A": os.environ.get("ELEVEN_VOICE_A", "21m00Tcm4TlvDq8ikWAM"),
     "B": os.environ.get("ELEVEN_VOICE_B", "AZnzlk1XvdvUeBnXmlld"),
@@ -37,10 +42,10 @@ def _ffmpeg_concat(part_files: list[str], out_path: str) -> None:
             lst.write(f"file '{os.path.abspath(p)}'\n")
         list_path = lst.name
     try:
-        # Re-encode to a uniform mp3 so mixed sample rates concatenate cleanly.
+        # Re-encode to a uniform, loudness-normalized mp3.
         subprocess.run(
             ["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", list_path,
-             "-c:a", "libmp3lame", "-q:a", "2", out_path],
+             "-af", LOUDNORM, "-c:a", "libmp3lame", "-q:a", "2", out_path],
             check=True, capture_output=True,
         )
     finally:
@@ -48,29 +53,32 @@ def _ffmpeg_concat(part_files: list[str], out_path: str) -> None:
 
 
 def render_kokoro(turns: list[dict], out_path: str) -> None:
-    import soundfile as sf  # noqa
+    import numpy as np
+    import soundfile as sf
     from kokoro import KPipeline
 
     pipeline = KPipeline(lang_code="a")  # 'a' = American English
+    pause = np.zeros(int(TURN_PAUSE_SECONDS * KOKORO_SAMPLE_RATE), dtype=np.float32)
+    pieces = []
+    for turn in turns:
+        voice = KOKORO_VOICES.get(turn["speaker"], "af_heart")
+        # KPipeline yields audio chunks; collect them for the turn.
+        chunks = [audio for _, _, audio in
+                  pipeline(turn["text"], voice=voice, speed=KOKORO_SPEED)]
+        if not chunks:
+            continue
+        if pieces:
+            pieces.append(pause)
+        pieces.append(np.concatenate(chunks))
+    if not pieces:
+        raise RuntimeError("Kokoro produced no audio for any turn.")
+    # One WAV, one encode: avoids the quality loss of per-turn mp3 + re-encode.
     with tempfile.TemporaryDirectory() as tmp:
-        parts = []
-        for i, turn in enumerate(turns):
-            voice = KOKORO_VOICES.get(turn["speaker"], "af_heart")
-            # KPipeline yields audio chunks; collect them for the turn.
-            chunks = [audio for _, _, audio in pipeline(turn["text"], voice=voice)]
-            if not chunks:
-                continue
-            import numpy as np
-
-            audio = np.concatenate(chunks)
-            part = os.path.join(tmp, f"turn_{i:03d}.wav")
-            sf.write(part, audio, 24000)
-            # Convert each to mp3 so concat output is uniform.
-            mp3 = os.path.join(tmp, f"turn_{i:03d}.mp3")
-            subprocess.run(["ffmpeg", "-y", "-i", part, "-c:a", "libmp3lame",
-                            "-q:a", "2", mp3], check=True, capture_output=True)
-            parts.append(mp3)
-        _ffmpeg_concat(parts, out_path)
+        wav = os.path.join(tmp, "episode.wav")
+        sf.write(wav, np.concatenate(pieces), KOKORO_SAMPLE_RATE)
+        subprocess.run(["ffmpeg", "-y", "-i", wav, "-af", LOUDNORM,
+                        "-c:a", "libmp3lame", "-q:a", "2", out_path],
+                       check=True, capture_output=True)
 
 
 def render_elevenlabs(turns: list[dict], out_path: str) -> None:

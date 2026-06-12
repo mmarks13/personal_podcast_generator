@@ -22,6 +22,7 @@ Memory model (history.json):
     "active_threads":  [ {"name","status","last_seen","arc"} ],   # capped
     "entities":        [ {"name","note","last_seen"} ],           # roster, capped
     "monthly":         [ {"month":"YYYY-MM","summary"} ],         # one line per month
+    "host_lore":       [ {"host","type","note","last_seen"} ],    # host canon, capped
     "updated": "YYYY-MM-DD"
   }
 }
@@ -41,11 +42,13 @@ HISTORY_FILE = "history.json"
 KEEP_DAYS = 30           # detailed window
 MAX_THREADS = 15         # active_threads cap
 MAX_ENTITIES = 40        # entity roster cap
+MAX_LORE = 40            # host canon cap (~years at the intended reveal rate)
 
 
 def _empty() -> dict:
     return {"episodes": [], "longterm": {
-        "active_threads": [], "entities": [], "monthly": [], "updated": ""}}
+        "active_threads": [], "entities": [], "monthly": [], "host_lore": [],
+        "updated": ""}}
 
 
 def load(path: str = HISTORY_FILE) -> dict:
@@ -57,6 +60,7 @@ def load(path: str = HISTORY_FILE) -> dict:
         lt.setdefault("active_threads", [])
         lt.setdefault("entities", [])
         lt.setdefault("monthly", [])
+        lt.setdefault("host_lore", [])
         lt.setdefault("updated", "")
         return data
     return _empty()
@@ -72,8 +76,16 @@ def _parse_date(s: str) -> date:
 
 
 def append_episode(data: dict, ep: dict) -> dict:
-    """Insert/replace today's episode in the detailed window (newest-first, dedup by date)."""
-    data["episodes"] = [e for e in data["episodes"] if e.get("date") != ep["date"]]
+    """Insert/replace an episode in the detailed window (newest-first).
+
+    Dedup key is (date, kind) so a weekend deep-dive episode ("kind": "deepdive"
+    in its meta) coexists with that day's daily record instead of replacing it.
+    """
+    key = (ep["date"], ep.get("kind", "daily"))
+    data["episodes"] = [
+        e for e in data["episodes"]
+        if (e.get("date"), e.get("kind", "daily")) != key
+    ]
     data["episodes"].append(ep)
     data["episodes"].sort(key=lambda e: e["date"], reverse=True)
     return data
@@ -111,6 +123,14 @@ def roll_off(data: dict, today: date, keep_days: int = KEEP_DAYS) -> dict:
     lt["entities"] = sorted(ents.values(), key=lambda x: x["last_seen"], reverse=True)[:MAX_ENTITIES]
     lt["active_threads"] = sorted(
         lt["active_threads"], key=lambda t: t.get("last_seen", ""), reverse=True)[:MAX_THREADS]
+
+    # Preserve host canon: fold aged episodes' lore into the long-term list. Oldest
+    # entries are evicted last only by the cap — canon should outlive the 30-day window.
+    for e in aged:
+        for item in e.get("lore", []):
+            lt["host_lore"].append({**item, "last_seen": e["date"]})
+    lt["host_lore"] = sorted(
+        lt["host_lore"], key=lambda x: x.get("last_seen", ""), reverse=True)[:MAX_LORE]
 
     lt["updated"] = today.isoformat()
     data["episodes"] = keep
