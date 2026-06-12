@@ -18,10 +18,16 @@ DATE="$(date +%F)"
 DOW="$(date +%u)"   # 1=Mon .. 6=Sat 7=Sun
 mkdir -p out
 
+# Pin the model explicitly so the nightly job never inherits whatever the
+# interactive CLI default happens to be (an interactive /model switch persists
+# into settings and would otherwise leak into this run).
+MODEL="opus"
+
 # 1–4: Claude follows the skill — fetch, gather, write script, render MP3.
 claude -p "Use the daily-ai-podcast skill to produce today's episode end to end, \
 following its grounding rules and length target (18-22 min). \
 Print the MP3 path when done." \
+  --model "$MODEL" \
   --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
   --permission-mode acceptEdits \
   --max-turns 80
@@ -32,6 +38,7 @@ Print the MP3 path when done." \
 if [ "$DOW" = "7" ]; then
   claude -p "Use the weekly-read skill to write this week's evening read and build \
 the EPUB. Print the EPUB path when done." \
+    --model "$MODEL" \
     --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
     --permission-mode acceptEdits \
     --max-turns 60 || echo "WARNING: weekly read failed; continuing with daily publish"
@@ -58,6 +65,7 @@ if [ "$DOW" = "6" ]; then
   claude -p "Use the weekly-deep-dive skill to produce this week's deep-dive episode \
 end to end, following its grounding rules and length target (20-25 min). \
 Print the MP3 path when done." \
+    --model "$MODEL" \
     --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
     --permission-mode acceptEdits \
     --max-turns 80
