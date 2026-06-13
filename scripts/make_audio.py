@@ -176,7 +176,13 @@ def render_gemini(turns: list[dict], out_path: str, tts_notes: str = "") -> None
     from google.genai import types
 
     api_key = os.environ["GEMINI_API_KEY"]  # KeyError = clear failure
-    client = genai.Client(api_key=api_key)
+    # Per-request timeout (ms) so a stalled stream raises and the retry loop
+    # below catches it, instead of blocking forever on an open socket. A chunk
+    # is ~3 min of audio; 600s leaves headroom for a slow-but-real response.
+    client = genai.Client(
+        api_key=api_key,
+        http_options=types.HttpOptions(timeout=600_000),
+    )
     config = types.GenerateContentConfig(
         temperature=1,
         response_modalities=["audio"],
@@ -209,21 +215,24 @@ def render_gemini(turns: list[dict], out_path: str, tts_notes: str = "") -> None
             # and short outages; a real outage fails the run within ~10 min.
             for attempt in range(5):
                 try:
-                    # Stream and concatenate every audio part, as AI Studio's
-                    # exported code does — a response may split its audio.
+                    # Non-streaming: Gemini TTS does not support streaming, and
+                    # the streaming path intermittently 504s / stalls past ~60s
+                    # of audio for this model — generate_content returns the full
+                    # chunk in one response. Concatenate every audio part in case
+                    # the response splits its audio across parts.
                     pcm = bytearray()
                     mime = ""
-                    for resp in client.models.generate_content_stream(
-                            model=GEMINI_MODEL, contents=prompt, config=config):
-                        if not resp.parts:
-                            continue
-                        for p in resp.parts:
-                            if p.inline_data and p.inline_data.data:
-                                data = p.inline_data.data
-                                if isinstance(data, str):  # base64 in some SDKs
-                                    data = base64.b64decode(data)
-                                pcm += data
-                                mime = mime or p.inline_data.mime_type
+                    resp = client.models.generate_content(
+                        model=GEMINI_MODEL, contents=prompt, config=config)
+                    for p in (resp.candidates[0].content.parts
+                              if resp.candidates
+                              and resp.candidates[0].content else []):
+                        if p.inline_data and p.inline_data.data:
+                            data = p.inline_data.data
+                            if isinstance(data, str):  # base64 in some SDKs
+                                data = base64.b64decode(data)
+                            pcm += data
+                            mime = mime or p.inline_data.mime_type
                     if not pcm:
                         raise RuntimeError("response contained no audio data")
                     break
