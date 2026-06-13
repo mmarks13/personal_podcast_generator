@@ -11,7 +11,8 @@ description: >
 
 A second weekend episode in the same feed: not the day's news, but a **teaching
 episode** — one topic, explained properly, chosen because this week's events made it
-worth understanding. Aim for **20–25 minutes** (~3,000–3,750 words at ~150 wpm).
+worth understanding. Aim for **~3,000–3,750 words** (the Gemini voices render that to
+roughly 22–29 minutes).
 
 The listener already hears the daily show, so don't re-report the week. Use the week's
 news as the doorway: "X kept coming up this week — here's how it actually works."
@@ -62,7 +63,11 @@ with "Stay grounded." Structure:
 5. **So what** — what a practitioner or informed listener should do or watch for.
 6. **Wrap** — 20–30 seconds.
 
-Keep turns short and conversational. No markdown or stage directions in turn text.
+Keep turns short and conversational. The daily skill's **"Write it as a
+conversation"**, **audio tags**, and **per-episode delivery note** (`tts_notes`)
+rules apply verbatim — backchannels and reactive turns matter even more in teaching
+mode, where the temptation is alternating lectures. No markdown, URLs, or stage
+directions in turn text; well-formed audio tags are the only non-spoken text.
 
 Write **three** files (schemas identical to the daily skill's):
 - `out/deepdive.json` — `{ "date", "title", "turns": [{"speaker": "A"|"B", "text"}] }`
@@ -83,11 +88,13 @@ Write **three** files (schemas identical to the daily skill's):
 ### 4. Validate, render, remember
 ```bash
 python scripts/check_episode.py --episode out/deepdive.json --min-words 3000 --max-words 4000
-python scripts/make_audio.py --episode out/deepdive.json --out "out/deepdive-$(date +%F).mp3" --backend ${TTS_BACKEND:-kokoro}
+python scripts/make_audio.py --episode out/deepdive.json --out "out/deepdive-$(date +%F).mp3" --backend gemini
 python scripts/update_history.py --append --meta out/deepdive_meta.json
 ```
 The check is a hard gate — revise until it passes. When under length, deepen the
-explanation (more mechanism, more evidence), never pad.
+explanation (more mechanism, more evidence), never pad. The renderer retries hard and
+then fails; **never re-render with another backend** — if Gemini is down, report the
+failure and stop.
 
 ### 5. Report
 Print the MP3 path, the topic chosen and the week's hook it ties to, the word count,

@@ -27,9 +27,13 @@ to an RSS feed Spotify polls.
 - `config/sources.yaml` — the source watchlist (Tier 1 = daily; Tier 2 = optional).
 - `scripts/fetch_sources.py` — deterministic pulls of ALL rss/api sources, both tiers
   (arXiv keyword-filtered to topic priorities, HF Daily Papers, HN, newsletters).
-- `scripts/check_episode.py` — hard pre-render gate: schema, word band, TTS artifacts.
-- `scripts/make_audio.py` — Kokoro/ElevenLabs render (single encode, inter-turn pauses,
-  loudnorm, Kokoro speed 1.05) + ffmpeg.
+- `scripts/check_episode.py` — hard pre-render gate: schema, word band, audio-tag
+  form/density, TTS artifacts.
+- `scripts/make_audio.py` — Gemini multi-speaker TTS render (NotebookLM-style
+  dialogue; the show's voice) + ffmpeg. Needs `GEMINI_API_KEY`; voices via
+  `GEMINI_VOICE_A/B` in `.env`; honors optional `tts_notes` in episode.json.
+  Retries hard then FAILS — never silently falls back. Kokoro path kept for manual
+  offline experiments only (loudnorm on that path; Gemini audio ships untouched).
 - `scripts/make_epub.py` — weekly read markdown → EPUB (chapters from `##` headings).
 - `scripts/publish.py` — upload MP3 + rebuild iTunes-compatible feed.xml; `--slug`
   distinguishes same-day episodes (daily vs deepdive).

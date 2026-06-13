@@ -10,8 +10,8 @@ description: >
 
 # Daily AI Podcast
 
-Turn the last ~24–48 hours of AI activity into an **18–22 minute**, two-host audio
-briefing (~150 wpm spoken).
+Turn the last ~24–48 hours of AI activity into a two-host audio briefing of
+**~2,700–3,300 words** (the Gemini voices render that to roughly 20–26 minutes).
 
 The pipeline is deliberately split by *how a source is gathered*, not how important it
 is. **Deterministic Python** (step 1) pulls every watchlist source with a clean machine
@@ -238,8 +238,8 @@ order below, decide what the show covers and how much.
 
 Write the dialogue **in character** — Ada (`"A"`) and Alan (`"B"`) per the Hosts
 section: story-by-story handoff, warm sparring, at most 1–2 AI-identity touches, lore
-only when earned, the greeting and "Stay grounded." sign-off. Aim for **18–22 minutes**
-(~2,700–3,300 words at ~150 wpm).
+only when earned, the greeting and "Stay grounded." sign-off. Aim for
+**~2,700–3,300 words**.
 
 **Grounding rules (these are the point of the whole exercise):**
 - Every factual claim must trace to something in `out/sources.json` or a page you
@@ -264,6 +264,39 @@ only when earned, the greeting and "Stay grounded." sign-off. Aim for **18–22 
   matters, say it as its own sentence; if not, cut it.
 - Keep turns short and conversational — a question, a pushback, a handoff — not
   alternating monologues.
+
+**Write it as a conversation, not alternating essays.** The renderer (Gemini
+multi-speaker TTS) performs both hosts in one pass and reacts to how the dialogue is
+*written* — give it dialogue worth performing:
+- **Backchannels and short reactive turns.** "Right.", "Wait, really?", "Huh — okay."
+  A turn can be three words. Let one host react before the other finishes a thought's
+  arc; the reaction is content.
+- **Mid-thought handoffs.** Sometimes one host sets up and the other lands it, or one
+  trails off ("...which is exactly the problem—") and the other picks it up. Use
+  sparingly; once or twice a segment is plenty.
+- **Friction stays unresolved sometimes.** Per the Hosts section, they can disagree and
+  move on — don't write a tidy concession into every dispute.
+- **React first, then explain.** A genuine "that number surprised me" before the
+  analysis beats launching straight into the analysis.
+
+**Audio tags (delivery directions).** Turn text may include short bracketed tags the
+renderer performs instead of reading: `[laughs]`, `[chuckles]`, `[sighs]`,
+`[short pause]`, emotion shifts like `[skeptical]` or `[excited]` at a phrase, and
+creative ones where the moment earns it (the TTS prompting guide encourages
+experimenting). Rules:
+- Tags are **seasoning**: most turns need none; the writing carries the emotion and a
+  tag amplifies it. The gate fails the script above ~1 tag per 60 words.
+- Form: lowercase, short (a few words), square brackets. Anything else in brackets
+  fails the gate.
+- Never use tags as content ("[laughs]" is not a reply) and never for sound effects —
+  this is a news show, not a radio drama.
+
+**Per-episode delivery note (optional).** When the day's material warrants a departure
+from the show's default warm energy — a somber lead story, an unusually celebratory
+release day — set `tts_notes` in `episode.json` to 1–2 sentences of mood/tone
+direction for the voices (e.g. "Measured, sober energy today; the lead story is a
+safety incident. Lighten up by the Releases segment."). It steers delivery only, not
+content. Most days, omit it.
 
 **Structure:** cold open (the greeting, then 1 line on the day's through-line) →
 *(optional)* **Headlines** → **Papers** → **Releases / launches** → **Industry & news**
@@ -294,10 +327,12 @@ Write **three** files:
   ```json
   { "date": "YYYY-MM-DD",
     "title": "string",
-    "turns": [ { "speaker": "A" | "B", "text": "one spoken line, no markdown" } ] }
+    "tts_notes": "OPTIONAL: 1-2 sentences of mood/tone direction (see above)",
+    "turns": [ { "speaker": "A" | "B", "text": "one spoken line" } ] }
   ```
-  Keep each turn's `text` plain spoken prose — no asterisks, brackets, or stage
-  directions; those get read aloud literally.
+  Keep each turn's `text` plain spoken prose — no markdown, URLs, or stage
+  directions. The **only** non-spoken text allowed is well-formed audio tags per the
+  rules above.
 - `out/shownotes.md` — episode title, date, a 2–3 sentence summary, then a linked list
   of every source you used (title + URL), grouped as Papers / Releases / Discussion.
 - `out/episode_meta.json` — the memory record for `history.json` (step 4.5). Schema:
@@ -332,8 +367,9 @@ Write **three** files:
 python scripts/check_episode.py --episode out/episode.json
 ```
 
-This is a hard gate: it checks the schema, speaker values, the word-count band, and
-TTS-hostile artifacts (markdown, URLs, embedded labels). If it fails, **revise
+This is a hard gate: it checks the schema, speaker values, the word-count band,
+audio-tag form and density (~1 per 60 words max), and TTS-hostile artifacts
+(markdown, URLs, embedded labels, malformed brackets). If it fails, **revise
 `out/episode.json` and re-run it until it passes** — when under length, add or deepen
 coverage from your candidate set; never pad with filler. (On a deep-dive day, pass the
 wider band the deep-dive skill specifies.)
@@ -346,12 +382,16 @@ the work of deepening real coverage.
 
 ### 4. Render the audio
 ```bash
-python scripts/make_audio.py --episode out/episode.json --out "out/podcast-$(date +%F).mp3" --backend ${TTS_BACKEND:-kokoro}
+python scripts/make_audio.py --episode out/episode.json --out "out/podcast-$(date +%F).mp3" --backend gemini
 ```
 
-`--backend kokoro` runs locally and free; `--backend elevenlabs` calls the API for
-higher-quality, more expressive voices (needs `ELEVENLABS_API_KEY`). Pick based on the
-`TTS_BACKEND` env var so the same skill works in every scheduling setup.
+The show's voice **is** Gemini multi-speaker TTS (needs `GEMINI_API_KEY`; voices come
+from `GEMINI_VOICE_A`/`GEMINI_VOICE_B` in `.env`). It performs the whole dialogue —
+including audio tags and `tts_notes` — in NotebookLM style. The renderer retries each
+chunk hard (5 attempts, ~10 min worst case) and then **fails; do not fall back to
+another backend or re-render with `--backend kokoro`** — a flat-voiced episode must
+never publish. If it fails, report the failure in step 5 and stop. (Kokoro exists in
+the script for manual offline experiments only.)
 
 ### 4.5. Update the show's memory
 Fold today into `history.json` so future episodes stay non-repetitive and can build on

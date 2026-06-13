@@ -24,9 +24,17 @@ import sys
 MIN_WORDS = 2700
 MAX_WORDS = 3900
 
-# Things TTS would read aloud literally.
+# Well-formed audio tags — delivery directions Gemini TTS performs instead of
+# reading: short, lowercase, bracketed ([laughs], [sighs], [short pause], ...).
+TAG_RE = re.compile(r"\[[a-z][a-z ,'-]{0,38}\]")
+# Episode-wide ceiling: more than ~1 tag per 60 spoken words is decoration.
+TAG_DENSITY_WORDS = 60
+
+# Things TTS would read aloud literally (checked after tags are removed).
 ARTIFACT_PATTERNS = [
-    (re.compile(r"[*_#`~]|\[|\]"), "markdown/stage-direction characters"),
+    (re.compile(r"[*_#`~]"), "markdown characters"),
+    (re.compile(r"[\[\]]"), "a stray/malformed bracket (audio tags must be short "
+                            "lowercase phrases like [laughs])"),
     (re.compile(r"https?://"), "a URL (don't read URLs aloud)"),
     (re.compile(r"\bHOST_[AB]\b", re.IGNORECASE), "a speaker label inside the text"),
     (re.compile(r"\n"), "an embedded newline"),
@@ -47,7 +55,15 @@ def check(episode: dict, min_words: int, max_words: int) -> tuple[list[str], lis
         errors.append("turns is missing or empty")
         return errors, warnings
 
+    notes = episode.get("tts_notes", "")
+    if not isinstance(notes, str):
+        errors.append(f"tts_notes must be a string, got {type(notes).__name__}")
+    elif len(notes) > 300:
+        warnings.append(f"tts_notes is {len(notes)} chars — keep it to 1-2 sentences "
+                        "of mood/tone direction")
+
     total_words = 0
+    total_tags = 0
     run_speaker, run_len = None, 0
     for i, turn in enumerate(turns):
         text = str(turn.get("text", "")).strip()
@@ -57,9 +73,13 @@ def check(episode: dict, min_words: int, max_words: int) -> tuple[list[str], lis
         if not text:
             errors.append(f"turn {i}: empty text")
             continue
-        total_words += len(text.split())
+        # Audio tags are delivery directions, not spoken words: count them
+        # separately and validate the remaining text without them.
+        total_tags += len(TAG_RE.findall(text))
+        spoken = TAG_RE.sub(" ", text)
+        total_words += len(spoken.split())
         for pattern, label in ARTIFACT_PATTERNS:
-            if pattern.search(text):
+            if pattern.search(spoken):
                 errors.append(f"turn {i}: contains {label}: {text[:80]!r}")
         if speaker == run_speaker:
             run_len += 1
@@ -67,6 +87,12 @@ def check(episode: dict, min_words: int, max_words: int) -> tuple[list[str], lis
                 warnings.append(f"turn {i}: 3+ consecutive turns by speaker {speaker}")
         else:
             run_speaker, run_len = speaker, 1
+
+    if total_tags > total_words / TAG_DENSITY_WORDS:
+        errors.append(
+            f"{total_tags} audio tags for {total_words} words — over the cap of "
+            f"~1 per {TAG_DENSITY_WORDS} words; keep tags for moments the writing earns"
+        )
 
     if total_words < min_words:
         errors.append(

@@ -16,7 +16,7 @@ truth the feed is rebuilt from — kept in the repo for `github`, in the bucket 
 
 CLI is identical for both backends (run_episode.sh doesn't change):
   python scripts/publish.py --mp3 out/podcast-2026-06-09.mp3 \
-      --title "AI Daily — Jun 9" --summary "Today's papers and releases." --date 2026-06-09
+      --title "Self-Attention — Jun 9" --summary "Today's papers and releases." --date 2026-06-09
 
 Env (github):  PAGES_URL (optional, for a custom domain), COVER_SRC (default
                assets/podcast_cover.png), SHOW_TITLE, SHOW_DESC, SHOW_AUTHOR,
@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 from datetime import datetime, timezone
@@ -42,6 +43,15 @@ FEED_NAME = "feed.xml"
 DOCS = "docs"                    # GitHub Pages source folder (main branch /docs)
 EPISODES_DIR = "episodes"        # per-episode HTML notes pages (under DOCS / bucket)
 READS_DIR = "reads"              # weekly-read EPUBs (under DOCS), built by make_epub.py
+
+
+# Audio tags ([laughs], [sighs], ...) are TTS delivery directions; strip any that
+# leak into summary/notes text. The (?!\() lookahead protects markdown links.
+TAG_RE = re.compile(r"\[[a-z][a-z ,'-]{0,38}\](?!\()")
+
+
+def strip_audio_tags(text: str) -> str:
+    return re.sub(r"  +", " ", TAG_RE.sub("", text))
 
 
 # ---------------------------------------------------------------- shared helpers
@@ -84,7 +94,7 @@ def notes_to_html(notes_md: str) -> str:
 
 def episode_page_html(title: str, date: str, notes_html: str, mp3_url: str) -> str:
     """A standalone per-episode notes page for GitHub Pages."""
-    show = os.environ.get("SHOW_TITLE", "AI Daily")
+    show = os.environ.get("SHOW_TITLE", "Self-Attention")
     return f"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
@@ -110,7 +120,7 @@ def episode_page_html(title: str, date: str, notes_html: str, mp3_url: str) -> s
 
 def index_page_html(catalog: list[dict], reads: list[str] | None = None) -> str:
     """A simple episodes index for GitHub Pages, newest first."""
-    show = os.environ.get("SHOW_TITLE", "AI Daily")
+    show = os.environ.get("SHOW_TITLE", "Self-Attention")
     desc = os.environ.get("SHOW_DESC", "A daily AI news briefing.")
     rows = []
     for ep in sorted(catalog, key=lambda e: e["date"], reverse=True):
@@ -155,14 +165,14 @@ def build_feed(catalog: list[dict], *, feed_self_url: str, cover_url: str) -> by
     site_link = feed_self_url.rsplit("/", 1)[0] or feed_self_url
     fg = FeedGenerator()
     fg.load_extension("podcast")
-    fg.title(os.environ.get("SHOW_TITLE", "AI Daily"))
+    fg.title(os.environ.get("SHOW_TITLE", "Self-Attention"))
     fg.link(href=feed_self_url, rel="self")
     fg.link(href=site_link, rel="alternate")
     fg.description(os.environ.get("SHOW_DESC", "A daily AI news briefing."))
     fg.language("en")
-    fg.podcast.itunes_author(os.environ.get("SHOW_AUTHOR", "AI Daily"))
+    fg.podcast.itunes_author(os.environ.get("SHOW_AUTHOR", "Self-Attention"))
     fg.podcast.itunes_owner(
-        os.environ.get("SHOW_AUTHOR", "AI Daily"),
+        os.environ.get("SHOW_AUTHOR", "Self-Attention"),
         os.environ["OWNER_EMAIL"],  # the address Spotify emails the claim code to
     )
     fg.podcast.itunes_category(os.environ.get("SHOW_CATEGORY", "Technology"))
@@ -359,10 +369,11 @@ def main() -> int:
                          "second same-day episode gets its own guid/tag/page")
     args = ap.parse_args()
 
+    args.summary = strip_audio_tags(args.summary)
     summary_html = ""
     if args.notes and os.path.exists(args.notes):
         with open(args.notes) as f:
-            summary_html = notes_to_html(f.read())
+            summary_html = notes_to_html(strip_audio_tags(f.read()))
 
     backend_name = os.environ.get("PUBLISH_BACKEND", "github").lower()
     backend = GitHubBackend() if backend_name == "github" else S3Backend()

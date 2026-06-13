@@ -36,13 +36,28 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 from datetime import date, datetime, timedelta
 
 HISTORY_FILE = "history.json"
+# Audio tags ([laughs], [sighs], ...) are TTS delivery directions; if the skill
+# quotes dialogue into meta fields, they must not enter the show's memory.
+TAG_RE = re.compile(r"\[[a-z][a-z ,'-]{0,38}\]")
 KEEP_DAYS = 30           # detailed window
 MAX_THREADS = 15         # active_threads cap
 MAX_ENTITIES = 40        # entity roster cap
 MAX_LORE = 40            # host canon cap (~years at the intended reveal rate)
+
+
+def _strip_tags(value):
+    """Recursively remove audio tags from every string in a JSON-ish structure."""
+    if isinstance(value, str):
+        return re.sub(r"\s{2,}", " ", TAG_RE.sub("", value)).strip()
+    if isinstance(value, list):
+        return [_strip_tags(v) for v in value]
+    if isinstance(value, dict):
+        return {k: _strip_tags(v) for k, v in value.items()}
+    return value
 
 
 def _empty() -> dict:
@@ -155,7 +170,7 @@ def main() -> int:
             print(f"WARNING: {args.meta} not found; skipping append (roll-off only).")
         else:
             with open(args.meta) as f:
-                ep = json.load(f)
+                ep = _strip_tags(json.load(f))
             ep.setdefault("date", today.isoformat())
             for key in ("topics", "entities", "threads"):
                 ep.setdefault(key, [])
