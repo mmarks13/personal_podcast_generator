@@ -55,7 +55,7 @@ summary = ""
 try: summary = json.load(open("out/episode_meta.json")).get("summary", "")[:600]
 except Exception: pass
 subprocess.run(["python3","scripts/publish.py","--mp3",mp3[-1],
-                "--title",ep.get("title",f"AI Daily — {date}"),
+                "--title",ep.get("title",f"Self-Attention — {date}"),
                 "--summary",summary,"--notes","out/shownotes.md",
                 "--date",ep.get("date",date)], check=True)
 PY

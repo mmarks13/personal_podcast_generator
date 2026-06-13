@@ -53,7 +53,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--md", default="out/weekly_read.md")
     ap.add_argument("--out", required=True, help="e.g. docs/reads/weekly-2026-06-14.epub")
-    ap.add_argument("--author", default=os.environ.get("SHOW_AUTHOR", "AI Daily"))
+    ap.add_argument("--author", default=os.environ.get("SHOW_AUTHOR", "Self-Attention"))
     args = ap.parse_args()
 
     with open(args.md) as f:
