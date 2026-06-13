@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why your model can't read a million words at once — and the trick that lets it pretend — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Why your model can't read a million words at once — and the trick that lets it pretend</h1>
+<div class="date">Self-Attention — 2026-06-13</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-06-13-deepdive/deepdive-2026-06-13.mp3"></audio>
+<p><strong>Weekly Deep Dive · 2026-06-13</strong></p>
+<p>This week MiniMax shipped a production model built around their own sparse-attention
+mechanism, pitching million-token context without the runaway cost. We use that as the
+doorway to teach how long-context attention actually works: why attention is quadratic,
+why the KV cache is the real deployment bottleneck, and how "sparse attention" — a cheap
+scout that picks a small set of context blocks to actually read — escapes both costs.
+We trace the lineage from Native Sparse Attention (NSA) into this week's models, and we
+read the receipts honestly: real but sub-theoretical speedups, on-par (not better)
+quality on the tested tasks, and the blind-spot risk on diffuse queries that standard
+needle-in-a-haystack benchmarks don't catch.</p>
+<h2>Primary sources</h2>
+<ul>
+<li>MiniMax Sparse Attention (paper) — https://huggingface.co/papers/2606.13392</li>
+<li>MiniMax-M3 (model card) — https://huggingface.co/MiniMaxAI/MiniMax-M3</li>
+<li>Native Sparse Attention: Hardware-Aligned and Natively Trainable Sparse Attention (DeepSeek-AI, Peking University, University of Washington; ACL 2025) — https://arxiv.org/abs/2502.11089</li>
+<li>Deploy Long-Context Reasoning and Agentic Workflows with MiniMax M3 (NVIDIA Developer Blog) — https://developer.nvidia.com/blog/deploy-long-context-reasoning-and-agentic-workflows-with-minimax-m3-on-nvidia-accelerated-infrastructure/</li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li>"Attention Is All You Need" (Vaswani et al., 2017) — the transformer / quadratic-attention origin — https://arxiv.org/abs/1706.03762</li>
+<li>NSA Triton implementation (fla-org) — https://github.com/fla-org/native-sparse-attention</li>
+<li>DeepSeek-V3.2 technical report (continued sparse-attention line) — https://arxiv.org/abs/2512.02556</li>
+</ul>
+<p><em>Figures cited on air — ~28.4× per-token attention compute reduction at 1M context;
+14.2× prefill / 7.6× decode wall-clock on H800 (paper); ~1/20th per-token compute and
+9× prefill / 15× decode (NVIDIA deployment writeup, different configuration) — are the
+authors'/vendors' reported numbers and are attached to specific lengths, hardware, and
+harnesses. Quality is reported by the authors as "on par with GQA" on their downstream
+tasks.</em></p>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
