@@ -44,7 +44,7 @@ def split_chapters(text: str) -> tuple[str, list[tuple[str, str]]]:
         lines = lines[1:]
 
     chapters: list[tuple[str, str]] = []
-    current_title, current_lines = "This Week", []
+    current_title, current_lines = "Today", []
     for line in lines:
         if line.startswith("## "):
             if "".join(current_lines).strip():
