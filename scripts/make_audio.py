@@ -40,10 +40,10 @@ GEMINI_VOICES = {  # prebuilt voice names; audition alternatives in Google AI St
     "B": os.environ.get("GEMINI_VOICE_B", "Iapetus"),    # Alan
 }
 GEMINI_SPEAKER_NAMES = {"A": "Ada", "B": "Alan"}  # names the transcript prompt uses
-# A response is capped at 8192 audio tokens (~5.5 min at 25 tokens/s). ~3000 chars
-# of script is ~3.5 min spoken — comfortable headroom, and each chunk still carries
+# A response is capped at 8192 audio tokens (~5.5 min at 25 tokens/s). ~2000 chars
+# of script is ~2.3 min spoken — comfortable headroom, and each chunk still carries
 # enough conversation for natural back-and-forth prosody.
-GEMINI_CHUNK_CHARS = 3000
+GEMINI_CHUNK_CHARS = 2000
 GEMINI_STYLE = """\
 TTS the following conversation between Ada and Alan.
 

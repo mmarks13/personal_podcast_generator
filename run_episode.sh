@@ -32,17 +32,20 @@ Print the MP3 path when done." \
   --permission-mode acceptEdits \
   --max-turns 80
 
-# Sunday: write the weekly evening read and build its EPUB into docs/reads/ first,
-# so the publish step below sweeps it into the same commit + index page. Non-fatal:
-# a failed read must not block the daily episode.
-if [ "$DOW" = "7" ]; then
-  claude -p "Use the weekly-read skill to write this week's evening read and build \
-the EPUB. Print the EPUB path when done." \
-    --model "$MODEL" \
-    --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
-    --permission-mode acceptEdits \
-    --max-turns 60 || echo "WARNING: weekly read failed; continuing with daily publish"
-fi
+# Daily: write "Self Attention" (the daily read) and build its EPUB into docs/reads/
+# first, so the publish step below sweeps it into the same commit + index page, then
+# email it to the Kindle. The skill itself builds the EPUB (with cover) and records the
+# issue in reads_history.json; it knows the day's length target from the date. Non-fatal:
+# a failed read (or failed email) must not block the daily podcast publish.
+claude -p "Use the daily-read skill to write today's issue of Self Attention end to end, \
+following its reasoning, grounding, and the day's length target. Build the EPUB with the \
+cover and record the issue. Print the EPUB path when done." \
+  --model "$MODEL" \
+  --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
+  --permission-mode acceptEdits \
+  --max-turns 80 || echo "WARNING: daily read failed; continuing with daily publish"
+python3 scripts/send_to_kindle.py --epub "docs/reads/self-attention-$DATE.epub" \
+  || echo "WARNING: Kindle email failed; EPUB still on GitHub Pages"
 
 # 5: publish — read title/date/summary from the episode, upload + rebuild the feed.
 python3 - "$DATE" <<'PY'
@@ -60,8 +63,8 @@ subprocess.run(["python3","scripts/publish.py","--mp3",mp3[-1],
                 "--date",ep.get("date",date)], check=True)
 PY
 
-# Saturday: also produce + publish the weekly deep-dive episode.
-if [ "$DOW" = "6" ]; then
+# Wed/Sat: also produce + publish the deep-dive episode.
+if [ "$DOW" = "6" ] || [ "$DOW" = "3" ]; then
   claude -p "Use the weekly-deep-dive skill to produce this week's deep-dive episode \
 end to end, following its grounding rules and length target (20-25 min). \
 Print the MP3 path when done." \

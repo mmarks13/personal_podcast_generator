@@ -22,8 +22,10 @@ to an RSS feed Spotify polls.
   two self-aware AIs whose evolving canon lives in `history.json` `lore`.
 - `.claude/skills/weekly-deep-dive/SKILL.md` — Saturday teaching episode (~20–25 min),
   one topic the week's news made worth learning; published with `--slug deepdive`.
-- `.claude/skills/weekly-read/SKILL.md` — Sunday evening read: single-essayist short
-  magazine → EPUB in `docs/reads/` (Kindle sideload).
+- `.claude/skills/daily-read/SKILL.md` — "Self Attention", a **daily** reading magazine
+  → EPUB in `docs/reads/`, emailed to Kindle. Fully independent of the podcast (never
+  mentions it). A fixed masthead of seven writers (Ada, Alan, Grace, Vannevar, Florence,
+  Karel, Linus); weekday issues ~30 min, Sat/Sun ~1 hr. Continuity in `reads_history.json`.
 - `config/sources.yaml` — the source watchlist (Tier 1 = daily; Tier 2 = optional).
 - `scripts/fetch_sources.py` — deterministic pulls of ALL rss/api sources, both tiers
   (arXiv keyword-filtered to topic priorities, HF Daily Papers, HN, newsletters).
@@ -34,7 +36,12 @@ to an RSS feed Spotify polls.
   `GEMINI_VOICE_A/B` in `.env`; honors optional `tts_notes` in episode.json.
   Retries hard then FAILS — never silently falls back. Kokoro path kept for manual
   offline experiments only (loudnorm on that path; Gemini audio ships untouched).
-- `scripts/make_epub.py` — weekly read markdown → EPUB (chapters from `##` headings).
+- `scripts/make_epub.py` — read markdown → EPUB (chapters from `##` headings); renders a
+  cover from `docs/cover.png` + title/subtitle via `--cover-src`/`--cover-subtitle`.
+- `scripts/update_reads_history.py` — append today's issue to `reads_history.json` (the
+  daily read's memory: mood, pieces, authors) so issues don't repeat and voices rotate.
+- `scripts/send_to_kindle.py` — email a read EPUB to the Kindle (Gmail SMTP; needs
+  `KINDLE_EMAIL`, `GMAIL_APP_PASSWORD`).
 - `scripts/publish.py` — upload MP3 + rebuild iTunes-compatible feed.xml; `--slug`
   distinguishes same-day episodes (daily vs deepdive).
 - `scripts/update_history.py` — maintain `history.json` (show memory: 30-day detail +
