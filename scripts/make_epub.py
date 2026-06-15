@@ -121,16 +121,30 @@ def main() -> int:
 
     with open(args.md) as f:
         text = f.read()
-    title, chapters = split_chapters(text)
+    _masthead, chapters = split_chapters(text)
     if not chapters:
         print(f"{args.md} has no content — not building an EPUB.", file=sys.stderr)
         return 1
+
+    # Kindle library title: a stable prefix + the issue date so every issue
+    # clusters and sorts together (and is identifiable) in the Docs view. Date
+    # comes from the --out filename (self-attention-YYYY-MM-DD.epub).
+    m = re.search(r"(\d{4}-\d{2}-\d{2})", os.path.basename(args.out))
+    issue_date = m.group(1) if m else ""
+    title = f"{args.author} — {issue_date}" if issue_date else args.author
 
     book = epub.EpubBook()
     book.set_identifier(re.sub(r"\W+", "-", os.path.basename(args.out)))
     book.set_title(title)
     book.set_language("en")
     book.add_author(args.author)
+    # Series metadata: ignored by Send-to-Kindle, but groups issues if the EPUB
+    # is ever routed through Calibre, and is free to set.
+    book.add_metadata("OPF", "belongs-to-collection", args.author,
+                      {"id": "series"})
+    if issue_date:
+        book.add_metadata(None, "meta", issue_date,
+                          {"name": "calibre:series", "content": args.author})
     css = epub.EpubItem(uid="style", file_name="style.css",
                         media_type="text/css", content=STYLE.encode())
     book.add_item(css)
