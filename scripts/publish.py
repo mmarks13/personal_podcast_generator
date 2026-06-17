@@ -27,6 +27,7 @@ Env (s3):      S3_BUCKET, S3_REGION, S3_ENDPOINT_URL (R2 only), AWS_* creds,
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -216,9 +217,12 @@ class GitHubBackend:
         open(os.path.join(DOCS, ".nojekyll"), "a").close()  # serve files raw
         cover_src = os.environ.get("COVER_SRC", "assets/podcast_cover.png")
         if os.path.exists(cover_src):
-            shutil.copyfile(cover_src, os.path.join(DOCS, "cover.png"))
+            digest = hashlib.sha256(open(cover_src, "rb").read()).hexdigest()[:8]
+            self._cover_filename = f"cover-{digest}.png"
+            shutil.copyfile(cover_src, os.path.join(DOCS, self._cover_filename))
         else:
             print(f"WARNING: cover not found at {cover_src}; Spotify requires show art")
+            self._cover_filename = "cover.png"
 
     @staticmethod
     def _owner_repo() -> str:
@@ -241,7 +245,7 @@ class GitHubBackend:
 
     @property
     def cover_url(self) -> str:
-        return f"{self.pages_base}/cover.png"
+        return f"{self.pages_base}/{self._cover_filename}"
 
     def upload_audio(self, mp3: str, tag: str, title: str, notes: str) -> str:
         exists = subprocess.run(["gh", "release", "view", tag],
