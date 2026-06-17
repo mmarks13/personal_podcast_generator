@@ -125,29 +125,17 @@ Use it to inform, not to perform:
 The structured feeds (step 1) don't cover the watchlist's HTML-only sources — lab blogs,
 release-note pages, leaderboards, news sections. These have no clean machine feed, so a
 **single subagent** crawls them and returns a traceable candidate list. Spawn it with the
-`Agent` tool. Read `config/sources.yaml` first and pass it **every source whose method is
-`fetch`** (the HTML ones), Tier-1 and Tier-2 alike — the eval, governance, and
-delivery sources the topic priorities care about mostly live in Tier-2. It may also
-follow an obvious link to a primary source it finds on those pages. (Leaderboards and
-slow-moving pages will often have nothing new — that's expected; the subagent just
-reports what it finds.)
+`Agent` tool as `subagent_type: source-crawler` (a Sonnet agent — its durable output
+contract lives in `.claude/agents/source-crawler.md`).
 
-Give the subagent this brief, verbatim in spirit:
-
-> Crawl each of these URLs (today and yesterday only). Return **every real AI-industry
-> item** you find — a release, paper, benchmark result, partnership, price change, policy
-> move, funding round, hire, outage, or similar concrete development. This is a *noise*
-> filter, not an importance filter: **drop only** site boilerplate/navigation, pure
-> marketing with no factual claim, and items clearly outside the last ~48h. **When unsure,
-> include it** and say why you weren't sure. Do **not** judge whether an item is important
-> enough for a show — that is decided downstream. For each item return JSON:
-> `{ "sources": ["which watchlist source(s) it appeared on"], "url": "exact primary URL",
-> "claims": ["the key factual claims, quoted or stated as the page had them — short, one
-> or two sentences each, no paraphrase that changes meaning"], "summary": "1–2 line plain
-> recap", "why_included": "one line; note here if you were unsure" }`. Keep quotes short.
-> Separately, report **every URL you could not read** (403/404/timeout/paywall) — return
-> a final JSON object `{ "items": [...], "failures": [ { "url": "...", "what_happened":
-> "one line" } ] }` as your last message and nothing else.
+Read `config/sources.yaml` first and pass the subagent, in the `prompt`, **every source
+whose method is `fetch`** (the HTML ones), Tier-1 and Tier-2 alike — the eval, governance,
+and delivery sources the topic priorities care about mostly live in Tier-2 — plus the date
+window (today and yesterday only). Example prompt: *"Crawl these sources for {today} and
+{yesterday} only: {labelled URL list}."* Add any per-run steering here (e.g. emphasis on a
+particular beat) — it stacks on top of the saved contract. (Leaderboards and slow-moving
+pages will often have nothing new — that's expected; the subagent just reports what it
+finds.)
 
 You'll merge this list with the step-1 feeds in step 3. Treat the subagent's `claims` as
 leads you can cite or re-verify — it read the page so you don't have to re-read all of
@@ -177,12 +165,21 @@ it. If it might be an update — or you can't tell — verify; when confirmed, c
 just because the topic is familiar.
 
 **Verify what you'll use.** Every item that makes the show must trace to a primary source
-you (or the step-2 subagent) actually read. Re-fetch with `WebFetch`/`WebSearch` when a
-claim is load-bearing or you're unsure — don't take a number, date, or quote on faith.
+you (or the step-2 subagent) actually read. Don't take a number, date, or quote on faith.
 **Load-bearing means:** any number, date, quote, or ranking; anything in the cold open;
 and the lead claims of any full-treatment story. A truncated feed excerpt in
 `sources.json` is a *lead*, not a read source — it supports at most a Headlines
 one-liner; full treatment requires fetching the actual page.
+
+Once you've chosen the stories, batch the load-bearing claims and hand them to the
+`fact-checker` subagent (`Agent` tool, `subagent_type: fact-checker`, a Sonnet agent) —
+pass each claim with the primary URL to check it against. It returns, per claim, a verdict
+(`supported`/`contradicted`/`not_found`/`unreachable`) and the **verbatim quote** that
+decides it. Only `supported` claims (with a real quote) go on air as stated; treat
+`contradicted` by correcting to what the quote says, and `not_found`/`unreachable` by
+re-checking yourself or dropping the claim. The quote is your evidence — grounding still
+rests on you, the subagent just does the fetching. For a one-off claim mid-write it's fine
+to `WebFetch` directly rather than spin up the subagent; use it for the batch.
 
 **Depth over breadth.** Pick **5–7 stories for full treatment** — enough time each that
 the hosts can explain, push, and land a "so what". Everything else that's real but

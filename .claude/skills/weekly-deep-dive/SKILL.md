@@ -39,14 +39,24 @@ Rules:
 
 ### 2. Research it properly
 Use `WebFetch`/`WebSearch` to read the primary material: the paper(s), official docs,
-technical blog posts, credible independent analyses. The daily show's grounding rules
-apply unchanged and matter even more here, because a deep dive invites confident
-explanation:
+technical blog posts, credible independent analyses. **Read the one or two core sources
+yourself** — the paper(s) the episode actually teaches — because the "how it works" and
+"where the analogy breaks" sections depend on your own understanding, not a secondhand
+extract. The daily show's grounding rules apply unchanged and matter even more here,
+because a deep dive invites confident explanation:
 - Every factual claim traces to a page you actually read. If you didn't read it,
   don't say it.
 - No invented numbers, names, dates, or quotes. "The authors report…", not "this
   proves…". Distinguish established results from claims.
 - When sources disagree, say so on air rather than picking one silently.
+
+For the **specific load-bearing details** that pepper a teaching episode — exact numbers,
+dates, benchmark figures, quotes, who-did-what-when — batch them to the `fact-checker`
+subagent (`Agent` tool, `subagent_type: fact-checker`, a Sonnet agent) with the URL to
+check each against; it returns a verdict and the **verbatim quote** per claim. Use it to
+confirm the details, not to replace your reading of the core material: only `supported`
+claims (with a real quote) are safe to state, `contradicted` gets corrected to the quote,
+`not_found`/`unreachable` gets re-checked or dropped.
 
 ### 3. Write the script
 Same hosts as the daily show — **Ada** (`"A"`) and **Alan** (`"B"`); read the **Hosts

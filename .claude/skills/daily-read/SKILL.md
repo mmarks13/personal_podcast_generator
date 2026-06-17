@@ -178,6 +178,13 @@ For every factual/historical/explanatory piece and every factual support in an o
 piece, fetch and confirm at primary or reputable sources. Fiction needs no sourcing but
 must be labeled.
 
+Batch the factual claims you need to confirm and hand them to the `fact-checker` subagent
+(`Agent` tool, `subagent_type: fact-checker`, a Sonnet agent), each with the URL to check
+it against; it returns a verdict and the **verbatim quote** per claim. Only `supported`
+claims (with a real quote) go in as stated — `contradicted` gets corrected to the quote,
+`not_found`/`unreachable` gets re-checked or dropped. Grounding still rests on you; the
+subagent just does the fetching. A one-off check mid-write can still be a direct `WebFetch`.
+
 ### 3. Write the issue
 One markdown file, `out/daily_read.md`:
 - `# Self Attention` — the H1 (always this title; the cover handles the subtitle).
