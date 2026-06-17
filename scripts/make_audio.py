@@ -34,7 +34,7 @@ KOKORO_SAMPLE_RATE = 24000
 TURN_PAUSE_SECONDS = 0.3   # breathing room at speaker changes
 # Podcast-standard loudness for the Kokoro path (API audio ships untouched).
 LOUDNORM = "loudnorm=I=-16:TP=-1.5:LRA=11"
-GEMINI_MODEL = os.environ.get("GEMINI_TTS_MODEL", "gemini-3.1-flash-tts-preview")
+GEMINI_MODEL = os.environ.get("GEMINI_TTS_MODEL", "gemini-2.5-pro-preview-tts")
 GEMINI_VOICES = {  # prebuilt voice names; audition alternatives in Google AI Studio
     "A": os.environ.get("GEMINI_VOICE_A", "Laomedeia"),  # Ada
     "B": os.environ.get("GEMINI_VOICE_B", "Iapetus"),    # Alan

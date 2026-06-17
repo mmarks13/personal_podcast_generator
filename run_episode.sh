@@ -8,7 +8,7 @@ cd "$(dirname "$0")"
 [ -f .venv/bin/activate ] && . .venv/bin/activate
 # Prepend the user-local CLI dir (claude); append conda's bin for ffmpeg/ffprobe
 # (installed there via conda) without letting conda's python shadow the venv.
-export PATH="$HOME/.local/bin:$PATH:$HOME/miniconda3/bin"
+export PATH="$HOME/.local/bin:$PATH:$HOME/miniforge3/bin"
 
 # Load storage + show config (but not an API key).
 set -a; [ -f .env ] && . ./.env; set +a
