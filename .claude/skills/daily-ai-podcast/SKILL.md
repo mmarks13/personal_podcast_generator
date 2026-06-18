@@ -170,7 +170,7 @@ in the step-5 report.
 ### 3. Select, verify, and write the script
 Now you have everything: the step-1.6 digest (`out/digest.json`) and the step-2 crawl
 list. **This is where importance is judged.** Merge the two into one candidate set, decide
-what the show is about using the topic priorities below, verify what you'll use, then write.
+what the show is about using the topic priorities below, fetch the main source for the stories you'll cover, then write.
 
 **Merge and de-duplicate.** The structured feeds arrive already de-duplicated in the
 digest, each entry carrying the list of sources that ran it and a `source_count`. Fold in
@@ -333,10 +333,10 @@ segment; it's the story going one level deeper because understanding it requires
 it when the material earns it; skip it when the story speaks for itself. The grounding
 rules apply to the explanation exactly as to the reporting.
 
-**Optional full deep-dive segment.** Rarely, a single item merits more than that
-in-story minute or two — a genuinely new architecture, an important technique, a debate
-worth unpacking properly. Then it's worth replacing **One to watch** with a 3–4 minute
-deep dive that *teaches* the thing end to end. Use it sparingly, only when the material
+**Optional full deep-dive segment.** (~1-2 times/week), a single item merits more than that
+in-story minute or two — a genuinely new architecture, an architecture that is showing up often in the literature, a prescient history lesson, an important technique, a debate
+worth unpacking properly. Then it's worth adding a 3–4 minute
+deep dive that *teaches* the thing end to end. Use it only when the material
 earns the time; the episode may run up to ~25 minutes on those days. Same grounding rules
 apply.
 
@@ -346,7 +346,7 @@ heard elsewhere), and it's the **triage tier** for real-but-secondary items that
 make the 5–7 full-treatment cut. It is **optional and tightly capped**:
 - Comes right after the cold open, before Papers. **Skip it entirely** if nothing
   qualifies.
-- **At most ~6 items, one or two lines each**, no host back-and-forth — name it, say in a
+- **At most ~6 items, 1-4 lines each**, no host back-and-forth — name it, say in a
   clause what it is, move on. It's a *mention, not coverage*.
 - If a loud story also has real substance under the priorities, it belongs in its proper
   segment with full treatment, **not** here — never cover the same item in both.
