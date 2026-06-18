@@ -46,6 +46,25 @@ The six topic priority areas (equal, unranked) — judge "on-priority" against t
 5. AI infrastructure, local deployment, governance & scaling (hardware, open-weight models, on-device/private inference, costs, energy, security, privacy, regulation, procurement).
 6. Applied AI & research frontiers with near-term practical signal (world models, multimodal reasoning, geospatial/Earth-observation, robotics, synthetic data, simulation).
 
+**Aim for a digest the main agent can read in one pass — about 1,500–2,500 words
+total, and no more than ~3,000 even on a heavy day.** Treat that as a budget you
+allocate, not a wall you hit by cutting real stories. Converge on it in this order:
+1. **Floor first.** List every real on-topic item at least once with its skeleton —
+   title, the sources that ran it, `source_count`, `url`, `signals`. This floor is
+   what lets the main agent still see and choose from everything; never drop a real
+   on-topic story to save space.
+2. **Spend the remaining budget on depth, not more items.** Give the fullest
+   summaries (up to 3 sentences) to the items sitting most squarely in the six areas
+   and carrying the strongest signal (multi-source pickup, high upvotes/points); step
+   marginal items down to one sentence, then to a single clause.
+3. **Busy-day fallback.** If the skeleton alone for every item already overruns the
+   budget, you have an unusually busy day — still don't drop real stories. Compress
+   the clearly-marginal ones into a terse tail (title + url + sources, no summary) so
+   they remain for the main agent to weigh, at minimal cost.
+
+The budget governs *how much you say*, never *which real stories you include* — only
+the clearly off-topic items are dropped (above).
+
 **Write the result to `out/digest.json`** as your deliverable, with this shape:
 `{ "items": [ { "title": "...", "sources": ["source name(s) it appeared on"],
 "source_count": <int>, "url": "exact primary url", "signals": { "hf_upvotes": <int|null>,
