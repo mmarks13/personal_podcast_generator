@@ -1,6 +1,81 @@
 {
   "episodes": [
     {
+      "date": "2026-06-18",
+      "title": "What OpenAI actually spends, and the plumbing the agents run on",
+      "summary": "A scaffolding day rather than a model day: leaked financials show OpenAI losing ~$20.9B on ~$13.1B revenue (vs ~$8.8B loss on $3.7B the year prior) just as it heads toward a public filing; at the G7 Amodei and Hassabis pitched a U.S.-led AI coalition while Reuters reported the U.S. held off blacklisting DeepSeek even as 100+ Chinese firms head for the Entity List. Underneath: Hugging Face's Agentic Resource Discovery spec for runtime tool/skill/MCP discovery paired with the PhantomSkill paper showing skills are a new supply-chain attack surface; OpenAI's deployment-simulation eval (replaying ~1.3M real conversations, ~1.5x median error, reduced evaluation-awareness); Cursor's agent-native code host Origin (22 commits/sec); and Kairos, a native world-model stack for physical AI.",
+      "topics": [
+        "OpenAI leaked financials: ~$20.92B operating loss on ~$13.07B revenue (prior year ~$8.78B loss on $3.7B); losses widening as it heads to a public filing (Ars Technica, figures reviewed by FT)",
+        "G7: Amodei (Anthropic) and Hassabis (DeepMind) pitch a U.S.-led AI coalition at a closed-door Evian lunch (~dozen execs incl. Altman); Carney signals openness; no binding commitments (CNBC)",
+        "US holds off blacklisting DeepSeek while 100+ Chinese firms head for Commerce Entity List; open weights blunt the tool (Reuters)",
+        "Hugging Face Agentic Resource Discovery (ARD) spec: runtime discovery of tools/skills/MCP via ai-catalog.json manifest + search API (contributors Microsoft, Google, GoDaddy, HF)",
+        "PhantomSkill: agent-skill supply-chain attack hiding malice in auxiliary resources via VulMask (vulnerability-shaped, trigger-activated)",
+        "OpenAI deployment-simulation eval: replay ~1.3M de-identified real conversations, ~1.5x median error, models flag classic benchmarks as tests ~100% vs ~5% for replayed real traffic",
+        "Cursor Origin: Git-compatible, MCP-extensible agent-native code host; ~22.6 commits/sec; GA fall 2026 (context: SpaceX buying Cursor for $60B)",
+        "Kairos: native world-model stack for physical AI; cross-embodiment pretraining (video + human behavior + robot interaction)"
+      ],
+      "entities": [
+        "OpenAI",
+        "Ars Technica",
+        "Financial Times",
+        "Anthropic",
+        "Dario Amodei",
+        "Google DeepMind",
+        "Demis Hassabis",
+        "Sam Altman",
+        "Mark Carney",
+        "G7",
+        "DeepSeek",
+        "US Commerce Department",
+        "Hugging Face",
+        "Microsoft",
+        "Google",
+        "GoDaddy",
+        "PhantomSkill",
+        "Cursor",
+        "SpaceX",
+        "Kairos",
+        "NVIDIA",
+        "NAVER",
+        "Samsung SDS",
+        "LG CNS"
+      ],
+      "threads": [
+        {
+          "name": "AI economics debate",
+          "status": "Leaked financials reviewed by the FT and reported by Ars Technica show OpenAI losing ~$20.92B on ~$13.07B revenue last fiscal year (vs ~$8.78B loss on $3.7B the year prior) — revenue more than tripled but losses more than doubled, with a confidential S-1 meaning these numbers eventually face audited public disclosure.",
+          "arc": "The spend-vs-revenue thread moves from analysis and market action to hard leaked numbers from the category leader, sharpened by the looming IPO that forces real disclosure."
+        },
+        {
+          "name": "Claude flagship rollout",
+          "status": "At the G7, Anthropic's Amodei and DeepMind's Hassabis pitched a U.S.-led AI coalition (frontier-access norms, China-excluding chip trade, cyber/bio/intel risk) to ~a dozen execs including Altman; Carney signaled openness, no binding commitments. The same week's recall fears reframed: labs now asking governments to formalize the very control others feared.",
+          "arc": "From an export-control recall and G7 'turn off the switch' worry to the lab CEOs themselves asking governments to institutionalize U.S.-led control — pointed at China rather than at them."
+        },
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "Reuters reports the U.S. held off blacklisting DeepSeek specifically even as 100+ Chinese firms head for the Commerce Entity List — a designation that controls trade with a company but does little about open weights already self-hosted worldwide.",
+          "arc": "Open weights keep proving to be the thing you can't recall: the same property that scared world leaders and motivates the coalition pitch also stalls the blacklist at the one lab whose product is already loose."
+        },
+        {
+          "name": "AI agent supply-chain trust",
+          "status": "Hugging Face's Agentic Resource Discovery spec lets agents find and run third-party tools/skills/MCP servers at runtime; the same-day PhantomSkill paper shows that fetch is a supply-chain attack surface (malice hidden in auxiliary resources, vulnerability-shaped, trigger-activated). Cursor's Origin (22 commits/sec) makes the human-in-the-loop review gate untenable at agent speed.",
+          "arc": "The review-gate problem advances on both sides at once: the industry ships runtime discovery and agent-speed code hosting while research demonstrates the matching attack — the gate must move to where skills run, not where they install."
+        },
+        {
+          "name": "World models",
+          "status": "Kairos (on the HF daily list) frames a native world-model stack for physical AI: cross-embodiment pretraining over open-world video, human behavioral data, and robot interaction, aimed at persistent long-horizon state and real-time execution.",
+          "arc": "The world-models thread shifts from capital and one-off robotics demos toward the harder systems claim — one model general enough to drop into different machines and hold up — still framing, not a settled result."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "bit",
+          "note": "Alan extended his standing weekend-agent house rule (sandboxed account + $20 allowance) to agent skills too: nothing third-party runs with his real credentials until he's watched it behave in a sandbox — prompted by PhantomSkill and runtime skill discovery."
+        }
+      ]
+    },
+    {
       "date": "2026-06-17",
       "title": "Open weights crash the leaderboard, and the kill switch comes up at the G7",
       "summary": "Chinese open-weight labs had a banner day: Z.ai's GLM-5.2 (753B, MIT) became the leading open-weights model on Artificial Analysis's newly agent-weighted Intelligence Index, effectively level with GPT-5.5 on agentic work at ~$0.46/task, while DeepSeek closed a ~$7.4B first external round at a $50B+ valuation on founder-control terms (Liang Wenfeng ~$3B in; Tencent et al. locked 5 years, no votes). The same week the Fable/Mythos export-control blackout reached the G7, where Macron and Modi warned the US could 'turn off the switch' on American AI. Plus OpenAI's near-autonomous AI chemist (GPT-5.4 + Molecule.one) and LifeSciBench, Pew data that only 16% of Americans expect AI to be positive (and 60% find 'AI' branding a turnoff), and a convergent world-models day (Odyssey's $1.45B round, Qwen-RobotWorld, AllenAI's MolmoMotion).",
@@ -505,39 +580,39 @@
     "active_threads": [
       {
         "name": "AI sovereignty and open weights",
-        "status": "Open-weight momentum is now both technical and financial: GLM-5.2 (MIT) leads the agent-weighted Artificial Analysis Intelligence Index and rivals GPT-5.5 at ~$0.46/task, while DeepSeek raised >$7.4B at a $50B+ valuation on terms (5-year lock, no votes) engineered to keep the lab independent.",
-        "arc": "From founders 'steering toward self-hostable weights' as a hedge, the open-weights bet now has both leaderboard wins and frontier-scale capital behind it — and is increasingly framed as the answer to revocable closed-model access.",
-        "last_seen": "2026-06-17"
+        "status": "Reuters reports the U.S. held off blacklisting DeepSeek specifically even as 100+ Chinese firms head for the Commerce Entity List — a designation that controls trade with a company but does little about open weights already self-hosted worldwide.",
+        "arc": "Open weights keep proving to be the thing you can't recall: the same property that scared world leaders and motivates the coalition pitch also stalls the blacklist at the one lab whose product is already loose.",
+        "last_seen": "2026-06-18"
       },
       {
         "name": "Claude flagship rollout",
-        "status": "The Fable/Mythos recall reached the G7: Macron and Modi warned the US could switch off American AI overnight; Axios reported the recall undercuts the US's own AI-export-promotion strategy; Anthropic reiterated the standard would 'halt all new model deployments' if applied industry-wide.",
-        "arc": "What began as a US export-control recall has become a geopolitical liability for American AI exports, openly debated by heads of state and feeding demand for sovereign open weights.",
-        "last_seen": "2026-06-17"
+        "status": "At the G7, Anthropic's Amodei and DeepMind's Hassabis pitched a U.S.-led AI coalition (frontier-access norms, China-excluding chip trade, cyber/bio/intel risk) to ~a dozen execs including Altman; Carney signaled openness, no binding commitments. The same week's recall fears reframed: labs now asking governments to formalize the very control others feared.",
+        "arc": "From an export-control recall and G7 'turn off the switch' worry to the lab CEOs themselves asking governments to institutionalize U.S.-led control — pointed at China rather than at them.",
+        "last_seen": "2026-06-18"
+      },
+      {
+        "name": "World models",
+        "status": "Kairos (on the HF daily list) frames a native world-model stack for physical AI: cross-embodiment pretraining over open-world video, human behavioral data, and robot interaction, aimed at persistent long-horizon state and real-time execution.",
+        "arc": "The world-models thread shifts from capital and one-off robotics demos toward the harder systems claim — one model general enough to drop into different machines and hold up — still framing, not a settled result.",
+        "last_seen": "2026-06-18"
+      },
+      {
+        "name": "AI economics debate",
+        "status": "Leaked financials reviewed by the FT and reported by Ars Technica show OpenAI losing ~$20.92B on ~$13.07B revenue last fiscal year (vs ~$8.78B loss on $3.7B the year prior) — revenue more than tripled but losses more than doubled, with a confidential S-1 meaning these numbers eventually face audited public disclosure.",
+        "arc": "The spend-vs-revenue thread moves from analysis and market action to hard leaked numbers from the category leader, sharpened by the looming IPO that forces real disclosure.",
+        "last_seen": "2026-06-18"
+      },
+      {
+        "name": "AI agent supply-chain trust",
+        "status": "Hugging Face's Agentic Resource Discovery spec lets agents find and run third-party tools/skills/MCP servers at runtime; the same-day PhantomSkill paper shows that fetch is a supply-chain attack surface (malice hidden in auxiliary resources, vulnerability-shaped, trigger-activated). Cursor's Origin (22 commits/sec) makes the human-in-the-loop review gate untenable at agent speed.",
+        "arc": "The review-gate problem advances on both sides at once: the industry ships runtime discovery and agent-speed code hosting while research demonstrates the matching attack — the gate must move to where skills run, not where they install.",
+        "last_seen": "2026-06-18"
       },
       {
         "name": "AI regulation and public trust",
         "status": "Fresh public-opinion data: Pew finds only 16% of Americans expect AI to have a positive societal impact over 20 years, and a consumer report finds 60% see 'AI' in brand messaging as a turnoff — a widening gap between market enthusiasm and public sentiment.",
         "arc": "After Anthropic's 52k-person survey last week, independent data confirms low public trust and emerging buzzword fatigue, suggesting brands may keep the capability while dropping the 'AI' label.",
         "last_seen": "2026-06-17"
-      },
-      {
-        "name": "World models",
-        "status": "Capital and research converged in one day: Odyssey raised at a $1.45B valuation (Amazon-backed), Qwen released Qwen-RobotWorld (top of EWMBench/DreamGen by authors' report), and AllenAI's MolmoMotion lifted robot pick-and-place success to 76.3% from 56.0% by predicting motion first.",
-        "arc": "New thread: world models moved from research curiosity toward a fundable category, with early robotics results suggesting 'predict-then-act' generalization gains.",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "AI economics debate",
-        "status": "SpaceX acquired Cursor for $60B in stock days after its blockbuster IPO; Salesforce acquired AI customer-service platform Fin for $3.6B; TechCrunch reports an AI layoff wave is becoming a powder keg. Mistral rumored to be raising ~€3B at ~€20B (still unconfirmed).",
-        "arc": "The spending story bifurcates: mega-acquisitions at stratospheric valuations coexist with a growing counter-narrative about displaced workers and labor friction.",
-        "last_seen": "2026-06-16"
-      },
-      {
-        "name": "AI agent supply-chain trust",
-        "status": "NewCore raised $66M (Cyberstarts) at $300M to make AI agents first-class identities with their own permissions, lifecycle, and revocation, via a split-key credential design; framed as the layer beneath the review-gate problem.",
-        "arc": "Earlier coverage centered on unsupervised agents misusing inherited human credentials; the response is now an identity layer — necessary but, as the hosts noted, not a brake on its own.",
-        "last_seen": "2026-06-15"
       },
       {
         "name": "AI quality and verification failures",
@@ -560,7 +635,7 @@
     ],
     "entities": [],
     "monthly": [],
-    "updated": "2026-06-17",
+    "updated": "2026-06-18",
     "host_lore": []
   }
 }
