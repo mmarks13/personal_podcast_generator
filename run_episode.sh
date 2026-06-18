@@ -18,19 +18,21 @@ DATE="$(date +%F)"
 DOW="$(date +%u)"   # 1=Mon .. 6=Sat 7=Sun
 mkdir -p out
 
-# Pin the model explicitly so the nightly job never inherits whatever the
-# interactive CLI default happens to be (an interactive /model switch persists
-# into settings and would otherwise leak into this run).
-MODEL="opus"
+# Pin models explicitly so the nightly job never inherits an interactive /model switch.
+# Opus for the podcast (editorial judgment, grounding, source selection).
+# Sonnet for the read and deep dive (writing-heavy tasks; saves Pro session budget).
+PODCAST_MODEL="opus"
+READ_MODEL="opus"
+DEEPDIVE_MODEL="opus"
 
 # 1–4: Claude follows the skill — fetch, gather, write script, render MP3.
 claude -p "Use the daily-ai-podcast skill to produce today's episode end to end, \
 following its grounding rules and length target (18-22 min). \
 Print the MP3 path when done." \
-  --model "$MODEL" \
+  --model "$PODCAST_MODEL" \
   --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
   --permission-mode acceptEdits \
-  --max-turns 80
+  --max-turns 60
 
 # Daily: write "Self Attention" (the daily read) and build its EPUB into docs/reads/
 # first, so the publish step below sweeps it into the same commit + index page, then
@@ -40,10 +42,10 @@ Print the MP3 path when done." \
 claude -p "Use the daily-read skill to write today's issue of Self Attention end to end, \
 following its reasoning, grounding, and the day's length target. Build the EPUB with the \
 cover and record the issue. Print the EPUB path when done." \
-  --model "$MODEL" \
+  --model "$READ_MODEL" \
   --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
   --permission-mode acceptEdits \
-  --max-turns 80 || echo "WARNING: daily read failed; continuing with daily publish"
+  --max-turns 50 || echo "WARNING: daily read failed; continuing with daily publish"
 python3 scripts/send_to_kindle.py --epub "docs/reads/self-attention-$DATE.epub" \
   || echo "WARNING: Kindle email failed; EPUB still on GitHub Pages"
 
@@ -68,10 +70,10 @@ if [ "$DOW" = "6" ] || [ "$DOW" = "3" ]; then
   claude -p "Use the weekly-deep-dive skill to produce this week's deep-dive episode \
 end to end, following its grounding rules and length target (20-25 min). \
 Print the MP3 path when done." \
-    --model "$MODEL" \
+    --model "$DEEPDIVE_MODEL" \
     --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
     --permission-mode acceptEdits \
-    --max-turns 80
+    --max-turns 60
 
   python3 - "$DATE" <<'PY'
 import json, subprocess, sys, glob

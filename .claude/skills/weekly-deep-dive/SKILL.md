@@ -52,7 +52,7 @@ because a deep dive invites confident explanation:
 
 For the **specific load-bearing details** that pepper a teaching episode — exact numbers,
 dates, benchmark figures, quotes, who-did-what-when — batch them to the `fact-checker`
-subagent (`Agent` tool, `subagent_type: fact-checker`, a Sonnet agent) with the URL to
+subagent (`Agent` tool, `subagent_type: fact-checker`, `model: "haiku"`) with the URL to
 check each against; it returns a verdict and the **verbatim quote** per claim. Use it to
 confirm the details, not to replace your reading of the core material: only `supported`
 claims (with a real quote) are safe to state, `contradicted` gets corrected to the quote,

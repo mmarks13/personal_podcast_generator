@@ -179,7 +179,7 @@ piece, fetch and confirm at primary or reputable sources. Fiction needs no sourc
 must be labeled.
 
 Batch the factual claims you need to confirm and hand them to the `fact-checker` subagent
-(`Agent` tool, `subagent_type: fact-checker`, a Sonnet agent), each with the URL to check
+(`Agent` tool, `subagent_type: fact-checker`, `model: "haiku"`), each with the URL to check
 it against; it returns a verdict and the **verbatim quote** per claim. Only `supported`
 claims (with a real quote) go in as stated — `contradicted` gets corrected to the quote,
 `not_found`/`unreachable` gets re-checked or dropped. Grounding still rests on you; the

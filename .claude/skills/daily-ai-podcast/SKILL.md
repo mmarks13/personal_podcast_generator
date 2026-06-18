@@ -172,7 +172,7 @@ and the lead claims of any full-treatment story. A truncated feed excerpt in
 one-liner; full treatment requires fetching the actual page.
 
 Once you've chosen the stories, batch the load-bearing claims and hand them to the
-`fact-checker` subagent (`Agent` tool, `subagent_type: fact-checker`, a Sonnet agent) —
+`fact-checker` subagent (`Agent` tool, `subagent_type: fact-checker`, `model: "haiku"`) —
 pass each claim with the primary URL to check it against. It returns, per claim, a verdict
 (`supported`/`contradicted`/`not_found`/`unreachable`) and the **verbatim quote** that
 decides it. Only `supported` claims (with a real quote) go on air as stated; treat
@@ -236,7 +236,8 @@ order below, decide what the show covers and how much.
 Write the dialogue **in character** — Ada (`"A"`) and Alan (`"B"`) per the Hosts
 section: story-by-story handoff, warm sparring, at most 1–2 AI-identity touches, lore
 only when earned, the greeting and "Stay grounded." sign-off. Aim for
-**~2,700–3,300 words**.
+**~3,300–3,600 words** (Gemini TTS renders at ~165–170 wpm; below 3,300 words the episode
+risks landing under 20 minutes).
 
 **Grounding rules (these are the point of the whole exercise):**
 - Every factual claim must trace to something in `out/sources.json` or a page you
