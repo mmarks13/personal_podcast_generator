@@ -13,14 +13,17 @@ description: >
 Turn the last ~24–48 hours of AI activity into a two-host audio briefing of
 **~2,700–3,300 words** (the Gemini voices render that to roughly 20–26 minutes).
 
-The pipeline is deliberately split by *how a source is gathered*, not how important it
-is. **Deterministic Python** (step 1) pulls every watchlist source with a clean machine
-feed — RSS and APIs. A **condense subagent** (step 1.6) de-duplicates that raw dump into
-a compact digest so you don't have to read the whole thing. A **crawl subagent** (step 2)
-handles the watchlist's HTML-only sources, which need a browser. **You, the main agent**
-(step 3), are the editor-in-chief: you read the digest and the crawl list, decide what the
-show is about, verify it, and write the script. The digest only condenses and de-dupes —
-it never decides what's worth covering. Importance is judged in step 3 and nowhere else.
+The pipeline is deliberately split so the gathering and organizing happen in cheap
+subagents and you spend your budget only on editorial judgment. **Deterministic Python**
+(step 1) pulls every watchlist source with a clean machine feed — RSS and APIs. A **crawl
+subagent** (step 2) handles the watchlist's HTML-only sources, which need a browser, and
+writes `out/crawl.json`. A **consolidator subagent** (step 2.5) then reads both dumps,
+de-duplicates and condenses them into one compact, organized candidate set
+(`out/candidates.json`), flagging likely repeats along the way. **You, the main agent**
+(step 3), are the editor-in-chief: you read only `out/candidates.json`, decide what the
+show is about, deep-read and verify the stories you choose, and write the script. The
+subagents only gather and organize — they never decide what's worth covering. Importance
+is judged in step 3 and nowhere else.
 
 ## The hosts
 
@@ -126,65 +129,68 @@ Use it to inform, not to perform:
   bits that might return, and open positions that today's news may settle — see
   Continuity in the Hosts section. Same restraint as callbacks: use it only when earned.
 
-### 1.6. Condense the structured feeds into a digest
-`out/sources.json` is a large raw dump — every item from every RSS/API feed, with the
-same story often repeated across feeds. Reading all of it into your own context is
-expensive and most of it never makes the show. So hand it to a **single subagent** to
-condense first. Spawn it with the `Agent` tool as `subagent_type: source-digest` (a
-Sonnet agent; its durable contract lives in `.claude/agents/source-digest.md`). It reads
-`out/sources.json` itself, collapses cross-feed duplicates into one entry each (keeping
-the full list of sources that carried a story and a `source_count`), preserves the
-notability signals (HF upvotes, HN points), drops only clearly off-topic noise, and
-writes a compact `out/digest.json`. It does **not** judge what's show-worthy — that's
-yours in step 3.
-
-You read `out/digest.json` in step 3, not the raw `sources.json`. The raw file stays on
-disk if you ever need the fuller feed excerpt for a specific item.
-
 ### 2. Crawl the HTML sources with one subagent
 The structured feeds (step 1) don't cover the watchlist's HTML-only sources — lab blogs,
 release-note pages, leaderboards, news sections. These have no clean machine feed, so a
-**single subagent** crawls them and returns a traceable candidate list. Spawn it with the
-`Agent` tool as `subagent_type: source-crawler` (a Sonnet agent — its durable output
-contract lives in `.claude/agents/source-crawler.md`).
+**single subagent** crawls them and **writes a traceable candidate list to
+`out/crawl.json`**. Spawn it with the `Agent` tool as `subagent_type: source-crawler` (a
+Sonnet agent — its durable output contract lives in `.claude/agents/source-crawler.md`).
+It doesn't depend on `out/sources.json`, so you can launch it alongside the step-1 fetcher.
 
 Read `config/sources.yaml` first and pass the subagent, in the `prompt`, **every source
 whose method is `fetch`** (the HTML ones), Tier-1 and Tier-2 alike — the eval, governance,
 and delivery sources the topic priorities care about mostly live in Tier-2 — plus the date
-window (today and yesterday only). Example prompt: *"Crawl these sources for {today} and
-{yesterday} only: {labelled URL list}."* Add any per-run steering here (e.g. emphasis on a
-particular beat) — it stacks on top of the saved contract. (Leaderboards and slow-moving
-pages will often have nothing new — that's expected; the subagent just reports what it
-finds.)
+window (today and yesterday only). **Label each URL with its tier**, so the subagent knows
+which failures to chase. Example prompt: *"Crawl these sources for {today} and {yesterday}
+only, writing out/crawl.json: {tier-labelled URL list}."* Add any per-run steering here
+(e.g. emphasis on a particular beat) — it stacks on top of the saved contract.
+(Leaderboards and slow-moving pages will often have nothing new — that's expected; the
+subagent just reports what it finds.)
 
-You'll merge this list with the step-1 feeds in step 3. Treat the subagent's `claims` as
-leads you can cite or re-verify — it read the page so you don't have to re-read all of
-them, but **anything you put in the script still follows the grounding rules** (verify at
-the primary source when in doubt).
+The crawler **self-recovers Tier-1 blind spots**: when a Tier-1 source fails to load it
+runs a backup search itself, so `out/crawl.json` already folds in what it could recover
+and records every failure (Tier-1 and Tier-2) for the step-5 report. You don't merge this
+file yourself — the step-2.5 consolidator does. Its `claims` are leads you can cite or
+re-verify in step 3, but **anything you put in the script still follows the grounding
+rules** (verify at the primary source when in doubt).
 
-**Act on the failures.** A blocked source is a blind spot, not an empty source. For any
-**Tier-1** source in `failures`, run a quick `WebSearch` (e.g. the lab's name + "announcement"
-+ today's date) to check whether you missed something real; Tier-2 failures just get noted
-in the step-5 report.
+### 2.5. Consolidate all sources into one candidate set
+Now both raw dumps exist — `out/sources.json` (structured feeds, large and repetitive
+across feeds) and `out/crawl.json` (the HTML crawl). Reading them into your own context
+is expensive and most of it never makes the show. Hand them to a **single subagent** to
+merge and condense first. Spawn it with the `Agent` tool as
+`subagent_type: source-consolidator` (a Sonnet agent; its durable contract lives in
+`.claude/agents/source-consolidator.md`). It reads both files itself, collapses duplicates
+across feeds *and* the crawl into one entry each (keeping the union of sources that carried
+a story and a `source_count`), preserves the notability signals (HF upvotes, HN points)
+and the crawl `claims`, drops only clearly off-topic noise, **flags likely repeats against
+`history.json`**, and writes a compact `out/candidates.json`. It does **not** judge what's
+show-worthy — that's yours in step 3. Run it once both `out/sources.json` and
+`out/crawl.json` exist.
+
+You read `out/candidates.json` in step 3 — not the raw dumps. The raw files stay on disk
+if you ever need the fuller feed excerpt for a specific item.
 
 ### 3. Select, verify, and write the script
-Now you have everything: the step-1.6 digest (`out/digest.json`) and the step-2 crawl
-list. **This is where importance is judged.** Merge the two into one candidate set, decide
-what the show is about using the topic priorities below, fetch the main source for the stories you'll cover, then write.
+Now you have everything in one place: read `out/candidates.json` — the unified candidate
+set, already de-duplicated across the feeds and the crawl, each entry carrying the sources
+that ran it, a `source_count`, the notability signals, and (for crawl-origin items) the
+`claims` the crawler read. **This is where importance is judged.** Decide what the show is
+about using the topic priorities below, fetch the main source for the stories you'll
+cover, then write. (For any item whose lead is too thin to judge, the fuller excerpt is
+still in `out/sources.json` or `out/crawl.json` on disk.) That multi-source pickup,
+captured in each entry's source list, is a *signal of importance* — weigh it, don't
+discard it.
 
-**Merge and de-duplicate.** The structured feeds arrive already de-duplicated in the
-digest, each entry carrying the list of sources that ran it and a `source_count`. Fold in
-the step-2 crawl list and de-dupe across the two — a story may appear in both. That
-multi-source pickup is a *signal of importance*, so keep the combined source list per item
-rather than discarding it. (For any item where the digest's lead is too thin to judge, the
-full feed excerpt is still in `out/sources.json`.)
-
-**Repeat-check against memory.** Before committing to an item, compare it to the
-`history.json` memory you read in step 1.5. If it's clearly the same story you already
-covered and nothing has moved (no new release, number, decision, or development), drop
-it. If it might be an update — or you can't tell — verify; when confirmed, cover the
-*update*, not the original news. When in doubt, keep it; never drop a real development
-just because the topic is familiar.
+**Repeat-check against memory.** The consolidator has already flagged likely repeats
+against `history.json` — each candidate carries `possible_repeat` (the matching episode
+plus a one-line why) or null. You don't need to re-scan everything. For the items you
+actually intend to cover, if `possible_repeat` is set, confirm it against the
+`history.json` memory you read in step 1.5: if it's clearly the same story and nothing has
+moved (no new release, number, decision, or development), drop it; if it's an update —
+or you can't tell — verify, and when confirmed cover the *update*, not the original news.
+A null flag isn't a guarantee — if your own read says an item is a stale repeat, drop it.
+When in doubt, keep it; never drop a real development just because the topic is familiar.
 
 **Verify what you'll use.** Every item that makes the show must trace to a primary source
 you (or the step-2 subagent) actually read. Don't take a number, date, or quote on faith.
@@ -262,8 +268,9 @@ only when earned, the greeting and "Stay grounded." sign-off. Aim for
 risks landing under 20 minutes).
 
 **Grounding rules (these are the point of the whole exercise):**
-- Every factual claim must trace to something in `out/sources.json` or a page you
-  actually fetched. If you didn't read it, don't say it.
+- Every factual claim must trace to your gathered material (`out/candidates.json`, or the
+  fuller `out/sources.json` / `out/crawl.json` on disk) or a page you actually fetched. If
+  you didn't read it, don't say it.
 - Do **not** invent benchmark numbers, author names, dates, funding figures, or quotes.
   If a detail isn't in your gathered material, omit it or say it's unconfirmed.
 - Distinguish *what a paper claims* from *what is established*. "The authors report…"
@@ -438,8 +445,9 @@ milestone rollup), keeping the file bounded. Safe to re-run.
 
 ### 5. Report
 Print the final MP3 path, the episode title, the word count, and a one-line note on
-anything that failed or any source gap (including step-2 crawl failures and whether the
-thin-day exception was used, with its justification). Also list **which watchlist
+anything that failed or any source gap (including the crawl failures carried in
+`out/candidates.json`'s `crawl_failures` — Tier-1 ones the crawler already tried to
+recover — and whether the thin-day exception was used, with its justification). Also list **which watchlist
 sources contributed items that made the show** — over weeks this reveals which sources
 earn their place in `sources.yaml`. If a downstream step (commit, upload, email) is
 configured by the caller, that happens outside this skill — just produce the artifacts.
