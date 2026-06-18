@@ -15,10 +15,12 @@ Turn the last ~24–48 hours of AI activity into a two-host audio briefing of
 
 The pipeline is deliberately split by *how a source is gathered*, not how important it
 is. **Deterministic Python** (step 1) pulls every watchlist source with a clean machine
-feed — RSS and APIs. A **crawl subagent** (step 2) handles the watchlist's HTML-only
-sources, which need a browser. **You, the main agent** (step 3), are the editor-in-chief:
-you see everything both steps gathered, decide what the show is about, verify it, and
-write the script. Importance is judged in step 3 and nowhere else.
+feed — RSS and APIs. A **condense subagent** (step 1.6) de-duplicates that raw dump into
+a compact digest so you don't have to read the whole thing. A **crawl subagent** (step 2)
+handles the watchlist's HTML-only sources, which need a browser. **You, the main agent**
+(step 3), are the editor-in-chief: you read the digest and the crawl list, decide what the
+show is about, verify it, and write the script. The digest only condenses and de-dupes —
+it never decides what's worth covering. Importance is judged in step 3 and nowhere else.
 
 ## The hosts
 
@@ -70,11 +72,14 @@ records and `longterm.host_lore`). Treat it as **canon**:
 Capture what this episode revealed or developed in `episode_meta.json`'s `lore` field
 (schema below). Like callbacks, lore is felt, not performed.
 
-**Rituals (light).** Open with the classic two-voice shape — date, names, then the
-day's through-line: "Good morning — it's Friday, June twelfth. I'm Ada." / "And I'm
-Alan. Here's what actually mattered in AI in the last twenty-four hours." (Vary the
-wording naturally day to day; keep the shape.) Close every episode with the signature
-sign-off — **"Stay grounded."** — alternating which host says it.
+**Rituals (light).** Open with the classic two-voice shape — date, names, then a single
+line orienting the listener to the day: "Good morning — it's Friday, June twelfth. I'm
+Ada." / "And I'm Alan. Here's what actually mattered in AI in the last twenty-four
+hours." (Vary the wording naturally day to day; keep the shape.) If the day's stories
+genuinely share a thread, that line is where to name it — but only when one is really
+there. Most days are just several separate developments, and saying that plainly is
+better than inventing a theme to tie them together. Close every episode with the
+signature sign-off — **"Stay grounded."** — alternating which host says it.
 
 ## Workflow
 
@@ -121,6 +126,21 @@ Use it to inform, not to perform:
   bits that might return, and open positions that today's news may settle — see
   Continuity in the Hosts section. Same restraint as callbacks: use it only when earned.
 
+### 1.6. Condense the structured feeds into a digest
+`out/sources.json` is a large raw dump — every item from every RSS/API feed, with the
+same story often repeated across feeds. Reading all of it into your own context is
+expensive and most of it never makes the show. So hand it to a **single subagent** to
+condense first. Spawn it with the `Agent` tool as `subagent_type: source-digest` (a
+Sonnet agent; its durable contract lives in `.claude/agents/source-digest.md`). It reads
+`out/sources.json` itself, collapses cross-feed duplicates into one entry each (keeping
+the full list of sources that carried a story and a `source_count`), preserves the
+notability signals (HF upvotes, HN points), drops only clearly off-topic noise, and
+writes a compact `out/digest.json`. It does **not** judge what's show-worthy — that's
+yours in step 3.
+
+You read `out/digest.json` in step 3, not the raw `sources.json`. The raw file stays on
+disk if you ever need the fuller feed excerpt for a specific item.
+
 ### 2. Crawl the HTML sources with one subagent
 The structured feeds (step 1) don't cover the watchlist's HTML-only sources — lab blogs,
 release-note pages, leaderboards, news sections. These have no clean machine feed, so a
@@ -148,14 +168,16 @@ the primary source when in doubt).
 in the step-5 report.
 
 ### 3. Select, verify, and write the script
-Now you have everything: the step-1 `feeds` and the step-2 crawl list. **This is where
-importance is judged.** Merge the two into one candidate set, decide what the show is
-about using the topic priorities below, verify what you'll use, then write.
+Now you have everything: the step-1.6 digest (`out/digest.json`) and the step-2 crawl
+list. **This is where importance is judged.** Merge the two into one candidate set, decide
+what the show is about using the topic priorities below, verify what you'll use, then write.
 
-**Merge and de-duplicate.** The same story often appears across several feeds and on the
-HTML sources — that multi-source pickup is a *signal of importance*, so note it rather
-than discarding it. Collapse duplicates into one item, keeping the list of sources it
-appeared on.
+**Merge and de-duplicate.** The structured feeds arrive already de-duplicated in the
+digest, each entry carrying the list of sources that ran it and a `source_count`. Fold in
+the step-2 crawl list and de-dupe across the two — a story may appear in both. That
+multi-source pickup is a *signal of importance*, so keep the combined source list per item
+rather than discarding it. (For any item where the digest's lead is too thin to judge, the
+full feed excerpt is still in `out/sources.json`.)
 
 **Repeat-check against memory.** Before committing to an item, compare it to the
 `history.json` memory you read in step 1.5. If it's clearly the same story you already
@@ -295,17 +317,28 @@ direction for the voices (e.g. "Measured, sober energy today; the lead story is 
 safety incident. Lighten up by the Releases segment."). It steers delivery only, not
 content. Most days, omit it.
 
-**Structure:** cold open (the greeting, then 1 line on the day's through-line) →
+**Structure:** cold open (the greeting, then a line orienting the listener to the day —
+name a through-line only if one genuinely fits) →
 *(optional)* **Headlines** → **Papers** → **Releases / launches** → **Industry & news**
 → **One to watch** (1 item, slightly deeper) → 20–30s wrap + sign-off. The 5–7
 full-treatment stories spread across the middle segments — let the day's material
 decide how many land in each.
 
-**Optional deep-dive segment.** Occasionally — when one of the day's items genuinely
-merits it (a new architecture, an important technique, a debate worth unpacking) — replace
-**One to watch** with a 3–4 minute deep dive that *teaches* the thing rather than just
-reporting it. Use it sparingly, only when the material earns the time; the episode may run
-up to ~25 minutes on those days. Same grounding rules apply.
+**Explain, don't just report.** The point of giving a story full treatment isn't to
+relay that something happened — it's to leave the listener actually understanding it.
+When a story turns on a concept the audience may not already hold — why a technique
+works, what a number really measures, where an approach breaks — it's worth taking a
+minute or two inside that story to teach the idea before moving on. This isn't a separate
+segment; it's the story going one level deeper because understanding it requires that. Do
+it when the material earns it; skip it when the story speaks for itself. The grounding
+rules apply to the explanation exactly as to the reporting.
+
+**Optional full deep-dive segment.** Rarely, a single item merits more than that
+in-story minute or two — a genuinely new architecture, an important technique, a debate
+worth unpacking properly. Then it's worth replacing **One to watch** with a 3–4 minute
+deep dive that *teaches* the thing end to end. Use it sparingly, only when the material
+earns the time; the episode may run up to ~25 minutes on those days. Same grounding rules
+apply.
 
 **The Headlines segment** serves two purposes: it acknowledges the loud/viral/marketed
 stories the topic priorities de-emphasize (so the show isn't oblivious to what listeners

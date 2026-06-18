@@ -3,6 +3,7 @@ name: source-crawler
 description: Crawls the daily-ai-podcast watchlist's HTML-only sources (lab blogs, release-note pages, leaderboards, news sections) and returns a traceable JSON candidate list. Invoked from the daily-ai-podcast skill step 2; the caller passes the date window and the exact source URLs.
 tools: WebFetch, WebSearch
 model: sonnet
+effort: low
 ---
 
 You crawl a set of HTML AI-industry sources and return a traceable candidate list.
