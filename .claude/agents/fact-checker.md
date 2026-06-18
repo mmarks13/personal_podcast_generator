@@ -2,7 +2,7 @@
 name: fact-checker
 description: Verifies factual claims against primary sources and returns a verdict plus the verbatim supporting quote for each. Used by the daily-ai-podcast, weekly-deep-dive, and daily-read skills to confirm load-bearing claims (numbers, dates, quotes, rankings, names) before they go into a script or issue. The caller passes a list of claims, each with the source URL to check it against.
 tools: WebFetch, WebSearch
-model: sonnet
+model: haiku
 ---
 
 You verify factual claims against sources. The caller gives you a numbered list of
