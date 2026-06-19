@@ -92,7 +92,7 @@ Run these steps in order. Do not skip the grounding rules in step 3.
 Run the fetcher. It writes `out/sources.json` and prints a summary.
 
 ```bash
-python scripts/fetch_sources.py --hours 48 --out out/sources.json
+.venv/bin/python scripts/fetch_sources.py --hours 48 --out out/sources.json
 ```
 
 It reads `config/sources.yaml` and deterministically pulls **every source whose method
@@ -402,7 +402,7 @@ Write **three** files:
 
 ### 3.5. Validate the script before rendering
 ```bash
-python scripts/check_episode.py --episode out/episode.json
+.venv/bin/python scripts/check_episode.py --episode out/episode.json
 ```
 
 This is a hard gate: it checks the schema, speaker values, the word-count band,
@@ -420,7 +420,7 @@ the work of deepening real coverage.
 
 ### 4. Render the audio
 ```bash
-python scripts/make_audio.py --episode out/episode.json --out "out/podcast-$(date +%F).mp3" --backend gemini
+.venv/bin/python scripts/make_audio.py --episode out/episode.json --out "out/podcast-$(date +%F).mp3" --backend gemini
 ```
 
 The show's voice **is** Gemini multi-speaker TTS (needs `GEMINI_API_KEY`; voices come
@@ -436,7 +436,7 @@ Fold today into `history.json` so future episodes stay non-repetitive and can bu
 ongoing arcs. This reads the `out/episode_meta.json` you wrote in step 3:
 
 ```bash
-python scripts/update_history.py --append
+.venv/bin/python scripts/update_history.py --append
 ```
 
 It appends today's record to the detailed window, promotes/updates named threads, and

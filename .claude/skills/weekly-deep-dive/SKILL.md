@@ -101,9 +101,9 @@ Write **three** files (schemas identical to the daily skill's):
 
 ### 4. Validate, render, remember
 ```bash
-python scripts/check_episode.py --episode out/deepdive.json --min-words 3000 --max-words 4000
-python scripts/make_audio.py --episode out/deepdive.json --out "out/deepdive-$(date +%F).mp3" --backend gemini
-python scripts/update_history.py --append --meta out/deepdive_meta.json
+.venv/bin/python scripts/check_episode.py --episode out/deepdive.json --min-words 3000 --max-words 4000
+.venv/bin/python scripts/make_audio.py --episode out/deepdive.json --out "out/deepdive-$(date +%F).mp3" --backend gemini
+.venv/bin/python scripts/update_history.py --append --meta out/deepdive_meta.json
 ```
 The check is a hard gate — revise until it passes. When under length, deepen the
 explanation (more mechanism, more evidence), never pad. The renderer retries hard and
