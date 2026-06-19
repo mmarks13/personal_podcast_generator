@@ -27,6 +27,13 @@ bad() { echo "  FAIL - $1"; FAILED_ASSERT=1; }
 has() { grep -qF -- "$2" "$LOG" && ok "$1" || bad "$1 (missing: $2)"; }
 hasre() { grep -qE -- "$2" "$LOG" && ok "$1" || bad "$1 (no match: $2)"; }
 no()  { grep -qF -- "$2" "$LOG" && bad "$1 (unexpected: $2)" || ok "$1"; }
+# assert the exact set of steps that ran, so adding/dropping a step in
+# run_episode.sh trips the test until this expectation is updated.
+steps() {  # $1 = expected sorted, space-joined step names
+  local actual
+  actual=$(grep -oE 'step start: [a-z-]+' "$LOG" | sed 's/step start: //' | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+  [ "$actual" = "$1" ] && ok "step set == [$1]" || bad "step set mismatch: expected [$1] got [$actual]"
+}
 
 # ---- sandbox layout ----------------------------------------------------------
 mkdir -p "$SB/scripts" "$SB/out" "$SB/docs/reads" "$SB/logs" "$SB/home/.local/bin"
@@ -63,6 +70,11 @@ elif [[ "$args" == *weekly-deep-dive* ]]; then
   printf '{"summary":"dd"}\n' > "out/deepdive_meta.json"
   printf 'dd notes\n' > "out/deepdive_shownotes.md"
   [ -n "${MOCK_NO_MP3:-}" ] || printf 'FAKE' > "out/deepdive-$DATE.mp3"
+else
+  # Fail loudly on an unrecognized prompt so a newly-added claude step in
+  # run_episode.sh cannot silently slip through untested — extend this mock instead.
+  echo "[fake-claude] ERROR: unrecognized prompt (no known skill name): $args" >&2
+  exit 1
 fi
 SH
 chmod +x "$SB/home/.local/bin/claude"
@@ -98,6 +110,12 @@ has   "kindle sender was the mock" "MOCK kindle:"
 hasre "usage snapshot logged"     '\[usage\] \{'
 hasre "run end status OK"         '===== RUN END .* status=OK'
 no    "real claude not invoked"   "Use the daily-ai-podcast skill"  # prompt text only appears if claude echoed it
+# Expected steps depend on the weekday: the deep-dive branch runs Wed (3) / Sat (6).
+expA="kindle podcast publish read"
+if [ "$(date +%u)" = "3" ] || [ "$(date +%u)" = "6" ]; then
+  expA="deepdive kindle podcast publish publish-deepdive read"
+fi
+steps "$expA"
 ! pgrep -f "scripts/run_log.py poll" >/dev/null \
   && ok "usage poller terminated after run" || bad "usage poller still running"
 
