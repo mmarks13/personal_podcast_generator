@@ -423,6 +423,12 @@ the work of deepening real coverage.
 .venv/bin/python scripts/make_audio.py --episode out/episode.json --out "out/podcast-$(date +%F).mp3" --backend gemini
 ```
 
+**Run this in the foreground and wait for it to finish — do NOT background it.** The
+render can take several minutes (it generates and stitches chunks), but you must block on
+it so you see its exit status: if it fails you need to catch that here and report it in
+step 5, not end your turn assuming success. Do not move on until the command returns and
+the MP3 exists.
+
 The show's voice **is** Gemini multi-speaker TTS (needs `GEMINI_API_KEY`; voices come
 from `GEMINI_VOICE_A`/`GEMINI_VOICE_B` in `.env`). It performs the whole dialogue —
 including audio tags and `tts_notes` — in NotebookLM style. The renderer retries each

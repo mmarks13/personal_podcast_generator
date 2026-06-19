@@ -106,9 +106,10 @@ Write **three** files (schemas identical to the daily skill's):
 .venv/bin/python scripts/update_history.py --append --meta out/deepdive_meta.json
 ```
 The check is a hard gate — revise until it passes. When under length, deepen the
-explanation (more mechanism, more evidence), never pad. The renderer retries hard and
-then fails; **never re-render with another backend** — if Gemini is down, report the
-failure and stop.
+explanation (more mechanism, more evidence), never pad. **Run the render in the foreground
+and wait for it to finish — do NOT background it.** It can take several minutes, but you
+must block on it so you see its exit status. The renderer retries hard and then fails;
+**never re-render with another backend** — if Gemini is down, report the failure and stop.
 
 ### 5. Report
 Print the MP3 path, the topic chosen and the week's hook it ties to, the word count,
