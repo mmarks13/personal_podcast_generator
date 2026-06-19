@@ -147,12 +147,9 @@ Then:
   `out/episode_meta.json` (use it *only* if its `date` is today's) and the last few
   `history.json` episode entries — their `topics`/`entities` **only**, never `lore`. If a
   planned piece would just re-tell one of those stories, give it a genuinely distinct
-  angle or pick something else. This is a quick negative check during planning, not a
-  research step or a topic source: skip it silently if those files are missing or stale,
-  and never block an issue on them. It's internal signal only — it must never surface in
-  the prose, and the independence rule above still holds absolutely. (This is *not* a
-  nudge toward current events; evergreen remains encouraged — it only steers you off
-  topics the news just exhausted.)
+  angle, go deep into something about it, or pick something else. This is a quick negative
+  check during planning, not a research step or a topic source: skip it silently if those
+  files are missing or stale, and never block an issue on them.
 
 ## Grounding (mixed and labeled)
 
