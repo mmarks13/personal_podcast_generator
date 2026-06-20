@@ -215,6 +215,18 @@ secondary goes to Headlines as a one-liner (it doubles as the triage tier, not j
 viral-story containment). Ten shallow recaps is what every newsletter already does; the
 full-treatment stories are the show.
 
+**Watch for a breakout tool.** The community feeds (r/LocalLLaMA, Hacker News, TLDR AI)
+regularly surface a new open-source repo that's gaining real traction. When one of them
+**fills a genuine gap** — something practitioners couldn't easily do before, not just
+another wrapper, demo, or tutorial collection — it's worth a mention woven into whichever
+segment fits (a new inference runtime in Infrastructure, a coding agent in Software
+Delivery). The bar is *usefulness*, not star count: stars are a hint that something landed,
+but a repo earns airtime by being a real new capability, and you should be able to say in a
+sentence what it lets someone do that they couldn't before. This is occasional, not a
+fixture — most days nothing qualifies, and forcing a repo in when none stands out is worse
+than skipping it. Same grounding rules apply: look at the repo before describing it; don't
+state stars, authorship, or what it does on the strength of a feed headline alone.
+
 **Topic prioritization (decide what the show is about).** Prioritize signal over noise.
 Do not spend much time on stories that are interesting mainly because they are loud,
 viral, speculative, or heavily marketed. Focus on developments that change how AI systems

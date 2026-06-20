@@ -11,30 +11,20 @@
 
 sources:
   # --- Papers / research discovery ---
-  - name: arXiv Core AI/LLM/Agents
-    method: api
-    url: "http://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL+OR+cat:cs.LG+OR+cat:cs.MA&sortBy=submittedDate&sortOrder=descending"
-    tier: 1
-
+  # arXiv Core AI/LLM/Agents (cs.AI/CL/LG/MA) and Vision/Robotics (cs.CV/RO/eess.IV)
+  # removed: Core overlapped heavily with HF Daily Papers (same submissions, HF adds
+  # curation + upvotes), and the Vision/Robotics query consistently yielded ~0 in-window
+  # items after topic filtering. The Retrieval/SE/Security query is kept — it catches
+  # governance, IR, and security papers HF's ML-practitioner curation misses.
   - name: arXiv Retrieval / Software Engineering / Security
     method: api
     url: "http://export.arxiv.org/api/query?search_query=cat:cs.IR+OR+cat:cs.SE+OR+cat:cs.CR&sortBy=submittedDate&sortOrder=descending"
-    tier: 2
-
-  - name: arXiv Vision / Robotics / Earth AI
-    method: api
-    url: "http://export.arxiv.org/api/query?search_query=cat:cs.CV+OR+cat:cs.RO+OR+cat:eess.IV&sortBy=submittedDate&sortOrder=descending"
     tier: 2
 
   - name: Hugging Face Daily Papers
     method: api
     url: "https://huggingface.co/api/daily_papers"
     tier: 1
-
-  - name: alphaXiv
-    method: fetch
-    url: "https://www.alphaxiv.org"
-    tier: 2
 
   - name: BAIR Blog
     method: rss
@@ -67,11 +57,6 @@ sources:
     url: "https://openai.com/news/rss.xml"
     tier: 1
 
-  - name: OpenAI Release Notes
-    method: fetch
-    url: "https://help.openai.com/en/articles/6825453-chatgpt-release-notes"
-    tier: 2
-
   - name: Google DeepMind Blog
     method: fetch
     url: "https://deepmind.google/discover/blog/"
@@ -97,11 +82,6 @@ sources:
     url: "https://developer.nvidia.com/blog/category/generative-ai/feed/"
     tier: 2
 
-  - name: Qwen Blog
-    method: fetch
-    url: "https://qwen.ai/blog"
-    tier: 2
-
   - name: Mistral AI News
     method: fetch
     url: "https://mistral.ai/news"
@@ -117,16 +97,6 @@ sources:
     method: rss
     url: "https://venturebeat.com/category/ai/feed/"
     tier: 1
-
-  - name: The Verge AI
-    method: fetch
-    url: "https://www.theverge.com/ai-artificial-intelligence"
-    tier: 2
-
-  - name: Ars Technica AI
-    method: fetch
-    url: "https://arstechnica.com/ai/"
-    tier: 2
 
   # --- Newsletters / curation ---
   - name: TLDR AI
@@ -196,26 +166,8 @@ sources:
     tier: 2
 
   # --- Benchmarks / evals / model decision-making ---
-  - name: Artificial Analysis
-    method: fetch
-    url: "https://artificialanalysis.ai/"
-    tier: 2
-
-  - name: LiveBench
-    method: fetch
-    url: "https://livebench.ai/"
-    tier: 2
-
-  - name: SWE-bench
-    method: fetch
-    url: "https://www.swebench.com/"
-    tier: 2
-
-  - name: LMArena
-    method: fetch
-    url: "https://lmarena.ai/leaderboard"
-    tier: 2
-
+  # Artificial Analysis, LiveBench, SWE-bench, LMArena removed: JS-dynamic pages
+  # with no dateable content structure; they publish results but not in a crawlable feed.
   - name: Epoch AI
     method: fetch
     url: "https://epoch.ai/latest"
