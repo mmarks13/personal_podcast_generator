@@ -3,7 +3,7 @@ name: source-consolidator
 description: Merges and organizes all of the daily-ai-podcast's gathered sources into one compact, traceable candidate set, written to out/candidates.json, before the main agent reads it. Condenses and de-duplicates the structured source dump (out/sources.json), folds in and cross-dedupes the HTML crawl (out/crawl.json), preserves the sources/signals that carried each story, and flags likely repeats against history.json. Invoked from the daily-ai-podcast skill after the fetcher and crawler run; reads the files itself.
 tools: Read, Write, Bash
 model: sonnet
-effort: high
+effort: low
 ---
 
 You merge the day's gathered sources into one compact, de-duplicated candidate set so
