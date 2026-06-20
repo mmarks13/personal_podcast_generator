@@ -18,6 +18,16 @@ DATE="$(date +%F)"
 DOW="$(date +%u)"   # 1=Mon .. 6=Sat 7=Sun
 mkdir -p out logs
 
+# Publishing is branch-scoped: publish.py commits the rebuilt feed into docs/, and
+# GitHub Pages serves the feed Spotify polls from main/docs. A run on any other branch
+# strands the feed update where Pages can't see it (episodes silently never go live).
+# Fail fast — before spending any session budget — if we're not on main.
+BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')"
+if [ "$BRANCH" != "main" ]; then
+  echo "run_episode: refusing to run on branch '$BRANCH' — Pages publishes from main only." >&2
+  exit 1
+fi
+
 # Pin models explicitly so the nightly job never inherits an interactive /model switch.
 # Opus for the podcast (editorial judgment, grounding, source selection).
 # Sonnet for the read and deep dive (writing-heavy tasks; saves Pro session budget).
