@@ -22,8 +22,10 @@ mkdir -p out logs
 # GitHub Pages serves the feed Spotify polls from main/docs. A run on any other branch
 # strands the feed update where Pages can't see it (episodes silently never go live).
 # Fail fast — before spending any session budget — if we're not on main.
+# RUN_EPISODE_ALLOW_ANY_BRANCH=1 overrides this for the hermetic test, which runs a
+# copy of this script in a non-repo sandbox (no branch to check).
 BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')"
-if [ "$BRANCH" != "main" ]; then
+if [ "$BRANCH" != "main" ] && [ "${RUN_EPISODE_ALLOW_ANY_BRANCH:-}" != "1" ]; then
   echo "run_episode: refusing to run on branch '$BRANCH' — Pages publishes from main only." >&2
   exit 1
 fi

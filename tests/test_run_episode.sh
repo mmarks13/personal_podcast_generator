@@ -84,9 +84,12 @@ chmod +x "$SB/home/.local/bin/claude"
 reset_artifacts() { rm -f "$SB"/out/* "$SB"/docs/reads/* 2>/dev/null || true; }
 
 # invoke <VAR=val...> : run the sandbox copy; echoes the exit code.
+# RUN_EPISODE_ALLOW_ANY_BRANCH=1: the sandbox is a temp dir, not a git repo, so the
+# script's main-branch guard would otherwise refuse every scenario. Scenario D below
+# tests that guard directly, without this override.
 invoke() {
   set +e
-  ( cd "$SB" && env -u ANTHROPIC_API_KEY HOME="$SB/home" "$@" bash run_episode.sh ) \
+  ( cd "$SB" && env -u ANTHROPIC_API_KEY HOME="$SB/home" RUN_EPISODE_ALLOW_ANY_BRANCH=1 "$@" bash run_episode.sh ) \
     >>"$SB/console.txt" 2>&1
   local rc=$?
   set -e
@@ -137,6 +140,22 @@ for _ in 1 2 3 4 5; do invoke LOG_KEEP_RUNS=3 >/dev/null; done
 blocks="$(grep -c 'RUN START' "$LOG")"
 [ "$blocks" = "3" ] && ok "exactly 3 run blocks retained (after 5 runs)" \
                      || bad "expected 3 run blocks, found $blocks"
+
+# ---- Scenario D: branch guard refuses off-main -------------------------------
+# Without the override, a run anywhere but main must abort before any step starts —
+# this is what kept the 2026-06-20 episodes off the live feed (run on a feature branch
+# published the feed where Pages, which serves from main, never saw it).
+echo "Scenario D: branch guard aborts when not on main"
+reset_artifacts; : > "$LOG"
+set +e
+guard_out="$( cd "$SB" && env -u ANTHROPIC_API_KEY HOME="$SB/home" bash run_episode.sh 2>&1 )"
+guard_rc=$?
+set -e
+[ "$guard_rc" != "0" ] && ok "non-zero exit ($guard_rc)" || bad "expected non-zero exit"
+echo "$guard_out" | grep -qF "refusing to run on branch" && ok "guard message printed" \
+  || bad "guard message missing"
+grep -q "step start:" "$LOG" 2>/dev/null && bad "a step ran despite guard" \
+  || ok "no step ran (aborted pre-flight)"
 
 echo
 if [ "$FAILED_ASSERT" = "0" ]; then echo "ALL ASSERTIONS PASSED"; else echo "SOME ASSERTIONS FAILED"; fi
