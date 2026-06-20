@@ -16,7 +16,7 @@ unset ANTHROPIC_API_KEY || true   # belt-and-suspenders: stay on the Pro subscri
 
 DATE="$(date +%F)"
 DOW="$(date +%u)"   # 1=Mon .. 6=Sat 7=Sun
-mkdir -p out
+mkdir -p out logs
 
 # Pin models explicitly so the nightly job never inherits an interactive /model switch.
 # Opus for the podcast (editorial judgment, grounding, source selection).
@@ -25,8 +25,50 @@ PODCAST_MODEL="opus"
 READ_MODEL="opus"
 DEEPDIVE_MODEL="opus"
 
+# --- Logging ------------------------------------------------------------------
+# The script owns its log (logs/run.log); cron only catches catastrophic pre-logging
+# errors via its own bootstrap redirect. Logging helpers run on the SYSTEM python3 so
+# they keep working even if the .venv is broken (a broken .venv was a real failure mode).
+LOG="logs/run.log"
+LOG_KEEP_RUNS="${LOG_KEEP_RUNS:-10}"   # how many past run blocks to retain in run.log
+
+log() { printf '%s [%s] %s\n' "$(date '+%FT%T%:z')" "$1" "$2" >> "$LOG"; }
+
+# run_step <src> <cmd...> : run a stage, timestamping its stdout+stderr into the log
+# tagged by <src>, bracketed by start/end markers (exit code + duration). Returns the
+# command's exit code so callers keep their fatal/non-fatal semantics (e.g. `|| log ...`).
+run_step() {
+  local src="$1"; shift
+  local start; start=$(date +%s)
+  log run "step start: $src"
+  set +e
+  "$@" 2>&1 | python3 scripts/run_log.py prefix --src "$src" >> "$LOG"
+  local rc=${PIPESTATUS[0]}
+  set -e
+  log run "step end: $src exit=$rc dur=$(( $(date +%s) - start ))s"
+  if [ "$rc" -ne 0 ]; then FAILED+=("$src"); fi
+  return "$rc"
+}
+
+FAILED=()
+RUN_START=$(date +%s)
+python3 scripts/run_log.py trim --keep "$((LOG_KEEP_RUNS-1))" --log "$LOG"
+log run "===== RUN START $DATE dow=$DOW pid=$$ host=$(hostname) git=$(git rev-parse --short HEAD 2>/dev/null || echo '?') ====="
+
+# Per-minute usage snapshot (5h + 7d limits) as a parallel sidecar; killed on exit.
+python3 scripts/run_log.py poll --interval 60 --log "$LOG" &
+USAGE_PID=$!
+cleanup() {
+  kill "$USAGE_PID" 2>/dev/null || true
+  local status
+  if [ ${#FAILED[@]} -eq 0 ]; then status="OK"; else status="FAIL failed=[$(IFS=,; echo "${FAILED[*]}")]"; fi
+  log run "===== RUN END $DATE dur=$(( $(date +%s) - RUN_START ))s status=$status ====="
+}
+trap cleanup EXIT
+# ------------------------------------------------------------------------------
+
 # 1–4: Claude follows the skill — fetch, gather, write script, render MP3.
-claude -p "Use the daily-ai-podcast skill to produce today's episode end to end, \
+run_step podcast claude -p "Use the daily-ai-podcast skill to produce today's episode end to end, \
 following its grounding rules and length target (18-22 min). \
 Print the MP3 path when done." \
   --model "$PODCAST_MODEL" \
@@ -39,18 +81,18 @@ Print the MP3 path when done." \
 # email it to the Kindle. The skill itself builds the EPUB (with cover) and records the
 # issue in reads_history.json; it knows the day's length target from the date. Non-fatal:
 # a failed read (or failed email) must not block the daily podcast publish.
-claude -p "Use the daily-read skill to write today's issue of Self Attention end to end, \
+run_step read claude -p "Use the daily-read skill to write today's issue of Self Attention end to end, \
 following its reasoning, grounding, and the day's length target. Build the EPUB with the \
 cover and record the issue. Print the EPUB path when done." \
   --model "$READ_MODEL" \
   --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
   --permission-mode acceptEdits \
-  --max-turns 50 || echo "WARNING: daily read failed; continuing with daily publish"
-python3 scripts/send_to_kindle.py --epub "docs/reads/self-attention-$DATE.epub" \
-  || echo "WARNING: Kindle email failed; EPUB still on GitHub Pages"
+  --max-turns 50 || log run "WARNING: daily read failed; continuing with daily publish"
+run_step kindle python3 scripts/send_to_kindle.py --epub "docs/reads/self-attention-$DATE.epub" \
+  || log run "WARNING: Kindle email failed; EPUB still on GitHub Pages"
 
 # 5: publish — read title/date/summary from the episode, upload + rebuild the feed.
-python3 - "$DATE" <<'PY'
+run_step publish python3 - "$DATE" <<'PY'
 import json, subprocess, sys, glob
 date = sys.argv[1]
 ep = json.load(open("out/episode.json"))
@@ -67,7 +109,7 @@ PY
 
 # Wed/Sat: also produce + publish the deep-dive episode.
 if [ "$DOW" = "6" ] || [ "$DOW" = "3" ]; then
-  claude -p "Use the weekly-deep-dive skill to produce this week's deep-dive episode \
+  run_step deepdive claude -p "Use the weekly-deep-dive skill to produce this week's deep-dive episode \
 end to end, following its grounding rules and length target (20-25 min). \
 Print the MP3 path when done." \
     --model "$DEEPDIVE_MODEL" \
@@ -75,7 +117,7 @@ Print the MP3 path when done." \
     --permission-mode acceptEdits \
     --max-turns 60
 
-  python3 - "$DATE" <<'PY'
+  run_step publish-deepdive python3 - "$DATE" <<'PY'
 import json, subprocess, sys, glob
 date = sys.argv[1]
 ep = json.load(open("out/deepdive.json"))
@@ -91,4 +133,4 @@ subprocess.run(["python3","scripts/publish.py","--mp3",mp3[-1],
 PY
 fi
 
-echo "Done: $DATE"
+log run "Done: $DATE"

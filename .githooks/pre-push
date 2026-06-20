@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Run the hermetic run_episode test before every push; block the push on failure.
+# Enabled via a one-time: git config core.hooksPath .githooks
+set -euo pipefail
+root="$(git rev-parse --show-toplevel)"
+echo "pre-push: running tests/test_run_episode.sh ..."
+bash "$root/tests/test_run_episode.sh"

@@ -209,7 +209,7 @@ Hit the day's word band. Prefer cutting a weak piece to padding a thin one.
 ### 4. Build the EPUB (with cover)
 ```bash
 MOOD="$(grep -oP '(?<=<!-- mood: ).*(?= -->)' out/daily_read.md)"
-python scripts/make_epub.py --md out/daily_read.md \
+.venv/bin/python scripts/make_epub.py --md out/daily_read.md \
   --out "docs/reads/self-attention-$(date +%F).epub" \
   --cover-src docs/cover.png \
   --cover-subtitle "$(date '+%A, %B %-d') · ${MOOD}"
@@ -218,7 +218,7 @@ python scripts/make_epub.py --md out/daily_read.md \
 ### 5. Record it
 Append today's issue to `reads_history.json` so future issues don't repeat:
 ```bash
-python scripts/update_reads_history.py --md out/daily_read.md --date "$(date +%F)"
+.venv/bin/python scripts/update_reads_history.py --md out/daily_read.md --date "$(date +%F)"
 ```
 
 ### 6. Report

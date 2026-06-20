@@ -101,14 +101,15 @@ Write **three** files (schemas identical to the daily skill's):
 
 ### 4. Validate, render, remember
 ```bash
-python scripts/check_episode.py --episode out/deepdive.json --min-words 3000 --max-words 4000
-python scripts/make_audio.py --episode out/deepdive.json --out "out/deepdive-$(date +%F).mp3" --backend gemini
-python scripts/update_history.py --append --meta out/deepdive_meta.json
+.venv/bin/python scripts/check_episode.py --episode out/deepdive.json --min-words 3000 --max-words 4000
+.venv/bin/python scripts/make_audio.py --episode out/deepdive.json --out "out/deepdive-$(date +%F).mp3" --backend gemini
+.venv/bin/python scripts/update_history.py --append --meta out/deepdive_meta.json
 ```
 The check is a hard gate — revise until it passes. When under length, deepen the
-explanation (more mechanism, more evidence), never pad. The renderer retries hard and
-then fails; **never re-render with another backend** — if Gemini is down, report the
-failure and stop.
+explanation (more mechanism, more evidence), never pad. **Run the render in the foreground
+and wait for it to finish — do NOT background it.** It can take several minutes, but you
+must block on it so you see its exit status. The renderer retries hard and then fails;
+**never re-render with another backend** — if Gemini is down, report the failure and stop.
 
 ### 5. Report
 Print the MP3 path, the topic chosen and the week's hook it ties to, the word count,
