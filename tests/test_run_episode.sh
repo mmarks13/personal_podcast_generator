@@ -65,7 +65,13 @@ PY
 cat > "$SB/home/.local/bin/claude" <<'SH'
 #!/usr/bin/env bash
 args="$*"; DATE="$(date +%F)"; mkdir -p out docs/reads
-if [[ "$args" == *daily-ai-podcast* ]]; then
+if [[ "$args" == *source-crawler* ]]; then
+  echo "[fake-claude] ran crawl"
+  printf '{"items":[],"failures":[]}\n' > "out/crawl.json"
+elif [[ "$args" == *source-consolidator* ]]; then
+  echo "[fake-claude] ran consolidate"
+  printf '{"items":[],"dropped_off_topic":0}\n' > "out/candidates.json"
+elif [[ "$args" == *daily-ai-podcast* ]]; then
   echo "[fake-claude] ran daily-ai-podcast skill"
   printf '{"title":"Test Episode %s","date":"%s"}\n' "$DATE" "$DATE" > "out/episode.json"
   printf '{"summary":"test summary"}\n' > "out/episode_meta.json"
@@ -119,6 +125,8 @@ hasre "kindle step end exit=0"    "step end: kindle exit=0"
 hasre "publish step end exit=0"   "step end: publish exit=0"
 has   "deterministic prep: scratch cleared" "prep: cleared podcast scratch"
 has   "deterministic prep: fetcher ran in-shell" "MOCK fetch:"
+has   "gather: crawl ran before opus"   "[fake-claude] ran crawl"
+has   "gather: consolidate ran before opus" "[fake-claude] ran consolidate"
 has   "captured fake-claude output"  "[fake-claude] ran daily-ai-podcast skill"
 has   "publisher was the mock"    "MOCK publish:"
 has   "kindle sender was the mock" "MOCK kindle:"
@@ -126,9 +134,9 @@ hasre "usage snapshot logged"     '\[usage\] \{'
 hasre "run end status OK"         '===== RUN END .* status=OK'
 no    "real claude not invoked"   "Use the daily-ai-podcast skill"  # prompt text only appears if claude echoed it
 # Expected steps depend on the weekday: the deep-dive branch runs Wed (3) / Sat (6).
-expA="kindle podcast publish read"
+expA="consolidate crawl kindle podcast publish read"
 if [ "$(date +%u)" = "3" ] || [ "$(date +%u)" = "6" ]; then
-  expA="deepdive kindle podcast publish publish-deepdive read"
+  expA="consolidate crawl deepdive kindle podcast publish publish-deepdive read"
 fi
 steps "$expA"
 ! pgrep -f "scripts/run_log.py poll" >/dev/null \

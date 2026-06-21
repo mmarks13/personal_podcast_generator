@@ -131,6 +131,9 @@ Use it to inform, not to perform:
   Continuity in the Hosts section. Same restraint as callbacks: use it only when earned.
 
 ### 2. Crawl the HTML sources with one subagent
+**If `out/crawl.json` already exists, the nightly harness pre-crawled — skip this step.**
+(Only crawl yourself if invoked manually without a harness-built `out/crawl.json`.)
+
 The structured feeds (step 1) don't cover the watchlist's HTML-only sources — lab blogs,
 release-note pages, leaderboards, news sections. These have no clean machine feed, so a
 **single subagent** crawls them and **writes a traceable candidate list to
@@ -156,6 +159,11 @@ re-verify in step 3, but **anything you put in the script still follows the grou
 rules** (verify at the primary source when in doubt).
 
 ### 2.5. Consolidate all sources into one candidate set
+**If `out/candidates.json` already exists, the nightly harness pre-consolidated — skip
+straight to step 3 and read it.** Building it pulls the raw dumps into your (Opus) context,
+which is exactly what the harness moved out; only consolidate yourself if invoked manually
+without a harness-built `out/candidates.json`.
+
 Now both raw dumps exist — `out/sources.json` (structured feeds, large and repetitive
 across feeds) and `out/crawl.json` (the HTML crawl). Reading them into your own context
 is expensive and most of it never makes the show. Hand them to a **single subagent** to

@@ -85,28 +85,50 @@ cleanup() {
 trap cleanup EXIT
 # ------------------------------------------------------------------------------
 
-# --- Deterministic pre-gather (podcast) --------------------------------------
-# Don't spend session budget on work that needs no judgment. Clear scratch from a
-# prior/failed run (a stale out/crawl.json once made the agent delete it and re-run the
-# whole crawler), then run the deterministic fetcher here instead of inside a Claude turn.
-# The crawler + consolidator stay in the skill — they need judgment. Kept off the tracked
-# step set on purpose (it's prep, not a stage). Non-fatal: a flaky source must not abort
-# the night — fetch_sources.py still writes a partial sources.json, and the skill falls
-# back to fetching itself if out/sources.json is somehow missing.
+# --- Gather pipeline (podcast): run ENTIRELY before the Opus session ----------
+# The gather phase (fetch → crawl → consolidate) needs little/no Opus-grade judgment, but
+# when it ran *inside* the Opus orchestrator it dragged the whole gather residue into the
+# expensive Opus context and made Opus block on (and recover from) cheap subagents. So we
+# run it here, on the cheapest model that does the job, and let the Opus podcast session
+# start clean at out/candidates.json. Each stage is non-fatal: the podcast skill still
+# falls back to doing any missing stage itself, so a flaky gather can't lose the night.
 rm -f out/sources.json out/crawl.json out/candidates.json
 log run "prep: cleared podcast scratch (sources/crawl/candidates.json)"
+
+# 1. Structured fetch — deterministic, in-shell (no model).
 set +e
 python3 scripts/fetch_sources.py --hours 48 --out out/sources.json 2>&1 \
   | python3 scripts/run_log.py prefix --src fetch >> "$LOG"
 FETCH_RC=${PIPESTATUS[0]}
 set -e
-[ "$FETCH_RC" -eq 0 ] || log run "WARNING: fetch_sources exit=$FETCH_RC; the skill will fetch if out/sources.json is missing"
+[ "$FETCH_RC" -eq 0 ] || log run "WARNING: fetch_sources exit=$FETCH_RC; consolidator works from whatever exists"
 
-# 2–4: Claude follows the skill — crawl, consolidate, write script, render MP3.
-# (Step 1, the structured fetch, was done deterministically just above.)
-run_step podcast claude -p "Use the daily-ai-podcast skill to produce today's episode end to end, \
-following its grounding rules and length target (18-22 min). \
-Print the MP3 path when done." \
+# 2. Crawl the HTML watchlist — standalone Haiku session writing out/crawl.json.
+run_step crawl claude -p "Follow .claude/agents/source-crawler.md exactly. Read config/sources.yaml, \
+take every source whose method is 'fetch' (both tiers), crawl them for today ($DATE) and yesterday only, \
+recover Tier-1 failures via a backup search, and write out/crawl.json in that contract's shape." \
+  --model haiku \
+  --allowedTools "Read WebSearch WebFetch Write" \
+  --permission-mode acceptEdits \
+  --max-turns 40 \
+  || log run "WARNING: crawl failed; consolidator will work from sources.json alone"
+
+# 2.5 Consolidate — standalone Sonnet session writing out/candidates.json.
+run_step consolidate claude -p "Follow .claude/agents/source-consolidator.md exactly. Merge \
+out/sources.json and out/crawl.json (use whichever exist) into out/candidates.json, flagging likely \
+repeats against history.json. Write the file even if one input is missing." \
+  --model sonnet \
+  --allowedTools "Read Write Bash" \
+  --permission-mode acceptEdits \
+  --max-turns 30 \
+  || log run "WARNING: consolidate failed; podcast skill will gather inline"
+
+# 3–4: Opus writes + renders, starting from the already-built out/candidates.json.
+run_step podcast claude -p "Use the daily-ai-podcast skill to produce today's episode. The harness has \
+already run steps 1, 2, and 2.5 — out/sources.json, out/crawl.json, and out/candidates.json already \
+exist, so SKIP them. Do step 1.5 (recall history) then steps 3–5 (select, verify, write, validate, \
+render), following the grounding rules and length target (18-22 min). If out/candidates.json is somehow \
+missing, fall back to doing the gather steps yourself. Print the MP3 path when done." \
   --model "$PODCAST_MODEL" \
   --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
   --permission-mode acceptEdits \
