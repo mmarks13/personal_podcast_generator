@@ -37,8 +37,8 @@ if [ "$BRANCH" != "main" ] && [ "${RUN_EPISODE_ALLOW_ANY_BRANCH:-}" != "1" ]; th
 fi
 
 # Pin models explicitly so the nightly job never inherits an interactive /model switch.
-# Opus for the podcast (editorial judgment, grounding, source selection).
-# Sonnet for the read and deep dive (writing-heavy tasks; saves Pro session budget).
+# Opus is the default orchestrator for every Claude run — the podcast (editorial
+# judgment, grounding, source selection), the read, and the deep dive.
 PODCAST_MODEL="opus"
 READ_MODEL="opus"
 DEEPDIVE_MODEL="opus"
