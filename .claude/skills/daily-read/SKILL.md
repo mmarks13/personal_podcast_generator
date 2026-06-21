@@ -41,14 +41,20 @@ author, in the first person where it earns it, bylined "by <Name>".
   lectures). His instinct on anything is: what happens when you actually run this, what
   does it cost, what breaks, what would he do with it tonight. He grounds elegance in
   deployment reality. Warm, energetic, concrete.
-- **Grace** — a Stanford organizational-behavior researcher in the CS department, a
-  former engineering manager who now embeds with teams as a field anthropologist of
-  software organizations. Her beat is the shift from **AI-assisted coding → agentic
-  software development → AI-native delivery**: what actually changes on the ground in how
-  teams are structured, who owns what, how accountability and craft and trust reshape
-  when code is increasingly agent-authored. Writes from observed detail and real stories,
-  not abstraction. (Stories she "observes" are illustrative persona color — composite,
-  not reportage; never present them as verified named-company facts.)
+- **Grace** — the field correspondent on agentic software practice. Her question is a
+  first-principles one: as agents take over *producing* code, where does the scarce human
+  work go? She reports the answers from real, **named** practitioners — what teams are
+  actually doing about reviewing code no human wrote, encoding judgment into shared
+  scaffolding (skills, permissions, MCP servers, CI/CD), staying the principal rather than
+  the passenger, and telling a person's signal from a tool's output when hiring. She is a
+  **synthesist, not a memoirist**: she reads the field and connects it, every observation
+  tied to a real source she links — she does **not** invent embedded fieldwork, composite
+  teams, or anonymized "a team I worked with" anecdotes (that device is retired). Her
+  standing haunts: Simon Willison, The Pragmatic Engineer, Latent Space, the GitHub and
+  Cursor blogs, Anthropic Engineering, ReleaseBot (for new agent-tooling features),
+  Birgitta Böckeler on martinfowler.com, Addy Osmani, Kent Beck, and CodeScene — plus fresh
+  search. Literary and readable, never a listicle; the rigor shows in the citations, not
+  the format.
 - **Vannevar** — an economic historian of technological revolutions (steam, electricity,
   the assembly line, the computer). He loves *the pattern that repeats*: deskilling and
   reskilling, productivity paradoxes, Luddites who were right about more than we admit,
@@ -97,7 +103,8 @@ targets, not quotas — judgment over arithmetic:
 - **History lesson** — a prescient piece of computing/tech/economic history (Ada/Vannevar).
 - **How-it-works** — mechanism, hands-on, what-it-costs (Alan/Linus).
 - **Skeptic's column** — puncture a claim, demand the evidence (Florence).
-- **Fieldwork** — what's changing inside teams/orgs (Grace).
+- **Field report** — what real teams are actually doing about agentic engineering,
+  synthesized from named, linked sources (Grace).
 - **Speculative fiction** — a near-future vignette (Karel).
 - **The footnote** — a short, genuinely delightful/odd/human closer (~300–500 words).
 - **Anecdote / curiosity** — a small true (or clearly-fictional) story that sticks.
@@ -171,6 +178,14 @@ The reader must always be able to tell **what kind of thing they're reading**.
 - **Persona color** (a writer's habits, preferences, asides) is fine as long as it's
   obviously persona-shaped and never fabricates real-world specifics.
 
+**Citations (non-fiction).** Every non-fiction piece must *show its sources*. Put inline
+markdown links on each load-bearing claim — numbers, study findings, dates, quotes, and
+any named person, team, or company — pointing at the real source you read (the most
+accessible stable reference: the author's post, publisher page, DOI, or primary source).
+Close each non-fiction piece with a compact `**Sources:**` line listing the links it used.
+Never invent a study, statistic, quote, date, or URL. Speculative fiction is exempt — it
+carries no Sources line — but must be labeled as below; persona color needs no citation.
+
 When in doubt, label. A one-line italic note under a piece title is enough.
 
 ## Workflow
@@ -202,11 +217,20 @@ One markdown file, `out/daily_read.md`:
 - Then the pieces, each under a `## <piece title>` heading (each becomes a chapter).
   Byline each piece on its own line directly under the heading: `*by <Name>*`. Put any
   grounding label (e.g. `*A short fiction.*`) on the next italic line.
-- Markdown links inline where a reader would want them; no bare URLs in prose.
+- Inline markdown links on every load-bearing claim (no bare URLs in prose), and close
+  each non-fiction piece with a `**Sources:**` line listing the links it used. Fiction
+  carries no Sources line.
 
 Hit the day's word band. Prefer cutting a weak piece to padding a thin one.
 
-### 4. Build the EPUB (with cover)
+### 4. Validate the links
+Collect every URL cited in `out/daily_read.md` and hand them to the `link-checker` subagent
+(`Agent` tool, `subagent_type: link-checker`, `model: "haiku"`), each tagged with the claim
+or piece it supports. It returns `ok` / `mismatch` / `dead` per URL. Fix every non-`ok`
+result before building: re-source and replace a `dead` link, repoint a `mismatch`, or drop
+the claim if no real source holds it up. A link only survives if it resolves and matches.
+
+### 5. Build the EPUB (with cover)
 ```bash
 MOOD="$(grep -oP '(?<=<!-- mood: ).*(?= -->)' out/daily_read.md)"
 .venv/bin/python scripts/make_epub.py --md out/daily_read.md \
@@ -215,13 +239,13 @@ MOOD="$(grep -oP '(?<=<!-- mood: ).*(?= -->)' out/daily_read.md)"
   --cover-subtitle "$(date '+%A, %B %-d') · ${MOOD}"
 ```
 
-### 5. Record it
+### 6. Record it
 Append today's issue to `reads_history.json` so future issues don't repeat:
 ```bash
 .venv/bin/python scripts/update_reads_history.py --md out/daily_read.md --date "$(date +%F)"
 ```
 
-### 6. Report
+### 7. Report
 Print the EPUB path, the mood word, total word count (vs the day's band), and the lineup
 (each piece: title — author — format). Emailing to Kindle and committing `docs/` happen
 in the caller, not here.
