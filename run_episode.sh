@@ -21,13 +21,19 @@ mkdir -p out logs
 # Publishing is branch-scoped: publish.py commits the rebuilt feed into docs/, and
 # GitHub Pages serves the feed Spotify polls from main/docs. A run on any other branch
 # strands the feed update where Pages can't see it (episodes silently never go live).
-# Fail fast — before spending any session budget — if we're not on main.
-# RUN_EPISODE_ALLOW_ANY_BRANCH=1 overrides this for the hermetic test, which runs a
-# copy of this script in a non-repo sandbox (no branch to check).
+# So before spending any session budget, get onto main: switch automatically when the
+# working tree is clean, but refuse (rather than stash/clobber) if there are uncommitted
+# changes — an unattended job must not make state decisions on top of in-progress work.
+# RUN_EPISODE_ALLOW_ANY_BRANCH=1 skips this for the hermetic test, which runs a copy of
+# this script in a non-repo sandbox (no branch to check).
 BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')"
 if [ "$BRANCH" != "main" ] && [ "${RUN_EPISODE_ALLOW_ANY_BRANCH:-}" != "1" ]; then
-  echo "run_episode: refusing to run on branch '$BRANCH' — Pages publishes from main only." >&2
-  exit 1
+  if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+    echo "run_episode: on '$BRANCH' with uncommitted changes — refusing (commit or stash, then rerun on main)." >&2
+    exit 1
+  fi
+  echo "run_episode: on '$BRANCH', switching to main (Pages publishes from main only)." >&2
+  git checkout main || { echo "run_episode: could not switch to main — aborting." >&2; exit 1; }
 fi
 
 # Pin models explicitly so the nightly job never inherits an interactive /model switch.

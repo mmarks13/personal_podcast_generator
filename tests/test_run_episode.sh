@@ -18,7 +18,8 @@ set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 SB="$(mktemp -d)"
-trap 'rm -rf "$SB"' EXIT
+GD="$(mktemp -d)"   # a real git repo for Scenario D's branch-guard checks
+trap 'rm -rf "$SB" "$GD"' EXIT
 LOG="$SB/logs/run.log"
 FAILED_ASSERT=0
 
@@ -141,21 +142,38 @@ blocks="$(grep -c 'RUN START' "$LOG")"
 [ "$blocks" = "3" ] && ok "exactly 3 run blocks retained (after 5 runs)" \
                      || bad "expected 3 run blocks, found $blocks"
 
-# ---- Scenario D: branch guard refuses off-main -------------------------------
-# Without the override, a run anywhere but main must abort before any step starts —
-# this is what kept the 2026-06-20 episodes off the live feed (run on a feature branch
-# published the feed where Pages, which serves from main, never saw it).
-echo "Scenario D: branch guard aborts when not on main"
-reset_artifacts; : > "$LOG"
-set +e
-guard_out="$( cd "$SB" && env -u ANTHROPIC_API_KEY HOME="$SB/home" bash run_episode.sh 2>&1 )"
-guard_rc=$?
-set -e
-[ "$guard_rc" != "0" ] && ok "non-zero exit ($guard_rc)" || bad "expected non-zero exit"
-echo "$guard_out" | grep -qF "refusing to run on branch" && ok "guard message printed" \
-  || bad "guard message missing"
-grep -q "step start:" "$LOG" 2>/dev/null && bad "a step ran despite guard" \
-  || ok "no step ran (aborted pre-flight)"
+# ---- Scenario D: branch guard (switch when clean, refuse when dirty) ----------
+# Publishing is branch-scoped, so an off-main run must get onto main first: switch
+# automatically when the tree is clean, but refuse rather than clobber in-progress work
+# when it's dirty. (A feature-branch run is what kept 2026-06-20 off the live feed.)
+# These checks run WITHOUT the override, in a throwaway git repo with the same mocks.
+echo "Scenario D: off-main — auto-switch when clean, refuse when dirty"
+mkdir -p "$GD/scripts" "$GD/home/.local/bin" "$GD/out" "$GD/docs/reads" "$GD/logs"
+cp "$SB/run_episode.sh" "$GD/run_episode.sh"
+cp "$SB/scripts/run_log.py" "$SB/scripts/publish.py" "$SB/scripts/send_to_kindle.py" "$GD/scripts/"
+cp "$SB/home/.local/bin/claude" "$GD/home/.local/bin/claude"
+printf 'out/\nlogs/\ndocs/reads/\nconsole.txt\n' > "$GD/.gitignore"
+echo seed > "$GD/tracked.txt"   # a tracked file we can dirty in D2 without touching the script
+( cd "$GD" && git init -q && git config user.email t@t && git config user.name t \
+    && git add -A && git commit -qm init && git branch -M main && git branch feature ) >/dev/null
+GDLOG="$GD/logs/run.log"
+gd_run() { ( cd "$GD" && env -u ANTHROPIC_API_KEY HOME="$GD/home" "$@" bash run_episode.sh ); }
+
+# D1: clean tree on a feature branch -> auto-switch to main, run normally.
+( cd "$GD" && git checkout -q feature ); : > "$GDLOG"
+set +e; gd_run LOG_KEEP_RUNS=3 >"$GD/console.txt" 2>&1; d1rc=$?; set -e
+d1branch="$( cd "$GD" && git rev-parse --abbrev-ref HEAD )"
+[ "$d1rc" = "0" ]            && ok "clean off-main: exit 0"         || bad "clean off-main: expected exit 0 (got $d1rc)"
+[ "$d1branch" = "main" ]     && ok "clean off-main: switched to main" || bad "clean off-main: ended on $d1branch"
+grep -q "step start: podcast" "$GDLOG" && ok "clean off-main: pipeline ran" || bad "clean off-main: no step ran"
+
+# D2: dirty tree on a feature branch -> refuse, switch nothing, run nothing.
+( cd "$GD" && git checkout -q feature && echo edit >> tracked.txt ); : > "$GDLOG"
+set +e; d2out="$(gd_run 2>&1)"; d2rc=$?; set -e
+[ "$d2rc" != "0" ]          && ok "dirty off-main: refused (exit $d2rc)" || bad "dirty off-main: expected non-zero"
+echo "$d2out" | grep -qF "uncommitted changes" && ok "dirty off-main: refusal message" || bad "dirty off-main: message missing"
+[ "$( cd "$GD" && git rev-parse --abbrev-ref HEAD )" = "feature" ] && ok "dirty off-main: stayed on feature" || bad "dirty off-main: branch changed"
+grep -q "step start:" "$GDLOG" 2>/dev/null && bad "dirty off-main: a step ran" || ok "dirty off-main: no step ran"
 
 echo
 if [ "$FAILED_ASSERT" = "0" ]; then echo "ALL ASSERTIONS PASSED"; else echo "SOME ASSERTIONS FAILED"; fi
