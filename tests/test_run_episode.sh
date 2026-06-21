@@ -49,6 +49,15 @@ cat > "$SB/scripts/send_to_kindle.py" <<'PY'
 import sys
 print("MOCK kindle:", " ".join(sys.argv[1:]))
 PY
+# Mock fetcher: run_episode.sh now runs the deterministic fetch in-shell before the
+# podcast Claude step. Stub it (no network) so the test stays hermetic; it just writes
+# a minimal sources.json the way the real fetcher would.
+cat > "$SB/scripts/fetch_sources.py" <<'PY'
+import pathlib, sys
+pathlib.Path("out").mkdir(exist_ok=True)
+open("out/sources.json", "w").write('{"feeds": {}}')
+print("MOCK fetch:", " ".join(sys.argv[1:]))
+PY
 
 # Fake claude: pick the skill out of the prompt args, emit the expected artifacts.
 # MOCK_NO_MP3=1 makes the podcast run skip the MP3 (reproduces last night's failure:
@@ -108,6 +117,8 @@ hasre "podcast step end exit=0"   "step end: podcast exit=0 dur=[0-9]+s"
 hasre "read step end exit=0"      "step end: read exit=0"
 hasre "kindle step end exit=0"    "step end: kindle exit=0"
 hasre "publish step end exit=0"   "step end: publish exit=0"
+has   "deterministic prep: scratch cleared" "prep: cleared podcast scratch"
+has   "deterministic prep: fetcher ran in-shell" "MOCK fetch:"
 has   "captured fake-claude output"  "[fake-claude] ran daily-ai-podcast skill"
 has   "publisher was the mock"    "MOCK publish:"
 has   "kindle sender was the mock" "MOCK kindle:"
@@ -150,7 +161,7 @@ blocks="$(grep -c 'RUN START' "$LOG")"
 echo "Scenario D: off-main — auto-switch when clean, refuse when dirty"
 mkdir -p "$GD/scripts" "$GD/home/.local/bin" "$GD/out" "$GD/docs/reads" "$GD/logs"
 cp "$SB/run_episode.sh" "$GD/run_episode.sh"
-cp "$SB/scripts/run_log.py" "$SB/scripts/publish.py" "$SB/scripts/send_to_kindle.py" "$GD/scripts/"
+cp "$SB/scripts/run_log.py" "$SB/scripts/publish.py" "$SB/scripts/send_to_kindle.py" "$SB/scripts/fetch_sources.py" "$GD/scripts/"
 cp "$SB/home/.local/bin/claude" "$GD/home/.local/bin/claude"
 printf 'out/\nlogs/\ndocs/reads/\nconsole.txt\n' > "$GD/.gitignore"
 echo seed > "$GD/tracked.txt"   # a tracked file we can dirty in D2 without touching the script

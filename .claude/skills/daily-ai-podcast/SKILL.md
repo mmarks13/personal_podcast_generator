@@ -89,19 +89,20 @@ signature sign-off — **"Stay grounded."** — alternating which host says it.
 Run these steps in order. Do not skip the grounding rules in step 3.
 
 ### 1. Pull the structured sources
-Run the fetcher. It writes `out/sources.json` and prints a summary.
+The nightly harness (`run_episode.sh`) already cleared stale scratch and ran the
+deterministic fetcher before invoking you, so **`out/sources.json` already exists — do
+not run the fetcher.** It needs no judgment, so spending a turn on it is pure waste.
+(Only if you were invoked manually and `out/sources.json` is missing should you run it
+yourself: `.venv/bin/python scripts/fetch_sources.py --hours 48 --out out/sources.json`.)
+You don't read this file directly anyway — the step-2.5 consolidator does.
 
-```bash
-.venv/bin/python scripts/fetch_sources.py --hours 48 --out out/sources.json
-```
-
-It reads `config/sources.yaml` and deterministically pulls **every source whose method
-is `rss` or `api`, both tiers** — arXiv (keyword-filtered to the topic priorities,
-capped per query), Hugging Face Daily Papers, HN, and the lab/news/newsletter feeds.
-Output is a `feeds` object keyed by source name; **every item carries the `source`
-it came from**, so when the same story appears across several feeds you can see that. If
-a single source fails or returns nothing in the window, the script keeps going and notes
-it — read the printed summary and work with what you have.
+`sources.json` is `config/sources.yaml`'s **rss/api sources, both tiers**, pulled
+deterministically — arXiv (keyword-filtered to the topic priorities, capped per query),
+Hugging Face Daily Papers, HN, and the lab/news/newsletter feeds. Output is a `feeds`
+object keyed by source name; **every item carries the `source` it came from**, so a story
+appearing across several feeds is visible. A source that failed or returned nothing is
+simply absent — work with whatever is there. The harness also pre-cleared any stale
+`out/crawl.json` / `out/candidates.json`, so don't second-guess leftover scratch.
 
 ### 1.5. Recall what the show has already covered
 Read `history.json` if it exists. It is the show's memory — treat it the way a regular

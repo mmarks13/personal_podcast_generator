@@ -85,7 +85,25 @@ cleanup() {
 trap cleanup EXIT
 # ------------------------------------------------------------------------------
 
-# 1–4: Claude follows the skill — fetch, gather, write script, render MP3.
+# --- Deterministic pre-gather (podcast) --------------------------------------
+# Don't spend session budget on work that needs no judgment. Clear scratch from a
+# prior/failed run (a stale out/crawl.json once made the agent delete it and re-run the
+# whole crawler), then run the deterministic fetcher here instead of inside a Claude turn.
+# The crawler + consolidator stay in the skill — they need judgment. Kept off the tracked
+# step set on purpose (it's prep, not a stage). Non-fatal: a flaky source must not abort
+# the night — fetch_sources.py still writes a partial sources.json, and the skill falls
+# back to fetching itself if out/sources.json is somehow missing.
+rm -f out/sources.json out/crawl.json out/candidates.json
+log run "prep: cleared podcast scratch (sources/crawl/candidates.json)"
+set +e
+python3 scripts/fetch_sources.py --hours 48 --out out/sources.json 2>&1 \
+  | python3 scripts/run_log.py prefix --src fetch >> "$LOG"
+FETCH_RC=${PIPESTATUS[0]}
+set -e
+[ "$FETCH_RC" -eq 0 ] || log run "WARNING: fetch_sources exit=$FETCH_RC; the skill will fetch if out/sources.json is missing"
+
+# 2–4: Claude follows the skill — crawl, consolidate, write script, render MP3.
+# (Step 1, the structured fetch, was done deterministically just above.)
 run_step podcast claude -p "Use the daily-ai-podcast skill to produce today's episode end to end, \
 following its grounding rules and length target (18-22 min). \
 Print the MP3 path when done." \
