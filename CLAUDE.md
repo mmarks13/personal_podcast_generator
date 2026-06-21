@@ -24,8 +24,9 @@ to an RSS feed Spotify polls.
   one topic the week's news made worth learning; published with `--slug deepdive`.
 - `.claude/skills/daily-read/SKILL.md` — "Self Attention", a **daily** reading magazine
   → EPUB in `docs/reads/`, emailed to Kindle. Fully independent of the podcast (never
-  mentions it). A fixed masthead of seven writers (Ada, Alan, Grace, Vannevar, Florence,
-  Karel, Linus); weekday issues ~30 min, Sat/Sun ~1 hr. Continuity in `reads_history.json`.
+  mentions it). A fixed masthead of nine writers (Ada, Alan, Grace, Vannevar, Florence,
+  Karel, Linus, Norbert, Herbert); weekday issues ~30 min, Sat/Sun ~1 hr. Continuity in
+  `reads_history.json`.
 - `config/sources.yaml` — the source watchlist (Tier 1 = daily; Tier 2 = optional).
 - `scripts/fetch_sources.py` — deterministic pulls of ALL rss/api sources, both tiers
   (arXiv keyword-filtered to topic priorities, HF Daily Papers, HN, newsletters).

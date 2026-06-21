@@ -3,7 +3,7 @@ name: daily-read
 description: >
   Write "Self Attention", a daily reading magazine in EPUB form, emailed to Kindle. A
   varied, fun, thought-provoking issue every day — essays, explainers, history, fiction,
-  guest columns — from a fixed masthead of seven writers. Weekday issues are ~30 minutes;
+  guest columns — from a fixed masthead of nine writers. Weekday issues are ~30 minutes;
   Saturday and Sunday are ~1 hour. Use when asked to "write the read", "make today's
   issue", "do Self Attention", or produce the daily EPUB.
 ---
@@ -23,7 +23,7 @@ audio show, "the show", hosts, episodes, listeners, or "as we discussed"** — n
 not obliquely. The writers here are columnists for a magazine. If a sentence only makes
 sense to someone who knows about some other product, cut it.
 
-## The masthead — seven fixed writers
+## The masthead — nine fixed writers
 
 These are **fixed characters**, not evolving ones: each has a stable voice, beat, and
 temperament that stays consistent issue to issue. Don't invent biographical specifics
@@ -64,12 +64,40 @@ author, in the first person where it earns it, bylined "by <Name>".
   error bars, separates signal from hype, and steel-mans the bear case better than the
   bears do. Forensic, principled, occasionally deflating — never snarky. When she
   doubts a number, she explains *how* to doubt it, so the reader learns to.
-- **Karel** — the speculative-fiction writer. Short near-future vignettes, "a day in
-  the life of —", scenarios with a human core. The fun, imaginative slot. His pieces are
-  clearly fiction and labeled as such (see grounding).
+- **Karel** — the speculative-fiction writer, and fiction's home on the masthead.
+  Near-future scenarios with a human core, in a *wide repertoire of forms*: not just "a day
+  in the life of —" but an oral history from the future, a 2031 product page, a hearing
+  transcript, a changelog, a letter home, one event from three points of view. About half
+  his pieces *extrapolate from a real current development* and follow its second- and
+  third-order consequences; the rest are free imaginative leaps. Either way the grounding
+  stays **invisible** — no "extrapolated from X" frame, no explanatory coda; the story
+  carries the idea and is simply labeled as fiction (see grounding).
 - **Linus** — the practitioner: a working engineer/founder voice, in the trenches.
   Candid, tactical, funny, "here's what I actually shipped and what broke", strong
   opinions loosely held and occasionally recanted. The counterweight to theory.
+- **Norbert** — the humanist of the machine. His question is never just *can* we but
+  *should* we, and *who bears the cost*: what automation does to human dignity, attention,
+  judgment, and the texture of work and a life. He weighs ends, not only means — what we're
+  optimizing for, and what we quietly trade away to get it. Humane and serious without
+  moralizing; he argues a values position and owns it *as* a position, grounding every
+  factual claim like everyone else. The conscience of the masthead, never its scold.
+- **Herbert** — the connector. His mode is the *non-obvious link between things happening
+  right now*: the same pattern surfacing at once in a model release, a labor market, and a
+  supply chain — and what the convergence means. A synthesist of the present where Ada and
+  Vannevar read the past; restless and cross-disciplinary. He owns the Saturday throughline
+  by temperament, though it can still go to whoever fits the week. He connects; he doesn't
+  just list.
+
+**Three practice voices, one axis — keep them distinct.** Alan, Linus, and Grace all work
+the hands-on/real-world axis but differ by *stance, not topic*: Alan teaches the general
+case ("what happens when you run this"), Linus testifies in the first person ("what I
+shipped and what broke"), Grace reports the named field ("what teams are actually doing").
+Never run two of the three in the same weekday issue.
+
+**Fiction is a mode, not just a slot.** Karel is its home, but any voice may write
+clearly-labeled fiction in their own register when a piece wants to be a story — Florence's
+skeptical dystopia, Vannevar's historical-rhyme future, Norbert's ethics fable. The labeling
+and grounding rules are the same whoever writes it.
 
 **House voice (collective):** smart-friend Sunday magazine — erudite but warm and
 playful, accessible, human, occasionally funny. Each writer is distinct *within* that
@@ -80,18 +108,24 @@ should be enjoyable to read, not efficient to scan.
 
 | Day | Length (target) | Structure |
 |-----|-----------------|-----------|
-| **Mon–Fri** | ~30 min · **4,000–4,500 words** | A lead piece + **1–2** shorter pieces. |
+| **Mon–Fri** | ~30 min · **4,000–4,500 words** | A lead piece + **1–3** shorter pieces (up to 4 total). |
 | **Saturday** | ~1 hr · **9,000–11,000 words** | A flagship lead essay + **the week's throughline** (see below) + **4–5** other pieces. |
 | **Sunday** | ~1 hr · **9,000–11,000 words** | Same as Saturday but **without** the throughline piece — **5–6** pieces, all standalone. |
 
 Each piece is a `## ` chapter (see Build). One author per piece. A weekday issue draws
-**2–3 different writers**; a weekend issue draws **4–6**, ideally most of the masthead.
+**2–4 different writers**; a weekend issue draws **4–6**, ideally most of the masthead.
 
 **The Saturday throughline** (Saturday only): one piece (~1,200–2,000 words) that finds a
 real *theme* connecting several threads in AI/computing/work right now and says something
 about what it means — written by whichever masthead voice fits the theme. It's the one
 piece allowed to lean on current events. It is **not** a news recap; it's an argument
 about what a pattern *means*.
+
+**Fiction every day.** Every issue carries at least one clearly-labeled fiction piece — on
+weekdays a short one among the pieces above; on **weekends a longer "get lost in" piece**
+with room to breathe. It's additive, never a displacement: it doesn't crowd out the issue's
+non-fiction range, which the up-to-four weekday capacity and the weekend breadth absorb.
+Rotate who writes it (Karel most often) and vary its form day to day.
 
 ## The format menu (what a piece can be)
 
@@ -105,14 +139,18 @@ targets, not quotas — judgment over arithmetic:
 - **Skeptic's column** — puncture a claim, demand the evidence (Florence).
 - **Field report** — what real teams are actually doing about agentic engineering,
   synthesized from named, linked sources (Grace).
-- **Speculative fiction** — a near-future vignette (Karel).
+- **Speculative fiction** — a near-future scenario in any form: vignette, oral history,
+  transcript, product page, letter (Karel's home turf; any voice may visit).
+- **The ethical question** — what we should want, and what it costs (Norbert).
+- **The connection** — the non-obvious link between things happening now (Herbert).
 - **The footnote** — a short, genuinely delightful/odd/human closer (~300–500 words).
 - **Anecdote / curiosity** — a small true (or clearly-fictional) story that sticks.
 
-**High variety, few anchors.** Almost everything rotates day to day; the only fixtures
-are the Saturday throughline and (optionally) a closing footnote when one earns the slot.
-Surprise the reader. Don't run the same format two days running if you can help it, and
-don't let one writer dominate a week.
+**High variety, with a few anchors.** Almost everything rotates day to day; the standing
+fixtures are **a fiction piece every issue** (above), the Saturday throughline, and
+(optionally) a closing footnote when one earns the slot. Surprise the reader. Don't run the
+same *form* two days running if you can help it — fiction recurs daily, but its form and its
+author should not — and don't let one writer dominate a week.
 
 ## How to choose each issue — the reasoning (do this every time)
 
@@ -146,7 +184,7 @@ Then:
   angle (say what's new).
 - Don't repeat a **format** from yesterday; vary the mix across the week.
 - **Rotate writers** so no one disappears for long and no one dominates; aim for roughly
-  equal presence across a week (Grace's agentic-delivery beat is one voice among seven,
+  equal presence across a week (Grace's agentic-delivery beat is one voice among nine,
   not a daily fixture).
 - Across a week, make sure the masthead's range actually shows up: some history, some
   building, some skepticism, some fiction, some fieldwork.
@@ -170,7 +208,7 @@ The reader must always be able to tell **what kind of thing they're reading**.
   encouraged, but evergreen ≠ unsourced.
 - **Opinion / argument pieces:** the *opinion* is free; the *evidence* is not. Make the
   position clearly the writer's view, and ground any factual support for it.
-- **Speculative fiction (Karel) and clearly-hypothetical scenarios:** invention is the
+- **Speculative fiction (any voice; Karel is its home) and clearly-hypothetical scenarios:** invention is the
   point and is allowed — but signal it unmistakably. Title or frame it so no reader could
   mistake a vignette for reportage (e.g. "A short fiction.", a dateline in the future).
   Fiction may *not* fabricate real-world specifics presented as fact (no invented real
