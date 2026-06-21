@@ -39,6 +39,39 @@ SKILL_OF_STEP = {
     "deepdive": "weekly-deep-dive",
 }
 
+# Per-token USD rates, keyed by model-id prefix. Source: Claude API pricing
+# (claude-api skill, cached 2026-06-04) + prompt-caching economics: 5-min cache
+# WRITE = 1.25x base input, cache READ = 0.1x base input.
+#   in = uncached input, out = output, cw = cache_creation, cr = cache_read
+# This is an ESTIMATE at public API rates — NOT what a Pro/Max subscription bills.
+# Its purpose is to weight the 5h usage limit, which is consumed ~in proportion to
+# model cost (Opus drains it far faster than Sonnet, Sonnet faster than Haiku), so
+# cost is the right lens for finding bottlenecks. Update rates when pricing changes.
+RATES = {
+    "claude-fable-5":    {"in": 10e-6, "out": 50e-6, "cw": 12.5e-6, "cr": 1.0e-6},
+    "claude-opus-4-8":   {"in": 5e-6,  "out": 25e-6, "cw": 6.25e-6, "cr": 0.5e-6},
+    "claude-opus-4-7":   {"in": 5e-6,  "out": 25e-6, "cw": 6.25e-6, "cr": 0.5e-6},
+    "claude-opus-4-6":   {"in": 5e-6,  "out": 25e-6, "cw": 6.25e-6, "cr": 0.5e-6},
+    "claude-sonnet-4-6": {"in": 3e-6,  "out": 15e-6, "cw": 3.75e-6, "cr": 0.3e-6},
+    "claude-haiku-4-5":  {"in": 1e-6,  "out": 5e-6,  "cw": 1.25e-6, "cr": 0.1e-6},
+}
+RATE_FALLBACK = RATES["claude-opus-4-8"]  # unknown model -> price as Opus (conservative)
+
+
+def rate_for(model: str) -> dict:
+    for prefix, r in RATES.items():
+        if model and model.startswith(prefix):
+            return r
+    return RATE_FALLBACK
+
+
+def turn_cost(u: dict, model: str) -> float:
+    r = rate_for(model)
+    return (u.get("input_tokens", 0) * r["in"]
+            + u.get("output_tokens", 0) * r["out"]
+            + u.get("cache_creation_input_tokens", 0) * r["cw"]
+            + u.get("cache_read_input_tokens", 0) * r["cr"])
+
 
 def est_tok(chars: int) -> int:
     return math.ceil(chars / 4)
@@ -165,6 +198,7 @@ def parse_transcript(rows: list) -> dict:
         rtype = r.get("type")
         if rtype == "assistant" and "usage" in m:
             u = m["usage"]
+            model = m.get("model", "")
             actions = []
             for c in m.get("content") or []:
                 if isinstance(c, dict) and c.get("type") == "tool_use":
@@ -177,11 +211,13 @@ def parse_transcript(rows: list) -> dict:
             )
             turns.append({
                 "ts": (ts or "")[11:19],
+                "model": model,
                 "in": u.get("input_tokens", 0),
                 "cr": u.get("cache_read_input_tokens", 0),
                 "cc": u.get("cache_creation_input_tokens", 0),
                 "out": u.get("output_tokens", 0),
                 "ctx": u.get("input_tokens", 0) + u.get("cache_read_input_tokens", 0) + u.get("cache_creation_input_tokens", 0),
+                "cost": turn_cost(u, model),
                 "actions": actions,
                 "text_only": txt and not actions,
             })
@@ -212,14 +248,17 @@ def agent_metrics(parsed: dict) -> dict:
             hist["(text/think only)"] += 1
         for a in t["actions"]:
             hist[a["name"]] += 1
+    models = sorted({t["model"] for t in turns if t["model"].startswith("claude-")})
     return {
         "turns": len(turns),
+        "model": models[0] if len(models) == 1 else (",".join(models) or "?"),
         "action_hist": dict(hist.most_common()),
         "tok_in": sum(t["in"] for t in turns),
         "tok_cache_read": sum(t["cr"] for t in turns),
         "tok_cache_create": sum(t["cc"] for t in turns),
         "tok_out": sum(t["out"] for t in turns),
         "input_total": sum(t["ctx"] for t in turns),
+        "cost": sum(t["cost"] for t in turns),
         "startup_ctx": turns[0]["ctx"] if turns else 0,
         "peak_ctx": max((t["ctx"] for t in turns), default=0),
         "first_ts": parsed["first_ts"],
@@ -327,21 +366,32 @@ def render(report: dict, threshold: int, show_timeline: bool, verbose: bool) -> 
     p(f"  span {report['first_ts']} -> {report['last_ts']}   threshold={threshold} tok")
     p("=" * 78)
 
-    p("\n--- agents (orchestrator + subagents) ---")
-    hdr = f"{'agent':24} {'turns':>5} {'in_total':>9} {'cache_rd':>9} {'cache_cr':>9} {'out':>7} {'peak_ctx':>8} {'ret_tok':>7}"
+    total_cost = sum(a["cost"] for a in report["agents"]) or 1e-9
+    ranked = sorted(report["agents"], key=lambda a: -a["cost"])
+    top = ranked[0]
+    p(f"\n  ESTIMATED COST (API-rate proxy for the 5h limit): ${total_cost:.2f}")
+    p(f"  Biggest cost center: {top['label']} ({top['model']}) — ${top['cost']:.2f} "
+      f"({100*top['cost']/total_cost:.0f}%)")
+
+    p("\n--- agents by COST (the bottleneck lens; 5h limit ~ cost-weighted) ---")
+    hdr = (f"{'agent':22} {'model':9} {'turns':>5} {'$cost':>7} {'share':>6} "
+           f"{'cache_rd':>9} {'out':>7} {'peak_ctx':>8} {'ret_tok':>7}")
     p(hdr); p("-" * len(hdr))
-    for a in report["agents"]:
+    for a in ranked:
         ret = "" if a.get("return_tok") in (None,) else f"{a['return_tok']:>7,}"
-        p(f"{a['label'][:24]:24} {a['turns']:>5} {a['input_total']:>9,} {a['tok_cache_read']:>9,} "
-          f"{a['tok_cache_create']:>9,} {a['tok_out']:>7,} {a['peak_ctx']:>8,} {ret:>7}")
+        mdl = a["model"].replace("claude-", "").split("-2025")[0][:9]
+        p(f"{a['label'][:22]:22} {mdl:9} {a['turns']:>5} {a['cost']:>6.2f} "
+          f"{100*a['cost']/total_cost:>5.0f}% {a['tok_cache_read']:>9,} {a['tok_out']:>7,} "
+          f"{a['peak_ctx']:>8,} {ret:>7}")
     t = report["totals"]
     p("-" * len(hdr))
-    p(f"{'TOTAL':24} {t['turns']:>5} {t['input_total']:>9,} {t['tok_cache_read']:>9,} "
-      f"{t['tok_cache_create']:>9,} {t['tok_out']:>7,}")
+    p(f"{'TOTAL':22} {'':9} {t['turns']:>5} {total_cost:>6.2f} {'100%':>6} "
+      f"{t['tok_cache_read']:>9,} {t['tok_out']:>7,}")
+    p("  (cost = uncached·rate + output·5×in + cache_create·1.25×in + cache_read·0.1×in, per model)")
 
     p("\n--- why so many turns (actions per agent) ---")
     for a in report["agents"]:
-        p(f"  {a['label']:24} {a['turns']:>3} turns  |  {fmt_hist(a['action_hist'])}")
+        p(f"  {a['label']:22} {a['turns']:>3} turns  |  {fmt_hist(a['action_hist'])}")
 
     p("\n--- FLAGS: returned to orchestrator (pollutes main context) ---")
     rets = [a for a in report["agents"] if a.get("return_tok")]
@@ -390,7 +440,7 @@ def render(report: dict, threshold: int, show_timeline: bool, verbose: bool) -> 
                 acts = "; ".join(f"{x['name']}({x['summary']})" for x in t["actions"]) or (
                     "(text/think)" if t["text_only"] else "(stop)")
                 res = f"  ->result {t['result_tok']:,}tok" if t.get("result_tok") else ""
-                p(f"    {i+1:>3} {t['ts']}  ctx={t['ctx']:>7,} out={t['out']:>5}  {acts}{res}")
+                p(f"    {i+1:>3} {t['ts']}  ${t.get('cost',0):>5.2f} ctx={t['ctx']:>7,} out={t['out']:>5}  {acts}{res}")
                 if verbose and t["actions"]:
                     for x in t["actions"]:
                         p(f"          · {x['name']}: {x['summary']}")
@@ -421,8 +471,8 @@ def build_report(session_path: str, threshold: int) -> dict:
         for t in parsed["turns"]:
             rtok = sum(res_by_id.get(a["id"], 0) for a in t["actions"])
             timeline.append({
-                "ts": t["ts"], "ctx": t["ctx"], "out": t["out"], "text_only": t["text_only"],
-                "result_tok": rtok,
+                "ts": t["ts"], "ctx": t["ctx"], "out": t["out"], "cost": t["cost"],
+                "text_only": t["text_only"], "result_tok": rtok,
                 "actions": [{"name": a["name"], "summary": tool_summary(a["name"], a["input"])} for a in t["actions"]],
             })
         return {
