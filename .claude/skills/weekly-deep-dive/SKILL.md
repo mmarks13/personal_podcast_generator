@@ -83,28 +83,42 @@ rules apply verbatim — backchannels and reactive turns matter even more in tea
 mode, where the temptation is alternating lectures. No markdown, URLs, or stage
 directions in turn text; well-formed audio tags are the only non-spoken text.
 
-Write **three** files (schemas identical to the daily skill's):
-- `out/deepdive.json` — `{ "date", "title", "turns": [{"speaker": "A"|"B", "text"}] }`
-- `out/deepdive_shownotes.md` — title, date, a 2–3 sentence summary, then every source
-  used (title + URL), grouped as Primary sources / Further reading.
-- `out/deepdive_meta.json` — the memory record, with two extras so the daily show's
-  repeat-check and future deep dives see it correctly:
+Author **two** files (same plain-text → build flow as the daily skill); the build step
+(step 4) turns them into `deepdive.json` + `deepdive_shownotes.md`, so you never hand-write
+JSON dialogue:
+- `out/deepdive_script.txt` — the spoken script as **plain text**, one turn per line, each
+  starting with `A:` (Ada) or `B:` (Alan); audio tags are the only non-spoken text; no
+  markdown, URLs, or stage directions. A tag-less line folds into the turn above it.
+- `out/deepdive_meta.json` — the memory record plus the show-notes data, with the deepdive
+  extras so the daily show's repeat-check and future deep dives see it correctly:
   ```json
   { "date": "YYYY-MM-DD", "kind": "deepdive",
     "title": "string", "summary": "1–2 sentences",
+    "tts_notes": "OPTIONAL delivery note; omit most episodes",
+    "sources": [ { "group": "Primary sources" | "Further reading",
+                   "title": "source title", "url": "https://…" } ],
     "topics": ["deep dive: <topic>"], "entities": [...], "threads": [],
     "lore": [ { "host": "Ada" | "Alan", "type": "reveal" | "bit" | "position" | "settled",
                 "note": "what is now canon" } ] }
   ```
+  `sources` becomes `deepdive_shownotes.md`, grouped as Primary sources / Further reading.
   `lore` follows the daily skill's rules: only what this episode added to the hosts'
   canon, 0–2 entries, usually 0.
 
-### 4. Validate and stop
+**Write each file once, then `Edit`** the source files (not the generated JSON/notes) — same
+discipline as the daily skill; never re-`Write` a whole file.
+
+### 4. Build, validate, and stop
+Convert your two files into the machine files, then run the gate on the built episode:
 ```bash
+.venv/bin/python scripts/build_episode.py --script out/deepdive_script.txt \
+  --meta out/deepdive_meta.json --episode out/deepdive.json --notes out/deepdive_shownotes.md
 .venv/bin/python scripts/check_episode.py --episode out/deepdive.json --min-words 3000 --max-words 4000
 ```
-The check is a hard gate — revise until it passes. When under length, deepen the
-explanation (more mechanism, more evidence), never pad.
+The check is a hard gate — when it fails, `Edit` `out/deepdive_script.txt`, re-run the build,
+and re-check until it passes. When under length, deepen the explanation (more mechanism,
+more evidence), never pad. If the build itself errors (a malformed line, a missing
+`date`/`title`), fix the source file and re-run.
 
 **Stop here.** The harness (`run_episode.sh`) updates `history.json` and renders the
 audio after you exit — do not run `make_audio.py` or `update_history.py` yourself.

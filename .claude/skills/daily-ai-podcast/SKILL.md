@@ -397,24 +397,31 @@ make the 5–7 full-treatment cut. It is **optional and tightly capped**:
   segment with full treatment, **not** here — never cover the same item in both.
 - Same grounding rules apply: even a one-liner traces to a source.
 
-Write **three** files:
-- `out/episode.json` — the machine-readable script the renderer consumes. Schema:
-  ```json
-  { "date": "YYYY-MM-DD",
-    "title": "string",
-    "tts_notes": "OPTIONAL: 1-2 sentences of mood/tone direction (see above)",
-    "turns": [ { "speaker": "A" | "B", "text": "one spoken line" } ] }
+You author **two** files; a deterministic build step (step 3.5) turns them into the
+machine files the pipeline consumes (`episode.json`, `shownotes.md`), so you never
+hand-write JSON dialogue or escape quotes.
+
+- `out/script.txt` — the spoken script as **plain text**: one turn per line, each line
+  starting with the speaker tag `A:` (Ada) or `B:` (Alan), then that turn's spoken words.
+  No JSON, no quoting, no brackets to escape — just dialogue, e.g.:
   ```
-  Keep each turn's `text` plain spoken prose — no markdown, URLs, or stage
-  directions. The **only** non-spoken text allowed is well-formed audio tags per the
-  rules above.
-- `out/shownotes.md` — episode title, date, a 2–3 sentence summary, then a linked list
-  of every source you used (title + URL), grouped as Papers / Releases / Discussion.
-- `out/episode_meta.json` — the memory record for `history.json` (step 4.5). Schema:
+  A: Good morning — it's Friday, June twentieth. I'm Ada.
+  B: And I'm Alan. Here's what actually mattered in AI in the last twenty-four hours.
+  A: [wry] Starting, of course, with another hallucination benchmark.
+  ```
+  Keep each line plain spoken prose; the **only** non-spoken text allowed is well-formed
+  audio tags per the rules above. No markdown, URLs, or stage directions. A line with no
+  speaker tag is folded into the turn above it (so a wrapped line is fine), but the natural
+  form is one turn per line.
+- `out/episode_meta.json` — everything *about* the episode: the memory record for
+  `history.json` (step 4 update), plus the show-notes data and any delivery note. Schema:
   ```json
   { "date": "YYYY-MM-DD",
     "title": "string",
     "summary": "1–2 sentence recap of the episode",
+    "tts_notes": "OPTIONAL: 1-2 sentences of mood/tone direction (see above); omit most days",
+    "sources": [ { "group": "Papers" | "Releases" | "Discussion",
+                   "title": "source title", "url": "https://…" } ],
     "topics":   ["short topic/story labels covered today"],
     "entities": ["orgs/models/people featured today, e.g. Anthropic, Gemini 3"],
     "threads": [ { "name": "ongoing storyline",
@@ -424,27 +431,41 @@ Write **three** files:
                 "type": "reveal" | "bit" | "position" | "settled",
                 "note": "what is now canon, e.g. 'Alan revealed he runs weekend experiments on an ancient mining rig he refuses to replace'" } ] }
   ```
-  Fill `threads` only for genuine multi-day storylines (a rollout, a lawsuit, a price
-  war) — not one-off items. Reuse a thread's exact `name` from `history.json` when you're
-  continuing one, so its arc accumulates instead of forking.
-  Fill `lore` with what this episode added to the hosts' canon: a self-revelation or
-  development of an established detail (`reveal` — the main event), a running bit worth
-  returning to (`bit`), a genuine position a host staked out (`position`), or the
-  settlement of one (`settled`). 0–2 entries; most episodes have 0. Routine banter and
-  one-off jokes don't enter canon — only things that should still be true about this
-  host next month.
-  **Record only what the show actually covered in depth — exclude the Headlines
-  one-liners.** A passing mention shouldn't enter memory, or it could later suppress the
-  real story as a "repeat".
+  - `sources` — every source you used, each tagged with the show-notes group it belongs
+    under (Papers / Releases / Discussion). This becomes `shownotes.md`; an entry with no
+    `url` is skipped.
+  - `tts_notes` — the optional per-episode delivery note (see above); omit it most days.
+  - Fill `threads` only for genuine multi-day storylines (a rollout, a lawsuit, a price
+    war) — not one-off items. Reuse a thread's exact `name` from `history.json` when you're
+    continuing one, so its arc accumulates instead of forking.
+  - Fill `lore` with what this episode added to the hosts' canon: a self-revelation or
+    development of an established detail (`reveal` — the main event), a running bit worth
+    returning to (`bit`), a genuine position a host staked out (`position`), or the
+    settlement of one (`settled`). 0–2 entries; most episodes have 0. Routine banter and
+    one-off jokes don't enter canon — only things that should still be true about this
+    host next month.
+  - **Record in `topics`/`entities`/`threads`/`lore` only what the show actually covered in
+    depth — exclude the Headlines one-liners.** A passing mention shouldn't enter memory, or
+    it could later suppress the real story as a "repeat". (`sources` is the exception — list
+    every source, including those behind a Headlines one-liner.)
 
-**Write each file once, then `Edit`.** Draft the full script to your per-segment budget
-and write `out/episode.json` a **single** time, then run the gate below. After that, fix
-anything with `Edit` — **never re-`Write` the whole file.** A full rewrite re-emits
-thousands of tokens to change a few lines; targeted edits are how you handle a gate
-failure or a grounding correction. The same goes for `shownotes.md` and
-`episode_meta.json`.
+**Write each file once, then `Edit`.** Draft the whole episode to your per-segment budget
+and write `out/script.txt` and `out/episode_meta.json` a **single** time each, then build
+and validate below. After that, fix anything with `Edit` **on these two source files** —
+not on the generated `episode.json`/`shownotes.md`, which the build step overwrites — and
+**never re-`Write` a whole file.** A full rewrite re-emits thousands of tokens to change a
+few lines; targeted edits are how you handle a gate failure or a grounding correction.
 
-### 3.5. Validate the script before rendering
+### 3.5. Build and validate the script before rendering
+First convert your two authored files into the machine files deterministically:
+```bash
+.venv/bin/python scripts/build_episode.py
+```
+This parses `out/script.txt` into turns (folding in `tts_notes`) and renders
+`out/shownotes.md` from the summary and `sources`, writing `out/episode.json` and
+`out/shownotes.md`. If it reports an error — a line before the first speaker tag, a missing
+`date`/`title` — fix the source file and re-run; that reliability is the point of authoring
+plain text. Then run the hard gate on the built episode:
 ```bash
 .venv/bin/python scripts/check_episode.py --episode out/episode.json
 ```
@@ -458,8 +479,9 @@ above is built to err high so the first draft clears the band on its own; a draf
 from ~3,300 up is on target, and being a few hundred words under your ideal is **not** a
 reason to run deepening edits. Revise only when the gate actually **fails**: under the
 floor, deepen a real story from your candidate set (never pad with filler); over the cap,
-tighten. Make every such revision with `Edit`, not a full rewrite. (On a deep-dive day,
-pass the wider band the deep-dive skill specifies.)
+tighten. Make every such revision by `Edit`ing `out/script.txt` (or `episode_meta.json`)
+and re-running `build_episode.py` then the gate — never by rewriting a whole file. (On a
+deep-dive day, pass the wider band the deep-dive skill specifies.)
 
 **Thin-day exception.** If the day is genuinely thin — you've deepened every story that
 deserves it and promoting anything else would put noise in the show — run the gate with
