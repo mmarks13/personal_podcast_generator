@@ -99,18 +99,16 @@ Write **three** files (schemas identical to the daily skill's):
   `lore` follows the daily skill's rules: only what this episode added to the hosts'
   canon, 0–2 entries, usually 0.
 
-### 4. Validate, render, remember
+### 4. Validate and stop
 ```bash
 .venv/bin/python scripts/check_episode.py --episode out/deepdive.json --min-words 3000 --max-words 4000
-.venv/bin/python scripts/make_audio.py --episode out/deepdive.json --out "out/deepdive-$(date +%F).mp3" --backend gemini
-.venv/bin/python scripts/update_history.py --append --meta out/deepdive_meta.json
 ```
 The check is a hard gate — revise until it passes. When under length, deepen the
-explanation (more mechanism, more evidence), never pad. **Run the render in the foreground
-and wait for it to finish — do NOT background it.** It can take several minutes, but you
-must block on it so you see its exit status. The renderer retries hard and then fails;
-**never re-render with another backend** — if Gemini is down, report the failure and stop.
+explanation (more mechanism, more evidence), never pad.
+
+**Stop here.** The harness (`run_episode.sh`) updates `history.json` and renders the
+audio after you exit — do not run `make_audio.py` or `update_history.py` yourself.
 
 ### 5. Report
-Print the MP3 path, the topic chosen and the week's hook it ties to, the word count,
-and any source gaps. Publishing happens in the caller (`run_episode.sh`), not here.
+Print the topic chosen and the week's hook it ties to, the word count, and any source
+gaps. Rendering and publishing happen in the caller (`run_episode.sh`), not here.

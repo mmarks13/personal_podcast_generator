@@ -123,16 +123,31 @@ repeats against history.json. Write the file even if one input is missing." \
   --max-turns 30 \
   || log run "WARNING: consolidate failed; podcast skill will gather inline"
 
-# 3–4: Opus writes + renders, starting from the already-built out/candidates.json.
+# 3: Opus selects, verifies, and writes the script — stops after validation.
 run_step podcast claude -p "Use the daily-ai-podcast skill to produce today's episode. The harness has \
 already run steps 1, 2, and 2.5 — out/sources.json, out/crawl.json, and out/candidates.json already \
-exist, so SKIP them. Do step 1.5 (recall history) then steps 3–5 (select, verify, write, validate, \
-render), following the grounding rules and length target (18-22 min). If out/candidates.json is somehow \
-missing, fall back to doing the gather steps yourself. Print the MP3 path when done." \
+exist, so SKIP them. Do step 1.5 (recall history) then steps 3 and 3.5 (select, verify, write, \
+validate). STOP after the gate passes — do NOT run steps 4 or 4.5; the harness renders and updates \
+history. If out/candidates.json is somehow missing, fall back to doing the gather steps yourself. \
+Print the episode title and word count when done." \
   --model "$PODCAST_MODEL" \
   --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
   --permission-mode acceptEdits \
   --max-turns 60
+
+# Update show memory — pure Python, reads out/episode_meta.json; runs before render so
+# history is current even if the render fails.
+set +e
+.venv/bin/python scripts/update_history.py --append \
+  2>&1 | python3 scripts/run_log.py prefix --src update-history >> "$LOG"
+HIST_RC=${PIPESTATUS[0]}
+set -e
+[ "$HIST_RC" -eq 0 ] || log run "WARNING: update_history failed; history.json may be stale"
+
+# 4: Render the podcast audio — pure Python, no model needed.
+run_step render-podcast \
+  .venv/bin/python scripts/make_audio.py \
+  --episode out/episode.json --out "out/podcast-$DATE.mp3"
 
 # Daily: write "Self Attention" (the daily read) and build its EPUB into docs/reads/
 # first, so the publish step below sweeps it into the same commit + index page, then
@@ -168,12 +183,24 @@ PY
 # Wed/Sat: also produce + publish the deep-dive episode.
 if [ "$DOW" = "6" ] || [ "$DOW" = "3" ]; then
   run_step deepdive claude -p "Use the weekly-deep-dive skill to produce this week's deep-dive episode \
-end to end, following its grounding rules and length target (20-25 min). \
-Print the MP3 path when done." \
+following its grounding rules and length target (20-25 min). STOP after step 4's validation gate \
+passes — do NOT run the render or update_history lines in step 4; the harness handles both. \
+Print the topic and word count when done." \
     --model "$DEEPDIVE_MODEL" \
     --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
     --permission-mode acceptEdits \
     --max-turns 60
+
+  set +e
+  .venv/bin/python scripts/update_history.py --append --meta out/deepdive_meta.json \
+    2>&1 | python3 scripts/run_log.py prefix --src update-history >> "$LOG"
+  HIST_DD_RC=${PIPESTATUS[0]}
+  set -e
+  [ "$HIST_DD_RC" -eq 0 ] || log run "WARNING: update_history (deepdive) failed; history.json may be stale"
+
+  run_step render-deepdive \
+    .venv/bin/python scripts/make_audio.py \
+    --episode out/deepdive.json --out "out/deepdive-$DATE.mp3"
 
   run_step publish-deepdive python3 - "$DATE" <<'PY'
 import json, subprocess, sys, glob
