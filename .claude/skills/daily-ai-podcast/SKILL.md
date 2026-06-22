@@ -11,7 +11,8 @@ description: >
 # Daily AI Podcast
 
 Turn the last ~24–48 hours of AI activity into a two-host audio briefing of
-**~2,700–3,300 words** (the Gemini voices render that to roughly 20–26 minutes).
+**~3,300–3,600 words** (the Gemini voices render that at ~165–170 wpm to roughly 20–22
+minutes).
 
 The pipeline is deliberately split so the gathering and organizing happen in cheap
 subagents and you spend your budget only on editorial judgment. **Deterministic Python**
@@ -192,13 +193,14 @@ captured in each entry's source list, is a *signal of importance* — weigh it, 
 discard it.
 
 **Repeat-check against memory.** The consolidator has already flagged likely repeats
-against `history.json` — each candidate carries `possible_repeat` (the matching episode
-plus a one-line why) or null. You don't need to re-scan everything. For the items you
-actually intend to cover, if `possible_repeat` is set, confirm it against the
-`history.json` memory you read in step 1.5: if it's clearly the same story and nothing has
-moved (no new release, number, decision, or development), drop it; if it's an update —
-or you can't tell — verify, and when confirmed cover the *update*, not the original news.
-A null flag isn't a guarantee — if your own read says an item is a stale repeat, drop it.
+against `history.json` — a candidate that's a likely repeat carries a `possible_repeat`
+(the matching episode plus a one-line why); items without that key aren't flagged. You
+don't need to re-scan everything. For the items you actually intend to cover, if
+`possible_repeat` is present, confirm it against the `history.json` memory you read in step
+1.5: if it's clearly the same story and nothing has moved (no new release, number,
+decision, or development), drop it; if it's an update — or you can't tell — verify, and
+when confirmed cover the *update*, not the original news. An absent flag isn't a guarantee
+— if your own read says an item is a stale repeat, drop it.
 When in doubt, keep it; never drop a real development just because the topic is familiar.
 
 **Verify what you'll use.** Every item that makes the show must trace to a primary source
@@ -282,10 +284,24 @@ order below, decide what the show covers and how much.
   simulation, robotics, and other frontier work with plausible near-term product or
   public-sector relevance.
 
-Write the dialogue **in character** — Ada (`"A"`) and Alan (`"B"`) per the Hosts
+**Plan the episode before you write a line — in your head, not in a file.** Once you've
+chosen and verified your 5–7 full-treatment stories, settle the shape first so the first
+draft lands in-band and you don't write into a rewrite loop:
+- **Running order and leads.** The stories in air order, which segment each lands in, and
+  which host brings (and therefore leads) each one.
+- **A per-segment word budget that errs slightly high.** Allocate the ~3,300–3,600-word
+  target across the segments and **aim each allocation a touch high** so the natural draft
+  lands at or above target on the first pass — no deepening needed. A typical split: cold
+  open ~150, Headlines ~150 (only if it runs), each full-treatment story ~450–600
+  depending on depth, the "one to watch" a touch more, wrap ~120. **Sum your allocations
+  to ~3,600 (the top of the band), not to the 2,700 gate floor** — budgeting to the floor
+  is exactly what forces the deepen-after-the-fact rewrites.
+- This plan is a thinking step, not a deliverable: **do not write an `episode_plan.md`.**
+
+Then write the dialogue **in character** — Ada (`"A"`) and Alan (`"B"`) per the Hosts
 section: story-by-story handoff, warm sparring, at most 1–2 AI-identity touches, lore
-only when earned, the greeting and "Stay grounded." sign-off. Aim for
-**~3,300–3,600 words** (Gemini TTS renders at ~165–170 wpm; below 3,300 words the episode
+only when earned, the greeting and "Stay grounded." sign-off. Write each segment to its
+planned budget so the whole lands at **~3,300–3,600 words** (below ~3,300 the episode
 risks landing under 20 minutes).
 
 **Grounding rules (these are the point of the whole exercise):**
@@ -421,17 +437,29 @@ Write **three** files:
   one-liners.** A passing mention shouldn't enter memory, or it could later suppress the
   real story as a "repeat".
 
+**Write each file once, then `Edit`.** Draft the full script to your per-segment budget
+and write `out/episode.json` a **single** time, then run the gate below. After that, fix
+anything with `Edit` — **never re-`Write` the whole file.** A full rewrite re-emits
+thousands of tokens to change a few lines; targeted edits are how you handle a gate
+failure or a grounding correction. The same goes for `shownotes.md` and
+`episode_meta.json`.
+
 ### 3.5. Validate the script before rendering
 ```bash
 .venv/bin/python scripts/check_episode.py --episode out/episode.json
 ```
 
-This is a hard gate: it checks the schema, speaker values, the word-count band,
-audio-tag form and density (~1 per 60 words max), and TTS-hostile artifacts
-(markdown, URLs, embedded labels, malformed brackets). If it fails, **revise
-`out/episode.json` and re-run it until it passes** — when under length, add or deepen
-coverage from your candidate set; never pad with filler. (On a deep-dive day, pass the
-wider band the deep-dive skill specifies.)
+This is a hard gate: it checks the schema, speaker values, the word-count band (floor
+2,700, cap 3,900), audio-tag form and density (~1 per 60 words max), and TTS-hostile
+artifacts (markdown, URLs, embedded labels, malformed brackets).
+
+**If the gate passes, you're done — don't chase the upper target.** The per-segment budget
+above is built to err high so the first draft clears the band on its own; a draft anywhere
+from ~3,300 up is on target, and being a few hundred words under your ideal is **not** a
+reason to run deepening edits. Revise only when the gate actually **fails**: under the
+floor, deepen a real story from your candidate set (never pad with filler); over the cap,
+tighten. Make every such revision with `Edit`, not a full rewrite. (On a deep-dive day,
+pass the wider band the deep-dive skill specifies.)
 
 **Thin-day exception.** If the day is genuinely thin — you've deepened every story that
 deserves it and promoting anything else would put noise in the show — run the gate with
@@ -439,45 +467,15 @@ deserves it and promoting anything else would put noise in the show — run the 
 report. A shorter honest episode beats a padded one; never use the exception to avoid
 the work of deepening real coverage.
 
-### 4. Render the audio
-```bash
-.venv/bin/python scripts/make_audio.py --episode out/episode.json --out "out/podcast-$(date +%F).mp3" --backend gemini
-```
+### 4. Report and stop
+Print the episode title, the word count, and a one-line note on anything that failed or
+any source gap (including the crawl failures carried in `out/candidates.json`'s
+`crawl_failures` — Tier-1 ones the crawler already tried to recover — and whether the
+thin-day exception was used). Also list **which watchlist sources contributed items that
+made the show** — over weeks this reveals which sources earn their place in `sources.yaml`.
 
-**Run this in the foreground and wait for it to finish — do NOT background it.** The
-render can take several minutes (it generates and stitches chunks), but you must block on
-it so you see its exit status: if it fails you need to catch that here and report it in
-step 5, not end your turn assuming success. Do not move on until the command returns and
-the MP3 exists.
-
-The show's voice **is** Gemini multi-speaker TTS (needs `GEMINI_API_KEY`; voices come
-from `GEMINI_VOICE_A`/`GEMINI_VOICE_B` in `.env`). It performs the whole dialogue —
-including audio tags and `tts_notes` — in NotebookLM style. The renderer retries each
-chunk hard (5 attempts, ~10 min worst case) and then **fails; do not fall back to
-another backend or re-render with `--backend kokoro`** — a flat-voiced episode must
-never publish. If it fails, report the failure in step 5 and stop. (Kokoro exists in
-the script for manual offline experiments only.)
-
-### 4.5. Update the show's memory
-Fold today into `history.json` so future episodes stay non-repetitive and can build on
-ongoing arcs. This reads the `out/episode_meta.json` you wrote in step 3:
-
-```bash
-.venv/bin/python scripts/update_history.py --append
-```
-
-It appends today's record to the detailed window, promotes/updates named threads, and
-rolls episodes older than 30 days into the long-term summary (entities roster + monthly
-milestone rollup), keeping the file bounded. Safe to re-run.
-
-### 5. Report
-Print the final MP3 path, the episode title, the word count, and a one-line note on
-anything that failed or any source gap (including the crawl failures carried in
-`out/candidates.json`'s `crawl_failures` — Tier-1 ones the crawler already tried to
-recover — and whether the thin-day exception was used, with its justification). Also list **which watchlist
-sources contributed items that made the show** — over weeks this reveals which sources
-earn their place in `sources.yaml`. If a downstream step (commit, upload, email) is
-configured by the caller, that happens outside this skill — just produce the artifacts.
+**Stop here.** The harness (`run_episode.sh`) updates `history.json` and renders the
+audio after you exit — do not run `make_audio.py` or `update_history.py` yourself.
 
 ## Notes
 - This skill produces files; it does not publish. Scheduling and delivery live in the
