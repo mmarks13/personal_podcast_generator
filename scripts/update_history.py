@@ -47,6 +47,10 @@ KEEP_DAYS = 30           # detailed window
 MAX_THREADS = 15         # active_threads cap
 MAX_ENTITIES = 40        # entity roster cap
 MAX_LORE = 40            # host canon cap (~years at the intended reveal rate)
+# The only fields that belong in the show's memory. episode_meta.json may also
+# carry `sources` / `tts_notes` (for the show notes and the renderer), which must
+# not leak into history.json — it is re-read into context every run.
+STORE_KEYS = ("date", "kind", "title", "summary", "topics", "entities", "threads", "lore")
 
 
 def _strip_tags(value):
@@ -171,6 +175,8 @@ def main() -> int:
         else:
             with open(args.meta) as f:
                 ep = _strip_tags(json.load(f))
+            # Keep only the show-memory fields (drop sources/tts_notes etc.).
+            ep = {k: v for k, v in ep.items() if k in STORE_KEYS}
             ep.setdefault("date", today.isoformat())
             for key in ("topics", "entities", "threads"):
                 ep.setdefault(key, [])

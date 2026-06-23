@@ -38,6 +38,10 @@ steps() {  # $1 = expected sorted, space-joined step names
 
 # ---- sandbox layout ----------------------------------------------------------
 mkdir -p "$SB/scripts" "$SB/out" "$SB/docs/reads" "$SB/logs" "$SB/home/.local/bin"
+# Provide a .venv/bin/python so the harness's .venv/bin/python calls resolve to
+# the system python3, which then runs the mock scripts below.
+mkdir -p "$SB/.venv/bin"
+ln -sf "$(command -v python3)" "$SB/.venv/bin/python"
 cp "$REPO/run_episode.sh" "$SB/run_episode.sh"
 cp "$REPO/scripts/run_log.py" "$SB/scripts/run_log.py"
 
@@ -58,10 +62,28 @@ pathlib.Path("out").mkdir(exist_ok=True)
 open("out/sources.json", "w").write('{"feeds": {}}')
 print("MOCK fetch:", " ".join(sys.argv[1:]))
 PY
+# Mock renderer: write a fake MP3. MOCK_NO_MP3=1 makes it fail so the render and
+# publish steps both catch the missing audio (testing the failure path end-to-end).
+cat > "$SB/scripts/make_audio.py" <<'PY'
+import sys, pathlib, os
+args = sys.argv[1:]
+out = next((args[i+1] for i, a in enumerate(args) if a == "--out"), None)
+if os.environ.get("MOCK_NO_MP3"):
+    print(f"MOCK make_audio: MOCK_NO_MP3 set, not writing {out}")
+    raise SystemExit(1)
+if out:
+    pathlib.Path(out).write_bytes(b"FAKE-MP3")
+    print(f"MOCK make_audio: wrote {out}")
+PY
+# Mock history updater: no-op (reads/writes history.json which doesn't exist in sandbox).
+cat > "$SB/scripts/update_history.py" <<'PY'
+import sys
+print("MOCK update_history:", " ".join(sys.argv[1:]))
+PY
 
 # Fake claude: pick the skill out of the prompt args, emit the expected artifacts.
-# MOCK_NO_MP3=1 makes the podcast run skip the MP3 (reproduces last night's failure:
-# the agent "succeeds" but no audio is produced, so the publish guard must catch it).
+# Render and history-update now happen in the harness (not inside the Claude session),
+# so this mock never writes MP3s — those come from the mock make_audio.py above.
 cat > "$SB/home/.local/bin/claude" <<'SH'
 #!/usr/bin/env bash
 args="$*"; DATE="$(date +%F)"; mkdir -p out docs/reads
@@ -73,19 +95,17 @@ elif [[ "$args" == *source-consolidator* ]]; then
   printf '{"items":[],"dropped_off_topic":0}\n' > "out/candidates.json"
 elif [[ "$args" == *daily-ai-podcast* ]]; then
   echo "[fake-claude] ran daily-ai-podcast skill"
-  printf '{"title":"Test Episode %s","date":"%s"}\n' "$DATE" "$DATE" > "out/episode.json"
+  printf '{"title":"Test Episode %s","date":"%s","turns":[]}\n' "$DATE" "$DATE" > "out/episode.json"
   printf '{"summary":"test summary"}\n' > "out/episode_meta.json"
   printf 'show notes\n' > "out/shownotes.md"
-  [ -n "${MOCK_NO_MP3:-}" ] || printf 'FAKE-MP3' > "out/podcast-$DATE.mp3"
 elif [[ "$args" == *daily-read* ]]; then
   echo "[fake-claude] ran daily-read skill"
   printf 'FAKE-EPUB' > "docs/reads/self-attention-$DATE.epub"
 elif [[ "$args" == *weekly-deep-dive* ]]; then
   echo "[fake-claude] ran weekly-deep-dive skill"
-  printf '{"title":"DD %s","date":"%s"}\n' "$DATE" "$DATE" > "out/deepdive.json"
+  printf '{"title":"DD %s","date":"%s","turns":[]}\n' "$DATE" "$DATE" > "out/deepdive.json"
   printf '{"summary":"dd"}\n' > "out/deepdive_meta.json"
   printf 'dd notes\n' > "out/deepdive_shownotes.md"
-  [ -n "${MOCK_NO_MP3:-}" ] || printf 'FAKE' > "out/deepdive-$DATE.mp3"
 else
   # Fail loudly on an unrecognized prompt so a newly-added claude step in
   # run_episode.sh cannot silently slip through untested — extend this mock instead.
@@ -133,23 +153,26 @@ has   "kindle sender was the mock" "MOCK kindle:"
 hasre "usage snapshot logged"     '\[usage\] \{'
 hasre "run end status OK"         '===== RUN END .* status=OK'
 no    "real claude not invoked"   "Use the daily-ai-podcast skill"  # prompt text only appears if claude echoed it
+has   "render-podcast ran"        "MOCK make_audio: wrote out/podcast"
 # Expected steps depend on the weekday: the deep-dive branch runs Wed (3) / Sat (6).
-expA="consolidate crawl kindle podcast publish read"
+expA="consolidate crawl kindle podcast publish read render-podcast"
 if [ "$(date +%u)" = "3" ] || [ "$(date +%u)" = "6" ]; then
-  expA="consolidate crawl deepdive kindle podcast publish publish-deepdive read"
+  expA="consolidate crawl deepdive kindle podcast publish publish-deepdive read render-deepdive render-podcast"
 fi
 steps "$expA"
 ! pgrep -f "scripts/run_log.py poll" >/dev/null \
   && ok "usage poller terminated after run" || bad "usage poller still running"
 
-# ---- Scenario B: agent 'succeeds' but produces no MP3 ------------------------
-echo "Scenario B: no MP3 -> publish guard must fail the run"
+# ---- Scenario B: render fails -> run fails before reaching publish -----------
+# render-podcast is a fatal step (no || handler), so a failure exits immediately
+# via set -e; the read/kindle/publish steps never run.
+echo "Scenario B: render failure -> run fails, publish never reached"
 reset_artifacts; : > "$LOG"
 rcB="$(invoke LOG_KEEP_RUNS=3 MOCK_NO_MP3=1)"
 [ "$rcB" != "0" ] && ok "non-zero exit ($rcB)" || bad "expected non-zero exit"
-hasre "publish step end exit=1"   "step end: publish exit=1"
-has   "MP3 guard message logged"  "no MP3 produced"
-hasre "run end status FAIL[publish]" '===== RUN END .* status=FAIL failed=\[publish\]'
+hasre "render step end exit=1"    "step end: render-podcast exit=1"
+no    "publish did not run"       "step start: publish"
+hasre "run end status FAIL"       '===== RUN END .* status=FAIL'
 ! pgrep -f "scripts/run_log.py poll" >/dev/null \
   && ok "usage poller terminated after failed run" || bad "usage poller still running"
 
@@ -168,8 +191,11 @@ blocks="$(grep -c 'RUN START' "$LOG")"
 # These checks run WITHOUT the override, in a throwaway git repo with the same mocks.
 echo "Scenario D: off-main — auto-switch when clean, refuse when dirty"
 mkdir -p "$GD/scripts" "$GD/home/.local/bin" "$GD/out" "$GD/docs/reads" "$GD/logs"
+mkdir -p "$GD/.venv/bin" && ln -sf "$(command -v python3)" "$GD/.venv/bin/python"
 cp "$SB/run_episode.sh" "$GD/run_episode.sh"
-cp "$SB/scripts/run_log.py" "$SB/scripts/publish.py" "$SB/scripts/send_to_kindle.py" "$SB/scripts/fetch_sources.py" "$GD/scripts/"
+cp "$SB/scripts/run_log.py" "$SB/scripts/publish.py" "$SB/scripts/send_to_kindle.py" \
+   "$SB/scripts/fetch_sources.py" "$SB/scripts/make_audio.py" "$SB/scripts/update_history.py" \
+   "$GD/scripts/"
 cp "$SB/home/.local/bin/claude" "$GD/home/.local/bin/claude"
 printf 'out/\nlogs/\ndocs/reads/\nconsole.txt\n' > "$GD/.gitignore"
 echo seed > "$GD/tracked.txt"   # a tracked file we can dirty in D2 without touching the script

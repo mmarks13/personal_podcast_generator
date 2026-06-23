@@ -85,12 +85,19 @@ the clearly off-topic items are dropped (above).
 **Write the result to `out/candidates.json`** as your deliverable, with this shape:
 `{ "items": [ { "title": "...", "sources": ["source name(s) it appeared on"],
 "source_count": <int>, "url": "exact primary url", "origin": "feed|crawl|both",
-"signals": { "hf_upvotes": <int|null>, "hn_points": <int|null>, "hn_comments": <int|null> },
-"topic_area": "which of the six it fits (or 'other')", "claims": ["crawl-origin claims, or []"],
+"signals": { "hf_upvotes": <int>, "hn_points": <int>, "hn_comments": <int> },
+"topic_area": "which of the six it fits (or 'other')", "claims": ["crawl-origin claims"],
 "summary": "1-3 sentence lead, faithful to the input",
-"possible_repeat": { "episode": "YYYY-MM-DD or title", "why": "one line" } | null } ],
+"possible_repeat": { "episode": "YYYY-MM-DD or title", "why": "one line" } } ],
 "dropped_off_topic": <int>, "crawl_failures": <the failures list from out/crawl.json,
 passed through>, "generated_from": ["out/sources.json", "out/crawl.json"] }`.
+
+**Omit empty fields — don't emit nulls or empty lists.** This file is read into the main
+agent's context every turn, so dead keys cost real budget across the whole item set.
+Concretely: inside `signals`, keep only the keys that have a real value and **drop the
+`signals` object entirely** when none do; omit `claims` when there are none (don't write
+`[]`); and omit `possible_repeat` when the item isn't a likely repeat (don't write
+`null`). Every key you emit should carry information.
 
 Then return a single short line as your last message: the item count, the
 dropped-off-topic count, the flagged-repeat count, and the path `out/candidates.json`.
