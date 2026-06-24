@@ -1,6 +1,53 @@
 {
   "episodes": [
     {
+      "date": "2026-06-24",
+      "title": "Agents that ship, and the science they only pretend to do",
+      "summary": "A day on agents doing real, bounded production work versus where they still fall down: Mistral ships OCR 4 (document intelligence with per-field confidence scores, 72% avg win rate, $2-4/1,000 pages, self-hostable); Anthropic puts a single shared Claude into Slack channels; Coinbase reports 75% of PRs agent-authored across 2,400+ Cursor developers; Hugging Face cuts weekly hub releases for ~$0.25 via an open-weight agent plus deterministic validation. Against that, Qwen-AgentWorld trains agents inside a learned text world model (beating real-environment RL on a search task), and NatureBench shows the strongest agent matches a published Nature-family result ~48% of the time mostly by recognizing ML problems in disguise, not by domain discovery.",
+      "topics": [
+        "Qwen-AgentWorld: text-based language world models across 7 agent domains; ~400B-param model edges GPT-5.4 on AgentWorldBench (58.71 vs 58.25); used as RL simulator, training inside the sim beats real-environment training on WideSearch (50.3% vs 45.6%); LWM warm-up gives +11.3 on Claw-Eval, +9.0 on BFCL v4",
+        "NatureBench: 90 discovery tasks distilled from Nature-family papers (2022-2025); information firewall removes source methods; strongest agent Claude Opus 4.7 surpasses SOTA on 17.8% / matches on 47.8%; top success mode is methodological translation (45.5%), top failure is wrong method choice",
+        "Mistral OCR 4: document intelligence with extracted text, bounding boxes, typed-block classification, inline per-field confidence; 72% avg human-preference win rate, tops OlmOCRBench/OmniDocBench, 170 languages, $4 standard / $2 batch per 1,000 pages, single-container self-host",
+        "Anthropic Claude Tag: one shared Claude per Slack channel (not per-user), builds context over time, optional ambient mode flags/schedules and runs projects over days; Opus 4.8, beta for Enterprise and Team",
+        "Cursor x Coinbase: 2,400+ developers, 75% of PRs agent-authored across cloud and local, idea-to-production 20 days to under 2 (>90%), idea-to-first-PR 8 days to under 30 min, 55% more PRs merged per engineer YTD, ~7 hrs/week saved",
+        "Groq $650M raise (Disruptive/Infinitum); ~6 months after Nvidia's non-exclusive license + leadership hire (framed as $20B not-acqui-hire), Groq pivots to neocloud (13 data centers, 5M+ developers), Doug Wightman CEO; Nvidia shipped its own Groq-branded LPX box at GTC",
+        "Hugging Face weekly huggingface_hub releases via one GitHub Actions workflow: OpenCode runtime + GLM-5.2 via HF Inference Providers + PyPI Trusted Publishing; ~$0.25/release across 20-40 PRs; agent drafts prose, deterministic validation enforces correctness, human edits half-day to 15 min"
+      ],
+      "entities": [
+        "Mistral",
+        "Mistral OCR 4",
+        "Anthropic",
+        "Claude Tag",
+        "Opus 4.8",
+        "Cursor",
+        "Coinbase",
+        "Qwen",
+        "Qwen-AgentWorld",
+        "GPT-5.4",
+        "Claude Opus 4.7",
+        "Groq",
+        "Nvidia",
+        "Doug Wightman",
+        "Hugging Face",
+        "GLM-5.2",
+        "OpenCode",
+        "Z.ai"
+      ],
+      "threads": [
+        {
+          "name": "World models",
+          "status": "Qwen-AgentWorld builds a text-based world model across seven agent domains and uses it as an RL simulator; the authors report training inside the learned simulation beats training in the real environment on a search task (50.3% vs 45.6%), and warming an agent up on the world model transfers to out-of-distribution domains.",
+          "arc": "From WRBench naming the missing persistent state and ENPIRE closing the physical loop, the thread turns constructive: a learned model of the environment becomes the training ground itself, turning slow flaky environments into software you can plan and learn against."
+        },
+        {
+          "name": "AI quality and verification failures",
+          "status": "NatureBench strips the method out of 90 Nature-family tasks and scores agents against published SOTA; the strongest (Claude Opus 4.7) matches it ~48% of the time, but the dominant success mode is 'methodological translation' — recognizing an ML problem in disguise — not domain discovery.",
+          "arc": "The eval-honesty beat extends from 'tests the model can recognize as tests' to measuring genuine discovery: an honest benchmark exposes that high match rates come from pattern-matching tasks onto familiar pipelines, with wrong method choice the top failure when real domain insight is required."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-06-23",
       "title": "The cyber model ships, and the bottleneck moves to memory",
       "summary": "OpenAI launches Daybreak and a GPT-5.5-Cyber vulnerability model weeks after a rival's cyber-capable model was recalled; a new paper reframes prompt injection as a confused-deputy 'role confusion' problem (de-styling cut attack success 61%->10%); and big money moves into the hardware layer with Micron-Anthropic co-designing memory architecture and SpaceX renting GB300 compute to Reflection AI for $150M/month.",
@@ -770,9 +817,15 @@
     "active_threads": [
       {
         "name": "AI quality and verification failures",
-        "status": "EnterpriseClawBench builds an eval from real proprietary workplace sessions and scores harness-model pairs, not model names.",
-        "arc": "The eval-honesty beat sharpens again: after benchmarks that only measured Python and leaderboards that don't transfer, the proposed fix is a test the model can't recognize as a test, sourced from real work.",
-        "last_seen": "2026-06-23"
+        "status": "NatureBench strips the method out of 90 Nature-family tasks and scores agents against published SOTA; the strongest (Claude Opus 4.7) matches it ~48% of the time, but the dominant success mode is 'methodological translation' — recognizing an ML problem in disguise — not domain discovery.",
+        "arc": "The eval-honesty beat extends from 'tests the model can recognize as tests' to measuring genuine discovery: an honest benchmark exposes that high match rates come from pattern-matching tasks onto familiar pipelines, with wrong method choice the top failure when real domain insight is required.",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "World models",
+        "status": "Qwen-AgentWorld builds a text-based world model across seven agent domains and uses it as an RL simulator; the authors report training inside the learned simulation beats training in the real environment on a search task (50.3% vs 45.6%), and warming an agent up on the world model transfers to out-of-distribution domains.",
+        "arc": "From WRBench naming the missing persistent state and ENPIRE closing the physical loop, the thread turns constructive: a learned model of the environment becomes the training ground itself, turning slow flaky environments into software you can plan and learn against.",
+        "last_seen": "2026-06-24"
       },
       {
         "name": "AI economics debate",
@@ -791,12 +844,6 @@
         "status": "Interconnects calls GLM-5.2 the first open-weight model that behaves like a competent general agent inside coding harnesses; SpaceX rents Reflection AI ~$1.8B/yr of GB300 to produce give-away weights.",
         "arc": "Open weights move from strong-but-passive to genuinely agent-capable, just as the recall and containment debates assumed agent-grade capability stayed behind a pullable API lever.",
         "last_seen": "2026-06-23"
-      },
-      {
-        "name": "World models",
-        "status": "WRBench gives the frontier a name for the missing piece — no persistent state decoupled from observation; ENPIRE shows an early way to grow competence through a real-world feedback loop rather than baking physics in.",
-        "arc": "From 'the brain arrived before the reflexes' (Project Fetch) to a diagnostic naming the absent persistent-world-state, paired with a harness that closes the physical feedback loop — the two halves of the embodied gap stated explicitly.",
-        "last_seen": "2026-06-21"
       },
       {
         "name": "Claude flagship rollout",
@@ -825,7 +872,7 @@
     ],
     "entities": [],
     "monthly": [],
-    "updated": "2026-06-23",
+    "updated": "2026-06-24",
     "host_lore": []
   }
 }
