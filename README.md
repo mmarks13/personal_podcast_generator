@@ -162,10 +162,15 @@ The run must execute on the machine where you ran `claude login`, so it uses you
 subscription. Verify auth works non-interactively first (step 2 above), then install a
 schedule.
 
-**Linux (cron):**
+**Linux (cron):** two jobs — the full podcast pipeline overnight, and the daily read on
+its own just after the 5h rate-limit window resets (~5h after the podcast's first call),
+so the read gets a fresh budget instead of competing with the podcast:
 ```cron
-30 5 * * *  cd /ABSOLUTE/PATH/personal_podcast_generator && . .venv/bin/activate && ./run_episode.sh >> out/run.log 2>&1
+0 1 * * *  cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh      >> logs/cron-bootstrap.log 2>&1
+5 6 * * *  cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh read >> logs/cron-bootstrap.log 2>&1
 ```
+`run_episode.sh` (no arg) runs the full pipeline; `run_episode.sh read` runs only the
+daily read (write → Kindle → commit EPUB + reads_history).
 
 **macOS (launchd):** a `~/Library/LaunchAgents/com.user.dailyaipodcast.plist` with a
 `StartCalendarInterval` — preferred because it can wake the machine. The Mac must be
