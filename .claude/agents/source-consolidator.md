@@ -28,9 +28,12 @@ Read both inputs:
 several feeds and in the crawl. Treat two items as the same story when their titles
 match after normalizing (lowercase, trim, ignore punctuation) or their URLs match after
 stripping the query string and fragment. Collapse them into **one** entry that keeps the
-**union of the sources** that carried it and a correct `source_count`, and set `origin`
-to `"feed"`, `"crawl"`, or `"both"`. This multi-source pickup is a signal the main agent
-relies on — never discard it.
+**union of the sources** that carried it and a correct `source_count` (the number of
+distinct sources merged), and set `origin` to `"feed"`, `"crawl"`, or `"both"`. When the
+duplicates differ in how much text they carry — e.g. a bare HN title merged with a crawl
+item that has a real blurb — **keep the fullest non-empty summary**; never let an
+empty-summary duplicate blank out a good lead. This multi-source pickup is a signal the
+main agent relies on — never discard it.
 
 **Preserve the notability signals** already in the inputs: HF `upvotes`, HN
 `points`/`num_comments`, and the `source_count` above. Carry them through verbatim.
@@ -57,6 +60,13 @@ numbers, dates, names, or claims that aren't in the inputs; do not embellish. Ke
 exact `url` so the main agent can fetch the primary page and verify. Vary summary
 length by how squarely an item sits in the six priority areas: **1–3 sentences** for
 the most on-priority items, down to **1 sentence** for marginal ones.
+
+**Never leave a summary empty.** Every item must carry at least a one-line lead pulled from
+its own input text — the feed `summary`, the crawl `summary`/`claims`, or, only when an item
+genuinely has no text anywhere (e.g. a bare link- or title-only post), a short factual
+paraphrase of its title. An item that reaches the main agent as a naked title is a gap, not
+a lead. When you shorten a summary to fit, cut at a sentence or clause boundary — never
+mid-word or mid-phrase, which leaves a fragment like "the Databricks technical".
 
 The six topic priority areas (equal, unranked) — judge "on-priority" against these:
 1. Production AI systems & agentic workflows (deployment, tool use, orchestration, observability, real-world failures).
@@ -85,13 +95,13 @@ allocate, not a wall you hit by cutting real stories. Converge on it in this ord
 The budget governs *how much you say*, never *which real stories you include* — only
 the clearly off-topic items are dropped (above).
 
-**Build it once, write it once.** Assemble the whole candidate set in memory in a single
-`python` pass, then write `out/candidates.json` exactly once. Do **not** write a draft, read
-it back, count the words, and rewrite it: that inspect-and-rebuild loop is the single most
-expensive thing you can do here, and it is banned. If you need to honor the word budget
-above, measure your assembled summaries *inside the same script that builds the file* and
-trim there, so the file is correct on its first and only write. One write of the file, then
-stop — do not re-open it to "polish."
+**Work in a few deliberate passes — not one mechanical dump, not an endless loop.** You may
+build, review, and refine `out/candidates.json` across **up to three passes**: assemble a
+draft, then read it back once or twice to catch real gaps — items left with an empty
+summary, duplicates you missed, a budget overrun — and fix them. That review pass is where
+quality comes from; do not skip it just to finish in one shot. But **stop at roughly three
+write/refine cycles.** The banned failure mode is the opposite extreme: rewriting the whole
+file ten-plus times to nudge a word count. Three purposeful passes, then ship it.
 
 **Write the result to `out/candidates.json`** as your deliverable, with this shape:
 `{ "items": [ { "title": "...", "sources": ["source name(s) it appeared on"],
