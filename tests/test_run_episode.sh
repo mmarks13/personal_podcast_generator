@@ -35,6 +35,19 @@ steps() {  # $1 = expected sorted, space-joined step names
   actual=$(grep -oE 'step start: [a-z-]+' "$LOG" | sed 's/step start: //' | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')
   [ "$actual" = "$1" ] && ok "step set == [$1]" || bad "step set mismatch: expected [$1] got [$actual]"
 }
+# True if a usage poller spawned by THIS sandbox run is still alive. Scoped to the
+# sandbox by cwd: the poller's cmdline ("scripts/run_log.py poll --log logs/run.log")
+# is relative and so identical for every run_episode.sh. An unscoped pgrep therefore
+# also matches the poller of a REAL nightly run that is in progress — e.g. when this
+# test runs from its own pre-push hook during the live publish step — and would wrongly
+# fail the cleanup assertion (and so block the nightly publish). Match on /proc cwd.
+sandbox_poller_alive() {
+  local pid sb; sb="$(readlink -f "$SB")"
+  for pid in $(pgrep -f "scripts/run_log.py poll" 2>/dev/null); do
+    [ "$(readlink -f "/proc/$pid/cwd" 2>/dev/null)" = "$sb" ] && return 0
+  done
+  return 1
+}
 
 # ---- sandbox layout ----------------------------------------------------------
 mkdir -p "$SB/scripts" "$SB/out" "$SB/docs/reads" "$SB/logs" "$SB/home/.local/bin"
@@ -160,8 +173,8 @@ if [ "$(date +%u)" = "3" ] || [ "$(date +%u)" = "6" ]; then
   expA="consolidate crawl deepdive kindle podcast publish publish-deepdive read render-deepdive render-podcast"
 fi
 steps "$expA"
-! pgrep -f "scripts/run_log.py poll" >/dev/null \
-  && ok "usage poller terminated after run" || bad "usage poller still running"
+sandbox_poller_alive \
+  && bad "usage poller still running" || ok "usage poller terminated after run"
 
 # ---- Scenario B: render fails -> run fails before reaching publish -----------
 # render-podcast is a fatal step (no || handler), so a failure exits immediately
@@ -173,8 +186,8 @@ rcB="$(invoke LOG_KEEP_RUNS=3 MOCK_NO_MP3=1)"
 hasre "render step end exit=1"    "step end: render-podcast exit=1"
 no    "publish did not run"       "step start: publish"
 hasre "run end status FAIL"       '===== RUN END .* status=FAIL'
-! pgrep -f "scripts/run_log.py poll" >/dev/null \
-  && ok "usage poller terminated after failed run" || bad "usage poller still running"
+sandbox_poller_alive \
+  && bad "usage poller still running" || ok "usage poller terminated after failed run"
 
 # ---- Scenario C: retention trim ----------------------------------------------
 echo "Scenario C: LOG_KEEP_RUNS=3 caps run.log at 3 run blocks"
