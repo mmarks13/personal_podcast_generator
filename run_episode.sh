@@ -16,6 +16,11 @@ unset ANTHROPIC_API_KEY || true   # belt-and-suspenders: stay on the Pro subscri
 
 DATE="$(date +%F)"
 DOW="$(date +%u)"   # 1=Mon .. 6=Sat 7=Sun
+# Two cron jobs share this script: the full podcast pipeline at 01:00, and the daily read
+# on its own at ~06:30 — after the 5h limit resets — so the read stops competing with the
+# podcast for one rate-limit window. `read` runs only the read; no arg runs the full run.
+MODE="${1:-full}"
+case "$MODE" in full|read) ;; *) echo "usage: $0 [full|read]" >&2; exit 2 ;; esac
 mkdir -p out logs
 
 # Publishing is branch-scoped: publish.py commits the rebuilt feed into docs/, and
@@ -71,7 +76,7 @@ run_step() {
 FAILED=()
 RUN_START=$(date +%s)
 python3 scripts/run_log.py trim --keep "$((LOG_KEEP_RUNS-1))" --log "$LOG"
-log run "===== RUN START $DATE dow=$DOW pid=$$ host=$(hostname) git=$(git rev-parse --short HEAD 2>/dev/null || echo '?') ====="
+log run "===== RUN START $DATE mode=$MODE dow=$DOW pid=$$ host=$(hostname) git=$(git rev-parse --short HEAD 2>/dev/null || echo '?') ====="
 
 # Per-minute usage snapshot (5h + 7d limits) as a parallel sidecar; killed on exit.
 python3 scripts/run_log.py poll --interval 60 --log "$LOG" &
@@ -84,6 +89,26 @@ cleanup() {
 }
 trap cleanup EXIT
 # ------------------------------------------------------------------------------
+
+# In `read` mode (the separate ~06:30 cron job) write + publish ONLY the daily read, then
+# stop. The skill builds the EPUB into docs/reads/ and records reads_history.json; we then
+# email it to the Kindle and commit the EPUB + reads_history so it persists and serves on
+# Pages. Non-fatal steps mirror the podcast path: a failed read/email must not wedge the run.
+if [ "$MODE" = "read" ]; then
+  run_step read claude -p "Use the daily-read skill to write today's issue of Self Attention end to end, \
+following its reasoning, grounding, and the day's length target. Build the EPUB with the \
+cover and record the issue. Print the EPUB path when done." \
+    --model "$READ_MODEL" \
+    --effort medium \
+    --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
+    --permission-mode acceptEdits \
+    --max-turns 50 || log run "WARNING: daily read failed"
+  run_step kindle python3 scripts/send_to_kindle.py --epub "docs/reads/self-attention-$DATE.epub" \
+    || log run "WARNING: Kindle email failed; EPUB still on GitHub Pages"
+  run_step publish-read python3 scripts/publish_read.py --date "$DATE" \
+    || log run "WARNING: read publish failed; EPUB may be unpushed"
+  exit 0
+fi
 
 # --- Gather pipeline (podcast): run ENTIRELY before the Opus session ----------
 # The gather phase (fetch → crawl → consolidate) needs little/no Opus-grade judgment, but
@@ -132,7 +157,7 @@ validate). STOP after the gate passes — do NOT run steps 4 or 4.5; the harness
 history. If out/candidates.json is somehow missing, fall back to doing the gather steps yourself. \
 Print the episode title and word count when done." \
   --model "$PODCAST_MODEL" \
-  --effort medium \
+  --effort high \
   --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
   --permission-mode acceptEdits \
   --max-turns 60
@@ -150,22 +175,6 @@ set -e
 run_step render-podcast \
   .venv/bin/python scripts/make_audio.py \
   --episode out/episode.json --out "out/podcast-$DATE.mp3"
-
-# Daily: write "Self Attention" (the daily read) and build its EPUB into docs/reads/
-# first, so the publish step below sweeps it into the same commit + index page, then
-# email it to the Kindle. The skill itself builds the EPUB (with cover) and records the
-# issue in reads_history.json; it knows the day's length target from the date. Non-fatal:
-# a failed read (or failed email) must not block the daily podcast publish.
-run_step read claude -p "Use the daily-read skill to write today's issue of Self Attention end to end, \
-following its reasoning, grounding, and the day's length target. Build the EPUB with the \
-cover and record the issue. Print the EPUB path when done." \
-  --model "$READ_MODEL" \
-  --effort medium \
-  --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
-  --permission-mode acceptEdits \
-  --max-turns 50 || log run "WARNING: daily read failed; continuing with daily publish"
-run_step kindle python3 scripts/send_to_kindle.py --epub "docs/reads/self-attention-$DATE.epub" \
-  || log run "WARNING: Kindle email failed; EPUB still on GitHub Pages"
 
 # 5: publish — read title/date/summary from the episode, upload + rebuild the feed.
 run_step publish python3 - "$DATE" <<'PY'

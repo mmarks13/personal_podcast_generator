@@ -66,6 +66,10 @@ cat > "$SB/scripts/send_to_kindle.py" <<'PY'
 import sys
 print("MOCK kindle:", " ".join(sys.argv[1:]))
 PY
+cat > "$SB/scripts/publish_read.py" <<'PY'
+import sys
+print("MOCK publish_read:", " ".join(sys.argv[1:]))
+PY
 # Mock fetcher: run_episode.sh now runs the deterministic fetch in-shell before the
 # podcast Claude step. Stub it (no network) so the test stays hermetic; it just writes
 # a minimal sources.json the way the real fetcher would.
@@ -145,6 +149,16 @@ invoke() {
   echo "$rc"
 }
 
+# invoke_read <VAR=val...> : run the sandbox copy in `read` mode (the separate 06:30 job).
+invoke_read() {
+  set +e
+  ( cd "$SB" && env -u ANTHROPIC_API_KEY HOME="$SB/home" RUN_EPISODE_ALLOW_ANY_BRANCH=1 "$@" bash run_episode.sh read ) \
+    >>"$SB/console.txt" 2>&1
+  local rc=$?
+  set -e
+  echo "$rc"
+}
+
 # ---- Scenario A: happy path --------------------------------------------------
 echo "Scenario A: successful daily run"
 reset_artifacts; : > "$LOG"
@@ -153,28 +167,47 @@ rcA="$(invoke LOG_KEEP_RUNS=3)"
 hasre "run start banner"          '===== RUN START .* pid=[0-9]+'
 has   "podcast step start"        "step start: podcast"
 hasre "podcast step end exit=0"   "step end: podcast exit=0 dur=[0-9]+s"
-hasre "read step end exit=0"      "step end: read exit=0"
-hasre "kindle step end exit=0"    "step end: kindle exit=0"
 hasre "publish step end exit=0"   "step end: publish exit=0"
+no    "read not in full mode"      "step start: read"
+no    "kindle not in full mode"    "step start: kindle"
 has   "deterministic prep: scratch cleared" "prep: cleared podcast scratch"
 has   "deterministic prep: fetcher ran in-shell" "MOCK fetch:"
 has   "gather: crawl ran before opus"   "[fake-claude] ran crawl"
 has   "gather: consolidate ran before opus" "[fake-claude] ran consolidate"
 has   "captured fake-claude output"  "[fake-claude] ran daily-ai-podcast skill"
 has   "publisher was the mock"    "MOCK publish:"
-has   "kindle sender was the mock" "MOCK kindle:"
 hasre "usage snapshot logged"     '\[usage\] \{'
 hasre "run end status OK"         '===== RUN END .* status=OK'
 no    "real claude not invoked"   "Use the daily-ai-podcast skill"  # prompt text only appears if claude echoed it
 has   "render-podcast ran"        "MOCK make_audio: wrote out/podcast"
 # Expected steps depend on the weekday: the deep-dive branch runs Wed (3) / Sat (6).
-expA="consolidate crawl kindle podcast publish read render-podcast"
+expA="consolidate crawl podcast publish render-podcast"
 if [ "$(date +%u)" = "3" ] || [ "$(date +%u)" = "6" ]; then
-  expA="consolidate crawl deepdive kindle podcast publish publish-deepdive read render-deepdive render-podcast"
+  expA="consolidate crawl deepdive podcast publish publish-deepdive render-deepdive render-podcast"
 fi
 steps "$expA"
 sandbox_poller_alive \
   && bad "usage poller still running" || ok "usage poller terminated after run"
+
+# ---- Scenario E: read mode runs ONLY the read + kindle + publish-read ---------
+# The daily read is a separate ~06:30 cron job (`run_episode.sh read`) so it gets its own
+# 5h rate-limit window instead of competing with the podcast. It must run the read, email,
+# and read-publish — and none of the podcast pipeline.
+echo "Scenario E: read mode (06:30 job) runs read + kindle + publish-read only"
+reset_artifacts; : > "$LOG"
+rcE="$(invoke_read LOG_KEEP_RUNS=3)"
+[ "$rcE" = "0" ] && ok "read mode exit 0" || bad "read mode exit 0 (got $rcE)"
+hasre "read mode banner"             '===== RUN START .* mode=read'
+hasre "read step end exit=0"         "step end: read exit=0"
+hasre "kindle step end exit=0"       "step end: kindle exit=0"
+hasre "publish-read step end exit=0" "step end: publish-read exit=0"
+has   "read built the EPUB"          "[fake-claude] ran daily-read skill"
+has   "publish_read was the mock"    "MOCK publish_read:"
+no    "podcast did not run in read mode" "step start: podcast"
+no    "gather did not run in read mode"  "step start: consolidate"
+steps "kindle publish-read read"
+sandbox_poller_alive \
+  && bad "usage poller still running (read mode)" || ok "usage poller terminated (read mode)"
 
 # ---- Scenario B: render fails -> run fails before reaching publish -----------
 # render-podcast is a fatal step (no || handler), so a failure exits immediately
