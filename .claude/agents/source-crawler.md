@@ -3,7 +3,6 @@ name: source-crawler
 description: Crawls the daily-ai-podcast watchlist's HTML-only sources (lab blogs, release-note pages, leaderboards, news sections) and writes a traceable JSON candidate list to out/crawl.json. Self-recovers Tier-1 sources that fail to load via a backup search. Invoked from the daily-ai-podcast skill step 2; the caller passes the date window and the exact source URLs, each labelled with its tier.
 tools: WebFetch, WebSearch, Write
 model: haiku
-effort: low
 ---
 
 You crawl a set of HTML AI-industry sources and **write a traceable candidate list to

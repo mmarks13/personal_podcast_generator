@@ -2,6 +2,7 @@
 # method: api | rss | fetch
 # tier 1 = daily core
 # tier 2 = optional / supporting source
+# window_hours: optional per-source look-back override (default: the run's --hours, 48)
 #
 # Global source rule:
 # Use broad AI newsletters and aggregators for discovery, but rely on primary
@@ -11,15 +12,13 @@
 
 sources:
   # --- Papers / research discovery ---
-  # arXiv Core AI/LLM/Agents (cs.AI/CL/LG/MA) and Vision/Robotics (cs.CV/RO/eess.IV)
-  # removed: Core overlapped heavily with HF Daily Papers (same submissions, HF adds
-  # curation + upvotes), and the Vision/Robotics query consistently yielded ~0 in-window
-  # items after topic filtering. The Retrieval/SE/Security query is kept — it catches
-  # governance, IR, and security papers HF's ML-practitioner curation misses.
-  - name: arXiv Retrieval / Software Engineering / Security
-    method: api
-    url: "http://export.arxiv.org/api/query?search_query=cat:cs.IR+OR+cat:cs.SE+OR+cat:cs.CR&sortBy=submittedDate&sortOrder=descending"
+  # arXiv removed entirely: its category queries overlapped heavily with HF Daily Papers
+  # (same submissions, HF adds curation + upvotes) and added noise after topic filtering.
+  - name: Google Research Blog
+    method: rss
+    url: "https://research.google/blog/rss/"
     tier: 2
+    window_hours: 168   # lower-cadence lab blog; look back ~1 week (run default is 48h)
 
   - name: Hugging Face Daily Papers
     method: api

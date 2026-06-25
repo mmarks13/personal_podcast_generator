@@ -14,9 +14,12 @@ decide what is show-worthy — the main agent judges importance downstream.
 Read both inputs:
 - `out/sources.json` — the structured RSS/API dump, a `feeds` object keyed by source
   name; every item carries the `source` it came from, and items differ by source type
-  (RSS/news have `title`/`summary`/`url`; arXiv adds `authors`/`categories`; HF Daily
-  Papers adds `upvotes`; HN adds `points`/`num_comments`). It can be large — parse it
-  with a short `python`/`jq` pass via `bash` rather than reading it all inline if needed.
+  (RSS/news have `title`/`summary`/`url`; HF Daily Papers adds `upvotes`; HN adds
+  `points`/`num_comments`). It is large — **never `Read`/`cat` it whole, and never print
+  its full contents to stdout.** Parse it with short `python`/`jq` passes via `bash` that
+  emit only the specific fields, counts, or slices you actually need; treat `history.json`
+  the same way. Anything you dump into the transcript you then pay to re-read on every
+  later turn, so keep your `bash` output terse and purposeful.
 - `out/crawl.json` — the HTML crawl from the `source-crawler` agent: an `items` list
   (each with `sources`, `url`, `claims`, `summary`, `why_included`) and a `failures`
   list. Treat its items as candidates alongside the structured feeds.
@@ -81,6 +84,14 @@ allocate, not a wall you hit by cutting real stories. Converge on it in this ord
 
 The budget governs *how much you say*, never *which real stories you include* — only
 the clearly off-topic items are dropped (above).
+
+**Build it once, write it once.** Assemble the whole candidate set in memory in a single
+`python` pass, then write `out/candidates.json` exactly once. Do **not** write a draft, read
+it back, count the words, and rewrite it: that inspect-and-rebuild loop is the single most
+expensive thing you can do here, and it is banned. If you need to honor the word budget
+above, measure your assembled summaries *inside the same script that builds the file* and
+trim there, so the file is correct on its first and only write. One write of the file, then
+stop — do not re-open it to "polish."
 
 **Write the result to `out/candidates.json`** as your deliverable, with this shape:
 `{ "items": [ { "title": "...", "sources": ["source name(s) it appeared on"],

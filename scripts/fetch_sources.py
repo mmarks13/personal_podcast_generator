@@ -6,7 +6,7 @@ Driven by `config/sources.yaml`: every source whose method is `rss` or `api`
 feeds with clean, stable machine output — no judgment needed to *fetch* them
 (judgment about what's notable happens later, in the skill's writing step).
 
-  - `api`  sources are dispatched by URL shape (arXiv query, HF Daily Papers,
+  - `api`  sources are dispatched by URL shape (HF Daily Papers,
             Hacker News Algolia, GitHub releases).
   - `rss`  sources are parsed generically with feedparser and time-windowed.
   - `fetch` (HTML) sources are intentionally NOT pulled here — they need a browser
@@ -32,9 +32,6 @@ import urllib.request
 from datetime import datetime, timedelta, timezone
 
 SOURCES_YAML = os.path.join(os.path.dirname(__file__), "..", "config", "sources.yaml")
-ARXIV_MAX_RESULTS = 200   # raw pull per query; keyword-filtered + capped below
-ARXIV_MAX_KEPT = 40       # per query, after topic filtering
-ARXIV_SUMMARY_CHARS = 500  # judge relevance from this; fetch the paper if covering it
 RSS_MAX_ITEMS = 25  # per feed, after time-windowing
 # Word-boundary matching: a bare substring check let "ai" match "said"/"email".
 AI_KEYWORDS = (
@@ -43,35 +40,6 @@ AI_KEYWORDS = (
     "anthropic", "deepmind", "rag", "llama", "mistral", "qwen",
 )
 AI_PATTERN = re.compile(r"\b(" + "|".join(AI_KEYWORDS) + r")\b", re.IGNORECASE)
-# arXiv topic filter, matched to the skill's six topic priorities. The raw
-# category feeds are firehoses; keep papers whose title/abstract hit at least
-# one priority area. HF Daily Papers stays the curated lead — this supplements.
-ARXIV_TOPIC_TERMS = (
-    # production AI systems & agentic workflows
-    "agent", "agentic", "multi-agent", "tool use", "tool-use", "orchestration",
-    "human-in-the-loop", "deployment", "observability",
-    # retrieval, document intelligence & knowledge
-    "retrieval", "rag", "retrieval-augmented", "embedding", "embeddings",
-    "rerank", "reranking", "document", "knowledge graph", "question answering",
-    # quality, evaluation & model decision-making
-    "evaluation", "benchmark", "hallucination", "llm-as-judge", "calibration",
-    "factuality", "faithfulness", "routing", "distillation", "quantization",
-    # AI-native software delivery
-    "code generation", "software engineering", "program repair", "coding",
-    "code review", "test generation",
-    # infrastructure, local deployment, governance & scaling
-    "inference", "kv cache", "kv-cache", "mixture-of-experts", "moe",
-    "on-device", "edge", "efficient", "open-weight", "safety", "jailbreak",
-    "alignment", "privacy", "security",
-    # applied & research frontiers with practical signal
-    "world model", "multimodal", "remote sensing", "earth observation",
-    "geospatial", "robotics", "simulation", "synthetic data", "long context",
-    "reasoning", "reinforcement learning",
-)
-ARXIV_TOPIC_PATTERN = re.compile(
-    r"\b(" + "|".join(re.escape(t) for t in ARXIV_TOPIC_TERMS) + r")\b",
-    re.IGNORECASE,
-)
 USER_AGENT = "daily-ai-podcast/1.0 (personal project)"
 
 
@@ -91,36 +59,6 @@ def _published(entry) -> datetime | None:
 
 
 # --- api sources, dispatched by URL shape ---------------------------------
-
-def fetch_arxiv(url: str, hours: int) -> list[dict]:
-    """Recent arXiv papers for the query in `url`, newest first, time-windowed."""
-    import feedparser  # lazy import so other sources still work if it's missing
-
-    if "max_results" not in url:
-        url += ("&" if "?" in url else "?") + f"max_results={ARXIV_MAX_RESULTS}"
-    feed = feedparser.parse(_get(url, timeout=40))
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
-    out = []
-    for e in feed.entries:
-        published = _published(e)
-        if published and published < cutoff:
-            continue
-        title = e.title.replace("\n", " ").strip()
-        summary = e.summary.replace("\n", " ").strip()
-        if not ARXIV_TOPIC_PATTERN.search(f"{title} {summary}"):
-            continue
-        out.append(
-            {
-                "title": title,
-                "authors": [a.name for a in getattr(e, "authors", [])][:8],
-                "summary": summary[:ARXIV_SUMMARY_CHARS],
-                "url": e.link,
-                "published": published.isoformat() if published else None,
-                "categories": [t.term for t in getattr(e, "tags", [])],
-            }
-        )
-    return out[:ARXIV_MAX_KEPT]
-
 
 def fetch_hf_daily_papers(url: str, date: str | None = None) -> list[dict]:
     """Hugging Face Daily Papers feed (curated, upvoted AI papers)."""
@@ -198,8 +136,6 @@ def fetch_github_releases(url: str, hours: int) -> list[dict]:
 
 def dispatch_api(url: str, hours: int, hf_date: str | None) -> list[dict]:
     """Route an `api` source to the right fetcher by its URL shape."""
-    if "export.arxiv.org" in url:
-        return fetch_arxiv(url, hours)
     if "huggingface.co/api/daily_papers" in url:
         return fetch_hf_daily_papers(url, hf_date)
     if "hn.algolia.com" in url:
@@ -262,8 +198,8 @@ def load_structured() -> list[dict]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--hours", type=int, default=48,
-                    help="look-back window. >=48 so arXiv's daily announce gap "
-                         "(newest papers can be ~28h old) doesn't zero out the feed")
+                    help="look-back window in hours; >=48 keeps daily-announce "
+                         "sources (e.g. HF Daily Papers) from zeroing out the feed")
     ap.add_argument("--out", default="out/sources.json")
     ap.add_argument("--hf-date", default=None, help="YYYY-MM-DD; default = today")
     args = ap.parse_args()
@@ -276,11 +212,12 @@ def main() -> int:
     errors: list[str] = []
     for s in sources:
         name, method, url = s["name"], s["method"], s["url"]
+        win = s.get("window_hours", args.hours)  # optional per-source look-back override
         if method == "api":
-            items, err = safe(name, dispatch_api, url, args.hours, args.hf_date)
-            time.sleep(1)  # be polite to APIs (esp. arXiv)
+            items, err = safe(name, dispatch_api, url, win, args.hf_date)
+            time.sleep(1)  # be polite to APIs
         else:  # rss
-            items, err = safe(name, fetch_rss, url, args.hours)
+            items, err = safe(name, fetch_rss, url, win)
         for it in items:
             it["source"] = name
         feeds[name] = items

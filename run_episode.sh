@@ -118,6 +118,7 @@ run_step consolidate claude -p "Follow .claude/agents/source-consolidator.md exa
 out/sources.json and out/crawl.json (use whichever exist) into out/candidates.json, flagging likely \
 repeats against history.json. Write the file even if one input is missing." \
   --model sonnet \
+  --effort low \
   --allowedTools "Read Write Bash" \
   --permission-mode acceptEdits \
   --max-turns 30 \
@@ -131,6 +132,7 @@ validate). STOP after the gate passes — do NOT run steps 4 or 4.5; the harness
 history. If out/candidates.json is somehow missing, fall back to doing the gather steps yourself. \
 Print the episode title and word count when done." \
   --model "$PODCAST_MODEL" \
+  --effort high \
   --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
   --permission-mode acceptEdits \
   --max-turns 60
@@ -158,6 +160,7 @@ run_step read claude -p "Use the daily-read skill to write today's issue of Self
 following its reasoning, grounding, and the day's length target. Build the EPUB with the \
 cover and record the issue. Print the EPUB path when done." \
   --model "$READ_MODEL" \
+  --effort high \
   --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
   --permission-mode acceptEdits \
   --max-turns 50 || log run "WARNING: daily read failed; continuing with daily publish"
@@ -187,6 +190,7 @@ following its grounding rules and length target (20-25 min). STOP after step 4's
 passes — do NOT run the render or update_history lines in step 4; the harness handles both. \
 Print the topic and word count when done." \
     --model "$DEEPDIVE_MODEL" \
+    --effort high \
     --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
     --permission-mode acceptEdits \
     --max-turns 60
