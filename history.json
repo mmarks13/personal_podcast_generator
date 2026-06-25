@@ -1,6 +1,62 @@
 {
   "episodes": [
     {
+      "date": "2026-06-25",
+      "title": "The custom chip, the cloned model, and the baseline that keeps winning",
+      "summary": "A day on the unglamorous layer beneath the agents: OpenAI and Broadcom unveil Jalapeño, OpenAI's first custom inference chip, pitched on performance-per-watt; Google folds computer use into the fast Gemini 3.5 Flash tier with adversarial training and an injection-halt safeguard; Nvidia's NeMo AutoModel cuts mixture-of-experts fine-tuning to a third less memory at 3.4-3.7x throughput; and Anthropic accuses Alibaba of the largest known distillation campaign against Claude (28.8M exchanges via ~25,000 fake accounts, targeting the unreleased Mythos Preview). Two quiet papers close it out: Google Research shows reasoning surfaces parametric knowledge a model can't otherwise recall, and an agent-memory bake-off finds plain long-context retrieval still beats most purpose-built memory systems for time-dependent queries.",
+      "topics": [
+        "OpenAI + Broadcom Jalapeño: OpenAI's first custom chip, an inference-only processor pitched on significantly better performance-per-watt than current alternatives; still in testing, pretraining stays on Nvidia",
+        "Computer use built into Gemini 3.5 Flash: agentic screen control across browser/mobile/desktop in the fast tier, with targeted adversarial training and an optional safeguard layer (human confirmation, auto-halt on indirect prompt injection)",
+        "Nvidia NeMo AutoModel: 3.4-3.7x fine-tuning throughput vs HF Transformers v5 and ~30% less GPU memory on MoE models; Qwen3-30B-A3B 3k->11k tok/s/GPU; 550B full fine-tune at 815 tok/s/GPU across 128 GPUs",
+        "Anthropic accuses Alibaba of largest known distillation campaign: 28.8M Claude exchanges via ~25,000 fraudulent accounts, Apr 22-Jun 5, targeting software-engineering and agentic-reasoning capabilities of unreleased Mythos Preview; letter to Senate Banking Committee dated June 10",
+        "Google Research 'Thinking to Recall': reasoning surfaces parametric knowledge that is virtually unrecoverable single-shot; test-time selection over hallucination-free trajectories on SimpleQA Verified / EntityQuestions",
+        "Notion embeds Cursor coding agents via Cursor SDK: Notion thread = Cursor agent, message = agent run, remote-MCP read/write to workspace; full integration in a couple of weeks",
+        "'Are We Ready For An Agent-Native Memory System?': 12 memory systems across 5 workloads/11 datasets; long-context retrieval still beats most for time-dependent queries; graph memory strong on factual recall, weak on temporal; local maintenance cheaper than global reorganization"
+      ],
+      "entities": [
+        "OpenAI",
+        "Broadcom",
+        "Jalapeño",
+        "Google",
+        "Gemini 3.5 Flash",
+        "Google Research",
+        "Nvidia",
+        "NeMo AutoModel",
+        "Qwen3-30B-A3B",
+        "Hugging Face",
+        "Anthropic",
+        "Claude",
+        "Mythos Preview",
+        "Alibaba",
+        "DeepSeek",
+        "Moonshot",
+        "MiniMax",
+        "Cursor",
+        "Notion",
+        "Mem0",
+        "MemGPT",
+        "Zep"
+      ],
+      "threads": [
+        {
+          "name": "AI economics debate",
+          "status": "Cost optimization moves into custom inference silicon: OpenAI's Jalapeño chip targets performance-per-watt for the inference layer where the recurring bill lives, with pretraining still on Nvidia.",
+          "arc": "From the memory-bottleneck and neocloud-rent reshaping of the cost base toward labs owning their own inference silicon to control the power bill, even as serving cost stays the binding constraint."
+        },
+        {
+          "name": "AI model distillation and IP extraction",
+          "status": "Anthropic escalates to the Senate Banking Committee, calling Alibaba's 28.8M-exchange, ~25,000-account campaign the largest known attempt to extract Claude's capabilities, targeting the unreleased Mythos Preview.",
+          "arc": "From February's DeepSeek/Moonshot/MiniMax distillation disclosures to a larger, explicitly political escalation that folds 'they're cloning our capabilities' into the US-China export-control argument."
+        },
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "Nvidia's NeMo AutoModel makes full fine-tuning of frontier-scale open MoE models tractable (3.4-3.7x throughput, ~30% less memory), while the Alibaba distillation fight shows the IP flip side of exposed capability.",
+          "arc": "Open weights move from cheap-to-run to cheap-to-deeply-customize, just as distillation makes exposed model outputs the contested raw material of the capability race."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-06-24",
       "title": "Agents that ship, and the science they only pretend to do",
       "summary": "A day on agents doing real, bounded production work versus where they still fall down: Mistral ships OCR 4 (document intelligence with per-field confidence scores, 72% avg win rate, $2-4/1,000 pages, self-hostable); Anthropic puts a single shared Claude into Slack channels; Coinbase reports 75% of PRs agent-authored across 2,400+ Cursor developers; Hugging Face cuts weekly hub releases for ~$0.25 via an open-weight agent plus deterministic validation. Against that, Qwen-AgentWorld trains agents inside a learned text world model (beating real-environment RL on a search task), and NatureBench shows the strongest agent matches a published Nature-family result ~48% of the time mostly by recognizing ML problems in disguise, not by domain discovery.",
@@ -816,6 +872,24 @@
   "longterm": {
     "active_threads": [
       {
+        "name": "AI economics debate",
+        "status": "Cost optimization moves into custom inference silicon: OpenAI's Jalapeño chip targets performance-per-watt for the inference layer where the recurring bill lives, with pretraining still on Nvidia.",
+        "arc": "From the memory-bottleneck and neocloud-rent reshaping of the cost base toward labs owning their own inference silicon to control the power bill, even as serving cost stays the binding constraint.",
+        "last_seen": "2026-06-25"
+      },
+      {
+        "name": "AI sovereignty and open weights",
+        "status": "Nvidia's NeMo AutoModel makes full fine-tuning of frontier-scale open MoE models tractable (3.4-3.7x throughput, ~30% less memory), while the Alibaba distillation fight shows the IP flip side of exposed capability.",
+        "arc": "Open weights move from cheap-to-run to cheap-to-deeply-customize, just as distillation makes exposed model outputs the contested raw material of the capability race.",
+        "last_seen": "2026-06-25"
+      },
+      {
+        "name": "AI model distillation and IP extraction",
+        "status": "Anthropic escalates to the Senate Banking Committee, calling Alibaba's 28.8M-exchange, ~25,000-account campaign the largest known attempt to extract Claude's capabilities, targeting the unreleased Mythos Preview.",
+        "arc": "From February's DeepSeek/Moonshot/MiniMax distillation disclosures to a larger, explicitly political escalation that folds 'they're cloning our capabilities' into the US-China export-control argument.",
+        "last_seen": "2026-06-25"
+      },
+      {
         "name": "AI quality and verification failures",
         "status": "NatureBench strips the method out of 90 Nature-family tasks and scores agents against published SOTA; the strongest (Claude Opus 4.7) matches it ~48% of the time, but the dominant success mode is 'methodological translation' — recognizing an ML problem in disguise — not domain discovery.",
         "arc": "The eval-honesty beat extends from 'tests the model can recognize as tests' to measuring genuine discovery: an honest benchmark exposes that high match rates come from pattern-matching tasks onto familiar pipelines, with wrong method choice the top failure when real domain insight is required.",
@@ -828,21 +902,9 @@
         "last_seen": "2026-06-24"
       },
       {
-        "name": "AI economics debate",
-        "status": "Money concentrates in the hardware layer: Micron-Anthropic co-design memory architecture and Micron joins the Series H; SpaceX becomes a compute landlord with one tenant paying ~$1.8B/yr.",
-        "arc": "The cost base reshapes around the memory bottleneck and neocloud rent, even as the resulting open weights stay cheap and uncontainable once produced.",
-        "last_seen": "2026-06-23"
-      },
-      {
         "name": "AI agent supply-chain trust",
         "status": "Reframed at the conceptual level: prompt injection named as a confused-deputy 'role confusion' problem, with a concrete fix (de-styling) cutting attack success 61%->10%.",
         "arc": "From containment-and-incentives engineering toward a precise mechanism: the model authenticates the format of an instruction, not its source — old security theory (confused deputy) renamed for LLMs.",
-        "last_seen": "2026-06-23"
-      },
-      {
-        "name": "AI sovereignty and open weights",
-        "status": "Interconnects calls GLM-5.2 the first open-weight model that behaves like a competent general agent inside coding harnesses; SpaceX rents Reflection AI ~$1.8B/yr of GB300 to produce give-away weights.",
-        "arc": "Open weights move from strong-but-passive to genuinely agent-capable, just as the recall and containment debates assumed agent-grade capability stayed behind a pullable API lever.",
         "last_seen": "2026-06-23"
       },
       {
@@ -872,7 +934,7 @@
     ],
     "entities": [],
     "monthly": [],
-    "updated": "2026-06-24",
+    "updated": "2026-06-25",
     "host_lore": []
   }
 }
