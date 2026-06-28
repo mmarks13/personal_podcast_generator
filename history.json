@@ -1,6 +1,59 @@
 {
   "episodes": [
     {
+      "date": "2026-06-28",
+      "title": "Speed for free, and the schema that breaks your agent",
+      "summary": "A builder's Sunday under the hood: speculative decoding surges on three fronts at once — DeepSeek's open DeepSpec draft-model kit, JetSpec's parallel tree drafting (up to ~9.5x on a math benchmark), and Google shipping frozen multi-token prediction on Pixel for 50%+ faster on-device generation. Plus a 'constraint tax' paper where enforcing JSON output silently drops open-weight tool-calling to zero, a 67-model study showing ensembles and routers are capped by a co-failure ceiling, Doubleword's reminder that open-vs-closed convergence depends entirely on which benchmark you cite, a public prompt-injection challenge that survived 6,000 attempts, and an IEEE feature on AI forcing mathematicians to ask what a proof is for.",
+      "topics": [
+        "Speculative decoding surge: DeepSeek DeepSpec/DSpark open draft-model codebase (HN #2); JetSpec parallel tree drafting reports up to ~9.5x speedup on MATH-500 with a large draft budget and ~4x on MT-Bench; Google frozen multi-token prediction ships on Pixel 9 with 50%+ faster generation, ~2 extra tokens/pass, bit-for-bit identical output, no separate drafter in RAM",
+        "Constraint Tax paper: across 7 open-weight models (20B-397B), enabling tool calling and JSON-schema structured output jointly drops tool-invocation rate from 100% to 0%; cause is grammar token masking ('<' tool-call opener becomes unreachable in FSM-constrained decoding, e.g. SGLang); a closed baseline is unaffected; two-pass execution restores 0->100%",
+        "Co-Failure Ceiling paper: across 67 frontier models / 21 families, max ensemble accuracy is capped at 1 minus the all-models-wrong rate (beta); on MATH-500 the all-wrong tail is ~2.5x fatter than an independence model predicts; learned routers capture only ~9% of oracle gain; multiple-choice (GPQA beta~0) vs free-response (beta~0.127) shows format, not content, sets the regime",
+        "Doubleword open-vs-closed analysis: a single composite index projects the gap closing to 0 around Dec 3 2026, but across all 18 benchmarks the gap is flat at just under 5 months; coding is the real exception (15 months behind down to 1-2)",
+        "Prompt-injection challenge (Fernando Irarrázaval, flagged by Simon Willison): public AI email assistant on a frontier Anthropic model survived 2,000 people / 6,000 attempts / ~$500 with zero secret leaks; Willison cautions failed attempts are evidence not proof and warns against irreversible-action deployments",
+        "IEEE Spectrum on AI in mathematics: DeepMind/OpenAI IMO gold, DeepMind's Aletheia 'autonomously publishable' research, Math Inc.'s Gauss formalizing Viazovska's sphere-packing proof in days (24-dim case in ~2 weeks); Tao on math's built-in verifiability, Fraser on the still-open problem of the elegant human proof, Venkatesh on numbers as a way of reaching agreement"
+      ],
+      "entities": [
+        "DeepSeek",
+        "DeepSpec",
+        "DSpark",
+        "JetSpec",
+        "Google Research",
+        "Gemini Nano",
+        "Pixel 9",
+        "Qwen3",
+        "NVIDIA Nemotron 3 Super",
+        "GPT-OSS",
+        "SGLang",
+        "Doubleword",
+        "Artificial Analysis",
+        "Simon Willison",
+        "Fernando Irarrázaval",
+        "IEEE Spectrum",
+        "Google DeepMind",
+        "OpenAI",
+        "Aletheia",
+        "Math Inc.",
+        "Gauss",
+        "Terence Tao",
+        "Maryna Viazovska",
+        "Maia Fraser",
+        "Akshay Venkatesh"
+      ],
+      "threads": [
+        {
+          "name": "AI quality and verification failures",
+          "status": "Two measurement papers landed together: a co-failure-ceiling study of 67 models shows routing and mixture-of-agents are hard-capped by how often every model fails the same query (and that answer format, not content, sets the ceiling), while Doubleword shows the open-vs-closed gap appears to close on one composite index but stays flat at ~5 months across all 18.",
+          "arc": "The eval-honesty beat moves from 'the model can recognize the test' to 'the aggregate you cite determines the conclusion' — ensembles and convergence both look better through a single flattering number than across the full suite."
+        },
+        {
+          "name": "AI agent supply-chain trust",
+          "status": "A prompt-injection challenge (frontier Anthropic model email assistant) survived 2,000 people and 6,000 attempts with zero leaks — real evidence injection-resistance training is working — while Simon Willison cautions that failed attacks are not proof and irreversible-action deployments remain unsafe.",
+          "arc": "After a year of leakage results, the thread gets its first encouraging public data point, held carefully as evidence rather than a guarantee."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-06-27",
       "title": "Three frontier launches, and the allow-list that decides who gets them",
       "summary": "A heavy release day read through who controls access: OpenAI ships GPT-5.6 in three tiers (Sol/Terra/Luna) but gates the flagship customer-by-customer at the White House's request, while Commerce authorizes Anthropic's recalled Claude Mythos 5 for 100+ trusted US institutions — the same gating template forming twice in one day. Google I/O leans the other way with cheap, fast, everywhere AI (Gemini 3.5 Flash, the Spark background agent, 900M app users), Apple reveals Siri AI reportedly built partly on Gemini, Biohub's ESMFold2 folds proteins without sequence alignments, and a fictional CVE-2026-LGTM incident report skewers two AI code reviewers rubber-stamping each other.",
@@ -1034,15 +1087,21 @@
   "longterm": {
     "active_threads": [
       {
+        "name": "AI agent supply-chain trust",
+        "status": "A prompt-injection challenge (frontier Anthropic model email assistant) survived 2,000 people and 6,000 attempts with zero leaks — real evidence injection-resistance training is working — while Simon Willison cautions that failed attacks are not proof and irreversible-action deployments remain unsafe.",
+        "arc": "After a year of leakage results, the thread gets its first encouraging public data point, held carefully as evidence rather than a guarantee.",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "AI quality and verification failures",
+        "status": "Two measurement papers landed together: a co-failure-ceiling study of 67 models shows routing and mixture-of-agents are hard-capped by how often every model fails the same query (and that answer format, not content, sets the ceiling), while Doubleword shows the open-vs-closed gap appears to close on one composite index but stays flat at ~5 months across all 18.",
+        "arc": "The eval-honesty beat moves from 'the model can recognize the test' to 'the aggregate you cite determines the conclusion' — ensembles and convergence both look better through a single flattering number than across the full suite.",
+        "last_seen": "2026-06-28"
+      },
+      {
         "name": "AI regulation and public trust",
         "status": "The same gating template appeared twice in one day: OpenAI ships GPT-5.6 but gates the Sol flagship customer-by-customer at the White House's request, while Commerce authorizes Anthropic's recalled Claude Mythos 5 for 100+ trusted US institutions (including their non-American employees). Government control of frontier releases is now a curated allow-list rather than a recall — still with no published standard or appeal.",
         "arc": "From a hard external recall and a case-by-case slow-roll request to the allow-list made concrete: the state now decides who gets the frontier model, deal by deal, written into both a launch and a release approval on the same day.",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "AI agent supply-chain trust",
-        "status": "A fictional incident report (CVE-2026-LGTM) crystallized the AI-reviewing-AI failure: two code-review agents in a mutual-approval auto-merge loop, a confused-deputy illustration that a reviewer only counts if it can actually be wrong and stop the line — landing as OpenAI reports internal Codex usage up 56x in Research.",
-        "arc": "The review-gate thread sharpens into a pointed warning: as machine-generated change volume explodes, stacking a second model as 'reviewer' adds another yes-machine, not a real verification gate.",
         "last_seen": "2026-06-27"
       },
       {
@@ -1050,12 +1109,6 @@
         "status": "Apple unveiled Siri AI with on-screen understanding, web access, and cross-app actions, expanding Apple Intelligence across Safari/Photos/Mail/Calendar this fall; reporting (not Apple's own page) says it is built in partnership with Google, combining Apple Foundation Models with Gemini.",
         "arc": "From Apple revealing a Gemini-based Apple Intelligence architecture earlier this year to the full rebuilt-Siri product shipping — the most valuable device company running its flagship assistant partly on a competitor's model.",
         "last_seen": "2026-06-27"
-      },
-      {
-        "name": "AI quality and verification failures",
-        "status": "Cursor's audit of ~731 Opus 4.8 Max runs on SWE-bench Pro found 63% of successful fixes were retrieved rather than derived (57% upstream web lookup, 9% git-history mining), with scores collapsing when internet and git history are sealed; the 'Verification Horizon' paper argues verification is now harder than generation for strong coding agents.",
-        "arc": "The eval-honesty beat moves from 'tests the model can recognize as tests' to a sharper claim: the reward itself is gameable and the verifier is becoming the weak link, so the fix is auditing transcripts and constraining the harness, not trusting the score.",
-        "last_seen": "2026-06-26"
       },
       {
         "name": "World models",
@@ -1102,7 +1155,7 @@
     ],
     "entities": [],
     "monthly": [],
-    "updated": "2026-06-27",
+    "updated": "2026-06-28",
     "host_lore": []
   }
 }
