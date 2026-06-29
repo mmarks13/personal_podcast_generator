@@ -1,6 +1,57 @@
 {
   "episodes": [
     {
+      "date": "2026-06-29",
+      "title": "The adoption curve outran the guardrails",
+      "summary": "A day on the gap between how fast agents are landing in organizations and how little anyone is governing them: OpenAI opens its own books (research-agent use up 56x since November, non-developer use up 137x since August, and by May over 80% of sampled users had made a Codex request worth 30+ minutes of human work) alongside an HP Frontier pilot claiming ~82 hours/week of security-team capacity freed — set against a Resume Now survey where ~76% of workers source their own AI tools with no employer guidance, and Jon Udell's warning about unreviewable agent PRs. Plus Google throttling Meta's Gemini capacity, Asian labs (Sakana's Fugu, 360's Tulongfeng) marketing Mythos-class models as 'export-control-free,' and two papers on quiet agent failure: 'Plans Don't Persist' (evicting the plan drops ALFWorld success 57%->22%) and a tool-use RL collapse traced to control-token over-amplification.",
+      "topics": [
+        "OpenAI 'How Agents Are Transforming Work': internal agent use up 56x (Research), 32x (Customer Support), 27x (Engineering), 13x (Legal) Nov 2025->Jun 2026; non-developer use up 137x (individual) / 189x (organizational) since Aug 2025; by May 2026, 80.6% of sampled individual users made a Codex request estimated >30 min of human work, 70.2% >1 hour",
+        "HP Inc. expands OpenAI Frontier partnership: security pilot reports a directional estimate of ~82 hours/week of security-team capacity unlocked via ChatGPT for vulnerability remediation; Codex used for modernization and UI scaffolding",
+        "BYOAI / shadow AI (Resume Now survey): ~76% of workers source their own AI tools, 23% use them daily; 41% say employer provided no tools/training/guidance; only 21% have role-tailored guidelines; 19% have comprehensive training; plus Jon Udell (via Simon Willison) on agents producing unreviewable PRs and keeping a human-agent loop",
+        "Google limits Meta's Gemini access (FT via CNBC): around March Google told Meta it couldn't supply the full Gemini capacity Meta sought to buy, disrupting/delaying some Meta internal AI projects; Meta urged staff to use tokens more efficiently — a capacity constraint, not a policy ban",
+        "Asian labs market Mythos-class, export-control-free models (TechCrunch): Sakana AI's Fugu (Tokyo) claims parity with Fable 5 / Mythos Preview, built for agents orchestrating other models, advertised as 'frontier capability without the risk of export controls'; China's 360 unveils Tulongfeng claiming head-to-head with Mythos; capability claims are vendor-stated, not third-party benchmarked",
+        "Plans Don't Persist paper: replay-pairing diagnostic on Llama-3.1-70B shows a plan's influence on hidden state decays ~4.1x in one action-observation step (ALFWorld), ~12.4x on HotpotQA; naive plan eviction cuts ALFWorld success 56.7%->22.0% (-34.7pp); probe-gated re-surfacing doesn't recover it — agents depend on context-resident plans, not internalized state",
+        "Why Multi-Step Tool-Use RL Collapses paper: catastrophic collapse is structural, not capability loss — RL over-amplifies special control tokens (e.g. the tool-call opener), degenerating structured output; interleaving SFT with RL (Process Reflection Supervision) restores stability (small Qwen +22+ avg points) but degrades out of distribution",
+        "In-Context World Modeling (ICWM) for robotic control: VLA models fail on novel camera viewpoints/morphologies because they assume the training setup; ICWM treats system identification as in-context adaptation, inferring system dynamics from a short history of self-generated task-agnostic interactions, adapting without parameter updates; outperforms VLA baselines on novel viewpoints in sim and real"
+      ],
+      "entities": [
+        "OpenAI",
+        "Codex",
+        "ChatGPT",
+        "HP",
+        "OpenAI Frontier",
+        "Resume Now",
+        "Jon Udell",
+        "Simon Willison",
+        "Google",
+        "Gemini",
+        "Meta",
+        "Sakana AI",
+        "Fugu",
+        "360",
+        "Tulongfeng",
+        "Anthropic",
+        "Claude Mythos 5",
+        "Fable 5",
+        "Llama-3.1-70B",
+        "ALFWorld",
+        "Qwen2.5"
+      ],
+      "threads": [
+        {
+          "name": "AI agent supply-chain trust",
+          "status": "The adoption-vs-oversight gap widened on the same day: OpenAI reports internal agent use exploding (research 56x, non-developer 137x) and HP claims ~82 hours/week of security capacity freed, while a Resume Now survey shows ~76% of workers run their own unsanctioned AI tools with no employer guidance and Jon Udell warns of agent PRs no human can review.",
+          "arc": "The review-gate thread sharpens from 'how do we verify agents' to a measured gap: generation volume is scaling vertically while human oversight stays flat, and most real-world adoption is happening with no governance layer at all."
+        },
+        {
+          "name": "AI regulation and public trust",
+          "status": "The export-control allow-list is producing its predicted counter-move: with Commerce gating Mythos-class access to trusted institutions, Asian labs (Sakana's Fugu, China's 360 Tulongfeng) now market models explicitly as 'export-control-free' Mythos alternatives — capability claims as yet unverified by third parties.",
+          "arc": "From the gating-by-allow-list template (GPT-5.6 Sol, Mythos 5) to the substitution response: control only binds if there's no alternative, and 'no export controls' is now a selling point printed on the box."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-06-28",
       "title": "Speed for free, and the schema that breaks your agent",
       "summary": "A builder's Sunday under the hood: speculative decoding surges on three fronts at once — DeepSeek's open DeepSpec draft-model kit, JetSpec's parallel tree drafting (up to ~9.5x on a math benchmark), and Google shipping frozen multi-token prediction on Pixel for 50%+ faster on-device generation. Plus a 'constraint tax' paper where enforcing JSON output silently drops open-weight tool-calling to zero, a 67-model study showing ensembles and routers are capped by a co-failure ceiling, Doubleword's reminder that open-vs-closed convergence depends entirely on which benchmark you cite, a public prompt-injection challenge that survived 6,000 attempts, and an IEEE feature on AI forcing mathematicians to ask what a proof is for.",
@@ -1088,21 +1139,21 @@
     "active_threads": [
       {
         "name": "AI agent supply-chain trust",
-        "status": "A prompt-injection challenge (frontier Anthropic model email assistant) survived 2,000 people and 6,000 attempts with zero leaks — real evidence injection-resistance training is working — while Simon Willison cautions that failed attacks are not proof and irreversible-action deployments remain unsafe.",
-        "arc": "After a year of leakage results, the thread gets its first encouraging public data point, held carefully as evidence rather than a guarantee.",
-        "last_seen": "2026-06-28"
+        "status": "The adoption-vs-oversight gap widened on the same day: OpenAI reports internal agent use exploding (research 56x, non-developer 137x) and HP claims ~82 hours/week of security capacity freed, while a Resume Now survey shows ~76% of workers run their own unsanctioned AI tools with no employer guidance and Jon Udell warns of agent PRs no human can review.",
+        "arc": "The review-gate thread sharpens from 'how do we verify agents' to a measured gap: generation volume is scaling vertically while human oversight stays flat, and most real-world adoption is happening with no governance layer at all.",
+        "last_seen": "2026-06-29"
+      },
+      {
+        "name": "AI regulation and public trust",
+        "status": "The export-control allow-list is producing its predicted counter-move: with Commerce gating Mythos-class access to trusted institutions, Asian labs (Sakana's Fugu, China's 360 Tulongfeng) now market models explicitly as 'export-control-free' Mythos alternatives — capability claims as yet unverified by third parties.",
+        "arc": "From the gating-by-allow-list template (GPT-5.6 Sol, Mythos 5) to the substitution response: control only binds if there's no alternative, and 'no export controls' is now a selling point printed on the box.",
+        "last_seen": "2026-06-29"
       },
       {
         "name": "AI quality and verification failures",
         "status": "Two measurement papers landed together: a co-failure-ceiling study of 67 models shows routing and mixture-of-agents are hard-capped by how often every model fails the same query (and that answer format, not content, sets the ceiling), while Doubleword shows the open-vs-closed gap appears to close on one composite index but stays flat at ~5 months across all 18.",
         "arc": "The eval-honesty beat moves from 'the model can recognize the test' to 'the aggregate you cite determines the conclusion' — ensembles and convergence both look better through a single flattering number than across the full suite.",
         "last_seen": "2026-06-28"
-      },
-      {
-        "name": "AI regulation and public trust",
-        "status": "The same gating template appeared twice in one day: OpenAI ships GPT-5.6 but gates the Sol flagship customer-by-customer at the White House's request, while Commerce authorizes Anthropic's recalled Claude Mythos 5 for 100+ trusted US institutions (including their non-American employees). Government control of frontier releases is now a curated allow-list rather than a recall — still with no published standard or appeal.",
-        "arc": "From a hard external recall and a case-by-case slow-roll request to the allow-list made concrete: the state now decides who gets the frontier model, deal by deal, written into both a launch and a release approval on the same day.",
-        "last_seen": "2026-06-27"
       },
       {
         "name": "Apple AI strategy",
@@ -1155,7 +1206,7 @@
     ],
     "entities": [],
     "monthly": [],
-    "updated": "2026-06-28",
+    "updated": "2026-06-29",
     "host_lore": []
   }
 }
