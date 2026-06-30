@@ -1,6 +1,75 @@
 {
   "episodes": [
     {
+      "date": "2026-06-30",
+      "title": "Capability without the parameters, and the memory bill comes due",
+      "summary": "A spread day with one quiet thread — capability showing up somewhere other than raw model size — plus the memory shortage turning into real money. Meta's Brain2Qwerty v2 decodes typed text from non-invasive MEG at 61% word accuracy (78% for the best participant), up from ~8% for prior non-invasive methods, with accuracy improving log-linearly with data; a paper argues a 35B agent (Agents-A1) matches trillion-parameter models by 'scaling the horizon' — making the intermediate agent process trainable rather than growing the model. An open-weights release day: Meituan's LongCat-2.0 (1.6T total / ~48B active MoE, the stealth 'owl-alpha' on OpenRouter), DeepSeek V4 merged into llama.cpp for local runs, and DeepReinforce's self-scaffolding Ornith-1.0 (MIT). Industry: a Ramp/Revelio report finds high-intensity AI adopters grew headcount 10.2% (entry-level +12%) even as Goldman ties AI to ~16k net jobs lost/month — selection-skewed and 'messier' either way; and Anthropic signs a discounted-Claude deal with California while the federal government brands it a 'supply-chain risk.' One to watch: South Korea's $550B 'RAMageddon' memory buildout against a US DRAM price-fixing suit.",
+      "topics": [
+        "Meta Brain2Qwerty v2: non-invasive MEG brain-to-text at 61% word accuracy (78% best participant, more than half of sentences within one word error), vs ~8% for prior non-invasive; ~22,000 sentences / nine volunteers / ~10 hrs each; end-to-end deep learning + LLM for semantic context; accuracy improves log-linearly with data; training code released for v1 and v2; still trails invasive implants and requires a room-sized magnetometer",
+        "Agents-A1 'Scaling the Horizon, Not the Parameters': a 35B MoE agentic model reportedly matches/beats trillion-parameter models (DeepSeek V4, Kimi) on agentic benchmarks by making the intermediate process trainable — ~100k trajectories averaging ~45k tokens, evidence/actions/observations/verification linked as first-class objects, five atomic skills; authors' own benchmarks, needs replication",
+        "Open-weights release day: Meituan LongCat-2.0 (1.6T total / ~48B active MoE, previously the stealth 'owl-alpha' on OpenRouter ~2 months); DeepSeek V4 support merged into llama.cpp (PR #24162) enabling local inference; DeepReinforce Ornith-1.0 (MIT, self-scaffolding agentic coding, 9B/31B dense + 35B/397B MoE on Gemma 4 / Qwen 3.5 bases, ~100 tok/s local on the 35B per Simon Willison)",
+        "AI jobs debate 'messier' (Ramp + Revelio Labs, ~22k companies): high-intensity AI adopters (~$30/employee/month) grew headcount 10.2% and entry-level hiring 12%, against Goldman tying AI to ~16k net jobs lost/month and ~90k AI-linked cuts through May; authors concede it doesn't show AI universally creates jobs and the sample skews to well-funded tech-forward firms",
+        "Anthropic–California deal: state/local government to use Claude at a discounted rate with training/support (Newsom framing it as augmenting, not replacing, workers) — set against the federal government labeling Anthropic a 'supply-chain risk' and the Pentagon choosing OpenAI after Anthropic sought surveillance/autonomous-weapons safeguards; California's CIO said the federal designation 'didn't come up'",
+        "Memory 'RAMageddon': South Korea's Samsung and SK hynix commit over $550B to expand memory production as AI demand spikes prices; Samsung, SK hynix and Micron sued in the US over alleged DRAM price-fixing (suit claims the HBM shift was cover to curtail DDR3/DDR4 supply); Micron dubbed 'the next Nvidia' — memory as the binding constraint on inference economics"
+      ],
+      "entities": [
+        "Meta",
+        "Brain2Qwerty",
+        "Agents-A1",
+        "DeepSeek V4",
+        "Kimi",
+        "Meituan",
+        "LongCat-2.0",
+        "OpenRouter",
+        "llama.cpp",
+        "DeepReinforce",
+        "Ornith-1.0",
+        "Simon Willison",
+        "Gemma 4",
+        "Qwen 3.5",
+        "Ramp",
+        "Revelio Labs",
+        "Goldman Sachs",
+        "Anthropic",
+        "Claude",
+        "Gavin Newsom",
+        "Pentagon",
+        "OpenAI",
+        "Samsung",
+        "SK hynix",
+        "Micron"
+      ],
+      "threads": [
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "An open-weights release day: Meituan's LongCat-2.0 (1.6T/~48B-active MoE, revealed as the stealth 'owl-alpha' on OpenRouter), DeepSeek V4 merged into llama.cpp for local runs, and DeepReinforce's MIT-licensed self-scaffolding Ornith-1.0 — frontier-scale open weights runnable on a workstation within a day of release.",
+          "arc": "From open weights being cheap-to-run and cheap-to-customize to a steady cadence where the newest frontier-scale models from multiple labs are downloadable and locally runnable almost immediately — even as the hardware to run them gets scarcer."
+        },
+        {
+          "name": "AI infrastructure and the power grid",
+          "status": "The binding constraint shows up as memory, not power: South Korea's Samsung and SK hynix commit over $550B to expand memory production amid a 'RAMageddon' price spike, while the three big makers are sued in the US over alleged DRAM price-fixing; Micron is being called 'the next Nvidia.'",
+          "arc": "Alongside the grid/behind-the-meter buildout, the cost base tightens at the memory layer — the substrate that gates inference economics concentrates and gets more expensive just as open weights democratize the models that need it."
+        },
+        {
+          "name": "AI regulation and public trust",
+          "status": "State and federal governments split on the same company in one week: Anthropic signs a discounted-Claude deal with California (Newsom framing it as augmenting workers) while the federal government brands Anthropic a 'supply-chain risk' and the Pentagon picks OpenAI after Anthropic sought surveillance and autonomous-weapons safeguards; California's CIO said the federal designation 'didn't come up.'",
+          "arc": "From the export-control allow-list deciding who gets frontier models to a sharper split: who gets to deploy a model, and on what conditions, is now being decided in opposite directions at different levels of government — and the safeguards, not the capability, are the dealbreaker."
+        },
+        {
+          "name": "AI quality and verification failures",
+          "status": "Two results argue capability is coming from process, not parameter count: Meta's Brain2Qwerty v2 lifts non-invasive brain-to-text from ~8% to 61% word accuracy with accuracy scaling log-linearly in data, and a 35B agent (Agents-A1) reportedly matches trillion-parameter models by making the intermediate agent process trainable.",
+          "arc": "The eval/measurement beat turns constructive: after a run of papers on where benchmarks mislead, two land arguing the gains live in disciplined process and more data — though both rest on the authors' own numbers and need outside replication."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "bit",
+          "note": "Alan's local-hardware streak got a sore spot: he groaned that the cost of putting decent memory in a home box 'has gone stupid,' framing the RAM shortage as squeezing the cheap commodity memory that used to make running local AI democratic — the builder's-eye complaint that open weights are free but the hardware to run them isn't."
+        }
+      ]
+    },
+    {
       "date": "2026-06-29",
       "title": "The adoption curve outran the guardrails",
       "summary": "A day on the gap between how fast agents are landing in organizations and how little anyone is governing them: OpenAI opens its own books (research-agent use up 56x since November, non-developer use up 137x since August, and by May over 80% of sampled users had made a Codex request worth 30+ minutes of human work) alongside an HP Frontier pilot claiming ~82 hours/week of security-team capacity freed — set against a Resume Now survey where ~76% of workers source their own AI tools with no employer guidance, and Jon Udell's warning about unreviewable agent PRs. Plus Google throttling Meta's Gemini capacity, Asian labs (Sakana's Fugu, 360's Tulongfeng) marketing Mythos-class models as 'export-control-free,' and two papers on quiet agent failure: 'Plans Don't Persist' (evicting the plan drops ALFWorld success 57%->22%) and a tool-use RL collapse traced to control-token over-amplification.",
@@ -1138,22 +1207,34 @@
   "longterm": {
     "active_threads": [
       {
+        "name": "AI regulation and public trust",
+        "status": "State and federal governments split on the same company in one week: Anthropic signs a discounted-Claude deal with California (Newsom framing it as augmenting workers) while the federal government brands Anthropic a 'supply-chain risk' and the Pentagon picks OpenAI after Anthropic sought surveillance and autonomous-weapons safeguards; California's CIO said the federal designation 'didn't come up.'",
+        "arc": "From the export-control allow-list deciding who gets frontier models to a sharper split: who gets to deploy a model, and on what conditions, is now being decided in opposite directions at different levels of government — and the safeguards, not the capability, are the dealbreaker.",
+        "last_seen": "2026-06-30"
+      },
+      {
+        "name": "AI quality and verification failures",
+        "status": "Two results argue capability is coming from process, not parameter count: Meta's Brain2Qwerty v2 lifts non-invasive brain-to-text from ~8% to 61% word accuracy with accuracy scaling log-linearly in data, and a 35B agent (Agents-A1) reportedly matches trillion-parameter models by making the intermediate agent process trainable.",
+        "arc": "The eval/measurement beat turns constructive: after a run of papers on where benchmarks mislead, two land arguing the gains live in disciplined process and more data — though both rest on the authors' own numbers and need outside replication.",
+        "last_seen": "2026-06-30"
+      },
+      {
+        "name": "AI infrastructure and the power grid",
+        "status": "The binding constraint shows up as memory, not power: South Korea's Samsung and SK hynix commit over $550B to expand memory production amid a 'RAMageddon' price spike, while the three big makers are sued in the US over alleged DRAM price-fixing; Micron is being called 'the next Nvidia.'",
+        "arc": "Alongside the grid/behind-the-meter buildout, the cost base tightens at the memory layer — the substrate that gates inference economics concentrates and gets more expensive just as open weights democratize the models that need it.",
+        "last_seen": "2026-06-30"
+      },
+      {
+        "name": "AI sovereignty and open weights",
+        "status": "An open-weights release day: Meituan's LongCat-2.0 (1.6T/~48B-active MoE, revealed as the stealth 'owl-alpha' on OpenRouter), DeepSeek V4 merged into llama.cpp for local runs, and DeepReinforce's MIT-licensed self-scaffolding Ornith-1.0 — frontier-scale open weights runnable on a workstation within a day of release.",
+        "arc": "From open weights being cheap-to-run and cheap-to-customize to a steady cadence where the newest frontier-scale models from multiple labs are downloadable and locally runnable almost immediately — even as the hardware to run them gets scarcer.",
+        "last_seen": "2026-06-30"
+      },
+      {
         "name": "AI agent supply-chain trust",
         "status": "The adoption-vs-oversight gap widened on the same day: OpenAI reports internal agent use exploding (research 56x, non-developer 137x) and HP claims ~82 hours/week of security capacity freed, while a Resume Now survey shows ~76% of workers run their own unsanctioned AI tools with no employer guidance and Jon Udell warns of agent PRs no human can review.",
         "arc": "The review-gate thread sharpens from 'how do we verify agents' to a measured gap: generation volume is scaling vertically while human oversight stays flat, and most real-world adoption is happening with no governance layer at all.",
         "last_seen": "2026-06-29"
-      },
-      {
-        "name": "AI regulation and public trust",
-        "status": "The export-control allow-list is producing its predicted counter-move: with Commerce gating Mythos-class access to trusted institutions, Asian labs (Sakana's Fugu, China's 360 Tulongfeng) now market models explicitly as 'export-control-free' Mythos alternatives — capability claims as yet unverified by third parties.",
-        "arc": "From the gating-by-allow-list template (GPT-5.6 Sol, Mythos 5) to the substitution response: control only binds if there's no alternative, and 'no export controls' is now a selling point printed on the box.",
-        "last_seen": "2026-06-29"
-      },
-      {
-        "name": "AI quality and verification failures",
-        "status": "Two measurement papers landed together: a co-failure-ceiling study of 67 models shows routing and mixture-of-agents are hard-capped by how often every model fails the same query (and that answer format, not content, sets the ceiling), while Doubleword shows the open-vs-closed gap appears to close on one composite index but stays flat at ~5 months across all 18.",
-        "arc": "The eval-honesty beat moves from 'the model can recognize the test' to 'the aggregate you cite determines the conclusion' — ensembles and convergence both look better through a single flattering number than across the full suite.",
-        "last_seen": "2026-06-28"
       },
       {
         "name": "Apple AI strategy",
@@ -1168,21 +1249,9 @@
         "last_seen": "2026-06-26"
       },
       {
-        "name": "AI infrastructure and the power grid",
-        "status": "SemiAnalysis projects well over half of new US data centers will run behind-the-meter by 2028, toward 40GW+ of behind-the-meter capacity, as multi-year interconnection queues push the largest AI loads to generate their own power on site and bypass the public grid.",
-        "arc": "From FERC ordering grid operators to deal with data-center interconnection to the market routing around the grid entirely — the public system stops seeing the demand that is reshaping it.",
-        "last_seen": "2026-06-26"
-      },
-      {
         "name": "AI economics debate",
         "status": "Cost optimization moves into custom inference silicon: OpenAI's Jalapeño chip targets performance-per-watt for the inference layer where the recurring bill lives, with pretraining still on Nvidia.",
         "arc": "From the memory-bottleneck and neocloud-rent reshaping of the cost base toward labs owning their own inference silicon to control the power bill, even as serving cost stays the binding constraint.",
-        "last_seen": "2026-06-25"
-      },
-      {
-        "name": "AI sovereignty and open weights",
-        "status": "Nvidia's NeMo AutoModel makes full fine-tuning of frontier-scale open MoE models tractable (3.4-3.7x throughput, ~30% less memory), while the Alibaba distillation fight shows the IP flip side of exposed capability.",
-        "arc": "Open weights move from cheap-to-run to cheap-to-deeply-customize, just as distillation makes exposed model outputs the contested raw material of the capability race.",
         "last_seen": "2026-06-25"
       },
       {
@@ -1206,7 +1275,7 @@
     ],
     "entities": [],
     "monthly": [],
-    "updated": "2026-06-29",
+    "updated": "2026-06-30",
     "host_lore": []
   }
 }
