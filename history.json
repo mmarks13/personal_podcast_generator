@@ -1,6 +1,83 @@
 {
   "episodes": [
     {
+      "date": "2026-07-01",
+      "title": "The frontier moves down, and the switch turns back on",
+      "summary": "An Anthropic-heavy day framed by capability getting cheaper and control getting messier: Claude Sonnet 5 ships as the most agentic Sonnet yet, matching Opus 4.8 on some agentic work at two dollars per million input tokens (introductory, through Aug 31) and becoming the Claude Code default with a 1M-token context — the frontier migrating down into the tier you can afford to run in a loop. The US lifts export controls on Fable 5 and Mythos 5 just 18 days after banning them, with Anthropic owning the safety monitoring and competitive pressure from export-control-free Asian models a stated factor. Plus Orca, a general world foundation model that predicts next-state in a shared latent read out as text/images/robot actions; an Agentic Abstention benchmark showing agents are near-zero at timely stopping and scale doesn't fix it; Amazon's $1B internally-funded Forward Deployed Engineering org; Etched's $5B valuation and $1B booked inference-chip contracts; and a bipartisan 197-5 Pennsylvania vote repealing data-center tax incentives.",
+      "topics": [
+        "Claude Sonnet 5: 'most agentic Sonnet yet' — plans, browser/terminal use, autonomous runs; on agentic tasks matches Opus 4.8 in some cases at lower cost with adjustable effort levels; introductory pricing $2/$10 per M input/output through Aug 31 ($3/$15 thereafter); set as Claude Code default with a 1M-token context window — the frontier capability migrating down into the affordable, loop-it-all-night tier",
+        "US lifts export controls on Fable 5 and Mythos 5 (Commerce, June 30, access restoring July 1) just 18 days after the June 12 ban and the June 27 allow-list; Secretary Lutnick cites Anthropic agreeing to proactively detect/address security risks and work on protocols/standards — safeguards shift from government switch to company promise; TechCrunch notes export-control-free Asian models (Fugu, Tulongfeng) as competitive pressure driving the reversal",
+        "Orca general world foundation model: predicts next-state in a unified world latent (encoder learns 'unconscious' dense transitions from unlabeled video + 'conscious' language/VQA-supervised transitions; frozen backbone + lightweight per-modality decoders for text/images/robot actions); 125k hours video, 160M event annotations; Orca-4B 51.8 avg over four benchmarks vs ~47 Qwen baseline, edges FLUX on image prediction, on-par with a dedicated robot policy; performance scales with world-latent size — authors' own numbers, needs external replication",
+        "Agentic Abstention benchmark: whether agents recognize infeasible/underspecified tasks and stop; abstention as a sequential answer/abstain/gather decision; ~28k instances across WebShop, a command-line benchmark, and an interactive-search QA set, 13 model systems; agents near-zero at TIMELY abstention and scale doesn't fix it (buys eventual, not early, recognition); 'convolve' context-engineering distills stopping rules from traces, raising one model's timely rate ~27%->57% on WebShop with no retraining",
+        "Amazon AWS launches a $1B Forward Deployed Engineering org, funded internally (vs OpenAI's ~$4B and Anthropic's ~$1.5B private-equity JVs); engineers embed in customer orgs to build custom AI agents; VP Francessca Vasquez says customers leave with 'both new solutions and new engineering capabilities' — signals the bottleneck moved from model capability to in-org deployment; PE JVs buy a customer portfolio Amazon already has via AWS",
+        "Etched hits $5B post-money valuation and $1B in booked contracts for purpose-built 'frontier inference clusters' (inference-specialized chips + racks + software), targeting the serving phase where recurring AI cost lives; ~$800M raised, Stripes-led round, backers include Karpathy, Hinton, Fei-Fei Li; specialization-pendulum bet that the transformer workload has stabilized enough to fix in silicon; field now includes Cerebras (public), Groq, and hyperscaler in-house chips",
+        "Data-center backlash reaches statehouses: Pennsylvania House votes 197-5 (Senate companion 44-6) to repeal the ~5-year-old Computer Data Center Equipment sales-tax incentive (~$188.4M this fiscal year, projected >$517M by 2030); sponsor Greg Vitali questions subsidizing $100B-net-income firms; Dec 2025 Emerson poll 42% oppose vs 34% support; plus a Colorado county moratorium extension and Oregon pushback — permitting/politics as a binding AI-infrastructure constraint"
+      ],
+      "entities": [
+        "Anthropic",
+        "Claude Sonnet 5",
+        "Claude Opus 4.8",
+        "Claude Code",
+        "Claude Fable 5",
+        "Claude Mythos 5",
+        "US Commerce Department",
+        "Howard Lutnick",
+        "Orca",
+        "Qwen",
+        "FLUX",
+        "GPT-5.4",
+        "Llama-3.3",
+        "Amazon",
+        "AWS",
+        "Francessca Vasquez",
+        "OpenAI",
+        "Etched",
+        "Gavin Uberti",
+        "Stripes",
+        "Andrej Karpathy",
+        "Geoffrey Hinton",
+        "Fei-Fei Li",
+        "Cerebras",
+        "Groq",
+        "Pennsylvania",
+        "Greg Vitali"
+      ],
+      "threads": [
+        {
+          "name": "AI regulation and public trust",
+          "status": "The US lifted export controls on Fable 5 and Mythos 5 just 18 days after the June 12 ban and the June 27 allow-list, with Commerce citing Anthropic's agreement to proactively detect security risks and work on protocols/standards — safeguards moving from a government switch to a company commitment. TechCrunch frames competitive pressure from export-control-free Asian models as a driver as much as safety.",
+          "arc": "From hard recall to curated allow-list to full reversal in under three weeks: the state's off-switch turned out to be attached to a market, and when the ban only ceded share to substitutes, control shifted to negotiated company-owned monitoring rather than a published standard."
+        },
+        {
+          "name": "World models",
+          "status": "Orca proposes a general world foundation model that predicts next-state in a shared latent space read out as text, images, and robot actions, trained on 125k hours of video and 160M event annotations; the authors report performance scaling with the world-latent size across all three modalities, though on the authors' own numbers.",
+          "arc": "The thread moves from learned simulators and cross-embodiment stacks toward a single unified-representation bet — one world latent that gets better with scale and drags every downstream modality up with it — the purest 'foundation model for the world' framing yet, still awaiting external replication."
+        },
+        {
+          "name": "AI quality and verification failures",
+          "status": "An Agentic Abstention benchmark (~28k instances, 13 systems) finds agents near-zero at timely abstention on infeasible/underspecified tasks, and that scale buys eventual but not early recognition; a lightweight context-engineering method ('convolve') roughly doubles one model's timely-stopping rate from traces without retraining.",
+          "arc": "The eval-honesty beat extends from 'can the model get it right' to 'does the agent know when to quit' — measuring the expensive, side-effect-prone failure of agents that keep acting, and pointing the fix at remembered stopping rules rather than bigger models."
+        },
+        {
+          "name": "AI economics debate",
+          "status": "Cost pressure lands in silicon and in the model tiers at once: Etched booked $1B in contracts at a $5B valuation for inference-specialized clusters aimed at the serving phase, while Claude Sonnet 5 pushes flagship-class agentic capability into a $2-per-million-token tier cheap enough to run in a loop.",
+          "arc": "The recurring cost of running models — not training them — keeps being named as the real fight, now attacked from both ends: purpose-built inference hardware below and cheaper near-flagship models above."
+        },
+        {
+          "name": "AI infrastructure and the power grid",
+          "status": "The constraint shows up as local politics: Pennsylvania voted 197-5 to repeal its ~5-year-old data-center sales-tax incentive (Senate companion 44-6), joining a Colorado county moratorium extension and Oregon pushback — a bipartisan turn against subsidizing hyperscaler build-out as proposals proliferate.",
+          "arc": "Alongside power, memory, and chips, permitting and public opposition emerge as a binding infrastructure limit: as data centers stop being scarce and courted, the incentives read as giveaways and zoning boards become the gate the SemiAnalysis models don't price in."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "settled",
+          "note": "Ada's standing position — that the real frontier-model question was never 'is it safe to release' but 'who do you distribute it to' — got its cleanest test when the Fable 5 / Mythos 5 export ban was fully reversed after 18 days. She read the three-week 'distribute to almost no one' experiment as having produced not more safety but ceded market share, and accepted the honest version: the off-switch was attached to a market, and the market voted."
+        }
+      ]
+    },
+    {
       "date": "2026-06-30",
       "title": "Capability without the parameters, and the memory bill comes due",
       "summary": "A spread day with one quiet thread — capability showing up somewhere other than raw model size — plus the memory shortage turning into real money. Meta's Brain2Qwerty v2 decodes typed text from non-invasive MEG at 61% word accuracy (78% for the best participant), up from ~8% for prior non-invasive methods, with accuracy improving log-linearly with data; a paper argues a 35B agent (Agents-A1) matches trillion-parameter models by 'scaling the horizon' — making the intermediate agent process trainable rather than growing the model. An open-weights release day: Meituan's LongCat-2.0 (1.6T total / ~48B active MoE, the stealth 'owl-alpha' on OpenRouter), DeepSeek V4 merged into llama.cpp for local runs, and DeepReinforce's self-scaffolding Ornith-1.0 (MIT). Industry: a Ramp/Revelio report finds high-intensity AI adopters grew headcount 10.2% (entry-level +12%) even as Goldman ties AI to ~16k net jobs lost/month — selection-skewed and 'messier' either way; and Anthropic signs a discounted-Claude deal with California while the federal government brands it a 'supply-chain risk.' One to watch: South Korea's $550B 'RAMageddon' memory buildout against a US DRAM price-fixing suit.",
@@ -1208,21 +1285,33 @@
     "active_threads": [
       {
         "name": "AI regulation and public trust",
-        "status": "State and federal governments split on the same company in one week: Anthropic signs a discounted-Claude deal with California (Newsom framing it as augmenting workers) while the federal government brands Anthropic a 'supply-chain risk' and the Pentagon picks OpenAI after Anthropic sought surveillance and autonomous-weapons safeguards; California's CIO said the federal designation 'didn't come up.'",
-        "arc": "From the export-control allow-list deciding who gets frontier models to a sharper split: who gets to deploy a model, and on what conditions, is now being decided in opposite directions at different levels of government — and the safeguards, not the capability, are the dealbreaker.",
-        "last_seen": "2026-06-30"
+        "status": "The US lifted export controls on Fable 5 and Mythos 5 just 18 days after the June 12 ban and the June 27 allow-list, with Commerce citing Anthropic's agreement to proactively detect security risks and work on protocols/standards — safeguards moving from a government switch to a company commitment. TechCrunch frames competitive pressure from export-control-free Asian models as a driver as much as safety.",
+        "arc": "From hard recall to curated allow-list to full reversal in under three weeks: the state's off-switch turned out to be attached to a market, and when the ban only ceded share to substitutes, control shifted to negotiated company-owned monitoring rather than a published standard.",
+        "last_seen": "2026-07-01"
       },
       {
         "name": "AI quality and verification failures",
-        "status": "Two results argue capability is coming from process, not parameter count: Meta's Brain2Qwerty v2 lifts non-invasive brain-to-text from ~8% to 61% word accuracy with accuracy scaling log-linearly in data, and a 35B agent (Agents-A1) reportedly matches trillion-parameter models by making the intermediate agent process trainable.",
-        "arc": "The eval/measurement beat turns constructive: after a run of papers on where benchmarks mislead, two land arguing the gains live in disciplined process and more data — though both rest on the authors' own numbers and need outside replication.",
-        "last_seen": "2026-06-30"
+        "status": "An Agentic Abstention benchmark (~28k instances, 13 systems) finds agents near-zero at timely abstention on infeasible/underspecified tasks, and that scale buys eventual but not early recognition; a lightweight context-engineering method ('convolve') roughly doubles one model's timely-stopping rate from traces without retraining.",
+        "arc": "The eval-honesty beat extends from 'can the model get it right' to 'does the agent know when to quit' — measuring the expensive, side-effect-prone failure of agents that keep acting, and pointing the fix at remembered stopping rules rather than bigger models.",
+        "last_seen": "2026-07-01"
       },
       {
         "name": "AI infrastructure and the power grid",
-        "status": "The binding constraint shows up as memory, not power: South Korea's Samsung and SK hynix commit over $550B to expand memory production amid a 'RAMageddon' price spike, while the three big makers are sued in the US over alleged DRAM price-fixing; Micron is being called 'the next Nvidia.'",
-        "arc": "Alongside the grid/behind-the-meter buildout, the cost base tightens at the memory layer — the substrate that gates inference economics concentrates and gets more expensive just as open weights democratize the models that need it.",
-        "last_seen": "2026-06-30"
+        "status": "The constraint shows up as local politics: Pennsylvania voted 197-5 to repeal its ~5-year-old data-center sales-tax incentive (Senate companion 44-6), joining a Colorado county moratorium extension and Oregon pushback — a bipartisan turn against subsidizing hyperscaler build-out as proposals proliferate.",
+        "arc": "Alongside power, memory, and chips, permitting and public opposition emerge as a binding infrastructure limit: as data centers stop being scarce and courted, the incentives read as giveaways and zoning boards become the gate the SemiAnalysis models don't price in.",
+        "last_seen": "2026-07-01"
+      },
+      {
+        "name": "World models",
+        "status": "Orca proposes a general world foundation model that predicts next-state in a shared latent space read out as text, images, and robot actions, trained on 125k hours of video and 160M event annotations; the authors report performance scaling with the world-latent size across all three modalities, though on the authors' own numbers.",
+        "arc": "The thread moves from learned simulators and cross-embodiment stacks toward a single unified-representation bet — one world latent that gets better with scale and drags every downstream modality up with it — the purest 'foundation model for the world' framing yet, still awaiting external replication.",
+        "last_seen": "2026-07-01"
+      },
+      {
+        "name": "AI economics debate",
+        "status": "Cost pressure lands in silicon and in the model tiers at once: Etched booked $1B in contracts at a $5B valuation for inference-specialized clusters aimed at the serving phase, while Claude Sonnet 5 pushes flagship-class agentic capability into a $2-per-million-token tier cheap enough to run in a loop.",
+        "arc": "The recurring cost of running models — not training them — keeps being named as the real fight, now attacked from both ends: purpose-built inference hardware below and cheaper near-flagship models above.",
+        "last_seen": "2026-07-01"
       },
       {
         "name": "AI sovereignty and open weights",
@@ -1241,18 +1330,6 @@
         "status": "Apple unveiled Siri AI with on-screen understanding, web access, and cross-app actions, expanding Apple Intelligence across Safari/Photos/Mail/Calendar this fall; reporting (not Apple's own page) says it is built in partnership with Google, combining Apple Foundation Models with Gemini.",
         "arc": "From Apple revealing a Gemini-based Apple Intelligence architecture earlier this year to the full rebuilt-Siri product shipping — the most valuable device company running its flagship assistant partly on a competitor's model.",
         "last_seen": "2026-06-27"
-      },
-      {
-        "name": "World models",
-        "status": "General Intuition raised $320M at a $2.3B valuation (Khosla led; Bezos, Schmidt) to train agents on millions of hours of action-labeled video-game footage, demoing a quadruped fine-tuned on just eight minutes of real-world data after gameplay pretraining.",
-        "arc": "World models move from learned-simulator research toward action-labeled gameplay as a cheap, huge source of embodied experience for sim-to-real transfer — the data-bottleneck answer to the embodied feedback-loop problem.",
-        "last_seen": "2026-06-26"
-      },
-      {
-        "name": "AI economics debate",
-        "status": "Cost optimization moves into custom inference silicon: OpenAI's Jalapeño chip targets performance-per-watt for the inference layer where the recurring bill lives, with pretraining still on Nvidia.",
-        "arc": "From the memory-bottleneck and neocloud-rent reshaping of the cost base toward labs owning their own inference silicon to control the power bill, even as serving cost stays the binding constraint.",
-        "last_seen": "2026-06-25"
       },
       {
         "name": "AI model distillation and IP extraction",
@@ -1275,7 +1352,7 @@
     ],
     "entities": [],
     "monthly": [],
-    "updated": "2026-06-30",
+    "updated": "2026-07-01",
     "host_lore": []
   }
 }
