@@ -1,6 +1,50 @@
 {
   "episodes": [
     {
+      "date": "2026-07-03",
+      "title": "Two rulers for the frontier, and the soft spots in the models we already have",
+      "summary": "A White House executive order sets an August 1 deadline for a classified cyber-capability benchmark and a voluntary pre-release framework for frontier models, while Anthropic publishes its own Fable cyber-safeguard scale — two rulers being built at once. Plus research poking the soft spots: sycophancy in agent memory, a zero-shot foundation model for tables, and compiling fuzzy tasks down to a program that runs on a laptop.",
+      "topics": [
+        "White House executive order: August 1 deadline for NSA classified cyber-capability benchmarking of 'covered frontier models' and a Treasury/NSA/CISA voluntary pre-release framework; FT reports announcement possible week of July 7; GPT-5.6 (Sol/Terra/Luna) still limited to ~20 government-vetted partners, Google in talks ahead of next Gemini coding models",
+        "Anthropic Fable cyber safeguards: four cybersecurity-use categories (prohibited / high-risk dual-use / low-risk dual-use / benign) plus a Cyber Jailbreak Severity scale from CJS-0 Informational to CJS-4 Critical — a company-published ruler alongside the government's classified one",
+        "MemSyco-Bench: benchmarks sycophancy in agent memory — tests post-retrieval reasoning (reject memory as fact, respect scope, resolve conflicts with objective evidence); adding memory dropped Qwen3-8B from ~49% to high-20s/mid-30s on objective questions; ~60% of errors occur after correct retrieval; memory-caution instructions help conflict resolution but hurt personalization",
+        "TabFM (Google Research): zero-shot foundation model for tabular data; single forward pass via in-context learning, no training/tuning/feature engineering; alternating attention across columns and rows plus row compression; trained on hundreds of millions of synthetic datasets from structural causal models; on TabArena (38 classification / 13 regression) beats heavily tuned supervised algorithms (authors' numbers)",
+        "Program-as-Weights: describe a 'fuzzy function' in natural language, a 4B neural compiler compiles it to a compact neural artifact, a frozen 0.6B interpreter runs it locally; ~74% vs ~69% exact-match against prompting a 32B model directly, ~1/50th inference memory, ~30 tok/s on a MacBook (FuzzyBench, authors' numbers)",
+        "ZCode: a GLM-5.2-native coding agent from Z.ai (the GLM team) — planning/coding/review/deploy, goal-based long-running tasks, remote control via WeChat/Telegram/Feishu; tiers ~$16 to $144/month; open-weight labs claiming the agent layer as their own product",
+        "Anthropic in early talks with Samsung about a custom chip (The Information via TechCrunch); no decided purpose/spec; follows OpenAI's Broadcom inference chip; part of hardware-diversity strategy alongside Google TPUs and Amazon Trainium"
+      ],
+      "entities": [
+        "Anthropic",
+        "White House",
+        "NSA",
+        "CISA",
+        "OpenAI",
+        "Google",
+        "Samsung",
+        "Broadcom",
+        "Google Research",
+        "TabFM",
+        "Z.ai",
+        "GLM-5.2",
+        "Fable 5",
+        "GPT-5.6",
+        "Meta"
+      ],
+      "threads": [
+        {
+          "name": "Frontier-model release gating",
+          "status": "Formalizing: White House executive order sets an August 1 deadline for a classified cyber-capability benchmark and a voluntary pre-release framework; GPT-5.6 and next Gemini coding models still gated to a small partner set",
+          "arc": "From ad hoc bans and allow-lists (June export-control drama, Fable restoration) to a dated, process-driven regime — with companies like Anthropic publishing their own public severity scales alongside the government's classified ruler"
+        },
+        {
+          "name": "Custom AI silicon vs Nvidia",
+          "status": "Anthropic in early talks with Samsung on a custom chip, following OpenAI's Broadcom inference chip",
+          "arc": "Frontier labs building workload-specific silicon to reduce Nvidia dependence; Anthropic layering Samsung onto existing Google TPU and Amazon Trainium use"
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-07-02",
       "title": "Generation is cheap, checking is the product",
       "summary": "A day that keeps circling one idea — the hard part of AI has moved from generating to verifying. Snorkel's Senior SWE-Bench grades coding agents on deliberately under-specified tasks with a per-solution validation agent, targeting the judgment junior-vs-senior benchmarks never measured; the Act2Answer benchmark shows vision-language-action robot models lose 20-40 points of world knowledge after fine-tuning to act, unless they keep doing VQA alongside; and 'The Gauge Broke' revisits METR's RCT (16 devs, 246 tasks) where developers felt ~20% faster with AI but measured ~19% slower, corroborated by Faros AI's 10k-dev finding of PRs merged +98% but review time +91%. Godot bans AI-authored code contributions for the same reason — review capacity is the fixed constraint — while Cloudflare's Sept 15 policy forces AI crawlers to split search from training or pay. On the build side, HF+Cerebras ship a modular open voice pipeline (Parakeet + Gemma 4 31B on Cerebras + Qwen3TTS) built to kill P95 tail latency, already on 9,000+ Reachy Mini robots. One to watch: Anthropic's Claude Science — a workbench, not a new model, betting scientific AI's edge is an auditable, reproducible workflow.",
@@ -1367,6 +1411,18 @@
   "longterm": {
     "active_threads": [
       {
+        "name": "Frontier-model release gating",
+        "status": "Formalizing: White House executive order sets an August 1 deadline for a classified cyber-capability benchmark and a voluntary pre-release framework; GPT-5.6 and next Gemini coding models still gated to a small partner set",
+        "arc": "From ad hoc bans and allow-lists (June export-control drama, Fable restoration) to a dated, process-driven regime — with companies like Anthropic publishing their own public severity scales alongside the government's classified ruler",
+        "last_seen": "2026-07-03"
+      },
+      {
+        "name": "Custom AI silicon vs Nvidia",
+        "status": "Anthropic in early talks with Samsung on a custom chip, following OpenAI's Broadcom inference chip",
+        "arc": "Frontier labs building workload-specific silicon to reduce Nvidia dependence; Anthropic layering Samsung onto existing Google TPU and Amazon Trainium use",
+        "last_seen": "2026-07-03"
+      },
+      {
         "name": "AI quality and verification failures",
         "status": "The bottleneck-is-verification thesis converges from four directions in one day: Senior SWE-Bench grades agents on under-specified tasks with a per-solution validation agent (can't be retrieved against); Act2Answer shows VLA fine-tuning erases 20-40 points of world knowledge unless VQA co-training continues; 'The Gauge Broke' revisits METR's felt-20%-faster / measured-19%-slower RCT and Faros AI's +98% PRs / +91% review time; and Godot bans AI-authored contributions because reviewer capacity, not generation, is the fixed constraint.",
         "arc": "The eval-honesty beat generalizes past benchmarks into an economic claim: generation is now cheap and verification is the scarce, expensive, invisible-on-the-dashboard resource — measured in agents that can't be graded by leakable tests, robots that forget what they knew, developers who misjudge their own speed, and a volunteer project rationing intake to protect review.",
@@ -1441,7 +1497,7 @@
     ],
     "entities": [],
     "monthly": [],
-    "updated": "2026-07-02",
+    "updated": "2026-07-03",
     "host_lore": []
   }
 }
