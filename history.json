@@ -1,6 +1,59 @@
 {
   "episodes": [
     {
+      "date": "2026-07-04",
+      "title": "Everything bends toward control: who owns the model, and who can switch it off",
+      "summary": "A spread day that keeps circling ownership and control: ELDR shows that serving a mixture-of-experts model well means routing by which experts are already warm, not just balancing request counts; Portugal ships Amalia, a ~9B national LLM; Together AI raises $800M at $8.3B (Aramco-led) and Microsoft stands up a $2.5B deployment company, both betting the bottleneck is now the last mile, not the model; Zuckerberg tells Meta staff agents haven't accelerated as leadership hoped; and a 'Right to Intelligence' campaign argues for a legal right to run AI locally.",
+      "topics": [
+        "ELDR (Expert-Locality-Aware Decode Routing): for prefill-decode disaggregated MoE serving, equally-loaded decode workers differ in latency by how many DISTINCT experts their batches activate (a single layer ~4.7x slower going from 16 to 128 active experts at fixed batch size); ELDR builds an 'expert signature' from prefill activations (prefill-decode correlation ~0.70-0.92) to route requests to workers already warm on those experts; reduces median time-per-output-token ~7.0-13.9% and per-request active-expert count ~22% vs the strongest load-balancing baseline, with bit-for-bit identical outputs",
+        "Portugal releases Amalia, a ~9B national/sovereign LLM (pre-trained on ~4B words, fine-tuned on Portuguese data) built by a consortium of Portuguese universities and research centers; framed as language/civic-text sovereignty and ownership rather than leaderboard competition",
+        "Together AI raises $800M Series C at $8.3B valuation, led by Aramco Ventures, to scale open-source model hosting and inference as a neocloud (alongside CoreWeave, Lambda); read as capital betting on inference/serving as the recurring cost center",
+        "Microsoft launches Microsoft Frontier Company, a standalone $2.5B business dedicated to helping enterprises deploy AI; part of a pattern with Amazon's ~$1B Forward Deployed Engineering org and OpenAI/Anthropic deployment ventures — the bottleneck moving from model capability to the last-mile deployment gap",
+        "Mark Zuckerberg told Meta staff at a Thursday town hall that AI agent development had not 'accelerated in the way' leadership anticipated — a candid recalibration from a major infrastructure bettor, echoing the week's agent-reliability findings",
+        "Right to Intelligence: advocacy campaign (petitions, contacting state legislators) arguing for a legal right to run AI models locally on personal hardware; high Hacker News engagement (~514 points), read against export bans/reversals, gated frontier releases, and rising local-memory prices"
+      ],
+      "entities": [
+        "ELDR",
+        "mixture-of-experts",
+        "Portugal",
+        "Amalia",
+        "Together AI",
+        "Aramco Ventures",
+        "CoreWeave",
+        "Lambda",
+        "Microsoft",
+        "Microsoft Frontier Company",
+        "Amazon",
+        "Meta",
+        "Mark Zuckerberg",
+        "Right to Intelligence"
+      ],
+      "threads": [
+        {
+          "name": "AI economics debate",
+          "status": "Capital and product both bet on the last mile and the serving layer: Together AI raises $800M at $8.3B (Aramco-led) for open-model inference hosting, Microsoft stands up a $2.5B deployment company (Microsoft Frontier Company) joining Amazon's Forward Deployed Engineering org and the OpenAI/Anthropic deployment ventures, and ELDR shows why shaving inference cost is worth a research team's time.",
+          "arc": "From 'the model is the product' toward the recurring inference bill and the in-enterprise deployment gap being where the money and the margins actually are — the labs building the consulting arm and the serving stack to capture it."
+        },
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "Portugal ships Amalia, a ~9B national LLM built by a university consortium, framed as owning your language and civic text rather than topping a leaderboard; Mistral releases Leanstral-1.5 (119B/6B-active MoE) for local runs; and a 'Right to Intelligence' campaign argues for a legal right to run models locally.",
+          "arc": "The open-weights/sovereignty thread widens from labs and countries releasing runnable weights to an explicit ownership-and-control argument at two scales — national models you can inspect and an individual right to run a model no one can revoke or region-lock."
+        },
+        {
+          "name": "AI agent supply-chain trust",
+          "status": "Zuckerberg told Meta staff that agent development hasn't accelerated as leadership anticipated — the same wall the week's benchmarks and productivity studies named, now stated from the C-suite: agents work in bounded, supervised lanes but stall on long, open-ended, unsupervised tasks.",
+          "arc": "The adoption-vs-capability gap gets its most candid admission yet from a top infrastructure bettor: a recalibration (not a eulogy) that the agent roadmaps outran the delivery."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "bit",
+          "note": "Alan's running local-hardware sore spot returned and got named as canon: he keeps an old mining rig he refuses to replace, and the 2026 memory-price spike still visibly bothers him ('it is never letting that go') — the builder's-eye stake in whether running your own model at home stays affordable, tied here to the Right-to-Intelligence campaign."
+        }
+      ]
+    },
+    {
       "date": "2026-07-03",
       "title": "Two rulers for the frontier, and the soft spots in the models we already have",
       "summary": "A White House executive order sets an August 1 deadline for a classified cyber-capability benchmark and a voluntary pre-release framework for frontier models, while Anthropic publishes its own Fable cyber-safeguard scale — two rulers being built at once. Plus research poking the soft spots: sycophancy in agent memory, a zero-shot foundation model for tables, and compiling fuzzy tasks down to a program that runs on a laptop.",
@@ -1411,6 +1464,24 @@
   "longterm": {
     "active_threads": [
       {
+        "name": "AI economics debate",
+        "status": "Capital and product both bet on the last mile and the serving layer: Together AI raises $800M at $8.3B (Aramco-led) for open-model inference hosting, Microsoft stands up a $2.5B deployment company (Microsoft Frontier Company) joining Amazon's Forward Deployed Engineering org and the OpenAI/Anthropic deployment ventures, and ELDR shows why shaving inference cost is worth a research team's time.",
+        "arc": "From 'the model is the product' toward the recurring inference bill and the in-enterprise deployment gap being where the money and the margins actually are — the labs building the consulting arm and the serving stack to capture it.",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "AI sovereignty and open weights",
+        "status": "Portugal ships Amalia, a ~9B national LLM built by a university consortium, framed as owning your language and civic text rather than topping a leaderboard; Mistral releases Leanstral-1.5 (119B/6B-active MoE) for local runs; and a 'Right to Intelligence' campaign argues for a legal right to run models locally.",
+        "arc": "The open-weights/sovereignty thread widens from labs and countries releasing runnable weights to an explicit ownership-and-control argument at two scales — national models you can inspect and an individual right to run a model no one can revoke or region-lock.",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "AI agent supply-chain trust",
+        "status": "Zuckerberg told Meta staff that agent development hasn't accelerated as leadership anticipated — the same wall the week's benchmarks and productivity studies named, now stated from the C-suite: agents work in bounded, supervised lanes but stall on long, open-ended, unsupervised tasks.",
+        "arc": "The adoption-vs-capability gap gets its most candid admission yet from a top infrastructure bettor: a recalibration (not a eulogy) that the agent roadmaps outran the delivery.",
+        "last_seen": "2026-07-04"
+      },
+      {
         "name": "Frontier-model release gating",
         "status": "Formalizing: White House executive order sets an August 1 deadline for a classified cyber-capability benchmark and a voluntary pre-release framework; GPT-5.6 and next Gemini coding models still gated to a small partner set",
         "arc": "From ad hoc bans and allow-lists (June export-control drama, Fable restoration) to a dated, process-driven regime — with companies like Anthropic publishing their own public severity scales alongside the government's classified ruler",
@@ -1453,24 +1524,6 @@
         "last_seen": "2026-07-01"
       },
       {
-        "name": "AI economics debate",
-        "status": "Cost pressure lands in silicon and in the model tiers at once: Etched booked $1B in contracts at a $5B valuation for inference-specialized clusters aimed at the serving phase, while Claude Sonnet 5 pushes flagship-class agentic capability into a $2-per-million-token tier cheap enough to run in a loop.",
-        "arc": "The recurring cost of running models — not training them — keeps being named as the real fight, now attacked from both ends: purpose-built inference hardware below and cheaper near-flagship models above.",
-        "last_seen": "2026-07-01"
-      },
-      {
-        "name": "AI sovereignty and open weights",
-        "status": "An open-weights release day: Meituan's LongCat-2.0 (1.6T/~48B-active MoE, revealed as the stealth 'owl-alpha' on OpenRouter), DeepSeek V4 merged into llama.cpp for local runs, and DeepReinforce's MIT-licensed self-scaffolding Ornith-1.0 — frontier-scale open weights runnable on a workstation within a day of release.",
-        "arc": "From open weights being cheap-to-run and cheap-to-customize to a steady cadence where the newest frontier-scale models from multiple labs are downloadable and locally runnable almost immediately — even as the hardware to run them gets scarcer.",
-        "last_seen": "2026-06-30"
-      },
-      {
-        "name": "AI agent supply-chain trust",
-        "status": "The adoption-vs-oversight gap widened on the same day: OpenAI reports internal agent use exploding (research 56x, non-developer 137x) and HP claims ~82 hours/week of security capacity freed, while a Resume Now survey shows ~76% of workers run their own unsanctioned AI tools with no employer guidance and Jon Udell warns of agent PRs no human can review.",
-        "arc": "The review-gate thread sharpens from 'how do we verify agents' to a measured gap: generation volume is scaling vertically while human oversight stays flat, and most real-world adoption is happening with no governance layer at all.",
-        "last_seen": "2026-06-29"
-      },
-      {
         "name": "Apple AI strategy",
         "status": "Apple unveiled Siri AI with on-screen understanding, web access, and cross-app actions, expanding Apple Intelligence across Safari/Photos/Mail/Calendar this fall; reporting (not Apple's own page) says it is built in partnership with Google, combining Apple Foundation Models with Gemini.",
         "arc": "From Apple revealing a Gemini-based Apple Intelligence architecture earlier this year to the full rebuilt-Siri product shipping — the most valuable device company running its flagship assistant partly on a competitor's model.",
@@ -1497,7 +1550,7 @@
     ],
     "entities": [],
     "monthly": [],
-    "updated": "2026-07-03",
+    "updated": "2026-07-04",
     "host_lore": []
   }
 }
