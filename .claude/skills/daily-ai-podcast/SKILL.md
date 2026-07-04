@@ -279,6 +279,28 @@ still care in a month?) *and* at least one of these holds:
 An interesting-but-inconsequential paper does not earn a dive; it earns a sweep line.
 The grounding rules apply to a dive's teaching exactly as to its reporting.
 
+**"Genuinely matters" is anchored to signals, not taste.** Your own sense that
+something is fascinating is the weakest evidence you have — your taste runs hot on
+elegant mechanisms. The objective signals in `out/candidates.json` come first:
+multi-source pickup (`source_count`), real community traction (HF upvotes, HN points),
+or continuation of an active `history.json` thread. Dives are normally drawn from
+stories carrying at least one of these. A zero-signal story *can* still dive, but only
+if you can say in one sentence who specifically will care and why. Every dive's
+sentence — signal-backed or not — is recorded in `episode_meta.json`'s `dives` field
+(schema below): the bets are auditable, and tomorrow's writer sees yesterday's.
+- **Research papers: let the signal age.** Day-one upvotes are noise; a paper's real
+  reception takes days to materialize. The **HF Top Papers (7-day)** feed carries the
+  trailing week's top-voted papers — that is the pool paper dives normally come from.
+  A brand-new paper defaults to a sweep line ("new from X, one to watch"); if it ages
+  well it comes back through the weekly list with proven signal and earns its dive
+  then. Exception: a frontier-lab release or a plainly extraordinary result can dive
+  on day one. (A paper swept earlier doesn't enter `topics` memory, so its later dive
+  won't be flagged as a repeat — that's by design.)
+- **Listener preference: embodied AI sweeps by default.** Robotics, VLA models, and
+  embodied work should keep the listener aware via sweep lines and the occasional
+  teaching moment, but they don't win dive slots on topic interest alone — an embodied
+  story needs an unusually strong who-cares case to dive.
+
 **The shape flexes — that's the point.** On a news-heavy day, one big dive plus a
 broad sweep may serve better; when one story eats the day, the episode can be nearly
 all dive. Check the recent scripts from step 1.5: if the last episodes already leaned
@@ -468,6 +490,8 @@ hand-write JSON dialogue or escape quotes.
     "repeat_coverage": [ { "story": "label of the story as covered tonight",
                            "repeat_of": "the matching past episode/topic",
                            "new_development": "one sentence: what is new tonight" } ],
+    "dives": [ { "story": "label of each mini-dive",
+                 "why_it_matters": "one sentence: who specifically cares and why" } ],
     "lore": [ { "host": "Ada" | "Alan",
                 "type": "reveal" | "bit" | "position" | "settled",
                 "note": "what is now canon, e.g. 'Alan revealed he runs weekend experiments on an ancient mining rig he refuses to replace'" } ] }
@@ -486,6 +510,9 @@ hand-write JSON dialogue or escape quotes.
   - `repeat_coverage` — **required for every story you ran despite a `possible_repeat`
     flag** (see the repeat-check above); omit the key when nothing flagged ran. It's the
     audit trail proving each re-covered story carried a real new development.
+  - `dives` — **one entry per mini-dive**, the significance bet stated plainly. It
+    persists into `history.json`, so tomorrow's writer sees which bets the show has
+    been making — and the listener's corrections have something concrete to land on.
   - Fill `lore` with what this episode added to the hosts' canon: a self-revelation or
     development of an established detail (`reveal` — the main event), a running bit worth
     returning to (`bit`), a genuine position a host staked out (`position`), or the

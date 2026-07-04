@@ -51,7 +51,8 @@ MAX_LORE = 40            # host canon cap (~years at the intended reveal rate)
 # The only fields that belong in the show's memory. episode_meta.json may also
 # carry `sources` / `tts_notes` (for the show notes and the renderer), which must
 # not leak into history.json — it is re-read into context every run.
-STORE_KEYS = ("date", "kind", "title", "summary", "topics", "entities", "threads", "lore")
+STORE_KEYS = ("date", "kind", "title", "summary", "topics", "entities", "threads", "lore",
+              "dives")
 
 
 def _strip_tags(value):

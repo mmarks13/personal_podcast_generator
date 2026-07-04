@@ -83,6 +83,32 @@ def fetch_hf_daily_papers(url: str, date: str | None = None) -> list[dict]:
     return out
 
 
+def fetch_hf_top_week(url: str, days: int = 7, top: int = 15) -> list[dict]:
+    """Top-voted HF papers over the trailing week — the *aged* paper signal.
+
+    The nightly fetch sees today's papers at the moment of maximum ignorance
+    (hours of votes); real reception materializes over days. This feed aggregates
+    the last `days` daily pages, dedupes by paper id (keeping the highest vote
+    count seen), and returns the top by upvotes — the pool research dives are
+    normally drawn from. Weekend dates that return nothing are skipped silently.
+    """
+    best: dict[str, dict] = {}
+    for d in range(1, days + 1):
+        date = (datetime.now(timezone.utc) - timedelta(days=d)).strftime("%Y-%m-%d")
+        try:
+            papers = fetch_hf_daily_papers(url, date)
+        except Exception:  # noqa: BLE001 - one missing day never kills the feed
+            continue
+        for p in papers:
+            key = p.get("arxiv_id") or p.get("url") or p.get("title")
+            prev = best.get(key)
+            if prev is None or (p.get("upvotes") or 0) > (prev.get("upvotes") or 0):
+                best[key] = {**p, "listed_on": date}
+        time.sleep(1)  # be polite: one request per day-page
+    out = sorted(best.values(), key=lambda p: (p.get("upvotes") or 0), reverse=True)
+    return out[:top]
+
+
 def fetch_hacker_news(url: str, hours: int, min_points: int = 40) -> list[dict]:
     """AI-related HN stories from the window, by points."""
     since = int((datetime.now(timezone.utc) - timedelta(hours=hours)).timestamp())
@@ -218,6 +244,20 @@ def main() -> int:
             time.sleep(1)  # be polite to APIs
         else:  # rss
             items, err = safe(name, fetch_rss, url, win)
+        for it in items:
+            it["source"] = name
+        feeds[name] = items
+        if err:
+            errors.append(err)
+
+    # Companion feed to HF Daily Papers: the trailing week's top-voted papers.
+    # Day-one upvotes are a weak signal; this is the aged pool the writer's
+    # research dives normally come from (already-covered ones get repeat-flagged
+    # downstream by the consolidator).
+    hf = next((s for s in sources if "huggingface.co/api/daily_papers" in s["url"]), None)
+    if hf:
+        name = "HF Top Papers (7-day)"
+        items, err = safe(name, fetch_hf_top_week, hf["url"])
         for it in items:
             it["source"] = name
         feeds[name] = items
