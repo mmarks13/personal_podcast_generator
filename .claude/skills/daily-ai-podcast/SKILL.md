@@ -290,7 +290,9 @@ sentence — signal-backed or not — is recorded in `episode_meta.json`'s `dive
 (schema below): the bets are auditable, and tomorrow's writer sees yesterday's.
 - **Research papers: let the signal age.** Day-one upvotes are noise; a paper's real
   reception takes days to materialize. The **HF Top Papers (7-day)** feed carries the
-  trailing week's top-voted papers — that is the pool paper dives normally come from.
+  trailing week's top-voted papers — that is the pool paper dives normally come from
+  (its **30-day top-five** companion is the safety net for slow risers and weeks of
+  thin shows).
   A brand-new paper defaults to a sweep line ("new from X, one to watch"); if it ages
   well it comes back through the weekly list with proven signal and earns its dive
   then. Exception: a frontier-lab release or a plainly extraordinary result can dive

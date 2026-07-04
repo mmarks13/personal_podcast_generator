@@ -149,13 +149,24 @@ repeats against history.json. Write the file even if one input is missing." \
   --max-turns 30 \
   || log run "WARNING: consolidate failed; podcast skill will gather inline"
 
+# One-time steering (self-expiring): aged-well papers the pre-refresh pipeline missed
+# (found in a 30-day HF audit on 2026-07-04). The date guard makes this a no-op from
+# 2026-07-12 on — nothing to remember; delete the block whenever this file is next touched.
+BACKLOG_NOTE=""
+if [ "$DATE" \< "2026-07-12" ]; then
+  BACKLOG_NOTE=" One-time backlog: these aged-well HF papers were never covered — consider at most \
+one per night as a dive where it genuinely fits (check history.json first and skip any already \
+covered): 'ABot-Earth 0.5: Generative 3D Earth Model' (486 upvotes), 'Looped World Models' (476), \
+'LoopCoder-v2: Only Loop Once for Efficient Test-Time Computation Scaling' (209)."
+fi
+
 # 3: Opus selects, verifies, and writes the script — stops after validation.
 run_step podcast claude -p "Use the daily-ai-podcast skill to produce today's episode. The harness has \
 already run steps 1, 2, and 2.5 — out/sources.json, out/crawl.json, and out/candidates.json already \
 exist, so SKIP them. Do step 1.5 (recall history) then steps 3 and 3.5 (select, verify, write, \
 validate). STOP after the gate passes — do NOT run steps 4 or 4.5; the harness renders and updates \
 history. If out/candidates.json is somehow missing, fall back to doing the gather steps yourself. \
-Print the episode title and word count when done." \
+Print the episode title and word count when done.${BACKLOG_NOTE}" \
   --model "$PODCAST_MODEL" \
   --effort medium \
   --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \

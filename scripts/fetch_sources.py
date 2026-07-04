@@ -83,28 +83,40 @@ def fetch_hf_daily_papers(url: str, date: str | None = None) -> list[dict]:
     return out
 
 
-def fetch_hf_top_week(url: str, days: int = 7, top: int = 15) -> list[dict]:
-    """Top-voted HF papers over the trailing week — the *aged* paper signal.
+def fetch_hf_day_pages(url: str, days: int) -> dict[str, list[dict]]:
+    """The trailing `days` HF daily pages, keyed by date (one request each).
 
-    The nightly fetch sees today's papers at the moment of maximum ignorance
-    (hours of votes); real reception materializes over days. This feed aggregates
-    the last `days` daily pages, dedupes by paper id (keeping the highest vote
-    count seen), and returns the top by upvotes — the pool research dives are
-    normally drawn from. Weekend dates that return nothing are skipped silently.
+    Weekend/missing dates are skipped silently — one bad day never kills the feed.
     """
-    best: dict[str, dict] = {}
+    pages: dict[str, list[dict]] = {}
     for d in range(1, days + 1):
         date = (datetime.now(timezone.utc) - timedelta(days=d)).strftime("%Y-%m-%d")
         try:
-            papers = fetch_hf_daily_papers(url, date)
-        except Exception:  # noqa: BLE001 - one missing day never kills the feed
+            pages[date] = fetch_hf_daily_papers(url, date)
+        except Exception:  # noqa: BLE001 - isolate each day
+            continue
+        time.sleep(1)  # be polite: one request per day-page
+    return pages
+
+
+def hf_top_from_pages(pages: dict[str, list[dict]], days: int, top: int) -> list[dict]:
+    """Top-voted papers over the trailing `days`, from pre-fetched day pages.
+
+    The nightly fetch sees today's papers at the moment of maximum ignorance
+    (hours of votes); real reception materializes over days. This aggregates the
+    window's pages, dedupes by paper id (keeping the highest vote count seen),
+    and returns the top by upvotes — the aged pool research dives come from.
+    """
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
+    best: dict[str, dict] = {}
+    for date, papers in pages.items():
+        if date < cutoff:
             continue
         for p in papers:
             key = p.get("arxiv_id") or p.get("url") or p.get("title")
             prev = best.get(key)
             if prev is None or (p.get("upvotes") or 0) > (prev.get("upvotes") or 0):
                 best[key] = {**p, "listed_on": date}
-        time.sleep(1)  # be polite: one request per day-page
     out = sorted(best.values(), key=lambda p: (p.get("upvotes") or 0), reverse=True)
     return out[:top]
 
@@ -250,19 +262,23 @@ def main() -> int:
         if err:
             errors.append(err)
 
-    # Companion feed to HF Daily Papers: the trailing week's top-voted papers.
-    # Day-one upvotes are a weak signal; this is the aged pool the writer's
-    # research dives normally come from (already-covered ones get repeat-flagged
-    # downstream by the consolidator).
+    # Companion feeds to HF Daily Papers, built from one shared set of day-page
+    # requests: the trailing week's top papers (the aged pool research dives are
+    # normally drawn from) and a 30-day top-5 safety net for slow risers or weeks
+    # of thin shows. Day-one upvotes are a weak signal; these carry the real
+    # reception. Already-covered papers get repeat-flagged by the consolidator.
     hf = next((s for s in sources if "huggingface.co/api/daily_papers" in s["url"]), None)
     if hf:
-        name = "HF Top Papers (7-day)"
-        items, err = safe(name, fetch_hf_top_week, hf["url"])
-        for it in items:
-            it["source"] = name
-        feeds[name] = items
+        pages, err = safe("HF day pages (30)", fetch_hf_day_pages, hf["url"], 30)
         if err:
             errors.append(err)
+        for name, days, top in (("HF Top Papers (7-day)", 7, 15),
+                                ("HF Top Papers (30-day)", 30, 5)):
+            items = hf_top_from_pages(pages, days, top) if pages else []
+            for it in items:
+                it["source"] = name
+            feeds[name] = items
+            print(f"  [ok]   {name}: {len(items)} items", file=sys.stderr)
 
     bundle = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
