@@ -1,7 +1,8 @@
 # daily-ai-podcast — project memory
 
 Automated daily AI-news podcast: gather the day's AI papers, model releases, and
-top discussion → write a grounded 18–22 minute two-host script → render to MP3 → publish
+top discussion → write a grounded 18–28 minute two-host script (2–3 mini-dives + a
+brisk sweep by default; the day's material picks the shape) → render to MP3 → publish
 to an RSS feed Spotify polls.
 
 ## How this runs
@@ -31,7 +32,11 @@ to an RSS feed Spotify polls.
 - `scripts/fetch_sources.py` — deterministic pulls of ALL rss/api sources, both tiers
   (arXiv keyword-filtered to topic priorities, HF Daily Papers, HN, newsletters).
 - `scripts/check_episode.py` — hard pre-render gate: schema, word band, audio-tag
-  form/density, TTS artifacts.
+  form/density, TTS artifacts; warns (never fails) on phrases recurring across recent
+  archived scripts.
+- `archive/scripts/` — every published script + meta, archived by `run_episode.sh` and
+  committed by publish. The nightly writer reads the last 2–3 to break its own
+  patterns and balance the week; the gate's phrase check reads them too.
 - `scripts/make_audio.py` — Gemini multi-speaker TTS render (NotebookLM-style
   dialogue; the show's voice) + ffmpeg. Needs `GEMINI_API_KEY`; voices via
   `GEMINI_VOICE_A/B` in `.env`; honors optional `tts_notes` in episode.json.

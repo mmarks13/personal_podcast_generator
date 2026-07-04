@@ -157,7 +157,7 @@ validate). STOP after the gate passes — do NOT run steps 4 or 4.5; the harness
 history. If out/candidates.json is somehow missing, fall back to doing the gather steps yourself. \
 Print the episode title and word count when done." \
   --model "$PODCAST_MODEL" \
-  --effort high \
+  --effort medium \
   --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
   --permission-mode acceptEdits \
   --max-turns 60
@@ -170,6 +170,14 @@ set +e
 HIST_RC=${PIPESTATUS[0]}
 set -e
 [ "$HIST_RC" -eq 0 ] || log run "WARNING: update_history failed; history.json may be stale"
+
+# Archive the night's script + meta (committed by publish.py alongside the feed).
+# The writer reads the last few archived scripts to notice — and break — its own
+# patterns, and the gate's phrase-recurrence check compares against them.
+mkdir -p archive/scripts
+cp -f out/script.txt "archive/scripts/$DATE.txt" 2>/dev/null \
+  && cp -f out/episode_meta.json "archive/scripts/$DATE-meta.json" 2>/dev/null \
+  || log run "WARNING: script archive copy failed"
 
 # 4: Render the podcast audio — pure Python, no model needed.
 run_step render-podcast \
@@ -210,6 +218,10 @@ Print the topic and word count when done." \
   HIST_DD_RC=${PIPESTATUS[0]}
   set -e
   [ "$HIST_DD_RC" -eq 0 ] || log run "WARNING: update_history (deepdive) failed; history.json may be stale"
+
+  mkdir -p archive/scripts
+  cp -f out/deepdive_script.txt "archive/scripts/$DATE-deepdive.txt" 2>/dev/null \
+    || log run "WARNING: deepdive script archive copy failed"
 
   run_step render-deepdive \
     .venv/bin/python scripts/make_audio.py \

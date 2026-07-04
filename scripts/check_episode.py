@@ -16,19 +16,81 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 
-# Defaults match the daily target: 18-22 min at ~150 wpm, with headroom for an
-# occasional deep-dive segment (up to ~25 min).
-MIN_WORDS = 2700
-MAX_WORDS = 3900
+# Defaults match the daily envelope: 18-28 min at the ~165-170 wpm Gemini render
+# pace, with ~20-22 min the norm. The width is deliberate — the day's material
+# decides where in the band an episode lands.
+MIN_WORDS = 3000
+MAX_WORDS = 4700
 
 # Well-formed audio tags — delivery directions Gemini TTS performs instead of
 # reading: short, lowercase, bracketed ([laughs], [sighs], [short pause], ...).
 TAG_RE = re.compile(r"\[[a-z][a-z ,'-]{0,38}\]")
 # Episode-wide ceiling: more than ~1 tag per 60 spoken words is decoration.
 TAG_DENSITY_WORDS = 60
+
+# Phrase-recurrence check: the show's scripts are archived nightly (archive/scripts/);
+# a distinctive run of words that today's script shares with two or more recent scripts
+# is a verbal tic hardening into formula. Warn-only — technical phrases legitimately
+# recur — but the warnings are meant to be acted on when they're real.
+SCRIPTS_DIR = "archive/scripts"
+RECENT_SCRIPTS = 10
+NGRAM = 5
+# Fragments that recur by design (the greeting and sign-off are ritual) — a flagged
+# phrase containing one of these is dropped, not reported.
+RITUAL_FRAGMENTS = ("good morning", "i'm ada", "i'm alan", "stay grounded")
+
+SPEAKER_LINE_RE = re.compile(r"^[AB]\s*:\s?", re.MULTILINE)
+WORD_RE = re.compile(r"[a-z0-9'-]+")
+
+
+def _turn_words(text: str) -> list[str]:
+    """Normalize one spoken turn to a lowercase word list (audio tags removed)."""
+    return WORD_RE.findall(TAG_RE.sub(" ", text).lower())
+
+
+def _script_ngrams(path: str, n: int = NGRAM) -> set[tuple[str, ...]]:
+    """N-grams of an archived script.txt (per line, speaker tags stripped)."""
+    grams: set[tuple[str, ...]] = set()
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            words = _turn_words(SPEAKER_LINE_RE.sub("", line))
+            grams.update(tuple(words[i:i + n]) for i in range(len(words) - n + 1))
+    return grams
+
+
+def recurring_phrases(turns: list[dict], date: str,
+                      scripts_dir: str = SCRIPTS_DIR,
+                      recent: int = RECENT_SCRIPTS) -> list[str]:
+    """Phrases (merged NGRAM runs) today's script shares with >=2 recent scripts."""
+    if not os.path.isdir(scripts_dir):
+        return []
+    # Newest-first by filename (YYYY-MM-DD...); skip today's own archived copy.
+    names = sorted(os.listdir(scripts_dir), reverse=True)
+    paths = [os.path.join(scripts_dir, f) for f in names
+             if f.endswith(".txt") and not f.startswith(str(date))][:recent]
+    if len(paths) < 2:
+        return []
+    past = [_script_ngrams(p) for p in paths]
+
+    flagged: list[str] = []
+    for turn in turns:
+        words = _turn_words(str(turn.get("text", "")))
+        hits = [i for i in range(len(words) - NGRAM + 1)
+                if sum(tuple(words[i:i + NGRAM]) in g for g in past) >= 2]
+        # Merge overlapping/adjacent flagged n-grams into one readable phrase.
+        while hits:
+            start = end = hits.pop(0)
+            while hits and hits[0] <= end + NGRAM:
+                end = hits.pop(0)
+            phrase = " ".join(words[start:end + NGRAM])
+            if not any(fr in phrase for fr in RITUAL_FRAGMENTS):
+                flagged.append(phrase)
+    return flagged
+
 
 # Things TTS would read aloud literally (checked after tags are removed).
 ARTIFACT_PATTERNS = [
@@ -112,6 +174,8 @@ def main() -> int:
     ap.add_argument("--episode", default="out/episode.json")
     ap.add_argument("--min-words", type=int, default=MIN_WORDS)
     ap.add_argument("--max-words", type=int, default=MAX_WORDS)
+    ap.add_argument("--scripts-dir", default=SCRIPTS_DIR,
+                    help="archived past scripts for the phrase-recurrence warning")
     args = ap.parse_args()
 
     try:
@@ -122,6 +186,12 @@ def main() -> int:
         return 1
 
     errors, warnings = check(episode, args.min_words, args.max_words)
+    repeats = recurring_phrases(episode.get("turns") or [], episode.get("date", ""),
+                                scripts_dir=args.scripts_dir)
+    if repeats:
+        warnings.append(f"{len(repeats)} phrase(s) also appear in 2+ recent scripts — "
+                        "a hardening verbal tic; rephrase the real ones:")
+        warnings += [f'  recurring: "{p}"' for p in repeats[:15]]
     for w in warnings:
         print(f"  warn: {w}")
     for e in errors:

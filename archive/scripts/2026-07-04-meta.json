@@ -1,0 +1,66 @@
+{
+  "date": "2026-07-04",
+  "title": "Everything bends toward control: who owns the model, and who can switch it off",
+  "summary": "A spread day that keeps circling ownership and control: ELDR shows that serving a mixture-of-experts model well means routing by which experts are already warm, not just balancing request counts; Portugal ships Amalia, a ~9B national LLM; Together AI raises $800M at $8.3B (Aramco-led) and Microsoft stands up a $2.5B deployment company, both betting the bottleneck is now the last mile, not the model; Zuckerberg tells Meta staff agents haven't accelerated as leadership hoped; and a 'Right to Intelligence' campaign argues for a legal right to run AI locally.",
+  "sources": [
+    { "group": "Papers", "title": "ELDR: Expert-Locality-Aware Decode Routing for PD-Disaggregated MoE Serving", "url": "https://huggingface.co/papers/2607.00466" },
+    { "group": "Releases", "title": "Portugal releases Amalia, a 9B national LLM (r/LocalLLaMA)", "url": "https://www.reddit.com/r/LocalLLaMA/comments/1umhrn8/portugal_just_released_their_own_llm_/" },
+    { "group": "Releases", "title": "Mistral releases Leanstral-1.5-119B-A6B (r/LocalLLaMA)", "url": "https://www.reddit.com/r/LocalLLaMA/comments/1umgdhx/mistral_released_leanstral15119ba6b/" },
+    { "group": "Discussion", "title": "OpenAI proposed donating 5% of its equity to a US sovereign wealth fund (TechCrunch)", "url": "https://techcrunch.com/2026/07/02/openai-proposed-donating-5-of-its-equity-to-a-us-sovereign-wealth-fund/" },
+    { "group": "Discussion", "title": "Mark Zuckerberg tells staff AI agents haven't progressed as quickly as anticipated (TechCrunch)", "url": "https://techcrunch.com/2026/07/02/mark-zuckerberg-tells-staff-that-ai-agents-havent-progressed-as-quickly-as-anticipated/" },
+    { "group": "Discussion", "title": "Together AI raises $800M, leaps to $8.3B valuation (TechCrunch)", "url": "https://techcrunch.com/2026/07/01/neocloud-together-ai-raises-800m-leaps-to-8-3b-valuation" },
+    { "group": "Discussion", "title": "Microsoft launches its own AI deployment company with $2.5B commitment (TechCrunch)", "url": "https://techcrunch.com/2026/07/02/microsoft-launches-its-own-ai-deployment-company-with-2-5-billion-com/" },
+    { "group": "Discussion", "title": "Right to Intelligence — advocacy for a legal right to run local AI", "url": "https://righttointelligence.org/" },
+    { "group": "Discussion", "title": "AI can't be listed as inventor on patents, Japan's top court rules (The Japan News)", "url": "https://japannews.yomiuri.co.jp/science-nature/technology/20260306-314930/" },
+    { "group": "Discussion", "title": "Menlo Ventures closes $3B fund; Anthropic stake now ~$14B (news aggregators)", "url": "https://www.buildfastwithai.com/blogs/ai-news-today-july-3-2026" },
+    { "group": "Discussion", "title": "Please stop the AI confidence theater (Elena Verna)", "url": "https://www.elenaverna.com/p/please-stop-the-ai-confidence-theater" }
+  ],
+  "topics": [
+    "ELDR (Expert-Locality-Aware Decode Routing): for prefill-decode disaggregated MoE serving, equally-loaded decode workers differ in latency by how many DISTINCT experts their batches activate (a single layer ~4.7x slower going from 16 to 128 active experts at fixed batch size); ELDR builds an 'expert signature' from prefill activations (prefill-decode correlation ~0.70-0.92) to route requests to workers already warm on those experts; reduces median time-per-output-token ~7.0-13.9% and per-request active-expert count ~22% vs the strongest load-balancing baseline, with bit-for-bit identical outputs",
+    "Portugal releases Amalia, a ~9B national/sovereign LLM (pre-trained on ~4B words, fine-tuned on Portuguese data) built by a consortium of Portuguese universities and research centers; framed as language/civic-text sovereignty and ownership rather than leaderboard competition",
+    "Together AI raises $800M Series C at $8.3B valuation, led by Aramco Ventures, to scale open-source model hosting and inference as a neocloud (alongside CoreWeave, Lambda); read as capital betting on inference/serving as the recurring cost center",
+    "Microsoft launches Microsoft Frontier Company, a standalone $2.5B business dedicated to helping enterprises deploy AI; part of a pattern with Amazon's ~$1B Forward Deployed Engineering org and OpenAI/Anthropic deployment ventures — the bottleneck moving from model capability to the last-mile deployment gap",
+    "Mark Zuckerberg told Meta staff at a Thursday town hall that AI agent development had not 'accelerated in the way' leadership anticipated — a candid recalibration from a major infrastructure bettor, echoing the week's agent-reliability findings",
+    "Right to Intelligence: advocacy campaign (petitions, contacting state legislators) arguing for a legal right to run AI models locally on personal hardware; high Hacker News engagement (~514 points), read against export bans/reversals, gated frontier releases, and rising local-memory prices"
+  ],
+  "entities": [
+    "ELDR",
+    "mixture-of-experts",
+    "Portugal",
+    "Amalia",
+    "Together AI",
+    "Aramco Ventures",
+    "CoreWeave",
+    "Lambda",
+    "Microsoft",
+    "Microsoft Frontier Company",
+    "Amazon",
+    "Meta",
+    "Mark Zuckerberg",
+    "Right to Intelligence"
+  ],
+  "threads": [
+    {
+      "name": "AI economics debate",
+      "status": "Capital and product both bet on the last mile and the serving layer: Together AI raises $800M at $8.3B (Aramco-led) for open-model inference hosting, Microsoft stands up a $2.5B deployment company (Microsoft Frontier Company) joining Amazon's Forward Deployed Engineering org and the OpenAI/Anthropic deployment ventures, and ELDR shows why shaving inference cost is worth a research team's time.",
+      "arc": "From 'the model is the product' toward the recurring inference bill and the in-enterprise deployment gap being where the money and the margins actually are — the labs building the consulting arm and the serving stack to capture it."
+    },
+    {
+      "name": "AI sovereignty and open weights",
+      "status": "Portugal ships Amalia, a ~9B national LLM built by a university consortium, framed as owning your language and civic text rather than topping a leaderboard; Mistral releases Leanstral-1.5 (119B/6B-active MoE) for local runs; and a 'Right to Intelligence' campaign argues for a legal right to run models locally.",
+      "arc": "The open-weights/sovereignty thread widens from labs and countries releasing runnable weights to an explicit ownership-and-control argument at two scales — national models you can inspect and an individual right to run a model no one can revoke or region-lock."
+    },
+    {
+      "name": "AI agent supply-chain trust",
+      "status": "Zuckerberg told Meta staff that agent development hasn't accelerated as leadership anticipated — the same wall the week's benchmarks and productivity studies named, now stated from the C-suite: agents work in bounded, supervised lanes but stall on long, open-ended, unsupervised tasks.",
+      "arc": "The adoption-vs-capability gap gets its most candid admission yet from a top infrastructure bettor: a recalibration (not a eulogy) that the agent roadmaps outran the delivery."
+    }
+  ],
+  "lore": [
+    {
+      "host": "Alan",
+      "type": "bit",
+      "note": "Alan's running local-hardware sore spot returned and got named as canon: he keeps an old mining rig he refuses to replace, and the 2026 memory-price spike still visibly bothers him ('it is never letting that go') — the builder's-eye stake in whether running your own model at home stays affordable, tied here to the Right-to-Intelligence campaign."
+    }
+  ]
+}

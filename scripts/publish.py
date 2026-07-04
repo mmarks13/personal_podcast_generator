@@ -40,6 +40,7 @@ from feedgen.feed import FeedGenerator
 
 CATALOG_FILE = "episodes.json"   # github: repo root; s3: bucket key
 HISTORY_FILE = "history.json"    # show memory; written by update_history.py, persisted here
+ARCHIVE_DIR = "archive"          # past scripts (archive/scripts/), copied by run_episode.sh
 FEED_NAME = "feed.xml"
 DOCS = "docs"                    # GitHub Pages source folder (main branch /docs)
 EPISODES_DIR = "episodes"        # per-episode HTML notes pages (under DOCS / bucket)
@@ -290,6 +291,8 @@ class GitHubBackend:
         add = ["git", "add", DOCS, CATALOG_FILE]
         if os.path.exists(HISTORY_FILE):          # persist the show's memory too
             add.append(HISTORY_FILE)
+        if os.path.isdir(ARCHIVE_DIR):            # persist the script archive too
+            add.append(ARCHIVE_DIR)
         subprocess.run(add, check=True)
         if subprocess.run(["git", "diff", "--cached", "--quiet"]).returncode != 0:
             subprocess.run(["git", "commit", "-m", message], check=True)

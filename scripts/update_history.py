@@ -45,6 +45,7 @@ HISTORY_FILE = "history.json"
 TAG_RE = re.compile(r"\[[a-z][a-z ,'-]{0,38}\]")
 KEEP_DAYS = 30           # detailed window
 MAX_THREADS = 15         # active_threads cap
+THREAD_STALE_DAYS = 21   # a thread untouched this long is no longer active — retire it
 MAX_ENTITIES = 40        # entity roster cap
 MAX_LORE = 40            # host canon cap (~years at the intended reveal rate)
 # The only fields that belong in the show's memory. episode_meta.json may also
@@ -140,8 +141,14 @@ def roll_off(data: dict, today: date, keep_days: int = KEEP_DAYS) -> dict:
             row = ents.setdefault(k, {"name": name, "note": "", "last_seen": e["date"]})
             row["last_seen"] = max(row["last_seen"], e["date"])
     lt["entities"] = sorted(ents.values(), key=lambda x: x["last_seen"], reverse=True)[:MAX_ENTITIES]
+    # A thread that hasn't moved in THREAD_STALE_DAYS isn't active — retire it rather
+    # than let dead storylines invite stale callbacks. (Its stories persist in the
+    # episode records / monthly rollup; the writer can start a fresh thread if it
+    # genuinely reignites.)
+    stale_cutoff = (today - timedelta(days=THREAD_STALE_DAYS)).isoformat()
     lt["active_threads"] = sorted(
-        lt["active_threads"], key=lambda t: t.get("last_seen", ""), reverse=True)[:MAX_THREADS]
+        (t for t in lt["active_threads"] if t.get("last_seen", "") >= stale_cutoff),
+        key=lambda t: t.get("last_seen", ""), reverse=True)[:MAX_THREADS]
 
     # Preserve host canon: fold aged episodes' lore into the long-term list. Oldest
     # entries are evicted last only by the cap — canon should outlive the 30-day window.
