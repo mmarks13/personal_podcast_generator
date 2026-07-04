@@ -38,8 +38,10 @@ GEMINI_MODEL = os.environ.get("GEMINI_TTS_MODEL", "gemini-2.5-pro-preview-tts")
 GEMINI_VOICES = {  # prebuilt voice names; audition alternatives in Google AI Studio
     "A": os.environ.get("GEMINI_VOICE_A", "Laomedeia"),  # Ada
     "B": os.environ.get("GEMINI_VOICE_B", "Iapetus"),    # Alan
+    # C = occasional guest (episode.json "guest" can override name/voice/bio).
+    "C": os.environ.get("GEMINI_VOICE_C", "Sulafat"),
 }
-GEMINI_SPEAKER_NAMES = {"A": "Ada", "B": "Alan"}  # names the transcript prompt uses
+GEMINI_SPEAKER_NAMES = {"A": "Ada", "B": "Alan", "C": "Guest"}  # transcript names
 # A response is capped at 8192 audio tokens (~5.5 min at 25 tokens/s). ~2000 chars
 # of script is ~2.3 min spoken — comfortable headroom, and each chunk still carries
 # enough conversation for natural back-and-forth prosody.
@@ -133,20 +135,56 @@ def render_kokoro(turns: list[dict], out_path: str) -> None:
                        check=True, capture_output=True)
 
 
-def _gemini_chunks(turns: list[dict]) -> list[list[dict]]:
-    """Group consecutive turns into chunks under GEMINI_CHUNK_CHARS of script."""
-    chunks: list[list[dict]] = []
+def _gemini_chunks(turns: list[dict],
+                   breaks: set[int] | None = None) -> list[tuple[int, list[dict]]]:
+    """Group consecutive turns into chunks under GEMINI_CHUNK_CHARS of script.
+
+    Returns (start_turn_index, turns) per chunk. A chunk also breaks:
+    - at any turn index in `breaks` (chapter starts), so chapter timestamps fall
+      exactly on chunk boundaries, and
+    - before a turn whose speaker would give the chunk a third distinct speaker —
+      the multi-speaker API takes exactly two voices per request (guest scenes
+      are written as guest + one host, so this split is rare).
+    """
+    breaks = breaks or set()
+    chunks: list[tuple[int, list[dict]]] = []
     cur: list[dict] = []
+    start = 0
     size = 0
-    for turn in turns:
-        if cur and size + len(turn["text"]) > GEMINI_CHUNK_CHARS:
-            chunks.append(cur)
-            cur, size = [], 0
+    speakers: set[str] = set()
+    for i, turn in enumerate(turns):
+        third_voice = len(speakers | {turn["speaker"]}) > 2
+        if cur and (size + len(turn["text"]) > GEMINI_CHUNK_CHARS
+                    or i in breaks or third_voice):
+            chunks.append((start, cur))
+            cur, size, speakers, start = [], 0, set(), i
         cur.append(turn)
         size += len(turn["text"])
+        speakers.add(turn["speaker"])
     if cur:
-        chunks.append(cur)
+        chunks.append((start, cur))
     return chunks
+
+
+def _write_id3_chapters(mp3_path: str, chapters: list[dict]) -> None:
+    """Embed ID3v2 CHAP/CTOC frames ({'title', 'start_s'} per chapter)."""
+    from mutagen.id3 import CHAP, CTOC, ID3, TIT2, CTOCFlags
+    from mutagen.mp3 import MP3
+
+    total_ms = int(MP3(mp3_path).info.length * 1000)
+    tags = ID3(mp3_path) if MP3(mp3_path).tags else ID3()
+    ids = []
+    for n, ch in enumerate(chapters):
+        start = int(ch["start_s"] * 1000)
+        end = (int(chapters[n + 1]["start_s"] * 1000)
+               if n + 1 < len(chapters) else total_ms)
+        cid = f"chp{n}"
+        ids.append(cid)
+        tags.add(CHAP(element_id=cid, start_time=start, end_time=end,
+                      sub_frames=[TIT2(encoding=3, text=[ch["title"]])]))
+    tags.add(CTOC(element_id="toc", flags=CTOCFlags.TOP_LEVEL | CTOCFlags.ORDERED,
+                  child_element_ids=ids, sub_frames=[]))
+    tags.save(mp3_path)
 
 
 def _parse_pcm_mime(mime_type: str) -> tuple[int, int]:
@@ -167,7 +205,9 @@ def _parse_pcm_mime(mime_type: str) -> tuple[int, int]:
     return bits, rate
 
 
-def render_gemini(turns: list[dict], out_path: str, tts_notes: str = "") -> None:
+def render_gemini(turns: list[dict], out_path: str, tts_notes: str = "",
+                  chapters: list[dict] | None = None,
+                  guest: dict | None = None) -> None:
     import base64
     import time
     import wave
@@ -183,33 +223,58 @@ def render_gemini(turns: list[dict], out_path: str, tts_notes: str = "") -> None
         api_key=api_key,
         http_options=types.HttpOptions(timeout=600_000),
     )
-    config = types.GenerateContentConfig(
-        temperature=1,
-        response_modalities=["audio"],
-        speech_config=types.SpeechConfig(
-            multi_speaker_voice_config=types.MultiSpeakerVoiceConfig(
-                speaker_voice_configs=[
-                    types.SpeakerVoiceConfig(
-                        speaker=GEMINI_SPEAKER_NAMES[key],
-                        voice_config=types.VoiceConfig(
-                            prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                                voice_name=voice)),
-                    )
-                    for key, voice in GEMINI_VOICES.items()
-                ],
-            ),
-        ),
-    )
+    voices = dict(GEMINI_VOICES)
+    speaker_names = dict(GEMINI_SPEAKER_NAMES)
+    guest = guest or {}
+    if guest.get("name"):
+        speaker_names["C"] = guest["name"]
+    if guest.get("voice"):
+        voices["C"] = guest["voice"]
 
+    def chunk_config(chunk: list[dict]) -> "types.GenerateContentConfig":
+        # The multi-speaker API takes exactly two voices; give it the chunk's
+        # speakers, padded with a host if a chunk is single-voiced.
+        present = {t["speaker"] for t in chunk}
+        if len(present) < 2:
+            present.add("A" if "A" not in present else "B")
+        return types.GenerateContentConfig(
+            temperature=1,
+            response_modalities=["audio"],
+            speech_config=types.SpeechConfig(
+                multi_speaker_voice_config=types.MultiSpeakerVoiceConfig(
+                    speaker_voice_configs=[
+                        types.SpeakerVoiceConfig(
+                            speaker=speaker_names[key],
+                            voice_config=types.VoiceConfig(
+                                prebuilt_voice_config=types.PrebuiltVoiceConfig(
+                                    voice_name=voices[key])),
+                        )
+                        for key in sorted(present)
+                    ],
+                ),
+            ),
+        )
+
+    guest_block = ""
+    if guest.get("name"):
+        bio = guest.get("bio") or "A guest contributor on the show."
+        guest_block = (f"\n# AUDIO PROFILE: {guest['name']}\n"
+                       f"## \"The Guest\"\n{bio}\n")
     style = GEMINI_STYLE.format(
         episode_notes=(f"Note for today's episode: {tts_notes.strip()}"
                        if tts_notes.strip() else ""))
-    chunks = _gemini_chunks(turns)
+    if guest_block:
+        style = style.replace("\n## THE SCENE", guest_block + "\n## THE SCENE")
+
+    breaks = {ch["turn"] for ch in (chapters or [])}
+    chunks = _gemini_chunks(turns, breaks)
+    chunk_start_s: dict[int, float] = {}  # start turn index -> seconds into episode
+    elapsed = 0.0
     with tempfile.TemporaryDirectory() as tmp:
         parts = []
-        for i, chunk in enumerate(chunks):
+        for i, (start_turn, chunk) in enumerate(chunks):
             prompt = style + "\n".join(
-                f"{GEMINI_SPEAKER_NAMES.get(t['speaker'], 'Ada')}: {t['text']}"
+                f"{speaker_names.get(t['speaker'], 'Ada')}: {t['text']}"
                 for t in chunk)
             # 5 attempts, exponential backoff (10s..80s): rides out rate blips
             # and short outages; a real outage fails the run within ~10 min.
@@ -223,7 +288,8 @@ def render_gemini(turns: list[dict], out_path: str, tts_notes: str = "") -> None
                     pcm = bytearray()
                     mime = ""
                     resp = client.models.generate_content(
-                        model=GEMINI_MODEL, contents=prompt, config=config)
+                        model=GEMINI_MODEL, contents=prompt,
+                        config=chunk_config(chunk))
                     for p in (resp.candidates[0].content.parts
                               if resp.candidates
                               and resp.candidates[0].content else []):
@@ -251,9 +317,22 @@ def render_gemini(turns: list[dict], out_path: str, tts_notes: str = "") -> None
                 wf.writeframes(pcm)
             parts.append(part)
             seconds = len(pcm) / (bits // 8) / rate
+            chunk_start_s[start_turn] = elapsed
+            elapsed += seconds
             print(f"  chunk {i + 1}/{len(chunks)} done ({seconds:.0f}s, {mime})",
                   file=sys.stderr)
         _ffmpeg_concat(parts, out_path)
+
+    if chapters:
+        # Chapter turns were forced onto chunk boundaries, so each start time is
+        # exact; fall back to the nearest earlier chunk if a turn was filtered.
+        resolved = []
+        for ch in chapters:
+            starts = [s for t, s in chunk_start_s.items() if t <= ch["turn"]]
+            resolved.append({"title": ch["title"],
+                             "start_s": max(starts) if starts else 0.0})
+        _write_id3_chapters(out_path, resolved)
+        print(f"  wrote {len(resolved)} ID3 chapters", file=sys.stderr)
 
 
 def main() -> int:
@@ -265,19 +344,27 @@ def main() -> int:
 
     with open(args.episode) as f:
         episode = json.load(f)
-    turns = [t for t in episode.get("turns", []) if t.get("text", "").strip()]
+    raw = episode.get("turns", [])
+    turns = [t for t in raw if t.get("text", "").strip()]
     if not turns:
         print("No turns in episode.json — nothing to render.", file=sys.stderr)
         return 1
+    # Re-map chapter turn indices past any filtered-out empty turns.
+    kept_before = [0] * (len(raw) + 1)
+    for i, t in enumerate(raw):
+        kept_before[i + 1] = kept_before[i] + bool(t.get("text", "").strip())
+    chapters = [{"title": c["title"], "turn": kept_before[min(c["turn"], len(raw))]}
+                for c in episode.get("chapters", []) or []]
 
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     print(f"Rendering {len(turns)} turns via {args.backend}...", file=sys.stderr)
     if args.backend == "gemini":
         # No fallback: if Gemini is down after the retries, fail loudly. A
         # flat-voiced episode must never publish unnoticed.
-        render_gemini(turns, args.out, tts_notes=str(episode.get("tts_notes", "")))
+        render_gemini(turns, args.out, tts_notes=str(episode.get("tts_notes", "")),
+                      chapters=chapters, guest=episode.get("guest"))
     else:
-        render_kokoro(turns, args.out)
+        render_kokoro(turns, args.out)  # manual/offline path: no chapters
 
     size_mb = os.path.getsize(args.out) / 1e6
     print(f"Wrote {args.out} ({size_mb:.1f} MB)", file=sys.stderr)

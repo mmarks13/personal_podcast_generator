@@ -24,16 +24,23 @@ news as the doorway: "X kept coming up this week — here's how it actually work
 ## Workflow
 
 ### 1. Pick the topic
-Read `history.json` — the last ~7 days of `episodes` plus `longterm.active_threads`.
-Look for the concept underneath the week's coverage: an architecture (e.g. text
-diffusion, MoE routing), a technique (e.g. indirect prompt injection, KV-cache
-compression), an evaluation method, or a debate with real substance. Pick **one**.
+**If the invocation prompt says the listener pre-chose tonight's topic** (via the
+evening options push), take it as given — skip selection and go straight to step 2.
+Their free-text topic may need light interpretation into a teachable framing; keep
+its intent.
+
+Otherwise read `history.json` — the last ~7 days of `episodes` plus
+`longterm.active_threads` and `longterm.concepts_taught`. Look for the concept
+underneath the week's coverage: an architecture (e.g. text diffusion, MoE routing), a
+technique (e.g. indirect prompt injection, KV-cache compression), an evaluation
+method, or a debate with real substance. Pick **one**.
 
 Rules:
 - It must tie to something the show actually covered this week — name that connection
   in the cold open.
 - Don't repeat a recent deep dive: skip anything already in an episode record with
-  `"kind": "deepdive"` or a `deep dive:` topic label in `history.json`.
+  `"kind": "deepdive"`, a `deep dive:` topic label, or the `longterm.concepts_taught`
+  ledger in `history.json`.
 - Prefer topics where understanding transfers (how the thing works, why it matters,
   what its limits are) over news recaps or product tours.
 
@@ -89,6 +96,8 @@ JSON dialogue:
 - `out/deepdive_script.txt` — the spoken script as **plain text**, one turn per line, each
   starting with `A:` (Ada) or `B:` (Alan); audio tags are the only non-spoken text; no
   markdown, URLs, or stage directions. A tag-less line folds into the turn above it.
+  Add `## Title` **chapter markers** (never spoken; they become MP3 chapters and the
+  episode page's outline) before each major section of the lesson.
 - `out/deepdive_meta.json` — the memory record plus the show-notes data, with the deepdive
   extras so the daily show's repeat-check and future deep dives see it correctly:
   ```json
@@ -98,12 +107,14 @@ JSON dialogue:
     "sources": [ { "group": "Primary sources" | "Further reading",
                    "title": "source title", "url": "https://…" } ],
     "topics": ["deep dive: <topic>"], "entities": [...], "threads": [],
+    "concepts_taught": ["the concept this episode taught, e.g. 'speculative decoding'"],
     "lore": [ { "host": "Ada" | "Alan", "type": "reveal" | "bit" | "position" | "settled",
                 "note": "what is now canon" } ] }
   ```
   `sources` becomes `deepdive_shownotes.md`, grouped as Primary sources / Further reading.
-  `lore` follows the daily skill's rules: only what this episode added to the hosts'
-  canon, 0–2 entries, usually 0.
+  `concepts_taught` feeds the `longterm.concepts_taught` ledger — a deep dive always
+  fills it (that's the episode's whole job). `lore` follows the daily skill's rules:
+  only what this episode added to the hosts' canon, 0–2 entries, usually 0.
 
 **Write each file once, then `Edit`** the source files (not the generated JSON/notes) — same
 discipline as the daily skill; never re-`Write` a whole file.

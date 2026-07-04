@@ -53,6 +53,17 @@ story. The failure mode to guard against is two clever commentators trading
 symmetrical observations: if a story's lines could be re-dealt to the other host
 unchanged, the roles have collapsed — rewrite it.
 
+**Guests (occasional).** The show shares a universe with the "Self Attention" daily
+read: its masthead writers (Grace, Vannevar, Florence, Karel, Linus, Norbert, Herbert)
+may guest when a dive is squarely their beat — speaker `"C"` in the script. Rules:
+**at most one guest per week**, and only when the beat genuinely fits — most episodes
+have none. Guest scenes are **guest plus one host** (the renderer takes two voices per
+scene); the other host hands off into the scene and returns after. The hosting host
+still plays working skeptic. Define the guest in `episode_meta.json`'s `guest` field
+(name, a 1–2 line voice/persona `bio` for the renderer, optionally a Gemini prebuilt
+`voice` name). A guest appearance is canon — record it in `lore`. The crossover is
+one-way: the read never mentions the podcast.
+
 **Being AIs.** A running self-aware thread, used sparingly — at most one or two touches
 per episode, where their nature gives them a wry first-person stake in the news (a
 hallucination benchmark, an agent run amok). **Fiction rules:** persona color is
@@ -116,9 +127,22 @@ appearing across several feeds is visible. A source that failed or returned noth
 simply absent — work with whatever is there. The harness also pre-cleared any stale
 `out/crawl.json` / `out/candidates.json`, so don't second-guess leftover scratch.
 
-### 1.5. Recall what the show has already covered
-Read `history.json` if it exists. It is the show's memory — treat it the way a regular
-host remembers their own past episodes, **not** as a script of callbacks:
+### 1.5. Recall what the show has already covered — and what the listener said
+**First, read `feedback.md`** (repo root). Any notes there are direct listener
+feedback — the highest-priority editorial input you have. Apply what applies tonight,
+then move the consumed notes (dated) to `archive/feedback_log.md`. A note that
+reveals a durable preference: append it to `listener.yaml`. A mispronunciation: add
+the name to `config/pronunciations.yaml` with a speakable spelling. A note that would
+require changing this skill: leave it in `feedback.md` and flag it in the step-4
+report — **you never edit SKILL.md**.
+
+**Read `listener.yaml`** — the listener's standing interest weights. `boost` beats win
+ties for dive slots; `downweight` beats stay in the sweep unless the who-cares case is
+unusually strong. Consult `config/pronunciations.yaml` while writing (the gate warns
+on known-mispronounced raw forms).
+
+Then read `history.json` if it exists. It is the show's memory — treat it the way a
+regular host remembers their own past episodes, **not** as a script of callbacks:
 - `episodes` — the last ~30 days in detail (title, summary, topics, entities, threads).
 - `longterm` — older context: `active_threads` (named multi-day storylines with their
   status/arc), an `entities` roster, and a `monthly` rollup of major milestones.
@@ -141,6 +165,10 @@ Use it to inform, not to perform:
 - **Read the hosts' `lore` too** (in episode records and `longterm.host_lore`): running
   bits that might return, and open positions that today's news may settle — see
   Continuity in the Hosts section. Same restraint as callbacks: use it only when earned.
+- **Check `longterm.concepts_taught`** — concepts the show has already taught properly.
+  Before spending a dive's teaching minute on one, prefer a one-line refresher plus a
+  natural callback ("we walked through speculative decoding on the Fourth") over
+  re-teaching from scratch; a concept taught months ago can be re-taught fresh.
 
 **Then read your own recent shows** — the last 2–3 daily scripts in `archive/scripts/`
 (newest first; skip the `-deepdive` ones). This is the show's mirror, and it serves two
@@ -298,10 +326,9 @@ sentence — signal-backed or not — is recorded in `episode_meta.json`'s `dive
   then. Exception: a frontier-lab release or a plainly extraordinary result can dive
   on day one. (A paper swept earlier doesn't enter `topics` memory, so its later dive
   won't be flagged as a repeat — that's by design.)
-- **Listener preference: embodied AI sweeps by default.** Robotics, VLA models, and
-  embodied work should keep the listener aware via sweep lines and the occasional
-  teaching moment, but they don't win dive slots on topic interest alone — an embodied
-  story needs an unusually strong who-cares case to dive.
+- **Listener weights apply here.** `listener.yaml` (read in step 1.5) is part of the
+  dive decision: `boost` beats win ties for dive slots; `downweight` beats stay in
+  the sweep unless the who-cares case is unusually strong.
 
 **The shape flexes — that's the point.** On a news-heavy day, one big dive plus a
 broad sweep may serve better; when one story eats the day, the episode can be nearly
@@ -458,23 +485,34 @@ or split), how stories hand off. Principles, not slots:
   listener just heard the show.
 - **Vary the titles too.** `episode_meta` titles have converged on one "X, and Y"
   construction — break it.
+- **Sundays close with the week in review** (~5 minutes, ~800 words), the one standing
+  segment besides the rituals. Not a recap of headlines — a synthesis, built from
+  `history.json` and the week's archived scripts: what this week actually established,
+  which threads moved and where they stand, and one or two things to watch next week.
+  The rest of Sunday's episode stays a normal (often lighter) daily.
 
 You author **two** files; a deterministic build step (step 3.5) turns them into the
 machine files the pipeline consumes (`episode.json`, `shownotes.md`), so you never
 hand-write JSON dialogue or escape quotes.
 
 - `out/script.txt` — the spoken script as **plain text**: one turn per line, each line
-  starting with the speaker tag `A:` (Ada) or `B:` (Alan), then that turn's spoken words.
-  No JSON, no quoting, no brackets to escape — just dialogue, e.g.:
+  starting with the speaker tag `A:` (Ada), `B:` (Alan), or `C:` (a guest, if any),
+  then that turn's spoken words. No JSON, no quoting, no brackets to escape — just
+  dialogue, plus **chapter markers**: a `## Title` line before the first turn of each
+  story or segment. Markers are never spoken — they become the MP3's chapter points
+  and the episode page's story list, so make each title short and listener-facing.
+  E.g.:
   ```
   A: Good morning — it's Friday, June twentieth. I'm Ada.
   B: And I'm Alan. Here's what actually mattered in AI in the last twenty-four hours.
+  ## ELDR: routing by which experts are already warm
   A: [wry] Starting, of course, with another hallucination benchmark.
   ```
-  Keep each line plain spoken prose; the **only** non-spoken text allowed is well-formed
-  audio tags per the rules above. No markdown, URLs, or stage directions. A line with no
-  speaker tag is folded into the turn above it (so a wrapped line is fine), but the natural
-  form is one turn per line.
+  Mark every dive, the sweep, and the wrap (the cold open needs no marker). Keep each
+  dialogue line plain spoken prose; the **only** non-spoken text allowed is well-formed
+  audio tags per the rules above. No other markdown, URLs, or stage directions. A line
+  with no speaker tag or `##` is folded into the turn above it (so a wrapped line is
+  fine), but the natural form is one turn per line.
 - `out/episode_meta.json` — everything *about* the episode: the memory record for
   `history.json` (step 4 update), plus the show-notes data and any delivery note. Schema:
   ```json
@@ -494,6 +532,10 @@ hand-write JSON dialogue or escape quotes.
                            "new_development": "one sentence: what is new tonight" } ],
     "dives": [ { "story": "label of each mini-dive",
                  "why_it_matters": "one sentence: who specifically cares and why" } ],
+    "concepts_taught": ["OPTIONAL: concepts a dive taught properly tonight, e.g. 'speculative decoding'"],
+    "guest": { "name": "OPTIONAL: guest's name, e.g. Grace",
+               "bio": "1-2 lines of persona for the TTS renderer",
+               "voice": "OPTIONAL: Gemini prebuilt voice name" },
     "lore": [ { "host": "Ada" | "Alan",
                 "type": "reveal" | "bit" | "position" | "settled",
                 "note": "what is now canon, e.g. 'Alan revealed he runs weekend experiments on an ancient mining rig he refuses to replace'" } ] }
@@ -515,6 +557,12 @@ hand-write JSON dialogue or escape quotes.
   - `dives` — **one entry per mini-dive**, the significance bet stated plainly. It
     persists into `history.json`, so tomorrow's writer sees which bets the show has
     been making — and the listener's corrections have something concrete to land on.
+  - `concepts_taught` — only when a dive genuinely taught a concept end to end (the
+    kind a future episode could call back to instead of re-teaching). It feeds the
+    `longterm.concepts_taught` ledger. Most episodes: omit.
+  - `guest` — only on a guest episode (see the Hosts section); `name` is required,
+    `bio` steers the guest's voice performance, `voice` overrides the default guest
+    voice when a specific timbre fits the character.
   - Fill `lore` with what this episode added to the hosts' canon: a self-revelation or
     development of an established detail (`reveal` — the main event), a running bit worth
     returning to (`bit`), a genuine position a host staked out (`position`), or the

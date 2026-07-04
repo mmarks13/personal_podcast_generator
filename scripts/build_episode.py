@@ -32,26 +32,36 @@ import json
 import re
 import sys
 
-# A turn line: a speaker tag (A or B) + ":" + the spoken text. Leading whitespace
-# is tolerated; everything after the colon is the line's spoken text.
-SPEAKER_RE = re.compile(r"^([AB])\s*:\s?(.*)$")
+# A turn line: a speaker tag (A/B, or C for an occasional guest) + ":" + the
+# spoken text. Leading whitespace is tolerated; everything after the colon is the
+# line's spoken text.
+SPEAKER_RE = re.compile(r"^([ABC])\s*:\s?(.*)$")
+# A chapter marker: "## <title>" on its own line, before the turn it labels.
+# Stripped from the dialogue; becomes ID3 chapters + the episode page's chapter list.
+CHAPTER_RE = re.compile(r"^##\s+(.+)$")
 
 # Source groups render in this order; any other group follows in first-seen order.
 GROUP_ORDER = ["Papers", "Releases", "Discussion", "Industry & Discussion",
                "Primary sources", "Further reading"]
 
 
-def parse_script(text: str) -> tuple[list[dict], list[str], list[str]]:
-    """Parse `A:`/`B:` lines into turns. A non-tag, non-blank line continues the
-    current turn (so a wrapped turn still joins into one), which also means a
-    forgotten tag merges rather than vanishes — the gate's embedded-label check
-    is the backstop. Returns (turns, errors, warnings)."""
+def parse_script(text: str) -> tuple[list[dict], list[dict], list[str], list[str]]:
+    """Parse `A:`/`B:`/`C:` lines into turns and `## title` lines into chapters.
+    A non-tag, non-blank line continues the current turn (so a wrapped turn still
+    joins into one), which also means a forgotten tag merges rather than vanishes —
+    the gate's embedded-label check is the backstop.
+    Returns (turns, chapters, errors, warnings)."""
     turns: list[dict] = []
+    chapters: list[dict] = []
     errors: list[str] = []
     warnings: list[str] = []
     for n, raw in enumerate(text.splitlines(), 1):
         line = raw.strip()
         if not line:
+            continue
+        c = CHAPTER_RE.match(line)
+        if c:
+            chapters.append({"title": c.group(1).strip(), "turn": len(turns)})
             continue
         m = SPEAKER_RE.match(line)
         if m:
@@ -61,14 +71,20 @@ def parse_script(text: str) -> tuple[list[dict], list[str], list[str]]:
         else:
             errors.append(f"line {n}: text before the first A:/B: speaker tag — {line!r}")
     # A turn that ended up with no spoken text (e.g. a bare "A:") is dropped — a
-    # harmless authoring slip, not a build failure.
+    # harmless authoring slip, not a build failure. Chapter indices are re-mapped
+    # against the kept turns so a drop can't skew them.
     empties = sum(1 for t in turns if not t["text"])
     if empties:
         warnings.append(f"dropped {empties} empty turn(s) — a speaker tag with no text")
+        kept_before = [0] * (len(turns) + 1)
+        for i, t in enumerate(turns):
+            kept_before[i + 1] = kept_before[i] + bool(t["text"])
+        for ch in chapters:
+            ch["turn"] = kept_before[ch["turn"]]
     kept = [t for t in turns if t["text"]]
     if not kept:
         errors.append("no dialogue turns found — script must have A:/B: lines")
-    return kept, errors, warnings
+    return kept, chapters, errors, warnings
 
 
 def render_shownotes(meta: dict) -> str:
@@ -100,7 +116,7 @@ def build(script_text: str, meta: dict) -> tuple[dict, str, list[str], list[str]
     errors: list[str] = []
     warnings: list[str] = []
 
-    turns, perrs, pwarns = parse_script(script_text)
+    turns, chapters, perrs, pwarns = parse_script(script_text)
     errors += perrs
     warnings += pwarns
 
@@ -111,11 +127,26 @@ def build(script_text: str, meta: dict) -> tuple[dict, str, list[str], list[str]
         warnings.append("episode_meta.json has no 'summary' — show notes will have an empty lead")
     if not (meta.get("sources") or []):
         warnings.append("episode_meta.json has no 'sources' — show notes will list none")
+    if not chapters:
+        warnings.append("no '## title' chapter markers in the script — the MP3 and "
+                        "episode page will have no chapters")
 
     episode = {"date": meta.get("date", ""), "title": meta.get("title", "")}
     tts = (meta.get("tts_notes") or "").strip()
     if tts:
         episode["tts_notes"] = tts
+    guest = meta.get("guest") or {}
+    if guest:
+        if not (guest.get("name") or "").strip():
+            errors.append("episode_meta.json 'guest' needs at least a 'name'")
+        else:
+            episode["guest"] = {k: v for k, v in guest.items()
+                                if k in ("name", "voice", "bio") and v}
+    if any(t["speaker"] == "C" for t in turns) and not guest:
+        warnings.append("script has C: turns but episode_meta.json has no 'guest' — "
+                        "the renderer will use the default guest voice/name")
+    if chapters:
+        episode["chapters"] = chapters
     episode["turns"] = turns
 
     shownotes = render_shownotes(meta)

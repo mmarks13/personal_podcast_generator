@@ -48,6 +48,7 @@ MAX_THREADS = 15         # active_threads cap
 THREAD_STALE_DAYS = 21   # a thread untouched this long is no longer active — retire it
 MAX_ENTITIES = 40        # entity roster cap
 MAX_LORE = 40            # host canon cap (~years at the intended reveal rate)
+MAX_CONCEPTS = 120       # concepts-taught ledger cap
 # The only fields that belong in the show's memory. episode_meta.json may also
 # carry `sources` / `tts_notes` (for the show notes and the renderer), which must
 # not leak into history.json — it is re-read into context every run.
@@ -69,7 +70,7 @@ def _strip_tags(value):
 def _empty() -> dict:
     return {"episodes": [], "longterm": {
         "active_threads": [], "entities": [], "monthly": [], "host_lore": [],
-        "updated": ""}}
+        "concepts_taught": [], "updated": ""}}
 
 
 def load(path: str = HISTORY_FILE) -> dict:
@@ -82,6 +83,7 @@ def load(path: str = HISTORY_FILE) -> dict:
         lt.setdefault("entities", [])
         lt.setdefault("monthly", [])
         lt.setdefault("host_lore", [])
+        lt.setdefault("concepts_taught", [])
         lt.setdefault("updated", "")
         return data
     return _empty()
@@ -189,6 +191,22 @@ def main() -> int:
             for key in ("topics", "entities", "threads"):
                 ep.setdefault(key, [])
             data = append_episode(data, ep)
+            # Fold taught concepts straight into the long-term ledger (not the
+            # per-episode record): the writer checks it before re-teaching, and
+            # it must survive the 30-day roll-off.
+            with open(args.meta) as f:
+                taught = _strip_tags(json.load(f)).get("concepts_taught") or []
+            if taught:
+                ledger = {c["name"].lower(): c
+                          for c in data["longterm"]["concepts_taught"]}
+                for name in taught:
+                    if isinstance(name, str) and name.strip():
+                        row = ledger.setdefault(name.strip().lower(),
+                                                {"name": name.strip()})
+                        row["last_taught"] = ep["date"]
+                data["longterm"]["concepts_taught"] = sorted(
+                    ledger.values(), key=lambda c: c.get("last_taught", ""),
+                    reverse=True)[:MAX_CONCEPTS]
             # Promote/refresh any named threads the episode carried.
             threads = {t["name"].lower(): t for t in data["longterm"]["active_threads"]}
             for t in ep.get("threads", []):

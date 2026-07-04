@@ -183,14 +183,31 @@ podcast pipeline overnight, and the daily read on its own after the 5h rate-limi
 window resets, so the read gets a fresh budget instead of competing with the podcast:
 
 ```cron
-0 1 * * *  cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh      >> logs/cron-bootstrap.log 2>&1
-5 6 * * *  cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh read >> logs/cron-bootstrap.log 2>&1
+0 1 * * *    cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh         >> logs/cron-bootstrap.log 2>&1
+5 6 * * *    cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh read    >> logs/cron-bootstrap.log 2>&1
+0 20 * * 2,5 cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh propose >> logs/cron-bootstrap.log 2>&1
 ```
 
 `run_episode.sh` (no arg) runs the full pipeline — including the deep-dive on
 Wednesdays and Saturdays; `run_episode.sh read` runs only the daily read (write →
-Kindle → commit EPUB + reads_history). On macOS, use a launchd
+Kindle → commit EPUB + reads_history); `run_episode.sh propose` (Tue/Fri evening)
+pushes 3–5 deep-dive topic pitches to the phone. On macOS, use a launchd
 `StartCalendarInterval` plist instead (it can wake the machine).
+
+## Phone channel & listener feedback
+
+- **ntfy.sh** (`NTFY_TOPIC` in `.env`; subscribe to the same topic in the ntfy app):
+  run-failure alerts, and the Tue/Fri deep-dive picker — reply to the options push
+  with a number (or your own topic) and the next morning's deep-dive uses it; no
+  reply means the writer picks.
+- **`feedback.md`** (repo root): drop a note anytime; the nightly writer applies it,
+  logs it to `archive/feedback_log.md`, and promotes durable preferences to
+  **`listener.yaml`** (interest weights) or **`config/pronunciations.yaml`**
+  (TTS-mispronounced names — the gate warns when a raw form appears in a script).
+- Episode pages carry a chapter list + full transcript; the MP3s carry ID3 chapters
+  (from `##` markers in the script). An occasional **guest voice** (speaker `C`,
+  borrowed from the daily read's masthead) renders via `GEMINI_VOICE_C` or a
+  per-episode voice override.
 
 > One run/night fits comfortably within Pro's normal limits; a heavy Claude Code
 > coding week could occasionally bump a limit, in which case Max helps.

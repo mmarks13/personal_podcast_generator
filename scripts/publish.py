@@ -94,7 +94,50 @@ def notes_to_html(notes_md: str) -> str:
     return md.markdown(body, output_format="html5")
 
 
-def episode_page_html(title: str, date: str, notes_html: str, mp3_url: str) -> str:
+SPEAKER_NAMES = {"A": "Ada", "B": "Alan", "C": "Guest"}
+SPEAKER_LINE_RE = re.compile(r"^([ABC])\s*:\s?(.*)$")
+CHAPTER_LINE_RE = re.compile(r"^##\s+(.+)$")
+
+
+def transcript_section_html(script_path: str) -> str:
+    """Chapter list + collapsible transcript from an archived script.txt.
+
+    Best-effort: returns "" when the archive has no script for the episode
+    (pre-archive episodes). Audio tags are stripped; `##` markers become the
+    chapter list and headings inside the transcript.
+    """
+    if not os.path.exists(script_path):
+        return ""
+    chapters: list[str] = []
+    body: list[str] = []
+    with open(script_path, encoding="utf-8") as f:
+        for raw in f:
+            line = strip_audio_tags(raw.strip())
+            if not line:
+                continue
+            c = CHAPTER_LINE_RE.match(line)
+            if c:
+                chapters.append(c.group(1).strip())
+                body.append(f"<h3>{c.group(1).strip()}</h3>")
+                continue
+            m = SPEAKER_LINE_RE.match(line)
+            if m:
+                name = SPEAKER_NAMES.get(m.group(1), m.group(1))
+                body.append(f"<p><b>{name}:</b> {m.group(2).strip()}</p>")
+            elif body and body[-1].endswith("</p>"):
+                body[-1] = body[-1][:-4] + " " + line + "</p>"  # wrapped line
+    if not body:
+        return ""
+    chap_html = ""
+    if chapters:
+        items = "\n".join(f"<li>{c}</li>" for c in chapters)
+        chap_html = f"<h2>In this episode</h2>\n<ol>\n{items}\n</ol>\n"
+    return (f"{chap_html}<details><summary>Transcript</summary>\n"
+            + "\n".join(body) + "\n</details>")
+
+
+def episode_page_html(title: str, date: str, notes_html: str, mp3_url: str,
+                      extra_html: str = "") -> str:
     """A standalone per-episode notes page for GitHub Pages."""
     show = os.environ.get("SHOW_TITLE", "Self-Attention")
     return f"""<!doctype html>
@@ -116,6 +159,7 @@ def episode_page_html(title: str, date: str, notes_html: str, mp3_url: str) -> s
 <div class="date">{show} — {date}</div>
 <audio controls preload="none" src="{mp3_url}"></audio>
 {notes_html}
+{extra_html}
 <footer><a href="../index.html">← All episodes</a></footer>
 </body></html>"""
 
@@ -274,9 +318,11 @@ class GitHubBackend:
         ep_dir = os.path.join(DOCS, EPISODES_DIR)
         os.makedirs(ep_dir, exist_ok=True)
         for ep in catalog:
+            extra = transcript_section_html(
+                os.path.join(ARCHIVE_DIR, "scripts", f"{page_name(ep)}.txt"))
             html = episode_page_html(ep["title"], ep["date"],
                                      ep.get("summary_html", f"<p>{ep.get('summary','')}</p>"),
-                                     ep["mp3_url"])
+                                     ep["mp3_url"], extra_html=extra)
             with open(os.path.join(ep_dir, f"{page_name(ep)}.html"), "w") as f:
                 f.write(html)
         reads_dir = os.path.join(DOCS, READS_DIR)
@@ -293,6 +339,10 @@ class GitHubBackend:
             add.append(HISTORY_FILE)
         if os.path.isdir(ARCHIVE_DIR):            # persist the script archive too
             add.append(ARCHIVE_DIR)
+        # Listener-tunable files the writer may update in response to feedback.
+        for extra in ("listener.yaml", "feedback.md", "config/pronunciations.yaml"):
+            if os.path.exists(extra):
+                add.append(extra)
         subprocess.run(add, check=True)
         if subprocess.run(["git", "diff", "--cached", "--quiet"]).returncode != 0:
             subprocess.run(["git", "commit", "-m", message], check=True)

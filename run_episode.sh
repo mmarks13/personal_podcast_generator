@@ -16,11 +16,13 @@ unset ANTHROPIC_API_KEY || true   # belt-and-suspenders: stay on the Pro subscri
 
 DATE="$(date +%F)"
 DOW="$(date +%u)"   # 1=Mon .. 6=Sat 7=Sun
-# Two cron jobs share this script: the full podcast pipeline at 01:00, and the daily read
-# on its own at ~06:30 — after the 5h limit resets — so the read stops competing with the
-# podcast for one rate-limit window. `read` runs only the read; no arg runs the full run.
+# Cron jobs sharing this script: the full podcast pipeline at 01:00; the daily read on
+# its own at ~06:30 — after the 5h limit resets — so the read stops competing with the
+# podcast for one rate-limit window; and `propose` on Tue/Fri evenings, which pushes
+# 3-5 deep-dive topic pitches to the listener's phone (ntfy) so the reply can steer
+# the next morning's deep dive. No arg runs the full pipeline.
 MODE="${1:-full}"
-case "$MODE" in full|read) ;; *) echo "usage: $0 [full|read]" >&2; exit 2 ;; esac
+case "$MODE" in full|read|propose) ;; *) echo "usage: $0 [full|read|propose]" >&2; exit 2 ;; esac
 mkdir -p out logs
 
 # Publishing is branch-scoped: publish.py commits the rebuilt feed into docs/, and
@@ -84,7 +86,14 @@ USAGE_PID=$!
 cleanup() {
   kill "$USAGE_PID" 2>/dev/null || true
   local status
-  if [ ${#FAILED[@]} -eq 0 ]; then status="OK"; else status="FAIL failed=[$(IFS=,; echo "${FAILED[*]}")]"; fi
+  if [ ${#FAILED[@]} -eq 0 ]; then status="OK"; else
+    status="FAIL failed=[$(IFS=,; echo "${FAILED[*]}")]"
+    # Best-effort phone alert (no-op when NTFY_TOPIC is unset).
+    python3 scripts/notify.py --priority high \
+      --title "Podcast run FAILED ($DATE $MODE)" \
+      --message "Failed steps: $(IFS=,; echo "${FAILED[*]}"). See logs/run.log." \
+      >/dev/null 2>&1 || true
+  fi
   log run "===== RUN END $DATE dur=$(( $(date +%s) - RUN_START ))s status=$status ====="
 }
 trap cleanup EXIT
@@ -107,6 +116,45 @@ cover and record the issue. Print the EPUB path when done." \
     || log run "WARNING: Kindle email failed; EPUB still on GitHub Pages"
   run_step publish-read python3 scripts/publish_read.py --date "$DATE" \
     || log run "WARNING: read publish failed; EPUB may be unpushed"
+  exit 0
+fi
+
+# In `propose` mode (Tue/Fri ~20:00 cron) a cheap session drafts 3-5 deep-dive topic
+# options from the week's coverage, then the pitches go to the phone via ntfy. The
+# listener replies with a number (or a topic of their own); the 01:00 run reads the
+# reply via scripts/ntfy_choice.py. No reply -> the deep-dive writer picks, as ever.
+if [ "$MODE" = "propose" ]; then
+  run_step propose claude -p "Read .claude/skills/weekly-deep-dive/SKILL.md (its topic-selection \
+criteria), history.json (recent episodes, active threads, and longterm.concepts_taught), and the \
+2-3 newest daily scripts in archive/scripts/. Propose 3-5 candidate topics for tomorrow's deep-dive \
+episode: motivated by this week's news, teachable end-to-end in ~20 minutes, and not already taught \
+(check concepts_taught and past deepdive-kind episode records). Write out/deepdive_options.json as \
+exactly {\"options\": [{\"n\": 1, \"topic\": \"short topic name\", \"pitch\": \"one-line pitch for a \
+phone notification\"}]}. Do nothing else." \
+    --model sonnet \
+    --effort low \
+    --allowedTools "Read Write Bash" \
+    --permission-mode acceptEdits \
+    --max-turns 15 \
+    || log run "WARNING: propose failed; deep-dive writer will pick as usual"
+  OPTIONS_MSG="$(python3 - <<'PY'
+import json, time
+try:
+    opts = json.load(open("out/deepdive_options.json"))
+except Exception:
+    raise SystemExit(0)
+opts["sent_at"] = int(time.time())
+json.dump(opts, open("out/deepdive_options.json", "w"), indent=1)
+print("\n".join(f"{o.get('n')}. {o.get('topic')} — {o.get('pitch')}"
+                for o in opts.get("options", [])))
+PY
+)"
+  if [ -n "$OPTIONS_MSG" ]; then
+    run_step notify python3 scripts/notify.py \
+      --title "Deep-dive options for tomorrow — reply with a number or your own topic" \
+      --message "$OPTIONS_MSG" \
+      || log run "WARNING: options notification failed"
+  fi
   exit 0
 fi
 
@@ -211,12 +259,20 @@ subprocess.run(["python3","scripts/publish.py","--mp3",mp3[-1],
                 "--date",ep.get("date",date)], check=True)
 PY
 
-# Wed/Sat: also produce + publish the deep-dive episode.
+# Wed/Sat: also produce + publish the deep-dive episode. If the listener replied to
+# the previous evening's options push, their choice becomes the topic.
 if [ "$DOW" = "6" ] || [ "$DOW" = "3" ]; then
+  DIVE_CHOICE="$(python3 scripts/ntfy_choice.py 2>/dev/null || true)"
+  DIVE_TOPIC_NOTE=""
+  if [ -n "$DIVE_CHOICE" ]; then
+    log run "deepdive: listener pre-chose topic: $DIVE_CHOICE"
+    DIVE_TOPIC_NOTE=" The listener pre-chose tonight's topic via the evening picker: \
+'${DIVE_CHOICE}'. Take it as the deep-dive topic — skip topic selection and go straight to research."
+  fi
   run_step deepdive claude -p "Use the weekly-deep-dive skill to produce this week's deep-dive episode \
 following its grounding rules and length target (20-25 min). STOP after step 4's validation gate \
 passes — do NOT run the render or update_history lines in step 4; the harness handles both. \
-Print the topic and word count when done." \
+Print the topic and word count when done.${DIVE_TOPIC_NOTE}" \
     --model "$DEEPDIVE_MODEL" \
     --effort medium \
     --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
@@ -252,6 +308,7 @@ subprocess.run(["python3","scripts/publish.py","--mp3",mp3[-1],
                 "--summary",summary,"--notes","out/deepdive_shownotes.md",
                 "--date",ep.get("date",date),"--slug","deepdive"], check=True)
 PY
+  rm -f out/deepdive_options.json   # consumed; a stale one must not steer next week
 fi
 
 log run "Done: $DATE"

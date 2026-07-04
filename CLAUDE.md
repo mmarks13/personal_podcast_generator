@@ -39,7 +39,9 @@ to an RSS feed Spotify polls.
   patterns and balance the week; the gate's phrase check reads them too.
 - `scripts/make_audio.py` — Gemini multi-speaker TTS render (NotebookLM-style
   dialogue; the show's voice) + ffmpeg. Needs `GEMINI_API_KEY`; voices via
-  `GEMINI_VOICE_A/B` in `.env`; honors optional `tts_notes` in episode.json.
+  `GEMINI_VOICE_A/B` (and `_C` for the occasional guest, speaker `"C"`) in `.env`;
+  honors optional `tts_notes`/`guest` in episode.json and writes ID3 chapters from
+  the script's `##` markers.
   Retries hard then FAILS — never silently falls back. Kokoro path kept for manual
   offline experiments only (loudnorm on that path; Gemini audio ships untouched).
 - `scripts/make_epub.py` — read markdown → EPUB (chapters from `##` headings); renders a
@@ -49,7 +51,17 @@ to an RSS feed Spotify polls.
 - `scripts/send_to_kindle.py` — email a read EPUB to the Kindle (Gmail SMTP; needs
   `KINDLE_EMAIL`, `GMAIL_APP_PASSWORD`).
 - `scripts/publish.py` — upload MP3 + rebuild iTunes-compatible feed.xml; `--slug`
-  distinguishes same-day episodes (daily vs deepdive).
+  distinguishes same-day episodes (daily vs deepdive). Episode pages get a chapter
+  list + full transcript from the archived script; commits the listener-tunable
+  files too.
+- `scripts/notify.py` / `scripts/ntfy_choice.py` — the ntfy.sh phone channel
+  (`NTFY_TOPIC` in `.env`): run-failure alerts, and the Tue/Fri-evening deep-dive
+  picker (`run_episode.sh propose` pushes 3-5 topic pitches; a reply with a number
+  or free text becomes the next morning's deep-dive topic).
+- `feedback.md` (root) — listener notes, read first each night; consumed notes land
+  in `archive/feedback_log.md`. `listener.yaml` (root) — standing interest weights.
+  `config/pronunciations.yaml` — TTS-mispronounced names and speakable spellings
+  (gate warns on raw forms). The writer may update these three; never SKILL.md.
 - `scripts/update_history.py` — maintain `history.json` (show memory: 30-day detail +
   long-term thread/entity/monthly rollup) so episodes don't repeat and arcs build.
   Dedup key is (date, kind) so deep-dive records coexist with the daily's.

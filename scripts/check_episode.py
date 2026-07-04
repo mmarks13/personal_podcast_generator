@@ -43,8 +43,32 @@ NGRAM = 5
 # phrase containing one of these is dropped, not reported.
 RITUAL_FRAGMENTS = ("good morning", "i'm ada", "i'm alan", "stay grounded")
 
-SPEAKER_LINE_RE = re.compile(r"^[AB]\s*:\s?", re.MULTILINE)
+SPEAKER_LINE_RE = re.compile(r"^[ABC]\s*:\s?", re.MULTILINE)
 WORD_RE = re.compile(r"[a-z0-9'-]+")
+
+# Names the TTS is known to mispronounce, and the speakable spelling to use
+# instead. Warn-only: flags any raw form that appears in the spoken text.
+PRONUNCIATIONS_YAML = "config/pronunciations.yaml"
+
+
+def pronunciation_warnings(turns: list[dict],
+                           path: str = PRONUNCIATIONS_YAML) -> list[str]:
+    if not os.path.exists(path):
+        return []
+    try:
+        import yaml
+        lexicon = yaml.safe_load(open(path)) or {}
+    except Exception:  # noqa: BLE001 - a broken lexicon must not block the gate
+        return []
+    out = []
+    spoken = " ".join(TAG_RE.sub(" ", str(t.get("text", ""))) for t in turns)
+    for raw, speak_as in lexicon.items():
+        if not isinstance(raw, str) or not isinstance(speak_as, str):
+            continue
+        if re.search(rf"\b{re.escape(raw)}\b", spoken, re.IGNORECASE):
+            out.append(f'"{raw}" appears in the script — the TTS mispronounces it; '
+                       f'write it as "{speak_as}"')
+    return out
 
 
 def _turn_words(text: str) -> list[str]:
@@ -130,8 +154,9 @@ def check(episode: dict, min_words: int, max_words: int) -> tuple[list[str], lis
     for i, turn in enumerate(turns):
         text = str(turn.get("text", "")).strip()
         speaker = turn.get("speaker")
-        if speaker not in ("A", "B"):
-            errors.append(f"turn {i}: speaker must be 'A' or 'B', got {speaker!r}")
+        if speaker not in ("A", "B", "C"):
+            errors.append(f"turn {i}: speaker must be 'A', 'B', or 'C' (guest), "
+                          f"got {speaker!r}")
         if not text:
             errors.append(f"turn {i}: empty text")
             continue
@@ -192,6 +217,7 @@ def main() -> int:
         warnings.append(f"{len(repeats)} phrase(s) also appear in 2+ recent scripts — "
                         "a hardening verbal tic; rephrase the real ones:")
         warnings += [f'  recurring: "{p}"' for p in repeats[:15]]
+    warnings += pronunciation_warnings(episode.get("turns") or [])
     for w in warnings:
         print(f"  warn: {w}")
     for e in errors:
