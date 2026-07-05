@@ -28,9 +28,9 @@ to an RSS feed Spotify polls.
   ntfy picker.
 - `.claude/skills/daily-read/SKILL.md` — "Self Attention", a **daily** reading magazine
   → EPUB in `docs/reads/`, emailed to Kindle. Fully independent of the podcast (never
-  mentions it). A fixed masthead of nine writers (Ada, Alan, Grace, Vannevar, Florence,
-  Karel, Linus, Norbert, Herbert); weekday issues ~30 min, Sat/Sun ~1 hr. Continuity in
-  `reads_history.json`.
+  mentions it). A fixed masthead of ten writers (roster and beats live in that skill's
+  masthead section); weekday issues ~30 min, Sat/Sun ~1 hr. Continuity in
+  `reads_history.json`. Masthead writers may guest on the podcast (one-way crossover).
 - `config/sources.yaml` — the source watchlist (Tier 1 = daily; Tier 2 = optional).
 - `scripts/fetch_sources.py` — deterministic pulls of ALL rss/api sources, both tiers
   (arXiv keyword-filtered to topic priorities, HF Daily Papers, HN, newsletters).

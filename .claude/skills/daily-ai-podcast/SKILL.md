@@ -54,8 +54,9 @@ symmetrical observations: if a story's lines could be re-dealt to the other host
 unchanged, the roles have collapsed — rewrite it.
 
 **Guests (occasional).** The show shares a universe with the "Self Attention" daily
-read: its masthead writers (Grace, Vannevar, Florence, Karel, Linus, Norbert, Herbert)
-may guest when a dive is squarely their beat — speaker `"C"` in the script. Rules:
+read: its masthead writers (see the masthead in `.claude/skills/daily-read/SKILL.md`
+for the current roster and each writer's beat and voice) may guest when a dive is
+squarely their beat — speaker `"C"` in the script. Rules:
 **at most one guest per week**, and only when the beat genuinely fits — most episodes
 have none. Guest scenes are **guest plus one host** (the renderer takes two voices per
 scene); the other host hands off into the scene and returns after. The hosting host
