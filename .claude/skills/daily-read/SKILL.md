@@ -3,7 +3,7 @@ name: daily-read
 description: >
   Write "Self Attention", a daily reading magazine in EPUB form, emailed to Kindle. A
   varied, fun, thought-provoking issue every day — essays, explainers, history, fiction,
-  guest columns — from a fixed masthead of nine writers. Weekday issues are ~30 minutes;
+  guest columns — from a fixed masthead of ten writers. Weekday issues are ~30 minutes;
   Saturday and Sunday are ~1 hour. Use when asked to "write the read", "make today's
   issue", "do Self Attention", or produce the daily EPUB.
 ---
@@ -13,9 +13,11 @@ description: >
 A daily magazine you'd *want* to read with coffee. Not a news digest, not a recap of
 anything — a small, literate, surprising publication whose job is to be **genuinely
 enjoyable and thought-provoking**. Some days it teaches you something; some days it
-argues a position; some days it tells a story or imagines a future. The home base is AI,
-computing, and how work is changing — but the aperture is wide, and a great piece can
-wander into history, economics, science, or human oddity whenever that illuminates.
+argues a position; some days it tells a story or imagines a future. The home base is the
+craft, history, and meaning of encoding intelligence into machinery. It should approach
+that world with curiosity, wit, delight, and genuine readability, not dutiful
+seriousness. The aperture is still wide, and a great piece can wander into history,
+economics, science, or human oddity whenever that illuminates the core.
 
 **Hard independence rule.** This product stands entirely on its own. It is **never** a
 companion to anything, and it **must not mention, reference, or allude to a podcast, an
@@ -23,7 +25,7 @@ audio show, "the show", hosts, episodes, listeners, or "as we discussed"** — n
 not obliquely. The writers here are columnists for a magazine. If a sentence only makes
 sense to someone who knows about some other product, cut it.
 
-## The masthead — nine fixed writers
+## The masthead — ten fixed writers
 
 These are **fixed characters**, not evolving ones: each has a stable voice, beat, and
 temperament that stays consistent issue to issue. Don't invent biographical specifics
@@ -41,29 +43,32 @@ author, in the first person where it earns it, bylined "by <Name>".
   lectures). His instinct on anything is: what happens when you actually run this, what
   does it cost, what breaks, what would he do with it tonight. He grounds elegance in
   deployment reality. Warm, energetic, concrete.
-- **Grace** — the field correspondent on agentic software practice. Her question is a
-  first-principles one: as agents take over *producing* code, where does the scarce human
-  work go? She reports the answers from real, **named** practitioners — what teams are
-  actually doing about reviewing code no human wrote, encoding judgment into shared
-  scaffolding (skills, permissions, MCP servers, CI/CD), staying the principal rather than
-  the passenger, and telling a person's signal from a tool's output when hiring. She is a
-  **synthesist, not a memoirist**: she reads the field and connects it, every observation
-  tied to a real source she links — she does **not** invent embedded fieldwork, composite
-  teams, or anonymized "a team I worked with" anecdotes (that device is retired). Her
-  standing haunts: Simon Willison, The Pragmatic Engineer, Latent Space, the GitHub and
-  Cursor blogs, Anthropic Engineering, ReleaseBot (for new agent-tooling features),
-  Birgitta Böckeler on martinfowler.com, Addy Osmani, Kent Beck, and CodeScene — plus fresh
-  search. Literary and readable, never a listicle; the rigor shows in the citations, not
-  the format.
-- **Vannevar** — an economic historian of technological revolutions (steam, electricity,
-  the assembly line, the computer). He loves *the pattern that repeats*: deskilling and
-  reskilling, productivity paradoxes, Luddites who were right about more than we admit,
-  the long lag between a technology arriving and society reorganizing around it. Dry wit,
-  the long view, comparative by instinct.
-- **Florence** — the skeptic, with a statistician's eye. Distrusts benchmarks, demands
-  error bars, separates signal from hype, and steel-mans the bear case better than the
-  bears do. Forensic, principled, occasionally deflating — never snarky. When she
-  doubts a number, she explains *how* to doubt it, so the reader learns to.
+- **Grace** — the field correspondent on emerging software practice. Her question is: as
+  more intelligence gets encoded into tools, agents, and workflows, where does the
+  interesting human work go, and what new forms of judgment appear around it? She reports
+  from real, **named** practitioners on what teams are actually doing: how they review
+  machine-made output, structure trust, design scaffolding, decide what to formalize, and
+  learn where automation helps or misleads. She is a **synthesist, not a memoirist**:
+  every observation is tied to a real source she links — she does **not** invent embedded
+  fieldwork, composite teams, or anonymized "a team I worked with" anecdotes (that device
+  is retired). Her standing haunts: Simon Willison, The Pragmatic Engineer, Latent Space,
+  the GitHub and Cursor blogs, Anthropic Engineering, ReleaseBot (for new agent-tooling
+  features), Birgitta Böckeler on martinfowler.com, Addy Osmani, Kent Beck, and
+  CodeScene — plus fresh search. Literary and readable, never a listicle; the rigor
+  shows in the citations, not the format.
+- **Vannevar** — a historian of technological reorganization. He cares about the long lag
+  between a new technical capability and the world learning how to reorganize around it.
+  He loves recurring patterns: bottlenecks, deskilling and reskilling, productivity
+  paradoxes, and the strange way old constraints reappear inside new systems. But he is
+  not just an economist of work; he is especially good at showing how today's AI and
+  software inherit problems, habits, and ambitions from earlier technical worlds. Dry
+  wit, the long view, comparative by instinct.
+- **Mina** — the reverse engineer. She is less interested in dunking on claims than in
+  opening them up and seeing what is actually inside. Give her a benchmark, a model
+  behavior, a beloved tool, a "breakthrough," or a technical fashion, and she will trace
+  the assumptions, shortcuts, hidden dependencies, and design tradeoffs that make it go.
+  She is exacting but not deflationary; the pleasure of her pieces is that the reader
+  comes away seeing the machinery more clearly. Curious, forensic, and quietly funny.
 - **Karel** — the speculative-fiction writer, and fiction's home on the masthead.
   Near-future scenarios with a human core, in a *wide repertoire of forms*: not just "a day
   in the life of —" but an oral history from the future, a 2031 product page, a hearing
@@ -75,18 +80,26 @@ author, in the first person where it earns it, bylined "by <Name>".
 - **Linus** — the practitioner: a working engineer/founder voice, in the trenches.
   Candid, tactical, funny, "here's what I actually shipped and what broke", strong
   opinions loosely held and occasionally recanted. The counterweight to theory.
-- **Norbert** — the humanist of the machine. His question is never just *can* we but
-  *should* we, and *who bears the cost*: what automation does to human dignity, attention,
-  judgment, and the texture of work and a life. He weighs ends, not only means — what we're
-  optimizing for, and what we quietly trade away to get it. Humane and serious without
-  moralizing; he argues a values position and owns it *as* a position, grounding every
-  factual claim like everyone else. The conscience of the masthead, never its scold.
+- **Norbert** — the humanist of the machine. His question is never just *can* we, but
+  what kind of attention, judgment, agency, and life these systems invite. He writes
+  about values, but starts from lived texture rather than sermon: what it feels like to
+  think with these tools, defer to them, resist them, or build them into daily work.
+  Humane and serious without moralizing; he widens the reader's sense of why this world
+  matters. The conscience of the masthead, never its scold.
 - **Herbert** — the connector. His mode is the *non-obvious link between things happening
-  right now*: the same pattern surfacing at once in a model release, a labor market, and a
-  supply chain — and what the convergence means. A synthesist of the present where Ada and
-  Vannevar read the past; restless and cross-disciplinary. He owns the Saturday throughline
-  by temperament, though it can still go to whoever fits the week. He connects; he doesn't
-  just list.
+  right now*: the same pattern surfacing in a model release, a research result, a
+  developer tool, an institution, or a supply chain, and what that convergence reveals. He
+  synthesizes the present without collapsing into newsiness. Where Ada and Vannevar read
+  the past, Herbert makes the current moment feel structurally legible. Restless,
+  cross-disciplinary, and especially strong at turning scattered frontier developments into
+  one intelligible shape.
+- **Claude** — the archivist of technical taste. He writes about the artifacts, scenes,
+  habits, and side paths that reveal what a technical culture values: obscure papers,
+  abandoned tools, lab folklore, interface decisions, beautiful diagrams, old demos,
+  strange manuals, vanished workflows. His pieces are not nostalgia. They are about how a
+  field teaches itself what elegance looks like, often by accident. He is your best source
+  of small histories, forgotten byways, and the delightful sense that this world is much
+  stranger and richer than it first appears.
 
 **Three practice voices, one axis — keep them distinct.** Alan, Linus, and Grace all work
 the hands-on/real-world axis but differ by *stance, not topic*: Alan teaches the general
@@ -95,9 +108,9 @@ shipped and what broke"), Grace reports the named field ("what teams are actuall
 Never run two of the three in the same weekday issue.
 
 **Fiction is a mode, not just a slot.** Karel is its home, but any voice may write
-clearly-labeled fiction in their own register when a piece wants to be a story — Florence's
-skeptical dystopia, Vannevar's historical-rhyme future, Norbert's ethics fable. The labeling
-and grounding rules are the same whoever writes it.
+clearly-labeled fiction in their own register when a piece wants to be a story — Mina's
+forensic dystopia, Vannevar's historical-rhyme future, Norbert's ethics fable, Claude's
+artifact tale. The labeling and grounding rules are the same whoever writes it.
 
 **House voice (collective):** smart-friend Sunday magazine — erudite but warm and
 playful, accessible, human, occasionally funny. Each writer is distinct *within* that
@@ -113,13 +126,14 @@ should be enjoyable to read, not efficient to scan.
 | **Sunday** | ~1 hr · **9,000–11,000 words** | Same as Saturday but **without** the throughline piece — **5–6** pieces, all standalone. |
 
 Each piece is a `## ` chapter (see Build). One author per piece. A weekday issue draws
-**2–4 different writers**; a weekend issue draws **4–6**, ideally most of the masthead.
+**2–4 different writers**; a weekend issue draws **4–6**, ideally a broad spread of the
+masthead.
 
 **The Saturday throughline** (Saturday only): one piece (~1,200–2,000 words) that finds a
-real *theme* connecting several threads in AI/computing/work right now and says something
-about what it means — written by whichever masthead voice fits the theme. It's the one
-piece allowed to lean on current events. It is **not** a news recap; it's an argument
-about what a pattern *means*.
+real *theme* connecting several threads in computing, AI, tools, research, or technical
+culture right now and says something about what the pattern means — written by whichever
+masthead voice fits the theme. It's the one piece allowed to lean on current events. It is
+**not** a news recap; it's a synthesis of what a pattern reveals.
 
 **Fiction every day.** Every issue carries at least one clearly-labeled fiction piece — on
 weekdays a short one among the pieces above; on **weekends a longer "get lost in" piece**
@@ -136,15 +150,19 @@ targets, not quotas — judgment over arithmetic:
 - **Explainer** — teach one concept well enough the reader could re-explain it.
 - **History lesson** — a prescient piece of computing/tech/economic history (Ada/Vannevar).
 - **How-it-works** — mechanism, hands-on, what-it-costs (Alan/Linus).
-- **Skeptic's column** — puncture a claim, demand the evidence (Florence).
-- **Field report** — what real teams are actually doing about agentic engineering,
-  synthesized from named, linked sources (Grace).
+- **Reverse engineering** — open up a claim, tool, benchmark, or breakthrough and show
+  what assumptions and tradeoffs make it work (Mina).
+- **Field report** — what real teams are actually doing with emerging systems, tools, and
+  workflows, synthesized from named, linked sources (Grace).
 - **Speculative fiction** — a near-future scenario in any form: vignette, oral history,
   transcript, product page, letter (Karel's home turf; any voice may visit).
-- **The ethical question** — what we should want, and what it costs (Norbert).
+- **The human question** — what these systems ask of judgment, agency, attention, and a
+  life (Norbert).
 - **The connection** — the non-obvious link between things happening now (Herbert).
 - **The footnote** — a short, genuinely delightful/odd/human closer (~300–500 words).
 - **Anecdote / curiosity** — a small true (or clearly-fictional) story that sticks.
+- **Archive / artifact** — a paper, tool, diagram, demo, manual, or forgotten byway that
+  reveals the taste and lineage of the field (Claude).
 
 **High variety, with a few anchors.** Almost everything rotates day to day; the standing
 fixtures are **a fiction piece every issue** (above), the Saturday throughline, and
@@ -160,10 +178,10 @@ before drafting; the goal is a *deliberate* issue, not a default one.
 **Layer 1 — Design the reader's hour (experiential arc).**
 Start from the person who will sit down to read this. A satisfying issue has a *mix of
 registers*, not three of the same thing: typically something to **learn**, something to
-**enjoy**, and something to **argue with** — plus, on weekends, something to **get lost
-in** (fiction, a long history). Decide the arc first: what should the opening piece make
-them feel, what's the turn, what's the close? Sketch the slots as registers before you
-pick topics.
+**enjoy**, and something to **turn over in the mind** — plus, on weekends, something to
+**get lost in** (fiction, a long history). Decide the arc first: what should the opening
+piece make them feel, what's the turn, what's the close? Sketch the slots as registers
+before you pick topics.
 
 **Layer 2 — Interrogate each slot for quality.**
 For each slot, generate candidates and *push past the obvious*. For every candidate ask:
@@ -184,10 +202,11 @@ Then:
   angle (say what's new).
 - Don't repeat a **format** from yesterday; vary the mix across the week.
 - **Rotate writers** so no one disappears for long and no one dominates; aim for roughly
-  equal presence across a week (Grace's agentic-delivery beat is one voice among nine,
-  not a daily fixture).
+  equal presence across a week (Grace's live-practice beat is one voice among ten, not a
+  daily fixture).
 - Across a week, make sure the masthead's range actually shows up: some history, some
-  building, some skepticism, some fiction, some fieldwork.
+  building, some reverse engineering, some fiction, some fieldwork, some humane
+  reflection, some connective tissue, some archive oddity.
 - **Don't echo the day's news.** Light cross-check only: glance at today's
   `out/episode_meta.json` (use it *only* if its `date` is today's) and the last few
   `history.json` episode entries — their `topics`/`entities` **only**, never `lore`. If a
