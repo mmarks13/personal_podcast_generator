@@ -8,7 +8,7 @@ Used for the Tue/Fri deep-dive picker and for nightly-run failure alerts.
 Silently a no-op (exit 0) when NTFY_TOPIC is unset, so the pipeline never breaks
 on a machine without the channel configured. Pipeline-sent messages carry the
 "bot" tag; replies the listener publishes from the app don't, which is how
-ntfy_choice.py tells them apart.
+the ledger's `choice` mode tells them apart.
 
 Usage:
     python scripts/notify.py --title "Deep-dive options" --message "..." [--priority high]

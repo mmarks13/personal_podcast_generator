@@ -11,7 +11,7 @@ to an RSS feed Spotify polls.
   the run environment (that switches to paid API billing). Only object-storage keys are
   needed at runtime.
 - Audio is **Gemini multi-speaker TTS** (needs `GEMINI_API_KEY`). ffmpeg must be on
-  PATH. Kokoro remains for manual offline experiments only.
+  PATH.
 
 ## Editorial rules (non-negotiable)
 - Every factual claim traces to a fetched source. No invented benchmark numbers,
@@ -44,9 +44,7 @@ to an RSS feed Spotify polls.
   dialogue; the show's voice) + ffmpeg. Needs `GEMINI_API_KEY`; voices via
   `GEMINI_VOICE_A/B` (and `_C` for the occasional guest, speaker `"C"`) in `.env`;
   honors optional `tts_notes`/`guest` in episode.json and writes ID3 chapters from
-  the script's `##` markers.
-  Retries hard then FAILS — never silently falls back. Kokoro path kept for manual
-  offline experiments only (loudnorm on that path; Gemini audio ships untouched).
+  the script's `##` markers. Retries hard then FAILS — never silently falls back.
 - `scripts/make_epub.py` — read markdown → EPUB (chapters from `##` headings); renders a
   cover from `docs/cover.png` + title/subtitle via `--cover-src`/`--cover-subtitle`.
 - `scripts/update_reads_history.py` — append today's issue to `reads_history.json` (the
@@ -57,7 +55,7 @@ to an RSS feed Spotify polls.
   distinguishes same-day episodes (daily vs deepdive). Episode pages get a chapter
   list + full transcript from the archived script; commits the listener-tunable
   files too.
-- `scripts/notify.py` / `scripts/ntfy_choice.py` — the ntfy.sh phone channel
+- `scripts/notify.py` (+ `proposal_ledger.py choice`) — the ntfy.sh phone channel
   (`NTFY_TOPIC` in `.env`): run-failure alerts, and the Tue/Fri/Sat-evening deep-dive
   picker (`run_episode.sh propose` pushes a mixed slate of 6 typed topic pitches —
   mechanism/foundational/history/debate — drafted from memory + a fresh evening feed

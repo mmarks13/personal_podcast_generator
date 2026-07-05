@@ -1,22 +1,18 @@
 #!/usr/bin/env python3
-"""Render a two-host episode.json into a single MP3.
+"""Render a two-host episode.json into a single MP3 via Gemini multi-speaker TTS.
 
-Two backends, chosen with --backend:
-  gemini   (default) Gemini multi-speaker TTS (NotebookLM-style dialogue). Both
-           voices are generated together per ~3-min chunk, so the hosts react to
-           each other. Needs GEMINI_API_KEY. Retries hard (5 attempts/chunk,
-           exponential backoff), then FAILS — no silent fallback; a bad-audio
-           episode must never ship unnoticed.
-  kokoro   local, free, CPU-friendly (Apache-2.0). No API key. Flatter delivery
-           (per-turn synthesis). Manual/offline use only.
+NotebookLM-style dialogue: both voices are generated together per ~3-min chunk, so
+the hosts react to each other. Needs GEMINI_API_KEY. Retries hard (5 attempts/chunk,
+exponential backoff), then FAILS — no silent fallback; a bad-audio episode must
+never ship unnoticed.
 
-Honors an optional "tts_notes" field in episode.json: 1-2 sentences of mood/tone
-direction for the day, appended to the Director's Notes of every chunk's prompt.
+Honors optional episode.json fields: "tts_notes" (1-2 sentences of mood/tone
+direction appended to every chunk's Director's Notes), "chapters" (ID3 chapter
+points, from the script's `##` markers), and "guest" (speaker C name/voice/bio).
 ffmpeg must be on PATH.
 
 Usage:
-    python scripts/make_audio.py --episode out/episode.json \
-        --out out/podcast.mp3 --backend gemini
+    python scripts/make_audio.py --episode out/episode.json --out out/podcast.mp3
 """
 from __future__ import annotations
 
@@ -28,12 +24,6 @@ import sys
 import tempfile
 
 # --- Voice config (edit to taste) -------------------------------------------
-KOKORO_VOICES = {"A": "af_heart", "B": "am_michael"}  # A = Ada, B = Alan
-KOKORO_SPEED = 1.05        # Kokoro paces ~143 wpm at 1.0; nudge toward ~150
-KOKORO_SAMPLE_RATE = 24000
-TURN_PAUSE_SECONDS = 0.3   # breathing room at speaker changes
-# Podcast-standard loudness for the Kokoro path (API audio ships untouched).
-LOUDNORM = "loudnorm=I=-16:TP=-1.5:LRA=11"
 GEMINI_MODEL = os.environ.get("GEMINI_TTS_MODEL", "gemini-2.5-pro-preview-tts")
 GEMINI_VOICES = {  # prebuilt voice names; audition alternatives in Google AI Studio
     "A": os.environ.get("GEMINI_VOICE_A", "Laomedeia"),  # Ada
@@ -89,8 +79,7 @@ def _ffmpeg_concat(part_files: list[str], out_path: str) -> None:
     """Concatenate same-codec audio files losslessly via the concat demuxer.
 
     No loudness processing here: Gemini's audio is already well-leveled, and
-    one-pass loudnorm audibly pumps gain on speech. The loudnorm in
-    render_kokoro stays — that path needs it.
+    one-pass loudnorm audibly pumps gain on speech.
     """
     with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as lst:
         for p in part_files:
@@ -104,35 +93,6 @@ def _ffmpeg_concat(part_files: list[str], out_path: str) -> None:
         )
     finally:
         os.unlink(list_path)
-
-
-def render_kokoro(turns: list[dict], out_path: str) -> None:
-    import numpy as np
-    import soundfile as sf
-    from kokoro import KPipeline
-
-    pipeline = KPipeline(lang_code="a")  # 'a' = American English
-    pause = np.zeros(int(TURN_PAUSE_SECONDS * KOKORO_SAMPLE_RATE), dtype=np.float32)
-    pieces = []
-    for turn in turns:
-        voice = KOKORO_VOICES.get(turn["speaker"], "af_heart")
-        # KPipeline yields audio chunks; collect them for the turn.
-        chunks = [audio for _, _, audio in
-                  pipeline(turn["text"], voice=voice, speed=KOKORO_SPEED)]
-        if not chunks:
-            continue
-        if pieces:
-            pieces.append(pause)
-        pieces.append(np.concatenate(chunks))
-    if not pieces:
-        raise RuntimeError("Kokoro produced no audio for any turn.")
-    # One WAV, one encode: avoids the quality loss of per-turn mp3 + re-encode.
-    with tempfile.TemporaryDirectory() as tmp:
-        wav = os.path.join(tmp, "episode.wav")
-        sf.write(wav, np.concatenate(pieces), KOKORO_SAMPLE_RATE)
-        subprocess.run(["ffmpeg", "-y", "-i", wav, "-af", LOUDNORM,
-                        "-c:a", "libmp3lame", "-q:a", "2", out_path],
-                       check=True, capture_output=True)
 
 
 def _gemini_chunks(turns: list[dict],
@@ -339,7 +299,6 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--episode", default="out/episode.json")
     ap.add_argument("--out", default="out/podcast.mp3")
-    ap.add_argument("--backend", choices=["gemini", "kokoro"], default="gemini")
     args = ap.parse_args()
 
     with open(args.episode) as f:
@@ -357,14 +316,11 @@ def main() -> int:
                 for c in episode.get("chapters", []) or []]
 
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
-    print(f"Rendering {len(turns)} turns via {args.backend}...", file=sys.stderr)
-    if args.backend == "gemini":
-        # No fallback: if Gemini is down after the retries, fail loudly. A
-        # flat-voiced episode must never publish unnoticed.
-        render_gemini(turns, args.out, tts_notes=str(episode.get("tts_notes", "")),
-                      chapters=chapters, guest=episode.get("guest"))
-    else:
-        render_kokoro(turns, args.out)  # manual/offline path: no chapters
+    print(f"Rendering {len(turns)} turns via Gemini TTS...", file=sys.stderr)
+    # No fallback: if Gemini is down after the retries, fail loudly. A
+    # flat-voiced episode must never publish unnoticed.
+    render_gemini(turns, args.out, tts_notes=str(episode.get("tts_notes", "")),
+                  chapters=chapters, guest=episode.get("guest"))
 
     size_mb = os.path.getsize(args.out) / 1e6
     print(f"Wrote {args.out} ({size_mb:.1f} MB)", file=sys.stderr)

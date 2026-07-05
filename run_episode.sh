@@ -75,6 +75,37 @@ run_step() {
   return "$rc"
 }
 
+# finish_episode <kind> <episode.json> <meta.json> <script.txt> <archive-stem> \
+#                <mp3-prefix> <notes.md> <slug>
+# The shared tail for both episode kinds: record show memory, archive the script
+# (+ meta) for the writer's self-reading and the gate's phrase check, render, and
+# publish. publish.py derives title/date/summary from the episode files itself.
+finish_episode() {
+  local kind="$1" episode="$2" meta="$3" script="$4" stem="$5" prefix="$6" notes="$7" slug="$8"
+  local render_step="render-$kind" publish_step="publish-$kind"
+  [ "$kind" = "podcast" ] && publish_step="publish"   # historical step name
+
+  # Show memory first, so history is current even if the render fails.
+  set +e
+  .venv/bin/python scripts/update_history.py --append --meta "$meta" \
+    2>&1 | python3 scripts/run_log.py prefix --src update-history >> "$LOG"
+  local hist_rc=${PIPESTATUS[0]}
+  set -e
+  [ "$hist_rc" -eq 0 ] || log run "WARNING: update_history ($kind) failed; history.json may be stale"
+
+  mkdir -p archive/scripts
+  { cp -f "$script" "archive/scripts/$stem.txt" \
+      && cp -f "$meta" "archive/scripts/$stem-meta.json"; } 2>/dev/null \
+    || log run "WARNING: $kind archive copy failed"
+
+  run_step "$render_step" .venv/bin/python scripts/make_audio.py \
+    --episode "$episode" --out "out/$prefix-$DATE.mp3"
+
+  run_step "$publish_step" python3 scripts/publish.py \
+    --episode "$episode" --meta "$meta" --mp3 "out/$prefix-$DATE*.mp3" \
+    --notes "$notes" --slug "$slug"
+}
+
 FAILED=()
 RUN_START=$(date +%s)
 python3 scripts/run_log.py trim --keep "$((LOG_KEEP_RUNS-1))" --log "$LOG"
@@ -122,7 +153,7 @@ fi
 # In `propose` mode (Tue/Fri/Sat ~20:00 cron) a cheap session drafts 3-5 deep-dive topic
 # options from the week's coverage, then the pitches go to the phone via ntfy. The
 # listener replies with a number (or a topic of their own); the 01:00 run reads the
-# reply via scripts/ntfy_choice.py. No reply -> the deep-dive writer picks, as ever.
+# reply via `proposal_ledger.py choice`. No reply -> the deep-dive writer picks, as ever.
 if [ "$MODE" = "propose" ]; then
   # Fresh evening pull of the structured feeds so the picker sees today's papers
   # and discussion, not last night's snapshot. Non-fatal; a separate file so the
@@ -227,53 +258,18 @@ Print the episode title and word count when done.${BACKLOG_NOTE}" \
   --permission-mode acceptEdits \
   --max-turns 60
 
-# Update show memory — pure Python, reads out/episode_meta.json; runs before render so
-# history is current even if the render fails.
-set +e
-.venv/bin/python scripts/update_history.py --append \
-  2>&1 | python3 scripts/run_log.py prefix --src update-history >> "$LOG"
-HIST_RC=${PIPESTATUS[0]}
-set -e
-[ "$HIST_RC" -eq 0 ] || log run "WARNING: update_history failed; history.json may be stale"
-
-# Archive the night's script + meta (committed by publish.py alongside the feed).
-# The writer reads the last few archived scripts to notice — and break — its own
-# patterns, and the gate's phrase-recurrence check compares against them.
-mkdir -p archive/scripts
-cp -f out/script.txt "archive/scripts/$DATE.txt" 2>/dev/null \
-  && cp -f out/episode_meta.json "archive/scripts/$DATE-meta.json" 2>/dev/null \
-  || log run "WARNING: script archive copy failed"
-
-# 4: Render the podcast audio — pure Python, no model needed.
-run_step render-podcast \
-  .venv/bin/python scripts/make_audio.py \
-  --episode out/episode.json --out "out/podcast-$DATE.mp3"
-
-# 5: publish — read title/date/summary from the episode, upload + rebuild the feed.
-run_step publish python3 - "$DATE" <<'PY'
-import json, subprocess, sys, glob
-date = sys.argv[1]
-ep = json.load(open("out/episode.json"))
-mp3 = sorted(glob.glob(f"out/podcast-{date}*.mp3"))
-assert mp3, f"no MP3 produced for {date} — not publishing a stale episode"
-summary = ""
-try: summary = json.load(open("out/episode_meta.json")).get("summary", "")[:600]
-except Exception: pass
-subprocess.run(["python3","scripts/publish.py","--mp3",mp3[-1],
-                "--title",ep.get("title",f"Self-Attention — {date}"),
-                "--summary",summary,"--notes","out/shownotes.md",
-                "--date",ep.get("date",date)], check=True)
-PY
+# 4-5: memory, archive, render, publish — the shared tail.
+finish_episode podcast out/episode.json out/episode_meta.json out/script.txt \
+  "$DATE" podcast out/shownotes.md daily
 
 # Wed/Sat/Sun: also produce + publish the deep-dive episode. If the listener replied
 # to the previous evening's options push, their choice becomes the topic.
 if [ "$DOW" = "3" ] || [ "$DOW" = "6" ] || [ "$DOW" = "7" ]; then
-  DIVE_CHOICE="$(python3 scripts/ntfy_choice.py 2>/dev/null || true)"
+  # `choice` polls the ntfy topic, resolves the reply, and marks the ledger chosen.
+  DIVE_CHOICE="$(python3 scripts/proposal_ledger.py choice 2>/dev/null || true)"
   DIVE_TOPIC_NOTE=""
   if [ -n "$DIVE_CHOICE" ]; then
     log run "deepdive: listener pre-chose topic: $DIVE_CHOICE"
-    python3 scripts/proposal_ledger.py choose --topic "$DIVE_CHOICE" 2>/dev/null \
-      || log run "WARNING: proposal ledger update failed"
     DIVE_TOPIC_NOTE=" The listener pre-chose tonight's topic via the evening picker: \
 '${DIVE_CHOICE}'. Take it as the deep-dive topic — skip topic selection and go straight to research."
   fi
@@ -287,35 +283,9 @@ Print the topic and word count when done.${DIVE_TOPIC_NOTE}" \
     --permission-mode acceptEdits \
     --max-turns 60
 
-  set +e
-  .venv/bin/python scripts/update_history.py --append --meta out/deepdive_meta.json \
-    2>&1 | python3 scripts/run_log.py prefix --src update-history >> "$LOG"
-  HIST_DD_RC=${PIPESTATUS[0]}
-  set -e
-  [ "$HIST_DD_RC" -eq 0 ] || log run "WARNING: update_history (deepdive) failed; history.json may be stale"
+  finish_episode deepdive out/deepdive.json out/deepdive_meta.json out/deepdive_script.txt \
+    "$DATE-deepdive" deepdive out/deepdive_shownotes.md deepdive
 
-  mkdir -p archive/scripts
-  cp -f out/deepdive_script.txt "archive/scripts/$DATE-deepdive.txt" 2>/dev/null \
-    || log run "WARNING: deepdive script archive copy failed"
-
-  run_step render-deepdive \
-    .venv/bin/python scripts/make_audio.py \
-    --episode out/deepdive.json --out "out/deepdive-$DATE.mp3"
-
-  run_step publish-deepdive python3 - "$DATE" <<'PY'
-import json, subprocess, sys, glob
-date = sys.argv[1]
-ep = json.load(open("out/deepdive.json"))
-mp3 = sorted(glob.glob(f"out/deepdive-{date}*.mp3"))
-assert mp3, f"no deep-dive MP3 produced for {date}"
-summary = ""
-try: summary = json.load(open("out/deepdive_meta.json")).get("summary", "")[:600]
-except Exception: pass
-subprocess.run(["python3","scripts/publish.py","--mp3",mp3[-1],
-                "--title",ep.get("title",f"Deep Dive — {date}"),
-                "--summary",summary,"--notes","out/deepdive_shownotes.md",
-                "--date",ep.get("date",date),"--slug","deepdive"], check=True)
-PY
   rm -f out/deepdive_options.json   # consumed; a stale one must not steer next week
 fi
 

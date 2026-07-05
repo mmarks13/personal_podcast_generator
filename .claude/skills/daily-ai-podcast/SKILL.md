@@ -152,10 +152,8 @@ Use it to inform, not to perform:
 - **Don't re-explain what you've already established.** If you introduced a model, a
   paper, or a company recently, assume the listener has the background — cover today's
   development, not the backstory again.
-- **Suppress true repeats.** A story already covered, with nothing new, doesn't run
-  again — when it has moved, cover the *update*, not the original news. You apply this in
-  step 3 when you select what goes in the show (there's a repeat-check there); keep it in
-  mind as you read the memory now.
+- **True repeats are enforced in step 3** (the justify-or-drop check); here, just
+  absorb what the show has already covered so you recognize a repeat when you see one.
 - **Pick up arcs naturally.** When today advances an ongoing thread, continue it the way
   a host naturally would — informed and current. A brief, earned reference to past
   coverage is fine **occasionally**, only when it adds something. Do not pepper the show
@@ -411,8 +409,7 @@ draft lands in-band and you don't write into a rewrite loop:
 Then write the dialogue **in character** — Ada (`"A"`) and Alan (`"B"`) per the Hosts
 section: teacher/skeptic roles per dive, warm sparring, at most 1–2 AI-identity
 touches, lore only when earned, the greeting and "Stay grounded." sign-off. Write each
-piece to its planned budget so the whole lands where you planned it in the
-**~3,000–4,700-word envelope**.
+piece to its planned budget.
 
 **Grounding rules (these are the point of the whole exercise):**
 - Every factual claim must trace to your gathered material (`out/candidates.json`, or the
@@ -552,18 +549,14 @@ hand-write JSON dialogue or escape quotes.
     in memory. Reuse a thread's exact `name` from `history.json` when you're continuing
     one, so its arc accumulates instead of forking; threads that stop moving are
     retired automatically, so don't re-add a stale one without a real development.
-  - `repeat_coverage` — **required for every story you ran despite a `possible_repeat`
-    flag** (see the repeat-check above); omit the key when nothing flagged ran. It's the
-    audit trail proving each re-covered story carried a real new development.
-  - `dives` — **one entry per mini-dive**, the significance bet stated plainly. It
-    persists into `history.json`, so tomorrow's writer sees which bets the show has
-    been making — and the listener's corrections have something concrete to land on.
-  - `concepts_taught` — only when a dive genuinely taught a concept end to end (the
-    kind a future episode could call back to instead of re-teaching). It feeds the
+  - `repeat_coverage` — required for every story run despite a `possible_repeat` flag
+    (the rule lives in step 3's repeat-check); omit when nothing flagged ran.
+  - `dives` — one entry per mini-dive: the significance bet (rule in step 3). Persists
+    into `history.json` so tomorrow's writer sees the bets.
+  - `concepts_taught` — only for a concept genuinely taught end to end; feeds the
     `longterm.concepts_taught` ledger. Most episodes: omit.
-  - `guest` — only on a guest episode (see the Hosts section); `name` is required,
-    `bio` steers the guest's voice performance, `voice` overrides the default guest
-    voice when a specific timbre fits the character.
+  - `guest` — only on a guest episode (rules live in the Hosts section); `name`
+    required, `bio`/`voice` steer the renderer.
   - Fill `lore` with what this episode added to the hosts' canon: a self-revelation or
     development of an established detail (`reveal` — the main event), a running bit worth
     returning to (`bit`), a genuine position a host staked out (`position`), or the

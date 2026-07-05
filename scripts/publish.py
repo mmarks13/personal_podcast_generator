@@ -1,32 +1,27 @@
 #!/usr/bin/env python3
 """Publish today's episode: upload the MP3 and rebuild the podcast RSS feed.
 
-Storage backend is swappable via PUBLISH_BACKEND so the 15-minute hosting test can
-decide it without touching anything else:
+GitHub-native hosting: audio goes up as a GitHub Release asset (per-episode tag);
+feed.xml + cover + episode pages are committed to docs/ and served by GitHub Pages.
+No storage creds — uses the locally authenticated `gh` CLI + git.
 
-  github  (default)  Audio -> GitHub Release asset (per-episode tag). feed.xml + cover
-                     committed to docs/ and served by GitHub Pages. NO storage creds —
-                     uses the locally authenticated `gh` CLI + git. Most self-contained.
-  s3                 Audio + feed.xml + state -> an S3-compatible bucket (AWS S3 or
-                     Cloudflare R2 via S3_ENDPOINT_URL). Needs S3_*/AWS_* creds.
+ffprobe reads the exact duration; feedgen builds an iTunes-compatible feed. ffmpeg
+(ffprobe) must be on PATH. The episode catalog (episodes.json) is the source of
+truth the feed is rebuilt from.
 
-Common: ffprobe reads the exact duration; feedgen builds an iTunes-compatible feed.
-ffmpeg (ffprobe) must be on PATH. The episode catalog (episodes.json) is the source of
-truth the feed is rebuilt from — kept in the repo for `github`, in the bucket for `s3`.
+Title/date/summary can be given explicitly or derived from the built episode files:
+  python scripts/publish.py --episode out/episode.json --meta out/episode_meta.json \
+      --mp3 "out/podcast-2026-06-09*.mp3" --notes out/shownotes.md
+(--mp3 accepts a glob; the newest match is published, and no match is a hard error.)
 
-CLI is identical for both backends (run_episode.sh doesn't change):
-  python scripts/publish.py --mp3 out/podcast-2026-06-09.mp3 \
-      --title "Self-Attention — Jun 9" --summary "Today's papers and releases." --date 2026-06-09
-
-Env (github):  PAGES_URL (optional, for a custom domain), COVER_SRC (default
-               assets/podcast_cover.png), SHOW_TITLE, SHOW_DESC, SHOW_AUTHOR,
-               OWNER_EMAIL, SHOW_CATEGORY.
-Env (s3):      S3_BUCKET, S3_REGION, S3_ENDPOINT_URL (R2 only), AWS_* creds,
-               PUBLIC_BASE_URL, COVER_URL, SHOW_* / OWNER_EMAIL as above.
+Env: PAGES_URL (optional, for a custom domain), COVER_SRC (default
+     assets/podcast_cover.png), SHOW_TITLE, SHOW_DESC, SHOW_AUTHOR, OWNER_EMAIL,
+     SHOW_CATEGORY.
 """
 from __future__ import annotations
 
 import argparse
+import glob
 import hashlib
 import json
 import os
@@ -38,7 +33,7 @@ from datetime import datetime, timezone
 import markdown as md
 from feedgen.feed import FeedGenerator
 
-CATALOG_FILE = "episodes.json"   # github: repo root; s3: bucket key
+CATALOG_FILE = "episodes.json"   # repo root; the feed is rebuilt from it
 HISTORY_FILE = "history.json"    # show memory; written by update_history.py, persisted here
 ARCHIVE_DIR = "archive"          # past scripts (archive/scripts/), copied by run_episode.sh
 FEED_NAME = "feed.xml"
@@ -353,80 +348,37 @@ class GitHubBackend:
             print("Nothing changed to commit.")
 
 
-# ---------------------------------------------------------------- s3 / r2 backend
-class S3Backend:
-    """Audio + feed + state in an S3-compatible bucket (AWS S3 or Cloudflare R2)."""
-
-    def __init__(self):
-        import boto3  # lazy: only needed for this backend
-        self.bucket = os.environ["S3_BUCKET"]
-        self.base = os.environ["PUBLIC_BASE_URL"].rstrip("/")
-        self.s3 = boto3.client(
-            "s3",
-            region_name=os.environ.get("S3_REGION"),
-            endpoint_url=os.environ.get("S3_ENDPOINT_URL"),  # None for AWS, set for R2
-        )
-
-    @property
-    def feed_self_url(self) -> str:
-        return f"{self.base}/{FEED_NAME}"
-
-    @property
-    def cover_url(self) -> str:
-        return os.environ.get("COVER_URL", f"{self.base}/cover.png")
-
-    def upload_audio(self, mp3: str, tag: str, title: str, notes: str) -> str:
-        key = f"episodes/{os.path.basename(mp3)}"
-        self.s3.upload_file(mp3, self.bucket, key,
-                            ExtraArgs={"ContentType": "audio/mpeg"})
-        return f"{self.base}/{key}"
-
-    def load_catalog(self) -> list[dict]:
-        try:
-            obj = self.s3.get_object(Bucket=self.bucket, Key=CATALOG_FILE)
-            return json.loads(obj["Body"].read())
-        except Exception:
-            return []
-
-    def publish_feed(self, feed_bytes: bytes) -> None:
-        self.s3.put_object(Bucket=self.bucket, Key=FEED_NAME, Body=feed_bytes,
-                           ContentType="application/rss+xml")
-
-    def publish_pages(self, catalog: list[dict]) -> None:
-        """Write per-episode notes pages + an index into the bucket."""
-        for ep in catalog:
-            html = episode_page_html(ep["title"], ep["date"],
-                                     ep.get("summary_html", f"<p>{ep.get('summary','')}</p>"),
-                                     ep["mp3_url"])
-            self.s3.put_object(Bucket=self.bucket,
-                               Key=f"{EPISODES_DIR}/{page_name(ep)}.html",
-                               Body=html.encode(), ContentType="text/html")
-        self.s3.put_object(Bucket=self.bucket, Key="index.html",
-                           Body=index_page_html(catalog).encode(),
-                           ContentType="text/html")
-
-    def save_catalog(self, catalog: list[dict], message: str) -> None:
-        self.s3.put_object(Bucket=self.bucket, Key=CATALOG_FILE,
-                           Body=json.dumps(catalog, indent=2).encode(),
-                           ContentType="application/json")
-        if os.path.exists(HISTORY_FILE):          # persist the show's memory too
-            with open(HISTORY_FILE, "rb") as f:
-                self.s3.put_object(Bucket=self.bucket, Key=HISTORY_FILE,
-                                   Body=f.read(), ContentType="application/json")
-
-
 # ---------------------------------------------------------------- orchestration
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mp3", required=True)
-    ap.add_argument("--title", required=True)
-    ap.add_argument("--summary", default="")
+    ap.add_argument("--mp3", required=True, help="MP3 path or glob (newest match wins)")
+    ap.add_argument("--title", default="", help="explicit title; else from --episode")
+    ap.add_argument("--summary", default="", help="explicit summary; else from --meta")
     ap.add_argument("--notes", default="", help="path to shownotes.md (full show notes)")
-    ap.add_argument("--date", required=True, help="YYYY-MM-DD")
+    ap.add_argument("--date", default="", help="YYYY-MM-DD; else from --episode")
+    ap.add_argument("--episode", default="", help="built episode.json to derive title/date from")
+    ap.add_argument("--meta", default="", help="episode_meta.json to derive the summary from")
     ap.add_argument("--slug", default="daily",
                     help="episode kind; 'daily' (default) or e.g. 'deepdive' so a "
                          "second same-day episode gets its own guid/tag/page")
     args = ap.parse_args()
+
+    # Derive what wasn't given explicitly from the built episode files — this is
+    # how run_episode.sh calls it (no inline shims in the harness).
+    if args.episode:
+        with open(args.episode) as f:
+            ep_json = json.load(f)
+        args.title = args.title or ep_json.get("title", "")
+        args.date = args.date or ep_json.get("date", "")
+    if args.meta and os.path.exists(args.meta):
+        with open(args.meta) as f:
+            args.summary = args.summary or (json.load(f).get("summary", "") or "")[:600]
+    if not args.title or not args.date:
+        ap.error("need --title and --date (explicitly or via --episode)")
+
+    mp3_matches = sorted(glob.glob(args.mp3))
+    assert mp3_matches, f"no MP3 matches {args.mp3!r} — not publishing a stale episode"
+    args.mp3 = mp3_matches[-1]
 
     # Feed titles distinguish the episode kind: deep dives get a standing prefix
     # (the daily stays unprefixed). Idempotent for titles that already carry it.
@@ -439,9 +391,7 @@ def main() -> int:
         with open(args.notes) as f:
             summary_html = notes_to_html(strip_audio_tags(f.read()))
 
-    backend_name = os.environ.get("PUBLISH_BACKEND", "github").lower()
-    backend = GitHubBackend() if backend_name == "github" else S3Backend()
-    print(f"Backend: {backend_name}")
+    backend = GitHubBackend()
 
     duration = ffprobe_seconds(args.mp3)
     size = os.path.getsize(args.mp3)
@@ -479,8 +429,7 @@ def main() -> int:
     print(f"Published. Audio: {mp3_url}")
     print(f"Feed: {backend.feed_self_url}  ({len(catalog)} episodes)")
     stem = args.date if args.slug == "daily" else f"{args.date}-{args.slug}"
-    print(f"Notes page: {backend.pages_base if hasattr(backend,'pages_base') else backend.base}"
-          f"/{EPISODES_DIR}/{stem}.html")
+    print(f"Notes page: {backend.pages_base}/{EPISODES_DIR}/{stem}.html")
     return 0
 
 

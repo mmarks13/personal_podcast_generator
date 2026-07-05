@@ -24,7 +24,7 @@ personal_podcast_generator/
 ├── scripts/fetch_sources.py                   # deterministic pull of all rss/api feeds
 ├── scripts/build_episode.py                   # script.txt + meta → episode.json + shownotes
 ├── scripts/check_episode.py                   # pre-render gate: schema, length, tags, artifacts
-├── scripts/make_audio.py                      # Gemini multi-speaker TTS (default) or Kokoro
+├── scripts/make_audio.py                      # Gemini multi-speaker TTS + ID3 chapters
 ├── scripts/make_epub.py                       # read markdown → EPUB (with cover)
 ├── scripts/send_to_kindle.py                  # email the EPUB to a Kindle
 ├── scripts/publish.py                         # upload MP3 + rebuild feed.xml (github|s3)
@@ -34,7 +34,6 @@ personal_podcast_generator/
 ├── archive/scripts/                           # every published script; the show's mirror
 ├── run_episode.sh                             # the nightly local entrypoint
 ├── docs/                                      # GitHub Pages: feed.xml, episode pages, reads/
-├── examples/                                  # alternative entrypoints (Actions, SDK)
 └── requirements.txt
 ```
 
@@ -48,12 +47,10 @@ subscription rather than pay-per-token API billing:
   explicitly unsets it); setting it would switch billing to the paid API.
 - **Audio** is **Gemini multi-speaker TTS** (NotebookLM-style dialogue; needs
   `GEMINI_API_KEY`, voices via `GEMINI_VOICE_A/B` in `.env`) + `ffmpeg` on `PATH`. The
-  renderer retries hard and then **fails** — it never silently falls back. A local
-  [Kokoro](https://github.com/hexgrad/kokoro) path is kept for manual offline
-  experiments only.
+  renderer retries hard and then **fails** — it never silently falls back.
 - **Hosting** is **GitHub-native**: the MP3 is uploaded as a **GitHub Release asset**,
   and `feed.xml` + episode pages + the cover are served from `docs/` via **GitHub
-  Pages**. (`publish.py` also has an S3/R2 backend behind `PUBLISH_BACKEND=s3`.)
+  Pages**.
 - **Orchestration** is local **cron/launchd** firing `run_episode.sh` nightly.
 
 ## The show
@@ -211,14 +208,6 @@ pushes 3–5 deep-dive topic pitches to the phone. On macOS, use a launchd
 
 > One run/night fits comfortably within Pro's normal limits; a heavy Claude Code
 > coding week could occasionally bump a limit, in which case Max helps.
-
-## Other entrypoints
-
-`examples/` holds two alternatives, kept for reference and not wired in:
-
-- `examples/run_daily.py` — the same skill driven via the **Claude Agent SDK** (Python).
-- `examples/daily-podcast.yml` — a **GitHub Actions** workflow. Note: it sets
-  `ANTHROPIC_API_KEY` (paid API) — a deliberate deviation from the local-Pro setup.
 
 ## Things you'll want to tune
 
