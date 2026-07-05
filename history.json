@@ -1,6 +1,38 @@
 {
   "episodes": [
     {
+      "date": "2026-07-05",
+      "title": "Generating a planet from satellite photos",
+      "summary": "A Sunday episode: two teaching dives — ABot-Earth, a generative 3D Gaussian-splatting model that builds a plausible (not surveyed) 3D Earth from satellite imagery at under ten minutes per square kilometer, and Dockerless, an environment-free verifier that grades coding-agent patches by reading the repo instead of running tests and matches execution-based training. Plus a security-and-economics sweep, and a week-in-review synthesizing the shift from capability to deployment, control, and inference economics.",
+      "topics": [
+        "ABot-Earth 0.5: a generative 3D model that synthesizes navigable 3D scenes directly in the 3D Gaussian Splatting representation, conditioned solely on (mostly top-down) satellite imagery; trained on real urban 3DGS reconstructions so it generates plausible facades it never saw rather than reconstructing them; under 10 min per sq km, 300+ cities across 190+ countries, ~3.2 trillion Gaussians in production, whole planet's ~800,000 sq km of built-up area on a 1,000-GPU cluster in under 10 days; reports FID ~16.1 vs ~69.5 for the next-best baseline (authors' own numbers/benchmark); pitched against Google Earth's months-to-years staleness, lead application disaster response; caution: plausible not surveyed",
+        "Dockerless: environment-free verifier for training coding agents — replaces per-repo Docker test execution with agentic read-only repository exploration (2-4 diagnostic questions + sub-agent evidence + judge model producing a 0-1 correctness score); beats the strongest open-source verifier by ~14.3 AUC points; a fully environment-free post-training pipeline (SFT filter + RL reward) reaches 62.0% on SWE-bench Verified, essentially matching execution-based training (~62.4%); reward adds ~7% of per-rollout time; weaker on compilation-heavy languages (Rust/C, 7-13 pts) with no compiler diagnostics; still bootstrapped on ~3.7K execution-labeled examples (execution moved upstream, didn't vanish)"
+      ],
+      "entities": [
+        "ABot-Earth",
+        "Gaussian splatting",
+        "Dockerless",
+        "SWE-bench",
+        "Qwen3.5",
+        "Google DeepMind",
+        "Epoch AI",
+        "Anthropic",
+        "LiteLLM",
+        "Simon Willison"
+      ],
+      "threads": [],
+      "dives": [
+        {
+          "story": "ABot-Earth 0.5 (generative 3D Earth from satellite imagery)",
+          "why_it_matters": "Anyone in Earth observation, disaster response, or geospatial/simulation work now has a way to generate navigable 3D everywhere on a same-day refresh cadence — as long as they treat the inferred building facades as plausible guesses, not survey-grade measurement."
+        },
+        {
+          "story": "Dockerless (environment-free coding-agent verifier)",
+          "why_it_matters": "Teams sitting on private/legacy/enterprise codebases that can't be containerized can now generate a training reward signal by reading the repo instead of running tests, unlocking code that was previously untrainable — with an honest limit on compiled languages."
+        }
+      ]
+    },
+    {
       "date": "2026-07-04",
       "title": "Everything bends toward control: who owns the model, and who can switch it off",
       "summary": "A spread day that keeps circling ownership and control: ELDR shows that serving a mixture-of-experts model well means routing by which experts are already warm, not just balancing request counts; Portugal ships Amalia, a ~9B national LLM; Together AI raises $800M at $8.3B (Aramco-led) and Microsoft stands up a $2.5B deployment company, both betting the bottleneck is now the last mile, not the model; Zuckerberg tells Meta staff agents haven't accelerated as leadership hoped; and a 'Right to Intelligence' campaign argues for a legal right to run AI locally.",
@@ -1502,9 +1534,13 @@
     ],
     "entities": [],
     "monthly": [],
-    "updated": "2026-07-04",
+    "updated": "2026-07-05",
     "host_lore": [],
     "concepts_taught": [
+      {
+        "name": "3D Gaussian splatting (and its lineage from photogrammetry and NeRF)",
+        "last_taught": "2026-07-05"
+      },
       {
         "name": "speculative decoding",
         "last_taught": "2026-07-04"

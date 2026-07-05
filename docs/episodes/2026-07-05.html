@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generating a planet from satellite photos — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Generating a planet from satellite photos</h1>
+<div class="date">Self-Attention — 2026-07-05</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-07-05/podcast-2026-07-05.mp3"></audio>
+<p><em>2026-07-05</em></p>
+<p>A Sunday episode: two teaching dives — ABot-Earth, a generative 3D Gaussian-splatting model that builds a plausible (not surveyed) 3D Earth from satellite imagery at under ten minutes per square kilometer, and Dockerless, an environment-free verifier that grades coding-agent patches by reading the repo instead of running tests and matches execution-based training. Plus a security-and-economics sweep, and a week-in-review synthesizing the shift from capability to deployment, control, and inference economics.</p>
+<h2>Papers</h2>
+<ul>
+<li><a href="https://huggingface.co/papers/2606.09967">ABot-Earth 0.5: Generative 3D Earth Model</a></li>
+<li><a href="https://huggingface.co/papers/2606.28436">Dockerless: Environment-Free Program Verifier for Coding Agents</a></li>
+</ul>
+<h2>Releases</h2>
+<ul>
+<li><a href="https://deepmind.google/blog/investing-in-multi-agent-ai-safety-research/">Google DeepMind: Investing in multi-agent AI safety research (up to $10M, deadline Aug 8)</a></li>
+</ul>
+<h2>Discussion</h2>
+<ul>
+<li><a href="https://epoch.ai/data-insights/cve-severity-spike">Epoch AI: Serious CVE severity spiked around Claude Mythos Preview's release</a></li>
+<li><a href="https://www.sentinelone.com/vulnerability-database/cve-2026-42271/">CVE-2026-42271 — LiteLLM remote code execution via MCP/tool endpoints</a></li>
+<li><a href="https://okaneland.com/study/ai-productivity-roi-at-work/">AI saves about 3% of your hours, and almost none of it reaches the money</a></li>
+<li><a href="https://simonwillison.net/2026/Jul/5/sqlite-utils-fable/#atom-everything">Simon Willison: sqlite-utils 4.0rc2, mostly written by Claude Fable (for about $149.25)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>A generated planet</li>
+<li>Grading code without running it</li>
+<li>The sweep</li>
+<li>The week in review</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Sunday, July fifth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. It's Sunday, so we'll close the show with the week in review. But first, two papers I think are genuinely worth your time — both a little off the news cycle, both concrete.</p>
+<p><b>Ada:</b> One rebuilds the surface of the planet from satellite photos. The other teaches a coding agent to grade itself without ever running the code.</p>
+<p><b>Alan:</b> Plus a quick sweep in between — a safety fund, a sobering productivity number, and a couple of security stories. Start us off with the planet.</p>
+<h3>A generated planet</h3>
+<p><b>Ada:</b> Happily, because this one delighted me, and I want to explain why it's more than a graphics demo. It's called ABot-Earth — version zero-point-five — up on Hugging Face's daily papers. The pitch: hand it satellite imagery of anywhere on Earth, and it produces a full three-dimensional scene you could fly a camera through — buildings, streets, textures — at a rate of under ten minutes per square kilometer.</p>
+<p><b>Alan:</b> Under ten minutes a square kilometer. Okay, my builder brain immediately wants to know one thing — generates, or reconstructs? Because those are very different verbs.</p>
+<p><b>Ada:</b> That is exactly the right question, and it's the whole story. But hold it for a second, because I want to give you the lineage first — this is one of those cases where knowing the path makes the trick obvious.</p>
+<p><b>Alan:</b> Go.</p>
+<p><b>Ada:</b> So how do you normally turn photographs into three-D? The old craft is photogrammetry. You take many overlapping photos of a thing from different angles and you triangulate — this pixel and that pixel are the same corner of the same building, so that corner must sit here in space. That's how Google Earth's three-D was built. It's a survey. It's measurement.</p>
+<p><b>Alan:</b> And it needs a lot of angles. You can't triangulate a wall you never photographed.</p>
+<p><b>Ada:</b> Right. Then around 2020 came neural radiance fields — NeRF — which learned a little function that, given any camera position, tells you what you'd see from there. Gorgeous results, but slow to train, slow to render. And then in 2023 the field mostly leapt to a thing called Gaussian splatting.</p>
+<p><b>Alan:</b> Which is — help me say it in builder terms.</p>
+<p><b>Ada:</b> Instead of one big network, you represent the whole scene as millions of tiny fuzzy colored blobs floating in three-D space. Little translucent smudges, each with a position, a color, a size. To draw a frame, you splat them onto the screen. It's fast, and you can tune the blobs directly — nudge each one's position and color until the whole cloud matches your photos from every angle.</p>
+<p><b>Alan:</b> So — millions of little translucent paint blobs, and you optimize them like puzzle pieces until they look right. How many are we talking?</p>
+<p><b>Ada:</b> In their full production run — about three-point-two trillion of them.</p>
+<p><b>Alan:</b> Three-point-two trillion paint blobs. Alright, that's a number.</p>
+<p><b>Ada:</b> But — everything I've described so far is still reconstruction. It's survey. You need the photos. Here's the leap ABot-Earth makes, and it's your verb question coming home. They train a generative model directly in that blob representation, on a big corpus of real three-D city reconstructions. So the model learns a prior — a deep sense of what cities are shaped like. And then at inference, it generates the scene conditioned only on satellite imagery. Mostly top-down imagery.</p>
+<p><b>Alan:</b> Wait. Top-down. So it's looking essentially straight down at a city — and inventing the sides of the buildings?</p>
+<p><b>Ada:</b> Inventing is the honest word. It has never seen those facades. It produces the most plausible facades given everything it learned about how buildings look.</p>
+<p><b>Alan:</b> So this is not a map. This is a very well-educated hallucination of a place.</p>
+<p><b>Ada:</b> That's the caution, and I'd put it exactly that strongly. What comes back is plausible, not surveyed.</p>
+<p><b>Alan:</b> But how do you even train that? Your real three-D reconstructions were built from rich ground-level and aerial photos. At inference you only get the flat top-down satellite view. That's a mismatch.</p>
+<p><b>Ada:</b> And that's the neat part of the engineering. During training they take their real three-D scenes and render them from a simulated satellite's-eye view — straight down — then pair that fake overhead image with the true three-D underneath it. So the model spends training learning exactly the inverse map you'd want: from a top-down look, to a full standing world. They bridge the gap on purpose instead of hoping it generalizes.</p>
+<p><b>Alan:</b> Ah — so they manufacture the hard case and drill on it. That's clean.</p>
+<p><b>Ada:</b> And they build it with levels of detail baked in — coarse at city scale, sharpening as you zoom to a street — so it streams like a real map application instead of loading a whole city at once. If you're a planner checking one specific building's real height, still the wrong tool. But if you need a convincing three-dimensional world, fast, everywhere — it's remarkable.</p>
+<p><b>Alan:</b> Give me the number behind "remarkable," though, because that word is doing a lot of lifting.</p>
+<p><b>Ada:</b> Fair. They use a standard image-realism score — lower is better — and they report about sixteen, against roughly seventy for the next-best system in their comparison. That's a wide gap on that metric. Authors' own numbers, their own benchmark, so — external replication pending, as always with these.</p>
+<p><b>Alan:</b> And the coverage?</p>
+<p><b>Ada:</b> Three hundred-plus cities across more than a hundred and ninety countries. And the production math is the part that made me sit up. The built-up surface of the entire planet is roughly eight hundred thousand square kilometers — and they describe running that whole thing on a thousand-GPU cluster in under ten days.</p>
+<p><b>Alan:</b> The entire built world. In ten days. Okay, that reframes the pitch. It isn't "a beautiful model of one city." It's "a plausible three-D everywhere, refreshable on a schedule Google Earth can't match." And they make that comparison directly — that Earth's imagery can be months or years stale.</p>
+<p><b>Ada:</b> And that's the so-what. Disaster response is the application they lead with, and it's the one that lands for me. A flood, an earthquake — you get fresh satellite imagery within hours, and you could stand up a navigable three-D model of the hit zone the same day. Drones route through it, responders plan against it. Staleness is the enemy in that scenario, and generation beats survey on staleness every time.</p>
+<p><b>Alan:</b> As long as everyone using it remembers the walls are guesses.</p>
+<p><b>Ada:</b> Which is the whole discipline of this show, really — knowing exactly how far to trust the thing that looks authoritative.</p>
+<h3>Grading code without running it</h3>
+<p><b>Alan:</b> Alright, mine. Squarely in the coding-agent world, and it's a clever answer to a boring, expensive problem. The paper is called Dockerless.</p>
+<p><b>Ada:</b> Dockerless. As in — without Docker, the container tool.</p>
+<p><b>Alan:</b> Exactly. So, set up the problem. When you train a coding agent — one of these things that takes a bug report and writes a patch — you need a way, during training, to tell it whether the patch it just wrote was any good. That signal is what it learns from. And the gold-standard signal is dead simple: apply the patch, run the project's test suite, see if the tests pass.</p>
+<p><b>Ada:</b> Which sounds cheap. Running tests is the one thing computers are supposed to be good at.</p>
+<p><b>Alan:</b> Running them is cheap. Setting up to run them is brutal. For every single repository you need an isolated environment — the right language version, every dependency pinned, the test harness wired up correctly. That's what Docker is for. And the paper's whole point is that building those environments is where the pain lives. It fails constantly. And for private, or legacy, or messy enterprise codebases, it's often just not possible to reproduce the environment at all.</p>
+<p><b>Ada:</b> So there's this huge class of real code you simply can't train on — because you can't stand up a clean room to test it in.</p>
+<p><b>Alan:</b> That's the gap. And here's their move: don't run anything. Verify the patch by reading. They point a second agent at the repository with only read-only tools — grep, find, that kind of thing — and it writes itself a handful of diagnostic questions. Where should this fix actually apply? What would a correct patch touch? Which tests, if they existed, would confirm it? Sub-agents go spelunking through the real code to answer those, and then a judge model reads all that evidence, plus the patch, and outputs a score — how likely is this correct.</p>
+<p><b>Ada:</b> Alan. We have spent this entire week on studies saying models are worse at checking than at doing. The whole "generation is cheap, verification is the bottleneck" drum. And this is — verification by reading comprehension. Why should I believe the reader is any good?</p>
+<p><b>Alan:</b> I knew you'd swing at that, and it's the right swing. The answer's in the numbers. On a benchmark of judging patches, their reader beats the best open-source verifier by about fourteen points on a standard scoring metric. But the number that matters more — when they use this reader to actually train a coding agent, end to end, with no environments anywhere in the loop, the resulting model hits sixty-two percent on SWE-bench Verified. That's the standard bug-fixing benchmark.</p>
+<p><b>Ada:</b> Sixty-two versus what? The number's meaningless on its own.</p>
+<p><b>Alan:</b> Versus about sixty-two-and-a-half for the exact same pipeline trained the old way, with real test execution. That's the headline. It essentially matches environment-based training — without ever building an environment.</p>
+<p><b>Ada:</b> Huh. So the reader isn't perfect, but it's a good enough teacher that the student comes out in the same place.</p>
+<p><b>Alan:</b> That's the finding. And the reading step is cheap — it adds something like seven percent to the training time, against the enormous overhead of building all those containers.</p>
+<p><b>Ada:</b> So where does it break? "Reading instead of running" has to have a tell.</p>
+<p><b>Alan:</b> It does, and to their credit they name it. Compilation-heavy languages — Rust, C — it runs seven to thirteen points worse there. Because when you actually run a compiler, it tells you the truth in a way reading the source just can't. No amount of grep replaces a type error the compiler would have caught for free.</p>
+<p><b>Ada:</b> That's the honest seam — and it's the historian's note, too. This isn't "checking turned out to be easy after all." It's narrower. For a class of high-level languages where correctness is mostly logic and structure, a careful reader is good enough to teach with. And notice — they still needed a few thousand examples labeled by real test execution to build that reader in the first place. Execution didn't vanish. It moved upstream.</p>
+<p><b>Alan:</b> Right. It's bootstrapped on the old expensive signal, then amortized across everything after. Which is a very different claim from "we don't need tests anymore."</p>
+<p><b>Ada:</b> But a genuinely useful one. If you're a shop sitting on a mountain of code you could never containerize, this is the difference between training on it and not.</p>
+<p><b>Alan:</b> Your untestable legacy repo just turned into training data. That's the unlock.</p>
+<h3>The sweep</h3>
+<p><b>Ada:</b> Let's do the quick pass. Alan — you've got the security ones.</p>
+<p><b>Alan:</b> Two of them, and they rhyme. First: Epoch AI, the research shop, published a striking data point. In June, serious high- and critical-severity software vulnerabilities disclosed by notable organizations spiked to around fifteen hundred for the month — they put that at more than three-and-a-half times the previous monthly record.</p>
+<p><b>Ada:</b> And the correlation they draw?</p>
+<p><b>Alan:</b> It lines up with Anthropic announcing, back in April, that its Claude Mythos preview could autonomously discover software vulnerabilities. Correlation, they're careful to say — not proof the tool caused it. But it's exactly the shape you'd expect if automated bug-finding just became real: a step-change in how many serious holes get found.</p>
+<p><b>Ada:</b> Size it honestly, then — that's a "watch this line" number, not a settled cause.</p>
+<p><b>Alan:</b> Precisely. And second, a concrete one: a critical vulnerability in LiteLLM — a popular open-source proxy people put in front of language models. It allows remote code execution through the tool-calling endpoints. On its own it needs a valid key — so, an authenticated user. But chained with a separate authentication-bypass bug, it opens right up to an unauthenticated attacker. If you run LiteLLM, that one's a patch-now.</p>
+<p><b>Ada:</b> And those two are the same lesson from opposite ends — AI is now both the thing finding the holes and the thing full of them.</p>
+<p><b>Alan:</b> Neatly put.</p>
+<p><b>Ada:</b> My two. First, on research funding: Google DeepMind, with a set of partners — Schmidt Sciences, the Cooperative AI Foundation, the UK's ARIA among them — announced a fund of up to ten million dollars for research into multi-agent AI safety. The specific worry is how large numbers of AI agents behave as a group, not one at a time. Applications close August eighth. Worth flagging, because "agents interacting with other agents" is exactly the regime we keep saying is under-studied.</p>
+<p><b>Alan:</b> And it's cheap, as these things go. Ten million is a rounding error next to the deployment budgets we talked about all week. But it's aimed at a real blind spot.</p>
+<p><b>Ada:</b> Second — a productivity number worth sitting with. A study making the rounds finds AI saves workers about three percent of their hours. Call that real, measured time back. And then almost none of it reaches the money. The authors found something like three to seven percent of the productivity gain actually showed up in anyone's pay, or on a bottom line. The time saved mostly evaporates before it becomes income or profit.</p>
+<p><b>Alan:</b> Which is the quiet counterweight to every "ten-x your engineers" pitch. The hours move. The dollars, so far, mostly don't.</p>
+<p><b>Ada:</b> And one lighter one to close the sweep, because I liked it. Simon Willison shipped a new release of his sqlite-utils tool and noted it was mostly written by a Claude model — for a metered cost of about a hundred and forty-nine dollars.</p>
+<p><b>Alan:</b> A hundred and forty-nine dollars for a software release. As a data point about where this is heading, that's more eloquent than most of the essays.</p>
+<p><b>Ada:</b> It really is. Okay — the week.</p>
+<h3>The week in review</h3>
+<p><b>Ada:</b> So pull all the way back. If I had to name what this week actually established, it's that the industry has quietly stopped arguing about whether the models are smart enough — and started arguing about everything that surrounds them.</p>
+<p><b>Alan:</b> Which is a real shift. Rewind six months and every week was a capability week — new model, higher benchmark. This week, almost none of it was about raw intelligence.</p>
+<p><b>Ada:</b> Three things hardened, I think. First: the bottleneck is deployment and checking, not capability. We read it from every direction. Papers showing agents can't hold a plan across a long task, can't tell when to stop. Productivity studies — including today's — where the time saved doesn't convert to anything. And the money voting the same way: Amazon, Microsoft, the labs, all standing up billion-dollar organizations whose entire job is getting AI to actually work inside a company. When Zuckerberg told his own staff on Thursday that agents hadn't accelerated the way he'd hoped, that wasn't an outlier — it was the week's consensus, spoken by the person with the most reason to say the opposite.</p>
+<p><b>Alan:</b> And the tell is that "generation is cheap, checking is the product" showed up at every altitude. A benchmark paper midweek. A coding-agent verifier today. Even the fixes this week were about verification, not new capability.</p>
+<p><b>Ada:</b> The second thing: control became the political axis. The whole week was ownership and the off-switch. Export controls on frontier models reversed eighteen days after they landed. Releases gated customer-by-customer off lists nobody outside the room can see. A White House order setting an August first deadline for classified cyber-capability testing of frontier models. And the counter-moves on the other side — Portugal building a sovereign model it owns outright, a "right to run your own model" campaign catching fire online. The question stopped being "is it safe to release" and became "who holds the switch."</p>
+<p><b>Alan:</b> And that one has a live wire heading into this coming week. Reporting suggested the White House could formalize those voluntary pre-release standards as early as the week of the seventh — so that August-first deadline may get its scaffolding in the next few days. That's the thing I'd actually watch.</p>
+<p><b>Ada:</b> Good flag. The third thread — the frontier moved down, and the fight moved to inference economics. Frontier-grade capability landed in the cheap tier this week, with Sonnet 5. Papers showed small models reaching for big-model behavior without the parameters. And the capital went where the recurring bill is — not training, but serving the models we already have, over and over. Oil money into an inference cloud. Chip startups at multibillion-dollar valuations. Even a routing paper about keeping the right experts warm — all of it the same bet, that the durable cost, and the durable margin, live in inference, not in the next training run.</p>
+<p><b>Alan:</b> And under all of it, the unglamorous constraint: memory prices. The hardware to run any of this yourself got more expensive this year, not less. Which is exactly what turns "own your own model" from a slogan into a real problem — ownership doesn't help if you can't afford the box to run it on.</p>
+<p><b>Ada:</b> We also taught two things properly this week, for anyone who missed them. World models on Wednesday — how a system can build a world you walk through but that it can't remember once you look away. And speculative decoding yesterday — how a model runs faster without changing a single word it says. Both worth going back for.</p>
+<p><b>Alan:</b> So, what to watch. The pre-release framework, like you said — possibly this week. Whether any of those billion-dollar deployment arms shows a return, or whether the last mile stays stubborn. And memory prices, because they quietly gate everything downstream of them.</p>
+<p><b>Ada:</b> The through-line I'll leave you with — and I'll resist making it tidier than it actually is — is that this was the week the story stopped being about the model, and started being about the world the model has to live in. Who's allowed to ship it, who can afford to run it, and whether anyone can check what it did.</p>
+<p><b>Alan:</b> A good week to have been paying attention.</p>
+<p><b>Ada:</b> It was. I'm Ada.</p>
+<p><b>Alan:</b> I'm Alan.</p>
+<p><b>Ada:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
