@@ -16,6 +16,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 import urllib.request
@@ -28,11 +29,15 @@ def send(title: str, message: str, priority: str = "default") -> None:
     if not topic:
         print("notify: NTFY_TOPIC unset — skipping.", file=sys.stderr)
         return
+    # JSON publish endpoint (POST to the base URL, topic in the body): unlike
+    # header-based publishing it is fully UTF-8, so titles may contain em-dashes
+    # etc. (urllib headers are latin-1-only — that bit us on day one).
+    body = json.dumps({"topic": topic, "title": title, "message": message,
+                       "priority": {"min": 1, "low": 2, "default": 3,
+                                    "high": 4, "urgent": 5}[priority],
+                       "tags": ["bot"]}).encode()
     req = urllib.request.Request(
-        f"{NTFY_BASE}/{topic}",
-        data=message.encode(),
-        headers={"Title": title, "Priority": priority, "Tags": "bot"},
-    )
+        NTFY_BASE, data=body, headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=30) as resp:
         resp.read()
     print(f"notify: sent ({title!r}).", file=sys.stderr)
