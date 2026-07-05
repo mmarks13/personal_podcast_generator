@@ -1,22 +1,22 @@
 ---
 name: weekly-deep-dive
 description: >
-  Produce a deep-dive podcast episode (runs twice a week, Wednesday and Saturday): pick
+  Produce a deep-dive podcast episode (runs three times a week: Wednesday, Saturday, Sunday): pick
   one topic recent AI news made worth learning properly, research it at primary sources,
   and teach it as a ~20-25 minute two-host episode rendered to MP3. Use when asked to
-  "make the deep dive", "do the deep-dive episode", or produce a Wed/Sat teaching episode.
+  "make the deep dive", "do the deep-dive episode", or produce a Wed/Sat/Sun teaching episode.
 ---
 
 # Weekly Deep Dive
 
-A second episode in the same feed, twice a week (Wednesday and Saturday): not the day's
+A second episode in the same feed, three times a week (Wednesday, Saturday, and Sunday): not the day's
 news, but a **teaching episode** — one topic, explained properly, chosen because recent
 events made it worth understanding. Aim for **~3,000–3,750 words** (the Gemini voices
 render that to roughly 22–29 minutes).
 
-Because this runs twice a week, **check `history.json` for a deep-dive (`"kind":
+Because this runs three times a week, **check `history.json` for a deep-dive (`"kind":
 "deepdive"`) already recorded in the last several days and pick a clearly different
-topic** — don't re-teach what the week's earlier deep-dive already covered.
+topic** — don't re-teach what the week's earlier deep-dives already covered.
 
 The listener already hears the daily show, so don't re-report the week. Use the week's
 news as the doorway: "X kept coming up this week — here's how it actually works."

@@ -10,7 +10,8 @@ to an RSS feed Spotify polls.
 - Claude work uses the **logged-in Claude Pro CLI** — do NOT set ANTHROPIC_API_KEY in
   the run environment (that switches to paid API billing). Only object-storage keys are
   needed at runtime.
-- Audio is **local Kokoro** (free). ffmpeg must be on PATH.
+- Audio is **Gemini multi-speaker TTS** (needs `GEMINI_API_KEY`). ffmpeg must be on
+  PATH. Kokoro remains for manual offline experiments only.
 
 ## Editorial rules (non-negotiable)
 - Every factual claim traces to a fetched source. No invented benchmark numbers,
@@ -21,8 +22,10 @@ to an RSS feed Spotify polls.
 - `.claude/skills/daily-ai-podcast/SKILL.md` — the daily workflow Claude follows. Also
   defines the hosts: Ada (A, MIT computing historian) and Alan (B, Berkeley builder),
   two self-aware AIs whose evolving canon lives in `history.json` `lore`.
-- `.claude/skills/weekly-deep-dive/SKILL.md` — Saturday teaching episode (~20–25 min),
-  one topic the week's news made worth learning; published with `--slug deepdive`.
+- `.claude/skills/weekly-deep-dive/SKILL.md` — Wed/Sat/Sun teaching episode (~20–25
+  min), one topic the week's news made worth learning; published with `--slug deepdive`
+  (feed title gets a "Deep Dive:" prefix). Topic can be pre-chosen via the evening
+  ntfy picker.
 - `.claude/skills/daily-read/SKILL.md` — "Self Attention", a **daily** reading magazine
   → EPUB in `docs/reads/`, emailed to Kindle. Fully independent of the podcast (never
   mentions it). A fixed masthead of nine writers (Ada, Alan, Grace, Vannevar, Florence,
@@ -55,7 +58,7 @@ to an RSS feed Spotify polls.
   list + full transcript from the archived script; commits the listener-tunable
   files too.
 - `scripts/notify.py` / `scripts/ntfy_choice.py` — the ntfy.sh phone channel
-  (`NTFY_TOPIC` in `.env`): run-failure alerts, and the Tue/Fri-evening deep-dive
+  (`NTFY_TOPIC` in `.env`): run-failure alerts, and the Tue/Fri/Sat-evening deep-dive
   picker (`run_episode.sh propose` pushes 3-5 topic pitches; a reply with a number
   or free text becomes the next morning's deep-dive topic).
 - `feedback.md` (root) — listener notes, read first each night; consumed notes land

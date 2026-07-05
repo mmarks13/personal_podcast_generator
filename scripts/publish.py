@@ -426,6 +426,11 @@ def main() -> int:
                          "second same-day episode gets its own guid/tag/page")
     args = ap.parse_args()
 
+    # Feed titles distinguish the episode kind: deep dives get a standing prefix
+    # (the daily stays unprefixed). Idempotent for titles that already carry it.
+    if args.slug == "deepdive" and not args.title.lower().startswith("deep dive"):
+        args.title = f"Deep Dive: {args.title}"
+
     args.summary = strip_audio_tags(args.summary)
     summary_html = ""
     if args.notes and os.path.exists(args.notes):

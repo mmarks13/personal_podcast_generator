@@ -18,7 +18,7 @@ DATE="$(date +%F)"
 DOW="$(date +%u)"   # 1=Mon .. 6=Sat 7=Sun
 # Cron jobs sharing this script: the full podcast pipeline at 01:00; the daily read on
 # its own at ~06:30 — after the 5h limit resets — so the read stops competing with the
-# podcast for one rate-limit window; and `propose` on Tue/Fri evenings, which pushes
+# podcast for one rate-limit window; and `propose` on Tue/Fri/Sat evenings, which pushes
 # 3-5 deep-dive topic pitches to the listener's phone (ntfy) so the reply can steer
 # the next morning's deep dive. No arg runs the full pipeline.
 MODE="${1:-full}"
@@ -119,7 +119,7 @@ cover and record the issue. Print the EPUB path when done." \
   exit 0
 fi
 
-# In `propose` mode (Tue/Fri ~20:00 cron) a cheap session drafts 3-5 deep-dive topic
+# In `propose` mode (Tue/Fri/Sat ~20:00 cron) a cheap session drafts 3-5 deep-dive topic
 # options from the week's coverage, then the pitches go to the phone via ntfy. The
 # listener replies with a number (or a topic of their own); the 01:00 run reads the
 # reply via scripts/ntfy_choice.py. No reply -> the deep-dive writer picks, as ever.
@@ -259,9 +259,9 @@ subprocess.run(["python3","scripts/publish.py","--mp3",mp3[-1],
                 "--date",ep.get("date",date)], check=True)
 PY
 
-# Wed/Sat: also produce + publish the deep-dive episode. If the listener replied to
-# the previous evening's options push, their choice becomes the topic.
-if [ "$DOW" = "6" ] || [ "$DOW" = "3" ]; then
+# Wed/Sat/Sun: also produce + publish the deep-dive episode. If the listener replied
+# to the previous evening's options push, their choice becomes the topic.
+if [ "$DOW" = "3" ] || [ "$DOW" = "6" ] || [ "$DOW" = "7" ]; then
   DIVE_CHOICE="$(python3 scripts/ntfy_choice.py 2>/dev/null || true)"
   DIVE_TOPIC_NOTE=""
   if [ -n "$DIVE_CHOICE" ]; then

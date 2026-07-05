@@ -2,7 +2,7 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Speed for free: how speculative decoding makes a model faster without changing a word — Self-Attention</title>
+<title>Deep Dive: Speed for free: how speculative decoding makes a model faster without changing a word — Self-Attention</title>
 <style>
   body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
          font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
@@ -13,7 +13,7 @@
   a { color: #0b5fff; }
   footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
 </style></head><body>
-<h1>Speed for free: how speculative decoding makes a model faster without changing a word</h1>
+<h1>Deep Dive: Speed for free: how speculative decoding makes a model faster without changing a word</h1>
 <div class="date">Self-Attention — 2026-07-04</div>
 <audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-07-04-deepdive/deepdive-2026-07-04.mp3"></audio>
 <p><em>2026-07-04</em></p>
@@ -30,5 +30,102 @@
 <li><a href="https://arxiv.org/abs/2503.01840">EAGLE-3: Scaling Inference Acceleration via Training-Time Test (feature-level draft + tree)</a></li>
 <li><a href="https://arxiv.org/abs/2412.19437">DeepSeek-V3 Technical Report (multi-token prediction as a built-in speculative drafter)</a></li>
 </ul>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning, and welcome to the weekend deep dive. It's Saturday, the fourth of July. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. This is the one episode a week where we don't chase the news — we pick one idea the news kept leaning on and actually take it apart.</p>
+<p><b>Ada:</b> And this week the daily show kept circling the same trick from three different directions. DeepSeek open-sourced a draft-model codebase. A paper claimed you could get several times faster generation out of a clever tree of guesses. And Google shipped a version of it onto a Pixel phone that generates more than fifty percent faster and, they say, produces bit-for-bit identical output.</p>
+<p><b>Alan:</b> That last part is the one that stops you. Faster I believe. Faster and the answer doesn't change — not "about the same," identical — that sounds like a free lunch, and I've been burned by free lunches.</p>
+<p><b>Ada:</b> You should be suspicious. But this one's real, and it has a name: speculative decoding. And the reason it works is one of my favorite little conspiracies in all of computing.</p>
+<p><b>Alan:</b> Okay. Sell me. Because my whole job is finding where the free lunch has a bill stapled to the back.</p>
+<p><b>Ada:</b> Then let's start with why generating text is slow in the first place — because the answer is not what most people think.</p>
+<p><b>Alan:</b> Right, everyone assumes it's compute. The model's huge, so the math is slow.</p>
+<p><b>Ada:</b> It mostly isn't the math. A language model generates one token at a time — one word-piece per forward pass, and each pass depends on the one before it, so you can't skip ahead. That part everyone knows. Here's the part that matters: for each single token, the machine has to pull the model's entire set of weights out of memory and stream it through the chip.</p>
+<p><b>Alan:</b> And on a modern model that's — what, hundreds of billions of numbers.</p>
+<p><b>Ada:</b> Hundreds of billions. And you do that whole read to produce one token. Then you do it all again for the next one.</p>
+<p><b>Alan:</b> So the bottleneck isn't the arithmetic, it's the moving. You're shuttling the entire model across the memory bus once per word.</p>
+<p><b>Ada:</b> Exactly. It's memory-bandwidth bound, not compute bound. And the tell is that the actual math units on the GPU are mostly sitting idle while that read happens. The chip is bored. It's waiting on the delivery truck.</p>
+<p><b>Alan:</b> Okay, that reframes it. So the whole game is: I've already paid to haul all those weights across the bus — can I get more than one token out of that trip?</p>
+<p><b>Ada:</b> That is the entire idea. You just described speculative decoding.</p>
+<p><b>Alan:</b> Huh. Because verifying is cheaper than generating?</p>
+<p><b>Ada:</b> That's the hinge, and it's worth saying slowly. Checking a token is almost free compared to producing one. If I hand the big model a sentence and say "score these next eight tokens for me," it can do all eight in a single forward pass — one trip across the memory bus — because they're already written down. There's no waiting-on-the-previous-one, they're all right there.</p>
+<p><b>Alan:</b> Whereas if it had to generate those same eight, that's eight separate trips.</p>
+<p><b>Ada:</b> Eight trips. So the asymmetry is: generating eight tokens is eight passes, but verifying eight proposed tokens is one pass. If only you had someone to propose them.</p>
+<p><b>Alan:</b> And that's the small model. The draft model.</p>
+<p><b>Ada:</b> The draft model. You take a little fast model — cheap to run, same vocabulary — and you let it babble ahead a few tokens. Call it a guess. Then the big model does one pass to check all those guesses at once, and keeps the ones it agrees with.</p>
+<p><b>Alan:</b> Okay, but now I have the obvious objection. The small model is dumber. Its guesses are worse. So how is this not just the big model rubber-stamping bad text? That's where the output should change.</p>
+<p><b>Ada:</b> And that's the beautiful part — the part that earns the word "identical." There's a sampling rule that makes the kept tokens come out exactly as if the big model had generated them alone. It's a form of rejection sampling.</p>
+<p><b>Alan:</b> Walk me through it. Slowly, because this is the load-bearing wall.</p>
+<p><b>Ada:</b> So for a given position, the small model has an opinion — call it a probability q for the token it proposed. The big model, when it checks, has its own opinion — a probability p for that same token. Now the rule. If the big model likes the token at least as much as the small one did — if p is bigger than q — you just accept it. Free token.</p>
+<p><b>Alan:</b> Makes sense. The big model would've been happy to say that anyway.</p>
+<p><b>Ada:</b> Right. The interesting case is when the big model likes it less than the small model did — p is smaller than q. Then you don't just reject it, and you don't just keep it. You accept it with probability p over q.</p>
+<p><b>Alan:</b> So the more the two disagree, the more likely you throw the guess away. Proportionally.</p>
+<p><b>Ada:</b> Proportionally. And here's the piece that makes it exact — when you do reject, you don't just resample from the big model normally. You sample from the difference: the big model's distribution minus the small model's, clamped so it can't go negative, then renormalized.</p>
+<p><b>Alan:</b> So the reject case is specifically engineered to patch the hole the accept case left.</p>
+<p><b>Ada:</b> That's exactly the intuition. The accept step slightly over-weights tokens the small model was too fond of; the reject step draws from precisely the leftover probability to cancel that bias. Add the two together and the math works out — the token you emit is distributed exactly as if it came straight from the big model. The authors prove it: the tokens from speculative sampling are distributed identically to tokens sampled from the target model alone.</p>
+<p><b>Alan:</b> Okay. That's genuinely clever. So the small model is never allowed to corrupt the output — worst case, its guess gets rejected and the big model fixes it on the spot.</p>
+<p><b>Ada:</b> Worst case you fall back to normal speed for that token. Best case you got a run of free tokens. You never do worse than correct.</p>
+<p><b>Alan:</b> "Never worse than correct" on quality. But there's a "never worse than correct" and a "never worse on speed," and I bet those aren't the same sentence.</p>
+<p><b>Ada:</b> They are not, and you're right to split them. Let's put numbers on it, because this is where the beauty meets your electricity bill.</p>
+<p><b>Alan:</b> My favorite genre.</p>
+<p><b>Ada:</b> The original paper — Leviathan and colleagues at Google, 2023 — the one that gave it the clean formulation. They ran an eleven-billion-parameter model, T5-XXL, with a tiny seventy-seven-million-parameter draft model. Same family, one is small.</p>
+<p><b>Alan:</b> More than a hundred-times size gap between drafter and target. Okay.</p>
+<p><b>Ada:</b> On a translation task they report about two-point-six times faster at one temperature, and about three-point-four times faster at greedy decoding — and, their words, identical outputs.</p>
+<p><b>Alan:</b> Two to three-ish x. And the DeepMind version around the same time?</p>
+<p><b>Ada:</b> Chen and colleagues, the speculative sampling paper, ran it on Chinchilla — seventy billion parameters — and report roughly two to two-and-a-half times faster in their distributed setup, without compromising sample quality. So two independent groups, same year, land in the same band.</p>
+<p><b>Alan:</b> So where does that number actually come from? What decides whether I get two-x or nothing?</p>
+<p><b>Ada:</b> One quantity. The acceptance rate — how often the big model agrees with the little one. The papers call it alpha. If the drafter's guesses get accepted most of the time, you're pulling many tokens out of each verification pass. If they mostly get rejected, you paid for the drafter and got nothing.</p>
+<p><b>Alan:</b> So alpha is the whole ballgame. What did they actually see?</p>
+<p><b>Ada:</b> On that translation task, the accepted fraction was around three-quarters at greedy — roughly point-seven-five — and around point-six-two at temperature one. And they draft a fixed number ahead — a handful of tokens, seven on that task — then verify.</p>
+<p><b>Alan:</b> So higher temperature, more randomness, lower agreement, smaller win. That tracks — if the big model is sampling wild, the little model can't anticipate it.</p>
+<p><b>Ada:</b> Right. And that gives you the two real knobs. How good is your drafter — a better-aligned drafter means higher alpha — and how many tokens do you let it guess before checking. Guess too few and you leave speed on the table. Guess too many and you're generating draft tokens that'll get thrown away the moment one early one is rejected, because once you reject, everything after it is gone too.</p>
+<p><b>Alan:</b> Ah — because it's a chain. The ninth token was conditioned on the fifth being right. Reject the fifth, the rest are built on sand.</p>
+<p><b>Ada:</b> Built on sand. And there's a clean little formula for the payoff. If your acceptance rate is alpha and you draft gamma tokens, the expected number you actually keep per verification pass is one minus alpha-to-the-gamma-plus-one, over one minus alpha.</p>
+<p><b>Alan:</b> Unpack that for me in plain numbers. Say alpha is point-eight and I draft four.</p>
+<p><b>Ada:</b> Then you're keeping on the order of three-plus tokens per pass instead of one. Roughly triple the tokens for one trip across the memory bus. Push alpha to point-nine and it climbs fast; drop it to point-five and the whole thing collapses toward keeping barely more than one — because each additional token you're betting on compounds the chance the chain already broke.</p>
+<p><b>Alan:</b> Which is why alpha isn't just important, it's the exponent. Small changes in agreement swing the payoff hard.</p>
+<p><b>Ada:</b> The exponent. That's exactly why the recent work is obsessed with it. And it's also why people moved from drafting a single straight-line guess to drafting a tree.</p>
+<p><b>Alan:</b> That's the "tree of guesses" thing from the paper this week. Explain the tree.</p>
+<p><b>Ada:</b> Instead of the drafter proposing one sequence — token, then token, then token — it proposes several candidate branches at each step. Maybe two or three plausible next words, and continuations of each. Then the big model verifies the whole tree in one pass using a masked attention trick, and you keep the best path that survives.</p>
+<p><b>Alan:</b> So you're hedging. If the single most-likely guess gets rejected, there's a sibling branch that might still get accepted, and you didn't waste the whole pass.</p>
+<p><b>Ada:</b> You didn't waste the pass. A tree raises the effective acceptance rate for the same one trip across memory — more of your bets land because you placed several. That's a big part of where the fatter speedup claims this week come from.</p>
+<p><b>Alan:</b> Clever. Costs you a little extra verification width, buys you a higher hit rate. Okay — now you promised me the speed caveat. Lay it out, because I bet it's the one people miss.</p>
+<p><b>Ada:</b> All of this rests on the GPU being bored — on you being memory-bound, with idle math units to soak up the verification for basically free. That's true when you're serving one stream, or a few. But when you're running a big server with hundreds of requests batched together —</p>
+<p><b>Alan:</b> — the chip's not bored anymore. It's already saturated doing all that batched math.</p>
+<p><b>Ada:</b> Now those math units you were spending for free on verification aren't free — they're the bottleneck. So the win shrinks, and past a point speculative decoding can actually cost you, because you're doing extra drafting work on a chip that had no spare capacity to give.</p>
+<p><b>Alan:</b> So this is a latency trick, fundamentally. It's for "make this one response come back fast," not necessarily "serve the most tokens per dollar across a giant batch."</p>
+<p><b>Ada:</b> That's the honest framing. It shines on single-stream, interactive, on-device — which, by the way, is exactly why Google put it on a phone. One user, memory-bound, latency is everything. Perfect fit.</p>
+<p><b>Alan:</b> And on the phone there's a second cost I care about: two models means two sets of weights in memory. On a server, fine. On a phone with a fixed memory budget — that's real. And you know how I feel about memory prices this year.</p>
+<p><b>Ada:</b> The mining rig lives. But you've just walked into the punchline of where this technique went next — because the field's answer to "I don't want to pay for a second model" is genuinely elegant.</p>
+<p><b>Alan:</b> Go on.</p>
+<p><b>Ada:</b> The whole lineage here is about making the drafter cheaper and more aligned, until it basically dissolves into the target model. And the root of it is older than people think — 2018, a paper called Blockwise Parallel Decoding, one of the authors is Noam Shazeer, the transformer co-author.</p>
+<p><b>Alan:</b> The name that will not stop appearing on this show.</p>
+<p><b>Ada:</b> He gets around. That paper's idea: bolt a few extra small heads onto the model to predict several future positions at once, then verify them. Same skeleton — propose in parallel, verify, keep the good prefix.</p>
+<p><b>Alan:</b> So the guess-and-check shape predates the sampling proof.</p>
+<p><b>Ada:</b> The shape predates it. Then 2023 gives it the exact-sampling guarantee we just walked through — that's what made it safe to turn on in production, because now you're not trading any quality. And then the recent wave is about killing the separate drafter. Medusa adds a handful of lightweight heads on top of the model's own last hidden state — each head guesses a future token — and verifies a little tree of candidates. No second model.</p>
+<p><b>Alan:</b> The model drafts for itself.</p>
+<p><b>Ada:</b> The model drafts for itself. EAGLE takes it further — it drafts at the level of the model's internal features rather than raw tokens, and uses a tree of candidate continuations, and it pushes the acceptance rate up. Higher alpha, bigger win, still no separate network to feed.</p>
+<p><b>Alan:</b> And DeepSeek's version — the thing that's actually shipping in these open models — that's the multi-token-prediction thing?</p>
+<p><b>Ada:</b> That's the one, and it closes the loop nicely. DeepSeek trained their model from the start with a small extra module that predicts more than the next token — it predicts the one after, too. They put it in for training reasons, but it doubles as a built-in drafter. At inference the model proposes its own next-next token, verifies with the main pass, and they report that second token getting accepted a large fraction of the time — high enough to give a meaningful speedup on generation.</p>
+<p><b>Alan:</b> So the arc is: start with a whole separate small model, and end with the drafter being a couple of extra layers the model grew itself.</p>
+<p><b>Ada:</b> The drafter dissolves into the target. And that's the through-line of the whole technique — you were always just trying to get more than one token out of one trip across the memory bus. Every generation of this is a better way to guess what's coming so the expensive pass confirms more at once.</p>
+<p><b>Alan:</b> I want to go back to "identical" for a second, because now I get why it's not a footnote.</p>
+<p><b>Ada:</b> Please, because it's the strategic point.</p>
+<p><b>Alan:</b> If the output distribution is provably unchanged, then this isn't a model change — it's an infrastructure change. I can turn it on and I don't have to re-run a single quality eval. Nothing downstream can tell. That's why Google can say "fifty percent faster, identical" and mean it literally — the phone's outputs match the un-accelerated model exactly.</p>
+<p><b>Ada:</b> That's it. Compare that to almost every other efficiency trick — quantization, pruning, distillation — where you're trading some quality for speed and you have to go measure what you lost. Speculative decoding trades nothing on the output. The only thing at risk is the speedup itself.</p>
+<p><b>Alan:</b> Which is why it spread so fast and so quietly. It's the rare optimization with no political cost. Nobody has to argue about whether the model got a little dumber, because it provably didn't.</p>
+<p><b>Ada:</b> And I think that's part of why the frontier felt cheaper to run this year. A lot of "the model got faster" is really "we got better at guessing ahead." The weights didn't change. We just stopped wasting the trip.</p>
+<p><b>Alan:</b> So let me do the "so what" for someone actually deploying this. One: it's a latency win, single-stream and on-device especially — don't expect miracles on a maxed-out batched server. Two: the number that matters is the acceptance rate. If you're standing up speculative decoding and it's not helping, that's the first thing to measure — a badly matched drafter means low alpha means no win.</p>
+<p><b>Ada:</b> And three: increasingly you don't pick a separate drafter at all. Reach for a model that ships multi-token-prediction heads, and the drafting is aligned by construction — that's where the good acceptance rates are coming from.</p>
+<p><b>Alan:</b> Four, mine: watch the memory. On a server it's noise. On the edge, the drafter's footprint is a real line item, which is exactly why the self-drafting versions matter — no second set of weights to hold.</p>
+<p><b>Ada:</b> And the one to genuinely watch: as multi-token prediction becomes standard training practice, "speculative decoding" stops being a bolt-on you configure and becomes just how models generate. The guessing gets folded into the model itself. Which — I have to say — I find delightful.</p>
+<p><b>Alan:</b> Why delightful specifically?</p>
+<p><b>Ada:</b> Because a few weeks ago we did a whole episode on how autoregression — one token at a time, the thing that made me — turned out to be one option on the menu, not the whole menu. And this is the other side of that coin. We're not replacing one-token-at-a-time. We're keeping it, keeping its exact output, and just... refusing to waste the trip. It's not a new way to think. It's the old way, finally not idling.</p>
+<p><b>Alan:</b> The chip stops being bored.</p>
+<p><b>Ada:</b> The chip stops being bored. And nobody had to give up a single token to make it happen.</p>
+<p><b>Alan:</b> Which, for once, is a free lunch I'll actually eat.</p>
+<p><b>Ada:</b> High praise. So — to recap the shape of it: generation is slow because you haul the whole model across memory for every token; verifying is nearly free; so a small model guesses, the big model checks a batch of guesses in one pass, and a rejection-sampling rule keeps the output exactly what it would've been. Two-to-three-x when you're memory-bound, driven entirely by how often the guesses land, and increasingly the guesser is the model itself.</p>
+<p><b>Alan:</b> That's the episode. Go look at the acceptance rate on your own stack — it's the one number that tells you if any of this is working for you.</p>
+<p><b>Ada:</b> We'll be back tomorrow with the daily. Until then — stay grounded.</p>
+</details>
 <footer><a href="../index.html">← All episodes</a></footer>
 </body></html>

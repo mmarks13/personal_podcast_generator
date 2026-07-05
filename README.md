@@ -14,7 +14,7 @@ publishing, and a local scheduler fires it every night.
 ```
 personal_podcast_generator/
 ├── .claude/skills/daily-ai-podcast/SKILL.md   # the editor-in-chief brain (nightly)
-├── .claude/skills/weekly-deep-dive/SKILL.md   # Wed + Sat teaching episode (~20–25 min)
+├── .claude/skills/weekly-deep-dive/SKILL.md   # Wed/Sat/Sun teaching episode (~20–25 min)
 ├── .claude/skills/daily-read/SKILL.md         # "Self Attention": daily magazine → EPUB → Kindle
 ├── .claude/agents/source-crawler.md           # crawls the HTML-only watchlist sources
 ├── .claude/agents/source-consolidator.md      # merges dumps → out/candidates.json
@@ -108,7 +108,7 @@ drew and takes a different angle.
 
 ## The other two productions
 
-- **Weekly deep-dive** (Wed + Sat, `weekly-deep-dive` skill): one topic the week's news
+- **Deep-dive episodes** (Wed/Sat/Sun, `weekly-deep-dive` skill): one topic the week's news
   made worth learning properly, researched at primary sources and taught end-to-end,
   ~20–25 min, published with `--slug deepdive`.
 - **"Self Attention"** (daily, `daily-read` skill, separate ~06:30 cron job): a reading
@@ -185,19 +185,19 @@ window resets, so the read gets a fresh budget instead of competing with the pod
 ```cron
 0 1 * * *    cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh         >> logs/cron-bootstrap.log 2>&1
 5 6 * * *    cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh read    >> logs/cron-bootstrap.log 2>&1
-0 20 * * 2,5 cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh propose >> logs/cron-bootstrap.log 2>&1
+0 20 * * 2,5,6 cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh propose >> logs/cron-bootstrap.log 2>&1
 ```
 
 `run_episode.sh` (no arg) runs the full pipeline — including the deep-dive on
-Wednesdays and Saturdays; `run_episode.sh read` runs only the daily read (write →
-Kindle → commit EPUB + reads_history); `run_episode.sh propose` (Tue/Fri evening)
+Wednesdays, Saturdays, and Sundays; `run_episode.sh read` runs only the daily read (write →
+Kindle → commit EPUB + reads_history); `run_episode.sh propose` (Tue/Fri/Sat evening)
 pushes 3–5 deep-dive topic pitches to the phone. On macOS, use a launchd
 `StartCalendarInterval` plist instead (it can wake the machine).
 
 ## Phone channel & listener feedback
 
 - **ntfy.sh** (`NTFY_TOPIC` in `.env`; subscribe to the same topic in the ntfy app):
-  run-failure alerts, and the Tue/Fri deep-dive picker — reply to the options push
+  run-failure alerts, and the Tue/Fri/Sat deep-dive picker — reply to the options push
   with a number (or your own topic) and the next morning's deep-dive uses it; no
   reply means the writer picks.
 - **`feedback.md`** (repo root): drop a note anytime; the nightly writer applies it,
