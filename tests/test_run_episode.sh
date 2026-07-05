@@ -180,9 +180,9 @@ hasre "usage snapshot logged"     '\[usage\] \{'
 hasre "run end status OK"         '===== RUN END .* status=OK'
 no    "real claude not invoked"   "Use the daily-ai-podcast skill"  # prompt text only appears if claude echoed it
 has   "render-podcast ran"        "MOCK make_audio: wrote out/podcast"
-# Expected steps depend on the weekday: the deep-dive branch runs Wed (3) / Sat (6).
+# Expected steps depend on the weekday: the deep-dive branch runs Wed (3) / Sat (6) / Sun (7).
 expA="consolidate crawl podcast publish render-podcast"
-if [ "$(date +%u)" = "3" ] || [ "$(date +%u)" = "6" ]; then
+if [ "$(date +%u)" = "3" ] || [ "$(date +%u)" = "6" ] || [ "$(date +%u)" = "7" ]; then
   expA="consolidate crawl deepdive podcast publish publish-deepdive render-deepdive render-podcast"
 fi
 steps "$expA"
