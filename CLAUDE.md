@@ -59,8 +59,11 @@ to an RSS feed Spotify polls.
   files too.
 - `scripts/notify.py` / `scripts/ntfy_choice.py` — the ntfy.sh phone channel
   (`NTFY_TOPIC` in `.env`): run-failure alerts, and the Tue/Fri/Sat-evening deep-dive
-  picker (`run_episode.sh propose` pushes 3-5 topic pitches; a reply with a number
-  or free text becomes the next morning's deep-dive topic).
+  picker (`run_episode.sh propose` pushes a mixed slate of 6 typed topic pitches —
+  mechanism/foundational/history/debate — drafted from memory + a fresh evening feed
+  pull; a reply with a number or free text becomes the next morning's deep-dive
+  topic). `scripts/proposal_ledger.py` maintains `deepdive_proposals.json`: a topic
+  pitched 3 evenings without being chosen is retired from future slates.
 - `feedback.md` (root) — listener notes, read first each night; consumed notes land
   in `archive/feedback_log.md`. `listener.yaml` (root) — standing interest weights.
   `config/pronunciations.yaml` — TTS-mispronounced names and speakable spellings

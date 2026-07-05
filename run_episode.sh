@@ -124,31 +124,37 @@ fi
 # listener replies with a number (or a topic of their own); the 01:00 run reads the
 # reply via scripts/ntfy_choice.py. No reply -> the deep-dive writer picks, as ever.
 if [ "$MODE" = "propose" ]; then
-  run_step propose claude -p "Read .claude/skills/weekly-deep-dive/SKILL.md (its topic-selection \
-criteria), history.json (recent episodes, active threads, and longterm.concepts_taught), and the \
-2-3 newest daily scripts in archive/scripts/. Propose 3-5 candidate topics for tomorrow's deep-dive \
-episode: motivated by this week's news, teachable end-to-end in ~20 minutes, and not already taught \
-(check concepts_taught and past deepdive-kind episode records). Write out/deepdive_options.json as \
-exactly {\"options\": [{\"n\": 1, \"topic\": \"short topic name\", \"pitch\": \"one-line pitch for a \
-phone notification\"}]}. Do nothing else." \
+  # Fresh evening pull of the structured feeds so the picker sees today's papers
+  # and discussion, not last night's snapshot. Non-fatal; a separate file so the
+  # 01:00 run's own fetch is untouched.
+  python3 scripts/fetch_sources.py --hours 24 --out out/sources_evening.json 2>&1 \
+    | python3 scripts/run_log.py prefix --src propose-fetch >> "$LOG" \
+    || log run "WARNING: evening fetch failed; picker works from memory alone"
+
+  run_step propose claude -p "Read .claude/skills/weekly-deep-dive/SKILL.md (its topic palette and \
+selection criteria), history.json (recent episodes, active threads, longterm.concepts_taught), \
+deepdive_proposals.json (the proposal ledger — NEVER re-pitch a retired topic: times_proposed >= 3 \
+and never chosen; avoid re-pitching anything already proposed twice unless it's newly urgent), the \
+2-3 newest daily scripts in archive/scripts/, and out/sources_evening.json (today's fresh feed pull) \
+if it exists. Propose exactly 6 candidate topics for tomorrow's deep-dive episode as a MIXED slate: \
+about 2 of type 'mechanism' (the idea under this week's news), at least 1 'foundational', at least 1 \
+'history', at least 1 'debate' — plus one wildcard of any type. Rules: a topic is NEVER a single \
+paper — it is the idea or capability the paper instantiates, with the week's material as evidence; \
+every pitch must briefly say what the twenty minutes would actually contain (so thin topics reveal \
+themselves while drafting); nothing already taught (concepts_taught / past deepdive records). Write \
+out/deepdive_options.json as exactly {\"options\": [{\"n\": 1, \"type\": \"mechanism|foundational|\
+history|debate\", \"topic\": \"short topic name\", \"pitch\": \"one-line pitch: the hook plus what \
+the episode contains\"}]}. Do nothing else." \
     --model sonnet \
     --effort low \
     --allowedTools "Read Write Bash" \
     --permission-mode acceptEdits \
     --max-turns 15 \
     || log run "WARNING: propose failed; deep-dive writer will pick as usual"
-  OPTIONS_MSG="$(python3 - <<'PY'
-import json, time
-try:
-    opts = json.load(open("out/deepdive_options.json"))
-except Exception:
-    raise SystemExit(0)
-opts["sent_at"] = int(time.time())
-json.dump(opts, open("out/deepdive_options.json", "w"), indent=1)
-print("\n".join(f"{o.get('n')}. {o.get('topic')} — {o.get('pitch')}"
-                for o in opts.get("options", [])))
-PY
-)"
+
+  # Ledger pass: drop retired topics, bump proposal counts, stamp sent_at, and
+  # emit the numbered message body for the phone.
+  OPTIONS_MSG="$(python3 scripts/proposal_ledger.py record || true)"
   if [ -n "$OPTIONS_MSG" ]; then
     run_step notify python3 scripts/notify.py \
       --title "Deep-dive options for tomorrow — reply with a number or your own topic" \
@@ -266,6 +272,8 @@ if [ "$DOW" = "3" ] || [ "$DOW" = "6" ] || [ "$DOW" = "7" ]; then
   DIVE_TOPIC_NOTE=""
   if [ -n "$DIVE_CHOICE" ]; then
     log run "deepdive: listener pre-chose topic: $DIVE_CHOICE"
+    python3 scripts/proposal_ledger.py choose --topic "$DIVE_CHOICE" 2>/dev/null \
+      || log run "WARNING: proposal ledger update failed"
     DIVE_TOPIC_NOTE=" The listener pre-chose tonight's topic via the evening picker: \
 '${DIVE_CHOICE}'. Take it as the deep-dive topic — skip topic selection and go straight to research."
   fi

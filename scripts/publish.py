@@ -339,8 +339,10 @@ class GitHubBackend:
             add.append(HISTORY_FILE)
         if os.path.isdir(ARCHIVE_DIR):            # persist the script archive too
             add.append(ARCHIVE_DIR)
-        # Listener-tunable files the writer may update in response to feedback.
-        for extra in ("listener.yaml", "feedback.md", "config/pronunciations.yaml"):
+        # Listener-tunable files the writer may update in response to feedback,
+        # plus the deep-dive proposal ledger the picker maintains.
+        for extra in ("listener.yaml", "feedback.md", "config/pronunciations.yaml",
+                      "deepdive_proposals.json"):
             if os.path.exists(extra):
                 add.append(extra)
         subprocess.run(add, check=True)

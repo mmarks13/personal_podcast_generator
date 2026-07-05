@@ -29,15 +29,31 @@ evening options push), take it as given — skip selection and go straight to st
 Their free-text topic may need light interpretation into a teachable framing; keep
 its intent.
 
+**The topic palette — four types, all first-class:**
+- **Mechanism** — the idea under this week's news: an architecture (text diffusion,
+  MoE routing), a technique (indirect prompt injection, KV-cache compression), an
+  evaluation method.
+- **Foundational** — a load-bearing concept of the field taught properly, needing no
+  news hook beyond "you hear this word constantly."
+- **History** — how we got here: the lineage of an idea, told as narrative, landing
+  in the present.
+- **Debate** — a genuine unresolved argument, steel-manned from both sides.
+
 Otherwise read `history.json` — the last ~7 days of `episodes` plus
-`longterm.active_threads` and `longterm.concepts_taught`. Look for the concept
-underneath the week's coverage: an architecture (e.g. text diffusion, MoE routing), a
-technique (e.g. indirect prompt injection, KV-cache compression), an evaluation
-method, or a debate with real substance. Pick **one**.
+`longterm.active_threads` and `longterm.concepts_taught` — and pick **one** topic
+from the palette.
 
 Rules:
-- It must tie to something the show actually covered this week — name that connection
-  in the cold open.
+- **Soft "why now."** The cold open still answers *why this, now* — but "this word has
+  been in every episode this month" or "this fight keeps resurfacing" counts. A
+  this-week hook is preferred when it's real; never manufacture one.
+- **A topic is never a single paper.** It's the idea or capability the paper
+  instantiates; the paper is the episode's centerpiece and evidence, not its whole
+  body. If research (step 2) reveals the chosen framing is thin — one paper's worth of
+  material stretched over twenty minutes — you are **obligated to widen to the
+  surrounding idea**, keeping the chosen thing at the heart of the episode. You also
+  have license to spend real time on future implications — where this could go if it
+  works — clearly flagged as speculation, not fact.
 - Don't repeat a recent deep dive: skip anything already in an episode record with
   `"kind": "deepdive"`, a `deep dive:` topic label, or the `longterm.concepts_taught`
   ledger in `history.json`.
@@ -73,16 +89,33 @@ mode plays to type: **Ada owns the lineage and foundations** — the computing h
 in her element, tracing how we got here — while **Alan stress-tests everything** as the
 builder: he wants to run it, cost it, and find where it breaks, asking the questions a
 smart listener would. Open with the two-voice greeting (adapted for the weekend), close
-with "Stay grounded." Structure:
+with "Stay grounded."
 
-1. **Cold open** — the hook: what happened this week, and the question it raises.
+**Shape follows topic type** — pick the archetype, then flex it where the material
+wants to (the archetypes are defaults, not slots):
+
+*Mechanism / Foundational* — the classic lesson:
+1. **Cold open** — the hook: the "why now", and the question it raises.
 2. **Foundations** — the minimum background, in plain language. Spell out acronyms.
 3. **How it actually works** — the core mechanism, step by step. Analogies welcome,
    but keep them precise; say where the analogy breaks down.
 4. **Evidence and limits** — what's demonstrated vs. claimed, known failure modes,
    open questions.
-5. **So what** — what a practitioner or informed listener should do or watch for.
+5. **So what** — what a practitioner or informed listener should do or watch for —
+   and, when the material earns it, where this could plausibly go (flagged as
+   speculation).
 6. **Wrap** — 20–30 seconds.
+
+*History* — a narrative arc, not a lecture: the eras and turning points in order, what
+each generation was actually trying to do, why the promising paths died, and the
+landing in the present — what today inherits from that lineage. Ada leads by
+temperament; the mechanism beats still appear inside the story wherever an idea needs
+to be actually understood, not just named.
+
+*Debate* — both cases built honestly: the strongest version of each side (steel-manned
+by the host who least agrees with it), the evidence audit — what would settle it and
+why it hasn't — then the hosts' own honest reads, which may differ and **may stay
+unresolved**. No fake balance: if the evidence leans, say so.
 
 Keep turns short and conversational. The daily skill's **"Write it as a
 conversation"**, **audio tags**, and **per-episode delivery note** (`tts_notes`)
