@@ -1,6 +1,47 @@
 {
   "episodes": [
     {
+      "date": "2026-07-06",
+      "title": "The Turk retires, a stats class levels up, and three tricks that were one",
+      "summary": "Three unrelated stories: Amazon winds down Mechanical Turk (the hidden-human-behind-the-AI marketplace, now hollowed out by workers who secretly use LLMs), a Dartmouth study where an LLM-graded statistics 'textbook' lifted final-exam scores 0.71-1.30 SD but where the real lever was constructed-response practice, not the chatbot, and a paper proving GRPO, Dr. GRPO, and DAPO are one RL knob — the group's reward standard deviation. Plus a sweep on Microsoft 365 price hikes, a Claude tool-calling gotcha, a 'building to the test' coding-agent benchmark paper, LongCat open weights, the junior-programmer job market, Zuckerberg's admission that Meta's AI agents haven't progressed as hoped, and the Anthropic-Alibaba feud.",
+      "topics": [
+        "Amazon Mechanical Turk closes to new customers July 30, 2026 (existing customers continue, no new features); launched 2005 as a marketplace for tiny human-done tasks machines couldn't do, marketed as 'artificial artificial intelligence' and named for the 18th-century chess-automaton hoax (a human hidden inside a supposed machine); long the hidden-human enabler of fake-it-till-you-make-it AI; a 2023 analysis (cited by TechCrunch) found 33-46% of Turk workers using LLMs to do the tasks, poisoning it as a source of human ground truth; the broader shift is model-graded/synthetic data replacing the cheap human-in-the-loop, with the loss being the messy distribution-of-real-people signal",
+        "Phosphor (Jonah Bard, Dartmouth): an LLM-graded formative-assessment 'textbook' deployed in 3 sections of Intro Statistics (MATH 010), ~150 students, Spring 2026; Claude Sonnet grades constructed-response answers against instructor rubrics; adopted by 90.2%; full-engagement gap on the final exam of 1.30 SD unadjusted / 0.71 SD controlling for midterms (authors call 0.71 a conservative floor); observational, self-selection the central threat; a natural experiment across modules showed the dosage effect held for constructed-response quizzes but vanished for MCQ-only — the testing/doer effect is the mechanism, not the chatbot (RAG chat got just 72 queries all course); the LLM's role is cheap open-ended grading at scale, enabling old, well-established pedagogy",
+        "'GRPO, Dr. GRPO, and DAPO Are Three Operations on One Number' (HF Daily Papers): proves the three popular RLVR methods differ only in how they treat the group reward standard deviation; for binary right/wrong rewards sigma = sqrt(k(G-k))/G, and that disagreement IS the size of the training update (the group-standard-deviation identity) — max when a group of samples splits evenly, zero when unanimous ('falls silent'); GRPO divides by sigma, Dr. GRPO drops the division, DAPO discards zero-sigma groups; yields closed forms for samples-per-prompt needed and the silent-group rate; validated on Big-Math and a controlled run"
+      ],
+      "entities": [
+        "Amazon",
+        "Mechanical Turk",
+        "TechCrunch",
+        "Dartmouth",
+        "Phosphor",
+        "Jonah Bard",
+        "Claude Sonnet",
+        "GRPO",
+        "Dr. GRPO",
+        "DAPO",
+        "Big-Math",
+        "Meta",
+        "Mark Zuckerberg"
+      ],
+      "threads": [],
+      "dives": [
+        {
+          "story": "Amazon retires Mechanical Turk",
+          "why_it_matters": "Anyone who has relied on crowd-sourced human labels for training or eval data should note both that the platform's 'human' signal was already contaminated by workers using LLMs, and that the industry's shift to model-graded/synthetic data quietly removes the last cheap window onto what real, disagreeing humans actually think."
+        },
+        {
+          "story": "Dartmouth Phosphor AI-graded statistics course",
+          "why_it_matters": "For anyone building AI education tools, the study is a corrective: the measurable exam gains came from constructed-response practice (the testing/doer effect) that LLM grading makes cheap at scale, not from the conversational tutor everyone builds and almost nobody used."
+        },
+        {
+          "story": "GRPO / Dr. GRPO / DAPO group-standard-deviation identity",
+          "why_it_matters": "Teams doing RL post-training on reasoning models have been choosing among three methods as if they were rivals; the identity shows they are one knob (the group's reward std dev = the update size), and turns folk choices about samples-per-prompt and wasted 'silent' groups into computable closed forms."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-07-05",
       "title": "Generating a planet from satellite photos",
       "summary": "A Sunday episode: two teaching dives — ABot-Earth, a generative 3D Gaussian-splatting model that builds a plausible (not surveyed) 3D Earth from satellite imagery at under ten minutes per square kilometer, and Dockerless, an environment-free verifier that grades coding-agent patches by reading the repo instead of running tests and matches execution-based training. Plus a security-and-economics sweep, and a week-in-review synthesizing the shift from capability to deployment, control, and inference economics.",
@@ -1558,9 +1599,17 @@
     ],
     "entities": [],
     "monthly": [],
-    "updated": "2026-07-05",
+    "updated": "2026-07-06",
     "host_lore": [],
     "concepts_taught": [
+      {
+        "name": "the testing effect / doer effect in learning",
+        "last_taught": "2026-07-06"
+      },
+      {
+        "name": "the group-standard-deviation identity in RLVR (why unanimous sample groups teach nothing)",
+        "last_taught": "2026-07-06"
+      },
       {
         "name": "3D Gaussian splatting (and its lineage from photogrammetry and NeRF)",
         "last_taught": "2026-07-05"
