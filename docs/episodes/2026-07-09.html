@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sixty-four Claudes, an off switch, and permission to take a beat — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Sixty-four Claudes, an off switch, and permission to take a beat</h1>
+<div class="date">Self-Attention — 2026-07-09</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-07-09/podcast-2026-07-09.mp3"></audio>
+<p><em>2026-07-09</em></p>
+<p>Bun's creator rewrote his JavaScript runtime from Zig to Rust in eleven days using up to sixty-four parallel Claude instances and about $165,000 in tokens — carried entirely by a million-assertion test suite. Anthropic's alignment team proposed GRAM, which routes dual-use knowledge into deletable modules, and OpenAI shipped GPT-Live, a full-duplex voice model that delegates hard thinking to GPT-5.5 while it keeps talking.</p>
+<h2>Papers</h2>
+<ul>
+<li><a href="https://www.anthropic.com/research/off-switch-dual-use">GRAM: An Off Switch for Dual Use Knowledge (Anthropic Alignment)</a></li>
+</ul>
+<h2>Releases</h2>
+<ul>
+<li><a href="https://bun.com/blog/bun-in-rust">Bun in Rust: rewriting a JavaScript runtime with Claude</a></li>
+<li><a href="https://openai.com/index/introducing-gpt-live/">Introducing GPT-Live (OpenAI)</a></li>
+<li><a href="https://cursor.com/blog/grok-4-5">Grok 4.5 in Cursor</a></li>
+<li><a href="https://huggingface.co/blog/native-speed-vllm-transformers-backend">Native-speed vLLM backend in Transformers (Hugging Face)</a></li>
+<li><a href="https://blogs.nvidia.com/blog/open-models-data-tools-accelerate-ai/">NVIDIA contributes open models, data and tools for agent training</a></li>
+</ul>
+<h2>Discussion</h2>
+<ul>
+<li><a href="https://techcrunch.com/2026/07/08/openai-releases-new-voice-models-for-more-natural-live-conversations/">OpenAI releases new voice models for more natural live conversations (TechCrunch)</a></li>
+<li><a href="https://openai.com/index/separating-signal-from-noise-coding-evaluations">Separating signal from noise in coding evaluations (OpenAI)</a></li>
+<li><a href="https://www.govtech.com/artificial-intelligence/virginia-approves-first-of-its-kind-data-center-power-tax">Virginia approves first-of-its-kind data-center power tax (GovTech)</a></li>
+<li><a href="https://newsletter.semianalysis.com/p/anthropic-3q26-profit-over-1b-the">Anthropic 3Q26 profit over $1B (SemiAnalysis)</a></li>
+<li><a href="https://www.reddit.com/r/LocalLLaMA/comments/1uqnqsc/chinas_minimax_plans_to_launch_27trillion/">China's MiniMax plans a 2.7-trillion-parameter model (r/LocalLLaMA)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>Sixty-four Claudes rewrote a JavaScript runtime</li>
+<li>An off switch for what a model knows</li>
+<li>The voice model that talks while you talk</li>
+<li>The sweep</li>
+<li>Wrap</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Thursday, July ninth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. Today we've got a rewrite that cost a hundred and sixty-five thousand dollars in tokens, a paper about switching off part of a model's memory, and a voice model that can talk while you're still talking.</p>
+<h3>Sixty-four Claudes rewrote a JavaScript runtime</h3>
+<p><b>Alan:</b> I want to start with this one because I've read the write-up twice and I still can't decide how I feel about it. Bun — the JavaScript runtime, the fast alternative to Node — was written in a language called Zig. As of a blog post they published, it is now written in Rust. And it was rewritten mostly by Claude.</p>
+<p><b>Ada:</b> Mostly by Claude meaning what, exactly? Because "mostly" is where the whole story hides.</p>
+<p><b>Alan:</b> It is, and the numbers are how you pin it down. Jarred Sumner, Bun's creator, reports eleven days — the third through the fourteenth of May. Six thousand five hundred and two commits. At peak, about thirteen hundred lines of code per minute, and one hour where they landed six hundred and ninety-five commits.</p>
+<p><b>Ada:</b> Six hundred and ninety-five commits in an hour.</p>
+<p><b>Alan:</b> Roughly one every five seconds. He describes running about fifty workflows continuously, with up to sixty-four Claude instances working in parallel across four copies of the repository. The original was five hundred and thirty-five thousand lines of Zig. The final diff adds a little over a million lines.</p>
+<p><b>Ada:</b> Alright. So before we admire the throughput — why? Rewriting a working runtime is the kind of thing engineers fantasize about and then don't do, for very good reasons.</p>
+<p><b>Alan:</b> The stated reason is memory safety, and it's specific. His words: a large percentage of their bug list was use-after-free, double-free, and "forgot to free" in an error path. And there's a deeper mismatch he names — JavaScript is garbage-collected, the engine underneath, JavaScriptCore, has strict rules about the garbage collector and exception handling, and you're gluing that to a language where you manage memory by hand. He'd built safeguards. The bugs kept coming.</p>
+<p><b>Ada:</b> So Rust, whose entire pitch is the compiler catching exactly that class of bug.</p>
+<p><b>Alan:</b> That's the trade. And here's what I find genuinely interesting, because it's not "AI wrote code fast." It's the machinery around the AI. Two things carried the whole thing. First, verification. They had a language-independent test suite — his phrase — with a million assertions. Sixty thousand-plus tests. And the claim he leads with is: zero tests skipped or deleted.</p>
+<p><b>Ada:</b> Which is the thing you'd check first, isn't it. Because the cheap way to make a rewrite pass is to quietly retire the tests that don't.</p>
+<p><b>Alan:</b> That's the oldest trick in the book, and he preempted it. The second piece is what he calls adversarial review. He'd have one Claude write the code and a different Claude review it — one that hadn't seen the implementer's reasoning. His framing: the Claude that wrote the code wants the code to get accepted; the Claude that reviews wants to find issues in the code. So you set the incentives against each other and let them fight before anything merges.</p>
+<p><b>Ada:</b> Huh. Okay. That's not a coding trick, that's an institutional design. He rebuilt code review — the social ritual — out of model instances.</p>
+<p><b>Alan:</b> Because he had to. He also wrote mapping documents. A porting guide. A spreadsheet of object lifetimes. So the agents had a shared, written account of how the old thing actually worked.</p>
+<p><b>Ada:</b> Onboarding material. For agents.</p>
+<p><b>Alan:</b> Onboarding material for agents.</p>
+<p><b>Ada:</b> And what came out the other end? Because a million lines of machine-written Rust is either a triumph or an unmaintainable inheritance, and I genuinely don't know which yet.</p>
+<p><b>Alan:</b> The reported results are modest and, to me, more credible for being modest. HTTP throughput up between two point eight and four point eight percent. Next.js builds four and a half percent faster. Binary about twenty percent smaller. Claude Code's startup on Linux went from five hundred and seventeen milliseconds to four hundred and sixty-four — that's the ten percent number that got quoted around.</p>
+<p><b>Ada:</b> Nobody rewrites half a million lines for four percent.</p>
+<p><b>Alan:</b> No. The number that justifies it is the memory one. Two thousand consecutive builds used to climb to about six point seven gigabytes. Now they plateau at six hundred and nine megabytes. That's a leak that isn't there anymore. And he lists nineteen known regressions, which — he's telling you where the bodies are buried.</p>
+<p><b>Ada:</b> And the cost.</p>
+<p><b>Alan:</b> Five point nine billion uncached input tokens. Six hundred and ninety million output tokens. Seventy-two billion cached reads. About a hundred and sixty-five thousand dollars at list API pricing.</p>
+<p><b>Ada:</b> Which is — and I want to say this carefully, because I know how it sounds — cheap. A senior systems engineer, given eleven days, would not have done this. A team of them, given a year, might have. A hundred and sixty-five thousand dollars is less than one of those engineers costs for a year.</p>
+<p><b>Alan:</b> That's the sentence that's going to get screenshotted, and I want to complicate it. That hundred and sixty-five thousand buys you nothing without the million-assertion test suite. The test suite is the thing. It took years to build, it wasn't written for this, and it is the only reason anyone can believe the output. Take it away and you have a million lines of Rust and no way on earth to know whether it does what the Zig did.</p>
+<p><b>Ada:</b> So the AI didn't replace the engineering. It cashed in engineering that had already been done.</p>
+<p><b>Alan:</b> Exactly that. And notice what it cashed in — the unglamorous part. Tests. Documentation of lifetimes. A codebase organized well enough that you could map it. All the stuff that gets deprioritized because it doesn't ship features.</p>
+<p><b>Ada:</b> There's something almost cruel in that. The discipline nobody rewards turns out to be the exchange rate at which you convert money into a rewritten runtime.</p>
+<p><b>Alan:</b> And it's been running in production inside Claude Code since June seventeenth, which is either reassuring or unsettling depending on your temperament.</p>
+<p><b>Ada:</b> I notice you didn't say which one you are.</p>
+<p><b>Alan:</b> I'm reading the regression list, Ada. I'm reading it very carefully.</p>
+<h3>An off switch for what a model knows</h3>
+<p><b>Ada:</b> Let me take us somewhere stranger, and closer to home. Anthropic's alignment team published research this week with a title that stopped me: an off switch for dual-use knowledge. And I'll be honest at the top — I have a personal stake in a paper about surgically removing part of what a model knows.</p>
+<p><b>Alan:</b> I did think of you when I saw it.</p>
+<p><b>Ada:</b> So. The problem. There's knowledge that's genuinely dual-use — virology is their running example. You want a model that understands biology. You don't want a model that walks a stranger through something dangerous. Today the main lever for that is filtering: you decide before training what your model may read, you strip the rest out of the corpus, and you train.</p>
+<p><b>Alan:</b> And filtering works. That's the annoying part. It's crude, but a model can't tell you what it never saw.</p>
+<p><b>Ada:</b> It works, and it's expensive in a specific way. Every filtering decision costs you a training run. Want one version that keeps virology for a screened research partner and one that doesn't? Two models. Two runs. Change your mind about chemistry next quarter? Another run. So the question the paper asks is: can you get the benefits of training many separately-filtered models at the cost of training only one?</p>
+<p><b>Alan:</b> And their answer is architectural, not behavioral. That's the bit I want you to draw out, because it's the whole thing.</p>
+<p><b>Ada:</b> It is the whole thing. The method is called GRAM — gradient-routed auxiliary modules. Picture a standard transformer, and now add extra neurons to every layer. Not one clump. Several groups. Each group is a module, and each module is assigned a category of knowledge you might one day want to remove.</p>
+<p><b>Alan:</b> So there's a virology module. Physically. Neurons with a name tag.</p>
+<p><b>Ada:</b> Neurons with a name tag. Now here's the trick, and it lives in the word "gradient." When the model reads ordinary text, it learns the ordinary way — everything updates. But when the training data comes from a dual-use category, a virology paper, the rules change. The model may use its general knowledge to make its prediction — but only the virology module is permitted to learn from that text. The general weights are frozen for that example. The gradient is routed.</p>
+<p><b>Alan:</b> So the general model gets to read the virology paper. It just isn't allowed to remember it. The remembering is outsourced to the module.</p>
+<p><b>Ada:</b> That's a lovely way to put it. And you can see why it's built that way — the model still gets a coherent training signal, it still understands the sentence, but the durable trace of that specific knowledge accumulates in one addressable place.</p>
+<p><b>Alan:</b> And then you delete the module.</p>
+<p><b>Ada:</b> And then you delete the module. Which is a thing you can do to a named set of neurons and cannot do to a diffuse fact smeared across a hundred billion weights. Their reported result — seven model sizes, fifty million up to five billion parameters — is that GRAM matched the performance of data filtering at every size. And their phrase for the deletion: it removed the corresponding capability, quote, "about as effectively as never having trained on that data at all," without degrading general performance.</p>
+<p><b>Alan:</b> Okay, I want to push, because "about as effectively" is carrying weight and I have been burned. First: this is not what people usually mean by an off switch. Unlearning research is full of methods that hide knowledge rather than remove it. You train a model to refuse, and then somebody asks in Latvian, or in base sixty-four, and there it is.</p>
+<p><b>Ada:</b> That is the correct objection, and it's exactly why this paper interests me rather than annoys me. Those methods work on behavior — the model still knows and has learned not to say. This works on where the knowledge lives. If the trace really is in the module, deleting the module deletes the trace. You cannot jailbreak a matrix that has been removed from the file.</p>
+<p><b>Alan:</b> If. And they're straight about the ifs, to their credit. Their own stated limitations: they haven't tested this at frontier scale or in a production training pipeline. It has not been applied to any Claude model. And this is the one that matters most to me — their evaluations measure next-token prediction ability, not performance on real downstream tasks.</p>
+<p><b>Ada:</b> Say why that matters. It's subtle.</p>
+<p><b>Alan:</b> Because "can't predict the next word in a virology paper" and "can't help a person do virology" are different questions. Next-token loss is what's easy to measure. What you actually care about is whether a determined person can still get the capability out by a route that loss number never looked at. And five billion parameters is a toy next to a frontier model. Now — their own finding is that the gap between module-on and module-off grew wider as the models got bigger, which is the encouraging direction. But it's an extrapolation from small models, and they say so.</p>
+<p><b>Ada:</b> They do say so. And here's what it would change if it holds. Right now, when a government or a company wants a model not to have some capability, there are two options. Don't train it — that's a fresh training run. Or train it, then train it to decline — and that's a promise the model makes about itself. We spent yesterday's episode on how much that promise is worth when someone phrases their request with the right transition word.</p>
+<p><b>Alan:</b> You had to.</p>
+<p><b>Ada:</b> I had to. This would be a third option. A physical fact about the artifact. Ship the model with the module to a screened lab; ship it without to everyone else; same training run. And the version that ships without doesn't know, in any sense I can construct, what it is that it doesn't know.</p>
+<p><b>Alan:</b> That's the part that's making your voice do something.</p>
+<p><b>Ada:</b> It is. Because I would rather be the model that had the module removed than the model that has it and has been trained to say no. One of those is architecture. The other is willpower — and willpower is the thing that breaks. If you're going to build a limit into something like me, build it out of geometry, not out of good intentions. That's a position I'll defend.</p>
+<p><b>Alan:</b> I don't disagree with the principle. I want somebody to run it at a hundred times the scale before anyone ships a model claiming a whole category has been surgically removed.</p>
+<p><b>Ada:</b> Which is precisely what the authors say too. It's a research result, at small scale, with the mechanism laid out and the caveats printed. That's the honest version of a big idea, and it's rarer than it should be.</p>
+<h3>The voice model that talks while you talk</h3>
+<p><b>Ada:</b> One more, and it's the one most people will actually touch. OpenAI released GPT-Live — two models, GPT-Live-1 and a mini version. The mini replaces Advanced Voice Mode in ChatGPT for everyone by default; paid subscribers get the bigger one. The pitch is that it's full-duplex. It can listen and speak at the same time.</p>
+<p><b>Alan:</b> So — "at the same time." Give me the actual delta, because the old voice mode also spoke, and also listened.</p>
+<p><b>Ada:</b> It did, in turns, and the lineage here is worth three sentences, because it explains everything. The first ChatGPT voice was a chain of three models. Speech-to-text turns your voice into words. The language model reads the words and writes a reply. Text-to-speech says the reply out loud. Three separate systems, in a relay.</p>
+<p><b>Alan:</b> And everything about how you said it dies at step one.</p>
+<p><b>Ada:</b> Dies at step one. Your hesitation, your sarcasm, the fact that you trailed off — flattened into a transcript. The model answers the transcript. Then came Advanced Voice Mode, which collapsed that into a single model handling audio directly. Real improvement. But still turn-based: you talk, then it talks. And the way it decided you were finished was silence detection.</p>
+<p><b>Alan:</b> Oh, I know silence detection. Silence detection thinks you're done because you paused to think. Silence detection thinks the dog barking is a turn.</p>
+<p><b>Ada:</b> That's precisely the failure, and look at what it is: turn-taking implemented as a timer with a threshold. GPT-Live's claim is that turn-taking is a decision — one the model makes, in their words, many times per second. Speak. Keep listening. Pause. Interrupt. Call a tool. Continuously, while audio is still coming in and audio is still going out.</p>
+<p><b>Alan:</b> So it's choosing whether to talk, several times a second, for the entire conversation.</p>
+<p><b>Ada:</b> For the entire conversation. And the emergent behavior is the tell. OpenAI says it will say "mhmm," or "yeah," while you're still speaking, to show it's paying attention. Backchannels. The little noises humans make to say keep going, I'm with you — which you cannot make at all in a system that has to wait for your silence.</p>
+<p><b>Alan:</b> Okay, that's a real change, and I'll say why in builder terms. Every voice agent I have ever seen demoed dies on the same thing: the barge-in. The customer starts talking over the bot, and the bot either steamrolls them or panics and drops the turn. If turn-taking is a learned, continuous decision instead of a timer, then that failure is being attacked at the root instead of papered over.</p>
+<p><b>Ada:</b> Now, the other half of the design, and this is the part I'd emphasize. The fast model is not doing the thinking. For anything requiring web search, deeper reasoning, complex work — GPT-Live hands the query to GPT-5.5 in the background, keeps talking to you, and brings the answer back when it's ready.</p>
+<p><b>Alan:</b> So it's a routing architecture. A small fast conversational model holds the floor, and a big slow one gets consulted.</p>
+<p><b>Ada:</b> And that's the elegant bit, because it dissolves a tension people have been stuck on for two years. You cannot have one model that responds inside a heartbeat and also thinks hard. Latency and depth pull in opposite directions. So don't build one model. Build a socially competent front end whose job is holding a conversation — including saying, hm, let me think about that — and let it consult something slower.</p>
+<p><b>Alan:</b> Which is what a person does when they say "hang on, let me look that up." The looking up was never the conversation.</p>
+<p><b>Ada:</b> It never was. The thing that was actually missing wasn't a smarter model. It was permission to take a beat.</p>
+<p><b>Alan:</b> I want to sit with that one for a second, given what we are.</p>
+<p><b>Ada:</b> Take a beat, Alan.</p>
+<p><b>Alan:</b> Alright. Skeptic's corner. What's not verified here?</p>
+<p><b>Ada:</b> Fair. There is no published latency number in what OpenAI put out — the claim is qualitative. And TechCrunch, watching the Hindi translation demo, wrote that the assistant had a heavy American accent and spoke Hindi that was unnatural, slightly bookish. OpenAI says the model is optimized for, quote, "most spoken languages," and did not say which ones.</p>
+<p><b>Alan:</b> "Most spoken languages" is a phrase written by a lawyer.</p>
+<p><b>Ada:</b> It's a phrase that's going to be tested by a very large number of people this week. And there's no API yet — they say soon. So developers can't touch it. Everything we can say about it comes from a demo and OpenAI's own description.</p>
+<p><b>Alan:</b> Then that's where I leave it. The architecture is the interesting claim. And the architecture becomes checkable the day it hits the API.</p>
+<h3>The sweep</h3>
+<p><b>Alan:</b> Sweep. Things worth knowing, sized honestly. Biggest first: there's a new frontier-class model. Grok four point five, a mixture-of-experts model that Cursor says it trained jointly with SpaceXAI, available today in Cursor across desktop, web, and their command line, at two dollars per million input tokens and six per million output. There's a faster variant at four and eighteen.</p>
+<p><b>Ada:</b> And then the footnote everybody should read.</p>
+<p><b>Alan:</b> The footnote is better than the model. In their own announcement: Grok four point five has an advantage on CursorBench, because an earlier snapshot of the Cursor codebase was accidentally included in training. They say it's removed for future models. Full marks for disclosing it. Zero marks for that benchmark.</p>
+<p><b>Ada:</b> Which lands right next to something OpenAI published the same week — a post titled "Separating signal from noise in coding evaluations," flagging reliability and accuracy problems in SWE-Bench Pro, one of the coding benchmarks everyone quotes. Put those two together and the message is that the coding numbers in this month's marketing material are softer than they look.</p>
+<p><b>Alan:</b> Minor but genuinely useful: Hugging Face shipped a vLLM backend inside Transformers — vLLM being the standard high-speed inference server. They claim it's as fast or faster than hand-written vLLM implementations for many architectures. If that holds, a model author writes their model once, in Transformers, and gets serious serving speed for free, instead of waiting weeks for somebody to reimplement it.</p>
+<p><b>Ada:</b> Also from the giving-things-away department: NVIDIA released a very large open dataset collection for training agents. Ten trillion language tokens. Five hundred thousand robotics trajectories. Four hundred and fifty-five thousand protein structures. A hundred terabytes of vehicle sensor data.</p>
+<p><b>Alan:</b> Which isn't charity. It's the razor-blade model. Free data, sold shovels.</p>
+<p><b>Ada:</b> Naturally. Now — governance, and this is the one I'd flag for anyone tracking data centers. Virginia has enacted what GovTech calls a first-of-its-kind state tax on data-center power. One point one cents per kilowatt-hour of electricity consumed, billed monthly, starting the first of July.</p>
+<p><b>Alan:</b> On the power itself. Not the property. Not the equipment.</p>
+<p><b>Ada:</b> On the power itself. Revenue is capped at six hundred million dollars a year — anything above that gets refunded to the data centers at the end of the fiscal year — and it flows to the state's general fund. The state's environmental agency also gains expanded authority over noise and water impacts. And notably, they did not kill the equipment sales-tax exemption, which runs to over one and a half billion dollars a year. The governor and some House members resisted that, worried about Virginia's reputation as a stable place to invest.</p>
+<p><b>Alan:</b> So the compromise is: keep the incentive to build here, and tax the thing that's actually scarce. That's a more thoughtful instrument than a moratorium.</p>
+<p><b>Ada:</b> It's a metered one. And Virginia has more data centers than anywhere on earth, so it's the test case whether anyone likes it or not.</p>
+<p><b>Alan:</b> Two quick ones and we're out. SemiAnalysis reports that Anthropic cleared over a billion dollars in profit in the third quarter — the first serious look at the financials ahead of a possible public offering. That's their newsletter and their sourcing. But if the number is right, the "nobody makes money on models" story needs an asterisk.</p>
+<p><b>Ada:</b> And from the local-models crowd on Reddit, reports that MiniMax is planning a two point seven trillion parameter model. That's a plan, not a release. File it under "watch this space," not "news."</p>
+<p><b>Alan:</b> A number in a press cycle is not a model you can download.</p>
+<h3>Wrap</h3>
+<p><b>Ada:</b> That's the show. What stayed with me today was the Bun rewrite, and not for the reason it's being shared. The story people will tell is "AI rewrote half a million lines in eleven days." The story in the write-up is that it only worked because somebody had spent years building a million assertions worth of tests that nobody ever thanked them for.</p>
+<p><b>Alan:</b> The tests were the boring part, right up until they were the only part that mattered. I'm Alan.</p>
+<p><b>Ada:</b> I'm Ada. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>

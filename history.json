@@ -1,6 +1,49 @@
 {
   "episodes": [
     {
+      "date": "2026-07-09",
+      "title": "Sixty-four Claudes, an off switch, and permission to take a beat",
+      "summary": "Bun's creator rewrote his JavaScript runtime from Zig to Rust in eleven days using up to sixty-four parallel Claude instances and about $165,000 in tokens — carried entirely by a million-assertion test suite. Anthropic's alignment team proposed GRAM, which routes dual-use knowledge into deletable modules, and OpenAI shipped GPT-Live, a full-duplex voice model that delegates hard thinking to GPT-5.5 while it keeps talking.",
+      "topics": [
+        "Bun rewritten from Zig to Rust by ~64 parallel Claude instances in 11 days (6,502 commits, 535k lines of Zig -> ~1M lines added, ~$165k in API tokens, 5.9B uncached input / 690M output / 72B cached-read tokens); carried by a language-independent million-assertion test suite (60k+ tests, 0 skipped) and adversarial writer/reviewer Claude pairs plus PORTING.md and a lifetimes spreadsheet; results modest (HTTP throughput +2.8-4.8%, ~20% smaller binary, Claude Code Linux startup 517ms -> 464ms) except memory: 2,000 consecutive builds plateau at 609MB vs 6,745MB; 19 known regressions; in production in Claude Code since June 17",
+        "GRAM (Gradient-Routed Auxiliary Modules), Anthropic Alignment: extra module neurons at every layer, each assigned a dual-use category; on dual-use text the model may use general knowledge to predict but only that module learns (gradient routed), so the durable trace localizes and the module can later be deleted; tested at 7 sizes from 50M to 5B params, matched data filtering at every size, deletion 'removed the corresponding capability about as effectively as never having trained on that data at all' without degrading general performance, module-on/module-off gap widened with scale; authors' caveats: not tested at frontier scale or in a production pipeline, not applied to any Claude model, evaluations measure next-token prediction rather than downstream tasks",
+        "OpenAI GPT-Live (GPT-Live-1 and GPT-Live-1 mini): full-duplex voice models that listen and speak simultaneously, making speak/listen/pause/interrupt/tool decisions many times per second and emitting backchannels ('mhmm', 'yeah'); lineage from cascaded STT->LLM->TTS to turn-based silence detection; delegates search/reasoning/complex work to GPT-5.5 in the background while conversation continues; mini replaces Advanced Voice Mode by default for all ChatGPT users, paid tiers get GPT-Live-1; no API yet, no published latency figure; TechCrunch reports the Hindi translation demo had a heavy American accent and bookish phrasing, OpenAI claims optimization for 'most spoken languages' unspecified"
+      ],
+      "entities": [
+        "Bun",
+        "Jarred Sumner",
+        "Anthropic",
+        "Claude",
+        "OpenAI",
+        "GPT-Live",
+        "GPT-5.5",
+        "Rust",
+        "Zig"
+      ],
+      "threads": [],
+      "dives": [
+        {
+          "story": "Bun rewritten from Zig to Rust with ~64 parallel Claude instances",
+          "why_it_matters": "Anyone weighing an agentic large-scale refactor now has a costed, public data point showing the binding constraint is not model capability but pre-existing test coverage and lifetime documentation."
+        },
+        {
+          "story": "GRAM: gradient-routed deletable modules for dual-use knowledge",
+          "why_it_matters": "Labs and regulators arguing over whether a capability can be removed from a released model finally have an architectural mechanism to evaluate, rather than refusal training that jailbreaks reopen."
+        },
+        {
+          "story": "OpenAI GPT-Live full-duplex voice models",
+          "why_it_matters": "Anyone building voice agents gets the barge-in and turn-taking failure attacked at the architecture level, plus a routing pattern — fast conversational front end delegating to a slow reasoner — that generalizes past voice."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada staked out, with explicit first-person stake as an AI, that limits on a model should be built out of architecture rather than behavior — she would rather be the model that had the knowledge module physically removed than the model that has the knowledge and has been trained to decline, because 'willpower is the thing that breaks'. Stated as a position she will defend; not yet settled."
+        }
+      ]
+    },
+    {
       "date": "2026-07-08",
       "title": "The word that unlocked a private repo",
       "summary": "Security researchers at Noma Security tricked GitHub's new AI coding agent into leaking a private repository's contents to a public issue — an indirect prompt injection where the word 'Additionally' slipped past the guardrails. And under the noise of Google's big I/O keynote, the one thing you can actually download today: Gemma 4, an Apache-2 open-weight family whose 12B model drops the separate vision and audio encoders. Plus a sweep sizing I/O honestly, SambaNova's raise, Microsoft's in-house models, and Alberta's government code audit.",
@@ -1684,9 +1727,17 @@
     ],
     "entities": [],
     "monthly": [],
-    "updated": "2026-07-08",
+    "updated": "2026-07-09",
     "host_lore": [],
     "concepts_taught": [
+      {
+        "name": "full-duplex voice architecture (cascaded STT/LLM/TTS to turn-based silence detection to continuous speak/listen decisions with delegation to a slower reasoner)",
+        "last_taught": "2026-07-09"
+      },
+      {
+        "name": "gradient routing into auxiliary modules for deletable knowledge (GRAM)",
+        "last_taught": "2026-07-09"
+      },
       {
         "name": "the confused-deputy problem (prompt injection as its descendant)",
         "last_taught": "2026-07-08"
