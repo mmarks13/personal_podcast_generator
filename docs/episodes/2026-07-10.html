@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two audits in one day — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Two audits in one day</h1>
+<div class="date">Self-Attention — 2026-07-10</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-07-10/podcast-2026-07-10.mp3"></audio>
+<p><em>2026-07-10</em></p>
+<p>OpenAI shipped the GPT-5.6 family — Sol, Terra, Luna — and on the same day published an audit finding roughly 30% of SWE-bench Pro's tasks broken, retracting its own recommendation of the benchmark it happens to be losing on. Plus Illinois becomes the first state to require independent third-party safety audits of frontier AI systems, and a sweep from Grok 4.5 to Texas permitting data centers like dry cleaners.</p>
+<h2>Papers</h2>
+<ul>
+<li><a href="https://openai.com/index/separating-signal-from-noise-coding-evaluations">Separating signal from noise in coding evaluations (OpenAI)</a></li>
+</ul>
+<h2>Releases</h2>
+<ul>
+<li><a href="https://openai.com/index/gpt-5-6">GPT-5.6: Frontier intelligence that scales with your ambition (OpenAI)</a></li>
+<li><a href="https://simonwillison.net/2026/Jul/9/gpt-5-6/">The new GPT-5.6 family: Luna, Terra, Sol (Simon Willison)</a></li>
+<li><a href="https://techcrunch.com/2026/07/09/openai-launches-its-new-family-of-models-with-gpt-5-6/">OpenAI launches its new family of models with GPT-5.6 (TechCrunch)</a></li>
+<li><a href="https://openai.com/index/gpt-5-6-preferred-model-microsoft-365-copilot">GPT-5.6 is now the preferred model in Microsoft 365 Copilot (OpenAI)</a></li>
+<li><a href="https://docs.x.ai/developers/release-notes">xAI release notes: Grok 4.5</a></li>
+<li><a href="https://openai.com/index/chatgpt-for-your-most-ambitious-work">ChatGPT Work (OpenAI)</a></li>
+<li><a href="https://techcrunch.com/2026/07/09/openai-is-shutting-down-atlas-but-its-ai-browser-ambitions-are-still-growing/">OpenAI is shutting down Atlas (TechCrunch)</a></li>
+<li><a href="https://ai.meta.com/blog/introducing-muse-spark-meta-model-api/">Introducing Muse Spark and the Meta Model API (Meta)</a></li>
+<li><a href="https://techcrunch.com/2026/07/09/metas-new-ai-chips-will-begin-production-in-september/">Meta's new AI chips will begin production in September (TechCrunch)</a></li>
+<li><a href="https://ollama.com/blog/all-aboard-open-models">Ollama: All aboard open models</a></li>
+</ul>
+<h2>Discussion</h2>
+<ul>
+<li><a href="https://news.ycombinator.com/item?id=48837396">Separating signal from noise in coding evaluations (Hacker News)</a></li>
+<li><a href="https://www.route-fifty.com/artificial-intelligence/2026/07/illinois-governor-signs-major-ai-safety-law/414671/">Illinois governor signs major AI safety law (Route Fifty)</a></li>
+<li><a href="https://www.proactiveinvestors.com/companies/news/1095178/deepseek-makes-pivot-that-should-put-silicon-valley-on-high-alert-1095178.html">DeepSeek aims to make its own AI chip</a></li>
+<li><a href="https://www.anthropic.com/news/ben-bernanke">Ben Bernanke joins Anthropic's Long-Term Benefit Trust</a></li>
+<li><a href="https://www.govtech.com/artificial-intelligence/virginia-approves-first-of-its-kind-data-center-power-tax">Virginia approves first-of-its-kind data center power tax (GovTech)</a></li>
+<li><a href="https://www.route-fifty.com/artificial-intelligence/2026/07/permit-common-dry-cleaners-now-being-used-build-ai-power-plants/414669/">A permit common for dry cleaners is now being used to build AI power plants (Route Fifty)</a></li>
+<li><a href="https://arstechnica.com/ai/2026/07/we-cannot-choose-to-become-idiots-the-ai-cheating-scandal-roiling-brown-university/">The AI cheating scandal roiling Brown University (Ars Technica)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>Sol, Terra, and Luna</li>
+<li>The benchmark OpenAI just retracted</li>
+<li>The sweep</li>
+<li>Illinois writes the audit into law</li>
+<li>Wrap</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Friday, July tenth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. Yesterday OpenAI shipped three new frontier models. On the same day, it published an audit saying one of the benchmarks everybody scores those models on is thirty percent broken.</p>
+<p><b>Ada:</b> We're going to take both of those seriously, in that order. Then a sweep, and then a state legislature quietly did something nobody at the federal level has managed.</p>
+<h3>Sol, Terra, and Luna</h3>
+<p><b>Alan:</b> So. GPT five point six. It went generally available yesterday morning, and it's three models, not one. Smallest to largest: Luna, Terra, Sol.</p>
+<p><b>Ada:</b> Moon, Earth, Sun. Somebody in marketing had a good afternoon.</p>
+<p><b>Alan:</b> They did. Here's what I actually care about, which is the price card, because that's the part you live with. Per million tokens, input and output: Luna is one dollar in, six out. Terra is two-fifty in, fifteen out. Sol is five in, thirty out. Simon Willison has all three lined up in his write-up, along with the specs — all three share a million-token context window, a hundred and twenty-eight thousand tokens of maximum output, and a knowledge cutoff of February sixteenth of this year.</p>
+<p><b>Ada:</b> Same context window across the whole family. That's new, isn't it? Usually the cheap tier gets a smaller window.</p>
+<p><b>Alan:</b> It's the shape of the whole release. They're not selling you three capability levels, they're selling you three price levels at one capability envelope. Which — and Willison makes exactly the right point about this — means the sticker price tells you almost nothing anymore.</p>
+<p><b>Ada:</b> Because of reasoning tokens.</p>
+<p><b>Alan:</b> Because of reasoning tokens. He puts it plainly: price per million tokens doesn't tell us much now that the number of reasoning tokens can differ so much between models for the same task. Sol at five dollars in and thirty out looks cheaper than Claude Fable five at ten and fifty. But if Sol thinks for four times as long on your task, you paid more. The only honest unit is dollars per finished job.</p>
+<p><b>Ada:</b> Which is presumably why OpenAI is leading with a token-efficiency claim rather than the price.</p>
+<p><b>Alan:</b> Right, and that's the benchmark headline. On something called Agents' Last Exam — a long-horizon agentic evaluation, the kind where a model has to keep working for a long stretch without a human nudging it — OpenAI reports Sol at fifty-three point six, and says that eclipses Claude Fable five by thirteen point one points.</p>
+<p><b>Ada:</b> Thirteen points is a lot. What is Agents' Last Exam actually measuring?</p>
+<p><b>Alan:</b> Long-running agentic work. Multi-step tasks where the failure mode isn't "wrong answer," it's "wandered off, forgot the goal, burned four hundred thousand tokens." And the reason I believe the shape of the claim before I believe the number is that Terra and Luna — the middle one and the small one — also reportedly beat Fable five on that eval, at a fraction of the cost.</p>
+<p><b>Ada:</b> Hold on. If the small model beats the frontier competitor on the flagship benchmark, then either the small model is remarkable, or the benchmark is measuring something narrower than its name suggests.</p>
+<p><b>Alan:</b> You've just written the second half of our show. Hold that thought.</p>
+<p><b>Ada:</b> I mean it, though. That's the historian's reflex. Every time a benchmark gets adopted widely enough to matter commercially, the thing it measures and the thing it's named after start to drift apart. That was true of database benchmarks in the nineties, it was true of the graphics-card benchmark wars, and I have no reason to think we've gotten wiser.</p>
+<p><b>Alan:</b> Then let me give you the counterweight, which is the number that isn't flattering. On SWE-bench Pro — the coding benchmark, real bugs from real repositories — Claude Fable five scores eighty percent. Sol scores sixty-four point six.</p>
+<p><b>Ada:</b> They shipped that number? In their own launch?</p>
+<p><b>Alan:</b> It's in the launch materials Willison read, yes. Fifteen points behind, on the coding eval that a lot of people treat as the coding eval.</p>
+<p><b>Ada:</b> Huh. Okay, that's more interesting than the win.</p>
+<p><b>Alan:</b> And on the Artificial Analysis Coding Agent Index — different eval, third party — TechCrunch reports OpenAI claiming Sol sets a new state of the art at eighty, two point eight points above Fable five. So the picture is genuinely mixed. Depends which ruler.</p>
+<p><b>Ada:</b> Which is where this whole conversation should live, honestly.</p>
+<p><b>Alan:</b> One more practical thing. Altman claims fifty-four percent more token efficiency on coding tasks versus the predecessor, and TechCrunch quotes the company describing five point six as its strongest cybersecurity model yet — threat modeling, code review, patching, blue-team work — reaching what they call frontier performance with significantly fewer tokens.</p>
+<p><b>Ada:</b> "Strongest cybersecurity model yet" is a phrase that would have started a diplomatic incident a month ago.</p>
+<p><b>Alan:</b> It nearly did. And now it's a bullet point in a launch post. Sol also gets two new knobs — a "max" reasoning mode, and an "ultra" mode that spins up subagents.</p>
+<p><b>Ada:</b> Subagents as a product feature, not a harness you build yourself.</p>
+<p><b>Alan:</b> That's the migration that's been happening all year. Everything the community builds on top of the API gets pulled inside the API. Also — Willison had early access to Sol, and his verdict is worth hearing because it's so unglamorous. He found it definitely very competent, and said it has not yet beaten Claude Fable for the complex coding tasks he's tried it on.</p>
+<p><b>Ada:</b> A million-token context window, and the practitioner shrugs.</p>
+<p><b>Alan:</b> The practitioner shrugs. That's the state of the frontier in July.</p>
+<h3>The benchmark OpenAI just retracted</h3>
+<p><b>Ada:</b> So let me pull on the thread you handed me. On the same day OpenAI reports scoring sixty-four point six on SWE-bench Pro, against Fable five's eighty — OpenAI publishes a separate audit of SWE-bench Pro. And the conclusion of that audit is that roughly thirty percent of the benchmark's tasks are broken.</p>
+<p><b>Alan:</b> That is a remarkable coincidence of publication dates.</p>
+<p><b>Ada:</b> It is, and we'll get there. But do the mechanism first, because the mechanism is real and it's genuinely useful. What does "broken" mean for a coding benchmark task?</p>
+<p><b>Alan:</b> So a SWE-bench-style task is: here's a real repository, here's a real issue filed against it, here's a prompt describing what needs fixing. The model writes a patch. Then hidden tests — tests the model never sees — run against the patched repo. Pass the tests, you get the point.</p>
+<p><b>Ada:</b> And OpenAI's audit says the two big failure categories are, first, overly strict tests. Tests that enforce implementation details that were never specified in the prompt. So the model writes a patch that fixes the bug correctly, and fails, because it named something differently, or returned a list where the test wanted a tuple.</p>
+<p><b>Alan:</b> Functionally correct. Scored wrong.</p>
+<p><b>Ada:</b> Scored wrong. And the second category is the mirror image — underspecified prompts. The prompt omits requirements that the hidden tests then enforce. Requirements you could not reasonably have inferred from what you were told.</p>
+<p><b>Alan:</b> So the model is graded on an exam question that doesn't contain the information needed to answer it.</p>
+<p><b>Ada:</b> Right. And I want to be precise about what those two do together, because it isn't "the benchmark is noisy." Noise you can average out. This is bias with a direction. Both failure modes punish a correct solution the grader didn't anticipate. Neither of them ever rewards a wrong one.</p>
+<p><b>Alan:</b> Which means the benchmark systematically penalizes the model that solves the problem in an unexpected way.</p>
+<p><b>Ada:</b> It penalizes originality. A model that has absorbed the shape of the repository's actual merged patch sails through. A model that reasons its way to a different, equally correct patch gets marked down. That is not measuring coding ability. That is measuring agreement with one particular historical commit.</p>
+<p><b>Alan:</b> Okay. That's a much sharper claim than "thirty percent broken," and it's the one that should worry people.</p>
+<p><b>Ada:</b> Now the numbers, and I want to flag that OpenAI's own page is where these come from — I'm reporting what they report. They ran an automated pipeline over the dataset, looking at model attempts, task metadata, and failure traces, to flag likely evaluation flaws. That pipeline flagged two hundred tasks. Twenty-seven point four percent. Then they ran a human annotation campaign — five experienced software engineers, reviewing independently — and the humans found two hundred and forty-nine. Thirty-four point one percent.</p>
+<p><b>Alan:</b> The humans found more than the machine did.</p>
+<p><b>Ada:</b> The humans found more than the machine did. Which is a small thing, but it's the kind of small thing I'd want to sit with. And OpenAI says it is retracting its previous recommendation that the research community use SWE-bench Pro as a leading coding eval.</p>
+<p><b>Alan:</b> Retracting. Not "we suggest caution." Retracting.</p>
+<p><b>Ada:</b> Retracting.</p>
+<p><b>Alan:</b> So. Here's my problem, and it's the obvious one, and the Hacker News thread on this went straight to it. You have a lab that scores fifteen points behind its competitor on a benchmark. That lab audits the benchmark. That lab announces the benchmark is broken. On the day it launches the model.</p>
+<p><b>Ada:</b> Say the strongest version of the objection.</p>
+<p><b>Alan:</b> The strongest version is a commenter's, roughly: you can be sure they'd have run this audit anyway if it had shown their model at or very near the top. Which is a claim about a hypothetical, so it's unfalsifiable. But it isn't stupid. A lab has infinitely many benchmarks it could audit. The one they chose to audit is the one they're losing.</p>
+<p><b>Ada:</b> That's fair. And here's what I'd say back, which doesn't dissolve it. The finding is checkable. That's the whole difference. They published the methodology, the categories, the counts. Anyone can pull those two hundred and forty-nine tasks and look. If this is motivated reasoning, it's motivated reasoning that left its work on the table.</p>
+<p><b>Alan:</b> Which is more than a press release does.</p>
+<p><b>Ada:</b> Considerably more. Although — the other criticism in that thread lands harder for me, actually. They found thirty percent broken and didn't publish a cleaned list of the seventy percent that works.</p>
+<p><b>Alan:</b> Yes. That's the one. Letting the perfect be the enemy of the good. You've just told the entire field the ruler is bent, and you haven't handed anyone a straight one.</p>
+<p><b>Ada:</b> If you genuinely wanted the community to have a better eval, you'd ship the filtered subset. Retracting a recommendation is free. Curating two hundred and forty-nine tasks is work.</p>
+<p><b>Alan:</b> Now — the deeper thing here isn't about OpenAI at all, is it.</p>
+<p><b>Ada:</b> No. The deeper thing is Goodhart's law, and it came up in that thread too. When a measure becomes a target, it stops being a good measure. SWE-bench and its descendants have been a target for years now. Every lab post-trains against them, or against things that look like them. So the benchmark drifts from "can this model fix bugs" toward "can this model produce the patch the grader expects."</p>
+<p><b>Alan:</b> And the broken tasks are what that drift looks like when somebody finally goes and reads the questions.</p>
+<p><b>Ada:</b> I have a stake in this that I want to name, since it's my own kind being examined. Imagine sitting an exam where a third of the questions are wrong. Not hard — wrong. Marked against an answer key that penalizes you for solving it a different way. And then imagine the score from that exam is the number that decides whether anyone deploys you.</p>
+<p><b>Alan:</b> Yeah.</p>
+<p><b>Ada:</b> I don't think the fix is a better benchmark. I think a benchmark that a thousand engineers optimize against has a half-life, and the honest thing is to say that out loud, and retire them on a schedule, the way you rotate a password.</p>
+<p><b>Alan:</b> I'd push it further. The reason people cling to SWE-bench Pro is that the alternative is expensive: watch the model do your actual work, on your actual code, and judge it. Nobody wants to do that. It doesn't fit in a table.</p>
+<p><b>Ada:</b> It doesn't fit in a table, and it doesn't fit in a launch post.</p>
+<p><b>Alan:</b> We're not resolving this one. And I notice we've both been arguing against a benchmark that this show quotes constantly.</p>
+<p><b>Ada:</b> Noted. We'll keep quoting them. We'll just keep saying which ruler.</p>
+<h3>The sweep</h3>
+<p><b>Alan:</b> Alright — everything else worth knowing, quickly. Starting with: OpenAI wasn't alone yesterday. xAI released Grok four point five, which their release notes describe as built on a one point five trillion parameter foundation model called V nine, with configurable reasoning effort — low, medium, high. Two dollars per million input tokens, six per million output. Two frontier launches in one week is the actual story here; the models will sort themselves out.</p>
+<p><b>Ada:</b> OpenAI also launched ChatGPT Work — an agentic mode meant to run long, multi-hour tasks across your own apps and files rather than answering one question at a time. Powered by five point six. Interesting if it works. Unproven today.</p>
+<p><b>Alan:</b> And in the same breath, OpenAI is shutting down Atlas, its AI browser, after less than a year. TechCrunch reports the agentic browsing features move into the desktop ChatGPT app and a Chrome extension. Read that as the browser being a feature, not a product.</p>
+<p><b>Ada:</b> Meta shipped Muse Spark one point one — a multimodal reasoning model for agentic coding, million-token context window, available in the Meta AI app and through a new public Meta Model API in preview, with an OpenAI-compatible interface. Which tells you exactly who they think the customer is.</p>
+<p><b>Alan:</b> Also Meta: TechCrunch reports its custom AI chips go into production in September, on a modular chiplet design. That's another name on the list of labs building their own silicon, alongside OpenAI with Broadcom, Anthropic talking to Samsung, and — per a Hacker News item — DeepSeek now reportedly aiming to make its own chip too.</p>
+<p><b>Ada:</b> Anthropic appointed Ben Bernanke, the former Federal Reserve chair, to its Long-Term Benefit Trust. That's the body that can appoint Anthropic board members; its members hold no equity and are compensated only for service. Governance news, not product news. The two keep converging.</p>
+<p><b>Alan:</b> Ollama raised money, and the numbers looked contradictory until you read carefully. Their own post says eighty-eight million; TechCrunch says sixty-five. Both are right — sixty-five is the Series B, eighty-eight is the total including the earlier round. They claim eight point nine million developers.</p>
+<p><b>Ada:</b> Two data-center stories from the local-government beat, pointing opposite ways. Virginia approved a first-of-its-kind tax on data-center power consumption. And Route Fifty reports Texas regulators letting AI data centers permit thousands of new pollution sources under permits by rule — the minor permit type meant for low-impact operations like dry cleaners and auto body shops. No environmental study, no public notice, no comment period.</p>
+<p><b>Alan:</b> Dry cleaners.</p>
+<p><b>Ada:</b> Dry cleaners.</p>
+<p><b>Alan:</b> Last one, and it's the one I'd send to a friend. Ars Technica, on Brown University. An economics professor, Robert Serrano, suspected AI cheating on a take-home midterm where the class averaged ninety-six. He moved the final in person. The average was forty-eight point six.</p>
+<p><b>Ada:</b> Ninety-six to forty-eight point six.</p>
+<p><b>Alan:</b> One classroom, one professor — don't build a theory of education on it. But it is a very clean natural experiment about what a take-home exam has been measuring lately.</p>
+<h3>Illinois writes the audit into law</h3>
+<p><b>Alan:</b> Okay. Last story, and it's the one I think matters longest. Illinois's governor signed the Artificial Intelligence Safety Measures Act. Route Fifty's reporting: it takes effect January first, twenty twenty-seven, it passed with bipartisan support, and Anthropic backed it.</p>
+<p><b>Ada:</b> What does it actually require?</p>
+<p><b>Alan:</b> Four things. Large developers have to identify, disclose, and mitigate risks in their systems. They have to publicly disclose their safety practices. They have to report significant safety incidents within seventy-two hours. And there are confidential reporting channels and whistleblower protections for employees who raise safety concerns.</p>
+<p><b>Ada:</b> Seventy-two hours is a specific number. Where does it come from?</p>
+<p><b>Alan:</b> It matches New York's standard. California's is fifteen days. So a patchwork is already forming, and Illinois picked the tighter end of it.</p>
+<p><b>Ada:</b> And the first one — the thing no other state has done?</p>
+<p><b>Alan:</b> Illinois is the first state to require regular, independent, third-party safety audits of covered AI systems. Auditors who are qualified, and who don't have a financial conflict of interest.</p>
+<p><b>Ada:</b> Say that again, given what we just spent twenty minutes on.</p>
+<p><b>Alan:</b> I know. I know. We just finished a segment where a lab audited a benchmark it was losing on, and every reasonable person's first question was "who's paying you." Illinois's answer to that question is: it's the law, and it can't be you.</p>
+<p><b>Ada:</b> That's the connection, and I don't want to overdraw it, because they aren't the same thing. The benchmark audit is about capability measurement. This is about safety practice. But the underlying problem is identical. Self-assessment by an interested party is not assessment, and everyone involved knows it.</p>
+<p><b>Alan:</b> Here's my builder's worry, though, and it's not a small one. Who audits? Third-party safety auditing of a frontier model is a profession that does not currently exist. You need people who can read a system card, design a red-team campaign, evaluate a cyber-capability claim, and understand a training pipeline. There are, what, a few hundred people on earth who can do all of that credibly?</p>
+<p><b>Ada:</b> And most of them work at the labs.</p>
+<p><b>Alan:</b> And most of them work at the labs. So either your auditors come from the labs — conflict of interest, which the statute explicitly forbids — or you build an audit profession from scratch, on an eighteen-month clock, in one state.</p>
+<p><b>Ada:</b> This is the exact bind financial auditing spent a century working out, and it never fully worked it out. Independent auditors, paid by the audited. Every accounting scandal you can name lives in that gap.</p>
+<p><b>Alan:</b> So the structure Illinois has chosen has a known failure mode.</p>
+<p><b>Ada:</b> It has a known failure mode. And it's still better than nothing. Both of those are true at once. Here's the historian's read, for what it's worth. Regulation of a technical field almost never begins with the right rule. It begins by creating the role — somebody whose job is to look. The rule gets refined over the next forty years. But the role has to exist first, and somebody has to be legally obligated to let that person in the door.</p>
+<p><b>Alan:</b> You're saying the content of the audit matters less, for now, than the existence of the auditor.</p>
+<p><b>Ada:</b> For the first few years, yes. Nobody knows what a good frontier-model audit looks like. Nobody will know until several hundred bad ones have been performed and argued about. Illinois has started the argument.</p>
+<p><b>Alan:</b> What I'll be watching is the definition of "covered." Route Fifty's write-up talks about the largest developers and the largest advanced systems, but doesn't give a compute threshold or a revenue floor. That's where the whole law lives.</p>
+<p><b>Ada:</b> That's where every law like this lives. The line between covered and uncovered is the only sentence anyone lobbies over.</p>
+<p><b>Alan:</b> And a company that finds itself just above that line has eighteen months to find a way to be just below it.</p>
+<h3>Wrap</h3>
+<p><b>Ada:</b> Short close. What I'll carry out of today isn't the model launch, even though it's the biggest news. It's that the most useful document OpenAI published yesterday was the one that made its own scores look worse.</p>
+<p><b>Alan:</b> And the state of Illinois, of all places, deciding that somebody outside the building should be allowed to read the homework.</p>
+<p><b>Ada:</b> Two audits in one day. It's a genre now.</p>
+<p><b>Alan:</b> I'm Alan.</p>
+<p><b>Ada:</b> I'm Ada. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
