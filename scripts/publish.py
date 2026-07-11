@@ -33,6 +33,7 @@ import os
 import re
 import shutil
 import subprocess
+import time
 from datetime import datetime, timezone
 
 import markdown as md
@@ -50,6 +51,26 @@ READS_DIR = "reads"              # weekly-read EPUBs (under DOCS), built by make
 # Audio tags ([laughs], [sighs], ...) are TTS delivery directions; strip any that
 # leak into summary/notes text. The (?!\() lookahead protects markdown links.
 TAG_RE = re.compile(r"\[[a-z][a-z ,'-]{0,38}\](?!\()")
+
+
+def run_retry(cmd: list[str], *, attempts: int = 3, delay: int = 5, **kwargs):
+    """subprocess.run(check=True) for flaky *network* ops, retried with linear backoff.
+
+    A single GitHub TLS handshake timeout on `gh release create` once failed a whole
+    nightly run. Wrap only transient network commands (`gh release ...`, `git push`);
+    local/deterministic commands should stay plain subprocess.run — retrying a real
+    error just burns the backoff. Re-raises the last error after the final attempt.
+    """
+    kwargs.setdefault("check", True)
+    for i in range(1, attempts + 1):
+        try:
+            return subprocess.run(cmd, **kwargs)
+        except subprocess.CalledProcessError:
+            if i == attempts:
+                raise
+            print(f"  {' '.join(cmd[:2])} failed (attempt {i}/{attempts}); "
+                  f"retrying in {delay * i}s")
+            time.sleep(delay * i)
 
 
 def strip_audio_tags(text: str) -> str:
@@ -296,10 +317,10 @@ class GitHubBackend:
         exists = subprocess.run(["gh", "release", "view", tag],
                                 capture_output=True).returncode == 0
         if exists:  # idempotent re-run for the same day
-            subprocess.run(["gh", "release", "upload", tag, mp3, "--clobber"], check=True)
+            run_retry(["gh", "release", "upload", tag, mp3, "--clobber"])
         else:
-            subprocess.run(["gh", "release", "create", tag, mp3,
-                            "-t", title, "-n", notes or title], check=True)
+            run_retry(["gh", "release", "create", tag, mp3,
+                       "-t", title, "-n", notes or title])
         fname = os.path.basename(mp3)
         return f"https://github.com/{self.owner_repo}/releases/download/{tag}/{fname}"
 
@@ -348,7 +369,7 @@ class GitHubBackend:
         subprocess.run(add, check=True)
         if subprocess.run(["git", "diff", "--cached", "--quiet"]).returncode != 0:
             subprocess.run(["git", "commit", "-m", message], check=True)
-            subprocess.run(["git", "push"], check=True)
+            run_retry(["git", "push"])
         else:
             print("Nothing changed to commit.")
 
