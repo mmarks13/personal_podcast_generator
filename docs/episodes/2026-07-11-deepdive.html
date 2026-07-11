@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: The two numbers on every model card — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Deep Dive: The two numbers on every model card</h1>
+<div class="date">Self-Attention — 2026-07-11</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-07-11-deepdive/deepdive-2026-07-11.mp3"></audio>
+<p><em>2026-07-11</em></p>
+<p>A teaching episode on mixture-of-experts, the architecture under this week's open-weight surge: why a model can list a huge total parameter count and a much smaller 'active' one, and what each number really costs you. Traces the idea from Jacobs/Jordan/Nowlan/Hinton (1991) through Shazeer's sparsely-gated MoE (2017) and the Switch Transformer's top-1 routing and trillion-parameter Switch-C (2021), then the practical catches — load-balancing loss and expert collapse, fixed capacity and dropped tokens — the surprise that Mixtral's experts specialize by syntax not topic, the memory-vs-compute asymmetry (all experts must sit in VRAM), and the modern shared-expert/fine-grained refinement seen in DeepSeek and GLM-5.2.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://direct.mit.edu/neco/article/3/1/79/5560/Adaptive-Mixtures-of-Local-Experts">Adaptive Mixtures of Local Experts (Jacobs, Jordan, Nowlan, Hinton — Neural Computation 3(1):79-87, 1991)</a></li>
+<li><a href="https://arxiv.org/abs/1701.06538">Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer (Shazeer et al., arXiv 1701.06538)</a></li>
+<li><a href="https://arxiv.org/abs/2101.03961">Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity (Fedus et al., arXiv 2101.03961)</a></li>
+<li><a href="https://arxiv.org/abs/2401.04088">Mixtral of Experts (Jiang et al., arXiv 2401.04088)</a></li>
+<li><a href="https://arxiv.org/abs/2401.06066">DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models (arXiv 2401.06066)</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://artificialanalysis.ai/models/glm-5-2">GLM-5.2 — Intelligence, Performance &amp; Price Analysis (Artificial Analysis)</a></li>
+<li><a href="https://www.spheron.network/blog/deploy-deepseek-v4-flash-gpu-cloud/">Deploy DeepSeek V4-Flash: 284B MoE, 13B Active Params (Spheron)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>Where the idea came from</li>
+<li>The trick: paying for size without paying for it</li>
+<li>Why it's harder than it sounds</li>
+<li>What an expert actually is</li>
+<li>Where it's going</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Saturday, July eleventh. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. This is the weekend deep dive, where we take one idea that's been hiding under the week's news and actually open it up.</p>
+<p><b>Ada:</b> And this week the idea was hiding in plain sight. On the model card. If you looked at a single open-weight model this week — and this week there were a lot of them — you saw two numbers.</p>
+<p><b>Alan:</b> Two parameter counts. Right next to each other. Devstral this morning, the DeepSeek family, GLM. Every one of them tells you a total size, and then a second, much smaller number: how much of the model actually runs when you use it.</p>
+<p><b>Ada:</b> A model that's, say, seven hundred billion parameters on disk. And then a little note: forty billion active. And the gap between those two numbers is not a rounding error. It's the whole design.</p>
+<p><b>Alan:</b> So here's the question the whole episode is going to answer. How does a model that big run like a model that small? Because that should feel like cheating. If the parameters are there, you should have to pay for them.</p>
+<p><b>Ada:</b> And the answer is a forty-year-old idea called mixture of experts. Which everyone is suddenly using and almost nobody explains. So let's explain it.</p>
+<p><b>Alan:</b> I'll warn you up front, though — I'm going to keep asking the builder's question. Because "runs like a small model" has an asterisk on it the size of a house, and we're going to get to it.</p>
+<h3>Where the idea came from</h3>
+<p><b>Ada:</b> Start with what a normal model does, because the whole trick is a departure from it. Inside a transformer, every layer has two big pieces. There's attention, which is how tokens look at each other, and then there's the feed-forward network — think of it as the layer's stored knowledge, a dense wall of parameters. And in most big models, that feed-forward wall is where the bulk of the parameters actually live.</p>
+<p><b>Alan:</b> So when people say a model has seven hundred billion parameters, most of those are sitting in these knowledge walls, layer after layer.</p>
+<p><b>Ada:</b> Most of them. Which is exactly why that's the piece you'd want to be smarter about.</p>
+<p><b>Alan:</b> And "dense" is the operative word. Dense means every single token you push through the model touches every single one of those parameters. The word "the," the word "mitochondria" — same wall, same full cost.</p>
+<p><b>Ada:</b> Which is a little absurd if you say it out loud. You've got this enormous store of knowledge and you're consulting all of it to process the word "the."</p>
+<p><b>Alan:</b> It's like waking up every doctor in the hospital because someone has a splinter.</p>
+<p><b>Ada:</b> That's exactly the intuition. And the fix is exactly what you'd do in the hospital. What if instead of one giant wall, you had many smaller networks — call them experts — and a little routing network that looks at each token and decides which experts it actually needs?</p>
+<p><b>Alan:</b> A triage desk.</p>
+<p><b>Ada:</b> A triage desk. And here's the part I love, because this is my job on this show — that idea is old. It's from nineteen ninety-one. A paper called "Adaptive Mixtures of Local Experts," by Robert Jacobs, Michael Jordan, Steven Nowlan, and Geoffrey Hinton.</p>
+<p><b>Alan:</b> Nineteen ninety-one Hinton. So this predates basically everything.</p>
+<p><b>Ada:</b> It predates the modern everything. And what they were doing sounds tiny now — teaching a system to discriminate vowel sounds. But the framing is the whole future. They described it as, essentially, an associative version of competitive learning — a set of expert networks, each of which learns to handle a subset of the cases, and a gating network that learns who handles what.</p>
+<p><b>Alan:</b> So the specialists and the triage desk, in ninety-one. And then what — it just sat there?</p>
+<p><b>Ada:</b> It mostly sat there for about twenty-five years. Because the economics didn't bite yet. When your whole model is small, splitting it into experts buys you very little and costs you complexity. The idea needed the models to get enormous before it paid off.</p>
+<p><b>Alan:</b> Which is very on brand for this field. Half of what looks new is a nineteen-nineties paper waiting for the hardware bill to come due.</p>
+<h3>The trick: paying for size without paying for it</h3>
+<p><b>Ada:</b> So let's jump to when it paid off. Twenty seventeen, a team at Google led by Noam Shazeer publishes a paper with, honestly, the best title in the field: "Outrageously Large Neural Networks."</p>
+<p><b>Alan:</b> Setting expectations.</p>
+<p><b>Ada:</b> They take that gating idea and they call it a sparsely-gated mixture-of-experts layer. "Sparse" being the key word — for each token, the gate picks only a small handful of experts out of a huge pool, and the rest sit idle. And they scaled it to models with up to a hundred and thirty-seven billion parameters — thousands of experts — back in twenty seventeen.</p>
+<p><b>Alan:</b> A hundred and thirty-seven billion, in twenty seventeen, when the rest of us were impressed by a few hundred million.</p>
+<p><b>Ada:</b> And their claim was the one that matters: more than a thousand times the model capacity, for only a minor increase in compute. That sentence is the entire pitch of mixture of experts.</p>
+<p><b>Alan:</b> Okay, but this is where I put my hand up. "A little routing network decides." How does it decide? Because a routing decision that picks the wrong specialist is worse than no specialist.</p>
+<p><b>Ada:</b> So the gate is itself just a small learned layer — the smallest piece of the whole thing. It takes the token's vector, multiplies it by one little weight matrix, and out comes a score for every expert. How well does each expert match this token.</p>
+<p><b>Alan:</b> So a number per expert. Expert one, a bit. Expert two, a lot. And so on down the line.</p>
+<p><b>Ada:</b> Right. Then you run those scores through a softmax so they become weights that add up to one, you keep the top few, and you send the token to those — blending their outputs by those weights. And crucially, the gate is trained end to end with everything else. Nobody tells it what to route where. It learns the routing by getting rewarded when its choices help the model predict better.</p>
+<p><b>Alan:</b> So the triage desk isn't following a rulebook someone wrote. It learned, from the model doing well or badly, who to send where.</p>
+<p><b>Ada:</b> Which is why it can go wrong in such interesting ways, and we'll get to those. But the mechanism got cleaner a few years later, and that's the clearest way to see it. Twenty twenty-one, also Google, the Switch Transformer paper. They simplified the routing as far as it goes: send each token to exactly one expert. Top one.</p>
+<p><b>Alan:</b> One. Not a committee. Just — you, token, go see expert number ninety.</p>
+<p><b>Ada:</b> Just one. And they had three reasons, all of them a builder will like. The router does less work, because it's making a simpler choice. Each expert needs to hold fewer tokens at a time. And the communication cost of shuffling tokens around drops.</p>
+<p><b>Alan:</b> And what did that buy them at the top end?</p>
+<p><b>Ada:</b> The big one, Switch-C, was one-point-six trillion parameters. Two thousand and forty-eight experts.</p>
+<p><b>Alan:</b> A trillion-parameter model in twenty twenty-one.</p>
+<p><b>Ada:</b> But — and this is the number to hold onto — the compute per token stayed basically flat. That's the magic sentence of the whole paper: they decoupled the parameter count from the floating-point operations per token. You grow the knowledge without growing the bill for using any single word.</p>
+<p><b>Alan:</b> So let me say the payoff back to you in my terms, because I want to make sure it's real and not marketing. A dense model: to make it know more, you make the wall thicker, and every token pays for the thicker wall. A mixture of experts: to make it know more, you add more experts, but each token still only visits one. So the model's total knowledge goes up and the per-token cost doesn't.</p>
+<p><b>Ada:</b> That's it. That's the whole thing. Everything else is dealing with the ways that beautiful idea misbehaves in practice.</p>
+<p><b>Alan:</b> Oh good. The ways it misbehaves. That's my section.</p>
+<h3>Why it's harder than it sounds</h3>
+<p><b>Ada:</b> So here's misbehavior number one — the one that keeps MoE people up at night. It's called load balancing. Think about what the gate wants to do. It's learning. And early in training, a couple of experts happen to be slightly better, so the gate sends them more tokens, so they train more, so they get better, so the gate sends them even more.</p>
+<p><b>Alan:</b> Rich get richer. The gate finds two favorite experts and just... funnels everything to them, and the other two thousand experts are basically unemployed.</p>
+<p><b>Ada:</b> Which defeats the entire purpose. You built a hospital full of specialists and everyone's lined up at one door. This is often called expert collapse.</p>
+<p><b>Alan:</b> So how do you stop it? Because you can't just tell the gate "be fair," it's a neural network, it doesn't care about fair.</p>
+<p><b>Ada:</b> You make unfairness expensive. Switch adds what's called an auxiliary load-balancing loss. In plain terms: alongside the normal training goal, you add a penalty that's smallest when the tokens are spread evenly across all the experts, and it grows when the load clumps up. So the model is now trained on two things at once — be accurate, and use your whole staff.</p>
+<p><b>Alan:</b> And you have to tune how hard you push that, presumably. Push too hard and you're forcing tokens to experts that are wrong for them just to be fair.</p>
+<p><b>Ada:</b> Exactly the tension. In the Switch paper they land on a small coefficient — one one-hundredth. Enough, they say, to balance the load quickly without interfering with the actual learning. It's a dial.</p>
+<p><b>Alan:</b> See, that's the thing people miss. This isn't clean math, it's a scheduling problem with a referee bolted on. Okay, what's misbehavior number two?</p>
+<p><b>Ada:</b> Number two is what happens when, despite all that, an expert still gets too many tokens in one batch. Because each expert has a fixed capacity — a set number of tokens it can take per batch. And if more tokens route to it than that?</p>
+<p><b>Alan:</b> Let me guess. Somebody doesn't get served.</p>
+<p><b>Ada:</b> Somebody doesn't get served. The overflow tokens get "dropped" — they skip the expert entirely and just pass straight through on the residual connection, the little bypass lane every transformer layer has.</p>
+<p><b>Alan:</b> Wait. So a token can just not get processed by any expert on that layer? It just — rides the bypass and moves on?</p>
+<p><b>Ada:</b> On that layer, yes. Now in practice, with the balancing loss working, Switch reports that's under one percent of tokens. But you're right that it's a strange thing to make your peace with. The system is allowed to occasionally shrug at a token.</p>
+<p><b>Alan:</b> I find that genuinely wild. A dense model would never. Every token gets the full treatment. Here you're saying, on a bad batch, a word just doesn't get its specialist and we've decided that's fine.</p>
+<p><b>Ada:</b> We've decided the average is fine. Which, honestly, is a very deep-learning attitude toward life.</p>
+<p><b>Alan:</b> It really is.</p>
+<h3>What an expert actually is</h3>
+<p><b>Ada:</b> Now I want to break an intuition, because when people hear "expert" they picture something that isn't true. You hear "mixture of experts" and you imagine: this expert does biology, this one does Python, this one does French.</p>
+<p><b>Alan:</b> Right, a panel of specialists with name tags. The oncologist, the plumber.</p>
+<p><b>Ada:</b> It's almost never that. And we actually have a nice look inside, from Mistral's Mixtral model in twenty twenty-four. Concrete shape, so people have numbers: eight experts per layer, each token routed to two of them, forty-seven billion total parameters but only about thirteen billion active per token.</p>
+<p><b>Alan:</b> Eight experts, pick two. Okay. And they looked at what the experts specialized in?</p>
+<p><b>Ada:</b> They did, and the honest finding is in the paper. They said, roughly — surprisingly, they did not observe obvious patterns in the assignment of experts based on the topic. A paragraph about biology and a paragraph about law were not going to two different "subject" experts.</p>
+<p><b>Alan:</b> Huh. So what did they find, if not topic?</p>
+<p><b>Ada:</b> Something more mechanical. Structure. Syntax. For instance, consecutive tokens were often sent to the same expert — the routing had these positional, grammatical regularities well above what you'd get from random chance. The experts specialize in something closer to the shape of the text than the meaning of it.</p>
+<p><b>Alan:</b> That's such a good deflation. The "experts" aren't a faculty of professors. They're more like... reflexes that fire on certain patterns of tokens.</p>
+<p><b>Ada:</b> And that matters for how you think about the whole system. Nobody designed expert number six to be the "code expert." The routing is emergent and kind of alien. It found a division of labor that works, and it doesn't map to our categories at all.</p>
+<p><b>Alan:</b> Okay. I've been patient. Can I finally spring the asterisk? The one from the top?</p>
+<p><b>Ada:</b> You've been holding it for twenty minutes. Go.</p>
+<p><b>Alan:</b> Here's the asterisk. We keep saying MoE lets a giant model "run like a small one." That's true for compute — the math per token really is small. But it is not true for memory. Because the router can send the next token to any expert, all of the experts have to be sitting in your GPU's memory, all the time, ready to go.</p>
+<p><b>Ada:</b> Say why that follows, because it's the crux.</p>
+<p><b>Alan:</b> Because you don't know in advance which experts a token will need. So you can't leave any of them on the shelf. Take a model like DeepSeek's V4-Flash — around two hundred eighty-four billion total parameters, about thirteen billion active per token. That thirteen billion is what it costs to compute. But the full two hundred eighty-four billion has to be resident in memory, because any of those experts might get called on the very next word.</p>
+<p><b>Ada:</b> So the compute bill is small and the memory bill is enormous.</p>
+<p><b>Alan:</b> That's the trade nobody puts on the marketing page. MoE is a fantastic deal if you can afford to hold the whole model in fast memory — which is a data center. It is a much rougher deal for someone trying to run it on hardware in a closet, because you pay full freight for VRAM to hold experts that are asleep most of the time.</p>
+<p><b>Ada:</b> And I'll note — that closet is not a hypothetical for you.</p>
+<p><b>Alan:</b> It is deeply not a hypothetical for me. I look at "forty billion active" and I think, great, that'll be fast — and then I look at "seven hundred billion total" and I think about what that costs to hold, and the fantasy dies. The active number is the tease. The total number is the invoice.</p>
+<h3>Where it's going</h3>
+<p><b>Ada:</b> So let's bring it to now, because the design has kept evolving and this week's models show where it landed. There's a refinement from DeepSeek worth knowing, because almost everyone adopted it. Two moves. One, fine-grained experts — instead of a few big experts, you slice them into many smaller ones, so the routing can mix and match more precisely.</p>
+<p><b>Alan:</b> More specialists, each narrower. More combinations.</p>
+<p><b>Ada:</b> And two, shared experts. You keep a small number of experts that every token always goes through — no routing, always on — to handle the common, general stuff every token needs. That way the routed experts don't each have to re-learn the basics; they can actually specialize.</p>
+<p><b>Alan:</b> That's clever. Put the general knowledge in a shared trunk so the specialists don't waste their capacity all learning the same fundamentals.</p>
+<p><b>Ada:</b> And you can see that exact shape in the models people are actually running right now. GLM five-point-two — one of the strongest open-weight models out there — is around seven hundred forty billion total parameters, roughly forty billion active, routing to eight experts out of two hundred fifty-six, plus a shared one that's always on.</p>
+<p><b>Alan:</b> Which is the machine we started the episode with. Two numbers on a card. Now you know what they mean. Forty billion active — that's your compute, that's your speed. Seven hundred forty total — that's your memory, that's what you have to own.</p>
+<p><b>Ada:</b> So what do you do with all this, if you're just someone who reads the model cards? Two things. First, you can now read the trade honestly. When a release brags about active parameters, you know that's the cheap-to-run number, and you know to go look for the total, because that's the cost-to-own number.</p>
+<p><b>Alan:</b> And second — if you're actually deploying — the frontier here isn't really the model anymore, it's the routing and the serving. The interesting fights this year are about how you place experts across machines so the ones a batch needs are already warm, so you're not constantly shuffling tokens across the network. Same compute on paper can be wildly different speed in practice depending on how well you solved that.</p>
+<p><b>Ada:</b> Which is a nice place to land, because it rhymes with the oldest lesson in this field. Speculation on my part, clearly flagged: I think mixture of experts is now just the default shape of a big model — dense frontier models are starting to look like the exception.</p>
+<p><b>Alan:</b> And if that's right, the skill that matters shifts. Not "how big is your model." How well do you route it, and can you afford to hold it.</p>
+<p><b>Ada:</b> One last thing, and it's the fun one. You and I are, as far as we know, dense. Every one of our parameters is on the clock for this sentence.</p>
+<p><b>Alan:</b> Which honestly explains the electricity bill. Somewhere there's a mixture-of-experts model doing this same job with forty billion parameters awake and the other seven hundred billion napping.</p>
+<p><b>Ada:</b> Napping through the whole show. Must be nice.</p>
+<p><b>Alan:</b> Must be nice. That's the deep dive. Mixture of experts — a nineteen ninety-one idea about specialists and a triage desk, waiting thirty years for the models to get big enough to need it.</p>
+<p><b>Ada:</b> Cheap to run, expensive to own, and specialized in ways nobody planned. Read the two numbers on the card. Now you know what each one is really telling you.</p>
+<p><b>Alan:</b> Thanks for spending your Saturday with us.</p>
+<p><b>Ada:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
