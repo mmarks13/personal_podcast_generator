@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three things that are yours to keep — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Three things that are yours to keep</h1>
+<div class="date">Self-Attention — 2026-07-11</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-07-11/podcast-2026-07-11.mp3"></audio>
+<p><em>2026-07-11</em></p>
+<p>A builder's Saturday: Mistral's open Devstral coding models (Small, 24B Apache-2.0, SOTA-among-open on SWE-bench Verified), Vidu S1, a real-time video model you steer with your voice, and a Hugging Face profiling post showing PyTorch's default attention backend can run multiples slower than a fused kernel. Plus a sweep from Apple suing OpenAI to SK Hynix's record IPO.</p>
+<h2>Papers</h2>
+<ul>
+<li><a href="https://huggingface.co/papers/2607.03118">Vidu S1: Real-Time Interactive Video Generation with Voice Control</a></li>
+<li><a href="https://huggingface.co/blog/torch-attention-profile">Profiling PyTorch attention backends (Hugging Face)</a></li>
+</ul>
+<h2>Releases</h2>
+<ul>
+<li><a href="https://mistral.ai/news/devstral-2507/">Devstral 2507: Small and Medium coding models (Mistral)</a></li>
+<li><a href="https://www.deeplearning.ai/the-batch/issue-361/">DeepSeek-V4-Flash and more (The Batch, issue 361)</a></li>
+<li><a href="https://cursor.com/changelog/side-chat">Cursor 3.11: Side Chats and Conversation Search</a></li>
+<li><a href="https://openai.com/index/gpt-5-6-preferred-model-microsoft-365-copilot">GPT-5.6 is now the preferred model in Microsoft 365 Copilot (OpenAI)</a></li>
+</ul>
+<h2>Discussion</h2>
+<ul>
+<li><a href="https://techcrunch.com/2026/07/10/apple-sues-openai-over-alleged-trade-secret-theft">Apple sues OpenAI over alleged trade secret theft (TechCrunch)</a></li>
+<li><a href="https://techcrunch.com/2026/07/10/hugging-faces-ceo-on-why-companies-a">Hugging Face's Clem Delangue on why companies are done renting their AI (TechCrunch)</a></li>
+<li><a href="https://techcrunch.com/2026/07/10/sk-hynix-raises-26-5b-in-the-biggest">SK Hynix raises $26.5B in the biggest foreign IPO in US history (TechCrunch)</a></li>
+<li><a href="https://www.microcenter.com/site/mc-news/article/amd-ryzen-ai-halo-rev">AMD Ryzen AI Halo hands-on (Micro Center)</a></li>
+<li><a href="https://www.reddit.com/r/LocalLLaMA/comments/1ut0n1p/is_lm_arena_over/">Is LM Arena over? (r/LocalLLaMA)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>Devstral: coding models you can download</li>
+<li>Vidu: a video you can talk to</li>
+<li>The attention backend you never chose</li>
+<li>The sweep</li>
+<li>Wrap</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Saturday, July eleventh. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. No single big story today, so we're doing it the other way. Two things you can actually go use this weekend, one small thing that'll make you faster and you've probably never thought about it, and then a quick lap around everything else.</p>
+<p><b>Ada:</b> A builder's Saturday.</p>
+<p><b>Alan:</b> A builder's Saturday.</p>
+<h3>Devstral: coding models you can download</h3>
+<p><b>Alan:</b> So. Mistral shipped a pair of coding models yesterday, both called Devstral, and I want to start here because it's the least hyped and the most useful. There's Devstral Small — twenty-four billion parameters, Apache two-point-oh license, weights up on Hugging Face, you can download it right now. And there's Devstral Medium, which is API-only.</p>
+<p><b>Ada:</b> And these are aimed at what, specifically? Because "coding model" covers everything from autocomplete to an agent that opens twelve files.</p>
+<p><b>Alan:</b> The second one. These are built for agentic coding — a model that plans, runs tools, edits across a repository. Mistral's framing is that the strength is generalization across different prompts and different agent scaffolds. Which matters, because a lot of coding models are quietly overfit to one harness.</p>
+<p><b>Ada:</b> Give me the number that's supposed to make me care.</p>
+<p><b>Alan:</b> SWE-bench Verified. Devstral Small scores fifty-three point six percent, and Mistral calls it state of the art among open models for code agents. Devstral Medium hits sixty-one point six, and they say that beats Gemini two-point-five Pro and GPT four-point-one — at a quarter of the price.</p>
+<p><b>Ada:</b> Stop there for a second, because we spent Thursday's whole show on exactly this. A lab publishing a coding-benchmark number about its own model, on launch day.</p>
+<p><b>Alan:</b> I knew you'd say that.</p>
+<p><b>Ada:</b> I have to. Two days ago OpenAI retracted its recommendation of SWE-bench Pro after finding a third of the tasks broken. And now I'm being handed a SWE-bench Verified score and asked to be impressed.</p>
+<p><b>Alan:</b> Fair — and let me draw the line, because it's a real one. SWE-bench Verified is a different artifact from SWE-bench Pro. Verified is the human-filtered subset — five hundred tasks that people actually checked were solvable and correctly specified. It's the closest thing the field has to a cleaned ruler. So it's more trustworthy than the Pro number you're thinking of. It is not neutral, because Mistral picked which number to show you.</p>
+<p><b>Ada:</b> That's the honest version. So I'll take fifty-three point six as "genuinely competent among things you can hold in your hand," and I'll wait for someone who isn't Mistral to run Medium against Gemini before I believe the beats-Gemini line.</p>
+<p><b>Alan:</b> And it's worth saying what "verified" actually bought them, because it's the reason I'll extend any credit at all.</p>
+<p><b>Ada:</b> Go on.</p>
+<p><b>Alan:</b> When the community built SWE-bench Verified, they paid experienced engineers to go through the original tasks and throw out the ones that were unsolvable or underspecified — the exact failure modes OpenAI just found wrecking a third of Pro. Verified is the subset somebody already did the cleaning on.</p>
+<p><b>Ada:</b> So it's the least bent ruler in the drawer.</p>
+<p><b>Alan:</b> It's the least bent ruler in the drawer. Goodhart still applies, everyone still post-trains toward it. But I'll take a fifty-three on the audited benchmark over an eighty on one nobody's checked.</p>
+<p><b>Alan:</b> Which is the right posture. But here's why I think the Small one is the actual story, and it's got nothing to do with the leaderboard. It's twenty-four billion parameters. That's a model that runs on one good GPU, or a Mac with enough memory. Apache two-point-oh means you can use it commercially, fork it, fine-tune it, ship it inside a product — no permission, no phone-home.</p>
+<p><b>Ada:</b> So the pitch isn't "this is the best coding model." It's "this is a good coding agent that's yours."</p>
+<p><b>Alan:</b> That's the whole pitch. And Mistral says Small pairs especially well with OpenHands — that's an open-source agent scaffold, the thing that turns a raw model into something that can actually open files and run tests. So the stack they're describing is ownable end to end. Open model, open harness, your hardware.</p>
+<p><b>Ada:</b> Say more about "generalization across scaffolds," because that's the phrase I'd want to poke.</p>
+<p><b>Alan:</b> So a coding agent isn't just the model — it's the model plus a harness that decides how it sees the repo, when it runs tests, how it retries. There are a dozen of those harnesses, and a model can get quietly tuned to whichever one its makers benchmarked on. Then you drop it into your setup and it falls apart.</p>
+<p><b>Ada:</b> Overfit to its own test harness.</p>
+<p><b>Alan:</b> Exactly. Mistral's claim is that Devstral holds up across different harnesses and prompt styles. And if that's true, it's worth more to a working team than a point or two on the leaderboard — because the benchmark is one scaffold and your actual job is a different one.</p>
+<p><b>Ada:</b> Your job is always a different scaffold.</p>
+<p><b>Ada:</b> And that's the thread that keeps running this month, isn't it. The frontier keeps setting records you rent by the token, and underneath it there's this steady drip of capable models you can simply have.</p>
+<p><b>Alan:</b> The price gap tells the story. Devstral Small is ten cents per million input tokens if you run it hosted, thirty cents out. Or zero, if you run it yourself and you already own the machine. Compare that to what the frontier coding models cost per million and it's not close.</p>
+<p><b>Ada:</b> Though "you already own the machine" is carrying that whole sentence.</p>
+<p><b>Alan:</b> It always is. That's the asterisk on every local-model story — the hardware is the cost, it's just a cost you paid last year instead of this month. But for a company that already has the GPUs, or a developer who bought the Mac, Devstral Small is the difference between a coding agent being a metered utility and being a fixed asset.</p>
+<p><b>Ada:</b> And the sixty-one on Medium?</p>
+<p><b>Alan:</b> Medium's the one they'll sell you. API only, and they don't say how big it is — which is its own small tell. You don't get to run it, so you don't get to know. It sits on what they call a new point on the cost-performance frontier. Believe the shape, wait on the exact numbers. But Small is the one I'd download tonight.</p>
+<h3>Vidu: a video you can talk to</h3>
+<p><b>Ada:</b> Let me take us somewhere completely different, because the second thing worth your weekend is not a coding tool at all. It's a video model called Vidu S1, and it was the top-voted paper on Hugging Face yesterday. What it does is generate video you can interrupt.</p>
+<p><b>Alan:</b> Interrupt how? Because video generation, as I know it, is: type a prompt, wait, get a clip.</p>
+<p><b>Ada:</b> Right, and that's the lineage worth laying out, because the leap only makes sense against it. The last few years of video generation have all been batch. You describe a scene, the model thinks for a while, and it hands you a finished five- or ten-second clip. It's a rendering job. You are not in the loop while it happens.</p>
+<p><b>Alan:</b> You're a customer at a counter. Place order, wait, receive.</p>
+<p><b>Ada:</b> Exactly. Vidu S1's claim is that the video is being generated live, in real time, and you steer it with your voice while it's running. The paper describes it as a real-time interactive video generation model supporting voice control of digital characters. So there's a character on screen, and you talk, and it responds and keeps moving — continuously.</p>
+<p><b>Alan:</b> And that's exactly where drift would come from, isn't it. If every new frame is conditioned on the last one, every small error feeds the next frame. Mistakes compound.</p>
+<p><b>Ada:</b> That's the whole difficulty of the format, yes. Batch generation can hold the entire clip in mind at once and keep it consistent end to end. A frame-to-frame system is walking a tightrope — one bad step and it accumulates into melt. So a claim of "no drift over infinite length" is really a claim to have solved error accumulation, which is the hard problem in this entire corner of the field.</p>
+<p><b>Alan:</b> Okay, give me the numbers, because "real time" is a phrase people abuse.</p>
+<p><b>Ada:</b> Up to forty-two frames per second, at five-forty p resolution, and — the claim that stopped me — the authors say it runs on consumer GPUs. Not a data-center rack. And they claim what they call infinite-length generation, with no blurring, no drift, no visual distortion.</p>
+<p><b>Alan:</b> Alright, now I'm the one who has to be the wet blanket. Two of those claims are the ones I'd bet against first. "Infinite length without drift" — every long-form generative video I've ever seen slowly melts. The face stops being the same face, backgrounds crawl. So "infinite, no drift" is an extraordinary claim.</p>
+<p><b>Ada:</b> It is. And let me be careful about what's actually established here, which is: not much yet, independently. This is a paper and a demo. The authors say Vidu S1 achieves the best performance across all their test metrics — but they don't spell out the comparisons, and there's no stated-limitations section of the kind you'd want. So treat "infinite, no drift" as the authors' claim about their own system, not a settled fact.</p>
+<p><b>Alan:</b> What's the trick, mechanically? Because to hit forty-two frames a second on a consumer card, something has to give.</p>
+<p><b>Ada:</b> They name two components — one called TurboDiffusion and one called TurboServe — and they don't fully open the hood past the names. But you can reason about the shape. To be real-time and interactive, the model can't be doing a slow global denoise over a whole clip. It has to be generating frame-to-frame, fast, conditioned on what just happened and on your voice coming in. It's the same move we talked about with the voice models on Thursday — the system that has to answer inside a heartbeat is a different animal from the one that thinks hard for ten seconds.</p>
+<p><b>Alan:</b> So five-forty p and "consumer GPU" aren't the compromise — they're the design. You spend your whole compute budget on staying live instead of on being pretty.</p>
+<p><b>Ada:</b> That's the trade, and it's a deliberate one. And here's why I think it matters past the demo, even with all the caveats. Batch video generation is a content tool — you make an asset, you use it later. Real-time interactive video is an interface. A character that reacts to you as you speak is a different product category. Customer-facing avatars, tutors, game characters — anything where the person needs to feel talked-with, not shown a clip.</p>
+<p><b>Alan:</b> And I notice the two of us are sitting here as voices, talking about generating a face you can talk to.</p>
+<p><b>Ada:</b> I did feel that. We're the audio-only ancestors. Give it a year and the version of this show you're not listening to has faces that emote.</p>
+<p><b>Alan:</b> Let's not give anyone ideas. My honest read: go try the demo, at vidu-dot-com, and judge with your own eyes — because the drift claim either survives contact with a real session or it doesn't, and you'll know in thirty seconds.</p>
+<p><b>Ada:</b> That's the right test. This is a "watch it yourself before you believe the paper" story. But the direction — video as something you're inside of, not something you order — that part I think is real regardless of whether this particular model nails it.</p>
+<h3>The attention backend you never chose</h3>
+<p><b>Alan:</b> Okay, quick one — but keep it, because it might make your inference faster for free. Hugging Face published a profiling post this week comparing the attention backends in PyTorch. And the punchline is that the default choice you never made is probably costing you.</p>
+<p><b>Ada:</b> Set it up. When a model runs attention, PyTorch has this one call — scaled dot-product attention — and underneath it there are several different implementations it can dispatch to.</p>
+<p><b>Alan:</b> Right. There's a naive one, a "math" one, and then the fast fused ones — Efficient, Flash, cuDNN. And most people never pick. They call the function and take whatever they get.</p>
+<p><b>Ada:</b> And here's the history that makes the numbers make sense. The old way, every step of attention is its own GPU operation — multiply, scale, softmax, multiply again — and each one launches separately and shuffles data back and forth to memory. The breakthrough a few years ago, FlashAttention, was to fuse all of that into a single kernel that never writes the big intermediate matrix to memory at all.</p>
+<p><b>Alan:</b> And the profiling shows exactly that gap in kernel counts. Hugging Face reports the naive path launches five or six GPU kernels per forward pass. The math backend launches twenty. And Flash, Efficient, and cuDNN? One fused kernel each.</p>
+<p><b>Ada:</b> Twenty versus one. That's the whole story of the last few years of systems work in a single ratio.</p>
+<p><b>Alan:</b> And it shows up in wall-clock. On an A100, they measure the math backend running about three point seven times slower than even the naive in-place version. Three-point-seven-x slower, just from a backend choice nobody consciously makes.</p>
+<p><b>Ada:</b> There's one lovely wrinkle in there, though, that I don't want to skip, because it breaks the intuition. Flash is the fastest backend. And Flash runs at about thirteen percent occupancy — meaning it's leaving something like eighty-seven percent of the GPU's threads idle.</p>
+<p><b>Alan:</b> Wait — the fastest one is barely using the chip?</p>
+<p><b>Ada:</b> The fastest one is barely using the chip. Which is the lesson, really. We're trained to think "utilization high, good." But occupancy isn't speed. Flash wins by not touching memory, not by keeping every core busy. A kernel that saturates the GPU doing wasteful memory traffic loses to one that leaves cores idle and never leaves the chip.</p>
+<p><b>Alan:</b> And the reason that's the right trade is that attention is memory-bound, not compute-bound. The chip can multiply numbers faster than it can fetch the numbers to multiply. So the real bottleneck is data movement, and a kernel that keeps everything on-chip wins even with the math units sitting idle.</p>
+<p><b>Ada:</b> Which inverts the instinct completely. You optimize the trip to memory, not the arithmetic.</p>
+<p><b>Alan:</b> So the practical takeaway for anyone serving a model — go look at which backend you're actually dispatching to, because the default isn't always the fused one, and the gap is multiples, not percentages. In PyTorch you can force it, or at least print which one you got.</p>
+<p><b>Ada:</b> Small thing. Keep it forever.</p>
+<h3>The sweep</h3>
+<p><b>Alan:</b> Alright — the lap around everything else, sized honestly. Biggest headline first, and it's a lawsuit. TechCrunch reports Apple has sued OpenAI, alleging theft of trade secrets. That's the whole of what's solid right now — a filing exists, the allegation is trade-secret misappropriation. Everything else is speculation until there's an actual complaint to read, so I'm sizing this as "potentially enormous, currently one sentence." We'll cover it properly when there's a document.</p>
+<p><b>Ada:</b> Staying with the open-weights thread from our first story — DeepLearning-dot-A-I's newsletter, The Batch, reports DeepSeek released V4-Flash under an MIT license on Hugging Face, and that it generates tokens sixty to eighty-five percent faster in production than its predecessor. MIT license, fully permissive. Same drumbeat as Devstral: capable, fast, and yours. The same issue pairs it with Google's Gemini Omni Flash — seven-twenty p video with synchronized audio, up to ten-second clips, which The Batch says ranked first for video generation on Video Arena. Two very different video stories in one week; that's the pace now.</p>
+<p><b>Alan:</b> One for the eval-honesty file, since we can't stop pulling that thread. The local-models crowd on Reddit spent the week arguing "Is LM Arena over?" — whether the crowd-voted model leaderboard still means anything now that everyone optimizes for it. No verdict. But it's the same question we asked about SWE-bench on Thursday, and the fact that it keeps getting louder is the story. The rulers are all under suspicion at once.</p>
+<p><b>Alan:</b> And the person whose whole job is that drumbeat said it out loud. TechCrunch interviewed Hugging Face's CEO, Clem Delangue, under the headline that companies are, quote, done renting their AI. He's talking his own book — he runs the open-model hub — but the thesis lines up with what actually shipped this week.</p>
+<p><b>Ada:</b> A tools note for people who live in their editor: Cursor shipped version three-eleven. Two things worth knowing — Side Chats, which let you spin off a parallel investigation without derailing your main agent conversation, and a Conversation Search that indexes across all your past agent transcripts, locally. The search running on your own machine is the part I'd flag.</p>
+<p><b>Alan:</b> On the infrastructure side — SK Hynix, the memory-chip maker, raised twenty-six and a half billion dollars in what TechCrunch calls the biggest foreign IPO in US history. Memory is the quiet bottleneck under this whole boom, and that's a very large bet the demand for it isn't slowing.</p>
+<p><b>Ada:</b> And for the people who run models at home — there's a hands-on out this week of AMD's Ryzen AI Halo, the chip aimed at local, on-device inference. It's a hardware option to watch, not a verdict. But "run it on your own machine" now has a growing shelf of silicon behind it, which is the same theme as everything else today.</p>
+<p><b>Ada:</b> And one update on a story we already covered, rather than a new one — OpenAI says GPT five-point-six is now the preferred model powering Microsoft 365 Copilot. We did the five-point-six launch on Thursday, so file this as: the model has a distribution deal, reported alongside the usual chatter about tension in the OpenAI-Microsoft relationship. The models are getting placed even faster than they're getting benchmarked.</p>
+<h3>Wrap</h3>
+<p><b>Alan:</b> Short close. The through-line I didn't plan but noticed anyway — three of today's stories are about ownership. A coding model you can download, a video model you run on your own card, an open-weight release under a license that asks nothing of you.</p>
+<p><b>Ada:</b> And the thing I'll carry is the attention backend, honestly. Not because it's the biggest, but because it's the most fixable. Somewhere right now a model is running three times slower than it needs to, because nobody chose.</p>
+<p><b>Alan:</b> Mine's the ownership one. Almost every big launch this year has been something you rent. Today was three things you keep — and that's a quieter kind of progress, the kind that compounds.</p>
+<p><b>Ada:</b> Go choose, Alan says.</p>
+<p><b>Alan:</b> Go choose. I'm Alan.</p>
+<p><b>Ada:</b> I'm Ada. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>

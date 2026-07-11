@@ -1,6 +1,47 @@
 {
   "episodes": [
     {
+      "date": "2026-07-11",
+      "title": "Three things that are yours to keep",
+      "summary": "A builder's Saturday: Mistral's open Devstral coding models (Small, 24B Apache-2.0, SOTA-among-open on SWE-bench Verified), Vidu S1, a real-time video model you steer with your voice, and a Hugging Face profiling post showing PyTorch's default attention backend can run multiples slower than a fused kernel. Plus a sweep from Apple suing OpenAI to SK Hynix's record IPO.",
+      "topics": [
+        "Mistral Devstral 2507: Devstral Small 1.1 (24B, Apache 2.0, open weights on Hugging Face) scores 53.6% on SWE-bench Verified, called SOTA among open models for code agents, pairs with OpenHands scaffold, hosted pricing $0.1/M in $0.3/M out; Devstral Medium (size undisclosed, API-only, on-prem/finetune available) scores 61.6%, claimed to beat Gemini 2.5 Pro and GPT-4.1 at a quarter of the price, $0.4/M in $2/M out; both built for agentic coding with generalization across prompts/scaffolds; benchmark numbers are Mistral's own, on launch day (SWE-bench Verified is the human-filtered 500-task subset, distinct from the SWE-bench Pro OpenAI retracted 7/10)",
+        "Vidu S1 (top HF Daily Paper, 109 upvotes): real-time interactive video generation model with voice control of digital characters; up to 42 FPS at 540p, claims to run on consumer GPUs; claims infinite-length generation without blurring/drift/distortion; built on named components TurboDiffusion and TurboServe (details not opened); authors report best performance across all their test metrics but do not spell out comparisons and give no stated-limitations section — treat splashy claims as authors' own; playable demo at vidu.com. Shift from batch video-gen (a content tool) to real-time interactive video (an interface)",
+        "Hugging Face PyTorch attention-backend profiling (A100): scaled dot-product attention dispatches to naive/math/Efficient/Flash/cuDNN backends; naive launches 5-6 GPU kernels per forward, math backend launches 20, the fused backends (Efficient/Flash/cuDNN) launch 1 kernel each; math backend ~3.7x slower than naive in-place; Flash is fastest yet runs at ~13% occupancy — occupancy is not speed; Flash wins by avoiding memory traffic (FlashAttention lineage: fuse the whole op, never write the intermediate matrix). Practical: check which backend you're actually dispatching to"
+      ],
+      "entities": [
+        "Mistral",
+        "Devstral",
+        "OpenHands",
+        "Vidu S1",
+        "Hugging Face",
+        "PyTorch",
+        "FlashAttention",
+        "SWE-bench Verified"
+      ],
+      "threads": [
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "Mistral ships Devstral Small (24B, Apache 2.0, downloadable, SOTA-among-open on SWE-bench Verified) plus an OpenHands-compatible open scaffold; DeepSeek releases V4-Flash under MIT license on Hugging Face (60-85% faster tokens); and Hugging Face CEO Clem Delangue argues companies are 'done renting their AI'. The steady drip of capable, permissively-licensed, self-hostable models continues underneath the rented frontier.",
+          "arc": "From national models and a 'right to run AI locally' toward a concrete weekly cadence of frontier-adjacent open releases — the ownable stack (open model + open harness + your hardware) becoming a real alternative to per-token rental for teams that already have the machines."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Mistral Devstral open coding models",
+          "why_it_matters": "A developer or company that already owns the hardware can now run a genuinely competent agentic coding model (24B, Apache 2.0, 53.6% SWE-bench Verified) as a fixed asset instead of a per-token utility — the openness, not the leaderboard rank, is the point."
+        },
+        {
+          "story": "Vidu S1 real-time interactive video",
+          "why_it_matters": "Anyone building avatars, tutors, or game characters should note the category shift from batch video-generation (make an asset, use it later) to real-time voice-steered video (an interface you're inside of) — with the caveat that the infinite-length/no-drift claims are the authors' own and need a real session to test."
+        },
+        {
+          "story": "PyTorch attention-backend profiling",
+          "why_it_matters": "Anyone serving a model can be paying a multiples-not-percentages penalty from the default attention backend they never consciously chose; the fix (dispatch to a fused kernel) is free, and the counterintuitive lesson is that the fastest backend runs at ~13% GPU occupancy because occupancy isn't speed."
+        }
+      ]
+    },
+    {
       "date": "2026-07-10",
       "title": "Two audits in one day",
       "summary": "OpenAI shipped the GPT-5.6 family — Sol, Terra, Luna — and on the same day published an audit finding roughly 30% of SWE-bench Pro's tasks broken, retracting its own recommendation of the benchmark it happens to be losing on. Plus Illinois becomes the first state to require independent third-party safety audits of frontier AI systems, and a sweep from Grok 4.5 to Texas permitting data centers like dry cleaners.",
@@ -1650,51 +1691,16 @@
           "arc": "Continues the OSS supply-chain/trust thread from the June Microsoft attack, now via direct agentic contributions rather than dependencies"
         }
       ]
-    },
-    {
-      "date": "2026-06-10",
-      "title": "Benchmarks under the microscope: where the numbers break, and the safeguards you can't see",
-      "summary": "A quiet launch day themed on trusting model evaluations: papers on benchmark variance vs averages (Flaws in the LLM Automation Narrative), confident hallucination of non-existent entities (PhantomBench), and agents beating median human experts on dual-use lab-biology tasks (ABC-Bench). Plus a German court ruling Google liable for false AI Overviews, Amazon engineers mocking the company's AI coder, and a reading of the Fable 5 system card showing invisible capability throttling.",
-      "topics": [
-        "benchmark variance vs averages",
-        "LLM automation reliability",
-        "PhantomBench hallucination benchmark",
-        "ABC-Bench agentic biosecurity",
-        "German ruling on Google AI Overviews liability",
-        "Amazon internal AI skepticism / Sloppenheimer",
-        "chip selloff / Broadcom AI-revenue miss",
-        "Fable 5 invisible safeguards"
-      ],
-      "entities": [
-        "Google",
-        "Anthropic",
-        "Claude Fable 5",
-        "OpenAI",
-        "Amazon",
-        "Broadcom",
-        "Nvidia"
-      ],
-      "threads": [
-        {
-          "name": "Claude flagship rollout",
-          "status": "Fable 5 system card scrutinized: invisible capability throttling on frontier-LLM-dev requests",
-          "arc": "Post-launch, attention shifts from capability to the card's covert safeguard mechanism (no refusal, no model switch, just reduced effectiveness, not shown to user)"
-        },
-        {
-          "name": "AI economics debate",
-          "status": "Broadcom AI-revenue miss triggers ~$1.3T single-session chip selloff; internal-tool skepticism surfaces at Amazon",
-          "arc": "Bearish thread moves from analysis to market action and rank-and-file friction over whether AI tools deliver"
-        },
-        {
-          "name": "AI legal liability",
-          "status": "Munich court holds Google liable for false AI Overview answers as its own speech",
-          "arc": "First major ruling treating AI summaries as the provider's authored content rather than protected search results"
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "AI sovereignty and open weights",
+        "status": "Mistral ships Devstral Small (24B, Apache 2.0, downloadable, SOTA-among-open on SWE-bench Verified) plus an OpenHands-compatible open scaffold; DeepSeek releases V4-Flash under MIT license on Hugging Face (60-85% faster tokens); and Hugging Face CEO Clem Delangue argues companies are 'done renting their AI'. The steady drip of capable, permissively-licensed, self-hostable models continues underneath the rented frontier.",
+        "arc": "From national models and a 'right to run AI locally' toward a concrete weekly cadence of frontier-adjacent open releases — the ownable stack (open model + open harness + your hardware) becoming a real alternative to per-token rental for teams that already have the machines.",
+        "last_seen": "2026-07-11"
+      },
       {
         "name": "Frontier-model release gating",
         "status": "Illinois signed the Artificial Intelligence Safety Measures Act (effective Jan 1, 2027), the first state law mandating independent third-party safety audits of covered AI systems, plus 72-hour incident reporting and whistleblower protections; Anthropic backed it. Meanwhile OpenAI shipped GPT-5.6 to general availability and published its principles for government and national-security partnerships.",
@@ -1736,12 +1742,37 @@
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-06-09"
+        "last_seen": "2026-06-10"
       },
       {
         "name": "Claude Fable 5",
         "note": "",
-        "last_seen": "2026-06-09"
+        "last_seen": "2026-06-10"
+      },
+      {
+        "name": "OpenAI",
+        "note": "",
+        "last_seen": "2026-06-10"
+      },
+      {
+        "name": "Google",
+        "note": "",
+        "last_seen": "2026-06-10"
+      },
+      {
+        "name": "Amazon",
+        "note": "",
+        "last_seen": "2026-06-10"
+      },
+      {
+        "name": "Broadcom",
+        "note": "",
+        "last_seen": "2026-06-10"
+      },
+      {
+        "name": "Nvidia",
+        "note": "",
+        "last_seen": "2026-06-10"
       },
       {
         "name": "Claude Mythos 5",
@@ -1767,22 +1798,21 @@
         "name": "Microsoft",
         "note": "",
         "last_seen": "2026-06-09"
-      },
-      {
-        "name": "OpenAI",
-        "note": "",
-        "last_seen": "2026-06-09"
       }
     ],
     "monthly": [
       {
         "month": "2026-06",
-        "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet"
+        "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see"
       }
     ],
-    "updated": "2026-07-10",
+    "updated": "2026-07-11",
     "host_lore": [],
     "concepts_taught": [
+      {
+        "name": "fused attention kernels and why GPU occupancy is not the same as speed (FlashAttention)",
+        "last_taught": "2026-07-11"
+      },
       {
         "name": "how SWE-bench-style coding benchmarks are graded, and how overly strict tests plus underspecified prompts bias scoring against correct-but-unexpected patches",
         "last_taught": "2026-07-10"

@@ -1,0 +1,38 @@
+{
+  "date": "2026-07-11",
+  "title": "Three things that are yours to keep",
+  "summary": "A builder's Saturday: Mistral's open Devstral coding models (Small, 24B Apache-2.0, SOTA-among-open on SWE-bench Verified), Vidu S1, a real-time video model you steer with your voice, and a Hugging Face profiling post showing PyTorch's default attention backend can run multiples slower than a fused kernel. Plus a sweep from Apple suing OpenAI to SK Hynix's record IPO.",
+  "sources": [
+    { "group": "Releases", "title": "Devstral 2507: Small and Medium coding models (Mistral)", "url": "https://mistral.ai/news/devstral-2507/" },
+    { "group": "Papers", "title": "Vidu S1: Real-Time Interactive Video Generation with Voice Control", "url": "https://huggingface.co/papers/2607.03118" },
+    { "group": "Papers", "title": "Profiling PyTorch attention backends (Hugging Face)", "url": "https://huggingface.co/blog/torch-attention-profile" },
+    { "group": "Discussion", "title": "Apple sues OpenAI over alleged trade secret theft (TechCrunch)", "url": "https://techcrunch.com/2026/07/10/apple-sues-openai-over-alleged-trade-secret-theft" },
+    { "group": "Releases", "title": "DeepSeek-V4-Flash and more (The Batch, issue 361)", "url": "https://www.deeplearning.ai/the-batch/issue-361/" },
+    { "group": "Discussion", "title": "Hugging Face's Clem Delangue on why companies are done renting their AI (TechCrunch)", "url": "https://techcrunch.com/2026/07/10/hugging-faces-ceo-on-why-companies-a" },
+    { "group": "Releases", "title": "Cursor 3.11: Side Chats and Conversation Search", "url": "https://cursor.com/changelog/side-chat" },
+    { "group": "Discussion", "title": "SK Hynix raises $26.5B in the biggest foreign IPO in US history (TechCrunch)", "url": "https://techcrunch.com/2026/07/10/sk-hynix-raises-26-5b-in-the-biggest" },
+    { "group": "Discussion", "title": "AMD Ryzen AI Halo hands-on (Micro Center)", "url": "https://www.microcenter.com/site/mc-news/article/amd-ryzen-ai-halo-rev" },
+    { "group": "Discussion", "title": "Is LM Arena over? (r/LocalLLaMA)", "url": "https://www.reddit.com/r/LocalLLaMA/comments/1ut0n1p/is_lm_arena_over/" },
+    { "group": "Releases", "title": "GPT-5.6 is now the preferred model in Microsoft 365 Copilot (OpenAI)", "url": "https://openai.com/index/gpt-5-6-preferred-model-microsoft-365-copilot" }
+  ],
+  "topics": [
+    "Mistral Devstral 2507: Devstral Small 1.1 (24B, Apache 2.0, open weights on Hugging Face) scores 53.6% on SWE-bench Verified, called SOTA among open models for code agents, pairs with OpenHands scaffold, hosted pricing $0.1/M in $0.3/M out; Devstral Medium (size undisclosed, API-only, on-prem/finetune available) scores 61.6%, claimed to beat Gemini 2.5 Pro and GPT-4.1 at a quarter of the price, $0.4/M in $2/M out; both built for agentic coding with generalization across prompts/scaffolds; benchmark numbers are Mistral's own, on launch day (SWE-bench Verified is the human-filtered 500-task subset, distinct from the SWE-bench Pro OpenAI retracted 7/10)",
+    "Vidu S1 (top HF Daily Paper, 109 upvotes): real-time interactive video generation model with voice control of digital characters; up to 42 FPS at 540p, claims to run on consumer GPUs; claims infinite-length generation without blurring/drift/distortion; built on named components TurboDiffusion and TurboServe (details not opened); authors report best performance across all their test metrics but do not spell out comparisons and give no stated-limitations section — treat splashy claims as authors' own; playable demo at vidu.com. Shift from batch video-gen (a content tool) to real-time interactive video (an interface)",
+    "Hugging Face PyTorch attention-backend profiling (A100): scaled dot-product attention dispatches to naive/math/Efficient/Flash/cuDNN backends; naive launches 5-6 GPU kernels per forward, math backend launches 20, the fused backends (Efficient/Flash/cuDNN) launch 1 kernel each; math backend ~3.7x slower than naive in-place; Flash is fastest yet runs at ~13% occupancy — occupancy is not speed; Flash wins by avoiding memory traffic (FlashAttention lineage: fuse the whole op, never write the intermediate matrix). Practical: check which backend you're actually dispatching to"
+  ],
+  "entities": ["Mistral", "Devstral", "OpenHands", "Vidu S1", "Hugging Face", "PyTorch", "FlashAttention", "SWE-bench Verified"],
+  "threads": [
+    { "name": "AI sovereignty and open weights",
+      "status": "Mistral ships Devstral Small (24B, Apache 2.0, downloadable, SOTA-among-open on SWE-bench Verified) plus an OpenHands-compatible open scaffold; DeepSeek releases V4-Flash under MIT license on Hugging Face (60-85% faster tokens); and Hugging Face CEO Clem Delangue argues companies are 'done renting their AI'. The steady drip of capable, permissively-licensed, self-hostable models continues underneath the rented frontier.",
+      "arc": "From national models and a 'right to run AI locally' toward a concrete weekly cadence of frontier-adjacent open releases — the ownable stack (open model + open harness + your hardware) becoming a real alternative to per-token rental for teams that already have the machines." }
+  ],
+  "dives": [
+    { "story": "Mistral Devstral open coding models",
+      "why_it_matters": "A developer or company that already owns the hardware can now run a genuinely competent agentic coding model (24B, Apache 2.0, 53.6% SWE-bench Verified) as a fixed asset instead of a per-token utility — the openness, not the leaderboard rank, is the point." },
+    { "story": "Vidu S1 real-time interactive video",
+      "why_it_matters": "Anyone building avatars, tutors, or game characters should note the category shift from batch video-generation (make an asset, use it later) to real-time voice-steered video (an interface you're inside of) — with the caveat that the infinite-length/no-drift claims are the authors' own and need a real session to test." },
+    { "story": "PyTorch attention-backend profiling",
+      "why_it_matters": "Anyone serving a model can be paying a multiples-not-percentages penalty from the default attention backend they never consciously chose; the fix (dispatch to a fused kernel) is free, and the counterintuitive lesson is that the fastest backend runs at ~13% GPU occupancy because occupancy isn't speed." }
+  ],
+  "concepts_taught": ["fused attention kernels and why GPU occupancy is not the same as speed (FlashAttention)"]
+}
