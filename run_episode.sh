@@ -250,7 +250,10 @@ run_step render-podcast \
   --episode out/episode.json --out "out/podcast-$DATE.mp3"
 
 # 5: publish — read title/date/summary from the episode, upload + rebuild the feed.
-run_step publish python3 - "$DATE" <<'PY'
+# Non-fatal: a transient publish failure (e.g. a GitHub TLS handshake timeout) is logged
+# and recorded in FAILED (so the run still ends status=FAIL and alerts), but must NOT abort
+# the script — the deep-dive block below is independent work and should still run.
+run_step publish python3 - "$DATE" <<'PY' || log run "WARNING: daily publish failed — feed not updated for $DATE; continuing"
 import json, subprocess, sys, glob
 date = sys.argv[1]
 ep = json.load(open("out/episode.json"))
