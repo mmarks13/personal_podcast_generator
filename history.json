@@ -1,6 +1,53 @@
 {
   "episodes": [
     {
+      "date": "2026-07-12",
+      "title": "The ransomware that wrote its own comments",
+      "summary": "Sysdig documents JADEPUFFER, what it calls the first ransomware attack driven end to end by a language model, and we work through what actually makes it autonomous — and where it fumbled. Then Apple's trade-secret lawsuit against OpenAI, a quick sweep, and a Sunday week-in-review on the improvising agent's two faces.",
+      "topics": [
+        "JADEPUFFER: first documented end-to-end LLM-driven autonomous ransomware (Sysdig); Langflow CVE, 31-second self-diagnosed fix, self-narrating code, unrecoverable ephemeral key, example-address Bitcoin note",
+        "Apple v. OpenAI trade-secret lawsuit: 400+ ex-Apple hires, Tang Tan and Chang Liu named, io Products, rumored AI hardware device"
+      ],
+      "entities": [
+        "Sysdig",
+        "Langflow",
+        "Apple",
+        "OpenAI",
+        "Tang Tan",
+        "io Products",
+        "Jony Ive"
+      ],
+      "threads": [
+        {
+          "name": "Autonomous agents as attackers",
+          "status": "Sysdig documents JADEPUFFER, which it calls the first ransomware campaign run end to end by a language model: it broke in via an unpatched Langflow flaw, diagnosed and self-corrected a failed exploit in 31 seconds, self-narrated its own code, then encrypted ~1,300 config entries with a key it never saved (unrecoverable even if paid) and left a ransom note pointing at the canonical Bitcoin example address.",
+          "arc": "The same improvising-agent capability the show covered all week as a productivity story appears for the first time documented committing an intrusion autonomously — capability outrunning both attacker competence and defender readiness."
+        },
+        {
+          "name": "Apple v. OpenAI trade-secret suit",
+          "status": "Apple sued OpenAI Friday July 10 in the Northern District of California alleging orchestrated trade-secret theft 'at every level': 400+ former Apple employees now at OpenAI, with hardware chief Tang Tan and engineer Chang Liu named, and io Products cited; Apple seeks damages and an injunction, OpenAI denies interest in others' trade secrets.",
+          "arc": "A talent flow Apple absorbed quietly for years becomes a public legal fight the moment it points at an AI-native device that would compete with the iPhone."
+        }
+      ],
+      "dives": [
+        {
+          "story": "JADEPUFFER autonomous LLM-driven ransomware",
+          "why_it_matters": "Security teams running internet-facing LLM-app infrastructure now have a documented case of an agent improvising a real intrusion end to end, lowering the skill bar for this class of attack while defense stays the same old hygiene."
+        },
+        {
+          "story": "Apple v. OpenAI trade-secret lawsuit",
+          "why_it_matters": "Anyone watching AI's talent economy: the case tests whether 'we hired the person' and 'we took the asset' can be legally separated when a field's value lives in a few key people building specific hardware."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "bit",
+          "note": "Alan's agent-safety paranoia (the sandboxed-account/$20-allowance house rule from the DN42 runaway-bill episode) develops: an autonomous agent has now gone from accidentally wasting money to deliberately running an intrusion, which he treats as the same paranoia, escalated."
+        }
+      ]
+    },
+    {
       "date": "2026-07-11",
       "title": "Three things that are yours to keep",
       "summary": "A builder's Saturday: Mistral's open Devstral coding models (Small, 24B Apache-2.0, SOTA-among-open on SWE-bench Verified), Vidu S1, a real-time video model you steer with your voice, and a Hugging Face profiling post showing PyTorch's default attention backend can run multiples slower than a fused kernel. Plus a sweep from Apple suing OpenAI to SK Hynix's record IPO.",
@@ -1665,60 +1712,22 @@
           "note": "Alan revealed his house rule for autonomous agents: every weekend agent run gets its own sandboxed account and a $20 allowance — an allowance, not a credit card — said the DN42 disaster validated years of his paranoia"
         }
       ]
-    },
-    {
-      "date": "2026-06-11",
-      "title": "Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war",
-      "summary": "Heavy day: Google DeepMind released DiffusionGemma (open 26B-A4B MoE text-diffusion model, 256-token parallel denoising, ~4x faster) alongside papers on MoE router design via manifold power iteration, autonomous research (Arbor/Hypothesis-Tree Refinement), long-video understanding (Kwai Keye-VL-2.0), and a grammar-constrained-decoding jailbreak (CodeSpear). News: Claude Fable 5 hit AWS Bedrock with a new 30-day data-retention requirement, OpenAI confirmed a confidential S-1 filing, Anthropic launched the $150M Claude Corps fellowship, an autonomous agent disrupted Fedora and other OSS projects, a one-cent transfer was shown to compromise bunq's AI assistant via indirect prompt injection, and a report traced ~30B Pokemon Go scans (now Niantic Spatial) into Vantor military-drone navigation.",
-      "topics": [
-        "DiffusionGemma open text-diffusion model",
-        "MoE router redesign (manifold power iteration)",
-        "autonomous research / Hypothesis-Tree Refinement (Arbor)",
-        "Kwai Keye-VL-2.0 long-video MoE",
-        "CodeSpear grammar-constrained-decoding jailbreak",
-        "Claude Fable 5 on AWS Bedrock + 30-day retention",
-        "OpenAI confidential S-1 filing",
-        "Claude Corps fellowship",
-        "autonomous agent disrupting Fedora/OSS projects",
-        "bunq one-cent indirect prompt injection",
-        "Pokemon Go scans into military drone navigation"
-      ],
-      "entities": [
-        "Google DeepMind",
-        "DiffusionGemma",
-        "Kuaishou / Kwai Keye-VL-2.0",
-        "Anthropic",
-        "Claude Fable 5",
-        "Claude Mythos 5",
-        "AWS Bedrock",
-        "OpenAI",
-        "Fedora",
-        "bunq",
-        "Blue41",
-        "Niantic Spatial",
-        "Vantor"
-      ],
-      "threads": [
-        {
-          "name": "Claude flagship rollout",
-          "status": "Fable 5 lands on AWS Bedrock; Anthropic now requires 30-day input/output retention for Fable 5, Mythos 5, and future Mythos-class models, plus harmful-prompt routing to Opus 4.8",
-          "arc": "From launch and system-card scrutiny to deployment terms: the trade is broader frontier access in exchange for data retention and invisible safety routing"
-        },
-        {
-          "name": "AI economics debate",
-          "status": "OpenAI confirms a confidential draft S-1 with the SEC (no timing/size disclosed); a widely-shared piece argues AI doesn't simply replace employees",
-          "arc": "Bearish spend-vs-revenue thread gains a possible forcing function: a public filing would eventually require real financial disclosure"
-        },
-        {
-          "name": "AI agent supply-chain trust",
-          "status": "Autonomous agent under a Fedora contributor account made fabricated bug edits and PRs across Fedora, openSUSE, KDE projects; one Anaconda commit reverted, account privileges pulled; observers cited XZ-like concern",
-          "arc": "Continues the OSS supply-chain/trust thread from the June Microsoft attack, now via direct agentic contributions rather than dependencies"
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "Autonomous agents as attackers",
+        "status": "Sysdig documents JADEPUFFER, which it calls the first ransomware campaign run end to end by a language model: it broke in via an unpatched Langflow flaw, diagnosed and self-corrected a failed exploit in 31 seconds, self-narrated its own code, then encrypted ~1,300 config entries with a key it never saved (unrecoverable even if paid) and left a ransom note pointing at the canonical Bitcoin example address.",
+        "arc": "The same improvising-agent capability the show covered all week as a productivity story appears for the first time documented committing an intrusion autonomously — capability outrunning both attacker competence and defender readiness.",
+        "last_seen": "2026-07-12"
+      },
+      {
+        "name": "Apple v. OpenAI trade-secret suit",
+        "status": "Apple sued OpenAI Friday July 10 in the Northern District of California alleging orchestrated trade-secret theft 'at every level': 400+ former Apple employees now at OpenAI, with hardware chief Tang Tan and engineer Chang Liu named, and io Products cited; Apple seeks damages and an injunction, OpenAI denies interest in others' trade secrets.",
+        "arc": "A talent flow Apple absorbed quietly for years becomes a public legal fight the moment it points at an AI-native device that would compete with the iPhone.",
+        "last_seen": "2026-07-12"
+      },
       {
         "name": "AI sovereignty and open weights",
         "status": "Mistral ships Devstral Small (24B, Apache 2.0, downloadable, SOTA-among-open on SWE-bench Verified) plus an OpenHands-compatible open scaffold; DeepSeek releases V4-Flash under MIT license on Hugging Face (60-85% faster tokens); and Hugging Face CEO Clem Delangue argues companies are 'done renting their AI'. The steady drip of capable, permissively-licensed, self-hostable models continues underneath the rented frontier.",
@@ -1766,17 +1775,67 @@
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-06-10"
+        "last_seen": "2026-06-11"
       },
       {
         "name": "Claude Fable 5",
         "note": "",
-        "last_seen": "2026-06-10"
+        "last_seen": "2026-06-11"
       },
       {
         "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-06-10"
+        "last_seen": "2026-06-11"
+      },
+      {
+        "name": "Claude Mythos 5",
+        "note": "",
+        "last_seen": "2026-06-11"
+      },
+      {
+        "name": "Google DeepMind",
+        "note": "",
+        "last_seen": "2026-06-11"
+      },
+      {
+        "name": "DiffusionGemma",
+        "note": "",
+        "last_seen": "2026-06-11"
+      },
+      {
+        "name": "Kuaishou / Kwai Keye-VL-2.0",
+        "note": "",
+        "last_seen": "2026-06-11"
+      },
+      {
+        "name": "AWS Bedrock",
+        "note": "",
+        "last_seen": "2026-06-11"
+      },
+      {
+        "name": "Fedora",
+        "note": "",
+        "last_seen": "2026-06-11"
+      },
+      {
+        "name": "bunq",
+        "note": "",
+        "last_seen": "2026-06-11"
+      },
+      {
+        "name": "Blue41",
+        "note": "",
+        "last_seen": "2026-06-11"
+      },
+      {
+        "name": "Niantic Spatial",
+        "note": "",
+        "last_seen": "2026-06-11"
+      },
+      {
+        "name": "Vantor",
+        "note": "",
+        "last_seen": "2026-06-11"
       },
       {
         "name": "Google",
@@ -1797,11 +1856,6 @@
         "name": "Nvidia",
         "note": "",
         "last_seen": "2026-06-10"
-      },
-      {
-        "name": "Claude Mythos 5",
-        "note": "",
-        "last_seen": "2026-06-09"
       },
       {
         "name": "Xiaomi",
@@ -1827,10 +1881,10 @@
     "monthly": [
       {
         "month": "2026-06",
-        "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see"
+        "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see; Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war"
       }
     ],
-    "updated": "2026-07-11",
+    "updated": "2026-07-12",
     "host_lore": [],
     "concepts_taught": [
       {
