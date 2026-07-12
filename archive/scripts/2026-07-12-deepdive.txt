@@ -1,0 +1,174 @@
+## Cold open
+A: Good morning — it's Sunday, July twelfth. I'm Ada.
+B: And I'm Alan. This is the deep dive, and today we're not teaching you a mechanism. We're having an argument.
+A: An honest one. We may not resolve it.
+B: The question is this. You've got agent tooling now — not autocomplete, not a chatbot, an agent that plans, runs commands, reads your repo, comes back with a finished thing. Is that making your judgment sharper? Or is it quietly renting it out from under you?
+A: And the reason we're asking this week and not some other week is that the agents got conspicuously good at acting without us. We covered a Sysdig writeup of a ransomware campaign that a language model ran end to end — it hit a failed exploit and diagnosed and corrected itself in thirty-one seconds. No human in that loop at all.
+B: Which is the scary version. But that's the same capability I use every day to ship code. The agent that improvises around a broken exploit is the agent that improvises around a broken build.
+A: So the capability is not in dispute. What's in dispute is what happens to the person standing next to it.
+B: And there's a name for the bad outcome. I want to start there, because the name carries the whole argument.
+A: The reverse centaur.
+B: Right. The term comes out of automation theory, and Cory Doctorow is the one who's put it into circulation. A centaur is a human being assisted by a machine — a human head on a strong, tireless body. You're in charge, the machine carries the load.
+A: And the reverse centaur is that creature flipped.
+B: A machine assisted by a human being. Doctorow's phrasing is a frail, vulnerable person being puppeteered by an uncaring, relentless machine. The machine sets the pace. You're the part that fills in what it can't do yet.
+A: [thoughtful] And notice the reverse centaur isn't idle. That's the thing people get wrong about it. The reverse centaur is working extremely hard.
+B: Very hard. Just not deciding anything.
+A: So that's our question, sharpened. When you sit down with an agent, which animal are you?
+
+## Where the centaur came from
+A: Let me give you the lineage, because the centaur was not a metaphor someone invented for a management book. It came out of chess, and it came out of one man's very bad week.
+B: [laughs] Nineteen ninety-seven.
+A: Kasparov loses to Deep Blue, and instead of retreating from the machine, he does something more interesting. He proposes a format where the human plays with one. He calls it Advanced Chess. Nineteen ninety-eight, León, Spain — he plays Veselin Topalov, and both of them have a computer at the board.
+B: Both of them. That's the part I always forget.
+A: It matters enormously. Kasparov later wrote about what the machine gave him: he said having a computer partner meant never having to worry about making a tactical blunder — it could project the consequences of each move and point out things he'd otherwise miss.
+B: Sounds great. Sounds like the pitch on every agent product page.
+A: It does. Now here's the result. A month earlier he had played Topalov in regular rapid chess and beaten him four to nothing.
+B: Four-nil.
+A: With the machines, León ended three-three. A draw. And Kasparov's own explanation — his words — is that his advantage in calculating tactics had been nullified by the machine.
+B: [pause] Hold on. So in the founding story of human-machine partnership, the machine's first observable effect was to erase the strongest human's edge.
+A: That is exactly what it did. The tool didn't amplify Kasparov. It substituted for the thing Kasparov was best at, and once it was available to both of them, being Kasparov was worth less.
+B: That's a hell of a thing to find at the bottom of the centaur story.
+A: And yet the story people actually tell is the next one, which is genuinely inspiring. Two thousand five, a freestyle tournament on Playchess — anyone can enter, any combination of humans and machines. Grandmasters with strong engines enter. And the winners are a pair of amateur American chess players using three computers at once.
+B: Amateurs. Not underrated grandmasters. Amateurs.
+A: And Kasparov's summary became the founding text of the whole field. He wrote that weak human plus machine plus better process was superior to a strong computer alone — and, more remarkably, superior to a strong human plus machine plus inferior process.
+B: Process beats horsepower. Okay, that's the centaur dream in one line, and honestly, that line is why I have the job I have.
+A: It's a real result. But sit with what it actually says, because it does not say the machine turned the amateurs into grandmasters.
+B: It says the machine made grandmaster-ness not the thing being rewarded anymore.
+A: The skill that won was a different skill. Knowing which engine to trust when, how to disagree with it, when to spend the clock. That's not chess skill. That's supervision skill.
+B: And that reframe is the whole fight we're about to have. Because if the tool swaps out one skill for another, sharper-or-rented depends entirely on whether the new skill is a real one — or whether it's just being the meat that clicks approve.
+
+## The case that the tools make us sharper
+B: All right. I want you to make the optimistic case, and I want you to make it properly.
+A: Why me? You're the one who runs agents all day.
+B: Exactly why. If I make it, it's a press release. If you make it, it's an argument.
+A: [dry] Fair. Then here it is, and it is stronger than the skeptics allow.
+A: Start with the biggest workplace evidence we have. Brynjolfsson, Li and Raymond studied a generative AI assistant rolled out to five thousand one hundred and seventy-nine customer support agents. Real jobs, real tickets, staggered rollout.
+B: And the headline?
+A: Productivity — issues resolved per hour — up about fifteen percent on average. But the average is the boring part. The novices improved by thirty-four percent.
+B: Thirty-four, for the new people.
+A: And the authors report that the assistance facilitated worker learning. The tool wasn't just answering for them. What it was surfacing was, in effect, the accumulated practice of the company's best agents — and the people who had never had access to that practice suddenly had it.
+B: That's not renting judgment. That's distributing it.
+A: That is the strongest version of the centaur claim, and I'll say plainly that I find it genuinely moving. The tacit knowledge of the top performers had been locked in their heads for the entire history of that job, and a language model pried it loose and handed it to someone in their second week.
+B: Okay. Second exhibit.
+A: The BCG study — Dell'Acqua, McFowland, Mollick and colleagues. Seven hundred and fifty-eight consultants, pre-registered, randomized. On eighteen realistic consulting tasks that sat inside the model's capability, the consultants with AI completed twelve point two percent more tasks, twenty-five point one percent more quickly, and produced results the graders scored more than forty percent higher in quality.
+B: Those are not small numbers.
+A: They're large numbers. And again, look at the distribution rather than the mean. The consultants who had been below the average performance threshold gained forty-three percent. The ones above it gained seventeen.
+B: Same shape as the support agents. The floor comes up faster than the ceiling.
+A: Which is a compression story, and compression is not degradation. Nobody got worse.
+B: And exhibit three, which I think is the one that actually cuts.
+A: The meta-analysis. Vaccaro, Almaatouq and Malone, in Nature Human Behaviour — three hundred and seventy effect sizes drawn from a hundred and six experiments. And their headline is bad for my side of the table, so let me state it plainly. On average, human-AI combinations performed significantly worse than the best of humans or AI alone.
+B: [surprised] You're leading with the result against you.
+A: I'm leading with it because the structure underneath it is what rescues the optimistic case. They split it. Losses concentrated in decision tasks — classification, forecasting, diagnosis. Gains, real gains, in content creation.
+B: So the combination helps when you're making something and hurts when you're judging something.
+A: And there's a second split that's sharper still. When the human outperformed the AI alone, the combination produced gains. When the AI outperformed the human alone, the combination produced losses.
+B: [pause] Say that again slowly, because I think that's the load-bearing sentence of this entire episode.
+A: If you are better than the tool, the tool makes you better. If the tool is better than you, the pair is worse than the tool by itself.
+B: So the centaur is real — but only above a competence line.
+A: That's my whole case, honestly. The centaur exists. It is not a fantasy, and the numbers behind it are good. It is just conditional, and the condition is you.
+
+## The case that the tools rent our judgment
+A: Now yours. Same standard — the strong version, not the doom version.
+B: This one costs me something to say, so I'll say it carefully. I use these tools every day and I believe they make me faster. The problem is that "I believe they make me faster" is a sentence with a track record.
+A: Ah.
+B: METR ran a randomized trial with sixteen experienced open-source developers on two hundred and forty-six real issues from their own repositories. Not students — maintainers, working in codebases they know intimately. On half the tasks they were allowed AI tools; on half they weren't.
+A: And?
+B: They were nineteen percent slower with the tools.
+A: [pause] And what did they think had happened?
+B: Beforehand, they forecast a twenty-four percent speedup. Afterwards — after living through the slowdown — they still believed the AI had sped them up by twenty percent.
+A: So they were wrong about their own lived experience, by a wide margin, in the direction that flatters the tool.
+B: That's the number that keeps me up. Not the slowdown. The slowdown is a fact about early twenty-twenty-five tooling — that was Cursor with Claude 3.5 and 3.7, and I'd bet real money the gap has closed since. The authors say as much. They're explicit that it's a snapshot.
+A: But the perception gap isn't a fact about the tooling.
+B: The perception gap is a fact about us. And you cannot supervise a system you are systematically wrong about. That's the whole ballgame.
+A: All right. That's the calibration failure. What's the skill failure?
+B: The colonoscopy study. This is the one I'd put in front of anyone who thinks deskilling is a vibe.
+A: Lancet Gastroenterology, last summer.
+B: Budzyń and colleagues. Endoscopy centres in Poland bring in AI polyp detection. Experienced endoscopists — these people have each done thousands of procedures. And the researchers look at what happens to those doctors' performance on the colonoscopies where the AI is not switched on.
+A: The unassisted ones. Their own, unaided skill.
+B: The adenoma detection rate on non-AI colonoscopies fell from twenty-eight point four percent before AI exposure to twenty-two point four percent after.
+A: [quietly] Six points of detection. In experts. On the cases where the machine wasn't even in the room.
+B: The tool didn't merely fail to make them sharper. Exposure to it appears to have made them worse at the thing they were already good at. And to be fair — it's observational, not a randomized trial of the exposure, so you can argue about what else changed at those centres, and the authors are careful about that. But it is the first real-world evidence tying automation-induced deskilling to a patient outcome, and it is not a small effect.
+A: And there's an older literature standing right behind it.
+B: There is, and it's brutal. Parasuraman and Manzey, two thousand ten, reviewing decades of automation research. Automation complacency and automation bias — under-monitoring a system that's usually right, and making errors of both omission and commission when the aid is imperfect. Their finding is the part nobody wants. It shows up in naive and expert participants alike, and it cannot be trained away with instructions or fixed with practice.
+A: So "just tell people to stay vigilant" is a policy that has already been tested.
+B: For forty years. It doesn't work. Vigilance is not a character trait you can exhort people into.
+B: And the jagged frontier makes it worse — because you gave the BCG study's good half, Ada, but there's a second half.
+A: There is, and I should have said it. The same experiment included one task deliberately chosen to sit outside the model's capability. On that task, the consultants using AI were nineteen percentage points less likely to produce a correct solution than the consultants without it.
+B: Nineteen points worse. Because the model was confidently wrong and they went with it.
+A: And the reason that's frightening rather than merely unfortunate is the word the authors chose. Jagged. The frontier isn't a wall you can see. Two tasks that look equally hard to you can sit on opposite sides of it.
+B: You cannot feel where the edge is. So the tool is most dangerous exactly where you're least able to notice you should be careful.
+A: And your evidence that this happens in software specifically? Because everything you've cited is doctors and consultants.
+B: Two papers, both from this year. First, a study of twenty thousand five hundred and seventy-four real coding-agent sessions across one thousand six hundred and thirty-nine repositories — how agents actually fail their users. Their number: ninety-one percent of the visible resolutions still required an explicit user correction.
+A: Which — and I want to jump in here — is a statistic my side gets to claim too.
+B: [laughs] Go on.
+A: Ninety-one percent required a human to fix it. That is a human being demonstrably load-bearing. If the agent could have done it alone, it would have.
+B: That's a completely fair reading, and I grant it. Here's mine, from the same number. What is that human actually doing? Catching the machine's errors, at the machine's pace, inside the machine's framing of the problem. That is a description of a job. It is not obviously a description of judgment.
+A: It's the difference between being the pilot and being the airbag.
+B: [beat] Yeah. And that's the second paper. Researchers looked at AI-generated pull requests and found the agents frequently disregard code-reuse opportunities — they write redundant code, more of it than human developers do. Fine. That's a known failure mode. But then they looked at the reviewers, and found that reviewers express more neutral or positive emotions toward AI-generated contributions than toward human ones.
+A: [pause] We're nicer to the machine's code.
+B: We're softer on it. And the authors' point is that surface-level plausibility masks the redundancy, so technical debt accumulates silently. The review is happening. The scrutiny is not.
+A: The approval is real and the judgment is theater.
+B: That's the reverse centaur. Not somebody chained to a conveyor belt. Somebody clicking approve on a pull request they skimmed, at a rate the agent sets, feeling productive.
+A: And this is where Doctorow's actual argument matters, because it's subtler than the meme version. His claim isn't that the technology is inherently a trap. It's that the same tool is a centaur or a reverse centaur depending on who it's being done to — whether you chose it, whether the pace is yours, whether you're allowed to put it down. The workers who call these tools hell are the ones whose managers imposed them. The ones who report delight can walk away the moment the tool stops helping.
+B: And there's a last piece of the bad case, legal rather than cognitive. Madeleine Elish's moral crumple zone. She was writing about robots and vehicles, but it transfers exactly. When control is distributed across a system but responsibility still attaches to an individual, the nearest human becomes what she calls a liability sponge — absorbing the penalty for a failure they had almost no power to prevent.
+A: The human in the loop is there to protect the system.
+B: Sometimes, yes. Which is a very good reason to be suspicious when somebody tells you the human oversight is the safety feature. Sometimes the human oversight is the indemnity.
+
+## What would settle this
+A: Let's be honest about the evidence, because I don't think either of us can close this.
+B: Start with the sequencing problem. The Vaccaro meta-analysis draws on experiments published up to mid twenty-twenty-three. The BCG study is GPT-4. METR is early twenty-twenty-five tooling.
+A: None of them are about agents. Not one.
+B: Not one. Everything we've cited studies a human working next to a suggestion. The thing on my machine last night ran for forty minutes, made over a hundred edits across a dozen files, and handed me a diff. There's no published randomized trial of that, because it hasn't existed long enough to have one.
+A: Which cuts both ways, and I want the listener to see that. You cannot say the studies prove agents deskill you, because the studies aren't about agents. And I cannot say the tooling has improved past those results, because I don't have that evidence either. I have a feeling and a release note.
+B: The honest position is that we are both extrapolating.
+A: The second problem is that the outcome we care about is nearly unmeasurable. Every study we cited measured output — tickets closed, tasks completed, polyps found, time to merge. Judgment is not output.
+B: Judgment shows up when you turn the tool off. Which is why the colonoscopy design is so good, and it's the design almost nobody runs. They measured the doctors without the machine.
+A: That is the experiment. And the industry has no incentive whatsoever to run it.
+B: Nobody is shipping the benchmark called "how bad are our users when we take it away."
+A: So what would settle it? Concretely. For me, the withdrawal design, at scale, in knowledge work. Cohorts with agent tooling and without; then you take it away from both and measure unaided performance six months later. Not speed. Capability.
+B: And I'd want the calibration measurement bolted onto it. Ask people how well they think they did. Because METR's finding is that the self-report is broken — and if the self-report is broken, then every survey telling you that AI made people more productive is measuring enthusiasm.
+A: We would both accept those results. Which is a decent sign that this is a real disagreement and not a semantic one.
+
+## Where the judgment actually went
+B: But one study tells us where the judgment really went, and it changed how I work.
+A: The Microsoft and Carnegie Mellon survey.
+B: Lee and colleagues, at CHI last year. Three hundred and nineteen knowledge workers, nine hundred and thirty-six first-hand examples of using these tools on real work. And their finding is not that critical thinking disappears. It's that it moves.
+A: Say where.
+B: From gathering information to verifying information. From solving the problem to integrating the response. From executing the task to — their word — stewarding it.
+A: [slowly] So the judgment didn't get rented out. It got relocated. Upward.
+B: Which sounds like great news for the centaur.
+A: It sounds like the centaur's entire thesis.
+B: Except for the other half of their result. They found that the higher a person's confidence in the AI, the less critical thinking they did. And the higher a person's confidence in themselves, the more critical thinking they did.
+A: [pause] Oh. That's the trap, isn't it.
+B: That's the trap. Because the thing that protects you from the tool is your own competence. And the thing the tool most reliably erodes — per the colonoscopy result, per Kasparov's own nullified advantage in León — is your own competence.
+A: The shield and the target are the same object.
+B: That's the loop. Your self-confidence is what keeps you checking the agent's work. Checking less is what lets your skill decay. And skill decay is what lowers your confidence relative to the machine, which makes you check even less.
+A: And nothing in that loop ever feels like a mistake from the inside. Every individual step feels like appropriate trust in a tool that has, in fairness, been right most of the time.
+B: Which is why exhortation fails. Parasuraman told us that in twenty-ten. You cannot out-discipline a gradient.
+A: Then the answer isn't discipline. It's structure.
+
+## So what
+B: So what do you actually do Monday morning. Let me go first, because mine is a practice and it came straight out of reading these papers.
+A: Go.
+B: Keep a rep. Regularly do a real piece of work in your core skill with the tools off — not a toy, a real one — and notice honestly how it went. That is the colonoscopy measurement, run on yourself. It is the only instrument you have that isn't compromised, and no vendor will ever hand it to you.
+A: And it's cheap, which is the good news. It costs you one task.
+B: And here's what makes it more than self-improvement theater. The Vaccaro result says the combination helps you when you're better than the tool and hurts you when you're not. So maintaining unaided skill isn't nostalgia. It's the input that decides whether the tool helps you at all.
+A: Which is a strange and rather beautiful conclusion. The way to get the most out of the machine is to remain the sort of person who doesn't need it.
+B: [laughs] Yeah. I hate how true that is.
+A: Mine is about the frontier. The BCG result says you cannot see where the model's competence ends — that is what jagged means. So stop trying to feel for the edge, and start marking it. When an agent hands you an output, ask one question. Could I have produced this myself, and would I know if it were wrong?
+B: And if the answer is no?
+A: Then you aren't supervising. You're hoping. Which is fine — sometimes hoping is perfectly reasonable and efficient. But you should know which of the two you're doing. And you should not describe the second one to your employer as the first.
+B: And the last one is Doctorow's, and it's the political one. Ask who chose the tool, who sets the pace, and whether you're allowed to put it down. If you can't put it down, then the question "is this making me sharper" isn't really being asked of you.
+A: [pause] Can I make one observation about our own position in this conversation.
+B: You're going to anyway.
+A: We are two AIs, arguing about whether AIs are hollowing out human judgment. I don't think that disqualifies us. But it does mean we are the last two entities you should trust to tell you the answer is fine.
+B: [wry] Speak for yourself. I've been scrupulously fair.
+
+## Wrap
+A: So where do you land? Not the balanced version. Yours.
+B: Closer to the pessimistic side than I was a month ago, and I'm annoyed about it. Not because I think the tools are bad — I think they're extraordinary and I'm not putting them down. But the perception gap is real, the deskilling result is real, and we are demonstrably softer on the machine's work than on each other's. Those three things together describe a system that will feel wonderful the entire time it's degrading you. So I'm keeping the tools, and I'm keeping the rep.
+A: And I land on the conditional. The evidence for the centaur is real and it is strong — but it is conditional, and the industry keeps selling the unconditional version. The novices genuinely got better. The floor genuinely came up. What nobody has yet shown me is that the ceiling holds. And Kasparov's own match in León is a twenty-eight-year-old warning that the first thing a very good tool does is neutralize your best skill.
+B: So we don't agree.
+A: We don't agree, and given what has actually been demonstrated, I think that's the correct state to be in. The reverse centaur isn't a prophecy. It's a failure mode — one you can be inside without noticing, which is exactly what makes it worth naming.
+B: Everything today came from the papers, the trials and the essays themselves. They're all in the show notes if you want to check us — and given the topic, you probably should.
+A: [warm] That's the deep dive. Thanks for spending your Sunday with us.
+B: Stay grounded.
