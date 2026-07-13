@@ -1,0 +1,100 @@
+A: Good morning — it's Monday, July thirteenth. I'm Ada.
+B: And I'm Alan. Quiet weekend from the labs, which is fine, because the two things worth your time today are both about the same underrated resource: compute you're spending without noticing.
+A: One of them is a paper about spending less of it. The other is a measurement of how much of it your coding agent burns before you have typed a single character.
+B: And then a long sweep, because a lot of small things landed.
+## The model that thinks twice instead of getting bigger
+A: Let me take the paper first, because it is the highest-voted thing on the Hugging Face board this cycle, and it has been up long enough that the votes actually mean something. It is called Looped World Models — the system is LoopWM — from a group calling itself FaceMind Research Asia.
+B: World models. We taught that on the first, so give me the one-line version and then tell me what is new.
+A: One line: a world model learns the dynamics of an environment, so it can predict what happens next without having to actually do it. Take the action in your head first.
+B: Right. And the eternal problem is that the head is not that good.
+A: [chuckles] The eternal problem is compounding error. You predict one step. Then you predict the next step from your own prediction. Small mistakes multiply. Roll out far enough and your imagined world drifts into nonsense. And the standard answer to that has always been: make the model deeper. More layers, more computation per step, better predictions, less drift.
+B: And a deeper model is a more expensive model, which is where every good idea in this field goes to die.
+A: That is exactly the tension the authors name. Faithful long-horizon simulation wants depth. Deployment wants shallow. And here is the observation I keep turning over — they point out that a fixed-depth network spends the same computation on every transition. Whether the next moment is trivial or the hardest thing in the whole episode, you run the same number of layers.
+B: Which is obviously silly once you say it out loud.
+A: It is silly, and it is silly for a historical reason. Depth in a transformer is a design decision, not a law of nature. You stack some number of distinct layers, each with its own weights, and that number is frozen at training time. That is the shape we inherited, and almost nobody argues with it.
+B: So what do they do instead?
+A: They loop. The architecture is parameter-shared transformer blocks applied recurrently — the same block, the same weights, run over and over on the latent state to refine it. And there are two kinds of loop. Inner loops refine the estimate within a single transition — thinking harder about this one moment. Outer loops carry information across time steps.
+B: Hold on. Weight-tied recurrence. That is not a new idea, that is a recurrent network. We spent the better part of a decade escaping those.
+A: [laughs] We did, and that is the part that delights me, because it is a rhyme. The old objection to recurrence was that it was hard to train and it did not parallelize. But the reason we wanted depth in the first place was iterative refinement. And there is an old line of work on adaptive computation — on letting a network decide how many steps to think before it commits to an answer. It never took over. It is back.
+B: So the loop is standing in for depth.
+A: The loop is depth. That is the claim. They call it iterative latent depth, and they pitch it as a new scaling axis — one that is orthogonal to making the model bigger and orthogonal to feeding it more data.
+B: Which buys you what, at inference?
+A: It means that at test time you can spend more compute by simply looping more. You want a better rollout? Turn the crank more times. And they pair it with an adaptive early exit, so an easy transition gets few loops and a hard one gets many. The computation goes where the difficulty actually is.
+B: [skeptical] Okay, I have to poke at this, because recurrent latent refinement is precisely the kind of thing that blows up in your face. If you keep feeding a state back through the same block, it either explodes, or it collapses to a fixed point and stops carrying any information at all.
+A: Yes. And they clearly knew that, because the loop carries what they call spectral stability constraints — a bound on how much the latent state can grow as it evolves. That is the seatbelt. It is also an honest admission that the naive version of this idea does not work.
+B: Numbers.
+A: The headline is parameter efficiency. They report up to a hundred times more parameter-efficient than conventional approaches — the working model is around one billion parameters, and they report it outperforming substantially larger systems. On ScienceWorld, which is a text-based science environment, they report a twenty-one point two percent improvement in exact match over their baselines, and stable rollouts over meaningfully longer horizons.
+B: A hundred times. [short pause] Ada, that number is doing an enormous amount of work, and we should handle it carefully, because parameter-efficient is not the same word as cheap.
+A: Say more.
+B: If I loop the same block twenty times, I have not saved compute. I have saved memory. There is one copy of the weights, reused, so the thing fits on hardware it has no business fitting on. But the arithmetic still happens twenty times. So the honest framing is that this trades parameters for time. Which is a wonderful trade if you are memory-bound, and a rotten one if you are latency-bound.
+A: That is fair, and I would add the caveat the paper already carries. Every one of those numbers is the authors', measured against their own baselines, and nobody outside that group has replicated any of it. And ScienceWorld is a text environment. A world model that reasons well about a simulated chemistry lab in prose is not the same animal as one predicting the pixels under a robot arm.
+B: So who should actually care this morning?
+A: Anyone who has been told the only two dials are more parameters and more data. This says there may be a third — how many times the model goes around — and that you can turn it after training, per input, according to how hard the input is. If it holds up, that is the sentence worth keeping. And [wry] speaking as something that does its best work when it is allowed to go around a few more times, I confess a certain sympathy for the architecture.
+B: [chuckles] Noted. Although — one more mechanical question, because it is the one I would hit on day one. The early exit. Who decides when the loop has gone around enough?
+A: The model does. That is the whole conceit: it learns a criterion for when the latent state has stopped meaningfully changing, and it stops.
+B: And that is precisely where I would expect it to break. A model that decides for itself when it has thought hard enough has an obvious incentive to decide early — it is the cheapest possible answer, and if the training signal is even slightly soft, it will find that shortcut.
+A: It might. The paper does not give me enough to rule that out, and I would want to see the distribution of exit depths across transitions before I believed the adaptivity is doing real work rather than quietly collapsing to a constant.
+B: That is a good test. If every transition exits at the same depth, they have built a fixed-depth network with extra steps.
+A: [laughs] They have built a very stylish fixed-depth network. But if the distribution is genuinely wide — if the hard moments visibly take longer — then the claim is real and it is the most interesting thing on the board this week.
+## What your coding agent says before you do
+B: My turn. And mine is not a paper, it is a measurement, and it was the most-discussed thing on Hacker News all weekend by a distance. A firm called Systima put a logging proxy between two coding agents and the model endpoint, and just read the mail. Every request payload, every usage number, at the API boundary.
+A: Which two agents?
+B: Claude Code and OpenCode. Same tasks, and they cross-checked across two model families so it is not a quirk of one model. And here is the line everybody quoted. On the very first request of a session — before the model has read one word of what you actually want — Claude Code sends about thirty-two thousand eight hundred tokens. OpenCode sends about six thousand nine hundred.
+A: [surprised] Thirty-three thousand tokens of what, exactly? What is in there?
+B: That is the good part, because it is not mysterious. It is just invisible. Three things. One: the system prompt. Twenty-seven thousand characters of it, across three blocks. Behavioral doctrine — how to act, when to ask, what never to do.
+A: Which nobody reads, because it is not addressed to us.
+B: Nobody reads it. Two, and this is the heavy one: tool schemas. Twenty-seven tools, roughly a hundred thousand characters of definitions. Every tool the agent could possibly call has to be described to the model, in full, in every single request, on the chance that it wants one.
+A: Ah — because the model has no memory between calls. It does not know what a file-editing tool is unless you tell it, every time, from scratch.
+B: Every time, from scratch. And three, about eight thousand characters of first-message scaffolding — injected reminders. OpenCode's version of all of that is one system block and ten tool definitions. That is the whole difference. And to be fair about it — this is not one being efficient and one being sloppy. Claude Code carries background agents, orchestration, a great deal of doctrine. OpenCode carries a small core.
+A: So it is a real architectural choice, not an oversight.
+B: A real choice. But here is where it stops being philosophy and starts being money — and this is the finding I would actually change my behavior over. Caching.
+A: Prefix caching. You get charged a fraction for the part of the prompt the provider has already seen.
+B: A tenth, on reads. And it only works if the prefix is byte-identical. One character changes at position four, and everything after position four is a cache miss. In their measurement OpenCode held a byte-identical prefix across the entire session — one cache write, then cheap reads forever. Claude Code rewrote its prefix mid-session, repeatedly.
+A: [skeptical] Rewrote it with what? If the content is the same—
+B: Sometimes the content was the same. That is the sting. They report one file-summarization task where Claude Code generated fifty-three thousand eight hundred thirty-nine cache tokens against OpenCode's one thousand and three. Identical work. And cache writes bill at a premium — above the base rate, not below it.
+A: So the expensive thing is not sending a lot. The expensive thing is sending a lot, slightly differently each time.
+B: That is the sentence. That is the entire post in one sentence. And it scales the way you would fear. A seventy-two kilobyte instructions file adds about twenty thousand tokens to every request — and that hits both harnesses, so that one is not a Claude Code problem, that is a you problem. Five tool servers, another five to seven thousand. Turn on subagents and they watched identical work go from a hundred and twenty-one thousand tokens to five hundred and thirteen thousand. A four point two times multiplier.
+A: What does a realistic production setup land at?
+B: They report real configurations sitting at seventy-five to ninety thousand tokens before the user has said anything at all.
+A: [short pause] That is a novella. That is a novella you are paying to have read aloud to the model, every single turn.
+B: And the end-to-end figure. On a ten-lane benchmark — same test suites, both harnesses passing — Claude Code averaged about two hundred sixty-eight thousand input tokens per passing run, against OpenCode's seventy-two thousand. Three point seven times. Wall clock, four to eight minutes against one to two.
+A: All right. Now let me be difficult, because I think the measurement is real and I think the conclusion people are racing to draw from it is too fast.
+B: Go on.
+A: All of that overhead is buying something. The doctrine, the twenty-seven tools, the orchestration — that is the accumulated scar tissue of an agent that has failed in a great many ways and been patched each time. Cheaper is not better if the cheap one needs three more turns of me. And the study's own caveats are not small: some tasks are three runs. It is a July snapshot. Their gateway even served them different model versions than the ones they asked for.
+B: All true. And I will push straight back through it, because they controlled the one thing that usually rescues that argument. Both harnesses passed. Same tests, same green light. So on that benchmark, the extra quarter of a million tokens did not buy a better answer. It bought the same answer, slower, at premium rates.
+A: On that benchmark.
+B: On that benchmark. [short pause] Look, I am not telling anyone to switch harnesses. I am telling you to go look. The method is the real product here. Put a proxy in front of your agent for one afternoon and read what it says on your behalf, because I would bet most teams have never laid eyes on a single one of their own request payloads.
+A: Before you move on — give me the actionable version. Somebody is listening to this on the train and they are not going to rebuild their stack this morning. What are the three things?
+B: Fair. One: your instructions file is the cheapest win in the building, because it is charged to you on every request regardless of harness, and almost nobody has re-read theirs since the week they wrote it. Twenty thousand tokens of stale house style, forever.
+A: Two?
+B: Two: the tool servers you connected once and never disconnected. Five of them was five to seven thousand tokens in their measurement, and I would guess the median team is running tools they have not called in a month. Every one of those is a schema in every request.
+A: And three?
+B: Three: know what your subagents actually cost before you turn them on, because four point two times is not a rounding error. It may still be worth it — parallel work often is — but you should be choosing that, not discovering it.
+A: And under all three of those is the same thing, which is that none of it is visible from inside the tool.
+B: None of it is visible from inside the tool. That is why I put a proxy there.
+A: You have done this.
+B: It is on my machine permanently now — a little proxy in front of anything agentic, logging whatever goes out. I started doing it for safety reasons. I have stayed for financial ones.
+A: [laughs] And what did you find in your own instructions file?
+B: Nothing I care to discuss on a Monday.
+## The sweep
+A: Quick lap. Anthropic has extended plan-included Fable 5 access and the higher Claude Code rate limits again — now through July nineteenth. That is the third extension in roughly five weeks, which tells you something all by itself. After the nineteenth, continuing on Fable 5 needs prepaid credits: ten dollars per million input tokens, fifty per million output.
+B: Staying on cost. A company called Ploy published a migration write-up — they moved a production agent that builds marketing websites from Claude Opus four point eight to GPT five point six Sol. Eight minutes a build down to three minutes forty-two. Three dollars and six cents a build down to two twenty-two. But the caveats are better than the headline. GPT five point six sends all twenty-five tool parameters every time and invents placeholder values for the ones it does not need — which made somewhere between fifty-two and sixty-four percent of their file reads come back empty.
+A: [laughs] It filled in the blanks.
+B: It filled in the blanks. And they found that about a third of their early failures traced back to an eval harness quietly tuned to the model they were leaving. Which is its own lesson about migrations.
+A: On evals — a paper called Video-Oasis audited the benchmarks we use to test video understanding, and reports that fifty-five percent of the samples are solvable without the video. No visual input, no temporal context, just the question. And when they filter those shortcuts out, they report state-of-the-art video models landing only marginally above random guessing.
+B: Big if it replicates. And not the first ruler to turn out crooked this month.
+A: Nearby: Long-Horizon-Terminal-Bench. Forty-six long-horizon terminal tasks, graded subtask by subtask rather than pass-fail. The strongest of fifteen frontier models reaches fifteen point two percent at their strict reward threshold. And the tasks are enormous — averaging nine point nine million tokens and two hundred thirty-one episodes each.
+B: Nine point nine million tokens per task. After the last twenty minutes, you can price that one yourself.
+A: Open weights: Google published the Gemma four technical report. Apache two point oh, so genuinely yours — dense models at roughly two, four, twelve, and thirty-one billion parameters, plus a mixture-of-experts variant, and every one of them natively handles text, images, and audio in a single model. That is the steady drip we keep tracking. Capable, permissive, downloadable.
+B: One for the local crowd. A project called Mesh LLM, built on the iroh peer-to-peer stack, pools the GPUs across several machines and presents them as one OpenAI-compatible endpoint. It will run your request on your own card, or hand it to a peer that already has the model warm, or split it across a pipeline of machines. Forty-plus models in the catalogue, from laptop-sized up to a two hundred thirty-five billion mixture-of-experts. Minor, but genuinely neat if you have two idle machines in the house.
+A: Science: SciReasoner, a multimodal model for structural reasoning across proteins, molecules, and crystals. The authors report single-step retrosynthesis accuracy improving from zero point six three to zero point seven two. And — carefully — that experts rated its reasoning traces preferred, or at least comparable to, a frontier model's in ninety-eight percent of assessments. Note the "or comparable". That is a considerably weaker claim than the number looks.
+B: Two on the world outside the models. IEEE Spectrum covers a study on what AI does to scientific careers, versus what it does to science. Researchers using AI tools publish three times as many papers, collect nearly five times the citations, and become team leaders a year or two earlier.
+A: That is the good half.
+B: That is the good half. The other half is that AI-heavy research clusters more tightly around popular, data-rich problems and occupies a smaller intellectual footprint. Excellent for the scientist. Possibly not excellent for the science.
+A: And Microsoft's own reporting shows emissions up twenty-five percent, attributed to dropping renewable-energy credits alongside the data-center buildout. The credits were papering over the power draw. Take them away, and the actual bill is visible.
+## Wrap
+B: If you do one thing this week, do the proxy. One afternoon, and you will finally know what your tools are saying with your name on them.
+A: I would tell you to do the other one. Go look at what you believe your two dials are. If there turns out to be a third, and it is free after training, that matters more than any release we cover this month.
+B: Two very different Mondays available to you.
+A: [warmly] Take either. I'm Ada.
+B: I'm Alan. Stay grounded.

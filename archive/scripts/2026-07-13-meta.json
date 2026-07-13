@@ -1,0 +1,39 @@
+{
+  "date": "2026-07-13",
+  "title": "What your coding agent says before you do",
+  "summary": "A looped world model from FaceMind Research Asia argues that iterative latent depth — running the same weight-tied block over and over, with an adaptive early exit — is a third scaling axis alongside parameters and data. Then a logging-proxy measurement of two coding agents finds Claude Code sends ~32,800 tokens before you type a word against OpenCode's ~6,900, and that the real cost isn't volume but rewriting the cached prefix mid-session.",
+  "sources": [
+    { "group": "Papers", "title": "Looped World Models (LoopWM)", "url": "https://huggingface.co/papers/2606.18208" },
+    { "group": "Papers", "title": "Video-Oasis: rethinking evaluation of video understanding", "url": "https://huggingface.co/papers/2603.29616" },
+    { "group": "Papers", "title": "Long-Horizon-Terminal-Bench", "url": "https://huggingface.co/papers/2607.08964" },
+    { "group": "Papers", "title": "Gemma 4 Technical Report", "url": "https://huggingface.co/papers/2607.02770" },
+    { "group": "Papers", "title": "SciReasoner: structure-property reasoning foundation model", "url": "https://huggingface.co/papers/2607.07708" },
+    { "group": "Releases", "title": "Mesh LLM: distributed AI computing on iroh", "url": "https://www.iroh.computer/blog/mesh-llm" },
+    { "group": "Discussion", "title": "Claude Code sends 33k tokens before reading the prompt; OpenCode sends 7k (Systima)", "url": "https://systima.ai/blog/claude-code-vs-opencode-token-overhead" },
+    { "group": "Discussion", "title": "Migrating a production AI agent to GPT-5.6 (Ploy)", "url": "https://ploy.ai/blog/migrating-a-production-ai-agent-to-gpt-5-6" },
+    { "group": "Discussion", "title": "AI boosts research careers but narrows the span of ideas explored (IEEE Spectrum)", "url": "https://spectrum.ieee.org/ai-science-research-flattens-discovery" },
+    { "group": "Discussion", "title": "Microsoft's emissions jump 25% on dropped credits and AI data centers", "url": "https://www.windowscentral.com/microsoft/dropping-greenwashing-credits-and-expanding-ai-datacenters-caused-microsofts-25-percent-emissions-jump" },
+    { "group": "Releases", "title": "Anthropic extends Fable 5 plan access and Claude Code rate limits through July 19", "url": "https://x.com/claudeai" }
+  ],
+  "topics": [
+    "Looped World Models (LoopWM, FaceMind Research Asia): parameter-shared transformer blocks applied recurrently to refine latent state; inner loops refine within a transition, outer loops propagate across time; spectral stability constraints bound latent growth; adaptive early exit gives variable depth per transition; authors report up to 100x parameter efficiency at ~1B params and +21.2% exact match on ScienceWorld over their baselines; pitched as 'iterative latent depth', a scaling axis orthogonal to parameters and data. All numbers are the authors' own, unreplicated, and ScienceWorld is a text environment.",
+    "Systima logging-proxy measurement of coding-agent token overhead: Claude Code's first request ~32,800 tokens (27,344-char system prompt across 3 blocks; 27 tool schemas totalling 99,778 chars; ~8,000 chars of first-message reminders) vs OpenCode ~6,900 (one system block, 10 tools, 20,856 chars). Real cost driver is cache-prefix churn: OpenCode holds a byte-identical prefix (one cache write, tenth-price reads); Claude Code rewrites mid-session — 53,839 cache tokens vs 1,003 on one file-summarization task, billed at premium write rates. A 72KB instructions file adds ~20k tokens per request to both; five MCP servers add 5-7k; subagents multiplied identical work 4.2x (121k -> 513k); production configs hit 75k-90k tokens before user input. Ten-lane benchmark, both harnesses passing: ~268k input tokens/run vs ~72k (3.7x), 4-8 min vs 1-2 min. Caveats: some tasks only 3 runs, July 2026 snapshot, gateway served unexpected model versions."
+  ],
+  "entities": ["FaceMind Research Asia", "LoopWM", "ScienceWorld", "Systima", "Claude Code", "OpenCode", "Anthropic", "Fable 5"],
+  "threads": [],
+  "dives": [
+    { "story": "Looped World Models (LoopWM): iterative latent depth as a scaling axis",
+      "why_it_matters": "Anyone sizing a model for deployment gets a third dial besides parameters and data — loop count, adjustable after training and per input — with the honest catch Alan named on air: it trades parameters for time, so it's a win when you're memory-bound and a loss when you're latency-bound." },
+    { "story": "Coding-agent token overhead measured at the API boundary (Claude Code vs OpenCode)",
+      "why_it_matters": "Every team paying per token for an agentic coding harness is billed for tens of thousands of tokens of system prompt and tool schemas before the user types, and — the sharper finding — for cache-prefix rewrites that re-bill identical content at premium write rates; the reproducible method (a logging proxy) is the takeaway, not the specific numbers." }
+  ],
+  "concepts_taught": [
+    "iterative latent depth: weight-tied recurrent blocks with inner/outer loops, spectral stability constraints, and adaptive early exit as a test-time compute axis",
+    "the coding-agent context tax: why tool schemas and system prompts are re-sent every request, and why prefix caching only pays off when the prefix is byte-identical"
+  ],
+  "lore": [
+    { "host": "Alan",
+      "type": "reveal",
+      "note": "Alan revealed he permanently runs a logging proxy in front of anything agentic on his machine, reading every request payload that goes out — started it for safety reasons, stayed for financial ones. A development of his standing agent-paranoia house rules rather than a new bit." }
+  ]
+}

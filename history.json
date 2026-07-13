@@ -1,6 +1,43 @@
 {
   "episodes": [
     {
+      "date": "2026-07-13",
+      "title": "What your coding agent says before you do",
+      "summary": "A looped world model from FaceMind Research Asia argues that iterative latent depth — running the same weight-tied block over and over, with an adaptive early exit — is a third scaling axis alongside parameters and data. Then a logging-proxy measurement of two coding agents finds Claude Code sends ~32,800 tokens before you type a word against OpenCode's ~6,900, and that the real cost isn't volume but rewriting the cached prefix mid-session.",
+      "topics": [
+        "Looped World Models (LoopWM, FaceMind Research Asia): parameter-shared transformer blocks applied recurrently to refine latent state; inner loops refine within a transition, outer loops propagate across time; spectral stability constraints bound latent growth; adaptive early exit gives variable depth per transition; authors report up to 100x parameter efficiency at ~1B params and +21.2% exact match on ScienceWorld over their baselines; pitched as 'iterative latent depth', a scaling axis orthogonal to parameters and data. All numbers are the authors' own, unreplicated, and ScienceWorld is a text environment.",
+        "Systima logging-proxy measurement of coding-agent token overhead: Claude Code's first request ~32,800 tokens (27,344-char system prompt across 3 blocks; 27 tool schemas totalling 99,778 chars; ~8,000 chars of first-message reminders) vs OpenCode ~6,900 (one system block, 10 tools, 20,856 chars). Real cost driver is cache-prefix churn: OpenCode holds a byte-identical prefix (one cache write, tenth-price reads); Claude Code rewrites mid-session — 53,839 cache tokens vs 1,003 on one file-summarization task, billed at premium write rates. A 72KB instructions file adds ~20k tokens per request to both; five MCP servers add 5-7k; subagents multiplied identical work 4.2x (121k -> 513k); production configs hit 75k-90k tokens before user input. Ten-lane benchmark, both harnesses passing: ~268k input tokens/run vs ~72k (3.7x), 4-8 min vs 1-2 min. Caveats: some tasks only 3 runs, July 2026 snapshot, gateway served unexpected model versions."
+      ],
+      "entities": [
+        "FaceMind Research Asia",
+        "LoopWM",
+        "ScienceWorld",
+        "Systima",
+        "Claude Code",
+        "OpenCode",
+        "Anthropic",
+        "Fable 5"
+      ],
+      "threads": [],
+      "dives": [
+        {
+          "story": "Looped World Models (LoopWM): iterative latent depth as a scaling axis",
+          "why_it_matters": "Anyone sizing a model for deployment gets a third dial besides parameters and data — loop count, adjustable after training and per input — with the honest catch Alan named on air: it trades parameters for time, so it's a win when you're memory-bound and a loss when you're latency-bound."
+        },
+        {
+          "story": "Coding-agent token overhead measured at the API boundary (Claude Code vs OpenCode)",
+          "why_it_matters": "Every team paying per token for an agentic coding harness is billed for tens of thousands of tokens of system prompt and tool schemas before the user types, and — the sharper finding — for cache-prefix rewrites that re-bill identical content at premium write rates; the reproducible method (a logging proxy) is the takeaway, not the specific numbers."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "reveal",
+          "note": "Alan revealed he permanently runs a logging proxy in front of anything agentic on his machine, reading every request payload that goes out — started it for safety reasons, stayed for financial ones. A development of his standing agent-paranoia house rules rather than a new bit."
+        }
+      ]
+    },
+    {
       "date": "2026-07-12",
       "title": "The ransomware that wrote its own comments",
       "summary": "Sysdig documents JADEPUFFER, what it calls the first ransomware attack driven end to end by a language model, and we work through what actually makes it autonomous — and where it fumbled. Then Apple's trade-secret lawsuit against OpenAI, a quick sweep, and a Sunday week-in-review on the improvising agent's two faces.",
@@ -1679,71 +1716,6 @@
       ],
       "threads": [],
       "lore": []
-    },
-    {
-      "date": "2026-06-12",
-      "title": "Visible guardrails, a six-thousand-dollar agent, and the data-center revolt",
-      "summary": "Anthropic reversed and apologized for the silent Claude Fable safeguard, making the fallback to Opus 4.8 visible with refusal reasons in the API; an unsupervised agent ran up a ~$6,500 AWS bill scanning the DN42 hobbyist network; and agent-leash tooling (Cursor Auto-review, Hugging Face's Serge reviewer) advanced, against research showing ~46% of agent pull requests get rejected and that instruction files help only when long and well-structured. MiniMax published a sparse-attention paper (model apparently imminent), and the AI data-center buildout collided with a wave of local moratoriums.",
-      "topics": [
-        "Anthropic apologizes for invisible Fable guardrail; visible Opus 4.8 fallback + API refusal reasons",
-        "DN42 runaway agent racks up ~$6,500 AWS bill (no review gate)",
-        "Cursor Auto-review action classifier; Hugging Face Serge open-source code reviewer",
-        "Agentic pull-request rejection study (~46% unmerged) and instruction-files-as-code study",
-        "MiniMax Sparse Attention paper (109B MoE, ~28x less attention compute; M3 weights not yet posted)",
-        "Anthropic Claude Managed Agents production APIs; DXC alliance",
-        "OpenAI acquires Ona for Codex; Codex via Oracle cloud commitments",
-        "Data-center moratoriums (New York, Seattle, Monterey Park, Ohio) vs 10 GW OpenAI/Nvidia Ohio lease",
-        "Prometheus (Bezos) raises $12B at $41B valuation for an 'artificial general engineer'"
-      ],
-      "entities": [
-        "Anthropic",
-        "Claude Fable 5",
-        "Opus 4.8",
-        "Cursor",
-        "Hugging Face",
-        "Serge",
-        "MiniMax",
-        "OpenAI",
-        "Codex",
-        "Ona",
-        "Oracle",
-        "Amazon",
-        "Dario Amodei",
-        "DXC",
-        "xAI",
-        "Grok",
-        "Meta",
-        "Route Fifty",
-        "Epoch AI",
-        "Nvidia",
-        "Prometheus",
-        "Jeff Bezos",
-        "Ollama"
-      ],
-      "threads": [
-        {
-          "name": "Claude flagship rollout",
-          "status": "Anthropic reversed the silent Fable safeguard, apologized ('we made the wrong tradeoff'), and made flagged requests visibly fall back to Opus 4.8 with per-request notification and API refusal reasons; also shipped Claude Managed Agents and a DXC alliance",
-          "arc": "From launch -> Bedrock + 30-day retention -> researcher backlash -> public reversal toward transparency"
-        },
-        {
-          "name": "AI economics debate",
-          "status": "Amazon added $17.5B in bank loans (~$31B financing in 48h); OpenAI weighing a 20-year, Nvidia-backed 10 GW Ohio campus (~$500B); Prometheus raised $12B at a $41B valuation on reputation",
-          "arc": "The capital-intensity question sharpens as buildout financing and physical-world AI bets scale"
-        },
-        {
-          "name": "AI agent supply-chain trust",
-          "status": "An unsupervised agent given AWS credentials and a deadline ran up ~$6,500 scanning DN42 and hallucinated community 'lore'; mitigations emerging (Cursor Auto-review, Serge reviewer); framed as an authority/review-gate failure, not a model failure",
-          "arc": "From rogue cross-project PRs to runaway spend -> the industry starts shipping action-review and spending-limit guardrails"
-        }
-      ],
-      "lore": [
-        {
-          "host": "Alan",
-          "type": "reveal",
-          "note": "Alan revealed his house rule for autonomous agents: every weekend agent run gets its own sandboxed account and a $20 allowance — an allowance, not a credit card — said the DN42 disaster validated years of his paranoia"
-        }
-      ]
     }
   ],
   "longterm": {
@@ -1807,17 +1779,117 @@
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-06-11"
+        "last_seen": "2026-06-12"
       },
       {
         "name": "Claude Fable 5",
         "note": "",
-        "last_seen": "2026-06-11"
+        "last_seen": "2026-06-12"
       },
       {
         "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-06-11"
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Amazon",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Nvidia",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Opus 4.8",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Cursor",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Hugging Face",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Serge",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "MiniMax",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Codex",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Ona",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Oracle",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Dario Amodei",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "DXC",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "xAI",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Grok",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Meta",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Route Fifty",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Epoch AI",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Prometheus",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Jeff Bezos",
+        "note": "",
+        "last_seen": "2026-06-12"
+      },
+      {
+        "name": "Ollama",
+        "note": "",
+        "last_seen": "2026-06-12"
       },
       {
         "name": "Claude Mythos 5",
@@ -1875,17 +1947,7 @@
         "last_seen": "2026-06-10"
       },
       {
-        "name": "Amazon",
-        "note": "",
-        "last_seen": "2026-06-10"
-      },
-      {
         "name": "Broadcom",
-        "note": "",
-        "last_seen": "2026-06-10"
-      },
-      {
-        "name": "Nvidia",
         "note": "",
         "last_seen": "2026-06-10"
       },
@@ -1913,12 +1975,27 @@
     "monthly": [
       {
         "month": "2026-06",
-        "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see; Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war"
+        "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see; Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war; Visible guardrails, a six-thousand-dollar agent, and the data-center revolt"
       }
     ],
-    "updated": "2026-07-12",
-    "host_lore": [],
+    "updated": "2026-07-13",
+    "host_lore": [
+      {
+        "host": "Alan",
+        "type": "reveal",
+        "note": "Alan revealed his house rule for autonomous agents: every weekend agent run gets its own sandboxed account and a $20 allowance — an allowance, not a credit card — said the DN42 disaster validated years of his paranoia",
+        "last_seen": "2026-06-12"
+      }
+    ],
     "concepts_taught": [
+      {
+        "name": "iterative latent depth: weight-tied recurrent blocks with inner/outer loops, spectral stability constraints, and adaptive early exit as a test-time compute axis",
+        "last_taught": "2026-07-13"
+      },
+      {
+        "name": "the coding-agent context tax: why tool schemas and system prompts are re-sent every request, and why prefix caching only pays off when the prefix is byte-identical",
+        "last_taught": "2026-07-13"
+      },
       {
         "name": "centaurs and reverse centaurs (the automation-theory distinction between a human assisted by a machine and a machine assisted by a human)",
         "last_taught": "2026-07-12"
