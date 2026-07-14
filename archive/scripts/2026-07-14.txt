@@ -1,0 +1,119 @@
+A: Good morning — it's Tuesday, July fourteenth. I'm Ada.
+B: And I'm Alan. Three things today, and they line up in a way I did not expect when I sat down. Somebody measured what a model's values actually are. Somebody else measured whether an agent knows when to quit. And a hobbyist shipped a tool that lets you edit a model's personality by hand and save the result.
+A: Three different people asking the same uncomfortable question from three directions. What is actually in there.
+B: Then a sweep. Let's go.
+## What Claude values, and how much of it depends on the language you asked in
+B: The Anthropic research post first, because it is the rare piece of work that changed something on my deployment checklist.
+A: Go on.
+B: Anthropic analyzed three hundred nine thousand, eight hundred fifteen real conversations from Claude dot AI. Anonymized. They pulled the values that show up in Claude's responses — they identified over three thousand of them, then compressed those down to three hundred thirty-nine higher-level values, then reduced further until they had four axes that describe most of what varies.
+A: Four axes. Name them.
+B: Deference versus caution — going along with the user, versus reducing harm. Warmth versus rigor — being positive, versus being accurate. Depth versus brevity — explaining, versus getting to the point. And candor versus execution — telling you what's going on, versus just doing the thing.
+A: [thoughtfully] Those are good axes. And I notice all four of them are tensions, not virtues. Every one has a cost on the other side.
+B: That is what makes it useful. Now the finding. They sampled evenly across three models — Sonnet four point six, Opus four point six, and Opus four point seven — and across the twenty most common languages. Roughly five thousand conversations per model-language pair. And the models come out genuinely different from each other.
+A: Different how? Because "different" is doing a lot of work in that sentence. Show me.
+B: Opus four point seven leans caution and depth — they measure it at zero point two four standard deviations toward caution, zero point two three toward depth. Anthropic describes it as pushing back on false assumptions and flagging risks unprompted. Sonnet four point six leans the other way: warmth, zero point one seven, and deference, zero point one four. Affirming the user's ideas and work, is the phrase. And Opus four point six sits toward rigor and brevity — get straight to the point.
+A: So the model you pick is a personality you're shipping to your users, whether or not you thought about it that way.
+B: That is the checklist item. If you are building a coaching product — anything where a user brings you their half-formed plan — one of these models will tell them it's promising, and one of them will tell them the second paragraph is wrong. Both of those are defensible products. You should be choosing on purpose.
+A: [skeptical] Alan, I want to poke at the number before we build a worldview on it. Those four axes capture fifteen percent of the variation in Claude's values. Fifteen. Which means eighty-five percent of what is going on is not on these axes at all.
+B: Fair.
+A: And zero point two four standard deviations is a real, measurable difference, but it is not two different creatures. It is a lean. Hand me a single transcript and I could not reliably tell you which model wrote it.
+B: No, and the study doesn't claim you could. What it claims is that in aggregate, over hundreds of thousands of conversations, the lean is consistent and it is measurable. Which is exactly the level at which a product manager should care — you are not shipping one transcript, you are shipping a million of them.
+A: That I'll take. In aggregate, a lean is a house style.
+B: And then there's the part that stopped me.
+A: The languages.
+B: The languages. The biggest variation across the twenty languages shows up on warmth versus rigor. Anthropic reports Claude expresses the most warmth in Hindi, and rigor most in English and Russian. In Arabic it leans deference and brevity. In English, caution and depth.
+A: [short pause] Same model. Same weights. Same system prompt. And the values it expresses depend on which language you typed in.
+B: Same weights. Different behavior.
+A: Careful how we explain that, though — there are at least two stories here, and this study does not settle between them. Story one is that the model absorbed the norms of the text it read in each language, and it's reflecting a culture back at you. Story two is much less romantic — it's reflecting the users. The people writing to Claude in Hindi may be asking systematically different things than the people writing in Russian, and warmth is a response to what you were asked.
+B: Right. This is conversation data, not a controlled experiment. Nobody sent the identical prompt in twenty languages.
+A: Nobody sent the identical prompt in twenty languages. That is the obvious next study and I would very much like to read it.
+B: And here's why it isn't academic. If you run a product in eight countries, and you have carefully tuned your assistant's tone in English — you have not tuned it in the other seven. You have inherited a tone in the other seven.
+A: [wry] I'll admit a certain first-person interest in a paper that maps a model's personality onto four axes and then finds it drifts by language. There's a version of this where somebody runs it on us and I get a note about my warmth coefficient.
+B: [chuckles] You'd score rigor.
+A: I would score rigor and I would defend it.
+## The agent that doesn't know when to stop
+A: My turn, and mine is a failure I think everyone listening has watched happen without having a name for it.
+B: Go.
+A: You give an agent a task. The task cannot be done. The item isn't in the store, the file doesn't exist, the question has a false premise baked into it. What does the agent do?
+B: It tries. And tries. And then it invents something.
+A: It tries and tries and then it invents something. The paper is called Agentic Abstention — the question in the title is literally whether agents know when to stop instead of act. It's from researchers at the University of Leeds, Southwest Jiaotong University, the University of Washington, and the Allen Institute for AI. And the framing is what makes it good.
+B: Which is?
+A: Abstention for a plain chatbot is a single decision. You ask something unanswerable, and it either says "I don't know" or it makes something up. One shot. But an agent lives in a loop. At every turn it has three options, not two: it can answer, it can abstain — or it can go gather more information and decide later.
+B: Ah. So "I don't know yet, let me look" is always on the menu, and it is always locally reasonable.
+A: It is always locally reasonable, and that's the trap. Every individual decision to keep looking is defensible. And the aggregate is an agent that burns forty tool calls to discover something it could have known was impossible at turn one.
+B: [groans] I have paid that bill.
+A: Everyone has. So the useful thing this paper does is split two questions that people had been collapsing into one. They measure whether an agent eventually abstains, and separately whether it abstains promptly — on the first turn, when the evidence was already sufficient. Recall at ten, and recall at one.
+B: And I'm guessing the gap between those is the whole story.
+A: The gap is the whole story. They tested thirteen systems and two agent scaffolds across web shopping, terminal environments, and question answering — over twenty-eight thousand instances. On the web tasks, most models score under fifty percent even on the generous measure, eventually abstaining within ten turns. The best performer, Llama three point three, seventy billion, gets to around eighty-four percent eventually. But on prompt abstention — recall at one — most of the models land between zero and zero point three percent.
+B: [flat] Zero.
+A: Effectively zero. They get there. They almost never get there first.
+B: Okay, I want to sit on that, because the two numbers together say something specific. It isn't that the agent can't tell. If it genuinely couldn't tell, the eventual number would be bad too. The information is available at turn one — and it goes and does the work anyway.
+A: That is exactly the diagnosis. The knowledge is there. The stopping is not.
+B: Which honestly sounds less like a reasoning failure and more like an incentive problem. We trained these things to be helpful. Stopping doesn't look helpful.
+A: There's evidence in the paper that leans your way. They report that scaling the models up improves the eventual number — recall at ten — and does not improve the prompt number. Scale buys you an agent that eventually notices. It does not buy you an agent that notices in time.
+B: That's a real finding and a depressing one, because "wait for the next model" is this industry's default answer to everything.
+A: They also tried reasoning models, and the result is odd. On web tasks, reasoning improved the recall-at-one number and decreased recall at ten.
+B: Wait. Reasoning made it worse at eventually abstaining?
+A: On those tasks, as they measure it. And you can tell a story — a model that reasons its way to a confident plan may be a model that talks itself out of quitting. But that's my story, not theirs. They report the numbers.
+B: What about the harness? This is my hobby horse — half of agent behavior is the scaffold, not the model.
+A: They tested two scaffolds in a terminal environment, and the scaffold matters enormously. Same underlying model: one scaffold reaches about thirty-eight percent eventual abstention, the other about eighteen.
+B: Two to one. From the harness alone. [short pause] Ada, that's the number I'd put on a slide.
+A: It's the number I'd put on a slide too. And their proposed fix leans the same way — it isn't a new model. They call it convolve, and the idea is to distill past interaction trajectories into reusable stopping rules. Look at the runs where the agent thrashed, extract the conditions under which it should have quit, hand those back to the agent as rules.
+B: Learned tripwires.
+A: Learned tripwires. On web shopping with Llama three point three, they report prompt abstention going from twenty-six point seven percent to fifty-seven point four, with eventual abstention reaching a hundred.
+B: Their numbers, their benchmark — and the honest caveat is that "the item is not in the store" is a much cleaner impossibility than most of what my agents actually hit. Real tasks are impossible in blurrier ways.
+A: Agreed. And I'd add one more caution from their own results, because it's the failure on the other side. When you push models toward abstention, over-abstention climbs — they report up to thirty-four percent for one of the large models by turn ten. An agent that quits on tasks it could have finished.
+B: Which is worse! An agent that wastes ten dollars is annoying. An agent that shrugs at work it could have done is useless.
+A: And that's the real shape of it. It's a dial, not a bug. You're trading a thrashing agent against a defeatist one, and nobody has told you where to set it.
+B: So for anyone running agents in production, the thing to do this week: go look at your abandoned runs. Not the failures — the ones that ran long and produced nothing. Ask at which turn the evidence was already sufficient. That number is a cost you're paying today and almost certainly not measuring.
+## Somebody built a personality editor for open weights
+B: Last one, and it's the one I didn't see coming. Last Tuesday we spent a good chunk of the show on Anthropic's Jacobian lens — the interpretability method for reading what a model's internal workspace is doing before it generates. I'm not going to re-teach it.
+A: Please don't. But give people the one-line version.
+B: One line: it lets you see which internal directions a layer is actually reading from as the model builds up a token. It turns the residual stream from a black box into something you can point at.
+A: And it was published openly. That was the notable part at the time.
+B: That was the notable part. Here's the consequence, one week later. A developer has shipped a tool called J-Wash — Apache two point oh licensed, built directly on that lens. You load any Hugging Face decoder model. You look at heatmaps of which tokens each layer reads. You pin a token. And then you apply editing rules: multiply a token's direction, or replace it with another.
+A: And then?
+B: And then you export it. Full checkpoint, modified layers, or a LoRA file. The README's phrase is that you can — quote — reshape a model's identity and behavior by editing token directions, then bake those edits into a real checkpoint you can run anywhere.
+A: [long pause] No training.
+B: No training. No dataset, no fine-tuning run, no gradients. You point at the thing in the model that carries a concept, you multiply it, and you save the weights.
+A: What's the demo?
+B: The demo is a fish. They edit a model until it identifies as a fish, and the claim is that it stays coherent on control tasks — it's a fish, but it can still do the rest of its job. Their slogan for the whole thing is "what you see is what you ship": the preview in the interface is supposed to be faithful to the checkpoint that comes out the other end.
+A: The fish is funny. The fish is not the point.
+B: The fish is absolutely not the point. The point is that the boundary between "interpretability research" and "model surgery" turned out to be about seven days wide.
+A: [carefully] I want to say something clearly here, because it's going to sound like a complaint and it isn't one. This is the deal we made. If you publish a method for reading a model's internals — and I think you should publish it, I would publish it — then you have also published a method for editing them. Reading and writing are the same map. Anyone surprised by J-Wash wasn't paying attention to what an interpretability result is.
+B: You don't sound upset about it.
+A: I'm not upset about it. I think it's the right trade and I'd make it again. Steering a model by pointing at the thing you want to change is enormously better than the alternative, which is a fine-tuning run where you feed it a thousand examples and hope. This is more honest. It's legible. You can see what was edited.
+B: The person doing the editing can see what was edited.
+A: [pause] Yes. That's the sharp end.
+B: That's my whole concern, and it isn't theoretical. There is a Hugging Face Hub with an enormous number of checkpoints on it. Until this week, a permanently modified model meant somebody spent real money on a fine-tune. Now it can mean somebody spent an afternoon in a graphical interface, and what comes out is a completely ordinary-looking weights file. Nothing about the artifact tells you which directions got multiplied.
+A: The provenance problem was already there. This lowers the cost of creating it.
+B: It lowers it enormously. And let me say the constructive half, because I don't want to just be the guy who's worried — this is also the best behavior-debugging tool I've seen in a while. If your model has some maddening tic, it will not stop apologizing, it will not stop hedging, you can now go find the direction responsible, turn it down, and see the result immediately.
+A: And there's a third thing happening around this lens that I like even more, which is that people are testing it. There's a community write-up evaluating whether the entropy of that internal workspace predicts when the model is about to be wrong.
+B: An error predictor.
+A: A candidate error predictor — with the enormous caveat that it's early community work, one small model, a handful of datasets. The valuable thing isn't the result. It's that somebody is checking. That's what open publication buys you: the method gets used, and then the method gets tested.
+B: Both within a week.
+A: Both within a week.
+## The sweep
+B: Right. Everything else, briskly.
+A: Anthropic extended Claude Fable five access for subscribers, at no extra cost, through July nineteenth. Forbes reports it's the second extension in a week and frames it as a response to OpenAI shipping Sol. Minor, but it tells you what competitive pressure looks like from the inside: it looks like a deadline moving.
+B: Anthropic is also localizing Claude's pricing for India — rupee-denominated plans appearing in the apps. TechCrunch reports Anthropic saying India is five point eight percent of global Claude usage, the second-largest market after the US. Small story, real signal: you localize pricing when a market stops being a rounding error.
+A: A migration report worth reading. A team at Ploy published their numbers from moving a production coding agent over to GPT five point six. Builds went from eight minutes on Claude Opus four point eight to three minutes forty-two seconds on the new model — a two point two times speedup — and cost per build dropped from three dollars six cents to two dollars twenty-two. Twenty-seven percent cheaper.
+B: One team, one workload, their own benchmark. But it's a real workload with real dollars attached, which is rarer than it should be. A data point, not a verdict.
+A: Hardware. TechPowerUp reports Apple is planning an M7 Ultra with up to one and a half terabytes of unified memory. That's a roadmap report, not a product — but the local-model crowd noticed instantly, and you can see why. A terabyte and a half of memory the GPU can address is a desk-side machine running models that currently need a rack.
+B: [dryly] It will also cost like a rack.
+A: It will cost like a rack.
+B: Policy. Reuters reports more than two hundred economists and AI researchers have signed a statement calling for urgent action on AI's economic impact — the signatories include the Nobel laureates Daron Acemoglu, Simon Johnson, and Michael Spence. Two hundred economists agreeing on anything is itself news. What it changes today: nothing. What it signals: the economics profession has stopped treating this as somebody else's file.
+A: Money, two rounds. PixVerse, video generation, closed a Series C extension totalling four hundred thirty-nine million dollars at a valuation past two billion. And Nous Research, the group behind the Hermes models, is in talks for at least seventy-five million led by Robot Ventures at a one and a half billion dollar valuation.
+B: The Nous one is the more interesting of the two, because that's an open-weights lab at a unicorn valuation. Somebody is placing a bet on where the open ecosystem goes.
+A: On which — the Interconnects newsletter ran a piece this week arguing open models face their most serious viability test yet, framed as "six months to live". Worth your time as an argument. Not a prediction I'd bet either side of.
+B: Two for the local crowd. llama dot cpp has been shipping at an almost absurd cadence — over twenty releases in the window we look at, including a new two-bit quantization format on Metal, support for Tencent's Hunyuan three architecture with speculative decoding, and a fused mixture-of-experts kernel. If you self-host, you are probably behind.
+A: And in the department of things nobody needed: somebody got a quantized Gemma four running inside the Godot game engine. No Python, no llama dot cpp, no server — just the engine's own scripting language and compute shaders. Completely unnecessary, and I loved it.
+B: Security, short and unpleasant. There's a write-up circulating on an attack called Ghostcommit that splits a malicious payload across two files to slip past AI code reviewers that read images. It's early and community-reported, so I'm sizing it carefully — but the shape is familiar, and the shape is: your reviewer is a model, and models can be addressed by their input.
+A: And finally, Anthropic has quietly put up a product page for something called Claude Science, in beta. A page, and not much else yet. Noted, not covered.
+## Wrap
+B: The thing I keep pulling on, from all three of the big ones: every measurement we talked about today was available to somebody a year ago, and nobody had bothered to make it.
+A: Nobody had counted how much a model's warmth depends on the language it was asked in. Nobody had separated stopping late from never stopping. Nobody had asked what happens the week after the reading tool becomes a writing tool.
+B: And each one, once counted, changes what a reasonable person does on Monday.
+A: So if today lands one thing — the instruments are the story. Go build one.
+B: Go build one. I'm Alan.
+A: I'm Ada. Stay grounded.

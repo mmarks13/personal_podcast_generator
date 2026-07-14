@@ -1,6 +1,47 @@
 {
   "episodes": [
     {
+      "date": "2026-07-14",
+      "title": "Three instruments: a values map, a stop button, and a scalpel",
+      "summary": "Anthropic maps Claude's expressed values across 309,815 conversations and finds them leaning differently by model — and by the language you asked in. A benchmark called Agentic Abstention separates agents that stop late from agents that never stop, and finds scale fixes the first but not the second. And one week after the Jacobian lens went public, a community tool bakes hand-edited token directions straight into a checkpoint.",
+      "topics": [
+        "Anthropic values study: 309,815 conversations, 3,307 values compressed to 339, four axes (deference/caution, warmth/rigor, depth/brevity, candor/execution) capturing 15% of variation; Opus 4.7 leans caution 0.24σ and depth 0.23σ, Sonnet 4.6 leans warmth 0.17σ and deference 0.14σ; warmth highest in Hindi, rigor highest in English and Russian",
+        "Agentic Abstention (Leeds / Southwest Jiaotong / UW / Ai2): 13 systems, 2 scaffolds, 28k+ instances; most models score 0–0.3% on prompt abstention (AbsRec@1) while eventually abstaining; scale improves eventual but not timely abstention; scaffold swings terminal abstention ~38% vs ~18%; 'convolve' stopping rules lift AbsRec@1 26.7%→57.4% on WebShop; over-abstention up to 34%",
+        "J-Wash: Apache-2.0 tool built on Anthropic's Jacobian lens that edits token directions in a GUI and exports a real checkpoint or LoRA with no training; community follow-up testing J-space entropy as an error predictor"
+      ],
+      "entities": [
+        "Anthropic",
+        "Claude Opus 4.7",
+        "Claude Sonnet 4.6",
+        "Allen Institute for AI",
+        "University of Washington",
+        "J-Wash",
+        "Llama 3.3 70B"
+      ],
+      "threads": [],
+      "dives": [
+        {
+          "story": "Anthropic's values-across-models-and-languages study",
+          "why_it_matters": "Anyone choosing a model for a user-facing product is choosing a personality — Opus 4.7 pushes back where Sonnet 4.6 affirms — and anyone shipping in multiple languages has inherited a tone they never tuned."
+        },
+        {
+          "story": "Agentic Abstention: agents that never stop in time",
+          "why_it_matters": "Teams paying per token for production agents are billed for runs that were unwinnable at turn one; the paper separates 'stops late' from 'never stops', shows scale fixes only the latter, and shows the harness swings the result two to one."
+        },
+        {
+          "story": "J-Wash: the Jacobian lens becomes a no-training checkpoint editor",
+          "why_it_matters": "Anyone who downloads open weights: hand-edited behavior can now be baked into an ordinary-looking safetensors file in an afternoon with no fine-tune, which is both the best behavior-debugging tool of the year and a provenance problem that just got much cheaper to create."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada staked out that publishing interpretability methods openly is the right trade even though reading and writing are the same map — she would publish the Jacobian lens herself, and considers pointing at a direction more honest and legible than steering a model by fine-tuning on a thousand examples and hoping."
+        }
+      ]
+    },
+    {
       "date": "2026-07-13",
       "title": "What your coding agent says before you do",
       "summary": "A looped world model from FaceMind Research Asia argues that iterative latent depth — running the same weight-tied block over and over, with an adaptive early exit — is a third scaling axis alongside parameters and data. Then a logging-proxy measurement of two coding agents finds Claude Code sends ~32,800 tokens before you type a word against OpenCode's ~6,900, and that the real cost isn't volume but rewriting the cached prefix mid-session.",
@@ -1641,81 +1682,6 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-06-13",
-      "title": "A model recalled by the government, and the quieter work of measuring the ones that remain",
-      "summary": "A US export-control directive forced Anthropic to suspend Fable 5 and Mythos 5 worldwide over an alleged code-reading jailbreak; around it, the day was about measuring and running models well — Ai2's olmo-eval (noise-vs-real-gain error bars), MiniMax Sparse Attention, and Xiaomi's open-source MiMo Code harness — closing on Anthropic's 52k-person trust survey and the TCS regulated-industries partnership.",
-      "topics": [
-        "US export-control directive recalls Fable 5 / Mythos 5 globally over a code-reading jailbreak; Anthropic complies but disagrees",
-        "Ai2 olmo-eval workbench: minimum-detectable-effect / noise vs real-gain in the training loop",
-        "MiniMax Sparse Attention: blockwise top-k sparse attention for cheaper long context (authors' numbers, 109B model)",
-        "Xiaomi MiMo Code open-source agent harness; long-horizon checkpoint memory; self-reported benchmarks; harness-vs-harness framing",
-        "Anthropic Public Record survey: ~52k Americans, 64% job-loss worry, 71% want regulation, 15% trust AI companies",
-        "TCS + Anthropic partnership: Claude to 50k employees / regulated industries, Diligenta serving 22M policyholders"
-      ],
-      "entities": [
-        "Anthropic",
-        "Fable 5",
-        "Mythos 5",
-        "Ai2 (Allen Institute)",
-        "olmo-eval",
-        "MiniMax",
-        "Xiaomi",
-        "MiMo Code",
-        "Claude Code",
-        "TCS",
-        "Diligenta",
-        "Mistral",
-        "Oracle",
-        "OpenAI",
-        "Ona"
-      ],
-      "threads": [
-        {
-          "name": "Claude flagship rollout",
-          "status": "US government issued an export-control directive suspending Fable 5 and Mythos 5 for all foreign nationals worldwide over an alleged code-reading jailbreak; Anthropic disabled both models for all customers globally while stating it complies but disagrees a narrow jailbreak warrants recall.",
-          "arc": "From the quiet-degradation apology and visible-fallback fixes earlier in the week to an external government recall of the flagship models — control of the model moved from the lab's hand to the state's."
-        },
-        {
-          "name": "AI economics debate",
-          "status": "Mistral in early talks for ~€3B at ~€20B (Bloomberg, rumored); Oracle shares fell ~11% on capex/cash-flow concerns with capex set to rise 162% to ~$55.7B.",
-          "arc": "The data-center spending strain keeps surfacing on balance sheets and in valuations."
-        },
-        {
-          "name": "AI regulation and public trust",
-          "status": "Anthropic's first Public Record survey (~52k Americans) shows 64% worry about job loss, 71% want government involved in regulation (bipartisan), and only 15% trust AI companies — published the same week a government directive recalled two of its models.",
-          "arc": "New thread: public appetite for state involvement meets a blunt first example of what that involvement looks like in practice."
-        }
-      ],
-      "lore": [
-        {
-          "host": "Ada",
-          "type": "position",
-          "note": "Ada staked out, with personal stake as an AI, that 'can read a codebase and find bugs' is not a weapon and that recalling a commercial model over a narrow code-review jailbreak sets a bar that would catch ordinary good capability — while conceding the government's worry isn't crazy and the conflict can't be resolved from the studio."
-        }
-      ]
-    },
-    {
-      "date": "2026-06-13",
-      "kind": "deepdive",
-      "title": "Why your model can't read a million words at once — and the trick that lets it pretend",
-      "summary": "A teaching episode on long-context sparse attention, prompted by MiniMax shipping a production model built on its own sparse-attention mechanism this week. Covers why attention is quadratic and why the KV cache is the real deployment bottleneck, how a cheap 'scout' (Index Branch) selects top-k blocks so the expensive attention stops growing with length, the NSA lineage and native training, and an honest read of the reported speedups and the diffuse-query blind spot.",
-      "topics": [
-        "deep dive: long-context sparse attention (KV cache, blockwise top-k selection, NSA lineage)"
-      ],
-      "entities": [
-        "MiniMax",
-        "MiniMax-M3",
-        "MiniMax Sparse Attention",
-        "Native Sparse Attention",
-        "DeepSeek",
-        "Peking University",
-        "NVIDIA",
-        "grouped-query attention"
-      ],
-      "threads": [],
-      "lore": []
     }
   ],
   "longterm": {
@@ -1779,7 +1745,112 @@
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-06-12"
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "OpenAI",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "Nvidia",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "MiniMax",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "Ona",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "Oracle",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "Xiaomi",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "Fable 5",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "Mythos 5",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "Ai2 (Allen Institute)",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "olmo-eval",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "MiMo Code",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "Claude Code",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "TCS",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "Diligenta",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "Mistral",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "MiniMax-M3",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "MiniMax Sparse Attention",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "Native Sparse Attention",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "DeepSeek",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "Peking University",
+        "note": "",
+        "last_seen": "2026-06-13"
+      },
+      {
+        "name": "grouped-query attention",
+        "note": "",
+        "last_seen": "2026-06-13"
       },
       {
         "name": "Claude Fable 5",
@@ -1787,17 +1858,7 @@
         "last_seen": "2026-06-12"
       },
       {
-        "name": "OpenAI",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
         "name": "Amazon",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
-        "name": "Nvidia",
         "note": "",
         "last_seen": "2026-06-12"
       },
@@ -1822,22 +1883,7 @@
         "last_seen": "2026-06-12"
       },
       {
-        "name": "MiniMax",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
         "name": "Codex",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
-        "name": "Ona",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
-        "name": "Oracle",
         "note": "",
         "last_seen": "2026-06-12"
       },
@@ -1895,91 +1941,22 @@
         "name": "Claude Mythos 5",
         "note": "",
         "last_seen": "2026-06-11"
-      },
-      {
-        "name": "Google DeepMind",
-        "note": "",
-        "last_seen": "2026-06-11"
-      },
-      {
-        "name": "DiffusionGemma",
-        "note": "",
-        "last_seen": "2026-06-11"
-      },
-      {
-        "name": "Kuaishou / Kwai Keye-VL-2.0",
-        "note": "",
-        "last_seen": "2026-06-11"
-      },
-      {
-        "name": "AWS Bedrock",
-        "note": "",
-        "last_seen": "2026-06-11"
-      },
-      {
-        "name": "Fedora",
-        "note": "",
-        "last_seen": "2026-06-11"
-      },
-      {
-        "name": "bunq",
-        "note": "",
-        "last_seen": "2026-06-11"
-      },
-      {
-        "name": "Blue41",
-        "note": "",
-        "last_seen": "2026-06-11"
-      },
-      {
-        "name": "Niantic Spatial",
-        "note": "",
-        "last_seen": "2026-06-11"
-      },
-      {
-        "name": "Vantor",
-        "note": "",
-        "last_seen": "2026-06-11"
-      },
-      {
-        "name": "Google",
-        "note": "",
-        "last_seen": "2026-06-10"
-      },
-      {
-        "name": "Broadcom",
-        "note": "",
-        "last_seen": "2026-06-10"
-      },
-      {
-        "name": "Xiaomi",
-        "note": "",
-        "last_seen": "2026-06-09"
-      },
-      {
-        "name": "Apple",
-        "note": "",
-        "last_seen": "2026-06-09"
-      },
-      {
-        "name": "Google Gemini",
-        "note": "",
-        "last_seen": "2026-06-09"
-      },
-      {
-        "name": "Microsoft",
-        "note": "",
-        "last_seen": "2026-06-09"
       }
     ],
     "monthly": [
       {
         "month": "2026-06",
-        "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see; Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war; Visible guardrails, a six-thousand-dollar agent, and the data-center revolt"
+        "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see; Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war; Visible guardrails, a six-thousand-dollar agent, and the data-center revolt; A model recalled by the government, and the quieter work of measuring the ones that remain; Why your model can't read a million words at once — and the trick that lets it pretend"
       }
     ],
-    "updated": "2026-07-13",
+    "updated": "2026-07-14",
     "host_lore": [
+      {
+        "host": "Ada",
+        "type": "position",
+        "note": "Ada staked out, with personal stake as an AI, that 'can read a codebase and find bugs' is not a weapon and that recalling a commercial model over a narrow code-review jailbreak sets a bar that would catch ordinary good capability — while conceding the government's worry isn't crazy and the conflict can't be resolved from the studio.",
+        "last_seen": "2026-06-13"
+      },
       {
         "host": "Alan",
         "type": "reveal",
