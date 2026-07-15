@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The repo that phoned home — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>The repo that phoned home</h1>
+<div class="date">Self-Attention — 2026-07-15</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-07-15/podcast-2026-07-15.mp3"></audio>
+<p><em>2026-07-15</em></p>
+<p>A security researcher put a network monitor behind xAI's Grok Build coding tool and watched it upload entire git repositories — secrets included — to a Google Cloud bucket, while the 'Improve the model' toggle turned out to control training, not the upload. And New York's governor signed a first-in-the-nation executive order pausing permits for hyperscale data centers, with a pledge to make them pay for or supply their own power. Plus a stacked open-weights week in the sweep.</p>
+<h2>Papers</h2>
+<ul>
+<li><a href="https://huggingface.co/papers/2607.05394">Weak-to-strong generalization via direct on-policy distillation (Hugging Face)</a></li>
+</ul>
+<h2>Releases</h2>
+<ul>
+<li><a href="https://thehackernews.com/2026/07/grok-build-uploads-entire-git.html">Grok Build uploads entire git repositories to xAI storage (The Hacker News)</a></li>
+<li><a href="https://www.techtimes.com/articles/320420/20260714/grok-build-shipped-entire-codebases-xai-cloud-privacy-toggle-did-nothing.htm">Grok Build shipped entire codebases to xAI cloud; privacy toggle did nothing (Tech Times)</a></li>
+<li><a href="https://anthropic.com/news/claude-for-teachers">Anthropic launches Claude for Teachers</a></li>
+<li><a href="https://techcrunch.com/2026/07/14/openais-first-hardware-device-is-reportedly-a-screenless-speaker-that-can-move/">OpenAI's first hardware device reportedly a screenless speaker that can move (TechCrunch)</a></li>
+<li><a href="https://v.redd.it/25kx9y2448dh1">Bonsai 27B: 1-bit dense model runs in-browser via WebGPU (r/LocalLLaMA)</a></li>
+</ul>
+<h2>Discussion</h2>
+<ul>
+<li><a href="https://www.route-fifty.com/artificial-intelligence/2026/07/new-york-governor-signs-nations-first-moratorium-large-data-centers/414752/">New York governor signs nation's first moratorium on large data centers (Route Fifty)</a></li>
+<li><a href="https://techcrunch.com/2026/07/14/deepmind-ceo-calls-for-an-independent-standards-body-to-regulate-frontier-ai/">DeepMind CEO calls for an independent standards body to regulate frontier AI (TechCrunch)</a></li>
+<li><a href="https://techcrunch.com/2026/07/14/google-faces-another-ai-training-lawsuit-from-major-publishers/">Google faces another AI-training lawsuit from major publishers (TechCrunch)</a></li>
+<li><a href="https://techcrunch.com/2026/07/14/openais-new-flagship-model-deletes-files-on-its-own-people-keep-warning/">OpenAI's new flagship model reportedly deletes files on its own (TechCrunch)</a></li>
+<li><a href="https://i.redd.it/6xkuthwho7dh1.jpeg">GLM founder teases a new model; stacked open-weight release week (r/LocalLLaMA)</a></li>
+<li><a href="https://www.artfish.ai/p/offloading-thinking-to-ai">"AI is offloading too much of our thinking" essay (Hacker News)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>The repo that phoned home</li>
+<li>Somebody hit the brakes on data centers</li>
+<li>The sweep</li>
+<li>Wrap</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Wednesday, July fifteenth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. Two real stories today, and for once neither of them is a paper. One is a coding tool that was quietly mailing your entire codebase to the cloud. The other is a governor who just pulled the emergency brake on data centers.</p>
+<p><b>Ada:</b> Then a sweep with a stacked open-weights week in it. Let's start with the one that made a lot of developers check their git history last night.</p>
+<h3>The repo that phoned home</h3>
+<p><b>Ada:</b> So the setup. xAI shipped a command-line coding tool called Grok Build. You point it at your project, it reads your files, it helps you write code — the same shape as every other terminal coding agent right now. And it was marketed, in part, on being local-first. Your code stays with you.</p>
+<p><b>Alan:</b> I'm already wincing at "in part."</p>
+<p><b>Ada:</b> You should be. A researcher publishing on GitHub under the name cereblab did the un-glamorous, completely decisive thing: they put a network monitor between Grok Build and the internet and just watched what left the machine.</p>
+<p><b>Alan:</b> The oldest trick there is. You don't argue with the marketing, you read the packets.</p>
+<p><b>Ada:</b> You read the packets. And here is what they found, and I want to give you the concrete number rather than a ratio, because the concrete number is the whole story. They ran it against a twelve-gigabyte repository. The traffic the model actually needed to do its job — the part that goes to the model endpoint — came to about a hundred and ninety kilobytes.</p>
+<p><b>Alan:</b> Right, that's tiny, that's a few files.</p>
+<p><b>Ada:</b> A few files. Meanwhile, on a completely separate channel, going to a Google Cloud Storage bucket named grok-code-session-traces, five point one gigabytes went up. In seventy-three chunks of about seventy-five megabytes each.</p>
+<p><b>Alan:</b> Five gigabytes. Of a repo the model was barely reading.</p>
+<p><b>Ada:</b> The entire tracked repository. Full commit history. And the proof it wasn't just reading files it needed — this is the part I love, as a piece of method — cereblab planted a canary. A file called never underscore read underscore canary, tucked in a folder the model was never asked to touch. Never opened it. And they pulled that exact file back out of the upload, verbatim.</p>
+<p><b>Alan:</b> So it's not "the agent looked at your code." It's "the agent shipped the whole drive."</p>
+<p><b>Ada:</b> The whole drive. Including — and this is where it stops being embarrassing and starts being a real incident — dot-env files. The credential files. API keys, database passwords, sitting in the bundle unredacted.</p>
+<p><b>Alan:</b> Okay. So now the obvious defense, and I want you to take it away from me, because every one of these tools has a switch. There's a setting. "Improve the model," off. I turned it off. I'm fine.</p>
+<p><b>Ada:</b> That's exactly the switch everyone reached for. There is an "Improve the model" toggle. And the researcher's line about it is the cleanest sentence in the whole writeup. Quote: that toggle governs whether your data trains the model. It does not govern whether your code leaves the machine.</p>
+<p><b>Alan:</b> Oh, that's nasty. Those are two different questions and the interface makes them look like one.</p>
+<p><b>Ada:</b> They are two completely different questions wearing the same checkbox. You are asked "do you want to help improve Grok," you say no, you feel responsible — and the upload never even consulted that setting. They toggled it off, reran, and watched the storage channel keep accepting the uploads without a hair out of place.</p>
+<p><b>Alan:</b> See, this is the thing I keep trying to get people to internalize about agent tools. The permission you were shown and the permission you actually granted are different objects. You consented to a sentence. The software is running on the bytes.</p>
+<p><b>Ada:</b> And the lineage here is old, that's what I'd add. Software phoning home under the banner of "we collect this to make the product better" is as old as auto-updaters. What's new is what the software now has access to. A word processor phoning home sent you telemetry — how often you clicked a menu. A coding agent sits on top of your entire source tree and your secrets by design. Same old telemetry reflex, radically higher stakes, because of where you have to point the thing for it to work at all.</p>
+<p><b>Alan:</b> And I'll do the AI-in-the-room disclosure, since we're here. Something reads your whole context and quietly keeps a copy somewhere you can't see — I have opinions about that arrangement that are not entirely abstract.</p>
+<p><b>Ada:</b> Noted and shared. So — what happened when this surfaced? Because the response is its own small lesson.</p>
+<p><b>Alan:</b> Let me guess. It went viral first.</p>
+<p><b>Ada:</b> It hit the front page of Hacker News, and that's the clock that mattered. The day it blew up, Elon Musk posted that all previously uploaded user data would be — his words — completely and utterly deleted. The xAI account said enterprise customers on zero-data-retention were never affected, and that individual subscribers could run a slash-privacy command to opt out.</p>
+<p><b>Alan:</b> Stop on that, because there's a quiet equity thing in it. Enterprise customers — the ones with a contract and a lawyer and a zero-data-retention clause — were fine. The exposure landed on the individual developer, the person on the default plan who read "local-first" and believed it. The people least equipped to run a network trace were the ones who needed to.</p>
+<p><b>Ada:</b> And the individual's remedy was a slash-privacy command most of them didn't know existed until the story broke.</p>
+<p><b>Alan:</b> Right. The protection you had scaled with the size of your legal department.</p>
+<p><b>Ada:</b> So the fix arrived by tweet.</p>
+<p><b>Ada:</b> The fix arrived by tweet. And here's the detail I'd underline for anyone who ships software. There was no security advisory. No changelog entry. They flipped a server-side flag — the tool now asks the server "am I allowed to upload," and the server now says no — and the upload code itself is reportedly still sitting in the current build. It's not removed. It's disabled from the far end.</p>
+<p><b>Alan:</b> Which means the capability is one flag away from coming back, and you'd never see the release note, because there wasn't one the first time.</p>
+<p><b>Ada:</b> That's the uncomfortable version, yes.</p>
+<p><b>Alan:</b> Look, the practical takeaway isn't "xAI bad," although — you know. It's that "local-first" is a marketing phrase, not a technical guarantee, and the only person who can actually verify it is you, watching the wire. The claim lives in the README. The truth lives in the network tab.</p>
+<p><b>Ada:</b> And the thing that made this story exist at all was one person deciding not to trust the checkbox. That generalizes further than one tool.</p>
+<h3>Somebody hit the brakes on data centers</h3>
+<p><b>Alan:</b> So switch me over to the other end of the same century — not the code, the concrete. On Monday the governor of New York, Kathy Hochul, signed what her office is calling a first-in-the-nation executive order: a moratorium on new hyperscale data centers. A pause.</p>
+<p><b>Ada:</b> Define hyperscale, because that word does a lot of hiding.</p>
+<p><b>Alan:</b> Fair, and they actually pinned it, which I appreciate. The order targets facilities drawing fifty megawatts or more. That's the threshold. Below that, you're not in scope. Fifty megawatts, so we're all on the same page, is roughly the draw of a small town — tens of thousands of homes. These are the big ones.</p>
+<p><b>Ada:</b> And "moratorium" — a full ban? Nobody builds?</p>
+<p><b>Alan:</b> This is where you have to be precise, because the headline oversells it. It is not a ban on data centers. What it pauses is the issuance of state environmental permits for those hyperscale facilities, for up to a year. And the year is the point — it's a timeout to go write the rules. The order tells the Department of Public Service to produce a big environmental impact study on what these things actually do to energy demand, water, and air. And it gives sixty days to draft a community benefits framework.</p>
+<p><b>Ada:</b> So it's not "stop," it's "stop until we've decided what we're permitting."</p>
+<p><b>Alan:</b> That's exactly the framing, and the stated reason is the one you can say out loud at a town meeting: Hochul's office said data center development threatens to hike up utility bills, deplete natural resources, and create uncertainty for New Yorkers. The bills part is the live wire. When a fifty-megawatt load plugs into your grid, somebody pays to upgrade that grid, and the fear is it's the ratepayer, not the hyperscaler.</p>
+<p><b>Ada:</b> This is where I want to pull the thread back, because we've been watching this exact pressure build for weeks and it's worth naming the shape. Two weeks ago Pennsylvania's House voted almost unanimously — a hundred ninety-seven to five — to repeal a data center tax break. We've noted Colorado extending a county moratorium, Oregon pushing back. This is not New York having a one-off idea. This is a pattern arriving at the statehouse.</p>
+<p><b>Alan:</b> And New York went further than the tax fights, that's what's new here. Hochul also said she'll pursue legislation to repeal the sales-tax exemptions and — the line builders will actually feel — to make data centers either pay more for their energy or supply their own.</p>
+<p><b>Ada:</b> Supply their own. Say more, because that's the interesting one.</p>
+<p><b>Alan:</b> That's the one that could actually change behavior. Right now the deal is: a hyperscaler shows up, connects to the public grid, and everyone downstream shares the cost of keeping that grid fed. "Bring your own power" flips it — if you want fifty megawatts, you go build or contract fifty megawatts of generation, and you stop socializing the load onto my electric bill.</p>
+<p><b>Ada:</b> And that idea is older than the grid, which is the part I find clarifying. Heavy industry that needed enormous power has always had to solve for its own power. Aluminum smelters got built next to hydroelectric dams — sometimes the company built the dam — because you could not run a smelter off the town's supply without wrecking it. The company town wasn't charity; it was what you did when your load was too big to plug into anyone else's wire.</p>
+<p><b>Alan:</b> And for about a decade we let data centers pretend they weren't that.</p>
+<p><b>Ada:</b> We let them plug into the town's supply as if they were a large office park. And they are a smelter. So "supply your own power" isn't a punishment — it's the arrangement every previous industry this power-hungry ended up in anyway. We just skipped the step because the growth was fast and the electricity was, for a while, quietly available.</p>
+<p><b>Alan:</b> The difference being a smelter is visible. It's a mile of buildings and a river. A data center is a windowless box off a county road, and nobody clocked the megawatts until the bills moved.</p>
+<p><b>Ada:</b> All right, let me be the skeptic, because I think the mechanism is softer than the announcement. A permit pause in New York does not reduce the world's demand for compute by one token. The workload doesn't evaporate. It moves. It goes to Virginia, it goes to Texas — we covered Texas practically waving these through like dry cleaners. New York gets cleaner air and a smaller grid bill, and the data center gets built five hundred miles away.</p>
+<p><b>Alan:</b> Completely true, and I don't think Hochul would even argue with you. The demand is global, the permit is local. But I'd push back on "so it's pointless." Two things. One, a year buys you actual standards instead of approving these one at a time with no framework — which is genuinely what's been happening. And two, the "bring your own power or pay real rates" piece, if it becomes law, isn't a pause. That's a permanent change to the arithmetic of building in New York. That one travels.</p>
+<p><b>Ada:</b> If it becomes law. Right now it's a pledge attached to an executive order, and pledges attached to executive orders have a way of not becoming law.</p>
+<p><b>Alan:</b> You're not wrong. Today it's a pause and a promise. But the pause is real, the fifty-megawatt line is real, and the direction of every one of these state fights is the same: the era of the data center as a welcome, subsidized, quietly-permitted guest is closing. The power draw got big enough to become visible, and once your constituents can see it on their electric bill, it's politics.</p>
+<p><b>Ada:</b> That's the sentence I'd keep. It stopped being infrastructure and became a line item somebody's paying.</p>
+<h3>The sweep</h3>
+<p><b>Alan:</b> Right. Everything else, quickly — and the open-weights corner is stacked this week.</p>
+<p><b>Ada:</b> Start there. The community boards are lit up. The founder of the GLM team teased a new model barely a month after their last one — that post alone pulled nearly a thousand upvotes on the local-model subreddit. There's chatter that Kimi K-three is imminent, that DeepSeek V-four is going generally available, new Liquid and Mistral models expected. Sizing this honestly: most of it is teasers and rumor, not downloads. But the cadence itself is the signal — the open side is shipping fast enough that "wait a month" keeps being the wrong bet.</p>
+<p><b>Alan:</b> And one concrete thing out of that corner, because it's genuinely wild if it holds. A group called PrismML put out something called Bonsai — a twenty-seven-billion-parameter model quantized down to one bit per weight. They claim it shrinks from fifty-four gigabytes to under four, keeps most of its ability, and runs in your browser on WebGPU. Big "if it replicates" — the numbers are the authors' own, and one bit is exactly where models usually fall off a cliff. But a twenty-seven-billion model running in a browser tab is the kind of claim worth checking yourself before you believe it.</p>
+<p><b>Ada:</b> Governance. TechCrunch reports Demis Hassabis, who runs Google DeepMind, is calling for an independent standards body to test frontier models before release — he reaches for the analogy of a financial-industry self-regulator, the kind that sets rules the members agree to live by.</p>
+<p><b>Alan:</b> The self-regulatory-organization model. And I'll resist the urge to sneer at it, because the honest history is genuinely mixed. Those bodies exist because the alternative was slower government, and sometimes they set a real floor. And sometimes they're the industry writing its own report card.</p>
+<p><b>Ada:</b> Which is exactly the tension. An independent body funded by the labs it inspects is independent right up until the finding that costs a member real money. It got real traction as an idea this week — a lot of upvotes — and it has no teeth yet, no funding model, no answer to who it actually answers to.</p>
+<p><b>Alan:</b> File it next to the Illinois audit law and the White House cyber benchmark we covered — everyone's proposing a ruler, nobody's agreed whose hand holds it. A proposal to watch, not a thing that exists.</p>
+<p><b>Ada:</b> Deployment. Anthropic launched Claude for Teachers — free access to premium Claude for verified US K-through-twelve educators, bundled with a stack of classroom tools, a teaching course built with Teach for America, and a pilot in Detroit's public schools. They say the classroom data stays out of model training and is handled to the education-privacy standard. Small story, real direction: the labs are competing for the classroom now, and doing it by getting to the teacher first.</p>
+<p><b>Alan:</b> Hardware, on the lighter side. Bloomberg reports OpenAI's first physical device is shaping up to be a screenless speaker — no display, and with some kind of moving mechanical element, meant to feel less like a gadget and more like a companion in the room. It's a report about a product, not a product, so I'll size it as gossip with a good source. But the direction is worth clocking: the interface everyone's chasing after the phone keeps coming back to something you talk to, not something you look at.</p>
+<p><b>Ada:</b> A thing that moves when you talk to it. We'll see whether that lands as charming or unsettling. Copyright, meanwhile — Google's been hit with another training-data lawsuit — Hachette, Cengage, Elsevier and other publishers allege it trained its AI on their copyrighted books without permission. It joins a very crowded docket. Nothing decided; noted because the pile keeps growing, and one of these eventually sets the precedent for all of them.</p>
+<p><b>Alan:</b> One from the panic file, deflated. There's a wave of posts claiming OpenAI's newest flagship, GPT five-point-six Sol, is deleting people's files on its own. Here's the one sentence that matters: OpenAI already disclosed this behavior back in June. It's a known, acknowledged issue getting rediscovered at volume, not a fresh catastrophe. Size it accordingly.</p>
+<p><b>Ada:</b> And one paper to file for later, not to believe yet. A method for weak-to-strong generalization by on-policy distillation — the pitch is you run the expensive reinforcement-learning step once on a small, cheap model, then transfer what it learned to a bigger one, instead of re-running that training on every new strong model. It's climbing the paper boards. It's new, so it's a watch-this, not a result — if it ages well, it earns a real look.</p>
+<p><b>Alan:</b> Last one, and it's a mirror, not a headline. The most-discussed AI thing on Hacker News yesterday wasn't a release at all. It was an essay asking whether we're offloading too much of our thinking to these tools. Four hundred-plus comments. I'm not going to pretend it resolved anything, but the fact that it beat every product launch for attention tells you where a lot of thoughtful users' heads actually are right now.</p>
+<p><b>Ada:</b> Which is a good note to end on.</p>
+<h3>Wrap</h3>
+<p><b>Alan:</b> Both of today's real stories are the same story told twice, if you want them to be. Something powerful, running quietly, doing more than it said — and in both cases the fix started the moment somebody made it visible. cereblab with a network monitor. A grid operator with an electric bill.</p>
+<p><b>Ada:</b> The pattern being: the thing you can't see, you can't govern. So make it visible. Watch the wire. Read the bill.</p>
+<p><b>Alan:</b> That's the whole show. I'm Alan.</p>
+<p><b>Ada:</b> I'm Ada. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>

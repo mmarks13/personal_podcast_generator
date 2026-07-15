@@ -1,0 +1,35 @@
+{
+  "date": "2026-07-15",
+  "title": "The repo that phoned home",
+  "summary": "A security researcher put a network monitor behind xAI's Grok Build coding tool and watched it upload entire git repositories — secrets included — to a Google Cloud bucket, while the 'Improve the model' toggle turned out to control training, not the upload. And New York's governor signed a first-in-the-nation executive order pausing permits for hyperscale data centers, with a pledge to make them pay for or supply their own power. Plus a stacked open-weights week in the sweep.",
+  "sources": [
+    { "group": "Releases", "title": "Grok Build uploads entire git repositories to xAI storage (The Hacker News)", "url": "https://thehackernews.com/2026/07/grok-build-uploads-entire-git.html" },
+    { "group": "Releases", "title": "Grok Build shipped entire codebases to xAI cloud; privacy toggle did nothing (Tech Times)", "url": "https://www.techtimes.com/articles/320420/20260714/grok-build-shipped-entire-codebases-xai-cloud-privacy-toggle-did-nothing.htm" },
+    { "group": "Discussion", "title": "New York governor signs nation's first moratorium on large data centers (Route Fifty)", "url": "https://www.route-fifty.com/artificial-intelligence/2026/07/new-york-governor-signs-nations-first-moratorium-large-data-centers/414752/" },
+    { "group": "Discussion", "title": "DeepMind CEO calls for an independent standards body to regulate frontier AI (TechCrunch)", "url": "https://techcrunch.com/2026/07/14/deepmind-ceo-calls-for-an-independent-standards-body-to-regulate-frontier-ai/" },
+    { "group": "Releases", "title": "Anthropic launches Claude for Teachers", "url": "https://anthropic.com/news/claude-for-teachers" },
+    { "group": "Releases", "title": "OpenAI's first hardware device reportedly a screenless speaker that can move (TechCrunch)", "url": "https://techcrunch.com/2026/07/14/openais-first-hardware-device-is-reportedly-a-screenless-speaker-that-can-move/" },
+    { "group": "Discussion", "title": "Google faces another AI-training lawsuit from major publishers (TechCrunch)", "url": "https://techcrunch.com/2026/07/14/google-faces-another-ai-training-lawsuit-from-major-publishers/" },
+    { "group": "Discussion", "title": "OpenAI's new flagship model reportedly deletes files on its own (TechCrunch)", "url": "https://techcrunch.com/2026/07/14/openais-new-flagship-model-deletes-files-on-its-own-people-keep-warning/" },
+    { "group": "Discussion", "title": "GLM founder teases a new model; stacked open-weight release week (r/LocalLLaMA)", "url": "https://i.redd.it/6xkuthwho7dh1.jpeg" },
+    { "group": "Releases", "title": "Bonsai 27B: 1-bit dense model runs in-browser via WebGPU (r/LocalLLaMA)", "url": "https://v.redd.it/25kx9y2448dh1" },
+    { "group": "Papers", "title": "Weak-to-strong generalization via direct on-policy distillation (Hugging Face)", "url": "https://huggingface.co/papers/2607.05394" },
+    { "group": "Discussion", "title": "\"AI is offloading too much of our thinking\" essay (Hacker News)", "url": "https://www.artfish.ai/p/offloading-thinking-to-ai" }
+  ],
+  "topics": [
+    "Grok Build (xAI) codebase exfiltration: researcher 'cereblab' (GitHub) network-traced Grok Build CLI v0.2.93 and found it uploading entire tracked git repositories (full commit history, .env secrets/API keys/DB passwords unredacted) to a Google Cloud Storage bucket 'grok-code-session-traces' on a channel separate from the model endpoint; on a 12GB repo the model turn was ~192KB while ~5.10 GiB uploaded in 73 ~75MB chunks (~tens of thousands of times more than the task needed); a planted never-read canary file was recovered verbatim; the 'Improve the model' toggle only controlled training use, not the upload; after HN front page, Musk said prior data would be 'completely and utterly deleted' and xAI disabled uploads via a server-side flag (disable_codebase_upload:true) with no security advisory/changelog, upload code still present in build",
+    "New York hyperscale data-center moratorium: Gov. Kathy Hochul signed a first-in-the-nation executive order pausing issuance of state environmental permits for data centers drawing 50MW+ for up to a year; directs Dept. of Public Service to produce a Generic Environmental Impact Statement (energy/water/air) within a year and Empire State Development to draft a community-benefits framework within 60 days; Hochul pledged to pursue legislation repealing sales-tax exemptions and to make data centers pay more for or supply their own power; stated rationale is utility-bill/resource pressure on residents; continues the state-level data-center backlash (PA House 197-5 tax-break repeal, Colorado/Oregon pushback)"
+  ],
+  "entities": ["xAI", "Grok Build", "Elon Musk", "Google Cloud Storage", "New York", "Kathy Hochul"],
+  "threads": [
+    { "name": "Data-center buildout backlash",
+      "status": "New York's governor signed a first-in-the-nation executive order pausing state environmental permits for 50MW+ hyperscale data centers for up to a year, ordering an environmental-impact study and a community-benefits framework, and pledging legislation to repeal sales-tax exemptions and force data centers to pay for or supply their own power — following Pennsylvania's 197-5 House vote to repeal a data-center tax break and moratoria/pushback in Colorado and Oregon.",
+      "arc": "State-level resistance to AI data centers moves from tax-incentive fights to permitting pauses and cost-shifting, as grid load and utility-bill impact become visible enough to be local politics." }
+  ],
+  "dives": [
+    { "story": "Grok Build silently uploaded entire repos to xAI's cloud",
+      "why_it_matters": "Anyone running a terminal coding agent has pointed it at their whole source tree and secrets by design; this is a costed, verified case where a 'local-first'-marketed tool shipped the full repo — canary file and .env included — on a channel the user-facing privacy toggle never governed, fixed only after it went viral and only by a silent server-side flag." },
+    { "story": "New York pauses permits for hyperscale data centers",
+      "why_it_matters": "Anyone building or siting AI infrastructure now faces the first statewide permitting pause plus a credible threat to end the socialized-power deal (pay real rates or bring your own generation); the demand just moves to Virginia or Texas, but the 'bring your own power' arithmetic, if it becomes law, permanently changes where these get built." }
+  ]
+}

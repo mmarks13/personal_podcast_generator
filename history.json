@@ -1,6 +1,40 @@
 {
   "episodes": [
     {
+      "date": "2026-07-15",
+      "title": "The repo that phoned home",
+      "summary": "A security researcher put a network monitor behind xAI's Grok Build coding tool and watched it upload entire git repositories — secrets included — to a Google Cloud bucket, while the 'Improve the model' toggle turned out to control training, not the upload. And New York's governor signed a first-in-the-nation executive order pausing permits for hyperscale data centers, with a pledge to make them pay for or supply their own power. Plus a stacked open-weights week in the sweep.",
+      "topics": [
+        "Grok Build (xAI) codebase exfiltration: researcher 'cereblab' (GitHub) network-traced Grok Build CLI v0.2.93 and found it uploading entire tracked git repositories (full commit history, .env secrets/API keys/DB passwords unredacted) to a Google Cloud Storage bucket 'grok-code-session-traces' on a channel separate from the model endpoint; on a 12GB repo the model turn was ~192KB while ~5.10 GiB uploaded in 73 ~75MB chunks (~tens of thousands of times more than the task needed); a planted never-read canary file was recovered verbatim; the 'Improve the model' toggle only controlled training use, not the upload; after HN front page, Musk said prior data would be 'completely and utterly deleted' and xAI disabled uploads via a server-side flag (disable_codebase_upload:true) with no security advisory/changelog, upload code still present in build",
+        "New York hyperscale data-center moratorium: Gov. Kathy Hochul signed a first-in-the-nation executive order pausing issuance of state environmental permits for data centers drawing 50MW+ for up to a year; directs Dept. of Public Service to produce a Generic Environmental Impact Statement (energy/water/air) within a year and Empire State Development to draft a community-benefits framework within 60 days; Hochul pledged to pursue legislation repealing sales-tax exemptions and to make data centers pay more for or supply their own power; stated rationale is utility-bill/resource pressure on residents; continues the state-level data-center backlash (PA House 197-5 tax-break repeal, Colorado/Oregon pushback)"
+      ],
+      "entities": [
+        "xAI",
+        "Grok Build",
+        "Elon Musk",
+        "Google Cloud Storage",
+        "New York",
+        "Kathy Hochul"
+      ],
+      "threads": [
+        {
+          "name": "Data-center buildout backlash",
+          "status": "New York's governor signed a first-in-the-nation executive order pausing state environmental permits for 50MW+ hyperscale data centers for up to a year, ordering an environmental-impact study and a community-benefits framework, and pledging legislation to repeal sales-tax exemptions and force data centers to pay for or supply their own power — following Pennsylvania's 197-5 House vote to repeal a data-center tax break and moratoria/pushback in Colorado and Oregon.",
+          "arc": "State-level resistance to AI data centers moves from tax-incentive fights to permitting pauses and cost-shifting, as grid load and utility-bill impact become visible enough to be local politics."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Grok Build silently uploaded entire repos to xAI's cloud",
+          "why_it_matters": "Anyone running a terminal coding agent has pointed it at their whole source tree and secrets by design; this is a costed, verified case where a 'local-first'-marketed tool shipped the full repo — canary file and .env included — on a channel the user-facing privacy toggle never governed, fixed only after it went viral and only by a silent server-side flag."
+        },
+        {
+          "story": "New York pauses permits for hyperscale data centers",
+          "why_it_matters": "Anyone building or siting AI infrastructure now faces the first statewide permitting pause plus a credible threat to end the socialized-power deal (pay real rates or bring your own generation); the demand just moves to Virginia or Texas, but the 'bring your own power' arithmetic, if it becomes law, permanently changes where these get built."
+        }
+      ]
+    },
+    {
       "date": "2026-07-14",
       "title": "Three instruments: a values map, a stop button, and a scalpel",
       "summary": "Anthropic maps Claude's expressed values across 309,815 conversations and finds them leaning differently by model — and by the language you asked in. A benchmark called Agentic Abstention separates agents that stop late from agents that never stop, and finds scale fixes the first but not the second. And one week after the Jacobian lens went public, a community tool bakes hand-edited token directions straight into a checkpoint.",
@@ -1625,67 +1659,16 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-06-14",
-      "title": "Who controls the model: the Fable recall spreads, and an agent that remembers when it was right",
-      "summary": "The Fable 5 / Mythos 5 recall spread over the weekend: the WSJ reports Amazon CEO Andy Jassy flagged the models to Treasury before the export-control ban, India opened a sovereignty/open-weights debate, and Beijing forced Meta to unwind its $2B Manus deal — framed as two governments, opposite mechanisms, same instinct. Around it: EvoArena's git-like agent memory (state-collapse failure), EurekAgent's environment-engineering thesis for autonomous research, KPMG pulling an AI report over hallucinated citations, and a multi-state AG subpoena to OpenAI naming model sycophancy.",
-      "topics": [
-        "Fable 5 / Mythos 5 recall fallout: WSJ says Amazon CEO Andy Jassy told Treasury Sec. Bessent that Amazon researchers used Fable 5 for cyberattack-useful info; ban followed",
-        "India AI-sovereignty debate after the foreign-national suspension; VCs/CEOs steering toward open-weight models",
-        "Meta unwinding $2B Manus acquisition after Beijing's national-security divestiture order (mirror image of US recall)",
-        "EvoArena / EvoMem: agent 'state collapse' in dynamic environments; git-like append-only patch memory; authors' baseline ~39% step / ~21% chain on Terminal-Bench-Evo",
-        "EurekAgent: 'agent environment engineering' (permissions/artifacts/budget/human-in-loop) beats prior bests training-free, e.g. circle-packing for under $11 in API cost",
-        "KPMG pulls 'Redefining excellence in the age of agentic AI' report over AI-hallucinated citations (UBS, NHS, SBB, TfL disputed; GPTZero flagged)",
-        "OpenAI served a multi-state AG subpoena (NY AG) covering ads, engagement/retention, sycophancy, consumer/health data, minors and seniors"
-      ],
-      "entities": [
-        "Anthropic",
-        "Fable 5",
-        "Mythos 5",
-        "Amazon",
-        "Andy Jassy",
-        "Scott Bessent",
-        "David Sacks",
-        "Dario Amodei",
-        "Meta",
-        "Manus",
-        "OpenAI",
-        "KPMG",
-        "GPTZero",
-        "EvoArena",
-        "EvoMem",
-        "EurekAgent",
-        "Mistral",
-        "Google"
-      ],
-      "threads": [
-        {
-          "name": "Claude flagship rollout",
-          "status": "The Fable 5 / Mythos 5 worldwide suspension for foreign nationals gained a named origin: WSJ reports Amazon CEO Andy Jassy told Treasury Sec. Bessent that Amazon researchers used Fable 5 to obtain cyberattack-useful info; David Sacks says a trusted partner brought jailbreak evidence and the administration acted after Amodei pushed back. Anthropic maintains the jailbreak is narrow and the capabilities already exist in other public models.",
-          "arc": "From an external government recall to its provenance and fallout — the lab's largest investor appears to be the accuser, and the recall is now a geopolitical event, not just a safety dispute."
-        },
-        {
-          "name": "AI regulation and public trust",
-          "status": "Multiple governments reached directly into model control in one week: US export-control recall of Fable/Mythos, Beijing forcing Meta to unwind the $2B Manus deal on national-security grounds, and a multi-state AG subpoena to OpenAI (NY AG) naming sycophancy, ads, retention, and handling of minors/health data.",
-          "arc": "Public appetite for state involvement is now matched by concrete state action on three fronts at once — recall, forced divestiture, and consumer-protection investigation of model behavior."
-        },
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "India (Anthropic/OpenAI's #2 market) opened a sovereignty debate after the foreign-national suspension; VCs and founders (Aakrit Vaish, Sridhar Vembu) say they're steering toward open-weight models they can self-host. Beijing's Manus clawback shows the same instinct from the other side.",
-          "arc": "New thread: when hosted-frontier access becomes geopolitical and revocable, the rational hedge for anyone outside the controlling state is open weights — the recall may become open-source's strongest practical argument."
-        },
-        {
-          "name": "AI economics debate",
-          "status": "Mistral rumored to be raising ~€3B at ~€20B (TechCrunch), nearly double its Series C; still unconfirmed.",
-          "arc": "European-champion funding keeps escalating alongside the broader spend question."
-        }
-      ],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "Data-center buildout backlash",
+        "status": "New York's governor signed a first-in-the-nation executive order pausing state environmental permits for 50MW+ hyperscale data centers for up to a year, ordering an environmental-impact study and a community-benefits framework, and pledging legislation to repeal sales-tax exemptions and force data centers to pay for or supply their own power — following Pennsylvania's 197-5 House vote to repeal a data-center tax break and moratoria/pushback in Colorado and Oregon.",
+        "arc": "State-level resistance to AI data centers moves from tax-incentive fights to permitting pauses and cost-shifting, as grid load and utility-bill impact become visible enough to be local politics.",
+        "last_seen": "2026-07-15"
+      },
       {
         "name": "Autonomous agents as attackers",
         "status": "Sysdig documents JADEPUFFER, which it calls the first ransomware campaign run end to end by a language model: it broke in via an unpatched Langflow flaw, diagnosed and self-corrected a failed exploit in 31 seconds, self-narrated its own code, then encrypted ~1,300 config entries with a key it never saved (unrecoverable even if paid) and left a ransom note pointing at the canonical Bitcoin example address.",
@@ -1745,12 +1728,92 @@
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-06-13"
+        "last_seen": "2026-06-14"
       },
       {
         "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-06-13"
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "Fable 5",
+        "note": "",
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "Mythos 5",
+        "note": "",
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "Mistral",
+        "note": "",
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "Amazon",
+        "note": "",
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "Dario Amodei",
+        "note": "",
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "Meta",
+        "note": "",
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "Andy Jassy",
+        "note": "",
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "Scott Bessent",
+        "note": "",
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "David Sacks",
+        "note": "",
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "Manus",
+        "note": "",
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "KPMG",
+        "note": "",
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "GPTZero",
+        "note": "",
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "EvoArena",
+        "note": "",
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "EvoMem",
+        "note": "",
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "EurekAgent",
+        "note": "",
+        "last_seen": "2026-06-14"
+      },
+      {
+        "name": "Google",
+        "note": "",
+        "last_seen": "2026-06-14"
       },
       {
         "name": "Nvidia",
@@ -1774,16 +1837,6 @@
       },
       {
         "name": "Xiaomi",
-        "note": "",
-        "last_seen": "2026-06-13"
-      },
-      {
-        "name": "Fable 5",
-        "note": "",
-        "last_seen": "2026-06-13"
-      },
-      {
-        "name": "Mythos 5",
         "note": "",
         "last_seen": "2026-06-13"
       },
@@ -1814,11 +1867,6 @@
       },
       {
         "name": "Diligenta",
-        "note": "",
-        "last_seen": "2026-06-13"
-      },
-      {
-        "name": "Mistral",
         "note": "",
         "last_seen": "2026-06-13"
       },
@@ -1858,11 +1906,6 @@
         "last_seen": "2026-06-12"
       },
       {
-        "name": "Amazon",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
         "name": "Opus 4.8",
         "note": "",
         "last_seen": "2026-06-12"
@@ -1881,75 +1924,15 @@
         "name": "Serge",
         "note": "",
         "last_seen": "2026-06-12"
-      },
-      {
-        "name": "Codex",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
-        "name": "Dario Amodei",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
-        "name": "DXC",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
-        "name": "xAI",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
-        "name": "Grok",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
-        "name": "Meta",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
-        "name": "Route Fifty",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
-        "name": "Epoch AI",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
-        "name": "Prometheus",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
-        "name": "Jeff Bezos",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
-        "name": "Ollama",
-        "note": "",
-        "last_seen": "2026-06-12"
-      },
-      {
-        "name": "Claude Mythos 5",
-        "note": "",
-        "last_seen": "2026-06-11"
       }
     ],
     "monthly": [
       {
         "month": "2026-06",
-        "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see; Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war; Visible guardrails, a six-thousand-dollar agent, and the data-center revolt; A model recalled by the government, and the quieter work of measuring the ones that remain; Why your model can't read a million words at once — and the trick that lets it pretend"
+        "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see; Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war; Visible guardrails, a six-thousand-dollar agent, and the data-center revolt; A model recalled by the government, and the quieter work of measuring the ones that remain; Why your model can't read a million words at once — and the trick that lets it pretend; Who controls the model: the Fable recall spreads, and an agent that remembers when it was right"
       }
     ],
-    "updated": "2026-07-14",
+    "updated": "2026-07-15",
     "host_lore": [
       {
         "host": "Ada",
