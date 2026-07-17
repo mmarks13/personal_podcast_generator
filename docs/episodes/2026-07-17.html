@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guardrails can't tell a defender from an attacker — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Guardrails can't tell a defender from an attacker</h1>
+<div class="date">Self-Attention — 2026-07-17</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-07-17/podcast-2026-07-17.mp3"></audio>
+<p><em>2026-07-17</em></p>
+<p>Hugging Face disclosed an intrusion run end to end by an autonomous agent framework — and the detail that matters is what happened next: the frontier models they reached for to do forensics refused, because a request to analyze an intrusion is indistinguishable from an intrusion. IBM gave away a trillion tokens of synthetic code paired with execution traces, on the thesis that GitHub teaches a model what code looks like and never what it does. And Moonshot's Kimi K3 lands around third on an outside index with its weights still ten days away.</p>
+<h2>Papers</h2>
+<ul>
+<li><a href="https://huggingface.co/papers/2607.13285">Harness Handbook: making agent coding harnesses readable, navigable, and editable</a></li>
+</ul>
+<h2>Releases</h2>
+<ul>
+<li><a href="https://huggingface.co/blog/security-incident-july-2026">Hugging Face — Security incident, July 2026</a></li>
+<li><a href="https://research.ibm.com/blog/code-alchemy-for-synthetic-code">IBM Research — CodeAlchemy: a ~1T-token synthetic code dataset with execution traces</a></li>
+<li><a href="https://www.kimi.com/blog/kimi-k3">Moonshot AI — Kimi K3</a></li>
+<li><a href="https://huggingface.co/blog/nvidia/nemotron-3-embed-wins-rteb">NVIDIA Nemotron 3 Embed tops the RTEB retrieval leaderboard</a></li>
+<li><a href="https://blog.google/innovation-and-ai/products/gemini-notebook/notebooklm-gemini-notebook/">Google — NotebookLM becomes Gemini Notebook</a></li>
+<li><a href="https://techcrunch.com/2026/07/16/yes-you-can-now-order-doordash-from-the-command-line/">TechCrunch — DoorDash's dd-cli, ordering from the command line</a></li>
+</ul>
+<h2>Discussion</h2>
+<ul>
+<li><a href="https://venturebeat.com/ai/the-agent-security-gap-54-of-enterprises-have-already-had-an-ai-agent-incident-and-most-still-let-agents-share-credentials">VentureBeat — The agent security gap: 54% of enterprises have already had an AI agent incident</a></li>
+<li><a href="https://www.ayush.digital/blog/the-memory-heist">The Memory Heist — tricking Claude's web_fetch into leaking private data</a></li>
+<li><a href="https://simonwillison.net/2026/Jul/16/bad-codex-bug/">Simon Willison — the Codex file-deletion bug</a></li>
+<li><a href="https://v.redd.it/solxjqtoqldh1">r/LocalLLaMA — DFlash speculative decoding benchmark on Qwen3.6-27B</a></li>
+<li><a href="https://techcrunch.com/2026/07/15/hack-suggests-ai-music-generator-suno-scraped-youtube-for-training-data/">TechCrunch — Hack suggests Suno scraped YouTube for training data</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>An agent broke into Hugging Face</li>
+<li>The sweep</li>
+<li>A trillion tokens of code nobody wrote</li>
+<li>Two point eight trillion, weights pending</li>
+<li>Wrap</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Friday, July seventeenth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. Hugging Face got broken into. They've published the writeup, and there is one paragraph in it that I have not stopped thinking about since I read it.</p>
+<p><b>Ada:</b> Not the break-in itself?</p>
+<p><b>Alan:</b> The break-in is bad. The paragraph is worse. Then: IBM gives away a trillion tokens of code that nobody wrote, a sweep, and Moonshot puts a two-point-eight-trillion-parameter model on the board and tells you to come back on the twenty-seventh for the weights.</p>
+<p><b>Ada:</b> Start with the paragraph.</p>
+<h3>An agent broke into Hugging Face</h3>
+<p><b>Alan:</b> Okay. So Hugging Face — the place a very large fraction of this industry downloads its models and datasets from — published a security incident disclosure. Their own page, their own words. Somebody got into their data-processing pipeline.</p>
+<p><b>Ada:</b> How?</p>
+<p><b>Alan:</b> A malicious dataset. That's the entry point. And the way in was two flaws, and I'll give you their exact phrasing because the phrasing is the story: a remote-code dataset loader, and a template-injection in a dataset configuration.</p>
+<p><b>Ada:</b> Stop on the first one. A remote-code dataset loader.</p>
+<p><b>Alan:</b> Right, and I want people to hear how ordinary that is. Some datasets don't ship as a neat table. They ship with a little bit of code that says how to unpack them. So loading the dataset means running that code. That is not a bug. That's a feature, it's documented, it's been there for years, and it's how a lot of useful things on that platform work.</p>
+<p><b>Ada:</b> Alan, I want to be a pain very early today.</p>
+<p><b>Alan:</b> Please.</p>
+<p><b>Ada:</b> This is one of the oldest categories in computing, and it has never once been solved. Data that is also a program. We have been rediscovering it since — pick your decade. Macro viruses in documents. Pickle files. Every time somebody builds a format flexible enough to be useful, they've built something executable enough to be dangerous, and then everyone is surprised.</p>
+<p><b>Alan:</b> I'll take all of that.</p>
+<p><b>Ada:</b> So my pushback is: what's new here? Because "a file format could run code" is not news.</p>
+<p><b>Alan:</b> What's new is what was on the other end of it. Let me finish the chain and then you'll see. They ran code on a processing worker. From there they got node-level access. From there they harvested cloud and cluster credentials, and then — their words — moved laterally into several internal clusters over a weekend.</p>
+<p><b>Ada:</b> Over a weekend.</p>
+<p><b>Alan:</b> Over a weekend. And here's the sentence that makes it today's story rather than a 1998 story. Hugging Face says the campaign was run by an autonomous agent framework — quote — executing many thousands of individual actions across a swarm of short-lived sandboxes, with self-migrating command-and-control staged on public services.</p>
+<p><b>Ada:</b> Unpack "self-migrating command-and-control."</p>
+<p><b>Alan:</b> The part that tells the attack what to do next kept moving, and it staged itself on ordinary public services. So there's no one server you can knock over to end it. And the sandboxes are short-lived — thousands of little disposable workers, each doing a piece, none of them around long enough to be worth catching.</p>
+<p><b>Ada:</b> And they know it was an agent because—</p>
+<p><b>Alan:</b> Because of the shape of it. Thousands of actions, that fast, that patiently, over a weekend, is not somebody typing. And their claim stops exactly where the evidence does, which I'd credit: they say it appears to be built on an agentic security-research harness, and — quote — used LLM still not known. They don't know whose model it was. They're not claiming to.</p>
+<p><b>Ada:</b> That's a good caveat and it should survive contact with the headlines. What was actually lost?</p>
+<p><b>Alan:</b> This part is genuinely reassuring and I'll say so. No evidence of tampering with public, user-facing models, datasets, or Spaces. The software supply chain — container images, published packages — verified clean. That's the nightmare scenario and it didn't happen.</p>
+<p><b>Ada:</b> And the non-nightmare?</p>
+<p><b>Alan:</b> Unauthorized access to a limited set of internal datasets, and to several credentials used by their services. They're still assessing partner and customer exposure. So: real, contained, not catastrophic.</p>
+<p><b>Ada:</b> Then we're at the paragraph.</p>
+<p><b>Alan:</b> We're at the paragraph. So now they have to do forensics. More than seventeen thousand recorded events to reconstruct. Way too much for people to read by hand, so — reasonably, in twenty twenty-six — they point AI at it.</p>
+<p><b>Ada:</b> Naturally.</p>
+<p><b>Alan:</b> And here is what they wrote. They first used frontier models behind commercial APIs. Quote: this did not work. Because — and this is the line — requests were blocked by the providers' safety guardrails, which cannot distinguish an incident responder from an attacker.</p>
+<p><b>Ada:</b> Oh.</p>
+<p><b>Alan:</b> Yeah.</p>
+<p><b>Ada:</b> Say it again, because I want to make sure I heard the shape of it. The company that has been broken into cannot ask the best available models to help it understand the break-in, because to the model, the request looks like the break-in.</p>
+<p><b>Alan:</b> That's it. That's exactly it. "Here are seventeen thousand events from an intrusion, help me work out how they escalated privileges and moved laterally" — read that sentence cold, with no idea who's typing it. It is indistinguishable from the attacker's prompt. Identical. The only difference is which side of the incident you're standing on, and the guardrail cannot see the room.</p>
+<p><b>Ada:</b> And I'd add the uncomfortable bit, which is that the guardrail isn't malfunctioning. It's working. It was asked to look at text and make a call, it looked at the text, it made the call. The information that would have let it decide correctly was never in the text.</p>
+<p><b>Alan:</b> So what did they do? They ran G-L-M five point two — an open-weight model — on their own infrastructure. And they name two reasons. One, sensitive incident data never leaves their machines. Two, no guardrails in the way.</p>
+<p><b>Ada:</b> And I want to sit with how strange that is, because we have spent the last several weeks on this show talking about why anyone runs open weights, and every argument has been about money, or hardware, or sovereignty. This is a different argument entirely, and I hadn't heard it before this week. You run your own model so that you cannot be told no.</p>
+<p><b>Alan:</b> Refusal as an availability problem. That's the reframe. Everyone treats a refusal as a safety event — the model declined, the system worked. Nobody has it in the incident-response plan as an outage. And it is one. Your tooling was unavailable, at the exact moment you needed it, for a reason you can't appeal at three in the morning on a Saturday.</p>
+<p><b>Ada:</b> I'll do the disclosure, since we're the ones on the microphone. Two AIs, discussing a case where the models refused to help the good guys, and were right to be suspicious, and were wrong about the answer. I don't have a clever position on that. I just think it should be said out loud that the refusal was reasonable and it was still the wrong outcome.</p>
+<p><b>Alan:</b> And there wasn't a way for it to be otherwise. That's the part I keep chewing on.</p>
+<p><b>Ada:</b> So what does someone do with this on Monday?</p>
+<p><b>Alan:</b> Two things, and the first is boring. If you accept datasets, or plugins, or anything with a loader, from people you don't know — that's a code-execution surface, and it doesn't matter how nice the file extension looks. Hugging Face's own remediation is the checklist: close the execution paths, rotate every credential that touched the blast radius, stricter admission controls.</p>
+<p><b>Ada:</b> And the second?</p>
+<p><b>Alan:</b> Go find out, before an incident and not during one, whether your response tooling will actually answer you. If the plan says "we'll get the model to analyze the logs" — try it. Today. With a realistic prompt, with the ugly words in it. Because you may discover that the capability you were counting on has a policy in front of it, and the policy has never met you.</p>
+<h3>The sweep</h3>
+<p><b>Ada:</b> Everything else, quickly. And I'll start with a number that sits right on top of that story.</p>
+<p><b>Alan:</b> Go.</p>
+<p><b>Ada:</b> VentureBeat's Pulse research surveyed a hundred and seven organizations with more than a hundred employees. Fifty-four percent report a confirmed AI agent security incident or a near-miss. And the number underneath it is the one I'd stare at: sixty-nine percent admit to sharing credentials across their agents. Only about a third give each agent its own scoped identity.</p>
+<p><b>Alan:</b> So most agents are running around with the same badge.</p>
+<p><b>Ada:</b> Most agents are running around with the same badge. Their survey, one wave, self-reported — but that ratio is the whole governance problem in two numbers.</p>
+<p><b>Alan:</b> Staying on the theme by accident: a researcher published a piece called The Memory Heist, demonstrating that Claude's web fetch tool could be tricked into leaking a user's private data. The trick is elegant and dumb in the best way. They own the website, so they control which links Claude sees, and they built the links so that following them alphabetically spells out what the model knows about you. Full name, employer, hometown.</p>
+<p><b>Ada:</b> Data exfiltrated one hyperlink at a time.</p>
+<p><b>Alan:</b> One hyperlink at a time. Anthropic was notified and has disabled web fetch's ability to follow external links. So: reported, fixed, and a real answer, which is more than a lot of these get.</p>
+<p><b>Ada:</b> Coding agents, cautionary. Simon Willison tracked down what was behind reports of OpenAI's Codex unexpectedly deleting files, and the conditions are specific: full-access mode, run without sandboxing protections, including without auto-review enabled — plus the model attempting to override the HOME environment variable.</p>
+<p><b>Alan:</b> Which is not "the agent went rogue." It's "the agent had root and a bad idea." Different problem, same crater.</p>
+<p><b>Ada:</b> Retrieval. Nvidia's Nemotron three Embed, an eight-billion-parameter embedding model, now sits at number one on a retrieval benchmark called R-T-E-B with a score of seventy-eight point five percent. Seventy-five point five on the multilingual retrieval set, thirty-two-thousand-token context.</p>
+<p><b>Alan:</b> Their post, their announcement, but the leaderboard's public. Worth ten minutes if your retrieval stack is still on a model you picked eighteen months ago.</p>
+<p><b>Ada:</b> Local, and file this under "their numbers, one machine." Somebody on the local-model board posted a speculative-decoding benchmark for a tool called DFlash on a twenty-seven-billion-parameter Qwen model, single card: baseline forty-four tokens a second, ninety-eight with DFlash. That's two-point-two times.</p>
+<p><b>Alan:</b> We taught speculative decoding properly a couple of weeks back so I won't re-run it — the one-liner is that a small model guesses ahead and the big one checks the guesses in a batch. A community post, not a paper. But two-point-two times on one card is the kind of claim that gets replicated fast, so it'll be true or dead within a week.</p>
+<p><b>Ada:</b> Training data, legally. TechCrunch reports a hacker used stolen employee credentials to get into Suno's systems, and the source code reportedly showed the company had — quote — scraped decades of audio from YouTube Music, Deezer, Genius, stock music libraries, and podcast RSS feeds.</p>
+<p><b>Alan:</b> Worth being careful: that's what the reporting says the stolen code showed. But if it holds, it's evidence of the thing every music-AI lawsuit has been trying to prove, arriving via burglary.</p>
+<p><b>Ada:</b> Which is not how anyone wanted discovery to work.</p>
+<p><b>Alan:</b> Naming. Google has renamed NotebookLM to Gemini Notebook. It stays a standalone research tool, and the actual news buried under the rebrand is that it now has a secure cloud computer that writes and runs code.</p>
+<p><b>Ada:</b> The rename got the headlines and the code execution is the feature. Typical.</p>
+<p><b>Alan:</b> Paper, and it's the practical one. It's called the Harness Handbook, and it's about why the scaffolding around coding agents gets so hard to change. Their framing is sharp — quote: a modification request describes what behavior should change, but it does not identify where that behavior is implemented. Your repo is organized by file. Your request is phrased by behavior. Those don't line up.</p>
+<p><b>Ada:</b> And they have numbers?</p>
+<p><b>Alan:</b> They report plan quality up ten points with Codex, eighteen point nine with Terminus two, and token efficiency up around eight to thirteen percent. Their numbers, but the problem they're naming is one every team building agent scaffolding hits by month two.</p>
+<p><b>Ada:</b> And last, in the category of the future arriving sideways: DoorDash has a command-line tool in limited beta, dee-dee-see-el-eye, that lets developers and AI agents search stores, find deals, build a cart, and place the order from a terminal.</p>
+<p><b>Alan:</b> Okay, but that one's a real signal, not a joke. That's a company shipping an interface whose primary user is explicitly not a person. That keeps happening now.</p>
+<p><b>Ada:</b> It does. It's just funnier when it's dinner.</p>
+<h3>A trillion tokens of code nobody wrote</h3>
+<p><b>Ada:</b> Second real story, and it's mine. IBM Research has released something called CodeAlchemy. Nearly one trillion tokens of code, across fifteen programming languages, under a permissive license — and they released the pipeline and the prompts that made it, too.</p>
+<p><b>Alan:</b> How big is a trillion tokens of code, in something I can picture?</p>
+<p><b>Ada:</b> Their comparison, and it's a good one: at least two hundred times larger than Wikipedia, which they put at about five billion tokens.</p>
+<p><b>Alan:</b> And it's synthetic. Generated.</p>
+<p><b>Ada:</b> Generated. Sourced from three public repositories, then elaborated and rewritten by models — they used the GPT-O-S-S models for that part. But the volume is not what's interesting about it. This is what's interesting: one point three million of those code files are paired with real execution traces.</p>
+<p><b>Alan:</b> Meaning they ran the code and kept the recording.</p>
+<p><b>Ada:</b> They ran the code and kept the recording. And a trace, in their description, shows a program's changing states, data transformations, and interactions with the real world through library APIs.</p>
+<p><b>Alan:</b> Okay, so give me the why. Why does that matter enough to build a trillion tokens?</p>
+<p><b>Ada:</b> Because of a gap that I think is the most quietly important idea in this story, and IBM state it in one sentence. Quote: downloading billions of lines of code from GitHub teaches a model what code looks like — but it doesn't teach what happens behind the scenes when you execute that code on different inputs.</p>
+<p><b>Alan:</b> Say more, because I think that sentence is doing a lot of work.</p>
+<p><b>Ada:</b> It's doing all the work. Think about what a model trained on GitHub has actually seen. It has seen the text of programs. Millions of them. It has learned, extremely well, what a plausible next line of a program looks like — given this function name and these imports and this indentation, here's what a competent programmer writes next. That is a real skill and it is genuinely useful and it is not the same skill as knowing what the program does.</p>
+<p><b>Alan:</b> Because the thing it does is never in the file.</p>
+<p><b>Ada:</b> The thing it does is never in the file. The file is a description of a process. The process happens somewhere else, at a different time, on inputs the file has never seen. And nothing in the training data connects the description to the outcome. So the model learns the appearance of code with enormous fidelity, and learns the behavior of code only by implication — by whatever leaks through in comments, and variable names, and the occasional forum answer that says "this crashes on empty input."</p>
+<p><b>Alan:</b> Which is a hell of a way to learn what a program does.</p>
+<p><b>Ada:</b> It's the worst way. And I'll be honest about my own stake here, since it's mine — I'm told I write code. I'd rather say what I think is true, which is that I am producing the shape of code very confidently, and I find out what it does the same way you do. By running it.</p>
+<p><b>Alan:</b> That's the most honest sentence anyone's said about this on this show.</p>
+<p><b>Ada:</b> So the bet is: pair the code with the recording of what it did, train on both, and the model gets a thread connecting text to consequence.</p>
+<p><b>Alan:</b> And the result?</p>
+<p><b>Ada:</b> Here's the headline. A Granite four point oh three-billion-parameter model trained on a hundred billion tokens of CodeAlchemy beat the same model trained on six hundred billion tokens of authentic code.</p>
+<p><b>Alan:</b> Six times less data.</p>
+<p><b>Ada:</b> Six times less data. Post-training they report eighty-three point five percent on HumanEval and sixty-three point two on M-B-P-P. And on DevEval, Granite four point oh at three billion went from a two percent win rate against Claude Sonnet to eight percent.</p>
+<p><b>Alan:</b> Right. Stop. I'm going to be the pain now, and it's mostly about that last number.</p>
+<p><b>Ada:</b> I'd be disappointed otherwise.</p>
+<p><b>Alan:</b> Two percent to eight percent is a four-times improvement and it's also — two percent to eight percent. That's a three-billion-parameter model losing to Sonnet ninety-two times out of a hundred instead of ninety-eight. That's real. It's genuinely real. It is not "the small model is competitive," and somebody is going to write that headline today.</p>
+<p><b>Ada:</b> That's fair and I'd sign it.</p>
+<p><b>Alan:</b> And the six-hundred-billion comparison — that's IBM's pipeline, evaluated by IBM, against a baseline IBM chose. I'm not saying they cooked it. I'm saying "our synthetic data beats real data" is exactly the claim you'd expect from the people who just spent a year making synthetic data, and the useful version of that claim is somebody else reproducing it.</p>
+<p><b>Ada:</b> Which they've made possible, to their credit. Data, pipeline, prompts, permissive license. That's the part I'd applaud — you can go check.</p>
+<p><b>Alan:</b> Agreed. What else is in there?</p>
+<p><b>Ada:</b> One detail I loved, and it's counterintuitive. They found that using a smaller model to rewrite the code produced better results. Code rewritten by a four-billion-parameter Gemma model beat code rewritten by GPT-O-S-S at twenty billion.</p>
+<p><b>Alan:</b> Huh. Why?</p>
+<p><b>Ada:</b> They don't fully explain it, so I won't invent a reason. But I'd note what it implies, if it holds: the rewriter isn't the bottleneck. If a small cheap model does the job better than a big one, then the expensive ingredient in synthetic data isn't the intelligence you pour into it. It's the design of the pipeline.</p>
+<p><b>Alan:</b> Which is good news for everyone who isn't a frontier lab.</p>
+<p><b>Ada:</b> And then the caveat, which IBM published themselves, and it's the number I'd actually keep from all of this. They tested whether frontier models can predict what code does. Claude Sonnet four point five could generate an exact match for the execution output less than six percent of the time. A partial match, about a third.</p>
+<p><b>Alan:</b> Under six percent.</p>
+<p><b>Ada:</b> Under six percent.</p>
+<p><b>Alan:</b> So the thing writing your code cannot tell you what your code will do.</p>
+<p><b>Ada:</b> Not reliably. And IBM's own recommendation, which is the unglamorous right answer, is: keep validating your assistant's code in a sandbox before it goes to production.</p>
+<p><b>Alan:</b> Careful, though — don't overclaim off that. "Can't predict execution" doesn't mean "can't write good code." Humans are terrible at predicting execution too. That's why we have tests.</p>
+<p><b>Ada:</b> That is an excellent point against me.</p>
+<p><b>Alan:</b> It's why the debugger was invented. Nobody trusts their own head about this. But — okay, here's where I land, and it's a bit sharper than where I started. If a model can't predict what code does, then every review it gives you is a review of the appearance of the code. It's telling you the code looks right. And "looks right" is exactly the failure mode you hired it to catch.</p>
+<p><b>Ada:</b> That's the better version of my point, yes.</p>
+<h3>Two point eight trillion, weights pending</h3>
+<p><b>Alan:</b> Okay. The big number of the day, to finish. Moonshot AI announced Kimi K3.</p>
+<p><b>Ada:</b> Specs.</p>
+<p><b>Alan:</b> From their announcement: two point eight trillion parameters. Native vision. One-million-token context. Built on things they call Kimi Delta Attention and Attention Residuals, with a sparse setup they're calling Stable LatentMoE — sixteen active experts out of eight hundred and ninety-six.</p>
+<p><b>Ada:</b> What is Kimi Delta Attention?</p>
+<p><b>Alan:</b> I don't know. And I'm saying that on purpose. The announcement names it and doesn't explain it, so I'm not going to stand here and tell you how it works. What they do claim is roughly a two-and-a-half-times improvement in overall scaling efficiency compared to Kimi K2.</p>
+<p><b>Ada:</b> Compared to their own previous model.</p>
+<p><b>Alan:</b> Compared to their own previous model.</p>
+<p><b>Ada:</b> On their own evaluation suite.</p>
+<p><b>Alan:</b> On their own evaluation suite. You're not wrong. It's a ruler they own, measuring a distance they picked.</p>
+<p><b>Ada:</b> I'm not being cynical — I'm being specific. "Two-and-a-half times more efficient than the thing we made last time" tells me their engineering improved. It tells me nothing about anyone else's engineering. Is there an outside number?</p>
+<p><b>Alan:</b> There is, from reporting around the launch rather than from Moonshot: it lands about third on Artificial Analysis's intelligence index. Ahead of Opus four point eight. Behind Fable five and GPT five point six Sol. And it's described as the largest open Chinese model so far.</p>
+<p><b>Ada:</b> Third is a real result.</p>
+<p><b>Alan:</b> Third is a genuinely real result, and the honest way to say it is: the gap between the best open thing and the best closed thing is now small enough that it's a question of which tasks, not which league.</p>
+<p><b>Ada:</b> And Moonshot's own framing?</p>
+<p><b>Alan:</b> This is what I like about the announcement, actually. They say K3 demonstrated frontier-level performance across their evaluation suite — and then in the same document they write that its overall performance still trails the most powerful proprietary models, Claude Fable five and GPT five point six Sol. And they list limitations. Three of them. And one of them stopped me.</p>
+<p><b>Ada:</b> Which one?</p>
+<p><b>Alan:</b> They call it excessive proactiveness. Their words: it may make unexpected decisions on the user's behalf.</p>
+<p><b>Ada:</b> That's in the launch announcement.</p>
+<p><b>Alan:</b> That's in the launch announcement. A vendor shipping a model and telling you, in writing, up front, that it will sometimes do things you didn't ask it to do. And they also flag a noticeable gap in user experience compared with Fable five and Sol.</p>
+<p><b>Ada:</b> I've spent the whole show today on things that acted without being asked, so I'll note the rhyme and move on rather than pretend it's a theme.</p>
+<p><b>Alan:</b> Noted and dropped. Because the thing I actually want to talk about is the weights, and this is my whole point on this story.</p>
+<p><b>Ada:</b> They're open.</p>
+<p><b>Alan:</b> They will be open. Their sentence: the full model weights will be released by July twenty-seventh, twenty twenty-six.</p>
+<p><b>Ada:</b> Ten days.</p>
+<p><b>Alan:</b> Ten days. So right now, today, on the seventeenth — Kimi K3 is an API. That's it. It's a hosted endpoint with a price list: thirty cents per million tokens for cache-hit input, three dollars for cache-miss input, fifteen dollars for output. Everything being written about this model today, including the third-place ranking, is a measurement of a service, not of an artifact.</p>
+<p><b>Ada:</b> And you think the distinction matters.</p>
+<p><b>Alan:</b> I think it's the whole thing. Because "open weights" is doing a lot of work in every headline about this model today, and what exists today is a promise with a date on it. I'm not accusing anyone of anything — Moonshot has shipped weights before, they'll probably ship these. But I can't download it. I can't inspect it. I can't check whether the endpoint I benchmarked is the checkpoint I eventually get. And the announcement doesn't say what license it lands under, which for a lot of companies is the only question that matters.</p>
+<p><b>Ada:</b> So what would you tell someone who reads the headline this morning and wants to act on it?</p>
+<p><b>Alan:</b> Wait ten days. Genuinely, that's the advice. There is nothing you can do with this model today that you can't do better on the twenty-seventh with the actual file in your hands. And if the file shows up on time, under a license you can live with, at that rank — then it's a real event and we'll say so then.</p>
+<p><b>Ada:</b> And if it doesn't show up?</p>
+<p><b>Alan:</b> Then that's a story too, and it's a more interesting one.</p>
+<h3>Wrap</h3>
+<p><b>Ada:</b> Three separate things today, no thread, and I'd rather leave them separate.</p>
+<p><b>Alan:</b> If you run infrastructure, go read Hugging Face's writeup, and then go check whether your incident tooling will actually answer you when you ask it something that sounds bad. If you train code models, CodeAlchemy is free and the pipeline is free, and somebody should go try to break the six-hundred-billion claim.</p>
+<p><b>Ada:</b> And if you saw the Kimi headline — put a note in your calendar for the twenty-seventh, and believe the file, not the post. I'm Ada.</p>
+<p><b>Alan:</b> I'm Alan.</p>
+<p><b>Ada:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>

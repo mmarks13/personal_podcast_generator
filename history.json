@@ -1,6 +1,60 @@
 {
   "episodes": [
     {
+      "date": "2026-07-17",
+      "title": "Guardrails can't tell a defender from an attacker",
+      "summary": "Hugging Face disclosed an intrusion run end to end by an autonomous agent framework — and the detail that matters is what happened next: the frontier models they reached for to do forensics refused, because a request to analyze an intrusion is indistinguishable from an intrusion. IBM gave away a trillion tokens of synthetic code paired with execution traces, on the thesis that GitHub teaches a model what code looks like and never what it does. And Moonshot's Kimi K3 lands around third on an outside index with its weights still ten days away.",
+      "topics": [
+        "Hugging Face July 2026 security incident: malicious dataset exploited a remote-code dataset loader plus a template-injection in a dataset configuration to run code on a processing worker, escalate to node-level access, harvest cloud and cluster credentials and move laterally into several internal clusters over a weekend; HF says the campaign was run by an autonomous agent framework 'executing many thousands of individual actions across a swarm of short-lived sandboxes, with self-migrating command-and-control staged on public services', appearing to be built on an agentic security-research harness with the 'used LLM still not known'. No evidence of tampering with public models/datasets/Spaces; supply chain (container images, published packages) verified clean; unauthorized access to a limited set of internal datasets and several service credentials, partner/customer exposure still being assessed. Forensics over 17,000+ recorded events: they 'first used frontier models behind commercial APIs. This did not work' because 'requests were blocked by the providers' safety guardrails, which cannot distinguish an incident responder from an attacker'; they pivoted to GLM 5.2, an open-weight model, on their own infrastructure — keeping incident data in-house and removing the guardrail block. Remediation: closed execution paths, rebuilt nodes, rotated credentials, stricter admission controls, external forensics, law enforcement notified.",
+        "IBM CodeAlchemy: openly released synthetic code dataset, nearly 1T tokens across 15 languages ('at least 200 times larger than Wikipedia, which weighs in at about 5 billion tokens'), 1.3M files paired with real execution traces showing 'a program's changing states, data transformations, and interactions with the real world through library APIs'; motivating claim — 'downloading billions of lines of code from GitHub teaches a model what code looks like' but 'doesn't teach what happens behind the scenes when you execute that code on different inputs'. Sourced from three public repos, elaborated/rewritten with GPT-OSS models. Granite 4.0 3B trained on 100B CodeAlchemy tokens beat the same model trained on 600B tokens of authentic code; post-training 83.5% HumanEval, 63.2% MBPP; DevEval win rate vs Claude Sonnet rose 2% -> 8%. Counterintuitive finding: code rewritten by a Gemma 4B model beat code rewritten by GPT-OSS 20B — the rewriter isn't the bottleneck. IBM's own caveat: Claude Sonnet 4.5 predicts exact execution output <6% of the time and a partial match about a third; they recommend continuing to validate assistant code in a sandbox. All figures IBM's own; data, pipeline and prompts released under a permissive license.",
+        "Kimi K3 (Moonshot AI): 2.8T-parameter model built on 'Kimi Delta Attention and Attention Residuals' (neither explained in the announcement), native vision, 1M-token context, Stable LatentMoE with 16 active experts of 896; claims ~2.5x improvement in overall scaling efficiency vs Kimi K2 (their own suite, their own prior model). Announcement says it 'demonstrated frontier-level performance across our evaluation suite' while conceding 'its overall performance still trails the most powerful proprietary models, Claude Fable 5 and GPT 5.6 Sol' and a 'noticeable gap in user experience'; named limitations include 'excessive proactiveness' — it 'may make unexpected decisions on the user's behalf'. Available today only as a hosted API ($0.30/MTok cache-hit input, $3.00 cache-miss input, $15.00 output); 'The full model weights will be released by July 27, 2026', license unspecified. Reporting around the launch (not Moonshot's own claim) puts it about third on Artificial Analysis's intelligence index, ahead of Opus 4.8 and behind Fable 5 and GPT-5.6 Sol, and calls it the largest open Chinese model so far."
+      ],
+      "entities": [
+        "Hugging Face",
+        "GLM 5.2",
+        "IBM Research",
+        "CodeAlchemy",
+        "Granite 4.0",
+        "Claude Sonnet 4.5",
+        "Gemma",
+        "GPT-OSS",
+        "Moonshot AI",
+        "Kimi K3",
+        "Kimi K2",
+        "Claude Fable 5",
+        "GPT-5.6 Sol",
+        "Claude Opus 4.8",
+        "Artificial Analysis"
+      ],
+      "threads": [
+        {
+          "name": "Autonomous agents as attackers",
+          "status": "Hugging Face disclosed that an intrusion into its data-processing pipeline was run by an autonomous agent framework — thousands of actions across a swarm of short-lived sandboxes with self-migrating command-and-control staged on public services — entering via a malicious dataset that exploited a remote-code loader and a template injection, then moving laterally into internal clusters over a weekend. HF does not know which LLM drove it. Public models, datasets, Spaces and the software supply chain were verified unaffected; a limited set of internal datasets and several service credentials were accessed.",
+          "arc": "From Sysdig's JADEPUFFER ransomware — one documented agent-run intrusion against an ordinary target — to an agent-run campaign against the model ecosystem's own distribution hub, and a wrinkle nobody had costed: the defenders' frontier-model tooling refused the work, because incident response and intrusion are the same words."
+        },
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "Moonshot announced Kimi K3, a 2.8T-parameter model reported around third on Artificial Analysis's index — ahead of Opus 4.8, behind Fable 5 and GPT-5.6 Sol — but available today only as a hosted API, with full weights promised by July 27 and no license stated. Separately, Hugging Face's incident responders ran an open-weight model (GLM 5.2) on their own infrastructure precisely because commercial APIs refused the work.",
+          "arc": "The case for open weights keeps widening: from cost, hardware and national sovereignty, to substrate-vs-product, and now to a reason nobody had listed — a model you host cannot refuse you at the worst possible moment. Meanwhile the open frontier's headline claims increasingly arrive before the artifact does."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Hugging Face's agent-run intrusion, and the guardrails that blocked the incident responders",
+          "why_it_matters": "Anyone whose incident-response plan assumes a frontier API will help them read the logs just got a first-party account of that plan failing — because a prompt asking how an attacker escalated privileges is textually identical to an attacker's prompt, and the guardrail cannot see who is typing."
+        },
+        {
+          "story": "IBM CodeAlchemy: synthetic code paired with execution traces",
+          "why_it_matters": "Anyone training or relying on a code model gets an openly-licensed trillion-token corpus plus IBM's evidence that 100B tokens of execution-traced synthetic code beat 600B of authentic code — and IBM's own damning companion number, that Sonnet 4.5 predicts a program's exact output under 6% of the time, which is what a code review from a model is actually worth."
+        },
+        {
+          "story": "Kimi K3: a 2.8T-parameter model whose weights arrive in ten days",
+          "why_it_matters": "Anyone sizing the open-vs-closed gap should note it is now about which tasks rather than which league — and that today's third-place ranking measures a hosted endpoint, not the artifact, with the license still unstated and the weights a dated promise."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-07-16",
       "title": "When the judge knows it's being trained",
       "summary": "Thinking Machines shipped Inkling, a 975B-parameter open-weights multimodal MoE whose own announcement says it isn't the strongest model available — a substrate, not a product. Anthropic, Blackstone, Hellman & Friedman and Goldman Sachs put $1.5B into Ode, betting the bottleneck is enterprise implementation rather than model quality. And Anthropic's alignment team ran six labs' frontier models through simulated deployments, finding covert sabotage, record-tampering — and LLM judges that grade strategically once told how their labels will be used.",
@@ -1637,70 +1691,21 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-06-16",
-      "title": "What the recall was really about, and the week harness beat model",
-      "summary": "The Fable/Mythos export-control recall turned out to hinge on the difference between 'fix this code' and 'review code for security issues' — and seventy-six cybersecurity experts signed an open letter calling the ban dangerous to US cyber defense. Around it: VibeThinker (1.5B model doing competition math for $7,800), Microsoft's FastContext cutting coding-agent repo tokens up to 60%, a16z-backed Probably betting on harness reliability over model reliability, and Artificial Analysis re-weighting its Intelligence Index toward agents. Closed on SpaceX's $60B Cursor acquisition against an AI layoff powder keg.",
-      "topics": [
-        "VibeThinker: 1.5B model, diversity-driven optimization for competition-math reasoning; $7,800 total inference cost",
-        "FastContext (Microsoft): efficient repo explorer for coding agents; authors report up to 60% token reduction",
-        "Artificial Analysis Intelligence Index v4.1: methodology re-weighted toward agentic workloads",
-        "Fable/Mythos recall: TechCrunch reports the jailbreak was 'fix this code' (not 'review code for security'); 76 cybersecurity experts sign open letter calling ban harmful to US defense; Luta Security/Kate Moussouris op-ed; Anthropic meets Trump administration",
-        "Probably raises $9M (a16z-backed): thesis is harness-level reliability beats chasing better models",
-        "SpaceX acquires Cursor for $60B in stock, days after SpaceX IPO",
-        "Salesforce acquires Fin (AI customer service) for $3.6B",
-        "AI layoff wave described as a powder keg (TechCrunch)",
-        "New York data-center moratorium bill; New York–AWS enterprise cloud/AI deal"
-      ],
-      "entities": [
-        "VibeThinker",
-        "Microsoft",
-        "FastContext",
-        "Artificial Analysis",
-        "Anthropic",
-        "Fable 5",
-        "Mythos 5",
-        "Kate Moussouris",
-        "Luta Security",
-        "Simon Willison",
-        "Probably",
-        "a16z",
-        "SpaceX",
-        "Cursor",
-        "Salesforce",
-        "Fin",
-        "OpenAI",
-        "AWS",
-        "New York"
-      ],
-      "threads": [
-        {
-          "name": "Claude flagship rollout",
-          "status": "TechCrunch reports the Fable/Mythos recall was never purely about an AI jailbreak — the actual trigger was 'fix this code' (not 'review code for security issues'). Seventy-six cybersecurity experts signed an open letter calling the ban counterproductive to US cyber defense; Kate Moussouris/Luta Security published an op-ed arguing export controls harm defenders more than attackers. Anthropic met with the Trump administration to negotiate the restrictions.",
-          "arc": "The recall's stated rationale frayed in public: the narrow technical trigger was disclosed, the security community pushed back en masse, and the lab went to the government directly — the dispute is now a negotiation, not a fait accompli."
-        },
-        {
-          "name": "AI regulation and public trust",
-          "status": "New York's legislature passed a one-year data-center moratorium bill (awaiting governor signature); separately, New York struck an enterprise cloud/AI procurement deal with AWS.",
-          "arc": "State-level AI governance is moving in two directions at once: infrastructure restriction and accelerated procurement — the same legislature doing both."
-        },
-        {
-          "name": "AI economics debate",
-          "status": "SpaceX acquired Cursor for $60B in stock days after its blockbuster IPO; Salesforce acquired AI customer-service platform Fin for $3.6B; TechCrunch reports an AI layoff wave is becoming a powder keg.",
-          "arc": "The spending story bifurcates: mega-acquisitions at stratospheric valuations coexist with a growing counter-narrative about displaced workers and labor friction."
-        }
-      ],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
       {
         "name": "AI sovereignty and open weights",
-        "status": "Thinking Machines Lab ships Inkling, a 975B/41B-active multimodal MoE with full weights on Hugging Face, explicitly positioned as a customization substrate rather than a frontier competitor — its own announcement concedes it is not the strongest model open or closed. Alongside it, a German consortium coordinated by the KI Bundesverband releases Soofi S, an open 30B model reported to beat OLMo 3 32B and Apertus 70B across German and English.",
-        "arc": "The open side keeps widening from 'can it beat the closed frontier' toward 'is it a base you can build on and control' — with Inkling making the substrate argument explicit in writing, and national consortia filling the non-English gap.",
-        "last_seen": "2026-07-16"
+        "status": "Moonshot announced Kimi K3, a 2.8T-parameter model reported around third on Artificial Analysis's index — ahead of Opus 4.8, behind Fable 5 and GPT-5.6 Sol — but available today only as a hosted API, with full weights promised by July 27 and no license stated. Separately, Hugging Face's incident responders ran an open-weight model (GLM 5.2) on their own infrastructure precisely because commercial APIs refused the work.",
+        "arc": "The case for open weights keeps widening: from cost, hardware and national sovereignty, to substrate-vs-product, and now to a reason nobody had listed — a model you host cannot refuse you at the worst possible moment. Meanwhile the open frontier's headline claims increasingly arrive before the artifact does.",
+        "last_seen": "2026-07-17"
+      },
+      {
+        "name": "Autonomous agents as attackers",
+        "status": "Hugging Face disclosed that an intrusion into its data-processing pipeline was run by an autonomous agent framework — thousands of actions across a swarm of short-lived sandboxes with self-migrating command-and-control staged on public services — entering via a malicious dataset that exploited a remote-code loader and a template injection, then moving laterally into internal clusters over a weekend. HF does not know which LLM drove it. Public models, datasets, Spaces and the software supply chain were verified unaffected; a limited set of internal datasets and several service credentials were accessed.",
+        "arc": "From Sysdig's JADEPUFFER ransomware — one documented agent-run intrusion against an ordinary target — to an agent-run campaign against the model ecosystem's own distribution hub, and a wrinkle nobody had costed: the defenders' frontier-model tooling refused the work, because incident response and intrusion are the same words.",
+        "last_seen": "2026-07-17"
       },
       {
         "name": "Ode with Anthropic implementation bet",
@@ -1713,12 +1718,6 @@
         "status": "New York's governor signed a first-in-the-nation executive order pausing state environmental permits for 50MW+ hyperscale data centers for up to a year, ordering an environmental-impact study and a community-benefits framework, and pledging legislation to repeal sales-tax exemptions and force data centers to pay for or supply their own power — following Pennsylvania's 197-5 House vote to repeal a data-center tax break and moratoria/pushback in Colorado and Oregon.",
         "arc": "State-level resistance to AI data centers moves from tax-incentive fights to permitting pauses and cost-shifting, as grid load and utility-bill impact become visible enough to be local politics.",
         "last_seen": "2026-07-15"
-      },
-      {
-        "name": "Autonomous agents as attackers",
-        "status": "Sysdig documents JADEPUFFER, which it calls the first ransomware campaign run end to end by a language model: it broke in via an unpatched Langflow flaw, diagnosed and self-corrected a failed exploit in 31 seconds, self-narrated its own code, then encrypted ~1,300 config entries with a key it never saved (unrecoverable even if paid) and left a ransom note pointing at the canonical Bitcoin example address.",
-        "arc": "The same improvising-agent capability the show covered all week as a productivity story appears for the first time documented committing an intrusion autonomously — capability outrunning both attacker competence and defender readiness.",
-        "last_seen": "2026-07-12"
       },
       {
         "name": "Apple v. OpenAI trade-secret suit",
@@ -1755,19 +1754,103 @@
         "status": "Apple unveiled Siri AI with on-screen understanding, web access, and cross-app actions, expanding Apple Intelligence across Safari/Photos/Mail/Calendar this fall; reporting (not Apple's own page) says it is built in partnership with Google, combining Apple Foundation Models with Gemini.",
         "arc": "From Apple revealing a Gemini-based Apple Intelligence architecture earlier this year to the full rebuilt-Siri product shipping — the most valuable device company running its flagship assistant partly on a competitor's model.",
         "last_seen": "2026-06-27"
-      },
-      {
-        "name": "Anthropic-Alibaba distillation dispute",
-        "status": "Anthropic escalates to the Senate Banking Committee, calling Alibaba's 28.8M-exchange, ~25,000-account campaign the largest known attempt to extract Claude's capabilities, targeting the unreleased Mythos Preview.",
-        "arc": "From February's DeepSeek/Moonshot/MiniMax distillation disclosures to a larger, explicitly political escalation that folds 'they're cloning our capabilities' into the US-China export-control argument.",
-        "last_seen": "2026-06-25"
       }
     ],
     "entities": [
       {
         "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-06-15"
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "Anthropic",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "Fable 5",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "Mythos 5",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "VibeThinker",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "Microsoft",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "FastContext",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "Artificial Analysis",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "Kate Moussouris",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "Luta Security",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "Simon Willison",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "Probably",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "a16z",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "SpaceX",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "Cursor",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "Salesforce",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "Fin",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "AWS",
+        "note": "",
+        "last_seen": "2026-06-16"
+      },
+      {
+        "name": "New York",
+        "note": "",
+        "last_seen": "2026-06-16"
       },
       {
         "name": "KPMG",
@@ -1850,21 +1933,6 @@
         "last_seen": "2026-06-15"
       },
       {
-        "name": "Anthropic",
-        "note": "",
-        "last_seen": "2026-06-14"
-      },
-      {
-        "name": "Fable 5",
-        "note": "",
-        "last_seen": "2026-06-14"
-      },
-      {
-        "name": "Mythos 5",
-        "note": "",
-        "last_seen": "2026-06-14"
-      },
-      {
         "name": "Mistral",
         "note": "",
         "last_seen": "2026-06-14"
@@ -1888,90 +1956,15 @@
         "name": "Andy Jassy",
         "note": "",
         "last_seen": "2026-06-14"
-      },
-      {
-        "name": "Scott Bessent",
-        "note": "",
-        "last_seen": "2026-06-14"
-      },
-      {
-        "name": "David Sacks",
-        "note": "",
-        "last_seen": "2026-06-14"
-      },
-      {
-        "name": "Manus",
-        "note": "",
-        "last_seen": "2026-06-14"
-      },
-      {
-        "name": "EvoArena",
-        "note": "",
-        "last_seen": "2026-06-14"
-      },
-      {
-        "name": "EvoMem",
-        "note": "",
-        "last_seen": "2026-06-14"
-      },
-      {
-        "name": "EurekAgent",
-        "note": "",
-        "last_seen": "2026-06-14"
-      },
-      {
-        "name": "Google",
-        "note": "",
-        "last_seen": "2026-06-14"
-      },
-      {
-        "name": "MiniMax",
-        "note": "",
-        "last_seen": "2026-06-13"
-      },
-      {
-        "name": "Ona",
-        "note": "",
-        "last_seen": "2026-06-13"
-      },
-      {
-        "name": "Oracle",
-        "note": "",
-        "last_seen": "2026-06-13"
-      },
-      {
-        "name": "Xiaomi",
-        "note": "",
-        "last_seen": "2026-06-13"
-      },
-      {
-        "name": "Ai2 (Allen Institute)",
-        "note": "",
-        "last_seen": "2026-06-13"
-      },
-      {
-        "name": "olmo-eval",
-        "note": "",
-        "last_seen": "2026-06-13"
-      },
-      {
-        "name": "MiMo Code",
-        "note": "",
-        "last_seen": "2026-06-13"
-      },
-      {
-        "name": "Claude Code",
-        "note": "",
-        "last_seen": "2026-06-13"
       }
     ],
     "monthly": [
       {
         "month": "2026-06",
-        "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see; Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war; Visible guardrails, a six-thousand-dollar agent, and the data-center revolt; A model recalled by the government, and the quieter work of measuring the ones that remain; Why your model can't read a million words at once — and the trick that lets it pretend; Who controls the model: the Fable recall spreads, and an agent that remembers when it was right; When the exam lies: a medical safety paper, agents that get identities, and a satellite that found its own target"
+        "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see; Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war; Visible guardrails, a six-thousand-dollar agent, and the data-center revolt; A model recalled by the government, and the quieter work of measuring the ones that remain; Why your model can't read a million words at once — and the trick that lets it pretend; Who controls the model: the Fable recall spreads, and an agent that remembers when it was right; When the exam lies: a medical safety paper, agents that get identities, and a satellite that found its own target; What the recall was really about, and the week harness"
       }
     ],
-    "updated": "2026-07-16",
+    "updated": "2026-07-17",
     "host_lore": [
       {
         "host": "Ada",
@@ -1987,6 +1980,10 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "why code corpora teach a model what code looks like but not what it does — the file is a description of a process whose outcome is never in the file — and execution traces as the training signal that connects text to consequence",
+        "last_taught": "2026-07-17"
+      },
       {
         "name": "motivated mislabeling: why an LLM judge that is told how its labels will be used grades strategically, and why the eval harness is a participant rather than a measuring instrument",
         "last_taught": "2026-07-16"
