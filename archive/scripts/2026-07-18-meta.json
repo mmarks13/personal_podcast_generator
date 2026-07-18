@@ -1,0 +1,56 @@
+{
+  "date": "2026-07-18",
+  "title": "Trust nurses, not AI",
+  "summary": "Kaiser advice nurses say they're being timed, scored daily for productivity, and — the new part — tested against an AI that grades their empathy, and they describe self-censoring warmth to protect the metric; Kaiser denies using handle-time metrics and won't describe its systems. Then a systems paper, LongStraw, that fits a two-million-token reinforcement-learning step onto eight GPUs by replaying one answer branch at a time — a memory-wall breakthrough that's honest it has only proven it fits, not that it trains correctly yet. Plus a broad sweep from Kimi K3's market jitters to a Munich court putting Google on the hook for its AI Overviews.",
+  "tts_notes": "Measured, serious energy on the lead story — it's about healthcare workers under AI surveillance and a withheld comfort at a cancer diagnosis. Warm up into the sweep and land the LongStraw dive at the show's normal curious energy.",
+  "sources": [
+    { "group": "Discussion", "title": "Local News Matters — Kaiser nurses say AI workplace surveillance is making their jobs and patient care worse", "url": "https://localnewsmatters.org/2026/07/15/kaiser-nurses-say-ai-workplace-surveillance-are-making-their-jobs-and-patient-care-worse/" },
+    { "group": "Papers", "title": "LongStraw: Long-Context RL Beyond 2M Tokens on a Fixed GPU Budget", "url": "https://huggingface.co/papers/2607.14952" },
+    { "group": "Releases", "title": "Moonshot AI — Kimi K3", "url": "https://www.kimi.com/blog/kimi-k3" },
+    { "group": "Releases", "title": "Simon Willison — Anthropic makes Claude Fable 5 a permanent part of Max/Team plans", "url": "https://simonwillison.net/2026/Jul/18/claude-make-fable-5-permanent/#atom-everything" },
+    { "group": "Discussion", "title": "The Batch (issue 362) — Munich court can hold Google liable for defamatory AI Overviews; OpenAI's GPT-Live", "url": "https://www.deeplearning.ai/the-batch/issue-362" },
+    { "group": "Releases", "title": "Google DeepMind / Isomorphic Labs — our approach to bioresilience (AlphaEvolve for metagenomic sequencing)", "url": "https://deepmind.google/blog/our-approach-to-bioresilience/" },
+    { "group": "Releases", "title": "Dharma-AI — DharmaOCR, a Brazilian-Portuguese OCR model", "url": "https://huggingface.co/blog/Dharma-AI/newer-models-same-advantages" },
+    { "group": "Releases", "title": "LM Studio — introducing Bionic, an agent for running open models", "url": "https://lmstudio.ai/blog/introducing-lm-studio-bionic" },
+    { "group": "Discussion", "title": "TechCrunch — Databricks hits $188B valuation", "url": "https://techcrunch.com/2026/07/17/databricks-hits-188b-valuation-extending-its-run-as-ais-favorite-second-act/" }
+  ],
+  "topics": [
+    "Kaiser Permanente advice-nurse AI surveillance (Local News Matters; front-paged on Hacker News, ~514 points / 340 comments): nurses (named — Raquel Alvarez Sanchez, Charlotte Capulong, Pa Vue — and several anonymous citing retaliation fears) describe a monitoring stack: software flags any call over 15 minutes for performance review; a system predicting daily whether a nurse is underperforming/slow; and, tested in summer 2024, an AI tool rating nurses' empathy and tone of voice on calls. Reported effects: time between calls compressed to ~30 seconds or less when busy (was ~10 minutes), pressure to limit calls to 2-3 pieces of advice regardless of complexity, self-censoring compassion; one nurse described withholding comfort from an elderly woman receiving a terminal cancer diagnosis 'out of fear it would hurt her monthly performance score'. Kaiser (spokesman Vincent Staupe) denies the mechanism: 'Kaiser Permanente does not use Average Handle Time to assess agent performance or enforce call time metrics'; says call-center tools 'support our quality assurance efforts and have human review and oversight' and are used 'with patient safety in mind' — but declined to answer specifics about the AI tool or describe internal systems. Context: California Nurses Association (25,000 nurses, ~1,000 in call centers) in contract negotiations, protest slogan 'Trust nurses, not AI'. Framing on air: Goodhart's Law (a measure that becomes a target stops being a good measure), and the new capability being the ability to put a cheap score on the previously-unmeasurable (empathy/tone), which destroys the signal it reads. Caveat stated on air: single local outlet, mid-negotiation, employer won't describe systems.",
+    "LongStraw (HF Daily Papers + 7-day + 30-day top lists, ~146 upvotes): an architecture-aware execution stack for million-token RL post-training under a fixed GPU budget, instantiated with GRPO, targeting the gap between inference contexts approaching 1M tokens and RL post-training that usually stays at 256K or below — the behavior most worth training (good decisions deep into long agent trajectories) is exactly what short training never shows. Core insight: the backward pass forces training to retain the whole forward computation in memory (inference can forget as it goes), and GRPO multiplies this by group size (several long responses off one shared prompt). Trick: evaluate the shared prompt once without autograd, retain only the state later tokens need, then replay short response branches one at a time so only the small branch carries the full training graph — trading replay time for memory. Reported: 8x H20 GPUs with Qwen3.6-27B reach 2.1M token positions; going from group-of-2 to group-of-8 adds only ~0.21 GB peak memory; a stress test reaches 4.46M positions; 32x H20 with GLM-5.2 validates a 2.1M-token prompt across all 78 layers. Authors' honest limitation (foregrounded on air): 'these experiments establish execution capacity rather than complete training correctness because the captured prompt state is detached and some distributed forward and gradient composition paths remain incomplete' — a plumbing/feasibility proof, not a trained-model result."
+  ],
+  "entities": [
+    "Kaiser Permanente",
+    "California Nurses Association",
+    "LongStraw",
+    "GRPO",
+    "Qwen3.6-27B",
+    "GLM 5.2"
+  ],
+  "threads": [],
+  "repeat_coverage": [
+    {
+      "story": "Kimi K3 market jitters and community-leaderboard climbs (sweep)",
+      "repeat_of": "2026-07-17 dive (Kimi K3, weights pending)",
+      "new_development": "Community boards now show K3 topping some leaderboards (including beating Claude Sonnet on a popular reasoning benchmark), and TechCrunch/finance press tie a dip in AI and chip stocks to it as a 'DeepSeek moment' — weights still a promise dated July 27."
+    },
+    {
+      "story": "Claude Fable 5 made permanent in Max/Team plans (sweep)",
+      "repeat_of": "2026-07-02 (Fable 5 / Mythos 5 export-control saga) and the ongoing Fable-5 access thread",
+      "new_development": "Anthropic's concrete permanence decision: from July 20, Fable 5 is in all Max and Team Premium plans at 50% of standard limits, and Pro/Team Standard users get a one-time $100 credit — resolving a week of accounts losing and regaining the model."
+    }
+  ],
+  "dives": [
+    {
+      "story": "Kaiser nurses under AI monitoring — call timing, daily productivity scoring, and an empathy/tone grader",
+      "why_it_matters": "Anyone deploying AI monitoring on care work (nursing, teaching, support) is watching a live case of Goodhart's Law with a new twist: AI makes the previously-unmeasurable (empathy, tone) cheap to score at scale, and once a job depends on that score people produce performed warmth instead of warmth — the tool degrades the very signal it reads, no villain required."
+    },
+    {
+      "story": "LongStraw: fitting a two-million-token RL step onto eight GPUs by replaying answer branches one at a time",
+      "why_it_matters": "Teams who want to train agents on realistically long trajectories keep hitting a memory wall (the backward pass must retain the whole forward graph, and GRPO multiplies it by group size); LongStraw trades replay time for memory to make it fit on a modest GPU budget — but is explicit it has only proven the step fits, not that it trains correctly end to end, so it's a feasibility result to watch, not a finished method."
+    }
+  ],
+  "concepts_taught": [
+    "why training memory scales with context length while inference memory does not — the backward pass must retain the entire forward computation to compute gradients, and in GRPO this is multiplied by the group of sampled responses"
+  ],
+  "lore": []
+}

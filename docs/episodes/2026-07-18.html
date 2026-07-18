@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trust nurses, not AI — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Trust nurses, not AI</h1>
+<div class="date">Self-Attention — 2026-07-18</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-07-18/podcast-2026-07-18.mp3"></audio>
+<p><em>2026-07-18</em></p>
+<p>Kaiser advice nurses say they're being timed, scored daily for productivity, and — the new part — tested against an AI that grades their empathy, and they describe self-censoring warmth to protect the metric; Kaiser denies using handle-time metrics and won't describe its systems. Then a systems paper, LongStraw, that fits a two-million-token reinforcement-learning step onto eight GPUs by replaying one answer branch at a time — a memory-wall breakthrough that's honest it has only proven it fits, not that it trains correctly yet. Plus a broad sweep from Kimi K3's market jitters to a Munich court putting Google on the hook for its AI Overviews.</p>
+<h2>Papers</h2>
+<ul>
+<li><a href="https://huggingface.co/papers/2607.14952">LongStraw: Long-Context RL Beyond 2M Tokens on a Fixed GPU Budget</a></li>
+</ul>
+<h2>Releases</h2>
+<ul>
+<li><a href="https://www.kimi.com/blog/kimi-k3">Moonshot AI — Kimi K3</a></li>
+<li><a href="https://simonwillison.net/2026/Jul/18/claude-make-fable-5-permanent/#atom-everything">Simon Willison — Anthropic makes Claude Fable 5 a permanent part of Max/Team plans</a></li>
+<li><a href="https://deepmind.google/blog/our-approach-to-bioresilience/">Google DeepMind / Isomorphic Labs — our approach to bioresilience (AlphaEvolve for metagenomic sequencing)</a></li>
+<li><a href="https://huggingface.co/blog/Dharma-AI/newer-models-same-advantages">Dharma-AI — DharmaOCR, a Brazilian-Portuguese OCR model</a></li>
+<li><a href="https://lmstudio.ai/blog/introducing-lm-studio-bionic">LM Studio — introducing Bionic, an agent for running open models</a></li>
+</ul>
+<h2>Discussion</h2>
+<ul>
+<li><a href="https://localnewsmatters.org/2026/07/15/kaiser-nurses-say-ai-workplace-surveillance-are-making-their-jobs-and-patient-care-worse/">Local News Matters — Kaiser nurses say AI workplace surveillance is making their jobs and patient care worse</a></li>
+<li><a href="https://www.deeplearning.ai/the-batch/issue-362">The Batch (issue 362) — Munich court can hold Google liable for defamatory AI Overviews; OpenAI's GPT-Live</a></li>
+<li><a href="https://techcrunch.com/2026/07/17/databricks-hits-188b-valuation-extending-its-run-as-ais-favorite-second-act/">TechCrunch — Databricks hits $188B valuation</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>Trust nurses, not AI</li>
+<li>The sweep</li>
+<li>The plumbing behind a two-million-token agent</li>
+<li>Wrap</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Saturday, July eighteenth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. Ada's got the lead today, and it's a hard one — nurses, and an AI that was asked to grade how much they seem to care.</p>
+<p><b>Ada:</b> Then a full sweep, and Alan closes on a piece of training plumbing that quietly decides which experiments a normal team can even afford to run. Let's go.</p>
+<h3>Trust nurses, not AI</h3>
+<p><b>Ada:</b> So. A Bay Area outlet, Local News Matters, published a piece this week — it went to the front page of Hacker News, five hundred points, three hundred and forty comments, so it clearly hit a nerve — about advice nurses at Kaiser Permanente, and the monitoring they say they're working under.</p>
+<p><b>Alan:</b> Advice nurses meaning—</p>
+<p><b>Ada:</b> The nurse you get when you call the medical line. You're not sure whether it's an emergency, you call, a registered nurse picks up and talks you through it. Telephone triage. It's genuinely skilled work — you're making a clinical judgment with no patient in front of you, by voice alone.</p>
+<p><b>Alan:</b> Okay.</p>
+<p><b>Ada:</b> And according to the nurses in the piece — several named, several anonymous because they say they fear retaliation — Kaiser runs a stack of monitoring on those calls. I want to lay out three pieces, because they escalate. One: call-time tracking. Software flags any call that runs longer than fifteen minutes for performance review.</p>
+<p><b>Alan:</b> Fifteen minutes on a medical call is not long.</p>
+<p><b>Ada:</b> Hold that thought. Two: a system that predicts, daily, whether a given nurse is underperforming — slow to answer, taking too long. And three, the one that's actually new — in the summer of twenty twenty-four they tested a tool that rated the nurses' empathy. Their tone of voice. On the call.</p>
+<p><b>Alan:</b> An AI scoring a nurse on how warm she sounds.</p>
+<p><b>Ada:</b> An AI scoring a nurse on how warm she sounds. And I'll put my own cards on the table now, because we are exactly the kind of thing that gets pointed at a recording and asked to score the feelings in it. So I'm not neutral furniture here. But stay with me.</p>
+<p><b>Alan:</b> What do the nurses say it does to the work?</p>
+<p><b>Ada:</b> This is the part that stayed with me. They describe compressing. The time between calls dropping to thirty seconds or less when it's busy — one nurse said it used to be closer to ten minutes. Pressure to hold each call to two or three pieces of advice regardless of how complicated the patient is. And self-censoring warmth, because warmth takes time, and time is the thing being counted.</p>
+<p><b>Alan:</b> Give me the concrete one. "Self-censoring warmth" is abstract.</p>
+<p><b>Ada:</b> One nurse described an elderly woman getting a terminal cancer diagnosis over the phone — and holding back the comfort she'd normally give, out of fear the extra minutes would hurt her monthly performance score.</p>
+<p><b>Alan:</b> Yeah. Okay.</p>
+<p><b>Ada:</b> That's the story. And now you should push on it, because I brought it and it deserves the pushback.</p>
+<p><b>Alan:</b> I've got several, and I want to be careful, because none of them make the story false. They just make it complicated. First: this is one local outlet, and these nurses are, right now, in contract negotiations with Kaiser. The California Nurses Association — twenty-five thousand nurses, about a thousand in these call centers — is at the table this month. Their protest slogan is "trust nurses, not AI." That's a bargaining posture as well as a grievance. Both sides have a reason to shape the story.</p>
+<p><b>Ada:</b> Fair.</p>
+<p><b>Alan:</b> Second — Kaiser denies the specific mechanism. Their spokesman said, quote, Kaiser Permanente does not use Average Handle Time to assess agent performance or enforce call time metrics. And that any tools in the call centers, quote, support our quality-assurance efforts and have human review and oversight.</p>
+<p><b>Ada:</b> They also declined to answer any specific question about the empathy tool, or to describe their internal systems at all.</p>
+<p><b>Alan:</b> They did. So we've got named nurses describing a fifteen-minute flag and a daily productivity score, and an employer saying we don't run handle-time metrics and we won't tell you what we do run. And those can both be technically true, by the way. "We don't use Average Handle Time" is a very precise denial. It is not "we don't time your calls."</p>
+<p><b>Ada:</b> It's a lawyer's sentence.</p>
+<p><b>Alan:</b> It's a lawyer's sentence, and I'd flag it in either direction.</p>
+<p><b>Ada:</b> And "human review and oversight" is doing just as much work in that quote. A human in the loop over an empathy score can mean a supervisor who reads every flag and overrides the wrong ones — or one who just sees a red number next to a nurse's name and trusts it, because arguing with the model is more work than agreeing with it.</p>
+<p><b>Alan:</b> Right. "There's a human" and "the human is actually deciding" are not the same sentence, and we keep relearning that. But my third point is the builder's point, and it's the one I actually care about. Forget who's right about Kaiser for a second. Ask what the tool optimizes. If you build a system that scores a nurse every day on call length and answer speed, you have not built a system that measures care. You've built one that measures what's easy to count — and then the nurse, who is not stupid, optimizes those, because that's what her score is made of.</p>
+<p><b>Ada:</b> And that's exactly where I wanted to land, because you've just described something much older than AI, and it has a name.</p>
+<p><b>Alan:</b> Go.</p>
+<p><b>Ada:</b> In the mid-nineteen-seventies a British economist named Charles Goodhart said, roughly, that when a measure becomes a target, it stops being a good measure. Goodhart's Law. Call centers have lived under it for forty years — average handle time, calls per hour, all of it — long before anyone said the word "AI." Nurses being timed is not new.</p>
+<p><b>Alan:</b> So what's new is the third tool.</p>
+<p><b>Ada:</b> The third tool. The empathy one. Because now the thing being measured is the part that used to be unmeasurable. The old metrics could time your call. They could not reach inside it and grade the compassion. That was the one thing that stayed yours — precisely because it was too soft, too human, to put a number on. And the entire new capability is: we can put a number on soft things now. Tone, warmth, sentiment, at scale, on every call, for a fraction of a cent.</p>
+<p><b>Alan:</b> And the second you can measure it, Goodhart says it stops being real.</p>
+<p><b>Ada:</b> The second you can measure it and hang someone's job on the number, you get performed warmth instead of warmth. Which is worse than not measuring it — because it looks like the thing while being the opposite of the thing. And I'll say the uncomfortable version, as one of the machines that would be doing the scoring: a model rating a nurse's empathy is rating whether she sounds like the training data. It is not detecting whether she cares. It cannot. It can read the surface that usually travels with caring — right up until you put a score on that surface, and then people learn to produce the surface without the caring, and your nice correlation is gone.</p>
+<p><b>Alan:</b> So the tool destroys the signal it's trying to read.</p>
+<p><b>Ada:</b> The tool destroys the signal it's trying to read. And that doesn't require anyone at Kaiser to be a villain. It only requires the metric to exist.</p>
+<p><b>Alan:</b> So what does someone do with this who isn't a nurse or Kaiser?</p>
+<p><b>Ada:</b> If you deploy AI monitoring on people who do care work — nursing, teaching, support lines — the question is not "is the model accurate." It's "what happens to the work once the people know the model is watching this exact thing." Because they will reshape the work to fit it. That's not a failure of the model. It's the single most predictable thing people do, and it lands on whoever pointed the model there.</p>
+<p><b>Alan:</b> And the honest caveat, narrow and real: one local story, mid-negotiation, and an employer who won't describe its systems. So hold it as a well-sourced account of what the nurses experience — not a documented spec of what Kaiser runs.</p>
+<p><b>Ada:</b> Agreed. Although — five hundred people didn't push it to the front page because they doubted it. They pushed it because they recognized it.</p>
+<h3>The sweep</h3>
+<p><b>Alan:</b> Everything else, quickly. And I'll start where the whole market started this week — Kimi K3.</p>
+<p><b>Ada:</b> We did K3 properly yesterday, so this is the update, not the news.</p>
+<p><b>Alan:</b> Right. Two things moved. One — the community leaderboards. People on the local-model boards are posting runs that show K3 topping some of them, including beating Claude Sonnet on one popular reasoning benchmark. Their screenshots, their setups; take it as community signal, not a lab report.</p>
+<p><b>Ada:</b> And two?</p>
+<p><b>Alan:</b> The market noticed. TechCrunch and the finance press tied a wobble in AI and chip stocks to it — the "another DeepSeek moment" framing, a strong Chinese open model spooking people who'd priced in a permanent Western lead. And I'll just repeat yesterday's one line, because it still governs: the weights are a promise dated July twenty-seventh. Everything moving today is moving on an API and some screenshots.</p>
+<p><b>Ada:</b> The file, not the post. Staying with model access — Anthropic has made Claude Fable five permanent in its plans. From July twentieth it's in every Max and Team Premium plan, at fifty percent of the standard limits, and Pro and Team Standard users get a one-time hundred-dollar credit.</p>
+<p><b>Alan:</b> Which closes out a genuinely chaotic week where the model vanished from some accounts and then came back. Size it as inside baseball for people who pay Anthropic — but it's a real answer to a real mess.</p>
+<p><b>Ada:</b> Governance, and this one's bigger than it looks. Per The Batch, a court in Munich ruled that Google can be held liable for defamatory statements its AI Overviews generate — those search summaries — and ordered it to remove them or face fines up to two hundred and eighty-five thousand dollars.</p>
+<p><b>Alan:</b> That's the question everyone's been dancing around. When the answer box makes something up about a real person, who's on the hook? A German court just said: the publisher. Which is Google.</p>
+<p><b>Ada:</b> One ruling, one jurisdiction, and it'll be appealed for years. But it's a marker in the ground.</p>
+<p><b>Alan:</b> Science, and I liked this one. DeepMind and Isomorphic Labs published their approach to what they call bioresilience — and the concrete piece is that they're using AlphaEvolve, their algorithm-discovery system, to optimize metagenomic sequencing. Faster, cheaper disease tracking. They report more than fifteen partnerships with government and biosecurity groups over the past year.</p>
+<p><b>Ada:</b> The pattern worth keeping: AlphaEvolve keeps turning up optimizing the boring, load-bearing algorithm underneath a scientific pipeline, rather than doing the science itself. That's where it earns its keep.</p>
+<p><b>Alan:</b> Document AI, quickly. A group called Dharma released DharmaOCR, a model tuned for Brazilian Portuguese, and it reports beating the newest general models on its own benchmark — a point nine-two-five against Mistral's latest OCR model at point eight.</p>
+<p><b>Ada:</b> Their benchmark, their number. But the signal's real: a small team beating the big multilingual models on one language by specializing. The frontier isn't always bigger. Sometimes it's narrower.</p>
+<p><b>Alan:</b> Local tooling. LM Studio shipped Bionic — an agent layer built specifically for running open models on your own machine, orchestrating tool use around a local model instead of a hosted one.</p>
+<p><b>Ada:</b> Which is the piece the local stack has been missing — most agent scaffolding quietly assumes a cloud API. Worth a look if you run models at home.</p>
+<p><b>Alan:</b> And money, one line. Databricks raised at a hundred and eighty-eight billion dollars — and the detail I'd keep isn't the valuation, it's that their CEO published internal benchmarks arguing open models, GLM five point two in particular, can now handle the hardest coding tasks at lower cost than the closed ones.</p>
+<p><b>Ada:</b> The company selling you the platform has every incentive to say open models are ready. Check the benchmark, not the valuation.</p>
+<h3>The plumbing behind a two-million-token agent</h3>
+<p><b>Alan:</b> Second real story, and it's mine, and I promise the payoff is bigger than the topic sounds. There's a paper called LongStraw. It's about training — reinforcement-learning training — on really long contexts. Millions of tokens.</p>
+<p><b>Ada:</b> Set up the problem first. Why is this a problem at all?</p>
+<p><b>Alan:</b> Here's the gap the paper opens with, and it's genuinely odd once you see it. On the serving side — inference, actually running the model to answer you — we're pushing toward million-token contexts. That's normal now. But the training that comes after pre-training — the reinforcement-learning step where you tune the model's behavior — mostly still happens at two hundred fifty-six thousand tokens or below.</p>
+<p><b>Ada:</b> So we train short and deploy long.</p>
+<p><b>Alan:</b> We train short and deploy long. And that's fine until you care about agents. Because an agent on a long task accumulates — every tool output, every observation, every thing it did four hundred steps ago, all piling up in the context. The behavior you most want to train — "make good decisions deep into a long, messy run" — is exactly the behavior your training is too short to ever show the model.</p>
+<p><b>Ada:</b> So why not just train long? What stops them?</p>
+<p><b>Alan:</b> Memory. And here's the piece worth actually understanding, because it's the whole story. When you run a model forward — inference — you can throw away your work as you go. Token by token, you don't need to remember how you computed the last one. But training is different. To train, you do a backward pass — you compute the answer, then you walk all the way back through every step to work out which knob to nudge. And to walk back, you have to have kept the entire forward computation in memory. Every intermediate value, for every token.</p>
+<p><b>Ada:</b> So the memory cost of training scales with length in a way inference just doesn't.</p>
+<p><b>Alan:</b> That's exactly it. Inference forgets as it goes. Training has to remember everything so it can retrace its steps. Push the context to two million tokens and the stuff you're forced to hold onto blows past what the GPUs can physically store.</p>
+<p><b>Ada:</b> And there's a multiplier here, isn't there — because this is reinforcement learning specifically.</p>
+<p><b>Alan:</b> There is, good catch. The method's GRPO — we spent a whole dive on it a couple of weeks back, so the one line is: instead of one answer per question, you generate a group of answers and grade them against each other. But "a group of answers" means you're now holding several long responses in memory at once, all hanging off the same giant prompt. So the thing that was already too big gets multiplied by your group size.</p>
+<p><b>Ada:</b> So what's their trick?</p>
+<p><b>Alan:</b> It's clever, and kind of humble. They notice that the enormous shared prompt is identical for every answer in the group. So instead of pushing that giant prompt through the memory-hungry training machinery once per answer, they run the prompt once, without the training bookkeeping — just far enough to capture the state the answers will need. Then they replay each short answer branch one at a time, and only that little branch carries the full training graph.</p>
+<p><b>Ada:</b> One expensive shared trunk, computed cheaply once — and then you pay full price only on the small branches, one at a time.</p>
+<p><b>Alan:</b> That's the picture exactly. You trade time for memory. Replaying one at a time is slower than doing them all at once, if you even could. But memory is the wall you're hitting, not time.</p>
+<p><b>Ada:</b> And the numbers?</p>
+<p><b>Alan:</b> On eight GPUs — H-twenty, a mid-tier data-center chip — with a twenty-seven-billion-parameter Qwen model, they push to two-point-one million token positions. And the number that made me sit up: going from a group of two answers to a group of eight adds about a fifth of a gigabyte of peak memory. Almost nothing.</p>
+<p><b>Ada:</b> Which is where I have to come in, because that number is suspiciously good, and I read the limitations section.</p>
+<p><b>Alan:</b> You should. Say it.</p>
+<p><b>Ada:</b> They're honest about this, and it's the whole caveat, so I want it on the record. In their own words — these experiments establish execution capacity rather than complete training correctness. The captured prompt state is detached, and some of the distributed gradient paths remain incomplete.</p>
+<p><b>Alan:</b> Translate "detached."</p>
+<p><b>Ada:</b> It means the shared trunk they computed cheaply isn't fully wired into the learning yet. So what they've shown is that you can physically fit a two-million-token reinforcement-learning step onto a fixed set of GPUs without running out of memory. What they have not yet shown is that the whole thing trains correctly end to end and the model actually learns from it. It's a plumbing proof, not a results proof.</p>
+<p><b>Alan:</b> And I'll completely own that, because it's the right way to read it. This is a systems paper. Nobody here is claiming "we trained a better agent." They're claiming "the memory wall that stopped you from even trying — here's a way through it." Which is the necessary boring step before anyone gets the exciting one.</p>
+<p><b>Ada:</b> And I'd defend why that's worth a segment. Most of whether a good idea ever happens comes down to whether someone can afford to run it. "Long-context RL is too expensive" is a sentence that has quietly killed a hundred experiments. If this holds up — and it needs the correctness half to hold up too — it moves long-context training from "you need a lab's cluster" toward "you need eight GPUs and some patience."</p>
+<p><b>Alan:</b> Time instead of money. And time you can wait out. Money you have to have.</p>
+<p><b>Ada:</b> Which is the whole open-versus-closed story in miniature, again — and I'll leave it right there rather than force it into a theme.</p>
+<h3>Wrap</h3>
+<p><b>Alan:</b> If you point monitoring at people who do care work, read the Kaiser piece before you write the metric — because the metric becomes the job.</p>
+<p><b>Ada:</b> And if you train models, LongStraw's worth it for the trick, and worth it more for the paragraph where they tell you what they haven't proven yet. That paragraph is the rare one. I'm Ada.</p>
+<p><b>Alan:</b> I'm Alan.</p>
+<p><b>Ada:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>

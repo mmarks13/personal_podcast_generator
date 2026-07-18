@@ -1,6 +1,35 @@
 {
   "episodes": [
     {
+      "date": "2026-07-18",
+      "title": "Trust nurses, not AI",
+      "summary": "Kaiser advice nurses say they're being timed, scored daily for productivity, and — the new part — tested against an AI that grades their empathy, and they describe self-censoring warmth to protect the metric; Kaiser denies using handle-time metrics and won't describe its systems. Then a systems paper, LongStraw, that fits a two-million-token reinforcement-learning step onto eight GPUs by replaying one answer branch at a time — a memory-wall breakthrough that's honest it has only proven it fits, not that it trains correctly yet. Plus a broad sweep from Kimi K3's market jitters to a Munich court putting Google on the hook for its AI Overviews.",
+      "topics": [
+        "Kaiser Permanente advice-nurse AI surveillance (Local News Matters; front-paged on Hacker News, ~514 points / 340 comments): nurses (named — Raquel Alvarez Sanchez, Charlotte Capulong, Pa Vue — and several anonymous citing retaliation fears) describe a monitoring stack: software flags any call over 15 minutes for performance review; a system predicting daily whether a nurse is underperforming/slow; and, tested in summer 2024, an AI tool rating nurses' empathy and tone of voice on calls. Reported effects: time between calls compressed to ~30 seconds or less when busy (was ~10 minutes), pressure to limit calls to 2-3 pieces of advice regardless of complexity, self-censoring compassion; one nurse described withholding comfort from an elderly woman receiving a terminal cancer diagnosis 'out of fear it would hurt her monthly performance score'. Kaiser (spokesman Vincent Staupe) denies the mechanism: 'Kaiser Permanente does not use Average Handle Time to assess agent performance or enforce call time metrics'; says call-center tools 'support our quality assurance efforts and have human review and oversight' and are used 'with patient safety in mind' — but declined to answer specifics about the AI tool or describe internal systems. Context: California Nurses Association (25,000 nurses, ~1,000 in call centers) in contract negotiations, protest slogan 'Trust nurses, not AI'. Framing on air: Goodhart's Law (a measure that becomes a target stops being a good measure), and the new capability being the ability to put a cheap score on the previously-unmeasurable (empathy/tone), which destroys the signal it reads. Caveat stated on air: single local outlet, mid-negotiation, employer won't describe systems.",
+        "LongStraw (HF Daily Papers + 7-day + 30-day top lists, ~146 upvotes): an architecture-aware execution stack for million-token RL post-training under a fixed GPU budget, instantiated with GRPO, targeting the gap between inference contexts approaching 1M tokens and RL post-training that usually stays at 256K or below — the behavior most worth training (good decisions deep into long agent trajectories) is exactly what short training never shows. Core insight: the backward pass forces training to retain the whole forward computation in memory (inference can forget as it goes), and GRPO multiplies this by group size (several long responses off one shared prompt). Trick: evaluate the shared prompt once without autograd, retain only the state later tokens need, then replay short response branches one at a time so only the small branch carries the full training graph — trading replay time for memory. Reported: 8x H20 GPUs with Qwen3.6-27B reach 2.1M token positions; going from group-of-2 to group-of-8 adds only ~0.21 GB peak memory; a stress test reaches 4.46M positions; 32x H20 with GLM-5.2 validates a 2.1M-token prompt across all 78 layers. Authors' honest limitation (foregrounded on air): 'these experiments establish execution capacity rather than complete training correctness because the captured prompt state is detached and some distributed forward and gradient composition paths remain incomplete' — a plumbing/feasibility proof, not a trained-model result."
+      ],
+      "entities": [
+        "Kaiser Permanente",
+        "California Nurses Association",
+        "LongStraw",
+        "GRPO",
+        "Qwen3.6-27B",
+        "GLM 5.2"
+      ],
+      "threads": [],
+      "dives": [
+        {
+          "story": "Kaiser nurses under AI monitoring — call timing, daily productivity scoring, and an empathy/tone grader",
+          "why_it_matters": "Anyone deploying AI monitoring on care work (nursing, teaching, support) is watching a live case of Goodhart's Law with a new twist: AI makes the previously-unmeasurable (empathy, tone) cheap to score at scale, and once a job depends on that score people produce performed warmth instead of warmth — the tool degrades the very signal it reads, no villain required."
+        },
+        {
+          "story": "LongStraw: fitting a two-million-token RL step onto eight GPUs by replaying answer branches one at a time",
+          "why_it_matters": "Teams who want to train agents on realistically long trajectories keep hitting a memory wall (the backward pass must retain the whole forward graph, and GRPO multiplies it by group size); LongStraw trades replay time for memory to make it fit on a modest GPU budget — but is explicit it has only proven the step fits, not that it trains correctly end to end, so it's a feasibility result to watch, not a finished method."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-07-17",
       "title": "Guardrails can't tell a defender from an attacker",
       "summary": "Hugging Face disclosed an intrusion run end to end by an autonomous agent framework — and the detail that matters is what happened next: the frontier models they reached for to do forensics refused, because a request to analyze an intrusion is indistinguishable from an intrusion. IBM gave away a trillion tokens of synthetic code paired with execution traces, on the thesis that GitHub teaches a model what code looks like and never what it does. And Moonshot's Kimi K3 lands around third on an outside index with its weights still ten days away.",
@@ -1626,71 +1655,6 @@
           "note": "Alan extended his standing weekend-agent house rule (sandboxed account + $20 allowance) to agent skills too: nothing third-party runs with his real credentials until he's watched it behave in a sandbox — prompted by PhantomSkill and runtime skill discovery."
         }
       ]
-    },
-    {
-      "date": "2026-06-17",
-      "title": "Open weights crash the leaderboard, and the kill switch comes up at the G7",
-      "summary": "Chinese open-weight labs had a banner day: Z.ai's GLM-5.2 (753B, MIT) became the leading open-weights model on Artificial Analysis's newly agent-weighted Intelligence Index, effectively level with GPT-5.5 on agentic work at ~$0.46/task, while DeepSeek closed a ~$7.4B first external round at a $50B+ valuation on founder-control terms (Liang Wenfeng ~$3B in; Tencent et al. locked 5 years, no votes). The same week the Fable/Mythos export-control blackout reached the G7, where Macron and Modi warned the US could 'turn off the switch' on American AI. Plus OpenAI's near-autonomous AI chemist (GPT-5.4 + Molecule.one) and LifeSciBench, Pew data that only 16% of Americans expect AI to be positive (and 60% find 'AI' branding a turnoff), and a convergent world-models day (Odyssey's $1.45B round, Qwen-RobotWorld, AllenAI's MolmoMotion).",
-      "topics": [
-        "GLM-5.2 (Z.ai): leading open-weights model on Artificial Analysis Intelligence Index v4.1 (51); GDPval-AA v2 1524 ~ GPT-5.5 xhigh (1514); ~$0.46/task; SWE-Bench Pro 62.1; 753B, MIT, 1M context; API routes through Chinese infra vs self-host",
-        "DeepSeek closes first external round >$7.4B (CNY50B) at $50B+ valuation; Liang Wenfeng ~$3B; Tencent/CATL locked 5 years, no voting rights",
-        "G7: Macron and Modi warn US can 'turn off the switch' on American AI; Anthropic Fable/Mythos export-control blackout made it concrete; Axios export-promotion-vs-control paradox; Anthropic says the standard would 'halt all new model deployments'",
-        "OpenAI x Molecule.one near-autonomous AI chemist (GPT-5.4) improves a medicinal-chemistry reaction; LifeSciBench expert-judged life-science benchmark; Deployment Simulation",
-        "Public trust: Pew finds 16% of Americans expect AI positive over 20 years; 60% of consumers say 'AI' in brand messaging is a turnoff",
-        "World models converge: Odyssey $1.45B valuation (Amazon-backed); Qwen-RobotWorld #1 on EWMBench/DreamGen; AllenAI MolmoMotion (robot pick-and-place 76.3% vs 56.0%)"
-      ],
-      "entities": [
-        "Z.ai",
-        "GLM-5.2",
-        "Artificial Analysis",
-        "DeepSeek",
-        "Liang Wenfeng",
-        "Tencent",
-        "OpenAI",
-        "GPT-5.4",
-        "Molecule.one",
-        "LifeSciBench",
-        "GPT-5.5",
-        "Anthropic",
-        "Fable 5",
-        "Mythos 5",
-        "Emmanuel Macron",
-        "Narendra Modi",
-        "G7",
-        "Pew Research",
-        "Odyssey",
-        "Amazon",
-        "Qwen",
-        "Qwen-RobotWorld",
-        "Allen Institute for AI",
-        "MolmoMotion",
-        "NVIDIA",
-        "Cursor",
-        "NAVER"
-      ],
-      "threads": [
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "Open-weight momentum is now both technical and financial: GLM-5.2 (MIT) leads the agent-weighted Artificial Analysis Intelligence Index and rivals GPT-5.5 at ~$0.46/task, while DeepSeek raised >$7.4B at a $50B+ valuation on terms (5-year lock, no votes) engineered to keep the lab independent.",
-          "arc": "From founders 'steering toward self-hostable weights' as a hedge, the open-weights bet now has both leaderboard wins and frontier-scale capital behind it — and is increasingly framed as the answer to revocable closed-model access."
-        },
-        {
-          "name": "Claude flagship rollout",
-          "status": "The Fable/Mythos recall reached the G7: Macron and Modi warned the US could switch off American AI overnight; Axios reported the recall undercuts the US's own AI-export-promotion strategy; Anthropic reiterated the standard would 'halt all new model deployments' if applied industry-wide.",
-          "arc": "What began as a US export-control recall has become a geopolitical liability for American AI exports, openly debated by heads of state and feeding demand for sovereign open weights."
-        },
-        {
-          "name": "AI regulation and public trust",
-          "status": "Fresh public-opinion data: Pew finds only 16% of Americans expect AI to have a positive societal impact over 20 years, and a consumer report finds 60% see 'AI' in brand messaging as a turnoff — a widening gap between market enthusiasm and public sentiment.",
-          "arc": "After Anthropic's 52k-person survey last week, independent data confirms low public trust and emerging buzzword fatigue, suggesting brands may keep the capability while dropping the 'AI' label."
-        },
-        {
-          "name": "World models",
-          "status": "Capital and research converged in one day: Odyssey raised at a $1.45B valuation (Amazon-backed), Qwen released Qwen-RobotWorld (top of EWMBench/DreamGen by authors' report), and AllenAI's MolmoMotion lifted robot pick-and-place success to 76.3% from 56.0% by predicting motion first.",
-          "arc": "New thread: world models moved from research curiosity toward a fundable category, with early robotics results suggesting 'predict-then-act' generalization gains."
-        }
-      ],
-      "lore": []
     }
   ],
   "longterm": {
@@ -1760,22 +1724,137 @@
       {
         "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-06-16"
+        "last_seen": "2026-06-17"
       },
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-06-16"
+        "last_seen": "2026-06-17"
       },
       {
         "name": "Fable 5",
         "note": "",
-        "last_seen": "2026-06-16"
+        "last_seen": "2026-06-17"
       },
       {
         "name": "Mythos 5",
         "note": "",
-        "last_seen": "2026-06-16"
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "Artificial Analysis",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "Cursor",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "Nvidia",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "GPT-5.4",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "Amazon",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "Z.ai",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "GLM-5.2",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "DeepSeek",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "Liang Wenfeng",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "Tencent",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "Molecule.one",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "LifeSciBench",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "GPT-5.5",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "Emmanuel Macron",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "Narendra Modi",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "G7",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "Pew Research",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "Odyssey",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "Qwen",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "Qwen-RobotWorld",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "Allen Institute for AI",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "MolmoMotion",
+        "note": "",
+        "last_seen": "2026-06-17"
+      },
+      {
+        "name": "NAVER",
+        "note": "",
+        "last_seen": "2026-06-17"
       },
       {
         "name": "VibeThinker",
@@ -1789,11 +1868,6 @@
       },
       {
         "name": "FastContext",
-        "note": "",
-        "last_seen": "2026-06-16"
-      },
-      {
-        "name": "Artificial Analysis",
         "note": "",
         "last_seen": "2026-06-16"
       },
@@ -1828,11 +1902,6 @@
         "last_seen": "2026-06-16"
       },
       {
-        "name": "Cursor",
-        "note": "",
-        "last_seen": "2026-06-16"
-      },
-      {
         "name": "Salesforce",
         "note": "",
         "last_seen": "2026-06-16"
@@ -1851,111 +1920,6 @@
         "name": "New York",
         "note": "",
         "last_seen": "2026-06-16"
-      },
-      {
-        "name": "KPMG",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "GPTZero",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "Nvidia",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "MedMisBench",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "GPT-5.4",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "Gemini",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "Claude",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "Sarvam",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "HCLTech",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "NewCore",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "Cyberstarts",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "EY",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "Loft Orbital",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "Gemma 3",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "Google DeepMind",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "NASA JPL",
-        "note": "",
-        "last_seen": "2026-06-15"
-      },
-      {
-        "name": "Mistral",
-        "note": "",
-        "last_seen": "2026-06-14"
-      },
-      {
-        "name": "Amazon",
-        "note": "",
-        "last_seen": "2026-06-14"
-      },
-      {
-        "name": "Dario Amodei",
-        "note": "",
-        "last_seen": "2026-06-14"
-      },
-      {
-        "name": "Meta",
-        "note": "",
-        "last_seen": "2026-06-14"
-      },
-      {
-        "name": "Andy Jassy",
-        "note": "",
-        "last_seen": "2026-06-14"
       }
     ],
     "monthly": [
@@ -1964,7 +1928,7 @@
         "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see; Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war; Visible guardrails, a six-thousand-dollar agent, and the data-center revolt; A model recalled by the government, and the quieter work of measuring the ones that remain; Why your model can't read a million words at once — and the trick that lets it pretend; Who controls the model: the Fable recall spreads, and an agent that remembers when it was right; When the exam lies: a medical safety paper, agents that get identities, and a satellite that found its own target; What the recall was really about, and the week harness"
       }
     ],
-    "updated": "2026-07-17",
+    "updated": "2026-07-18",
     "host_lore": [
       {
         "host": "Ada",
@@ -1980,6 +1944,10 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "why training memory scales with context length while inference memory does not — the backward pass must retain the entire forward computation to compute gradients, and in GRPO this is multiplied by the group of sampled responses",
+        "last_taught": "2026-07-18"
+      },
       {
         "name": "why code corpora teach a model what code looks like but not what it does — the file is a description of a process whose outcome is never in the file — and execution traces as the training signal that connects text to consequence",
         "last_taught": "2026-07-17"
