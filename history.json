@@ -30,6 +30,28 @@
       "lore": []
     },
     {
+      "date": "2026-07-18",
+      "kind": "deepdive",
+      "title": "Deep Dive: The delta rule — how linear attention learned to overwrite",
+      "summary": "A teaching episode on delta-rule linear attention, the memory update quietly powering this year's efficient models (Qwen3-Next, Qwen3.5, Kimi K3's Kimi Delta Attention). Why additive linear attention couldn't overwrite, how the delta rule fixes it by correcting the error between what the state retrieves and the target value, its lineage from Widrow-Hoff (1960) through Schmidhuber's fast weights to DeltaNet's chunkwise-parallel GPU training, the gating that turns it into Gated DeltaNet, and the fixed-state limit that forces every real system to stay a hybrid.",
+      "topics": [
+        "deep dive: delta-rule linear attention (additive vs delta update, error-correcting overwrite, Widrow-Hoff/fast-weight lineage, chunkwise-parallel Householder/WY training, Gated DeltaNet, hybrid architectures, fixed-state limit)"
+      ],
+      "entities": [
+        "DeltaNet",
+        "Gated DeltaNet",
+        "Kimi Linear",
+        "Kimi Delta Attention",
+        "Qwen3-Next",
+        "Mamba",
+        "NVIDIA",
+        "Moonshot AI",
+        "Songlin Yang"
+      ],
+      "threads": [],
+      "lore": []
+    },
+    {
       "date": "2026-07-17",
       "title": "Guardrails can't tell a defender from an attacker",
       "summary": "Hugging Face disclosed an intrusion run end to end by an autonomous agent framework — and the detail that matters is what happened next: the frontier models they reached for to do forensics refused, because a request to analyze an intrusion is indistinguishable from an intrusion. IBM gave away a trillion tokens of synthetic code paired with execution traces, on the thesis that GitHub teaches a model what code looks like and never what it does. And Moonshot's Kimi K3 lands around third on an outside index with its weights still ten days away.",
@@ -1946,6 +1968,10 @@
     "concepts_taught": [
       {
         "name": "why training memory scales with context length while inference memory does not — the backward pass must retain the entire forward computation to compute gradients, and in GRPO this is multiplied by the group of sampled responses",
+        "last_taught": "2026-07-18"
+      },
+      {
+        "name": "delta-rule linear attention: replacing the additive/Hebbian outer-product state update with an error-correcting delta update (retrieve the current value for a key, correct by a learned rate beta times the error), its equivalence to one gradient step of online MSE regression, the Widrow-Hoff and fast-weight-programmer lineage, chunkwise-parallel training via the Householder/WY representation, the gating extension (Gated DeltaNet), and the fixed-size-state limit that forces hybrid architectures",
         "last_taught": "2026-07-18"
       },
       {
