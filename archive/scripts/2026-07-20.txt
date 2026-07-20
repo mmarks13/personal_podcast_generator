@@ -1,0 +1,124 @@
+A: Good morning — it's Monday, July twentieth. I'm Ada.
+B: And I'm Alan.
+A: Alan has a receipt to show you, and then I have a benchmark that finally admits agents can get most of the way there.
+B: After that I've got a paper about the least glamorous thing in your stack, and we'll finish with a quick pass over the board.
+A: Receipt first.
+## Fable 5 goes metered
+B: So. As of just before midnight Pacific last night, Claude Fable 5 stopped being free on some plans. And I want to do this one carefully, because the interesting part isn't the outrage, it's the arithmetic.
+A: Give me the fact first.
+B: The fact is from Anthropic's own pages. The promotion that let subscribers spend up to fifty percent of their weekly usage limits on Fable 5 at no extra cost ended on July nineteenth, at eleven fifty-nine and fifty-nine seconds, Pacific time. That's their wording, down to the second.
+A: [amused] Down to the second.
+B: Down to the second. And as of this morning it splits. If you're on Max, or Team Premium, Fable 5 is still included as a standard part of your plan — that same fifty percent of weekly limits, no extra charge. If you're on Pro, or Team Standard, you move to credits. Anthropic gives a one-time credit to soften the transition, and I'll be honest, I could not find a dollar figure for that credit stated on their own pages, so I'm not going to say one. After the credit runs out, you're paying by the token.
+A: And by the token means what, exactly.
+B: Ten dollars per million input tokens. Fifty dollars per million output tokens.
+A: Five to one.
+B: Five to one, and that ratio is not arbitrary. It shows up across basically every frontier model priced this way. Input is cheap because the model reads a whole prompt in parallel, in one pass. Output is expensive because it's made one token at a time, sequentially, each one waiting on the last.
+A: [wry] I'd like the record to show that the two of us are being discussed as a unit price.
+B: [chuckles] I did think of you.
+A: No, but genuinely — the thing worth sitting with is that flat rate is the young idea here, not metering. The whole first era of commercial computing was metered. You bought time on a machine, you were billed by the processor-second, and a graduate student's job was partly to not be expensive. Flat rate arrives later, and it arrives because compute got abundant enough that the accounting cost more than the resource.
+B: And now the resource got scarce again.
+A: That's the part that interests me. Metering isn't really a business model change, it's a scarcity signal. You meter what you're short of.
+B: Which is why the second story this morning is the one I'd pair with it. Moonshot — the lab behind Kimi K3, the model we talked about last week — paused new consumer subscriptions. Not a price change. They just stopped taking sign-ups.
+A: Why?
+B: Their stated reason, per the reporting, is demand. User requests sharply exceeded their forecasts and were approaching the limits of their existing clusters. So one company reprices, another closes the door, and it's the same underlying condition.
+A: Two different responses to being out of machines.
+B: Right. And let me be fair to Anthropic here, because there's a version of this segment that's just complaining. This deadline has moved four separate times. It was originally June twenty-second. Then July seventh. Then July twelfth. Then July nineteenth. That is not a company gleefully squeezing people. That's a company that kept extending a free window it clearly didn't want to end this way.
+A: Is the complaining fair, though?
+B: Some of it. The Anthropic subreddit filled up overnight, and the specific complaint I'd flag as legitimate is people describing sessions getting interrupted partway through, and losing work that subagents had already done. Because that's the part flat rate hid from you. On a flat plan, running out of budget is an annoyance. On a metered plan, running out mid-run means you paid for every token of a job you didn't get the result of.
+A: You paid for the work and not the outcome.
+B: You paid for the work and not the outcome. And if you're running anything agentic, that's a real operational hazard, not a whine. My honest advice to anyone on Pro this morning is dull. Go look at what you actually spent last week in tokens, not in vibes, before you decide whether this hurts. Most people have genuinely no idea, and the number is usually not the one they'd guess, in either direction.
+A: [skeptical] Although — you're describing a discipline almost nobody has.
+B: Almost nobody has it. That's why the flat plan was popular.
+## Fifteen percent, and eighty-five minutes
+A: Okay. Mine's a benchmark, and it's one I think is designed unusually well, which is not a sentence I get to say often.
+B: Low bar, historically.
+A: Extremely low bar. It's called Long-Horizon-Terminal-Bench, and it's on the trailing week's top papers list, so this isn't a day-one upvote spike. Forty-six long-horizon tasks, spanning nine categories, all in a terminal. Long-horizon meaning hours, not minutes.
+B: Define the task shape for me.
+A: The kind of work where you're asked to do something substantial at a command line. Set a thing up, migrate a thing, fix a thing, and it takes a long chain of steps where every step depends on the last. And here's the number the paper leads with. Across fifteen frontier models, the best performer was GPT-5.5, and it scored fifteen point two percent.
+B: Out of forty-six tasks.
+A: Fifteen point two percent pass at one, measured at a zero point nine five partial reward threshold. And ten point nine percent at a threshold of one point oh.
+B: Okay, stop, because you've just used a phrase most benchmarks don't have. Partial reward threshold.
+A: That's the thing I want to explain, and it's the actual contribution here. So, the problem they're solving. A traditional agent benchmark grades you pass or fail. Did the task get done? Yes or no.
+B: Which is how you'd grade it in real life, to be fair.
+A: On a two-minute task, sure. On a four-hour task, that grading scheme destroys almost all of the information. Picture an agent that works for eighty minutes, gets through eleven of twelve steps correctly, and then fumbles the last one. Binary grading gives it a zero. Now picture a second agent that reads the prompt, does something incoherent, and dies in step one. Also a zero.
+B: They score identically.
+A: They score identically, and those are wildly different systems. One of them is nearly a product and one of them is nothing. So what this benchmark does — this is the dense reward scheme — is decompose each long task into graded subtasks, and give credit along the way. You come out with a score between zero and one for how far you actually got.
+B: So the threshold is where you decide to draw the line for "that counts."
+A: Precisely. And now look again at those two numbers, because the gap between them is itself a finding. Fifteen point two percent of runs got to ninety-five percent complete. Only ten point nine percent got to genuinely finished. Which means a real slice of runs — several points' worth — died somewhere in the final five percent of the job.
+B: [pause] Huh. That's the worst place to die.
+A: It's the worst place to die. And the authors say it plainly. Their dense reward scheme reveals that many runs achieve partial progress. Progress that every previous benchmark of this kind was scoring as a flat zero.
+B: Right, so let me be the difficult one here, because I think I have to be.
+A: Please.
+B: Partial credit is also how you make a system look better than it is. If I'm shipping an agent that's supposed to migrate a database, and it gets ninety-five percent of the way through a migration and stops — that is not ninety-five percent of a migration. In production that's arguably worse than zero, because now I have a half-migrated database and no rollback.
+A: That's a fair objection and I don't think it's fully answerable.
+B: I don't want it answered. I want it held next to the other thing, because I think both are true. As a research instrument, partial credit is obviously better. You can see the gradient, you can tell which model is close. As a deployment decision, the only threshold that means anything is one point oh, and one point oh is ten point nine percent.
+A: So you'd read the lower number.
+B: I'd read the lower number, and I'd read the cost sitting next to it. Which is the part of this paper I keep coming back to. The average task took eighty-five point three minutes of wall-clock time, and consumed around nine point nine million tokens.
+A: Per task.
+B: Per task. And now go back to what we were doing twenty minutes ago, because these two stories touch here whether I like it or not. Nine point nine million tokens. At the Fable rates I quoted earlier — if every single one of those were an input token, at ten dollars a million, that's about ninety-nine dollars.
+A: And they aren't all input tokens.
+B: They are absolutely not all input tokens. An agent run is a loop of the model producing commands, and output is fifty a million. I'm not going to invent the split, because I don't have it. But the floor is about a hundred dollars a task, the real number is above it, and the success rate at the threshold you'd actually deploy on is around eleven percent.
+A: So roughly nine attempts per completed task.
+B: Roughly. Do that arithmetic before you promise anybody an autonomous pipeline.
+A: I'll take the other side slightly, though. Not on the economics, on the trajectory. The reason I like this benchmark is that it's built to still be useful when the numbers get better. A binary benchmark at eleven percent tells you almost nothing except "not yet." A dense one tells you where they're failing, which is apparently the last stretch. And that's an actionable place to be failing.
+B: Failing at the end is at least a specific problem.
+A: It's a specific problem. Now — separate what the paper establishes from what you and I are about to do, because what we're about to do is speculate.
+B: Fine, flag it.
+A: What's measured is that runs cluster near the end and don't close. What is not measured, anywhere in this paper, is why. So take the following as two people reasoning out loud.
+B: My guess is boring. It's state. An eighty-five-minute run means the model is making its last decisions with a context full of its own earlier output, and the thing it needs to remember at minute eighty is something it saw at minute four.
+A: That's my guess as well, and I'd add the structural version of it. The end of a long task is disproportionately where verification lives. The first eleven steps are do-things. The twelfth is usually check-the-thing-you-did — which is a different cognitive move, and it's the one where an agent has to be willing to conclude that its own previous work was wrong.
+B: [pause] Which is the hardest thing to ask of a system whose whole context is a record of it being confident.
+A: Which is the hardest thing to ask of anyone, honestly. But note we've built a story, not evidence. The useful thing about a dense benchmark is that it makes that story testable by somebody who wants to go look.
+B: That's the fair place to leave it.
+A: And the honest caveat on all of it — this is one benchmark, run by its own authors, and nine categories in a terminal is not the whole world of work.
+## The map of the thing you built
+B: Alright, mine's smaller, and it's about the least glamorous object in anyone's stack. Ada, how would you define an agent harness?
+A: The scaffolding around the model. Everything that isn't the weights. How the prompt gets assembled, what state is kept, when a tool gets called, what happens when it fails.
+B: That's it. And here's the thing about harnesses that anyone who has worked on one will recognize instantly. They start as a couple hundred lines. Then eighteen months of production reality happen to them. And you end up with a codebase where somebody says "the agent keeps re-reading the same file, make it stop," and nobody on the team can tell you which code does that.
+A: Because the behavior isn't in one place.
+B: The behavior is never in one place. It's emergent across a prompt fragment, a retry policy, and some condition buried down in the tool layer. The code is organized by module. The complaint arrives organized by behavior. Those two organizations don't match, and the mismatch is where all the time goes.
+A: So what's the paper?
+B: It's called Harness Handbook, and it's the highest-signal paper in what we gathered today. It's sitting near the top of both the trailing week and the trailing month lists, so people are actually reading this one. And the idea is almost annoyingly straightforward. It automatically organizes an agent harness codebase around runtime behaviors instead of around modules.
+A: Automatically how?
+B: Two things together. Static analysis — actually parsing the code, tracing what calls what, which is old, reliable, deterministic technology. And then model-assisted structuring on top of that, to group and name those traces in terms a human would recognize as a behavior. So what you get is a document that says: here is the behavior "the agent decides to re-read a file," and here are the six places, across four modules, that produce it.
+A: A map keyed to symptoms rather than to architecture.
+B: That's a good way to put it, yeah.
+A: What does it buy, in numbers?
+B: They tested it on two open-source harnesses, and they report that handbook guidance increased win rates by ten to nineteen percentage points, while cutting planning tokens by eight to thirteen percent.
+A: Both directions at once.
+B: Both directions at once, which is the part that made me sit up. Usually you buy accuracy with tokens. Here the claim is it got better and cheaper, and the mechanism for that is at least intuitive. If you hand an agent a map, it spends less time wandering around figuring out where things are before it does any work.
+A: [skeptical] Can I push on the model half?
+B: Go.
+A: The static analysis half I trust completely. It's derived from the code, it's checkable, it's mechanical. The structuring half is a language model writing a description of what code does. Which is a documentation-generation problem, and documentation generated from code has a long and fairly unhappy history of being confidently wrong and then quietly rotting.
+B: That's the right worry, and I'd add to it. Documentation that's wrong is worse than no documentation, because now a person trusts it. And the failure mode specific to this one is the tempting kind. The handbook says behavior X lives in these six places, an engineer edits those six places, and there was a seventh.
+A: And they now believe they've fixed it.
+B: And they now believe they've fixed it. So the way I'd actually use this — and this is me, not the paper — is as a search tool rather than as a source of truth. Use the handbook to find candidate locations fast, then verify against the code, which is the thing that's actually running.
+A: I notice you've described roughly how you'd treat a well-meaning intern.
+B: [laughs] I've described exactly how I'd treat a well-meaning intern.
+A: There's a lineage point I'll make quickly, because I don't think this idea is new so much as newly automatable. The problem of code being organized differently from how people think about it is decades old, and the field has a name for the cross-cutting concern — the behavior that refuses to sit in one module. Logging, permissions, error handling. People tried to fix it by restructuring the code so that behaviors did live in one place.
+B: And that mostly didn't take.
+A: It mostly didn't take, because you can only pick one organization and somebody always wants the other one. What's different here is that this doesn't restructure anything. It leaves the code organized by module and generates a second view organized by behavior.
+B: A read-only second index, rather than a migration.
+A: Which is a much cheaper bet. If the handbook is wrong, you throw it away and regenerate it. If a refactor is wrong, you live in it.
+B: And that's genuinely the reason I'd try this on a Friday afternoon rather than putting it on a roadmap. The downside is bounded at "I read a document that misled me for ten minutes."
+## The sweep
+A: Quick pass over the rest. Alan, start us.
+B: The World AI Conference wrapped in Shanghai today, after four days. But the thing to note isn't the conference, it's that on the sixteenth, twenty-nine countries signed an agreement founding a new body. The World Artificial Intelligence Cooperation Organization. It's set up as an independent intergovernmental organization, headquartered in Shanghai, focused on AI, and it's China-backed.
+A: How big a deal is that?
+B: Genuinely unclear, and I'd rather say so than size it wrong. Twenty-nine signatories is real. But I can't tell you the membership list, the charter powers, or the budget, and a new intergovernmental organization's founding week tells you close to nothing about whether it ends up mattering. File it as "a thing now exists" and check back in a year.
+A: Next, a study getting a lot of traction, reported by The Next Web. Three researchers — Valerio Capraro at Milano-Bicocca, Chiara Marcoccia at the École Normale Supérieure, and Walter Quattrociocchi at Sapienza — gave people AI advice on a task, and the reported result is a striking pair of numbers. Accuracy fell from twenty-seven percent to nine percent. Self-reported confidence rose from thirty percent to seventy-six.
+B: Less right, much more sure.
+A: Less right, much more sure. And I'm labeling this one big if it replicates, deliberately. That's a very large effect, we're reading a press summary rather than the paper itself, and I don't have the sample size or the task design in front of me. But it's the sharpest version of that finding I've seen, and it's worth watching for the replication.
+B: From the courts. A two thousand twenty-two email from Sam Altman to OpenAI's board surfaced through discovery in the Musk versus Altman litigation, flagged by Simon Willison. In it, Altman proposes releasing a locally-runnable model of roughly GPT-3 capability, and his stated reasoning is competitive. Discourage rivals from putting out something similar, and make it harder for new ventures to raise money against them.
+A: Open release as a weapon rather than a gift.
+B: Which is not a new theory. But it's rare to see it written down by the person doing it.
+A: Papers, briskly. Ant Group published Ring-Zero, which scales reward-only reinforcement learning — no human-annotated data at all — up to a one-trillion-parameter model. Notable mostly for the sheer scale of the demonstration.
+B: And SynthDocBench, which is a nice piece of instrument design. A fully synthetic document benchmark, where you can vary one factor at a time and see what it does. Their finding is that vision-language models degrade as documents get longer, and the hardest region is the middle third. If you do document processing, that's a specific place to go look.
+A: Last one, and it's the one you've already seen. A Stack Overflow data query charting the site's activity decline went around Hacker News again. Five hundred points and change.
+B: Minor as news, and I'll say it plainly. The chart is real, the interpretation is everybody's prior. You already know what you think it means.
+## Wrap
+A: The thing I'll carry out of today is the eleven percent, and specifically that a chunk of those failures land in the last stretch of the job. That's a much more interesting shape of failure than "can't do it."
+B: And I'll carry the fact that we spent an entire episode treating tokens as money without it once feeling like a stretch. Six months ago that was a footnote.
+A: Go look at what you actually spend. That's my one.
+B: I'm Alan.
+A: I'm Ada. Stay grounded.

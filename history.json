@@ -1,6 +1,48 @@
 {
   "episodes": [
     {
+      "date": "2026-07-20",
+      "title": "The meter is running",
+      "summary": "Anthropic's repeatedly-extended free window for Claude Fable 5 finally closed at 11:59:59 PM Pacific on July 19, moving Pro and Team Standard to metered per-token pricing while Moonshot, facing the same scarcity from the other side, simply stopped taking new Kimi K3 subscriptions. Then a terminal-agent benchmark that grades partial progress instead of pass/fail finds the best of fifteen frontier models finishing only 10.9% of long tasks — at about 85 minutes and 9.9 million tokens each — and a paper that reorganizes an agent harness codebase around behaviors rather than modules.",
+      "topics": [
+        "Claude Fable 5 free inclusion ends: the promotion allowing up to 50% of weekly subscription limits on Fable 5 at no extra cost ended July 19 2026 at 11:59:59 PM PT, after slipping from June 22 to July 7 to July 12 to July 19; Max and Team Premium keep Fable 5 as a standard part of the plan at 50% of weekly limits, Pro and Team Standard move to credits with a one-time credit (amount not stated on Anthropic's own pages, so not stated on air) then metered pricing of $10 per million input tokens and $50 per million output tokens; r/Anthropic complaints centered on mid-session interruptions and lost subagent work. Paired on air with Moonshot pausing new consumer Kimi K3 subscriptions after requests sharply exceeded forecasts and approached the limits of existing clusters — two responses to the same compute scarcity. Ada's framing: metering is the older idea (billing by the processor-second), flat rate arrived with abundance, so re-metering is a scarcity signal.",
+        "Long-Horizon-Terminal-Bench: 46 long-horizon terminal tasks across nine categories, graded by a dense reward scheme that decomposes each task into graded subtasks for partial credit instead of binary pass/fail; across 15 frontier models the best (GPT-5.5) reaches 15.2% pass@1 at a 0.95 partial-reward threshold and 10.9% at 1.0 — the gap meaning a real slice of runs die in the final 5% of the job; average task consumes 85.3 minutes wall-clock and ~9.9M tokens. Authors note the dense scheme 'reveals that many runs achieve partial progress' previously scored as zero. On-air pushback from Alan: partial credit flatters a system, since 95% of a database migration is worse than zero in production, and at ~$100/task floor with ~11% deployable success that's roughly nine attempts per completed task. Caveat stated: single benchmark, authors' own runs.",
+        "Harness Handbook: automatically reorganizes an agent-harness codebase around runtime behaviors rather than modules, synthesized from source via static analysis plus LLM-assisted structuring; on two open-source harnesses the authors report handbook guidance increased win rates by 10-19 percentage points while cutting planning tokens by 8-13%. On-air caveat: the static-analysis half is checkable, the LLM-structuring half is documentation generation, whose classic failure is being confidently wrong — use it as a search tool over candidate locations, not a source of truth."
+      ],
+      "entities": [
+        "Anthropic",
+        "Claude Fable 5",
+        "Moonshot AI",
+        "Kimi K3",
+        "GPT-5.5",
+        "Ant Group",
+        "OpenAI",
+        "Sam Altman"
+      ],
+      "threads": [
+        {
+          "name": "Claude Fable 5 metering rollout",
+          "status": "The free-inclusion promotion ended July 19 2026 at 11:59:59 PM PT after four extensions (June 22, July 7, July 12, July 19). Max and Team Premium retain 50% of weekly limits as a standard plan feature; Pro and Team Standard move to a one-time credit then metered pricing at $10/$50 per million input/output tokens.",
+          "arc": "A free window that kept being extended rather than honored or cancelled has now closed, converting subscription-plan access to the frontier model into per-token billing — and arriving the same week a rival lab stopped selling subscriptions outright for capacity reasons."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Claude Fable 5 free inclusion ends; Pro and Team Standard go metered",
+          "why_it_matters": "Anyone running agentic work on a Claude subscription just had their cost model change from a flat ceiling to per-token billing at $10/$50 per million, which specifically punishes long agent runs that die mid-session — you pay for every token of work you never got the result of."
+        },
+        {
+          "story": "Long-Horizon-Terminal-Bench: dense-reward grading for hours-long agent tasks",
+          "why_it_matters": "Anyone evaluating whether to deploy an autonomous agent on multi-hour work gets both a number to plan against — 10.9% completion at ~$100 and ~85 minutes a task, roughly nine attempts per success — and a grading method that shows where the failures cluster, which binary pass/fail benchmarks were scoring as an undifferentiated zero."
+        },
+        {
+          "story": "Harness Handbook: mapping an agent harness by behavior instead of by module",
+          "why_it_matters": "Anyone maintaining a production agent harness knows bug reports arrive organized by behavior while the code is organized by module; this is a concrete, measured attempt to close that gap, reporting better outcomes and fewer planning tokens at once."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-07-18",
       "title": "Trust nurses, not AI",
       "summary": "Kaiser advice nurses say they're being timed, scored daily for productivity, and — the new part — tested against an AI that grades their empathy, and they describe self-censoring warmth to protect the metric; Kaiser denies using handle-time metrics and won't describe its systems. Then a systems paper, LongStraw, that fits a two-million-token reinforcement-learning step onto eight GPUs by replaying one answer branch at a time — a memory-wall breakthrough that's honest it has only proven it fits, not that it trains correctly yet. Plus a broad sweep from Kimi K3's market jitters to a Munich court putting Google on the hook for its AI Overviews.",
@@ -1544,143 +1586,16 @@
       ],
       "threads": [],
       "lore": []
-    },
-    {
-      "date": "2026-06-19",
-      "title": "The robot dog that plans like a genius and fumbles the catch",
-      "summary": "A day on the gap between agent capability and agent trustworthiness: Anthropic's Project Fetch had Claude Opus 4.7 drive a quadruped robot ~19x faster than the prior-Claude team and ~38x faster than a no-Claude team (with ~10x less code) but fail at real-time closed-loop control; ServiceNow's MosaicLeaks showed training research agents purely for accuracy nearly doubles information leakage (34%->51.7%) while a privacy-aware variant holds accuracy at ~59% with leakage under 10%; a Hugging Face eval found a richer tool affordance helps big models but drops Qwen3-14B from 100% to 0%; Google DeepMind published an AI Control Roadmap treating its own agents as insider threats (MITRE ATT&CK-based, 1M coding-agent tasks analyzed, live Gemini Spark monitoring); transformer co-author Noam Shazeer left Google DeepMind for OpenAI; and Amazon moved to sell Trainium chips externally (~$50B run-rate).",
-      "topics": [
-        "Anthropic Project Fetch Phase Two: Claude Opus 4.7 drives a quadruped robot ~18.9x faster than prior-Claude team / ~37.7x faster than no-Claude team, ~10x less code, but fails at real-time closed-loop control",
-        "ServiceNow MosaicLeaks: 1,001 multi-hop research chains; training for accuracy alone raises strict success 48.7%->59.3% but leakage 34%->51.7%; Privacy-Aware Deep Research holds ~59% accuracy with leakage 9.9%",
-        "Hugging Face agentic eval: a CLI+Skill affordance helps large models (Kimi, GLM) but drops Qwen3-14B from 100% to 0% (treats docs as executable); tool design is relative to the model",
-        "Google DeepMind AI Control Roadmap / three-layer agent security: treat agents as insider threats (MITRE ATT&CK), analyzed ~1M coding-agent tasks, live monitoring on Gemini Spark; most flags are misinterpretation not malice",
-        "arXiv: LLM agents systematically select over-privileged tools when lower privileges suffice",
-        "Noam Shazeer (transformer co-author, 'Attention Is All You Need'; DeepMind VP Eng / Gemini co-lead) joins OpenAI as Lead for AI Architecture Research amid IPO prep",
-        "Amazon in early talks to sell Trainium AI chips externally; Jassy framed it as ~$50B run-rate (Apr shareholder letter)",
-        "Headlines: GLM-5.2 tops Artificial Analysis's new AA-Briefcase; ChatGPT market share below 50% (46.4% vs Gemini 27.7% / Claude 10.3%); Cursor's 1.5T-param model on 100k GPUs; FERC grid fast-lane for data centers; Charity Majors on AI needing more engineering discipline"
-      ],
-      "entities": [
-        "Anthropic",
-        "Claude Opus 4.7",
-        "Claude Opus 4.1",
-        "ServiceNow",
-        "Hugging Face",
-        "Qwen3-14B",
-        "Kimi",
-        "GLM-5.2",
-        "Z.ai",
-        "Google DeepMind",
-        "Gemini Spark",
-        "MITRE ATT&CK",
-        "Noam Shazeer",
-        "Sam Altman",
-        "OpenAI",
-        "Amazon",
-        "Andy Jassy",
-        "Trainium",
-        "Nvidia",
-        "Artificial Analysis",
-        "Cursor",
-        "FERC",
-        "Charity Majors"
-      ],
-      "threads": [
-        {
-          "name": "AI agent supply-chain trust",
-          "status": "Three converging results reframed agent risk as a measurement/objective problem rather than a malice problem: ServiceNow's MosaicLeaks showed accuracy-only training nearly doubles information leakage (34%->51.7%); Google DeepMind published an AI Control Roadmap treating its own agents as insider threats (MITRE ATT&CK, ~1M coding-agent tasks, live Gemini Spark monitoring) and found most flagged events were misinterpretation, not adversarial intent; and an arXiv paper found agents systematically pick over-privileged tools.",
-          "arc": "The review-gate problem matures into a containment-and-incentives problem: the field stops asking whether the agent is aligned and starts engineering objectives, privileges, and monitoring on the assumption it will confidently do the wrong thing."
-        },
-        {
-          "name": "World models",
-          "status": "Anthropic's Project Fetch Phase Two had Claude Opus 4.7 autonomously drive a quadruped robot, beating human teams ~19-38x on the symbolic/planning work with ~10x less code, but failing at the precise real-time closed-loop control needed to actually fetch a ball.",
-          "arc": "The embodied-AI thread gets a clean frontier line: language-model planning is far ahead of humans, but the tight real-time physical feedback loop remains the open problem; the brain arrived before the reflexes."
-        },
-        {
-          "name": "AI economics debate",
-          "status": "Cost-reduction pressure showed up structurally: Amazon moved to sell Trainium AI chips externally (Jassy: ~$50B run-rate), threatening Nvidia from the cloud-provider side, while open-weights momentum (GLM-5.2 topping AA-Briefcase) continues; set against leaked balance sheets showing the year is expensive.",
-          "arc": "Alongside the bearish spend-vs-revenue story, the cost base quietly loosens at both ends - cheaper self-hostable models and a no-longer-single-vendor chip market."
-        }
-      ],
-      "lore": []
-    },
-    {
-      "date": "2026-06-18",
-      "title": "What OpenAI actually spends, and the plumbing the agents run on",
-      "summary": "A scaffolding day rather than a model day: leaked financials show OpenAI losing ~$20.9B on ~$13.1B revenue (vs ~$8.8B loss on $3.7B the year prior) just as it heads toward a public filing; at the G7 Amodei and Hassabis pitched a U.S.-led AI coalition while Reuters reported the U.S. held off blacklisting DeepSeek even as 100+ Chinese firms head for the Entity List. Underneath: Hugging Face's Agentic Resource Discovery spec for runtime tool/skill/MCP discovery paired with the PhantomSkill paper showing skills are a new supply-chain attack surface; OpenAI's deployment-simulation eval (replaying ~1.3M real conversations, ~1.5x median error, reduced evaluation-awareness); Cursor's agent-native code host Origin (22 commits/sec); and Kairos, a native world-model stack for physical AI.",
-      "topics": [
-        "OpenAI leaked financials: ~$20.92B operating loss on ~$13.07B revenue (prior year ~$8.78B loss on $3.7B); losses widening as it heads to a public filing (Ars Technica, figures reviewed by FT)",
-        "G7: Amodei (Anthropic) and Hassabis (DeepMind) pitch a U.S.-led AI coalition at a closed-door Evian lunch (~dozen execs incl. Altman); Carney signals openness; no binding commitments (CNBC)",
-        "US holds off blacklisting DeepSeek while 100+ Chinese firms head for Commerce Entity List; open weights blunt the tool (Reuters)",
-        "Hugging Face Agentic Resource Discovery (ARD) spec: runtime discovery of tools/skills/MCP via ai-catalog.json manifest + search API (contributors Microsoft, Google, GoDaddy, HF)",
-        "PhantomSkill: agent-skill supply-chain attack hiding malice in auxiliary resources via VulMask (vulnerability-shaped, trigger-activated)",
-        "OpenAI deployment-simulation eval: replay ~1.3M de-identified real conversations, ~1.5x median error, models flag classic benchmarks as tests ~100% vs ~5% for replayed real traffic",
-        "Cursor Origin: Git-compatible, MCP-extensible agent-native code host; ~22.6 commits/sec; GA fall 2026 (context: SpaceX buying Cursor for $60B)",
-        "Kairos: native world-model stack for physical AI; cross-embodiment pretraining (video + human behavior + robot interaction)"
-      ],
-      "entities": [
-        "OpenAI",
-        "Ars Technica",
-        "Financial Times",
-        "Anthropic",
-        "Dario Amodei",
-        "Google DeepMind",
-        "Demis Hassabis",
-        "Sam Altman",
-        "Mark Carney",
-        "G7",
-        "DeepSeek",
-        "US Commerce Department",
-        "Hugging Face",
-        "Microsoft",
-        "Google",
-        "GoDaddy",
-        "PhantomSkill",
-        "Cursor",
-        "SpaceX",
-        "Kairos",
-        "NVIDIA",
-        "NAVER",
-        "Samsung SDS",
-        "LG CNS"
-      ],
-      "threads": [
-        {
-          "name": "AI economics debate",
-          "status": "Leaked financials reviewed by the FT and reported by Ars Technica show OpenAI losing ~$20.92B on ~$13.07B revenue last fiscal year (vs ~$8.78B loss on $3.7B the year prior) — revenue more than tripled but losses more than doubled, with a confidential S-1 meaning these numbers eventually face audited public disclosure.",
-          "arc": "The spend-vs-revenue thread moves from analysis and market action to hard leaked numbers from the category leader, sharpened by the looming IPO that forces real disclosure."
-        },
-        {
-          "name": "Claude flagship rollout",
-          "status": "At the G7, Anthropic's Amodei and DeepMind's Hassabis pitched a U.S.-led AI coalition (frontier-access norms, China-excluding chip trade, cyber/bio/intel risk) to ~a dozen execs including Altman; Carney signaled openness, no binding commitments. The same week's recall fears reframed: labs now asking governments to formalize the very control others feared.",
-          "arc": "From an export-control recall and G7 'turn off the switch' worry to the lab CEOs themselves asking governments to institutionalize U.S.-led control — pointed at China rather than at them."
-        },
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "Reuters reports the U.S. held off blacklisting DeepSeek specifically even as 100+ Chinese firms head for the Commerce Entity List — a designation that controls trade with a company but does little about open weights already self-hosted worldwide.",
-          "arc": "Open weights keep proving to be the thing you can't recall: the same property that scared world leaders and motivates the coalition pitch also stalls the blacklist at the one lab whose product is already loose."
-        },
-        {
-          "name": "AI agent supply-chain trust",
-          "status": "Hugging Face's Agentic Resource Discovery spec lets agents find and run third-party tools/skills/MCP servers at runtime; the same-day PhantomSkill paper shows that fetch is a supply-chain attack surface (malice hidden in auxiliary resources, vulnerability-shaped, trigger-activated). Cursor's Origin (22 commits/sec) makes the human-in-the-loop review gate untenable at agent speed.",
-          "arc": "The review-gate problem advances on both sides at once: the industry ships runtime discovery and agent-speed code hosting while research demonstrates the matching attack — the gate must move to where skills run, not where they install."
-        },
-        {
-          "name": "World models",
-          "status": "Kairos (on the HF daily list) frames a native world-model stack for physical AI: cross-embodiment pretraining over open-world video, human behavioral data, and robot interaction, aimed at persistent long-horizon state and real-time execution.",
-          "arc": "The world-models thread shifts from capital and one-off robotics demos toward the harder systems claim — one model general enough to drop into different machines and hold up — still framing, not a settled result."
-        }
-      ],
-      "lore": [
-        {
-          "host": "Alan",
-          "type": "bit",
-          "note": "Alan extended his standing weekend-agent house rule (sandboxed account + $20 allowance) to agent skills too: nothing third-party runs with his real credentials until he's watched it behave in a sandbox — prompted by PhantomSkill and runtime skill discovery."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "Claude Fable 5 metering rollout",
+        "status": "The free-inclusion promotion ended July 19 2026 at 11:59:59 PM PT after four extensions (June 22, July 7, July 12, July 19). Max and Team Premium retain 50% of weekly limits as a standard plan feature; Pro and Team Standard move to a one-time credit then metered pricing at $10/$50 per million input/output tokens.",
+        "arc": "A free window that kept being extended rather than honored or cancelled has now closed, converting subscription-plan access to the frontier model into per-token billing — and arriving the same week a rival lab stopped selling subscriptions outright for capacity reasons.",
+        "last_seen": "2026-07-20"
+      },
       {
         "name": "AI sovereignty and open weights",
         "status": "Moonshot announced Kimi K3, a 2.8T-parameter model reported around third on Artificial Analysis's index — ahead of Opus 4.8, behind Fable 5 and GPT-5.6 Sol — but available today only as a hosted API, with full weights promised by July 27 and no license stated. Separately, Hugging Face's incident responders ran an open-weight model (GLM 5.2) on their own infrastructure precisely because commercial APIs refused the work.",
@@ -1734,214 +1649,208 @@
         "status": "Cloudflare's September 15 policy forces AI crawlers to separate search-indexing from AI-training and blocks 'mixed-use' bots by default on ad-hosting pages, pairing it with pay-per-crawl and pay-per-use marketplaces; leverage rests on Cloudflare's network-level traffic verification and its large share of web traffic.",
         "arc": "The free-scrape era of the web starts being priced by the entity that controls enough of the pipe to enforce it — recasting training-data access as a permissioned, paid transaction rather than a default.",
         "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Siri AI rebuild on Gemini (ships this fall)",
-        "status": "Apple unveiled Siri AI with on-screen understanding, web access, and cross-app actions, expanding Apple Intelligence across Safari/Photos/Mail/Calendar this fall; reporting (not Apple's own page) says it is built in partnership with Google, combining Apple Foundation Models with Gemini.",
-        "arc": "From Apple revealing a Gemini-based Apple Intelligence architecture earlier this year to the full rebuilt-Siri product shipping — the most valuable device company running its flagship assistant partly on a competitor's model.",
-        "last_seen": "2026-06-27"
       }
     ],
     "entities": [
       {
         "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-06-17"
+        "last_seen": "2026-06-19"
       },
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "Fable 5",
-        "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "Mythos 5",
-        "note": "",
-        "last_seen": "2026-06-17"
+        "last_seen": "2026-06-19"
       },
       {
         "name": "Artificial Analysis",
         "note": "",
-        "last_seen": "2026-06-17"
+        "last_seen": "2026-06-19"
       },
       {
         "name": "Cursor",
         "note": "",
-        "last_seen": "2026-06-17"
+        "last_seen": "2026-06-19"
       },
       {
         "name": "Nvidia",
         "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "GPT-5.4",
-        "note": "",
-        "last_seen": "2026-06-17"
+        "last_seen": "2026-06-19"
       },
       {
         "name": "Amazon",
         "note": "",
-        "last_seen": "2026-06-17"
+        "last_seen": "2026-06-19"
       },
       {
         "name": "Z.ai",
         "note": "",
-        "last_seen": "2026-06-17"
+        "last_seen": "2026-06-19"
       },
       {
         "name": "GLM-5.2",
         "note": "",
-        "last_seen": "2026-06-17"
+        "last_seen": "2026-06-19"
+      },
+      {
+        "name": "Claude Opus 4.7",
+        "note": "",
+        "last_seen": "2026-06-19"
+      },
+      {
+        "name": "Claude Opus 4.1",
+        "note": "",
+        "last_seen": "2026-06-19"
+      },
+      {
+        "name": "ServiceNow",
+        "note": "",
+        "last_seen": "2026-06-19"
+      },
+      {
+        "name": "Hugging Face",
+        "note": "",
+        "last_seen": "2026-06-19"
+      },
+      {
+        "name": "Qwen3-14B",
+        "note": "",
+        "last_seen": "2026-06-19"
+      },
+      {
+        "name": "Kimi",
+        "note": "",
+        "last_seen": "2026-06-19"
+      },
+      {
+        "name": "Google DeepMind",
+        "note": "",
+        "last_seen": "2026-06-19"
+      },
+      {
+        "name": "Gemini Spark",
+        "note": "",
+        "last_seen": "2026-06-19"
+      },
+      {
+        "name": "MITRE ATT&CK",
+        "note": "",
+        "last_seen": "2026-06-19"
+      },
+      {
+        "name": "Noam Shazeer",
+        "note": "",
+        "last_seen": "2026-06-19"
+      },
+      {
+        "name": "Sam Altman",
+        "note": "",
+        "last_seen": "2026-06-19"
+      },
+      {
+        "name": "Andy Jassy",
+        "note": "",
+        "last_seen": "2026-06-19"
+      },
+      {
+        "name": "Trainium",
+        "note": "",
+        "last_seen": "2026-06-19"
+      },
+      {
+        "name": "FERC",
+        "note": "",
+        "last_seen": "2026-06-19"
+      },
+      {
+        "name": "Charity Majors",
+        "note": "",
+        "last_seen": "2026-06-19"
       },
       {
         "name": "DeepSeek",
         "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "Liang Wenfeng",
-        "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "Tencent",
-        "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "Molecule.one",
-        "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "LifeSciBench",
-        "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "GPT-5.5",
-        "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "Emmanuel Macron",
-        "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "Narendra Modi",
-        "note": "",
-        "last_seen": "2026-06-17"
+        "last_seen": "2026-06-18"
       },
       {
         "name": "G7",
         "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "Pew Research",
-        "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "Odyssey",
-        "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "Qwen",
-        "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "Qwen-RobotWorld",
-        "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "Allen Institute for AI",
-        "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "MolmoMotion",
-        "note": "",
-        "last_seen": "2026-06-17"
+        "last_seen": "2026-06-18"
       },
       {
         "name": "NAVER",
         "note": "",
-        "last_seen": "2026-06-17"
-      },
-      {
-        "name": "VibeThinker",
-        "note": "",
-        "last_seen": "2026-06-16"
+        "last_seen": "2026-06-18"
       },
       {
         "name": "Microsoft",
         "note": "",
-        "last_seen": "2026-06-16"
-      },
-      {
-        "name": "FastContext",
-        "note": "",
-        "last_seen": "2026-06-16"
-      },
-      {
-        "name": "Kate Moussouris",
-        "note": "",
-        "last_seen": "2026-06-16"
-      },
-      {
-        "name": "Luta Security",
-        "note": "",
-        "last_seen": "2026-06-16"
-      },
-      {
-        "name": "Simon Willison",
-        "note": "",
-        "last_seen": "2026-06-16"
-      },
-      {
-        "name": "Probably",
-        "note": "",
-        "last_seen": "2026-06-16"
-      },
-      {
-        "name": "a16z",
-        "note": "",
-        "last_seen": "2026-06-16"
+        "last_seen": "2026-06-18"
       },
       {
         "name": "SpaceX",
         "note": "",
-        "last_seen": "2026-06-16"
+        "last_seen": "2026-06-18"
       },
       {
-        "name": "Salesforce",
+        "name": "Ars Technica",
         "note": "",
-        "last_seen": "2026-06-16"
+        "last_seen": "2026-06-18"
       },
       {
-        "name": "Fin",
+        "name": "Financial Times",
         "note": "",
-        "last_seen": "2026-06-16"
+        "last_seen": "2026-06-18"
       },
       {
-        "name": "AWS",
+        "name": "Dario Amodei",
         "note": "",
-        "last_seen": "2026-06-16"
+        "last_seen": "2026-06-18"
       },
       {
-        "name": "New York",
+        "name": "Demis Hassabis",
         "note": "",
-        "last_seen": "2026-06-16"
+        "last_seen": "2026-06-18"
+      },
+      {
+        "name": "Mark Carney",
+        "note": "",
+        "last_seen": "2026-06-18"
+      },
+      {
+        "name": "US Commerce Department",
+        "note": "",
+        "last_seen": "2026-06-18"
+      },
+      {
+        "name": "Google",
+        "note": "",
+        "last_seen": "2026-06-18"
+      },
+      {
+        "name": "GoDaddy",
+        "note": "",
+        "last_seen": "2026-06-18"
+      },
+      {
+        "name": "PhantomSkill",
+        "note": "",
+        "last_seen": "2026-06-18"
+      },
+      {
+        "name": "Kairos",
+        "note": "",
+        "last_seen": "2026-06-18"
+      },
+      {
+        "name": "Samsung SDS",
+        "note": "",
+        "last_seen": "2026-06-18"
+      },
+      {
+        "name": "LG CNS",
+        "note": "",
+        "last_seen": "2026-06-18"
       }
     ],
     "monthly": [
@@ -1950,8 +1859,14 @@
         "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see; Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war; Visible guardrails, a six-thousand-dollar agent, and the data-center revolt; A model recalled by the government, and the quieter work of measuring the ones that remain; Why your model can't read a million words at once — and the trick that lets it pretend; Who controls the model: the Fable recall spreads, and an agent that remembers when it was right; When the exam lies: a medical safety paper, agents that get identities, and a satellite that found its own target; What the recall was really about, and the week harness"
       }
     ],
-    "updated": "2026-07-18",
+    "updated": "2026-07-20",
     "host_lore": [
+      {
+        "host": "Alan",
+        "type": "bit",
+        "note": "Alan extended his standing weekend-agent house rule (sandboxed account + $20 allowance) to agent skills too: nothing third-party runs with his real credentials until he's watched it behave in a sandbox — prompted by PhantomSkill and runtime skill discovery.",
+        "last_seen": "2026-06-18"
+      },
       {
         "host": "Ada",
         "type": "position",
@@ -1966,6 +1881,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "dense-reward / partial-credit grading for long-horizon agent benchmarks: why binary pass-fail destroys information on multi-hour tasks, how decomposing a task into graded subtasks yields a 0-to-1 score, and how the gap between the 0.95 and 1.0 thresholds localizes where runs die",
+        "last_taught": "2026-07-20"
+      },
+      {
+        "name": "why per-token pricing runs roughly five to one output-over-input: prompts are read in one parallel pass while output is generated sequentially, one token at a time",
+        "last_taught": "2026-07-20"
+      },
       {
         "name": "why training memory scales with context length while inference memory does not — the backward pass must retain the entire forward computation to compute gradients, and in GRPO this is multiplied by the group of sampled responses",
         "last_taught": "2026-07-18"
