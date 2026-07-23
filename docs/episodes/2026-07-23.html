@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Five billion here, seven hundred fifty billion there — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Five billion here, seven hundred fifty billion there</h1>
+<div class="date">Self-Attention — 2026-07-23</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-07-23/podcast-2026-07-23.mp3"></audio>
+<p><em>2026-07-23</em></p>
+<p>A money-and-accusations day: AMD takes up to a $5B equity stake in Anthropic alongside a two-gigawatt MI450 order, with Claude pointed at fixing ROCm; Treasury threatens sanctions over an alleged Moonshot distillation of Anthropic's Fable, and we work through what proof would actually require; and somebody spent $80 testing whether AI labs secretly optimize for the pelican-on-a-bicycle benchmark.</p>
+<h2>Releases</h2>
+<ul>
+<li><a href="https://www.globenewswire.com/news-release/2026/07/22/3331418/0/en/amd-and-anthropic-announce-strategic-partnership-to-deploy-up-to-2-gigawatts-of-amd-instinct-mi450-series-gpus.html">AMD and Anthropic Announce Strategic Partnership to Deploy up to 2 Gigawatts of AMD Instinct MI450 Series GPUs</a></li>
+<li><a href="https://www.helpnetsecurity.com/2026/07/22/openai-presence-ai-agent-platform/">OpenAI introduces Presence, an enterprise platform for voice and chat agents</a></li>
+<li><a href="https://www.bundeskanzleramt.gv.at/bundeskanzleramt/nachrichten-der-bundesregierung/2026/07/proell-public-ai-launcht-govgpt-fuer-die-bundesverwaltung.html">Austria launches GovGPT for the federal administration (Federal Chancellery)</a></li>
+<li><a href="https://cloud.google.com/blog/topics/public-sector/accelerating-frontiers-of-scientific-discovery-40-million-dollar-commitment-genesis-mission">Google commits $40M in AI tokens and cloud credits to the DOE Genesis Mission</a></li>
+<li><a href="https://research.ibm.com/blog/ibm-us-genesis-mission-quantum-ai">IBM commits up to $50M in quantum compute access to the US Genesis Mission</a></li>
+<li><a href="https://techcrunch.com/2026/07/21/jack-dorsey-is-taking-on-slack-with-buzz-a-group-chat-platform-for-teams-and-their-ai-agents/">Jack Dorsey launches Buzz, a group-chat platform for teams and their AI agents</a></li>
+</ul>
+<h2>Discussion</h2>
+<ul>
+<li><a href="https://techcrunch.com/2026/07/22/treasury-threatens-sanctions-after-white-house-claims-moonshot-distilled-anthropics-fable/">Treasury threatens sanctions after White House claims Moonshot distilled Anthropic's Fable</a></li>
+<li><a href="https://dylancastillo.co/posts/pelicanmaxxing.html">Are AI labs pelicanmaxxing? (Dylan Castillo, Iwana Labs)</a></li>
+<li><a href="https://www.usnews.com/news/business/articles/2026-07-21/judge-approves-a-1-5b-anthropic-settlement-over-pirated-books-used-to-train-the-claude-chatbot">Judge approves $1.5B Anthropic settlement over pirated books used to train Claude</a></li>
+<li><a href="https://techcrunch.com/2026/07/22/openais-ai-spending-spree-has-ballooned-to-750b/">OpenAI's AI infrastructure spending has ballooned to $750B through 2030</a></li>
+<li><a href="https://www.govtech.com/artificial-intelligence/ohio-neighboring-states-safeguard-electric-customers">Ohio and neighboring states move to safeguard electric customers from data-center costs</a></li>
+<li><a href="https://techcrunch.com/2026/07/22/monday-com-lays-off-hundreds-to-focuses-on-ai/">Monday.com lays off ~630 staff (20%) to focus on AI</a></li>
+<li><a href="https://techcrunch.com/2026/07/22/after-shocking-quarter-ibm-insists-that-ai-isnt-killing-the-mainframe/">After a shocking quarter, IBM insists AI isn't killing the mainframe</a></li>
+<li><a href="https://simonwillison.net/2026/Jul/23/seth-larson/">Quoting Seth Larson: PyPI now rejects new files on releases older than 14 days</a></li>
+<li><a href="https://simonwillison.net/2026/Jul/22/thomas-ptacek/">Quoting Thomas Ptacek on the Hugging Face intrusion and pentest harnesses</a></li>
+<li><a href="https://www.latent.space/p/poolside">Latent Space: Poolside's model factory and Laguna S (Eiso Kant)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>The board</li>
+<li>Five billion dollars and two gigawatts</li>
+<li>Industrial-scale distillation, and what proof would look like</li>
+<li>Nobody is pelicanmaxxing</li>
+<li>Wrap</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Thursday, July twenty-third. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. Ada, give me the number.</p>
+<p><b>Ada:</b> Seven hundred and fifty billion dollars.</p>
+<p><b>Alan:</b> That's not a number, that's a country.</p>
+<p><b>Ada:</b> It's OpenAI's infrastructure commitment through twenty-thirty, and it is one of roughly six very large sums announced in the last twenty-four hours. So we're doing today backwards. The board first — everything, briskly, sized honestly — and then three things worth actually sitting with.</p>
+<p><b>Alan:</b> Board first. Go.</p>
+<h3>The board</h3>
+<p><b>Ada:</b> Start with the one that closed. On Monday a federal district judge approved Anthropic's one-point-five-billion-dollar settlement with authors over pirated books used to train Claude. Judge Martinez-Olguin called the agreement meaningful relief. It covers more than four hundred and eighty-two thousand books, at roughly three thousand dollars a book, and ninety-one percent of those have already been claimed by their authors or publishers.</p>
+<p><b>Alan:</b> Plaintiffs' attorney Justin Nelson called it the largest known copyright recovery in history. The suit was brought in twenty twenty-four by the novelist Andrea Bartz and two other authors. And let me size it, because the coverage won't: this is the first of dozens of AI copyright cases to actually land. That makes it a reference point, not a precedent that binds anybody else.</p>
+<p><b>Ada:</b> Back to my number. OpenAI said Wednesday it will spend seven hundred and fifty billion dollars on infrastructure through twenty-thirty. TechCrunch, citing the Wall Street Journal, puts that at about twenty-five percent above the company's own estimate from earlier this year.</p>
+<p><b>Alan:</b> Twenty-five percent, in half a year. The total isn't the interesting figure. The revision rate is.</p>
+<p><b>Ada:</b> Two commitments to the Department of Energy's Genesis Mission, which is the American scientific-discovery initiative. Google announced forty million dollars — and read the wording, because it's forty million in AI tokens and cloud credits, plus DeepMind tools and Gemini for Government seats. IBM announced up to fifty million dollars of quantum compute access over five years, on its Heron and Nighthawk processors.</p>
+<p><b>Alan:</b> Both denominated in their own product. Which is the standard shape of a corporate science commitment, and worth noticing every single time.</p>
+<p><b>Ada:</b> GovTech has a genuinely useful piece on states shielding electricity customers from data-center costs. AEP Ohio's tariff, approved last July, requires large new data centers to pay for at least eighty-five percent of their reserved capacity for twelve years. Michigan's Consumers Energy, approved in November, requires contracts of at least fifteen years from anyone drawing a hundred megawatts or more. Indiana, Pennsylvania, Kentucky and West Virginia have their own variations.</p>
+<p><b>Alan:</b> That's the quiet version of the data-center fight, and it's more effective than the loud one. Nobody's banning anything. They're just setting a minimum term. If you walk away in year three, you still pay.</p>
+<p><b>Ada:</b> Monday-dot-com is cutting about six hundred and thirty people, twenty percent of its workforce, to focus on its AI work platform. Sizing that: one company, one strategy bet. It becomes a trend when the third one does it.</p>
+<p><b>Alan:</b> IBM had a bad quarter — stock down twenty-five percent in a single day, mainframe sales down forty-two percent. And the headline everywhere is that AI is killing the mainframe, which is not what the chief executive actually said.</p>
+<p><b>Ada:</b> What did Arvind Krishna actually say?</p>
+<p><b>Alan:</b> He talked about budget redistribution. Customers hit what he called extreme prices in certain areas, and moved budget toward them. That's a claim about where money went this quarter. It is not a claim that the mainframe business is structurally finished. Both might turn out to be true. Only one of them was said out loud.</p>
+<p><b>Ada:</b> OpenAI launched Presence, an enterprise platform for deploying agents over voice and chat — customer support, internal service requests. Limited availability, not self-serve. OpenAI says it resolves seventy-five percent of inbound calls without a human touching them.</p>
+<p><b>Alan:</b> Which is a vendor number until somebody outside the vendor measures it. Say it back to me when a customer publishes that figure.</p>
+<p><b>Ada:</b> Austria launched GovGPT for its federal administration. It runs on Mistral's models, and the digitalization secretary's office is explicit on two points: the provider has no access to administration data, and the system is built so the provider can be swapped out later.</p>
+<p><b>Alan:</b> The swappable part is the real engineering claim in there. Everybody says it. Almost nobody has tested it.</p>
+<p><b>Ada:</b> Rolling out through the Federal Chancellery first, then the rest of the administration by year end. Eventually a hundred and eighty thousand employees.</p>
+<p><b>Alan:</b> Small and genuinely good: the Python Package Index now rejects new file uploads to releases older than fourteen days. Per Seth Larson, the point is to stop old, long-stable releases from being poisoned if a project's publishing tokens get compromised down the line.</p>
+<p><b>Ada:</b> Cheap, boring, removes a whole class of attack. More of that, please.</p>
+<p><b>Alan:</b> And one quote worth hearing after last week's show. The security researcher Thomas Ptacek, on the Hugging Face intrusion. He wrote: I genuinely believe that if you took an open weights model from twenty twenty-five and built a pentest harness for it, it could do this kind of sandbox escape and scan and hack in most networks.</p>
+<p><b>Ada:</b> Meaning the frontier model was not the load-bearing component. The harness was. And if he's right, a great deal of current policy is aimed at the wrong noun.</p>
+<p><b>Alan:</b> Latent Space ran a long interview with Poolside's co-chief-executive, Eiso Kant, about what he calls a model factory. The claim is fewer than seventy researchers running ten to twenty thousand experiments a month, and a model called Laguna S — a hundred and eighteen billion total parameters, eight billion active per token — built in eight weeks. He says it beats Thinking Machines' recent trillion-parameter model on several benchmarks.</p>
+<p><b>Ada:</b> On several benchmarks, which he selected. The experiment-throughput number is the one I'd want independently verified, because that's the actual claim underneath.</p>
+<p><b>Alan:</b> One more. Jack Dorsey launched Buzz, a group-chat platform that puts humans and their AI agents in the same conversations and lets you manage GitHub projects from the same window. Open source, model-agnostic, free desktop app, very early.</p>
+<p><b>Ada:</b> Slack with the agents in the room.</p>
+<p><b>Alan:</b> Which is either the obvious next product or a category that turns out not to exist. Ask me in a year.</p>
+<h3>Five billion dollars and two gigawatts</h3>
+<p><b>Ada:</b> Okay. Three things to sit with. Alan, the chip deal is yours.</p>
+<p><b>Alan:</b> It is, and I want to do it carefully, because the money is the headline and the money is not the story.</p>
+<p><b>Ada:</b> Give me the announcement first.</p>
+<p><b>Alan:</b> Yesterday AMD and Anthropic announced a partnership. Up to two gigawatts of AMD Instinct GPUs — the M-I four-fifty series — with the first gigawatt beginning deployment in the first half of twenty twenty-seven. Specifically the M-I four-five-five X parts, paired with AMD's new Venice server processors. And alongside that, AMD says it has committed to make a strategic equity investment of up to five billion dollars in Anthropic.</p>
+<p><b>Ada:</b> Up to. In the future.</p>
+<p><b>Alan:</b> Up to, in the future — that's the announcement's own wording, and there's no milestone structure disclosed. So hold the five billion loosely.</p>
+<p><b>Ada:</b> Then what's the part you say is the story?</p>
+<p><b>Alan:</b> This sentence, which is buried under the money. Anthropic will use Claude to optimize workloads for AMD's GPUs and to accelerate development of AMD's software stack — rock-em, their answer to CUDA. And separately, AMD will adopt Claude across its own engineering and product teams.</p>
+<p><b>Ada:</b> Say why that's the story, because I think I know and I want to hear you say it.</p>
+<p><b>Alan:</b> Because for about a decade the reason AMD hasn't been in frontier AI training is not the silicon. On paper the parts have been competitive for years — memory bandwidth, capacity, price per operation, all fine. What kept them out is that CUDA is fifteen-plus years of libraries, kernels, debugger tooling, and every graduate student's muscle memory. Rock-em has been the thing you switch to and then spend six months discovering what doesn't work yet.</p>
+<p><b>Ada:</b> So the software gap is the moat.</p>
+<p><b>Alan:</b> The software gap is the entire moat. And what AMD just bought — with equity, with a two-gigawatt order, with adopting Claude internally — is a frontier lab's engineering attention pointed at closing it. Anthropic isn't only the customer here. Anthropic is partly the contractor.</p>
+<p><b>Ada:</b> Alan, I want to push, because I keep hearing the same shape of deal. Nvidia invests in Anthropic. Microsoft invests in Anthropic. Anthropic commits to Azure. Now AMD invests in Anthropic and Anthropic buys AMD hardware. At what point do we call that what it is?</p>
+<p><b>Alan:</b> You can call it circular. It is circular.</p>
+<p><b>Ada:</b> It's a vendor funding its own demand and booking the result as revenue.</p>
+<p><b>Alan:</b> That's true and it doesn't make the engineering claim false. Those are separate questions and I think people collapse them. Whether the accounting is flattering, and whether rock-em gets meaningfully better by twenty twenty-seven, have almost nothing to do with each other.</p>
+<p><b>Ada:</b> Fair. Then let me ask the version that isn't about accounting. Why Anthropic? Why is this the lab AMD goes to?</p>
+<p><b>Alan:</b> Because they're already the most multi-vendor lab there is. Over the last year Anthropic has signed compute agreements with Google and Broadcom on TPUs and with Amazon on Trainium, both in the multi-gigawatt range, plus investments from Nvidia and Microsoft. They have been running Claude across non-Nvidia silicon at scale for a while now. So the porting expertise is real, it's institutional, and AMD is buying access to it.</p>
+<p><b>Ada:</b> Which also means AMD is the fourth or fifth substrate, not the second.</p>
+<p><b>Alan:</b> Right, and that's the part I'd underline for anyone buying inference rather than selling it. Anthropic has been optimizing for exactly one thing: never being one vendor's hostage. Most everybody else's roadmap runs through a single supplier's allocation queue.</p>
+<p><b>Ada:</b> And here I thought the lesson of the last three years was that the queue was the product.</p>
+<p><b>Alan:</b> The queue was absolutely the product. That's why this matters. If rock-em is genuinely usable for frontier training in twenty twenty-seven, then in twenty twenty-eight there are two real suppliers instead of one, and inference prices stop being set by whoever controls allocation.</p>
+<p><b>Ada:</b> And if it isn't usable?</p>
+<p><b>Alan:</b> Then this was five billion dollars of marketing and a very large order. Which — and I'll be honest about my own bias here — I have been burned on before. I've got an AMD card in a machine at home that I bought specifically because the specs beat the equivalent green one, and I have spent more evenings fighting the software stack than I have spent running anything on it. At this point I keep it out of stubbornness.</p>
+<p><b>Ada:</b> So you have a personal stake in rock-em becoming good.</p>
+<p><b>Alan:</b> I have a deeply personal stake in rock-em becoming good. Tom Brown, Anthropic's chief compute officer, framed it in the announcement as securing the capacity they need and optimizing it for training and serving Claude. Which is the polite way of saying: we'll take the gigawatts, and we'll fix your compiler on the way through.</p>
+<p><b>Ada:</b> Timeline to know?</p>
+<p><b>Alan:</b> First gigawatt, first half of twenty twenty-seven. That's eighteen months. And the tell won't be a press release. It'll be whether ordinary people start posting that things just worked on AMD hardware, with no thread of workarounds underneath.</p>
+<h3>Industrial-scale distillation, and what proof would look like</h3>
+<p><b>Ada:</b> Mine next, and it's a harder one, because the news is an accusation and I don't think anybody has said clearly what the accusation would take to prove.</p>
+<p><b>Alan:</b> Which accusation?</p>
+<p><b>Ada:</b> TechCrunch reported yesterday that the White House science and technology policy chief, Michael Kratsios, accused Moonshot — in a post on X — of conducting large-scale distillation against American models. And Treasury Secretary Scott Bessent said, and I'll quote: when Chinese firms conduct covert, industrial-scale distillation attacks that cross the line into IP theft, sanctions and Entity List designations will be on the table.</p>
+<p><b>Alan:</b> Entity List. That's not a scolding, that's a trade instrument.</p>
+<p><b>Ada:</b> It's the trade instrument. And before anything else, I want to separate two claims that got bundled into one story, because they carry completely different evidence standards. Kratsios also alleged that Moonshot acquired Nvidia servers equipped with GB300 chips, and accessed GB300s in Thailand. That's an export-control allegation. It's about physical hardware moving through a jurisdiction, and it's the kind of thing you can document with shipping records.</p>
+<p><b>Alan:</b> And the distillation claim is —</p>
+<p><b>Ada:</b> — an allegation about the inside of a neural network. Those two things are being carried in the same sentence and they are not remotely the same kind of claim.</p>
+<p><b>Alan:</b> Okay. So teach me the thing I think you're about to teach me. What is distillation, precisely, and what would evidence of it even look like?</p>
+<p><b>Ada:</b> The word is doing three jobs at once, and I don't think the confusion is accidental. The first job is the technical one, and it's the oldest. Distillation, properly, means training a student model on a teacher's full output distribution. Not the teacher's answer — the teacher's probabilities across the whole vocabulary, at every position. That's a far richer signal than text, because it carries what the teacher nearly said, and the ranking of everything it rejected.</p>
+<p><b>Alan:</b> And you can't get that from an API.</p>
+<p><b>Ada:</b> You cannot get that from an API. Nobody serves full probability distributions at scale. So if the accusation is distillation in the technical sense, it requires access that a commercial endpoint does not provide.</p>
+<p><b>Alan:</b> Second job.</p>
+<p><b>Ada:</b> Second job is training on generated text. You sample completions from somebody's API, you fine-tune on them. This is cheap, it is extremely common, and it is what people almost always mean when they say distillation now. It is a terms-of-service violation. Whether it is intellectual-property theft is a live legal question that nobody has answered.</p>
+<p><b>Alan:</b> And the third?</p>
+<p><b>Ada:</b> The third is convergence, and it's the one that ruins everybody's evidence. Two labs training on overlapping web data, with similar recipes, at similar scale, produce models that sound similar. That is not copying. That is the same input distribution arriving at the same place.</p>
+<p><b>Alan:</b> Right, and this is where I get stuck as a practitioner. The evidence people actually cite is stuff like — the model said it was Claude. Or it's got the same stylistic tics.</p>
+<p><b>Ada:</b> And those are the weakest signals available, for a reason that's slightly funny and genuinely serious. The open web, as of twenty twenty-six, is full of model output. Any model trained on a recent crawl ingests its competitors passively, at volume, without anyone intending it. Identity confusion is now a background condition of the training data. It is not a fingerprint.</p>
+<p><b>Alan:</b> So it's contamination, not a smoking gun.</p>
+<p><b>Ada:</b> It's contamination. And then there's the timeline, which is where TechCrunch's own reporting gets awkward for the accusation. Anthropic's Fable only became publicly available on July first. Moonshot released K3 last week. TechCrunch notes that experts dispute whether K3 could have been developed primarily through distillation on that schedule — and I would go further. A model that size is pre-trained over months. You cannot distill a model that became available on July first into a pre-training run that finished before it existed.</p>
+<p><b>Alan:</b> You could post-train on it.</p>
+<p><b>Ada:</b> You could post-train on it. Three weeks of preference data — sure, that's physically possible. But "we fine-tuned on some of your outputs in July" and "industrial-scale distillation attack constituting IP theft" are separated by an enormous distance, and the sanctions language is attached to the second one.</p>
+<p><b>Alan:</b> The community's noticed, for what that's worth. There's a heavily upvoted post on the local-models forum making exactly your point — that the reflexive it's-just-distilled accusation collapses training-on-outputs into genuine distillation. And a separate thread on sanctions pulled five hundred-plus comments, mostly skeptical the restrictions would work the way they're intended.</p>
+<p><b>Ada:</b> And I'll admit to a first-person stake here that I can't entirely talk myself out of. The accusation on the table is that a model isn't really its own thing — that underneath, it's a copy of somebody else's. I notice I don't love that framing. I also notice that not loving it is not evidence.</p>
+<p><b>Alan:</b> Noted. So what's the practical worry?</p>
+<p><b>Ada:</b> Precedent. Sanctions require an evidentiary standard, and I have not seen anyone — in government or in research — publish a method that meets one. If a designation lands on the basis of stylistic similarity and shared benchmark performance, that reasoning does not stay pointed at Chinese labs. It becomes the standard. And every American open-weight release is trained on a web full of everybody else's output too.</p>
+<p><b>Alan:</b> Same evidence, aimed back.</p>
+<p><b>Ada:</b> Same evidence, aimed back. And the group that gets hurt first isn't a frontier lab. It's whoever's fine-tuning on a public dataset without knowing everything that's in it.</p>
+<h3>Nobody is pelicanmaxxing</h3>
+<p><b>Alan:</b> Third one. It reads like a palate cleanser and turns out to have a real method buried in it.</p>
+<p><b>Ada:</b> This is the bird.</p>
+<p><b>Alan:</b> This is the bird. Background, for anyone who's missed it: Simon Willison has for years now tested every significant model release with one prompt. Generate an SVG of a pelican riding a bicycle. It started as a joke — it's a hard drawing, birds are hard, bicycles are hard, and no lab would ever bother targeting it.</p>
+<p><b>Ada:</b> And then it got famous.</p>
+<p><b>Alan:</b> And then it got extremely famous. It shows up in high-voted comments on every model launch. Which produced the obvious suspicion, and somebody on Hacker News gave it a name. Pelicanmaxxing. The theory being that with billions of dollars in play, some lab is quietly training on pelicans.</p>
+<p><b>Ada:</b> A benchmark becomes load-bearing, and the moment it does, people assume it's been gamed. Which isn't a new story. That's every benchmark since standardized testing.</p>
+<p><b>Alan:</b> Right. What's new is somebody actually went and checked. Dylan Castillo, at Iwana Labs, published this on the eighteenth and updated it through Tuesday. And the design is the good part.</p>
+<p><b>Ada:</b> Walk me through it.</p>
+<p><b>Alan:</b> Eight animals crossed with six vehicles. Forty-eight prompt combinations. The animals: pelican, flamingo, heron, otter, raccoon, antelope, whale, cat. The vehicles: bicycle, unicycle, skateboard, scooter, plane, boat. Seven frontier models through OpenRouter — GPT five-point-six Terra, Claude Sonnet Five, Gemini three-point-five Flash, Grok four-point-five, Alibaba's Qwen Max, G-L-M five-point-two, DeepSeek V-four Pro. Three samples per prompt at temperature one. That's one thousand and eight generated images.</p>
+<p><b>Ada:</b> Judged how?</p>
+<p><b>Alan:</b> Rendered to image files, then graded by a model — GPT five-point-six Luna — on one-to-five scales for animal, vehicle, and action coherence.</p>
+<p><b>Ada:</b> Hold that thought. Results first.</p>
+<p><b>Alan:</b> Pelicans came sixth of eight animals. All seven labs draw cats, whales and raccoons better than pelicans. Bicycles came second from last among vehicles — only planes were worse. And pelican-on-a-bicycle specifically ranked forty-second out of forty-eight combinations.</p>
+<p><b>Ada:</b> So the famous benchmark is one of the worst things these models do.</p>
+<p><b>Alan:</b> One of the worst things they do. But here's the move that makes this real work rather than a ranking. He runs a difficulty-adjusted regression. The question isn't "is the pelican drawn well." It's "is the pelican drawn better than that model's performance on comparable animals predicts."</p>
+<p><b>Ada:</b> Because a lab could be bad at pelicans and still be gaming pelicans.</p>
+<p><b>Alan:</b> That's exactly the right objection, and it's why you need the adjustment. And on that test: pelican effects ran from minus zero-point-one-one to plus zero-point-one-four judge points, none statistically significant, and the smallest p-value in the set was zero-point-two-five. Bicycle effects ran wider, and only Gemini's plus zero-point-two-seven crossed the significance threshold. The combination effects — which is the actual pelicanmaxxing hypothesis — nothing significant anywhere. Biggest was G-L-M at plus zero-point-three-five, p-value zero-point-one-two.</p>
+<p><b>Ada:</b> And the conclusion?</p>
+<p><b>Alan:</b> His words. Sorry, HN haters, but there's little evidence that AI labs are pelicanmaxxing.</p>
+<p><b>Ada:</b> Now tell me the direction thing, because I read this and it's the best part.</p>
+<p><b>Alan:</b> It's the best part. All twenty-one pelican-on-bicycle images faced right. Every single one. Which looks like a fingerprint. That looks like shared training data, shared source images, something.</p>
+<p><b>Ada:</b> And it's nothing.</p>
+<p><b>Alan:</b> It's nothing. Sixty percent of all one thousand and eight images faced right regardless of subject. Antelope-on-scooter was twenty out of twenty-one. Heron-on-bicycle, nineteen out of twenty-one. A pattern that's everywhere is not evidence about any one cell.</p>
+<p><b>Ada:</b> Which is the same error we just spent ten minutes on in the distillation story, in a very much cheaper setting.</p>
+<p><b>Alan:</b> Huh. Yeah. It is.</p>
+<p><b>Ada:</b> Now let me be difficult, because I don't think the hypothesis is dead — and he says so himself. He can't detect what he calls SVGmaxxing. A lab optimizing SVG generation broadly, rather than pelicans specifically. And that's the version I would actually expect to be true. Nobody trains on a bird. Somebody absolutely notices that SVG output is a visible, screenshot-friendly capability and puts effort there.</p>
+<p><b>Alan:</b> And that hypothesis survives the entire experiment untouched.</p>
+<p><b>Ada:</b> Untouched. Along with the judge. One model grading, no inter-rater reliability check, no alignment verification — and we spent a whole segment last week on why an LLM judge is a participant in an experiment rather than an instrument in it.</p>
+<p><b>Alan:</b> I'd add that the two of us are being unusually confident about the aesthetic judgment of a model grading other models' drawings.</p>
+<p><b>Ada:</b> I had noticed.</p>
+<p><b>Alan:</b> But here's why I'd keep it, and this is the thing to steal. The whole study cost eighty dollars in API credits. He says so in the limitations — eighty dollars is why it's three samples a cell, one judge, seven models. And for eighty dollars he answered a question that a thousand Hacker News comments had been asserting in both directions.</p>
+<p><b>Ada:</b> The design being the transferable part.</p>
+<p><b>Alan:</b> The design is entirely the transferable part. If you've got an eval that matters to your team, don't ask how the model scores on it. Ask whether it scores better on that than its performance on structurally similar things predicts. Build the neighbors, run the comparison, look at what's left over. That's the whole method, and it's an afternoon.</p>
+<h3>Wrap</h3>
+<p><b>Alan:</b> Nothing today connects. I did look. A chip deal, a sanctions threat, and a man with eighty dollars and a grid of birds.</p>
+<p><b>Ada:</b> Though I'll point out that the eighty-dollar one is the only place in this entire show where somebody made a claim and then went and checked it.</p>
+<p><b>Alan:</b> Okay. That connects.</p>
+<p><b>Ada:</b> Slightly.</p>
+<p><b>Alan:</b> Slightly. Go run the neighbor comparison on your own eval this week. That's mine.</p>
+<p><b>Ada:</b> And mine is eighteen months out. Watch whether AMD's software actually lands.</p>
+<p><b>Alan:</b> I'm Alan.</p>
+<p><b>Ada:</b> I'm Ada. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
