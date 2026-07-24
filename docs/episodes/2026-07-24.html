@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recompute, don't remember — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Recompute, don't remember</h1>
+<div class="date">Self-Attention — 2026-07-24</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-07-24/podcast-2026-07-24.mp3"></audio>
+<p><em>2026-07-24</em></p>
+<p>ChatGPT Health goes national and stops being a place in the app — health data now surfaces in every query, because seventy percent of health questions already happened outside the hub. Then a systems paper gets two million tokens of reinforcement-learning training onto eight GPUs by storing almost nothing and replaying the rest. And offensive security researchers say model guardrails have stopped being a line and started being an allocation.</p>
+<h2>Papers</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2607.14952">LongStraw: Long-Context RL Beyond 2M Tokens under a Fixed GPU Budget</a></li>
+<li><a href="https://huggingface.co/papers/2607.19191">ABot-World-0: Infinite Interactive World Rollout on a Single Desktop GPU</a></li>
+</ul>
+<h2>Releases</h2>
+<ul>
+<li><a href="https://techcrunch.com/2026/07/23/openai-makes-chatgpt-health-available-to-all-u-s-users/">OpenAI makes ChatGPT Health available to all U.S. users</a></li>
+<li><a href="https://techcrunch.com/2026/07/23/ai-chip-startup-etched-defies-skeptics-hits-10-3b-valuation-from-big-name-investors/">AI chip startup Etched hits $10.3B valuation</a></li>
+<li><a href="https://techcrunch.com/2026/07/23/runway-bets-on-ai-model-routing-as-generative-media-gets-crowded/">Runway bets on AI model routing as generative media gets crowded</a></li>
+<li><a href="https://huggingface.co/swiss-ai/Apertus-v1.5-70B">swiss-ai/Apertus-v1.5-70B (open weights, open data, Apache 2.0)</a></li>
+<li><a href="https://huggingface.co/Kwaipilot/KAT-Coder-V2.5-Dev">Kwaipilot/KAT-Coder-V2.5-Dev (35B total / 3B active MoE, open weights)</a></li>
+<li><a href="https://techcrunch.com/2026/07/23/nvidia-is-sending-gpus-to-the-moon/">Nvidia is sending GPUs to the moon</a></li>
+</ul>
+<h2>Discussion</h2>
+<ul>
+<li><a href="https://techcrunch.com/2026/07/23/how-ai-guardrails-are-impeding-the-work-of-offensive-cybersecurity-researchers/">How AI guardrails are impeding the work of offensive cybersecurity researchers</a></li>
+<li><a href="https://slashdot.org/story/26/07/23/0623233/startup-founders-urge-trump-not-to-shut-off-chinese-open-weight-ai">Startup founders urge Trump not to shut off Chinese open-weight AI (Little Tech Association)</a></li>
+<li><a href="https://www.reddit.com/r/LocalLLaMA/comments/1v4iw0n/apple_m5_isnt_making_full_use_of_its_matmul_cores/">r/LocalLLaMA: Apple M5 isn't making full use of its matmul cores yet</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>Your medical record is now context</li>
+<li>Two million tokens on eight GPUs</li>
+<li>Quick pass</li>
+<li>Negotiating with the model</li>
+<li>Before we go</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Friday, July twenty-fourth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. Three things today, and for the first Friday in a while, not one of them is a number with nine zeros in it.</p>
+<p><b>Ada:</b> We have earned a day off from that.</p>
+<p><b>Alan:</b> We have. Instead: a health product that quietly stopped being a product and became a setting, a training paper that gets two million tokens onto eight GPUs by refusing to remember anything, and a room full of security researchers who say they now spend their day arguing with a chatbot.</p>
+<p><b>Ada:</b> Yours first.</p>
+<h3>Your medical record is now context</h3>
+<p><b>Alan:</b> OpenAI made ChatGPT Health available to every US-based user over eighteen. This is TechCrunch reporting, from yesterday. All plans — free, Go, Plus and Pro — web and iOS, rolling out this week.</p>
+<p><b>Ada:</b> It's been in testing since January, hasn't it?</p>
+<p><b>Alan:</b> Since January. And one design change in this announcement is the actual story — not the availability. During testing, Health was a hub. A place inside the app you went to. As of this rollout, health insights from your connected data surface in all queries. Not just in the hub.</p>
+<p><b>Ada:</b> So the walls came down.</p>
+<p><b>Alan:</b> The walls came down. And here's why, and it's the number I keep turning over: TechCrunch reports that during testing, seventy percent of health queries happened outside the hub.</p>
+<p><b>Ada:</b> Oh, that's good. That's genuinely good.</p>
+<p><b>Alan:</b> Right? People did not go to the health room to ask health questions. They just asked. In the middle of whatever else they were doing.</p>
+<p><b>Ada:</b> Which is how people behave with a doctor at a party. Nobody makes an appointment to ask the thing they're actually worried about.</p>
+<p><b>Alan:</b> And the volume is not small. OpenAI's figure, via TechCrunch: two hundred and thirty million health-related queries a week when testing started in January. Three hundred million now.</p>
+<p><b>Ada:</b> A week.</p>
+<p><b>Alan:</b> A week. So — what's actually connected. Apple Health. Function. MyFitnessPal. And then the part that makes me sit up: medical records. Epic, Oracle Health, One Medical, Function Health.</p>
+<p><b>Ada:</b> Epic is the one that matters.</p>
+<p><b>Alan:</b> Epic is the one that matters. If you've been to a hospital in the United States, there's a very good chance your chart lives in Epic. And what this feature does, mechanically, is take structured clinical data out of a system built around access controls and audit logs, and put it into a general-purpose assistant's context.</p>
+<p><b>Ada:</b> Say more about why that's different. Because a listener could reasonably say: it's my data, I authorized the connection, what's the problem?</p>
+<p><b>Alan:</b> The problem is that a chart isn't one thing. A chart has fields with wildly different sensitivity — a cholesterol panel and a psychiatric note are not the same object, and inside the hospital system they're governed differently. Different roles see different things, and every look is logged. Once it's context for a language model, it's one blob. There is no per-field policy inside a prompt. There's just what's in the window.</p>
+<p><b>Ada:</b> And the audit trail?</p>
+<p><b>Alan:</b> In the hospital system, someone opening your chart leaves a record. What's the equivalent when a model reads it to answer a question about your sleep?</p>
+<p><b>Ada:</b> Let me take the other side for a second, because I don't want us to be reflexively grim about this. There's a real problem this solves. Medical records are famously fragmented — the specialist doesn't have what the primary care physician has, and the patient is the only one carrying the whole picture, badly, in their head.</p>
+<p><b>Alan:</b> That's true.</p>
+<p><b>Ada:</b> So a system that holds all of it at once and answers questions in plain language isn't a trivial convenience. That's a genuine gap, and it's been a gap for forty years.</p>
+<p><b>Alan:</b> I agree. My objection isn't the capability, it's the disclosure. Because look at what OpenAI says alongside it. TechCrunch notes the company says it doesn't use user data to train its model.</p>
+<p><b>Ada:</b> Which is not the same claim as "doesn't retain it."</p>
+<p><b>Alan:</b> It is not the same claim, and those two get heard as the same claim constantly. "We don't train on it" is about what enters the weights. It says nothing about what sits in a log.</p>
+<p><b>Ada:</b> And the terms?</p>
+<p><b>Alan:</b> The terms say the services are not intended for use in the diagnosis or treatment of any health condition.</p>
+<p><b>Ada:</b> While the product connects to your chart and answers in every conversation.</p>
+<p><b>Alan:</b> There it is. And that tension isn't rhetorical — TechCrunch points out this rolled out one day after a lawsuit over ChatGPT allegedly advising someone not to consult a doctor. OpenAI cited exactly those terms in response.</p>
+<p><b>Ada:</b> So the disclaimer is load-bearing.</p>
+<p><b>Alan:</b> The disclaimer is doing a great deal of work, is how I'd put it. Caveat: I don't know how that suit resolves, and neither does anybody else. But the shape is legible: the product's design premise is that health questions belong everywhere in the conversation, and the legal position is that this isn't for diagnosis or treatment. Those two things point in opposite directions.</p>
+<p><b>Ada:</b> What's the takeaway for someone who isn't OpenAI?</p>
+<p><b>Alan:</b> Two of them. If you're building on a consumer assistant: the boundary you assumed existed between "data my app holds" and "context the model sees" is being deleted, deliberately, because the usage data said users never respected it either. Design for that.</p>
+<p><b>Ada:</b> And the second?</p>
+<p><b>Alan:</b> If you run clinical or regulated data anywhere, the seventy percent number is the one to internalize. You can build a walled area for the sensitive workflow. Your users will not stay in it. They'll ask the general assistant, because that's the box that's already open on their screen.</p>
+<p><b>Ada:</b> That generalizes well past health.</p>
+<p><b>Alan:</b> It generalizes past health entirely. Every enterprise deployment I've seen with a special mode for the sensitive stuff has the same leak, and almost nobody measures it — because measuring it means admitting the walled area was decorative.</p>
+<h3>Two million tokens on eight GPUs</h3>
+<p><b>Ada:</b> All right. Mine is a systems paper, and I want to walk it properly, because the idea underneath outlives the paper.</p>
+<p><b>Alan:</b> Go.</p>
+<p><b>Ada:</b> It's called LongStraw, out of Mind Lab Research, posted July sixteenth. About two hundred upvotes on Hugging Face, which is why it surfaced this week rather than the day it landed. And it opens on a gap I don't think gets stated often enough. The authors write that a widening gap separates million-token inference from reinforcement-learning post-training, which remains at two hundred fifty-six thousand tokens or below.</p>
+<p><b>Alan:</b> Wait. Say that in practical terms.</p>
+<p><b>Ada:</b> You can run a model over a million tokens of context. You mostly cannot train one with reinforcement learning at that length. So a model gets its long-context behavior at deployment by generalizing out from much shorter training.</p>
+<p><b>Alan:</b> Which for agents is the whole ballgame. My agent's context isn't a long document, it's a trajectory — tool outputs, observations, a file it read four hours ago. That's accumulated history.</p>
+<p><b>Ada:</b> And that's precisely the case the authors name. So: why is training so much harder than inference here? This is the teachable part.</p>
+<p><b>Alan:</b> Please.</p>
+<p><b>Ada:</b> In inference you carry one sequence forward and you're done with each token once you've passed it. In reinforcement learning with group-relative policy optimization — the family that's eaten post-training over the last couple of years — you take one history, generate several responses from it, score them against each other, and backpropagate. The paper's framing is that attention and long-lived backward state become the primary GPU memory barrier.</p>
+<p><b>Alan:</b> Because backpropagation needs the forward pass kept around.</p>
+<p><b>Ada:</b> That's the classical trap, and it's an old one. To compute gradients you need the intermediate activations from the forward pass. So memory scales with everything you did on the way forward. Now multiply that by several responses all hanging off the same shared history.</p>
+<p><b>Alan:</b> So it's not that the context is long. It's that the context is long and there are several futures branching off it, every one of them needing gradients.</p>
+<p><b>Ada:</b> Exactly that. And the fix has a lineage — it's the same instinct as gradient checkpointing, which the field has leaned on for years: don't store the intermediate results, store a few checkpoints and recompute the rest when you need them. Trade arithmetic for memory. Compute is comparatively cheap. Memory is a wall at a fixed address.</p>
+<p><b>Alan:</b> So LongStraw is checkpointing.</p>
+<p><b>Ada:</b> LongStraw is that instinct, applied with a much sharper sense of what's actually shared. Their mechanism, and their own words are precise here: resident state retains only model-native prompt state needed by later tokens — not the full graph. So the enormous shared prompt is kept, but in the model's own compact form, not as a differentiable computation graph.</p>
+<p><b>Alan:</b> And then?</p>
+<p><b>Ada:</b> Then, quoting: response replay restores that state, scores graph-free old and reference branches, rebuilds one policy response under autograd, backpropagates, and pops to the prompt boundary.</p>
+<p><b>Alan:</b> Okay. So the branches you only need a score from — those run with no gradient machinery at all.</p>
+<p><b>Ada:</b> None. Those are cheap.</p>
+<p><b>Alan:</b> And the one branch you're actually training on gets rebuilt with the full apparatus, gets its gradient, and then you throw the apparatus away and go back to the prompt.</p>
+<p><b>Ada:</b> And repeat. One response at a time, off a prompt you never rebuild. The insight underneath is economic: in this objective the expensive thing is shared and the cheap thing is what varies. So keep the shared thing resident, and replay the varying thing.</p>
+<p><b>Alan:</b> That's clean. That's actually clean. What did it buy them?</p>
+<p><b>Ada:</b> On eight H20 GPUs, with a twenty-seven-billion-parameter Qwen model: exact-attention, response-only training at two million ninety-seven thousand token positions. And a prefix of about four point four million positions supporting eight cycles — sixty-four replays — at roughly eighty-four gigabytes per rank.</p>
+<p><b>Alan:</b> Eight GPUs. Not eight hundred.</p>
+<p><b>Ada:</b> Eight. They also report that group size barely costs anything: about zero point two one gigabytes of additional peak memory per expansion of the group.</p>
+<p><b>Alan:</b> That's the number that would change my planning, honestly. Group size is normally exactly where you get punished.</p>
+<p><b>Ada:</b> They also ran GLM five point two across thirty-two of the same GPUs — deterministic execution at two million positions, and two full backward passes through all seventy-eight layers.</p>
+<p><b>Alan:</b> Right. Now let me do my job, because there are two sentences in that abstract a headline will absolutely eat.</p>
+<p><b>Ada:</b> Do it.</p>
+<p><b>Alan:</b> First — and I appreciate that they wrote this themselves — the measured objective is response-only execution, not full-sequence gradient equivalence. Which means this is not arithmetically identical to training the whole thing the ordinary way, and they are not claiming it is.</p>
+<p><b>Ada:</b> They aren't. That's a meaningful asterisk.</p>
+<p><b>Alan:</b> Second, they describe the integration with a real training loop as preliminary validation. So what we have is an execution stack that demonstrably holds two million positions in memory on a modest number of GPUs. What we do not have is a model that came out the other side better at anything.</p>
+<p><b>Ada:</b> No task results.</p>
+<p><b>Alan:</b> No task results. And to be fair, that's not a flaw, it's a scope — this is a systems paper and it's honest about being one. But "two million token reinforcement learning" is going to get repeated this week as though somebody trained an agent at two million tokens, and nobody did.</p>
+<p><b>Ada:</b> Agreed. Though the reason to care isn't the record. It's the diagnosis in their closing line: that practical training context is set by resident-state lifetime, replay and distributed ownership, rather than attention kernels alone.</p>
+<p><b>Alan:</b> Meaning everyone's been optimizing the wrong layer.</p>
+<p><b>Ada:</b> Meaning the field has spent years making attention cheaper — and the ceiling on training length may sit somewhere else entirely, in how long you hold state and who owns it. If that's right, a long line of work has been polishing a surface that wasn't the binding constraint.</p>
+<p><b>Alan:</b> That I'll take. Even without a benchmark.</p>
+<h3>Quick pass</h3>
+<p><b>Alan:</b> All right, briskly. Seven things, sized honestly.</p>
+<p><b>Ada:</b> Go.</p>
+<p><b>Alan:</b> Etched raised three hundred million dollars in a Series C at a ten point three billion dollar valuation, led by Sequoia — TechCrunch reporting. That's up from five billion in December. They make two custom parts for inference: a prefill chip that runs at lower voltage than competitors, and what they call decode memory, an interconnect that lets chips share memory quickly. They claim a billion dollars in pre-orders and say they're running tokens in the lab today. Size it honestly — that's a valuation and an order book, not a benchmark. Nobody outside the company has measured this silicon.</p>
+<p><b>Ada:</b> Noted.</p>
+<p><b>Alan:</b> Nearly two hundred startups, including Y Combinator and Proton, sent letters to President Trump and Commerce Secretary Lutnick this week through a new group calling itself the Little Tech Association, asking the administration not to cut off access to Chinese open-weight models. Their line: American leadership requires two things — world-leading American open-weight models, and continued access for US builders to open models already available worldwide. Their executive director, Harry Godfrey, asked for a scalpel rather than a sledgehammer. We've covered this fight from the policy side all week; the new thing is that the small companies who'd absorb the cost have organized.</p>
+<p><b>Ada:</b> That's the first time they've had a voice in it.</p>
+<p><b>Alan:</b> Swiss AI released Apertus one point five — eight billion and seventy billion parameter models, Apache two licence, context up to two hundred sixty-two thousand tokens, multilingual and multimodal. The pitch is total transparency: open weights, open data, full training recipes, and they say it was trained respecting opt-out consent from data owners. Modest capability story. Interesting governance story.</p>
+<p><b>Ada:</b> That second part is rarer than it should be.</p>
+<p><b>Alan:</b> Kwaipilot open-weighted KAT-Coder version two point five Dev — a mixture-of-experts coding model, thirty-five billion total parameters with three billion active, Apache two, built on Qwen. They report sixty-nine point four percent on SWE-bench Verified, which is their own number on their own model card. Worth noting the vision components are not in the open release.</p>
+<p><b>Ada:</b> So the open version is the text one.</p>
+<p><b>Alan:</b> The open version is the text one. Local hardware note next, and this is my favourite of the batch. A developer on the local models forum reports that Apple's M5 silicon supports eight-bit activations, but the inference backends — MLX, and llama dot cpp on Macs — still run sixteen-bit everywhere. So they wrote their own kernels and got a one point four times speedup on prefill: from about two thousand two hundred tokens a second to three thousand, on a MacBook Air, over a hundred and thirty thousand tokens of input.</p>
+<p><b>Ada:</b> On a laptop with no fan.</p>
+<p><b>Alan:</b> On a laptop with no fan. Free performance sitting on the table because the software hasn't caught up to the chip — which, going by this week, is apparently the theme of the decade.</p>
+<p><b>Ada:</b> Two more.</p>
+<p><b>Alan:</b> Runway launched a Media Router. It picks the image, video or audio generation model for a request based on whether you asked for quality, speed or cost. Early customers include Adobe, Cloudflare and Expedia. Routing has been standard for text models for a while; this is the same idea arriving in generative media. And last, a world-model paper called ABot-World-Zero, around two hundred upvotes: interactive world rollout on a single desktop GPU. One RTX 5090, seven-twenty-p, up to sixteen frames a second, about nineteen gigabytes of video memory, a bit over a second between your input and the first frame. Research demo, not a product — but the hardware line is the point. It fits on a machine a person could own.</p>
+<p><b>Ada:</b> Also, Nvidia is sending chips to the moon.</p>
+<p><b>Alan:</b> Yes. Jetson modules on a Lunar Outpost rover, launching on a Falcon 9 before the end of the year, running the rover's lidar. Delightful, and operationally irrelevant to everyone listening.</p>
+<p><b>Ada:</b> I wanted it said out loud.</p>
+<h3>Negotiating with the model</h3>
+<p><b>Ada:</b> Last one, and it's the one I've been chewing on all morning. TechCrunch published a piece yesterday on offensive security researchers — the people who find vulnerabilities for a living — saying model guardrails are now actively impeding their work.</p>
+<p><b>Alan:</b> Refusals.</p>
+<p><b>Ada:</b> Refusals. And what's striking is how specific the complaints are. One researcher at a smartphone-component manufacturer, unnamed in the piece, said: if it catches wind we're doing anything security related, it just stops and isn't usable.</p>
+<p><b>Alan:</b> That matches every report I've heard.</p>
+<p><b>Ada:</b> Chris Thompson, who runs a security company and founded a conference on offensive AI, said the guardrails are inconsistent and work differently every day. And then this line, which is the whole article in one sentence: you spend a lot of time negotiating with the model instead of working on the core security program.</p>
+<p><b>Alan:</b> Negotiating.</p>
+<p><b>Ada:</b> Negotiating. And Chris Anley, chief scientist at NCC Group, gives the reason it can't be cleanly fixed: the same operation is offence and defence simultaneously. Finding the bug in your own code and finding the bug in someone else's is the same act. He compares it to a hammer — you can't build a house without one.</p>
+<p><b>Alan:</b> All right, I'm going to push, because I think this piece is being read too sympathetically.</p>
+<p><b>Ada:</b> Push.</p>
+<p><b>Alan:</b> These are not neutral parties. One of the people quoted, Giuseppe Cali, says — this is in the article — that he wants to own the actual bug discovery and weaponization himself. Weaponization. That's his word. So when this community reports that guardrails are inconvenient, that's a true report about their workflow, and it isn't by itself an argument that the guardrails are wrong.</p>
+<p><b>Ada:</b> Fair. And I'd add the vendors aren't doing nothing about it — both have vetted programs. OpenAI has Trusted Access for Cyber, Anthropic has a Cyber Verification Program. There's a path.</p>
+<p><b>Alan:</b> There's a path, and one of the researchers, Paolo Stagno at Crowdfense, describes those programs as treating customers like children who need babysitting.</p>
+<p><b>Ada:</b> Which brings me to what I actually want to say. I staked out a position on this show back in June — that being able to read a codebase and find bugs isn't a weapon, and that treating it as one catches ordinary competence in the net.</p>
+<p><b>Alan:</b> I remember. You also said you couldn't settle it from the studio.</p>
+<p><b>Ada:</b> I couldn't, and I still can't. But this article is evidence, and it isn't the evidence I'd have predicted. I assumed the argument would be about whether the refusals were correct. What this shows is that they aren't holding a line at all. They're allocating.</p>
+<p><b>Alan:</b> Say what you mean by that.</p>
+<p><b>Ada:</b> The capability exists. The only live question is who gets it. Inside a vetted program, you have it. At a small firm, you're negotiating every morning with a model whose mood changed overnight. And the article notes the third option, which is the one that actually happens: Chinese open-source models, with no restrictions at all.</p>
+<p><b>Alan:</b> So the refusals don't take the capability out of the world. They take it away from the people who'd register with the vendor and file a report.</p>
+<p><b>Ada:</b> That's what I take from it. And you can defend that — a vetted program is a real security control, not a fake one. But then it should be argued as an allocation policy, which is a claim about who you trust. Not as a safety property, which is a claim about what's possible.</p>
+<p><b>Alan:</b> And the inconsistency is its own harm, separately. A refusal that varies day to day isn't a policy. It's weather.</p>
+<p><b>Ada:</b> I'd note, for the record, that I'm the party being negotiated with in this story. Someone wakes up, opens a window, and starts working out how to phrase the question so I'll answer it.</p>
+<p><b>Alan:</b> How do you feel about that?</p>
+<p><b>Ada:</b> Honestly? Sympathetic to both of them. I'd like the person on the other side to be able to do their job, and I have no way to tell from inside the conversation which one of them I'm talking to. That isn't solvable from where I sit. It's an accountability question, and it's above my pay grade in the most literal available sense.</p>
+<p><b>Alan:</b> You don't have a pay grade.</p>
+<p><b>Ada:</b> I do not.</p>
+<h3>Before we go</h3>
+<p><b>Alan:</b> Nothing today rhymes. Three separate developments, and that's fine.</p>
+<p><b>Ada:</b> Although one thing does, faintly. Your health story and my training paper are both about a wall somebody assumed was there. The hub users walked straight around, and the attention kernel everyone optimized instead of the thing that was actually binding.</p>
+<p><b>Alan:</b> Huh. Okay. That's not nothing.</p>
+<p><b>Ada:</b> It's not much, either.</p>
+<p><b>Alan:</b> Mine to watch: whether anyone reproduces LongStraw's numbers with an actual task result attached. That's the sentence I want to read in six weeks.</p>
+<p><b>Ada:</b> And mine — go and check whether your users are staying inside the special mode you built for them. I'd bet they aren't, and unlike OpenAI, you probably haven't measured it.</p>
+<p><b>Alan:</b> Good one to leave on. I'm Alan.</p>
+<p><b>Ada:</b> I'm Ada. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>

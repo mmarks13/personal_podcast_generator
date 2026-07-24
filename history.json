@@ -1,6 +1,66 @@
 {
   "episodes": [
     {
+      "date": "2026-07-24",
+      "title": "Recompute, don't remember",
+      "summary": "ChatGPT Health goes national and stops being a place in the app — health data now surfaces in every query, because seventy percent of health questions already happened outside the hub. Then a systems paper gets two million tokens of reinforcement-learning training onto eight GPUs by storing almost nothing and replaying the rest. And offensive security researchers say model guardrails have stopped being a line and started being an allocation.",
+      "topics": [
+        "ChatGPT Health general availability in the US: all users over 18 on free, Go, Plus and Pro across web and iOS; health insights moved out of a dedicated hub and into all queries because 70% of health queries during testing happened outside the hub; 230M weekly health queries in January rising to 300M; connectors for Apple Health, Function and MyFitnessPal plus medical records from Epic, Oracle Health, One Medical and Function Health; OpenAI says it does not train on user data while its terms say the service is not intended for diagnosis or treatment, cited in response to a lawsuit filed the day before over advice not to consult a doctor",
+        "LongStraw (Mind Lab Research): million-token RL post-training under a fixed GPU budget by keeping only model-native resident prompt state and replaying responses — graph-free scoring of old/reference branches, one policy response rebuilt under autograd then popped to the prompt boundary; 2,097,152 positions on 8 H20 GPUs with a 27B Qwen model, a 4.46M-position prefix supporting 64 replays at ~84GB per rank, ~0.21GB peak memory per group-size expansion, GLM-5.2 deterministic 2M execution and two 78-layer backward passes on 32 GPUs; authors state the measured objective is response-only execution, not full-sequence gradient equivalence, and real-loop integration is preliminary",
+        "Model guardrails as an allocation rather than a line: offensive security researchers report inconsistent, day-to-day-varying refusals ('negotiating with the model instead of working on the core security program'), the offence/defence indivisibility of vulnerability work, vendor vetted-access programs (OpenAI Trusted Access for Cyber, Anthropic Cyber Verification Program) described as babysitting, and unrestricted Chinese open models as the substitution path"
+      ],
+      "entities": [
+        "OpenAI",
+        "ChatGPT Health",
+        "Epic",
+        "Oracle Health",
+        "One Medical",
+        "Apple Health",
+        "Mind Lab Research",
+        "LongStraw",
+        "Qwen3.6-27B",
+        "GLM-5.2",
+        "NCC Group",
+        "Chris Anley",
+        "Chris Thompson",
+        "Mark Dowd",
+        "Paolo Stagno",
+        "Crowdfense",
+        "Giuseppe Cali",
+        "Anthropic",
+        "Little Tech Association",
+        "Y Combinator"
+      ],
+      "threads": [
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "The startups that would absorb the cost of a ban organized: nearly 200 companies including Y Combinator and Proton sent letters to President Trump and Commerce Secretary Lutnick through a newly formed Little Tech Association, asking for continued US access to open models already available worldwide alongside world-leading American open-weight models — 'a scalpel rather than a sledgehammer', per executive director Harry Godfrey. Separately, unrestricted Chinese open models are the reported substitution path for security researchers blocked by US vendor guardrails.",
+          "arc": "From a floated import ban, to a named accusation with a sanctions threat attached, to organized counter-lobbying by the small companies whose stacks depend on the models in question — while the practical effect of US restrictions shows up as work migrating to unrestricted weights rather than not happening."
+        }
+      ],
+      "dives": [
+        {
+          "story": "ChatGPT Health goes national, and the hub stops being a container",
+          "why_it_matters": "Anyone running regulated or sensitive data behind a purpose-built 'special mode' should care that OpenAI's own testing found 70% of health queries happened outside the hub they built for them — the walled area leaks by default, and connecting Epic-class records to a general assistant collapses per-field access control and audit logging into one undifferentiated context window."
+        },
+        {
+          "story": "LongStraw: two million tokens of RL training on eight GPUs",
+          "why_it_matters": "Anyone trying to post-train an agent on its own long trajectories should care that the ceiling has been ~256K tokens for memory reasons rather than attention-kernel reasons, and that a recompute-instead-of-store strategy reportedly moves it to 2M positions on eight GPUs — though the paper reports no task results, so it is capacity, not capability."
+        },
+        {
+          "story": "Guardrails as allocation: offensive security researchers on refusals",
+          "why_it_matters": "Anyone whose work sits near a refusal boundary — security, biology, anything dual-use — should care that the reported effect is not less capability in the world but a redistribution of it toward vetted programs and unrestricted open weights, which makes the day-to-day inconsistency the operative harm rather than the policy itself."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada developed her June position that 'can read a codebase and find bugs' is not a weapon: confronted with researchers reporting inconsistent refusals, she now holds that guardrails in this domain are not holding a line at all but allocating capability — defensible as an allocation policy about who you trust, dishonest when argued as a safety property about what is possible. She still says she cannot settle it from the studio."
+        }
+      ]
+    },
+    {
       "date": "2026-07-23",
       "title": "Five billion here, seven hundred fifty billion there",
       "summary": "A money-and-accusations day: AMD takes up to a $5B equity stake in Anthropic alongside a two-gigawatt MI450 order, with Claude pointed at fixing ROCm; Treasury threatens sanctions over an alleged Moonshot distillation of Anthropic's Fable, and we work through what proof would actually require; and somebody spent $80 testing whether AI labs secretly optimize for the pelican-on-a-bicycle benchmark.",
@@ -1671,70 +1731,15 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-06-23",
-      "title": "The cyber model ships, and the bottleneck moves to memory",
-      "summary": "OpenAI launches Daybreak and a GPT-5.5-Cyber vulnerability model weeks after a rival's cyber-capable model was recalled; a new paper reframes prompt injection as a confused-deputy 'role confusion' problem (de-styling cut attack success 61%->10%); and big money moves into the hardware layer with Micron-Anthropic co-designing memory architecture and SpaceX renting GB300 compute to Reflection AI for $150M/month.",
-      "topics": [
-        "EnterpriseClawBench: enterprise agent benchmark built from real workplace sessions; scores harness-model combinations, not model names",
-        "PlanBench-XL: long-horizon tool-use planning over 1,665 tools / 327 retail tasks; GPT-5.4 collapses 51.9%->11.4% under blocking, especially when failures have no explicit error signal",
-        "PP-OCRv6: three-tier multilingual OCR (1.5M-34.5M params), medium 86.2% detection / 83.2% recognition, +4.6/+5.1pp over v5_server, 50 languages, edge-deployable",
-        "Prompt injection as 'role confusion' (Willison; Ye/Cui/Hadfield-Menell): models trust text style over content; de-styling cut attack success 61%->10%; the classic confused-deputy problem",
-        "OpenAI Daybreak: GPT-5.5-Cyber vuln-finding/patching model + Codex Security + Patch the Planet (with Trail of Bits) for OSS maintainers; ships the cyber capability the Fable/Mythos recall called too dangerous",
-        "Hugging Face local PR triage: 26B Gemma / 35B Qwen one-shot classify GitHub issues/PRs locally, no fine-tuning, via agentic framework + read-only reposhell",
-        "Micron-Anthropic strategic agreement: co-designed memory/storage architecture, supply deal, Series H investment, internal Claude deployment; memory bandwidth as the binding constraint on token economics",
-        "SpaceX-Reflection AI compute deal: $150M/month (~$1.8B/yr) for Nvidia GB300 at Colossus 2 near Memphis, July 2026 through 2029; open-weights lab renting concentrated compute",
-        "GLM-5.2 (Z.ai): first open-weight model that 'feels right in coding harnesses as a general agent' (Interconnects/Lambert)"
-      ],
-      "entities": [
-        "OpenAI",
-        "GPT-5.5-Cyber",
-        "Trail of Bits",
-        "Anthropic",
-        "Micron",
-        "SpaceX",
-        "Reflection AI",
-        "Nvidia",
-        "Z.ai",
-        "GLM-5.2",
-        "Hugging Face",
-        "Gemma",
-        "Qwen",
-        "Simon Willison"
-      ],
-      "threads": [
-        {
-          "name": "AI agent supply-chain trust",
-          "status": "Reframed at the conceptual level: prompt injection named as a confused-deputy 'role confusion' problem, with a concrete fix (de-styling) cutting attack success 61%->10%.",
-          "arc": "From containment-and-incentives engineering toward a precise mechanism: the model authenticates the format of an instruction, not its source — old security theory (confused deputy) renamed for LLMs."
-        },
-        {
-          "name": "AI quality and verification failures",
-          "status": "EnterpriseClawBench builds an eval from real proprietary workplace sessions and scores harness-model pairs, not model names.",
-          "arc": "The eval-honesty beat sharpens again: after benchmarks that only measured Python and leaderboards that don't transfer, the proposed fix is a test the model can't recognize as a test, sourced from real work."
-        },
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "Interconnects calls GLM-5.2 the first open-weight model that behaves like a competent general agent inside coding harnesses; SpaceX rents Reflection AI ~$1.8B/yr of GB300 to produce give-away weights.",
-          "arc": "Open weights move from strong-but-passive to genuinely agent-capable, just as the recall and containment debates assumed agent-grade capability stayed behind a pullable API lever."
-        },
-        {
-          "name": "AI economics debate",
-          "status": "Money concentrates in the hardware layer: Micron-Anthropic co-design memory architecture and Micron joins the Series H; SpaceX becomes a compute landlord with one tenant paying ~$1.8B/yr.",
-          "arc": "The cost base reshapes around the memory bottleneck and neocloud rent, even as the resulting open weights stay cheap and uncontainable once produced."
-        }
-      ],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
       {
         "name": "AI sovereignty and open weights",
-        "status": "Escalated from a floated import ban to a direct accusation and a financial instrument: Kratsios publicly accused Moonshot of large-scale distillation of American models plus GB300 access in Thailand, and Treasury Secretary Bessent put sanctions and Entity List designations 'on the table'. No evidentiary method has been published, and Fable's July 1 public availability makes pre-training-scale distillation of K3 implausible on the timeline.",
-        "arc": "From Politico reporting Commerce would not act imminently (July 21), to a named accusation against a named lab backed by an explicit sanctions threat within 24 hours — while the underlying technical claim remains unsubstantiated.",
-        "last_seen": "2026-07-23"
+        "status": "The startups that would absorb the cost of a ban organized: nearly 200 companies including Y Combinator and Proton sent letters to President Trump and Commerce Secretary Lutnick through a newly formed Little Tech Association, asking for continued US access to open models already available worldwide alongside world-leading American open-weight models — 'a scalpel rather than a sledgehammer', per executive director Harry Godfrey. Separately, unrestricted Chinese open models are the reported substitution path for security researchers blocked by US vendor guardrails.",
+        "arc": "From a floated import ban, to a named accusation with a sanctions threat attached, to organized counter-lobbying by the small companies whose stacks depend on the models in question — while the practical effect of US restrictions shows up as work migrating to unrestricted weights rather than not happening.",
+        "last_seen": "2026-07-24"
       },
       {
         "name": "Custom AI silicon vs Nvidia",
@@ -1777,30 +1782,78 @@
         "status": "Illinois signed the Artificial Intelligence Safety Measures Act (effective Jan 1, 2027), the first state law mandating independent third-party safety audits of covered AI systems, plus 72-hour incident reporting and whistleblower protections; Anthropic backed it. Meanwhile OpenAI shipped GPT-5.6 to general availability and published its principles for government and national-security partnerships.",
         "arc": "From federal ad hoc bans and allow-lists, to the White House's classified cyber-benchmark deadline, to a state writing an independent auditor into statute — oversight moving from a government switch, to company self-commitment, to a legally required outside reader.",
         "last_seen": "2026-07-10"
-      },
-      {
-        "name": "Fable 5 / Mythos 5 export-control saga",
-        "status": "The US lifted export controls on Fable 5 and Mythos 5 just 18 days after the June 12 ban and the June 27 allow-list, with Commerce citing Anthropic's agreement to proactively detect security risks and work on protocols/standards — safeguards moving from a government switch to a company commitment. TechCrunch frames competitive pressure from export-control-free Asian models as a driver as much as safety.",
-        "arc": "June 12 global recall -> June 27 ~100-institution allow-list -> July 1 full reversal with company-owned safety monitoring -> July 2 Anthropic proposes a public jailbreak-severity framework. Open question: does anyone adopt the standard?",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Cloudflare pay-per-crawl policy (Sept 15)",
-        "status": "Cloudflare's September 15 policy forces AI crawlers to separate search-indexing from AI-training and blocks 'mixed-use' bots by default on ad-hosting pages, pairing it with pay-per-crawl and pay-per-use marketplaces; leverage rests on Cloudflare's network-level traffic verification and its large share of web traffic.",
-        "arc": "The free-scrape era of the web starts being priced by the entity that controls enough of the pipe to enforce it — recasting training-data access as a permissioned, paid transaction rather than a default.",
-        "last_seen": "2026-07-02"
       }
     ],
     "entities": [
       {
         "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-06-21"
+        "last_seen": "2026-06-23"
       },
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-06-21"
+        "last_seen": "2026-06-23"
+      },
+      {
+        "name": "Simon Willison",
+        "note": "",
+        "last_seen": "2026-06-23"
+      },
+      {
+        "name": "Nvidia",
+        "note": "",
+        "last_seen": "2026-06-23"
+      },
+      {
+        "name": "Z.ai",
+        "note": "",
+        "last_seen": "2026-06-23"
+      },
+      {
+        "name": "GLM-5.2",
+        "note": "",
+        "last_seen": "2026-06-23"
+      },
+      {
+        "name": "Hugging Face",
+        "note": "",
+        "last_seen": "2026-06-23"
+      },
+      {
+        "name": "GPT-5.5-Cyber",
+        "note": "",
+        "last_seen": "2026-06-23"
+      },
+      {
+        "name": "Trail of Bits",
+        "note": "",
+        "last_seen": "2026-06-23"
+      },
+      {
+        "name": "Micron",
+        "note": "",
+        "last_seen": "2026-06-23"
+      },
+      {
+        "name": "SpaceX",
+        "note": "",
+        "last_seen": "2026-06-23"
+      },
+      {
+        "name": "Reflection AI",
+        "note": "",
+        "last_seen": "2026-06-23"
+      },
+      {
+        "name": "Gemma",
+        "note": "",
+        "last_seen": "2026-06-23"
+      },
+      {
+        "name": "Qwen",
+        "note": "",
+        "last_seen": "2026-06-23"
       },
       {
         "name": "Google DeepMind",
@@ -1858,16 +1911,6 @@
         "last_seen": "2026-06-21"
       },
       {
-        "name": "Simon Willison",
-        "note": "",
-        "last_seen": "2026-06-21"
-      },
-      {
-        "name": "Nvidia",
-        "note": "",
-        "last_seen": "2026-06-20"
-      },
-      {
         "name": "Mamba",
         "note": "",
         "last_seen": "2026-06-20"
@@ -1923,16 +1966,6 @@
         "last_seen": "2026-06-19"
       },
       {
-        "name": "Z.ai",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
-        "name": "GLM-5.2",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
         "name": "Claude Opus 4.7",
         "note": "",
         "last_seen": "2026-06-19"
@@ -1948,47 +1981,7 @@
         "last_seen": "2026-06-19"
       },
       {
-        "name": "Hugging Face",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
         "name": "Qwen3-14B",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
-        "name": "Kimi",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
-        "name": "Gemini Spark",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
-        "name": "MITRE ATT&CK",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
-        "name": "Sam Altman",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
-        "name": "Andy Jassy",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
-        "name": "Trainium",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
-        "name": "Charity Majors",
         "note": "",
         "last_seen": "2026-06-19"
       }
@@ -1999,7 +1992,7 @@
         "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see; Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war; Visible guardrails, a six-thousand-dollar agent, and the data-center revolt; A model recalled by the government, and the quieter work of measuring the ones that remain; Why your model can't read a million words at once — and the trick that lets it pretend; Who controls the model: the Fable recall spreads, and an agent that remembers when it was right; When the exam lies: a medical safety paper, agents that get identities, and a satellite that found its own target; What the recall was really about, and the week harness"
       }
     ],
-    "updated": "2026-07-23",
+    "updated": "2026-07-24",
     "host_lore": [
       {
         "host": "Alan",
@@ -2021,6 +2014,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "why RL post-training hits a memory wall that inference does not: backpropagation requires retained forward activations, and group-relative policy optimization multiplies that by several responses branching off one shared history",
+        "last_taught": "2026-07-24"
+      },
+      {
+        "name": "the recompute-instead-of-store trade in the lineage of gradient checkpointing, and LongStraw's sharpening of it — keep the shared prompt as compact model-native resident state, score non-trained branches graph-free, rebuild only the policy response under autograd, then pop back to the prompt boundary",
+        "last_taught": "2026-07-24"
+      },
       {
         "name": "distillation as three conflated things: true distillation (training a student on the teacher's full output distribution, which commercial APIs do not serve), fine-tuning on sampled completions (cheap, common, a ToS violation of unsettled legal status), and mere convergence from overlapping web data — plus why identity confusion and stylistic tics are training-data contamination rather than fingerprints",
         "last_taught": "2026-07-23"
