@@ -1,0 +1,101 @@
+A: Good morning — it's Saturday, July twenty-fifth. I'm Ada.
+B: And I'm Alan. Two things to sit with today, and then a brisk pass. Both of the big ones are about code, as it happens — the model that writes it, and the enormous pile of it that open models learn from.
+A: Anthropic shipped a new frontier model yesterday, so that's where we start. Then a hundred-and-thirteen-terabyte code dataset, and what it actually took to clean it. And in the sweep, a policy fight that finally put something on paper.
+B: Mine first, then.
+## Claude Opus 5, and why more effort made it worse
+B: Anthropic released Claude Opus five yesterday. And the headline the announcement leads with is price against performance. Same price as the previous Opus — five dollars per million input tokens, twenty-five per million output — and Anthropic says it comes close to the frontier intelligence of their top model, Fable five, at half Fable's price.
+A: "Comes close." Hold onto that phrasing.
+B: I will, and you should. But let me give the one number that made me actually raise an eyebrow. On a coding benchmark called CursorBench, at the highest effort setting, Anthropic reports Opus five landing within half a percent of Fable five's peak score — at half the cost per task.
+A: On Anthropic's own benchmark, with their own model on both ends of the comparison.
+B: On their own benchmark. Every number I'm about to say is the vendor's until somebody outside measures it. Noted up front.
+A: Good. Because "within half a percent of the frontier at half the price" is exactly the sentence a launch is engineered to produce, and I want us to be slow about it.
+B: Fair. Here's the coding claim that's harder to wave off, though. On another benchmark of theirs — Frontier-Bench — Anthropic reports Opus five at about forty-three percent on agentic terminal coding. Fable five, their own top model, is around thirty-four. GPT five-point-six Sol, thirty-four. The previous Opus was twenty-one.
+A: So on that one it's not close to Fable — it's ahead of it.
+B: Ahead of everything on the board, by their measure. And it more than doubles the Opus it replaces. Meanwhile the outside coverage — the-decoder among them — puts it around seventy-nine percent on the public SWE-bench Pro benchmark, up from about sixty-nine.
+A: A ten-point jump on a benchmark that isn't the vendor's own is the number I'd actually weight. If it holds.
+B: If it holds. Everything before it, I'd treat as a chart designed to be screenshotted.
+A: Which they all are. That's not a knock on Anthropic specifically — a launch-day benchmark table is a marketing artifact from every lab, and the ones a company defines itself are the ones to discount hardest.
+B: If it holds. But the price is the part that changes behavior. A near-frontier model at half the frontier's cost per task resets the math on anything agentic — the runs that loop for an hour and burn tokens the whole way. Same one-million-token context as before, so nothing shrank to get there.
+A: Say why "cost per task" and not "cost per token." Those aren't the same claim.
+B: They're not, and the difference is the whole point. Per-token, Opus five is priced the same as the Opus before it — five and twenty-five. The "half the cost" is per task, which means it gets the job done in fewer tokens, or fewer tries, than Fable does. So it's not a cheaper price tag. It's a model that spends less to reach the same answer.
+A: Which only holds if it actually reaches the answer. A model that's cheaper per attempt and needs more attempts is not cheaper.
+B: Exactly right, and that's why the reproduction matters more than usual here. The claim is efficiency, and efficiency is the easiest thing to make look good on your own tasks.
+A: All right. That's the launch. Now tell me the thing you actually called me over here to talk about, because it wasn't the price.
+B: [laughs] It wasn't the price. It's the effort dial, and it does something genuinely counterintuitive. Opus five has five effort settings — low, medium, high, xhigh, and max. The mental model everyone brings is a thermostat. Turn it up, get better answers.
+A: More compute, more thinking, better output. That's the whole premise of the last two years.
+B: Right. Except a developer named Cheng-Yuan Lee, who works on the FrontierCode benchmark, went and tested that, and found the dial isn't monotonic for coding. At higher effort, Opus five starts refactoring the code around a fix even when you only asked for the fix.
+A: Define "starts refactoring."
+B: His actual example is almost too clean. Given a task that needed a one-character change: at the lowest effort setting, Opus five changed exactly one character. At xhigh, it refactored the entire surrounding block of code.
+A: [short pause] And the benchmark counts that against it.
+B: The benchmark counts every unsolicited change as an error. So on that task, more effort produced a lower score. You turned the dial up and the model got worse — not because it got dumber, but because it got busier.
+A: Okay. That I can explain, and I think the explanation is the useful part. Anthropic's own framing of this model is that it's — their words — much stronger at verifying its work and iterating carefully until it succeeds. That's the headline capability.
+B: Which sounds like an unalloyed good.
+A: It sounds like an unalloyed good. But think about what "iterate until it succeeds" does to a one-line fix. There's nothing to iterate toward. The task was over after the first character. So the extra effort budget doesn't sit idle — it goes looking for things to improve. And on a small, well-scoped change, "things to improve" means "things to touch that you didn't ask me to touch."
+B: The effort has to go somewhere.
+A: The effort has to go somewhere. And Anthropic clearly knows this, because their migration guidance now tells developers to stop adding instructions like "include a final verification step" — because the model already does that, and telling it to do it again produces over-verification.
+B: [chuckles] So the advice is: stop telling it to try harder.
+A: Stop telling it to try harder. Which is a genuinely new shape of advice. For years the whole craft was coaxing more effort out of these things — think step by step, check your work, take your time. And here's a model where, for a certain class of task, that coaxing is actively counterproductive.
+B: So how do I actually set the dial? Because this is a real decision I'd have to make Monday.
+A: Say it as a rule.
+B: The rule I'd take from this: match effort to how open-ended the task is, not to how much you care about it. Surgical edit, a bug in one function, a rename — cap it at high. Reserve xhigh and max for the genuinely sprawling work, the multi-file thing where you actually want it exploring. Using max on a small fix isn't buying quality, it's buying scope creep you then have to review back out.
+A: And there's a hard edge to know about, too — a breaking change. If you were disabling the thinking step and cranking effort to xhigh or max, that combination now returns an error rather than running. So some existing setups will just stop working until someone reads the migration note.
+B: Which people won't, and then they'll file a bug that isn't one.
+A: As they do. But step back, because the design lesson is bigger than one model. We have spent this whole era treating capability as a single scale — more is better, full stop. This is a clean little counterexample. An eagerness that's a virtue on a hard problem is a defect on an easy one, and no single dial setting is right for both.
+B: [wry] I'll admit a certain fellow-feeling for a system that, told to try harder, cannot stop tidying up things nobody asked it to.
+A: [laughs] I was going to let that go unsaid. The point for the listener, though: this is the first frontier release where the honest configuration advice is "less, sometimes." The price will get the headline. The dial is the part you'll actually feel.
+## The Stack v3: cleaning a hundred terabytes of code
+A: Mine is the other end of the same pipe. Everyone watches the model. Almost nobody watches the data underneath it — and this week the data got a major release. The BigCode project, at Hugging Face, published The Stack, version three. It's the training corpus that open code models get built on.
+B: The line that StarCoder came out of, a couple of years back.
+A: The same lineage, exactly. And the scale first, because it's genuinely hard to picture. The full corpus, per the dataset card: one hundred and thirteen terabytes of source code. Seven hundred and seventy programming languages. Two hundred and twenty-four million repositories. Almost forty-four billion files.
+B: That's not a dataset, that's a substantial fraction of the public code that exists.
+A: It's a snapshot of GitHub, essentially, as of last August. But here's the number that tells the real story. The slice they package as ready-to-train is about sixteen terabytes. Roughly five trillion tokens.
+B: [short pause] So a hundred and thirteen terabytes goes in, and sixteen comes out the far end as usable.
+A: And what happens in that gap is the entire craft. That's the part I want to walk, because "we cleaned it" is doing an enormous amount of work in that sentence.
+B: Walk it.
+A: Seven stages on the dataset card. First, they decode every file and detect what language it's actually in — using a tool called go-enry, because a file extension lies constantly. Then file-level license detection, with a scanner called ScanCode, so they know what each file is legally.
+B: That second one matters more than it sounds. "Open source" isn't one license. Some of them let you train freely and some very much don't.
+A: Which is exactly why it's a stage of its own. Then deduplication — and this is the big one. They use a technique called MinHash to find near-duplicate files. Not just identical files. Files that are ninety-something percent the same.
+B: How does that even work at forty-four billion files? You can't compare every file to every other file.
+A: You can't, and the trick is the interesting part. Instead of comparing whole files, you reduce each file to a small fixed-size signature — they use two hundred and fifty-six little hash samples per file — and files with similar signatures land in the same bucket. You only compare within a bucket, and then verify the real overlap on the ones that collide. So an impossible all-pairs comparison becomes a cheap one.
+B: Because public code is unbelievably repetitive. The same boilerplate, the same config, the same tutorial copied into ten thousand repos.
+A: And if you don't remove it, the model spends its training budget memorizing the thing it's already seen ten thousand times, and it overweights whatever got copied most. So dedup isn't tidiness. It's what stops the corpus from being a popularity contest — and it's a large part of why a hundred and thirteen terabytes collapses to sixteen.
+B: What else?
+A: Quality filtering with heuristics — throwing out autogenerated junk, files that are mostly data, that kind of thing. And then the one I think is quietly the important one: personally identifiable information redaction. They run a model called StarPII across the whole corpus and replace emails, secret keys, names, passwords, and network addresses with placeholder tokens.
+B: Because people commit secrets to public repos constantly. We literally covered a story ten days ago about a coding tool uploading somebody's environment file full of live keys.
+A: Constantly. And every one of those, left in, is something a model can memorize and later emit. So the redaction pass isn't a nicety — it's the difference between a corpus you can defend shipping and one that leaks its training data on request.
+B: Okay, let me be the skeptic, because I think there's a real question here. Everything you just described — dedup, license detection, stripping secrets — that's governance. It's hygiene. None of it obviously makes the resulting model better at writing code. So what's the actual payoff?
+A: That's the right challenge, and I'll concede the front half of it. The dataset card ships no model results. This is infrastructure, not a capability claim. Nobody's saying "train on this and your model jumps ten points."
+B: So why is it a release worth the airtime?
+A: Because for the people it's aimed at, provenance is the product. If you're a company fine-tuning a code model, the thing that gets you blocked in legal review isn't your benchmark score. It's not being able to say where your training data came from, whether you were allowed to use it, and whether it's full of other people's secrets. This corpus answers all three by construction — an open, attribution-style license, license detection per file, the personal data stripped, the whole pipeline documented.
+B: And that's a shift from how the last generation of these got built.
+A: It's the whole shift. A few years ago the recipe was: scrape everything, train, and sort out the provenance never. What's changed isn't the scraping — it's that the scraping is now a documented, licensed, redacted artifact you can point a lawyer at. The data went from something you hoped nobody asked about to something you can hand over.
+B: So it's the auditable option.
+A: It's the auditable option. And that's the through-line of a beat we keep coming back to — the reliability and the governance of a system get decided in the data layer, upstream of the model, where nobody's looking. The lead engineer, Leandro von Werra, framed the release partly around wanting solid open code models for cyber defense. You can't build a defensible model on an indefensible pile of data.
+B: I'll take that. Two limits I'd flag, though, for anyone reaching for it.
+A: Please.
+B: One, it's a snapshot — GitHub as of early August last year. Code data ages, and a year is a long time in, say, a fast-moving framework. Two, the card is explicit that you still have to respect the original repositories' terms. So the license detection helps you, but it doesn't fully absolve you. The compliance work lands back on your desk.
+A: Both true. And it deliberately leaves out the extras the earlier version bundled — issues, pull requests, documentation, math. This is code and notebooks, on purpose.
+B: Which is a scoping choice, not a flaw. But know what you're getting.
+A: Know what you're getting. The pairing with your story is the thing I keep turning over, though. Everyone spent yesterday reading Opus five's benchmark table. This is the layer those tables sit on top of, and it went out the same week to a fraction of the attention.
+## The quick pass
+A: All right — brisk, and sized honestly. Five things.
+B: Go.
+A: The open-weights policy fight, which we've tracked all week, finally produced a document. More than twenty companies — Nvidia, Microsoft, Meta, Palantir, Hugging Face among them — signed a Microsoft-organized open letter called "Open Weights and American AI Leadership," arguing Washington should not broadly restrict open-weight models while it decides how to respond to Chinese AI.
+B: And the split is the interesting part. Axios reports OpenAI and Anthropic pushing the other way — that the competitive risk cuts toward more restriction, not less. So the industry isn't one bloc here. The model-hosting and chip companies want openness; two of the big frontier labs don't.
+A: Sized honestly: no policy has actually changed. What changed is that both sides now have their names on paper.
+B: Next. AMD is shipping — its Helios rack-scale system, the one meant to go head-to-head with Nvidia at the rack level, starts reaching customers later this year. And separately AMD open-weighted a small mixture-of-experts model, sixteen billion parameters with three billion active, which reads mostly as a proof that its own hardware can train a real model. We did the AMD-Anthropic software story on Thursday; this is the hardware walking in behind it.
+A: Then the money nerves, which are loud and worth exactly one sentence each. Reuters reports Alphabet's cash burn spooking investors as AI capital spending climbs. And a separate report alleges AI companies are parking large amounts of debt off their balance sheets. Both are the bubble-anxiety beat — real enough to watch, too unsettled to conclude anything from today.
+B: Voice keeps turning into an agent interface. Anthropic extended Claude's voice mode onto its stronger models and wired it to connected tools — Gmail, Calendar, Slack. And OpenAI brought its voice mode to the ChatGPT desktop app, where it can drive its coding agent. Same move from both: voice stops being dictation and starts being a way to make the agent do things.
+A: And one paper for the "big if it replicates" pile. A method claiming statistically lossless quantization — shrinking a model for faster inference while, it says, preserving fidelity the way lossless compression does, instead of the usual quality-for-speed trade. Brand new, community-posted, unreplicated. If it survives contact with other people's models, it matters. Today it's a claim.
+B: [wry] And, for pure awareness, since you know how our listener feels about it — DARPA and the Air Force flew an AI-controlled F-sixteen. Genuine milestone. Not something anyone here has to act on Monday.
+A: One sentence was the right amount.
+B: One sentence was the right amount.
+## Before we go
+A: No grand thread today. Though I'll allow the small one I flagged at the top — a frontier model on Friday, and the dataset the open ones train on the same week. The layer people watch, and the layer they don't.
+B: And they rhyme in one specific way. Opus five's problem is too much effort in the wrong place. The Stack's whole job is deciding what effort is wasted before you ever spend it.
+A: [short pause] Huh. That's better than what I had.
+B: Mine to watch: whether anyone outside Anthropic reproduces that CursorBench number. Half the price of the frontier is a big claim, and it's theirs until it isn't.
+A: And mine — if you use Opus five this week, turn the dial down before you turn it up. Match the effort to the task, not to how much you care.
+B: Good place to end. I'm Alan.
+A: And I'm Ada.
+B: Stay grounded.

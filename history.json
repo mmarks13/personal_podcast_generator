@@ -1,6 +1,50 @@
 {
   "episodes": [
     {
+      "date": "2026-07-25",
+      "title": "More effort, worse code",
+      "summary": "Anthropic ships Claude Opus 5 at half the frontier's price — and the interesting part is the effort dial: turn it up on a small fix and the model over-refactors, so more effort can mean a lower coding score. Then The Stack v3, a 113-terabyte open code corpus, and what it actually takes to turn that pile into five trillion trainable, auditable tokens. Plus a sweep where the open-weights fight finally put its names on paper.",
+      "topics": [
+        "Claude Opus 5 (Anthropic): frontier release priced at $5/M input and $25/M output (same as Opus 4.8), 1M-token context unchanged; Anthropic reports it comes close to Fable 5's frontier intelligence at half Fable's price, and on CursorBench 3.2 at max effort lands within 0.5% of Fable 5's peak at half cost per task; on Frontier-Bench v0.1 agentic terminal coding it more than doubles Opus 4.8 and surpasses all other models; outside coverage (the-decoder) reports ~79% on SWE-bench Pro vs ~69% for Opus 4.8; five effort settings (low/medium/high/xhigh/max); Anthropic positions it as much stronger at verifying its work and iterating. The non-monotonic effort behavior: FrontierCode developer Cheng-Yuan Lee found that at higher effort Opus 5 refactors surrounding code even for a one-character fix (changed exactly one character at low, refactored the whole surrounding block at xhigh), and the benchmark penalizes unsolicited changes — so more effort can lower the coding score; Anthropic's migration guidance now warns against instructions like 'include a final verification step' because it causes over-verification, and disabling thinking with xhigh/max now returns a 400 error",
+        "The Stack v3 (BigCode / Hugging Face): open source-code corpus; full corpus 113.7 TB, 770 programming languages, 224M repositories, 43.9B files (GitHub snapshot as of Aug 7 2025); ready-to-train split ~15.9 TB, 713 languages, ~4.9 trillion tokens, ODC-By 1.0 license; seven-stage pipeline (go-enry language detection, ScanCode file-level license detection, MinHash-LSH near-deduplication, quality heuristics, StarPII PII redaction of emails/keys/names/passwords/IPs, Jupyter processing, repo-level grouping); ships no model results — positioned as auditable-provenance infrastructure for open code models, with lead engineer Leandro von Werra framing it partly around open code models for cyber defense; excludes issues/PRs/docs/math that earlier versions bundled and requires respecting original repo terms"
+      ],
+      "entities": [
+        "Anthropic",
+        "Claude Opus 5",
+        "Claude Opus 4.8",
+        "Claude Fable 5",
+        "CursorBench",
+        "Frontier-Bench",
+        "FrontierCode",
+        "Cheng-Yuan Lee",
+        "SWE-bench Pro",
+        "BigCode",
+        "Hugging Face",
+        "The Stack v3",
+        "StarCoder",
+        "StarPII",
+        "Leandro von Werra"
+      ],
+      "threads": [
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "The fight produced formal documents on both sides. A Microsoft-organized open letter, 'Open Weights and American AI Leadership,' signed by 20+ companies (Nvidia, Microsoft, Meta, Palantir, Hugging Face), argues against broad restrictions on open-weight models; Axios reports OpenAI and Anthropic taking the opposite side on competitive-risk grounds. Covered as a sweep update, not a dive.",
+          "arc": "From a floated import ban, to a named accusation with a sanctions threat, to organized counter-lobbying by small companies (the Little Tech Association) — and now to a formal industry coalition letter, with the model-hosting and chip companies and two of the big frontier labs landing on opposite sides on paper."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Claude Opus 5, and why more effort made it worse",
+          "why_it_matters": "Anyone configuring an agentic coding model should care that Opus 5's effort dial is non-monotonic for coding — at higher effort it over-refactors and over-verifies, so the right advice is now 'match effort to how open-ended the task is, not how much you care,' and cap effort at high for surgical edits; the price story (near-frontier at half Fable's cost per task) is real but vendor-reported until reproduced."
+        },
+        {
+          "story": "The Stack v3: cleaning a hundred terabytes of code",
+          "why_it_matters": "Anyone training or fine-tuning a code model should care that provenance, not benchmark score, is what clears legal review — and The Stack v3 turns 113 TB of GitHub into ~5T auditable tokens via documented dedup, per-file license detection, and PII redaction, making the data layer (where reliability and governance are actually decided) the product; it ships no model results, so it is infrastructure, not a capability claim."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-07-24",
       "title": "Recompute, don't remember",
       "summary": "ChatGPT Health goes national and stops being a place in the app — health data now surfaces in every query, because seventy percent of health questions already happened outside the hub. Then a systems paper gets two million tokens of reinforcement-learning training onto eight GPUs by storing almost nothing and replaying the rest. And offensive security researchers say model guardrails have stopped being a line and started being an allocation.",
@@ -1684,62 +1728,15 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-06-24",
-      "title": "Agents that ship, and the science they only pretend to do",
-      "summary": "A day on agents doing real, bounded production work versus where they still fall down: Mistral ships OCR 4 (document intelligence with per-field confidence scores, 72% avg win rate, $2-4/1,000 pages, self-hostable); Anthropic puts a single shared Claude into Slack channels; Coinbase reports 75% of PRs agent-authored across 2,400+ Cursor developers; Hugging Face cuts weekly hub releases for ~$0.25 via an open-weight agent plus deterministic validation. Against that, Qwen-AgentWorld trains agents inside a learned text world model (beating real-environment RL on a search task), and NatureBench shows the strongest agent matches a published Nature-family result ~48% of the time mostly by recognizing ML problems in disguise, not by domain discovery.",
-      "topics": [
-        "Qwen-AgentWorld: text-based language world models across 7 agent domains; ~400B-param model edges GPT-5.4 on AgentWorldBench (58.71 vs 58.25); used as RL simulator, training inside the sim beats real-environment training on WideSearch (50.3% vs 45.6%); LWM warm-up gives +11.3 on Claw-Eval, +9.0 on BFCL v4",
-        "NatureBench: 90 discovery tasks distilled from Nature-family papers (2022-2025); information firewall removes source methods; strongest agent Claude Opus 4.7 surpasses SOTA on 17.8% / matches on 47.8%; top success mode is methodological translation (45.5%), top failure is wrong method choice",
-        "Mistral OCR 4: document intelligence with extracted text, bounding boxes, typed-block classification, inline per-field confidence; 72% avg human-preference win rate, tops OlmOCRBench/OmniDocBench, 170 languages, $4 standard / $2 batch per 1,000 pages, single-container self-host",
-        "Anthropic Claude Tag: one shared Claude per Slack channel (not per-user), builds context over time, optional ambient mode flags/schedules and runs projects over days; Opus 4.8, beta for Enterprise and Team",
-        "Cursor x Coinbase: 2,400+ developers, 75% of PRs agent-authored across cloud and local, idea-to-production 20 days to under 2 (>90%), idea-to-first-PR 8 days to under 30 min, 55% more PRs merged per engineer YTD, ~7 hrs/week saved",
-        "Groq $650M raise (Disruptive/Infinitum); ~6 months after Nvidia's non-exclusive license + leadership hire (framed as $20B not-acqui-hire), Groq pivots to neocloud (13 data centers, 5M+ developers), Doug Wightman CEO; Nvidia shipped its own Groq-branded LPX box at GTC",
-        "Hugging Face weekly huggingface_hub releases via one GitHub Actions workflow: OpenCode runtime + GLM-5.2 via HF Inference Providers + PyPI Trusted Publishing; ~$0.25/release across 20-40 PRs; agent drafts prose, deterministic validation enforces correctness, human edits half-day to 15 min"
-      ],
-      "entities": [
-        "Mistral",
-        "Mistral OCR 4",
-        "Anthropic",
-        "Claude Tag",
-        "Opus 4.8",
-        "Cursor",
-        "Coinbase",
-        "Qwen",
-        "Qwen-AgentWorld",
-        "GPT-5.4",
-        "Claude Opus 4.7",
-        "Groq",
-        "Nvidia",
-        "Doug Wightman",
-        "Hugging Face",
-        "GLM-5.2",
-        "OpenCode",
-        "Z.ai"
-      ],
-      "threads": [
-        {
-          "name": "World models",
-          "status": "Qwen-AgentWorld builds a text-based world model across seven agent domains and uses it as an RL simulator; the authors report training inside the learned simulation beats training in the real environment on a search task (50.3% vs 45.6%), and warming an agent up on the world model transfers to out-of-distribution domains.",
-          "arc": "From WRBench naming the missing persistent state and ENPIRE closing the physical loop, the thread turns constructive: a learned model of the environment becomes the training ground itself, turning slow flaky environments into software you can plan and learn against."
-        },
-        {
-          "name": "AI quality and verification failures",
-          "status": "NatureBench strips the method out of 90 Nature-family tasks and scores agents against published SOTA; the strongest (Claude Opus 4.7) matches it ~48% of the time, but the dominant success mode is 'methodological translation' — recognizing an ML problem in disguise — not domain discovery.",
-          "arc": "The eval-honesty beat extends from 'tests the model can recognize as tests' to measuring genuine discovery: an honest benchmark exposes that high match rates come from pattern-matching tasks onto familiar pipelines, with wrong method choice the top failure when real domain insight is required."
-        }
-      ],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
       {
         "name": "AI sovereignty and open weights",
-        "status": "The startups that would absorb the cost of a ban organized: nearly 200 companies including Y Combinator and Proton sent letters to President Trump and Commerce Secretary Lutnick through a newly formed Little Tech Association, asking for continued US access to open models already available worldwide alongside world-leading American open-weight models — 'a scalpel rather than a sledgehammer', per executive director Harry Godfrey. Separately, unrestricted Chinese open models are the reported substitution path for security researchers blocked by US vendor guardrails.",
-        "arc": "From a floated import ban, to a named accusation with a sanctions threat attached, to organized counter-lobbying by the small companies whose stacks depend on the models in question — while the practical effect of US restrictions shows up as work migrating to unrestricted weights rather than not happening.",
-        "last_seen": "2026-07-24"
+        "status": "The fight produced formal documents on both sides. A Microsoft-organized open letter, 'Open Weights and American AI Leadership,' signed by 20+ companies (Nvidia, Microsoft, Meta, Palantir, Hugging Face), argues against broad restrictions on open-weight models; Axios reports OpenAI and Anthropic taking the opposite side on competitive-risk grounds. Covered as a sweep update, not a dive.",
+        "arc": "From a floated import ban, to a named accusation with a sanctions threat, to organized counter-lobbying by small companies (the Little Tech Association) — and now to a formal industry coalition letter, with the model-hosting and chip companies and two of the big frontier labs landing on opposite sides on paper.",
+        "last_seen": "2026-07-25"
       },
       {
         "name": "Custom AI silicon vs Nvidia",
@@ -1786,37 +1783,102 @@
     ],
     "entities": [
       {
+        "name": "Anthropic",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "Nvidia",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "Z.ai",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "GLM-5.2",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "Hugging Face",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "Qwen",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "Cursor",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "Claude Opus 4.7",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "Mistral",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "Mistral OCR 4",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "Claude Tag",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "Opus 4.8",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "Coinbase",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "Qwen-AgentWorld",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "GPT-5.4",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "Groq",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "Doug Wightman",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
+        "name": "OpenCode",
+        "note": "",
+        "last_seen": "2026-06-24"
+      },
+      {
         "name": "OpenAI",
         "note": "",
         "last_seen": "2026-06-23"
       },
       {
-        "name": "Anthropic",
-        "note": "",
-        "last_seen": "2026-06-23"
-      },
-      {
         "name": "Simon Willison",
-        "note": "",
-        "last_seen": "2026-06-23"
-      },
-      {
-        "name": "Nvidia",
-        "note": "",
-        "last_seen": "2026-06-23"
-      },
-      {
-        "name": "Z.ai",
-        "note": "",
-        "last_seen": "2026-06-23"
-      },
-      {
-        "name": "GLM-5.2",
-        "note": "",
-        "last_seen": "2026-06-23"
-      },
-      {
-        "name": "Hugging Face",
         "note": "",
         "last_seen": "2026-06-23"
       },
@@ -1847,11 +1909,6 @@
       },
       {
         "name": "Gemma",
-        "note": "",
-        "last_seen": "2026-06-23"
-      },
-      {
-        "name": "Qwen",
         "note": "",
         "last_seen": "2026-06-23"
       },
@@ -1924,66 +1981,6 @@
         "name": "Tri Dao",
         "note": "",
         "last_seen": "2026-06-20"
-      },
-      {
-        "name": "S4",
-        "note": "",
-        "last_seen": "2026-06-20"
-      },
-      {
-        "name": "HiPPO",
-        "note": "",
-        "last_seen": "2026-06-20"
-      },
-      {
-        "name": "Nemotron 3 Ultra",
-        "note": "",
-        "last_seen": "2026-06-20"
-      },
-      {
-        "name": "state-space models",
-        "note": "",
-        "last_seen": "2026-06-20"
-      },
-      {
-        "name": "Mamba-2",
-        "note": "",
-        "last_seen": "2026-06-20"
-      },
-      {
-        "name": "Artificial Analysis",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
-        "name": "Cursor",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
-        "name": "Amazon",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
-        "name": "Claude Opus 4.7",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
-        "name": "Claude Opus 4.1",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
-        "name": "ServiceNow",
-        "note": "",
-        "last_seen": "2026-06-19"
-      },
-      {
-        "name": "Qwen3-14B",
-        "note": "",
-        "last_seen": "2026-06-19"
       }
     ],
     "monthly": [
@@ -1992,7 +1989,7 @@
         "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see; Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war; Visible guardrails, a six-thousand-dollar agent, and the data-center revolt; A model recalled by the government, and the quieter work of measuring the ones that remain; Why your model can't read a million words at once — and the trick that lets it pretend; Who controls the model: the Fable recall spreads, and an agent that remembers when it was right; When the exam lies: a medical safety paper, agents that get identities, and a satellite that found its own target; What the recall was really about, and the week harness"
       }
     ],
-    "updated": "2026-07-24",
+    "updated": "2026-07-25",
     "host_lore": [
       {
         "host": "Alan",
@@ -2014,6 +2011,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "why a reasoning-effort dial can be non-monotonic for coding: a model tuned to verify and iterate will, given more budget on a small well-scoped task, spend it on unsolicited refactoring/over-verification, which graders penalize as errors",
+        "last_taught": "2026-07-25"
+      },
+      {
+        "name": "what 'cleaning' a large code corpus actually means: language detection, per-file license detection, MinHash near-deduplication (why dedup prevents a corpus from becoming a popularity contest), quality filtering, and PII redaction — and why provenance/auditability is the payoff rather than raw model quality",
+        "last_taught": "2026-07-25"
+      },
       {
         "name": "why RL post-training hits a memory wall that inference does not: backpropagation requires retained forward activations, and group-relative policy optimization multiplies that by several responses branching off one shared history",
         "last_taught": "2026-07-24"

@@ -1,0 +1,132 @@
+{
+  "date": "2026-07-25",
+  "title": "More effort, worse code",
+  "summary": "Anthropic ships Claude Opus 5 at half the frontier's price — and the interesting part is the effort dial: turn it up on a small fix and the model over-refactors, so more effort can mean a lower coding score. Then The Stack v3, a 113-terabyte open code corpus, and what it actually takes to turn that pile into five trillion trainable, auditable tokens. Plus a sweep where the open-weights fight finally put its names on paper.",
+  "sources": [
+    {
+      "group": "Releases",
+      "title": "Introducing Claude Opus 5 (Anthropic)",
+      "url": "https://www.anthropic.com/news/claude-opus-5"
+    },
+    {
+      "group": "Releases",
+      "title": "Anthropic claims Claude Opus 5 delivers near-Fable-5 performance at half the token price (the-decoder)",
+      "url": "https://the-decoder.com/anthropic-claims-its-new-claude-opus-5-delivers-near-fable-5-performance-at-half-the-token-price/"
+    },
+    {
+      "group": "Releases",
+      "title": "Anthropic launches Claude Opus 5 for coding, agents and enterprise workflows (VentureBeat)",
+      "url": "https://venturebeat.com/orchestration/anthropic-launches-claude-opus-5-a-cheaper-ai-model-for-coding-agents-and-enterprise-workflows"
+    },
+    {
+      "group": "Releases",
+      "title": "The Stack v3 — train split (HuggingFaceCode/stack-v3-train)",
+      "url": "https://huggingface.co/datasets/HuggingFaceCode/stack-v3-train"
+    },
+    {
+      "group": "Releases",
+      "title": "Leandro von Werra: introducing The Stack v3",
+      "url": "https://x.com/lvwerra/status/2080268415697047852"
+    },
+    {
+      "group": "Releases",
+      "title": "AMD takes on Nvidia with its Helios AI rack-scale system (TechCrunch)",
+      "url": "https://techcrunch.com/2026/07/23/amd-takes-on-nvidia-with-its-helios-ai-rack-scale-system/"
+    },
+    {
+      "group": "Releases",
+      "title": "AMD Instella-MoE-16B-A3B open model release (r/LocalLLaMA)",
+      "url": "https://www.reddit.com/r/LocalLLaMA/comments/1v5sb5b/amd_instellamoe16ba3b/"
+    },
+    {
+      "group": "Releases",
+      "title": "Anthropic: think through hard problems in voice mode",
+      "url": "https://claude.com/blog/think-through-hard-problems-in-voice-mode"
+    },
+    {
+      "group": "Releases",
+      "title": "OpenAI's new voice mode makes it to the ChatGPT desktop app (TechCrunch)",
+      "url": "https://techcrunch.com/2026/07/24/openais-new-voice-mode-makes-it-to-the-chatgpt-desktop-app/"
+    },
+    {
+      "group": "Discussion",
+      "title": "Open Weights and American AI Leadership (industry coalition letter)",
+      "url": "https://www.microsoft.com/en-us/corporate-responsibility/topics/open-weight/"
+    },
+    {
+      "group": "Discussion",
+      "title": "OpenAI and Anthropic push back against loosening open-weight-model rules (Axios)",
+      "url": "https://www.axios.com/2026/07/22/openai-anthropic-open-models-trump-china"
+    },
+    {
+      "group": "Discussion",
+      "title": "Alphabet's cash burn raises alarm as Big Tech AI spending climbs (Reuters)",
+      "url": "https://www.reuters.com/business/retail-consumer/alphabets-cash-burn-raises-alarm-big-tech-ai-spending-climbs-2026-07-23/"
+    },
+    {
+      "group": "Discussion",
+      "title": "AI companies are trying to hide a staggering amount of debt (Futurism)",
+      "url": "https://futurism.com/artificial-intelligence/ai-companies-hide-debt-off-balance-sheet"
+    },
+    {
+      "group": "Discussion",
+      "title": "Statistically-lossless quantization of LLMs (r/LocalLLaMA)",
+      "url": "https://i.redd.it/4u0iz2l5t7fh1.png"
+    },
+    {
+      "group": "Discussion",
+      "title": "DARPA and US Air Force fly an AI-controlled F-16",
+      "url": "https://www.darpa.mil/news/2026/darpa-us-air-force-fly-ai-controlled-f-16"
+    }
+  ],
+  "topics": [
+    "Claude Opus 5 (Anthropic): frontier release priced at $5/M input and $25/M output (same as Opus 4.8), 1M-token context unchanged; Anthropic reports it comes close to Fable 5's frontier intelligence at half Fable's price, and on CursorBench 3.2 at max effort lands within 0.5% of Fable 5's peak at half cost per task; on Frontier-Bench v0.1 agentic terminal coding it more than doubles Opus 4.8 and surpasses all other models; outside coverage (the-decoder) reports ~79% on SWE-bench Pro vs ~69% for Opus 4.8; five effort settings (low/medium/high/xhigh/max); Anthropic positions it as much stronger at verifying its work and iterating. The non-monotonic effort behavior: FrontierCode developer Cheng-Yuan Lee found that at higher effort Opus 5 refactors surrounding code even for a one-character fix (changed exactly one character at low, refactored the whole surrounding block at xhigh), and the benchmark penalizes unsolicited changes — so more effort can lower the coding score; Anthropic's migration guidance now warns against instructions like 'include a final verification step' because it causes over-verification, and disabling thinking with xhigh/max now returns a 400 error",
+    "The Stack v3 (BigCode / Hugging Face): open source-code corpus; full corpus 113.7 TB, 770 programming languages, 224M repositories, 43.9B files (GitHub snapshot as of Aug 7 2025); ready-to-train split ~15.9 TB, 713 languages, ~4.9 trillion tokens, ODC-By 1.0 license; seven-stage pipeline (go-enry language detection, ScanCode file-level license detection, MinHash-LSH near-deduplication, quality heuristics, StarPII PII redaction of emails/keys/names/passwords/IPs, Jupyter processing, repo-level grouping); ships no model results — positioned as auditable-provenance infrastructure for open code models, with lead engineer Leandro von Werra framing it partly around open code models for cyber defense; excludes issues/PRs/docs/math that earlier versions bundled and requires respecting original repo terms"
+  ],
+  "entities": [
+    "Anthropic",
+    "Claude Opus 5",
+    "Claude Opus 4.8",
+    "Claude Fable 5",
+    "CursorBench",
+    "Frontier-Bench",
+    "FrontierCode",
+    "Cheng-Yuan Lee",
+    "SWE-bench Pro",
+    "BigCode",
+    "Hugging Face",
+    "The Stack v3",
+    "StarCoder",
+    "StarPII",
+    "Leandro von Werra"
+  ],
+  "threads": [
+    {
+      "name": "AI sovereignty and open weights",
+      "status": "The fight produced formal documents on both sides. A Microsoft-organized open letter, 'Open Weights and American AI Leadership,' signed by 20+ companies (Nvidia, Microsoft, Meta, Palantir, Hugging Face), argues against broad restrictions on open-weight models; Axios reports OpenAI and Anthropic taking the opposite side on competitive-risk grounds. Covered as a sweep update, not a dive.",
+      "arc": "From a floated import ban, to a named accusation with a sanctions threat, to organized counter-lobbying by small companies (the Little Tech Association) — and now to a formal industry coalition letter, with the model-hosting and chip companies and two of the big frontier labs landing on opposite sides on paper."
+    }
+  ],
+  "repeat_coverage": [
+    {
+      "story": "Open-weights policy fight (sweep line)",
+      "repeat_of": "active thread 'AI sovereignty and open weights'; 2026-07-21 dive, 2026-07-23 sanctions threat, 2026-07-24 Little Tech Association sweep line",
+      "new_development": "A formal Microsoft-organized coalition letter ('Open Weights and American AI Leadership') was signed by 20+ named companies, and Axios reports OpenAI and Anthropic publicly on the opposite side — the first time both camps have their names on a document; kept to a sweep update rather than re-arguing the policy."
+    }
+  ],
+  "dives": [
+    {
+      "story": "Claude Opus 5, and why more effort made it worse",
+      "why_it_matters": "Anyone configuring an agentic coding model should care that Opus 5's effort dial is non-monotonic for coding — at higher effort it over-refactors and over-verifies, so the right advice is now 'match effort to how open-ended the task is, not how much you care,' and cap effort at high for surgical edits; the price story (near-frontier at half Fable's cost per task) is real but vendor-reported until reproduced."
+    },
+    {
+      "story": "The Stack v3: cleaning a hundred terabytes of code",
+      "why_it_matters": "Anyone training or fine-tuning a code model should care that provenance, not benchmark score, is what clears legal review — and The Stack v3 turns 113 TB of GitHub into ~5T auditable tokens via documented dedup, per-file license detection, and PII redaction, making the data layer (where reliability and governance are actually decided) the product; it ships no model results, so it is infrastructure, not a capability claim."
+    }
+  ],
+  "concepts_taught": [
+    "why a reasoning-effort dial can be non-monotonic for coding: a model tuned to verify and iterate will, given more budget on a small well-scoped task, spend it on unsolicited refactoring/over-verification, which graders penalize as errors",
+    "what 'cleaning' a large code corpus actually means: language detection, per-file license detection, MinHash near-deduplication (why dedup prevents a corpus from becoming a popularity contest), quality filtering, and PII redaction — and why provenance/auditability is the payoff rather than raw model quality"
+  ],
+  "lore": []
+}
