@@ -45,6 +45,31 @@
       "lore": []
     },
     {
+      "date": "2026-07-25",
+      "kind": "deepdive",
+      "title": "The CUDA moat: what a rival GPU software stack actually has to rebuild",
+      "summary": "A teaching episode on why CUDA — not the silicon — is the barrier to a second GPU vendor. We walk the stack layer by layer (driver, the PTX virtual ISA lowered to per-architecture machine code, the compiler, and fifteen years of tuned libraries — cuBLAS, cuDNN, NCCL, CUTLASS), map AMD's ROCm mirror component-for-component (HIP, hipify, rocBLAS, MIOpen, RCCL), lay out the three ways across the moat (rebuild it, translate it, or route around it through the PyTorch/Triton framework layer), and follow SemiAnalysis's argument that the moat has moved from single-node kernels up to disaggregated multi-GPU inference and networking.",
+      "topics": [
+        "deep dive: the CUDA moat — what a rival GPU software stack actually requires"
+      ],
+      "entities": [
+        "NVIDIA",
+        "CUDA",
+        "AMD",
+        "ROCm",
+        "HIP",
+        "Triton",
+        "PyTorch",
+        "OpenAI",
+        "SemiAnalysis",
+        "Anthropic",
+        "cuDNN",
+        "NCCL"
+      ],
+      "threads": [],
+      "lore": []
+    },
+    {
       "date": "2026-07-24",
       "title": "Recompute, don't remember",
       "summary": "ChatGPT Health goes national and stops being a place in the app — health data now surfaces in every query, because seventy percent of health questions already happened outside the hub. Then a systems paper gets two million tokens of reinforcement-learning training onto eight GPUs by storing almost nothing and replaying the rest. And offensive security researchers say model guardrails have stopped being a line and started being an allocation.",
@@ -2017,6 +2042,26 @@
       },
       {
         "name": "what 'cleaning' a large code corpus actually means: language detection, per-file license detection, MinHash near-deduplication (why dedup prevents a corpus from becoming a popularity contest), quality filtering, and PII redaction — and why provenance/auditability is the payoff rather than raw model quality",
+        "last_taught": "2026-07-25"
+      },
+      {
+        "name": "CUDA is a layered stack, not a language: the driver, the PTX virtual instruction set lowered in a second step to per-architecture machine code (SASS/cubin), the nvcc compiler, and fifteen-plus years of hand-tuned libraries (cuBLAS, cuDNN, NCCL, CUTLASS) — and why the tuning and edge-case fixes, not the API surface, are the actual barrier",
+        "last_taught": "2026-07-25"
+      },
+      {
+        "name": "ROCm as a component-for-component mirror of CUDA (HIP mirrors the CUDA language layer, hipify source-translates, rocBLAS/MIOpen/RCCL/rocFFT mirror cuBLAS/cuDNN/NCCL/cuFFT), and why the hard 20% is missing/slow/numerically-divergent kernels — floating-point non-associativity making 'correctness' a long-tail QA problem rather than a checkbox",
+        "last_taught": "2026-07-25"
+      },
+      {
+        "name": "the three strategies for crossing the CUDA moat: rebuild the mirror (ROCm), compatibility/translation layers at source or binary level (hipify, ZLUDA, SCALE) which stay one release behind, and routing around CUDA via the framework layer",
+        "last_taught": "2026-07-25"
+      },
+      {
+        "name": "the framework-abstraction bridge: almost no one hand-writes CUDA (they write PyTorch); Triton (OpenAI, 2021) is an MLIR-based kernel language with a swappable backend that lowers to NVIDIA PTX or AMD GCN, and PyTorch 2.0's torch.compile emits Triton by default — making a chip a backend flag rather than a rewrite, with the Gluon dialect (2025) as the leak where peak performance still needs architecture-specific code",
+        "last_taught": "2026-07-25"
+      },
+      {
+        "name": "why the moat has moved from single-node kernel software up to disaggregated multi-GPU inference and networking: with AI agents now able to write/optimize kernels, the durable barrier becomes collective communication and interconnect at system scale (NCCL/RCCL parity, network-card software), which compose unreliably on rivals — and why inference falls first and frontier training last",
         "last_taught": "2026-07-25"
       },
       {
