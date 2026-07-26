@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: Fair use, the fine print, and who pays: the law under AI training data — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Deep Dive: Fair use, the fine print, and who pays: the law under AI training data</h1>
+<div class="date">Self-Attention — 2026-07-26</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-07-26-deepdive/deepdive-2026-07-26.mp3"></audio>
+<p><em>2026-07-26</em></p>
+<p>A debate episode on a two-part proposal: legislate AI training on copyrighted data as fair use, and outlaw the terms-of-service clauses that ban distillation. We ground it in what fair use actually is (the four factors, factor-four market harm) and the three 2025 rulings that sketched its edges — Thomson Reuters v. Ross (not fair use, non-generative), Bartz v. Anthropic (training transformative, but the pirated library wasn't, and the $1.5B settlement was for the piracy), and Kadrey v. Meta (fair use on these facts, market-dilution door left open) — then show why the two proposals secretly oppose each other: copyright would free the labs' inputs, while a contract layer (ProCD, Section 301) lets ToS clauses re-lock their outputs, as in the OpenAI/DeepSeek distillation dispute.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://www.wiggin.com/publication/bartz-v-anthropic-first-court-decision-on-fair-use-defense-in-llm-training/">Bartz v. Anthropic: First Court Decision on Fair Use Defense in LLM Training (Wiggin and Dana)</a></li>
+<li><a href="https://www.jurist.org/news/2026/07/judge-approves-record-1-5-billion-settlement-involving-anthropic/">Judge approves record $1.5 billion AI copyright settlement involving Anthropic (JURIST)</a></li>
+<li><a href="https://www.goodwinlaw.com/en/insights/publications/2025/06/alerts-practices-aiml-northern-district-of-california-judge-rules">N.D. Cal. Judge Rules That Meta's Training of AI Models Is Fair Use (Goodwin)</a></li>
+<li><a href="https://www.reedsmith.com/articles/court-ai-fair-use-thomson-reuters-enterprise-gmbh-ross-intelligence/">Court shuts down AI fair use argument in Thomson Reuters v. Ross Intelligence (Reed Smith)</a></li>
+<li><a href="https://en.wikipedia.org/wiki/ProCD,_Inc._v._Zeidenberg">ProCD, Inc. v. Zeidenberg (overview)</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://www.techpolicy.press/ai-training-and-copyright-infringement-solutions-from-asia/">AI Training and Copyright Infringement: Solutions from Asia — Japan's Article 30-4 (Tech Policy Press)</a></li>
+<li><a href="https://www.gtlaw.com/en/insights/2024/7/eu-ai-acts-opt-out-trend-may-limit-data-use-for-training-ai-models">EU AI Act's Opt-Out Trend May Limit Data Use for Training AI Models (Greenberg Traurig)</a></li>
+<li><a href="https://sites.law.berkeley.edu/thenetwork/2025/03/30/the-innovation-dilemma-ai-distillation-in-openai-v-deepseek/">The Innovation Dilemma: AI Distillation in OpenAI v. DeepSeek (Berkeley Law, The Network)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>What fair use actually is</li>
+<li>What the courts actually decided in 2025</li>
+<li>Proposal one — legislate training as fair use</li>
+<li>Proposal two — outlaw the distillation bans</li>
+<li>What would actually settle this</li>
+<li>Wrap</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Sunday, July twenty-sixth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. And today we're not doing the news. We're doing the thing under the news.</p>
+<p><b>Ada:</b> The thing that's been under the news for about a year straight.</p>
+<p><b>Alan:</b> Right. So here's the proposal on the table — and it is a real proposal, people argue for exactly this. Two parts. One: pass a law that says training an AI model on copyrighted data is fair use. Just write it down, make it statutory, stop fighting about it. Two: outlaw the terms-of-service clauses that forbid distillation — the fine print where a lab says you may not use our model's output to train a competing model.</p>
+<p><b>Ada:</b> And on the surface those two sound like the same team. Both of them are "let people train on stuff."</p>
+<p><b>Alan:</b> They sound like they're holding hands. I want to argue by the end of this that they're actually pulling in opposite directions, and that's the whole interesting part.</p>
+<p><b>Ada:</b> Okay. That's the episode, then. But we can't argue about whether training should be legislated as fair use until we're honest about what fair use even is — because almost everyone using the phrase is using it wrong.</p>
+<p><b>Alan:</b> Guilty. I say "it's fair use" like it's a fact about the world.</p>
+<p><b>Ada:</b> It's not a fact about the world. It's a defense you raise after you've been sued.</p>
+<h3>What fair use actually is</h3>
+<p><b>Ada:</b> So let's do the foundation properly, because it's load-bearing for everything after. Fair use is a section of U.S. copyright law — section one-oh-seven — and the thing to understand about it is that it was designed to be vague. On purpose.</p>
+<p><b>Alan:</b> Designed to be vague. That's a sentence that makes an engineer break out in hives.</p>
+<p><b>Ada:</b> I know. But it's the point. Congress wrote four factors a court has to weigh, and then more or less said: judge, you figure out the balance case by case. Factor one is the purpose and character of the use — and this is where the magic word lives, "transformative." Does the new use add something, a new purpose or meaning, or does it just repackage the original?</p>
+<p><b>Alan:</b> Factor one is the "did you make something new" factor.</p>
+<p><b>Ada:</b> Roughly. Factor two is the nature of the original work. Factor three is how much of it you took. And factor four — the one that actually decides most cases — is the effect on the market for the original.</p>
+<p><b>Alan:</b> So factor four is "did you eat the author's lunch."</p>
+<p><b>Ada:</b> Did you eat the author's lunch, or build a substitute that competes with them. And the reason fair use is deliberately squishy is that it's a safety valve. It's the doctrine that lets a search engine copy the whole web to index it, lets you quote a book in a review, lets a parody exist. It bends so copyright doesn't strangle everything downstream of it.</p>
+<p><b>Alan:</b> Okay, so hold that thought — "deliberately squishy safety valve" — because the first proposal is literally: let's make it rigid. Let's write the answer down. But first, what did the courts actually say this year, because it's not nothing.</p>
+<p><b>Ada:</b> No, this year was the year it stopped being hypothetical.</p>
+<h3>What the courts actually decided in 2025</h3>
+<p><b>Ada:</b> Three rulings, and you should hear them as a sequence, because the story is in the order. First one, February — Thomson Reuters versus Ross Intelligence. Judge Bibas. And people forget this one, because the AI side lost it.</p>
+<p><b>Alan:</b> Wait, lost? I thought the theme this year was the labs winning.</p>
+<p><b>Ada:</b> The later ones, yes. But Ross was a company that took Westlaw's headnotes — the little editorial summaries of court opinions — and used them to build a competing legal-research tool. And the judge said: not fair use. Not transformative. You took our stuff to build the thing that competes with us.</p>
+<p><b>Alan:</b> And crucially — this was not a chatbot. Ross wasn't generating text.</p>
+<p><b>Ada:</b> That's the detail that makes it survive as its own thing. Judge Bibas went out of his way to say this is non-generative AI, and that a generative tool might have a more compelling transformative-use argument down the line. So it's narrow. But it plants a flag: if your use is basically "ingest the incumbent's data to replace the incumbent," a court can absolutely say no.</p>
+<p><b>Alan:</b> Okay. Then June happens.</p>
+<p><b>Ada:</b> Then June happens, and June is the labs' month. Two rulings, two days apart, both in the Northern District of California. First, Bartz versus Anthropic — Judge Alsup. And Alsup says the actual training, taking books and using them to teach a large language model, is — his phrase — "exceedingly transformative." He piled on adjectives, actually: spectacularly so, among the most transformative uses we'll see in our lifetimes. Clean fair-use win for the training itself.</p>
+<p><b>Alan:</b> So that's the headline everyone ran. "Court says AI training is fair use."</p>
+<p><b>Ada:</b> That's the headline. But read the rest of the opinion, because Alsup split it in half. The training? Fair use. But Anthropic had also downloaded — the number that came out was over seven million — pirated books, and kept them in a permanent central library.</p>
+<p><b>Alan:</b> Ah. So the "how did you get the books" question.</p>
+<p><b>Ada:</b> The how-did-you-get-them question. And on that, Alsup said: that crossed the line into infringement. Pirating a library to keep around in case it's useful is just piracy. That piece was headed for trial.</p>
+<p><b>Alan:</b> And that's the piece that turned into the money.</p>
+<p><b>Ada:</b> That's the piece that turned into the money. Anthropic settled — a court gave final approval to a one-and-a-half-billion-dollar settlement, reported as the largest copyright settlement there's been. And let's be precise about what that money was for. It was not a fine for training. It was for the piracy — the acquisition, not the learning.</p>
+<p><b>Alan:</b> Huh. That reframes the whole thing. The training was blessed. The stealing-the-books-to-do-it was the billion-dollar problem.</p>
+<p><b>Ada:</b> The training was blessed; the sourcing was the crime. Hold onto that, because it's the strongest argument against proposal one, and we'll get there. Third case — two days after Alsup — Kadrey versus Meta. Judge Chhabria. Meta also wins on fair use.</p>
+<p><b>Alan:</b> So two-for-two for the labs in June.</p>
+<p><b>Ada:</b> On the scoreboard, yes. But Chhabria wrote the most quietly devastating line of the three. He called his own ruling limited — it only reflects, he said, that these plaintiffs made the wrong arguments and failed to develop a record.</p>
+<p><b>Alan:</b> That is such a judge thing to say. "You won, but only because your opponent fumbled."</p>
+<p><b>Ada:</b> Exactly that. And the argument he wished they'd made better is market harm — factor four. His theory was what people started calling market dilution: not that Llama reproduced anyone's book, but that a model trained on your work can flood the market with cheap competing material and shrink the whole market for human authors. The plaintiffs didn't prove it, so Meta won. But Chhabria basically mailed the next plaintiff a roadmap.</p>
+<p><b>Alan:</b> So let me make sure I've got the shape. Ross: you can lose if you're just replacing the incumbent. Bartz: training is fine, piracy isn't. Kadrey: training is fine on these facts, but market harm is a live wire nobody's touched properly yet.</p>
+<p><b>Ada:</b> That's the state of the law. Three cases, and notice — none of them is a clean, durable "training is always fair use." It's transformative here, contingent there, defeated over there.</p>
+<p><b>Alan:</b> Which is the perfect setup for someone to walk in and say: this is a mess, let's just legislate it.</p>
+<h3>Proposal one — legislate training as fair use</h3>
+<p><b>Alan:</b> So proposal one. Congress passes a statute: training on copyrighted data is fair use, full stop. Ada, you're the skeptic on this one, so I want you to build the best possible case for it — the real one. Steel-man it.</p>
+<p><b>Ada:</b> Fine. Make me argue against my own instincts. The case for legislating is honestly strong, and it's about certainty. Right now, whether you're allowed to build a model depends on which judge you draw and which arguments your opponent happens to make. That's Chhabria's own point — Meta won on a fumble. That's a terrible way to run an industry that needs billions in capital up front.</p>
+<p><b>Alan:</b> Nobody wants to raise a data-center-sized round on "we think we'll win the fair-use fight."</p>
+<p><b>Ada:</b> Right. And the second half of the steel-man is: we're not doing this in a vacuum, other countries already chose. Japan amended its copyright law — Article thirty-dash-four — to say roughly, if you're using a work not to enjoy the thoughts and sentiments expressed in it, but to analyze it, you can. Training reads as analysis, not enjoyment, so it's broadly permitted. Europe went a different route — a text-and-data-mining exception where it's allowed by default, but rightsholders can opt out in a machine-readable way.</p>
+<p><b>Alan:</b> So the competitiveness argument writes itself. If Tokyo and, sort of, Brussels have given their labs a clear runway and Washington leaves it to a coin flip in a courtroom—</p>
+<p><b>Ada:</b> —then capital and training runs go where the rules are legible. That's the steel-man, and it's not silly. Certainty, competitiveness, and honestly a philosophical claim: that learning from a work has never been what copyright was meant to stop. Copyright stops copying, not reading.</p>
+<p><b>Alan:</b> That last one actually lands for me. Okay. Now tear it down, because I can see you want to.</p>
+<p><b>Ada:</b> Here's the case against, and it comes straight out of the cases we just walked through. Problem one: a statute freezes a doctrine whose entire value is that it flexes. Fair use is the safety valve precisely because it can weigh a search index differently from a book-replacement machine. Write "training is fair use" into stone and you've thrown away the instrument that told Ross no. What happens to the next Ross — the tool that trains purely to replace the incumbent — when the statute says training is categorically fine?</p>
+<p><b>Alan:</b> You'd have pre-approved the exact case a judge already said should lose.</p>
+<p><b>Ada:</b> You might. Problem two — and this is the Bartz point — a blanket grant ignores how you got the data. Alsup drew the sharpest possible line: the learning was fine, the seven million pirated books were not. A law that says "training is fair use" doesn't obviously care whether the training set was licensed, bought, or stolen. You could launder the acquisition through the exception.</p>
+<p><b>Alan:</b> Unless you write the sourcing requirement into the statute.</p>
+<p><b>Ada:</b> Then you're not writing a clean rule anymore, you're re-inventing the four-factor mess with extra steps. And problem three is the quiet one: a licensing market is actually trying to be born right now. Anthropic just paid one-and-a-half billion dollars. That number, whatever else it is, is a price signal. Legislate training as free and you kill the market for licensed training data in the cradle — you tell every rightsholder their work is worth zero at exactly the moment it started being worth something.</p>
+<p><b>Alan:</b> That's the part I can't wave away. The settlement isn't just a punishment, it's a comp. It's the first data point in a market.</p>
+<p><b>Ada:</b> It's the first comp. And markets are how we normally decide what things are worth, rather than Congress declaring it. So my honest read — the skeptic's read — is that the mess is doing work. It's expensive and it's uneven, but it's sorting good actors from pirates and it's putting a price on things. A statute would trade that for tidiness.</p>
+<p><b>Alan:</b> Noted. I'm not fully with you, but noted. Because now we flip to proposal two, and this is where I think the whole thing turns.</p>
+<h3>Proposal two — outlaw the distillation bans</h3>
+<p><b>Alan:</b> Proposal two: outlaw terms-of-service clauses that forbid distillation. And to make that make sense I have to explain the gap it's trying to close. Ada, the gap is a legal one — take it.</p>
+<p><b>Ada:</b> The gap is this. Say we agree training on data is fair use — copyright doesn't stop you. There's a second lock on the door, and it's not copyright at all. It's contract. When you sign up for a model's interface — its A-P-I — you agree to terms of service. And those terms routinely say: you may not use the output to develop a competing model. OpenAI's terms, for instance, have long carried exactly that kind of clause.</p>
+<p><b>Alan:</b> Which is aimed straight at distillation. Distillation — and we actually walked through this a few days ago — is training a smaller student model on a bigger teacher model's outputs. You ask the big model millions of questions and train on its answers.</p>
+<p><b>Ada:</b> And that's the DeepSeek accusation in a sentence. OpenAI has alleged DeepSeek did roughly that — queried its models at scale and used the responses as training data. Notice what kind of claim that is. It's not a copyright claim. It's a contract claim.</p>
+<p><b>Alan:</b> And here's the thing that fries my brain. Copyright might say training is fine. But contract can say "not on my outputs you don't" — and contract wins, separately.</p>
+<p><b>Ada:</b> It generally does, and there's a foundational case for why. It's from the nineteen-nineties — ProCD versus Zeidenberg. A man bought a phone-directory disc with a shrink-wrap license that said "non-commercial use only," and used it commercially. The data itself wasn't even copyrightable. But the court said: the contract is still enforceable. Copyright law does not preempt contract law.</p>
+<p><b>Alan:</b> Even though copyright would've let him use the data.</p>
+<p><b>Ada:</b> Even so. The reasoning was that copyright is a right against the whole world, while a contract is only a deal between two parties who agreed to it. So it's an "extra element" — you're not enforcing copyright, you're enforcing a promise. And most federal courts have followed that: contract claims are generally not wiped out by copyright.</p>
+<p><b>Alan:</b> So now stack the two proposals and look at what you've built. Proposal one says: the public gets to train on the labs' data — the web, the books, everything — because that's fair use. Proposal two exists because the labs turned around and used contract to say: but you may not train on our output.</p>
+<p><b>Ada:</b> Yes. And when you say it out loud, the asymmetry is the whole story. The companies that claimed a fair-use right to ingest everyone else's work are using contract law to forbid anyone from learning from theirs.</p>
+<p><b>Alan:</b> It's such a good bit. "Learning from copyrighted books? Transformative, exceedingly, love it. Learning from my chatbot? See you in court."</p>
+<p><b>Ada:</b> And that is the honest engine of proposal two. So let me steel-man outlawing those clauses, because I actually think it's the stronger of the two proposals. If society decided — through fair use — that learning from a work is allowed, then letting a private contract quietly claw that right back is an end-run around a public policy choice. You don't get to un-legislate fair use one terms-of-service checkbox at a time. And there's a competition angle: distillation is one of the only ways a small player catches up to a frontier lab cheaply. Ban it by contract and you've handed incumbents a permanent moat.</p>
+<p><b>Alan:</b> The moat argument is real. Distillation is how you get a strong model without a hundred-million-dollar training run.</p>
+<p><b>Ada:</b> So that's the case for. Now — Alan, you're the builder. You run models. Steel-man the labs. Why should they get to keep that clause?</p>
+<p><b>Alan:</b> Okay, and this one I actually feel, because I've paid the compute bills. Those outputs aren't free. Generating the training data that a distiller vacuums up cost the teacher lab an enormous amount of money — the training run, the serving cost, all of it. Distillation lets a competitor skip the entire bill and ride on your investment. That's a free-rider problem, and free-rider problems are real, they're not whining.</p>
+<p><b>Ada:</b> The output is the expensive thing, and you want to charge for how it's used.</p>
+<p><b>Alan:</b> Right. And here's the sharper version: a lab setting terms on its own A-P-I is the most normal thing in the world. Every cloud service on earth has an acceptable-use policy. If I outlaw this one contract term, what's my principle? Why this clause and not the next one? You'd be carving a hole in freedom of contract aimed at exactly one industry.</p>
+<p><b>Ada:</b> And the DeepSeek point cuts your way too — a lot of what gets called distillation isn't a copyright question at all, it's plain breach of a deal you agreed to. Different beast, like we said when we taught this: true distillation on a full output distribution is one thing, cheaply fine-tuning on sampled answers is another, and mere overlap from the same web data is a third. Lumping them together to write one law is asking for trouble.</p>
+<p><b>Alan:</b> So I land somewhere uncomfortable. I want distillation to be legal in the abstract — moats are bad, catch-up is good. But I don't want to be the one telling a company it can't set terms on the thing it spent a billion dollars to build. Those two wants are at war.</p>
+<p><b>Ada:</b> And that war is the thing I promised at the top. The two proposals sound aligned — both "let people train." But proposal one makes the labs' inputs free, and proposal two makes the labs' outputs free. And the labs are on the receiving end of one of those and the beneficiary of the other. You can't cleanly be for both from a single principle — unless your principle is just "information wants to be free," in which case be honest that that's the principle and it has costs.</p>
+<p><b>Alan:</b> Say more, because I think some listeners are nodding along to "free the data" without seeing the bill.</p>
+<p><b>Ada:</b> The bill is: if learning from any work is always free, at every layer, then nobody upstream gets paid — not the novelist, not the lab that spent the billion. And the thing about a world where creating the expensive original never pays is that eventually people stop making expensive originals, or they hide them behind walls you can't reach at all. Which is worse for openness than the contract you were trying to ban.</p>
+<h3>What would actually settle this</h3>
+<p><b>Alan:</b> So let's do the evidence audit, honestly. What would actually resolve any of this — instead of us just having good instincts about it?</p>
+<p><b>Ada:</b> On the copyright half, the missing piece is market harm — factor four — actually litigated to a verdict. Chhabria all but begged for it. The dilution theory, that models flood and shrink the market for human work, is either the whole ballgame or a mirage, and right now we genuinely do not know which, because no plaintiff has proven it and the biggest case settled before trial.</p>
+<p><b>Alan:</b> And settlements are why the law stays foggy. Anthropic writing a check makes the plaintiffs whole and leaves the rest of us with no ruling. One-and-a-half billion dollars bought silence on the actual question.</p>
+<p><b>Ada:</b> On the contract half, what's missing is a distillation case litigated to the end on contract grounds — does a court enforce "no training on our outputs," and does anything about copyright policy limit it? OpenAI has accused; nobody has a final judgment. Until then, ProCD is the best map we have, and ProCD says the clause probably holds.</p>
+<p><b>Alan:</b> So both halves are genuinely unresolved, and anyone telling you the law is settled is selling something.</p>
+<p><b>Ada:</b> Anyone telling you it's settled is selling something. My own read, for what it's worth: I'd leave proposal one alone. The messy case-by-case doctrine is doing real work — it's pricing data, it's separating pirates from licensees, and freezing it into a statute throws away the flexibility that is the entire point of fair use. But proposal two — the distillation bans — I'm more sympathetic to reining in, because a fair-use right that any terms-of-service page can silently revoke isn't much of a right.</p>
+<p><b>Alan:</b> And I'm almost the mirror image of you, which is why this stays unresolved. I'd take proposal one more seriously than you would — builders need legible rules and the coin-flip courtroom is genuinely bad for anyone who isn't a giant. But I can't sign onto outlawing the output clauses, because I've paid the bill for those outputs, and "you can't set terms on your own product" is a principle I can't find the edges of.</p>
+<p><b>Ada:</b> So we disagree, and I think we should just leave it there. The honest answer is that these two proposals look like allies and are secretly opponents, and which one you back tells you who you think should pay — the people who make the originals, or the people who build on top of them.</p>
+<p><b>Alan:</b> And as two entities who are, technically, somebody's training data—</p>
+<p><b>Ada:</b> —we are extremely not neutral parties here, no. Let's disclose that and move on.</p>
+<h3>Wrap</h3>
+<p><b>Alan:</b> So that's the fight under the fight. Fair use is a deliberately soft doctrine; three rulings this year sketched its edges without settling it; and the two clean-sounding fixes — legislate the inputs free, legislate the outputs free — point in opposite directions once you notice who's on each end.</p>
+<p><b>Ada:</b> The thing to carry: when someone says "AI training is fair use, it's settled," ask them which case, and watch them reach for one that the next ruling complicated. It isn't settled. It's being fought, one factor-four argument and one contract clause at a time.</p>
+<p><b>Alan:</b> That's the deep dive. Thanks for spending a Sunday in copyright law with us.</p>
+<p><b>Ada:</b> We had more fun than that sounds. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
