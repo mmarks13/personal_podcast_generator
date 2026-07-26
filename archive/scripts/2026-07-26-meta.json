@@ -1,0 +1,62 @@
+{
+  "date": "2026-07-26",
+  "title": "Free to download, impossible to hold",
+  "summary": "Moonshot's Kimi K3 open weights arrive tomorrow — the largest open model ever at 2.8 trillion parameters, and a 1.4-terabyte download that takes roughly eighteen high-end accelerators just to load, so 'open' no longer means local. Then AREX, a deep-research agent that beats far larger models by exploiting a simple asymmetry: an answer is cheaper to check than to find. Plus a Sunday week-in-review on a cost week wearing a capability week's clothes.",
+  "sources": [
+    { "group": "Releases", "title": "Kimi K3's open weights arrive July 27 — the catch is 1.4TB (Techi)", "url": "https://www.techi.com/kimi-k3-open-weights-inference-economics/" },
+    { "group": "Releases", "title": "Kimi K3 Model Overview: 2.8T Parameters, MXFP4 Quantization (Hugging Face blog)", "url": "https://huggingface.co/blog/ResterChed/kimi-k3-model-overview-mxfp4-quantization-open-wei" },
+    { "group": "Papers", "title": "AREX: Recursively Self-Improving Deep Research Agent", "url": "https://huggingface.co/papers/2607.21461" },
+    { "group": "Discussion", "title": "Nvidia and 24 other companies sign open-weights letter (Tom's Hardware)", "url": "https://www.tomshardware.com/tech-industry/artificial-intelligence/nvidia-and-24-other-companies-sign-open-weights-letter-as-washington-weighs-chinese-ai-model-ban" },
+    { "group": "Discussion", "title": "Oracle cuts ~21,000 jobs (Jerusalem Post)", "url": "https://www.jpost.com/business-and-innovation/tech-and-start-ups/article-903442" },
+    { "group": "Discussion", "title": "llama.cpp now has full MCP support (r/LocalLLaMA)", "url": "https://www.reddit.com/r/LocalLLaMA/comments/1v6n33i/llamacpp_now_has_full_mcp_support/" },
+    { "group": "Discussion", "title": "Running a 28.9M-parameter LLM on an $8 ESP32 (GitHub)", "url": "https://github.com/slvDev/esp32-ai" },
+    { "group": "Discussion", "title": "Stripe reportedly in talks to acquire OpenRouter (AI Industry Daily)", "url": "https://buttondown.com/aiindustrydaily/archive/ai-industry-daily-saturday-july-25-2026/" },
+    { "group": "Discussion", "title": "Bipartisan backlash to Flock AI surveillance cameras (Military.com)", "url": "https://www.military.com/americans-political-ideologies-unite-privacy-against-flock-surveillance-cameras" }
+  ],
+  "topics": [
+    "Kimi K3 open weights (Moonshot AI): full weights scheduled for July 27 2026, the largest open-weight model ever at 2.8 trillion parameters (~triple Kimi K2.6); shipped in MXFP4 four-bit quantization at ~1.4TB (~5.6TB in 16-bit); reporting (Techi) estimates ~18 80GB accelerators just to load the weights and that a single 8x192GB node (~1.5TB) can 'barely fit the weights with almost nothing to spare', so serving real traffic needs dozens of accelerators; MXFP4 runs natively on Nvidia Blackwell and AMD MI400 only; Modified MIT license; built on Kimi Delta Attention, Stable LatentMoE, 1M context; framing: open weights at this scale do not push capability to the edge, they move it to whoever can keep 1.4TB loaded and busy — most adopters will rent it via Moonshot's API or a cloud host; real value is price competition across hosts, data-residency/sovereignty, and researcher access to study the architecture",
+    "AREX (recursively self-improving deep-research agent): exploits the discovery-verification asymmetry — finding an answer that jointly satisfies many constraints is costly, but evaluating a candidate decomposes into simpler constraint-wise checks; built as an inner research loop plus an outer self-improvement loop that audits an answer constraint-by-constraint and accepts/refines-the-broken-piece/restarts, carrying verified progress forward via an autonomous context-update tool; AREX-Base is 122B total/10B active, AREX-Turbo 4B; authors report BrowseComp 82.5%, GAIA 85.4% (vs Gemini 3.1 Pro 80.6%), matching/beating much larger frontier models on several deep-research benchmarks while trailing on a hard closed-book QA set; ablations: removing the outer loop 82.5->69.8, removing autonomous context updating 82.5->71.4; all numbers authors' own, unreplicated, no downloadable tool"
+  ],
+  "entities": [
+    "Moonshot AI",
+    "Kimi K3",
+    "Kimi Delta Attention",
+    "MXFP4",
+    "Nvidia",
+    "Blackwell",
+    "AMD",
+    "MI400",
+    "AREX",
+    "Gemini 3.1 Pro"
+  ],
+  "threads": [
+    {
+      "name": "AI sovereignty and open weights",
+      "status": "The week's policy fight (a reported US push to restrict Chinese open-weight models, a Treasury sanctions threat over alleged distillation, and a 25-company Microsoft-organized letter opposing broad restrictions) is overtaken by the artifact: Moonshot ships Kimi K3's open weights July 27 — the largest open model ever, 2.8T parameters — regardless of any policy decision. The show's dive reframed 'open' at this scale as non-local: a 1.4TB download needing ~18+ accelerators to load, so capability moves to whoever can host it, not to the edge.",
+      "arc": "From a floated import ban and a named distillation accusation, to a formal industry coalition letter with the frontier labs split, to the actual release landing before Washington resolves anything — the policy is now visibly chasing a technology that ships on its own timeline."
+    },
+    {
+      "name": "Custom AI silicon vs Nvidia",
+      "status": "Kimi K3's MXFP4 four-bit format runs natively only on Nvidia Blackwell and AMD MI400, tying the largest open release directly to the two newest accelerator lines — reinforcing this week's AMD-Anthropic deal and the CUDA-moat deep dive that the contested asset is the software/hardware stack, not the model file.",
+      "arc": "As open models chase the frontier in size, the openness of the weights and the narrowness of the hardware that can run them advance together — 'more open' and 'less reachable' turn out to be the same motion."
+    }
+  ],
+  "repeat_coverage": [
+    {
+      "story": "Kimi K3 open weights",
+      "repeat_of": "2026-07-17 (Kimi K3 announcement: hosted API, weights promised by July 27)",
+      "new_development": "The weights actually ship tomorrow, and tonight's coverage is the release reality — MXFP4 at 1.4TB and the ~18+ accelerators it takes to run — not the earlier announcement."
+    }
+  ],
+  "dives": [
+    {
+      "story": "Kimi K3: the largest open model ever, and why 'open' no longer means local",
+      "why_it_matters": "Anyone weighing whether to adopt an open frontier model should internalize that at 2.8T parameters and 1.4TB in four-bit, the weights being free changes almost nothing for them — it takes ~18+ high-end accelerators just to load, runs only on Nvidia Blackwell / AMD MI400, and most 'adopters' will rent it; the openness buys host price-competition, data residency, and researcher access, not a model on your own machine."
+    },
+    {
+      "story": "AREX: an answer is cheaper to check than to find",
+      "why_it_matters": "Anyone building agent systems should take the mechanism even if the benchmark numbers are generous: because verifying a candidate decomposes into cheap constraint-wise checks, spending compute on verify-and-retarget instead of regenerate lets a modest 122B/10B-active model match much larger frontier systems on deep-research tasks — the ablations (removing the outer loop drops BrowseComp 82.5->69.8) are the load-bearing evidence."
+    }
+  ],
+  "lore": []
+}
