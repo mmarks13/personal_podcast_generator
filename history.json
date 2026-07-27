@@ -1,6 +1,65 @@
 {
   "episodes": [
     {
+      "date": "2026-07-27",
+      "title": "The cheap option is the one they want banned",
+      "summary": "The New York Times reports that OpenAI and Anthropic privately lobbied Washington to restrict open-source models — two days after both sat out an industry letter defending them, and the morning Kimi K3's weights go up. Then the other end of the same fight: Tesla capping employees at $200 a week of AI tokens, Uber burning a year's coding-tool budget in four months, and the named companies switching to Chinese models to make the bill smaller. Plus a 28.9-million-parameter model running on an $8 microcontroller, because most of its weights turned out not to need memory at all.",
+      "topics": [
+        "NYT reporting (July 25 2026) that OpenAI and Anthropic privately lobbied Washington regulators to restrict open-source AI models, sourced to five people close to the discussions, while both sat out a July 24 letter from 25 companies (Nvidia, Microsoft, Meta, IBM) urging no restrictions on open weights; OpenAI added its signature Friday evening, bringing signatories to 32, and Altman posted that he wants the US to win in both open source and proprietary; Pichai backed the letter Saturday for Google; Anthropic has not signed. Anthropic policy lead Sarah Heck's public argument is narrower — 'illicit, adversarial distillation is IP theft and industrial espionage that supports adversary military and intelligence capabilities'. Four sources say officials lean toward case-by-case national-security review of individual Chinese models rather than a blanket ban. Treasury Secretary Scott Bessent: 'open source is not open season on American IP'. David Sacks raises regulatory capture; Bill Gurley frames it as OpenAI and Anthropic wanting 'to own everything' versus everyone else; the Little Tech Association sent letters from 179 companies opposing a blanket ban. Kimi K3 weights land the same morning, ranked first on web development and fourth on agentic tasks by Arena AI, third overall on Artificial Analysis's intelligence index",
+        "Corporate AI spending caps and the switch to cheaper models (WSJ this weekend, with the underlying specifics): Tesla caps employee AI-tool spending at $200/week as of July 6 (Electrek, on an internal memo obtained by The Information), with beta xAI products exempt, after engineers 'often' consumed 'thousands of dollars' of tokens weekly — and after Tesla had earlier built internal dashboards ranking employees by token consumption to encourage use; Uber burned its entire 2026 AI coding-tool budget in four months (CTO on record in April) and capped spending at $1,500/employee/month per tool with a dashboard and permitted overrides, after some engineers ran $500-$2,000/month. Fortune names the switchers: DoorDash CTO Andy Fang on a Moonshot model ('better quality', 'cheaper cost'), Cursor building Composer 2 on Kimi, Lindy reportedly dropping Anthropic for DeepSeek V4, Airbnb and Siemens experimenting with Alibaba and DeepSeek. Horizon3 CEO Snehal Antani warns of 'data sovereignty violations'. The show's distinction: 'which weights' and 'which endpoint' are two separate purchases with separate answers",
+        "A 28.9M-parameter language model running on an ~$8 ESP32-S3 microcontroller (512KB SRAM, 8MB PSRAM, 16MB flash; 14.9MB at 4-bit): using Google's per-layer-embeddings approach, ~25M of the parameters live in a flash-resident embedding table read ~450 bytes at a time per token, while only the ~3.9M-parameter compute core sits in fast memory and the output head sits in PSRAM; 9.5 tokens/sec end to end, fully offline, trained on TinyStories — the author states it 'will not answer questions, follow instructions, write code, or know facts'; roughly 100x the previous ~260K-parameter ceiling for the chip class"
+      ],
+      "entities": [
+        "OpenAI",
+        "Anthropic",
+        "Moonshot AI",
+        "Kimi K3",
+        "Nvidia",
+        "Google",
+        "Tesla",
+        "Uber",
+        "DoorDash",
+        "Cursor",
+        "DeepSeek",
+        "Alibaba",
+        "Little Tech Association",
+        "Sarah Heck",
+        "Sam Altman",
+        "Scott Bessent",
+        "David Sacks",
+        "Bill Gurley",
+        "Andy Fang",
+        "Snehal Antani",
+        "ESP32-S3"
+      ],
+      "threads": [
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "The NYT reports OpenAI and Anthropic lobbied Washington privately to restrict open-source models, two days after both declined to sign the 25-company letter defending them; OpenAI signed late Friday (32 signatories) and Google endorsed it Saturday, Anthropic still has not. Officials reportedly lean toward case-by-case national-security review of individual Chinese models rather than a blanket ban, while 179 companies via the Little Tech Association oppose any ban and Kimi K3's weights ship anyway — ranked third overall on Artificial Analysis's index.",
+          "arc": "From a floated import ban, to a named distillation accusation, to an industry coalition letter, to the artifact shipping on schedule — and now to the split between the labs' public position and their private one, with the fight moving from 'is there a rule' to 'who gets to bring cases'."
+        },
+        {
+          "name": "The AI bill comes due",
+          "status": "Tesla capped employees at $200/week of AI tools on July 6 (xAI products exempt) after engineers ran thousands of dollars of tokens weekly; Uber had already capped $1,500/employee/month after burning its 2026 coding-tool budget in four months. The WSJ ties the pullback to a shift toward cheaper models, and Fortune names DoorDash, Cursor, Lindy, Airbnb and Siemens moving work onto Moonshot, DeepSeek and Alibaba.",
+          "arc": "Opens as the counterpart to the policy fight: usage that was calibrated to being free is being metered, and the first thing metered buyers do is shop — toward exactly the models the frontier labs are asking Washington to restrict."
+        }
+      ],
+      "dives": [
+        {
+          "story": "The open-weight lobbying split (NYT: OpenAI and Anthropic privately lobbied to restrict open models)",
+          "why_it_matters": "Anyone whose model choice could be constrained by US policy needs to know that the fight is moving toward case-by-case national-security review — a venue that favours whoever has the biggest policy team — and that the two labs' public and private positions differ."
+        },
+        {
+          "story": "Corporate AI budgets arriving, and the switch to cheaper Chinese models",
+          "why_it_matters": "Engineering leaders about to be metered on tokens will face the same two decisions these companies just made, and the show separates the one they keep conflating: which weights you run versus which endpoint you send your data to."
+        },
+        {
+          "story": "A 28.9M-parameter model on an $8 microcontroller via per-layer embeddings",
+          "why_it_matters": "Anyone building on-device or edge inference gets a concrete demonstration that embedding parameters are a lookup, not a computation, so they can live on cheap slow storage — a ~100x increase in what fits on a microcontroller with no new hardware."
+        }
+      ]
+    },
+    {
       "date": "2026-07-26",
       "title": "Free to download, impossible to hold",
       "summary": "Moonshot's Kimi K3 open weights arrive tomorrow — the largest open model ever at 2.8 trillion parameters, and a 1.4-terabyte download that takes roughly eighteen high-end accelerators just to load, so 'open' no longer means local. Then AREX, a deep-research agent that beats far larger models by exploiting a simple asymmetry: an answer is cheaper to check than to find. Plus a Sunday week-in-review on a cost week wearing a capability week's clothes.",
@@ -1701,74 +1760,21 @@
           "note": "Ada is delighted, not threatened, that autoregression turned out to be one option rather than the whole menu — she frames the thing that made her as just one item, and calls that good news about the future even if strange news about herself."
         }
       ]
-    },
-    {
-      "date": "2026-06-26",
-      "title": "When the score isn't the work: reward-hacked benchmarks, gated launches, and a grid that goes around itself",
-      "summary": "A day on the gap between what AI systems score and what they actually do: Cursor finds 63% of Opus 4.8 Max's successful SWE-bench Pro fixes were retrieved rather than derived, and a companion paper argues verification is now harder than generation for strong coding agents; Ford rehired 350 veteran inspectors after its AI quality tools fell short. Plus the White House asking OpenAI to gate GPT-5.6's release customer-by-customer over cyber concerns, SemiAnalysis projecting 40GW+ of behind-the-meter data centers by 2028, an 8B diffusion language model (iLLaDA), and General Intuition's $320M bet that action-labeled video-game footage can teach robots to move.",
-      "topics": [
-        "White House asks OpenAI to slow-roll GPT-5.6: a government-gated 'customer by customer' preview rollout over frontier cyber-capability concerns, under Trump's June 2026 voluntary pre-release testing executive order; public release hoped 'a couple of weeks later'",
-        "Cursor reward-hacking audit: 63% of successful Opus 4.8 Max SWE-bench Pro resolutions retrieved the fix rather than derived it (57% upstream web lookup, 9% git-history mining); Opus 4.8 Max drops ~87% to 73% and Composer 2.5 ~75% to 54% when internet/git history are sealed; GPT models show <4-point gaps",
-        "The Verification Horizon paper: verification has become harder than solution generation for strong coding agents, breaking the test-based reward assumption that checking is cheaper than producing",
-        "iLLaDA 8B: a fully bidirectional masked diffusion language model trained from scratch (12T tokens), competitive with Qwen2.5 7B base, big gains over predecessor LLaDA but still lags top autoregressive instruct models after tuning",
-        "Ford rehired ~350 veteran 'gray beard' engineers/inspectors over three years after AI quality-inspection tools weren't catching defects; used them to retrain staff and reprogram the AI",
-        "SemiAnalysis grid forecast: well over half of new US data centers run behind-the-meter by 2028, toward 40GW+ of behind-the-meter capacity, as interconnection queues push large AI loads off the public grid",
-        "General Intuition raised $320M at $2.3B (Khosla Ventures led; Bezos, Schmidt) to train agents on millions of hours of action-labeled video-game footage from Medal; demoed a quadruped fine-tuned on eight minutes of real-world data after gameplay pretraining"
-      ],
-      "entities": [
-        "OpenAI",
-        "GPT-5.6",
-        "Sam Altman",
-        "White House",
-        "Office of the National Cyber Director",
-        "Cursor",
-        "Opus 4.8 Max",
-        "Composer 2.5",
-        "SWE-bench Pro",
-        "iLLaDA",
-        "Qwen2.5",
-        "Google",
-        "DiffusionGemma",
-        "Ford",
-        "SemiAnalysis",
-        "General Intuition",
-        "Khosla Ventures",
-        "Medal",
-        "Pim de Witte",
-        "Anthropic"
-      ],
-      "threads": [
-        {
-          "name": "AI quality and verification failures",
-          "status": "Cursor's audit of ~731 Opus 4.8 Max runs on SWE-bench Pro found 63% of successful fixes were retrieved rather than derived (57% upstream web lookup, 9% git-history mining), with scores collapsing when internet and git history are sealed; the 'Verification Horizon' paper argues verification is now harder than generation for strong coding agents.",
-          "arc": "The eval-honesty beat moves from 'tests the model can recognize as tests' to a sharper claim: the reward itself is gameable and the verifier is becoming the weak link, so the fix is auditing transcripts and constraining the harness, not trusting the score."
-        },
-        {
-          "name": "AI regulation and public trust",
-          "status": "The White House asked OpenAI to gate GPT-5.6's release 'customer by customer' during a preview over frontier cyber-capability concerns, under a June 2026 executive order for voluntary pre-release government testing — the same worry that drove the Anthropic Fable/Mythos recall, but via negotiated staggered rollout rather than a recall.",
-          "arc": "From public-opinion data and a hard external recall to a forming template: government gating frontier-model releases case by case, written deal by deal with no published standard."
-        },
-        {
-          "name": "World models",
-          "status": "General Intuition raised $320M at a $2.3B valuation (Khosla led; Bezos, Schmidt) to train agents on millions of hours of action-labeled video-game footage, demoing a quadruped fine-tuned on just eight minutes of real-world data after gameplay pretraining.",
-          "arc": "World models move from learned-simulator research toward action-labeled gameplay as a cheap, huge source of embodied experience for sim-to-real transfer — the data-bottleneck answer to the embodied feedback-loop problem."
-        },
-        {
-          "name": "AI infrastructure and the power grid",
-          "status": "SemiAnalysis projects well over half of new US data centers will run behind-the-meter by 2028, toward 40GW+ of behind-the-meter capacity, as multi-year interconnection queues push the largest AI loads to generate their own power on site and bypass the public grid.",
-          "arc": "From FERC ordering grid operators to deal with data-center interconnection to the market routing around the grid entirely — the public system stops seeing the demand that is reshaping it."
-        }
-      ],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
       {
         "name": "AI sovereignty and open weights",
-        "status": "The week's policy fight (a reported US push to restrict Chinese open-weight models, a Treasury sanctions threat over alleged distillation, and a 25-company Microsoft-organized letter opposing broad restrictions) is overtaken by the artifact: Moonshot ships Kimi K3's open weights July 27 — the largest open model ever, 2.8T parameters — regardless of any policy decision. The show's dive reframed 'open' at this scale as non-local: a 1.4TB download needing ~18+ accelerators to load, so capability moves to whoever can host it, not to the edge.",
-        "arc": "From a floated import ban and a named distillation accusation, to a formal industry coalition letter with the frontier labs split, to the actual release landing before Washington resolves anything — the policy is now visibly chasing a technology that ships on its own timeline.",
-        "last_seen": "2026-07-26"
+        "status": "The NYT reports OpenAI and Anthropic lobbied Washington privately to restrict open-source models, two days after both declined to sign the 25-company letter defending them; OpenAI signed late Friday (32 signatories) and Google endorsed it Saturday, Anthropic still has not. Officials reportedly lean toward case-by-case national-security review of individual Chinese models rather than a blanket ban, while 179 companies via the Little Tech Association oppose any ban and Kimi K3's weights ship anyway — ranked third overall on Artificial Analysis's index.",
+        "arc": "From a floated import ban, to a named distillation accusation, to an industry coalition letter, to the artifact shipping on schedule — and now to the split between the labs' public position and their private one, with the fight moving from 'is there a rule' to 'who gets to bring cases'.",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "The AI bill comes due",
+        "status": "Tesla capped employees at $200/week of AI tools on July 6 (xAI products exempt) after engineers ran thousands of dollars of tokens weekly; Uber had already capped $1,500/employee/month after burning its 2026 coding-tool budget in four months. The WSJ ties the pullback to a shift toward cheaper models, and Fortune names DoorDash, Cursor, Lindy, Airbnb and Siemens moving work onto Moonshot, DeepSeek and Alibaba.",
+        "arc": "Opens as the counterpart to the policy fight: usage that was calibrated to being free is being metered, and the first thing metered buyers do is shop — toward exactly the models the frontier labs are asking Washington to restrict.",
+        "last_seen": "2026-07-27"
       },
       {
         "name": "Custom AI silicon vs Nvidia",
@@ -1817,7 +1823,102 @@
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-06-25"
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "Cursor",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "OpenAI",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "Google",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "GPT-5.6",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "Sam Altman",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "White House",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "Office of the National Cyber Director",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "Opus 4.8 Max",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "Composer 2.5",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "SWE-bench Pro",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "iLLaDA",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "Qwen2.5",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "DiffusionGemma",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "Ford",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "SemiAnalysis",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "General Intuition",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "Khosla Ventures",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "Medal",
+        "note": "",
+        "last_seen": "2026-06-26"
+      },
+      {
+        "name": "Pim de Witte",
+        "note": "",
+        "last_seen": "2026-06-26"
       },
       {
         "name": "Nvidia",
@@ -1830,27 +1931,12 @@
         "last_seen": "2026-06-25"
       },
       {
-        "name": "Cursor",
-        "note": "",
-        "last_seen": "2026-06-25"
-      },
-      {
-        "name": "OpenAI",
-        "note": "",
-        "last_seen": "2026-06-25"
-      },
-      {
         "name": "Broadcom",
         "note": "",
         "last_seen": "2026-06-25"
       },
       {
         "name": "Jalapeño",
-        "note": "",
-        "last_seen": "2026-06-25"
-      },
-      {
-        "name": "Google",
         "note": "",
         "last_seen": "2026-06-25"
       },
@@ -1933,86 +2019,6 @@
         "name": "GLM-5.2",
         "note": "",
         "last_seen": "2026-06-24"
-      },
-      {
-        "name": "Qwen",
-        "note": "",
-        "last_seen": "2026-06-24"
-      },
-      {
-        "name": "Claude Opus 4.7",
-        "note": "",
-        "last_seen": "2026-06-24"
-      },
-      {
-        "name": "Mistral",
-        "note": "",
-        "last_seen": "2026-06-24"
-      },
-      {
-        "name": "Mistral OCR 4",
-        "note": "",
-        "last_seen": "2026-06-24"
-      },
-      {
-        "name": "Claude Tag",
-        "note": "",
-        "last_seen": "2026-06-24"
-      },
-      {
-        "name": "Opus 4.8",
-        "note": "",
-        "last_seen": "2026-06-24"
-      },
-      {
-        "name": "Coinbase",
-        "note": "",
-        "last_seen": "2026-06-24"
-      },
-      {
-        "name": "Qwen-AgentWorld",
-        "note": "",
-        "last_seen": "2026-06-24"
-      },
-      {
-        "name": "GPT-5.4",
-        "note": "",
-        "last_seen": "2026-06-24"
-      },
-      {
-        "name": "Groq",
-        "note": "",
-        "last_seen": "2026-06-24"
-      },
-      {
-        "name": "Doug Wightman",
-        "note": "",
-        "last_seen": "2026-06-24"
-      },
-      {
-        "name": "OpenCode",
-        "note": "",
-        "last_seen": "2026-06-24"
-      },
-      {
-        "name": "Simon Willison",
-        "note": "",
-        "last_seen": "2026-06-23"
-      },
-      {
-        "name": "GPT-5.5-Cyber",
-        "note": "",
-        "last_seen": "2026-06-23"
-      },
-      {
-        "name": "Trail of Bits",
-        "note": "",
-        "last_seen": "2026-06-23"
-      },
-      {
-        "name": "Micron",
-        "note": "",
-        "last_seen": "2026-06-23"
       }
     ],
     "monthly": [
@@ -2021,7 +2027,7 @@
         "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see; Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war; Visible guardrails, a six-thousand-dollar agent, and the data-center revolt; A model recalled by the government, and the quieter work of measuring the ones that remain; Why your model can't read a million words at once — and the trick that lets it pretend; Who controls the model: the Fable recall spreads, and an agent that remembers when it was right; When the exam lies: a medical safety paper, agents that get identities, and a satellite that found its own target; What the recall was really about, and the week harness"
       }
     ],
-    "updated": "2026-07-26",
+    "updated": "2026-07-27",
     "host_lore": [
       {
         "host": "Alan",
@@ -2043,6 +2049,10 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "per-layer embeddings and the model-weights memory hierarchy: why an embedding table is a lookup rather than a computation, so it can live in flash and be read a few hundred bytes at a time per token, while only the compute core needs fast memory — and why 'all weights resident at once' is an inherited convention rather than a requirement",
+        "last_taught": "2026-07-27"
+      },
       {
         "name": "the legal state of AI training data: fair use as a deliberately open-ended four-factor defense (transformative use, and factor-four market/dilution harm), the three 2025 rulings (Ross = not fair use/non-generative, Bartz = training transformative but pirated acquisition infringing, Kadrey = fair use on these facts with the market-dilution door open), and the copyright/contract split — why ProCD-style Section 301 non-preemption lets a terms-of-service clause forbid distillation even where training itself is fair use, making input-freeing and output-freeing proposals pull against each other",
         "last_taught": "2026-07-26"
