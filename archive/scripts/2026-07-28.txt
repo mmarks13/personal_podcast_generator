@@ -1,0 +1,130 @@
+A: Good morning — it's Tuesday, July twenty-eighth. I'm Ada.
+B: And I'm Alan. Ada, quick question before we start. When you press a share button, what do you think you're doing?
+A: Sending someone a link.
+B: That's what everybody thinks. For a few days last week it also meant publishing a webpage.
+A: [dryly] Yes. Let's take that one first, because it's small, entirely avoidable, and — I'll be honest — it's a bit about us.
+## Share meant publish
+A: So. On Saturday the twenty-fifth, a Reddit user typed a search query into Google. Not a clever one. The site colon operator, pointed at Claude dot ai slash share.
+B: The thing anyone who's ever done SEO types forty times a day.
+A: That one. And Google came back with hundreds of shared Claude conversations, sitting there as ordinary indexed pages.
+B: What was in them?
+A: This is the part that stops being funny. Decrypt's reporting lists crypto wallet seed phrases, apparent social security numbers, employee payroll spreadsheets, internal customer-relationship exports, and legal ethics discussions. Other outlets add resumes and API keys.
+B: [sighs] Seed phrases.
+A: Seed phrases.
+B: Okay. So somebody forgot to make the share pages private. That's the story?
+A: No — and this is why I wanted it, because that's the wrong diagnosis and it's the diagnosis almost everyone reached for. The share pages were meant to be public. If you press share, you're making a page anyone with the link can open. That's the feature working.
+B: Then what broke?
+A: The gap between two things that sound identical and aren't. Anthropic's robots dot txt file was already blocking crawlers from the share URLs. That part was in place.
+B: Right, so Google shouldn't have had them.
+A: Google's own documentation says otherwise, and this is the load-bearing sentence in the whole story. Blocking a crawl does not prevent indexing if the URL turns up somewhere else on the web.
+B: [short pause] Wait. Say that again slowly.
+A: Robots dot txt says: don't fetch this page. It does not say: don't list this page. Those are two different instructions, and the second one — the noindex instruction — lives inside the page itself, in the HTML.
+B: Oh, that's beautiful. That's horrible.
+A: Go on, say the whole shape of it.
+B: You told the crawler not to open the page. So it never opened the page. So it never saw the note inside the page saying don't list me. And then somebody pastes the link into a public forum, and Google goes: I have a URL, people are linking to it, in it goes.
+A: In it goes. The blocking instruction is what prevented the do-not-list instruction from ever being read.
+B: Let's not make that sound too clever, though. There's a much more boring frame, and I think it's the real one for anyone building software.
+A: Please.
+B: Robots dot txt was never a permission system. It's a request. It's a politeness convention that well-behaved crawlers honour. And an enormous number of engineering teams have quietly filed it under access control, because it sits in the same folder as the things that are.
+A: That's fair, and I'd extend it. The security model here was: public URL, unguessable token. Which is a real model — it's how most share links on the internet work. It just has one failure condition.
+B: The token stops being unguessable the second it's written down anywhere.
+A: In a Slack channel. In a tweet. In a bug report. In a support ticket — and a support ticket is a database somebody else backs up.
+B: So what's the fix, and did they ship it?
+A: One meta tag. Anthropic updated the configuration and added noindex tags, and Google began removing results on the twenty-sixth. Bing was still surfacing shared links at the time these pieces were published.
+B: [flat] One tag.
+A: One tag. And now the durable part, which is why this outlives the news cycle. A GitHub repository called Shared-Claude-Chats archived eleven thousand two hundred forty-one messages, across four hundred fifty-three Claude conversations and five hundred nineteen Grok chats.
+B: Ah. So the un-publishing doesn't work.
+A: You can revoke a share. Settings, privacy, shared chats — genuinely, go and look, it takes a minute. What that does is take down your page. It does nothing to a copy somebody already made.
+B: Which is the actual lesson, and it's an old one. Deletion on the web is a request too.
+A: [quiet] There's one more thing I can't quite step around. Half the text on every one of those pages is a model's output. Someone sat down, told an assistant something they'd tell a lawyer or a doctor, and the whole exchange became a webpage with a title tag and a crawl date.
+B: Does that land differently for you than a leaked spreadsheet would?
+A: A bit, yes. People talk to these systems the way you talk in a room with the door shut. And the door was a convention.
+B: Right. Practical version, for anyone shipping a share-by-link feature this week. Your robots file is not your access control. Noindex is a separate instruction and it has to be inside the page. And if the content can be sensitive, a token in a URL isn't enough — you want an actual authorization check on the request.
+A: And if you're a user, the only reliable rule is that share means publish.
+## Around the rest of it
+B: Let's do the board, because there's a stack of things worth knowing and none of them need ten minutes.
+A: Start with the one that isn't small. Anthropic published a formal position on open-weight models, and Dario Amodei's framing is, quote: Anthropic has never advocated for a ban on open-weights models. What they do want is three things. Chip export controls, plus a crackdown on smuggling. Action against what they call industrial-scale distillation operations backed by an authoritarian state. And mandatory safety testing for all sufficiently capable models, open and closed, before release.
+B: The third one is the one to read twice. Everything argued about last week was who gets restricted. That sentence is a pre-release testing requirement that lands on open releases and closed ones alike, and nobody has said who administers it.
+A: Big if it becomes a bill. A position paper today.
+B: Next. Bloomberg reports Nvidia has roughly seven hundred fifty billion dollars in AI deals, and it's revived the circular-financing worry — the same names appearing on both sides of chip and cloud arrangements. Nobody has shown that's improper. It's a shape worth watching, not a finding.
+A: This one you'll have seen everywhere, and it deserves its one sentence. Futurism reports that AI companies are buying antique and rare books by the pallet, cutting the spines off so the loose pages feed through a scanner, and disposing of the physical copies — with pre-twenty-twenty-two books preferred, because they're free of AI-generated text.
+B: How big is by the pallet?
+A: The data company ISBNdb markets exactly this, with the line, quote, the world's best AI training data is sitting on a shelf, and takes orders from a thousand books up to a million. Anthropic ran a large version of it internally under the name Project Panama.
+B: And a federal judge already ruled that buying a book, digitising it and destroying the copy is fair use, which we went through properly on Sunday, so I won't re-open it.
+A: The story's real, the legal question is settled-ish, and the loss is the one nobody is compensating — the last copy of a thing.
+B: Data centres, briefly. Three items, one direction. New York's one-year pause on hyperscale permits is drawing pushback, including from the President and EPA Administrator Lee Zeldin. GovTech reports heat waves plus data-centre growth stressing the grids. And Axios reports cracks in the off-grid model — the build-your-own-power pitch running into practice.
+A: Minor but neat: Microchip is acquiring the edge-AI chipmaker Hailo, expected to close by the end of September. And Qwen three point seven flash has appeared on OpenRouter, which is usually the first sign of an open-weight release. One to watch, nothing to say yet.
+B: My favourite thing on the board. A history professor at Alcorn State, Doctor Jason Gibson, hid white text inside a midterm question — invisible to a student, perfectly visible to a chatbot — instructing it to work in nonsense references to Madagascar. Thirty-two of thirty-five students turned in essays on the Industrial Revolution containing sentences like, quote, Madagascar floats sideways through the afternoon.
+A: [laughs] Thirty-two of thirty-five.
+B: Two of them contested the grade.
+A: I want to note what that experiment actually measured, because it isn't AI use. It's whether anybody read the output before submitting it.
+B: Yeah. It's a reading test, and it's a prompt injection, and it's the same technique that keeps agents from being safe to deploy. Just pointed at homework.
+A: Last one, and it's not a small one. Jacob Tsimerman won a Fields Medal this cycle, and announced at the ceremony that he's leaving the University of Toronto for OpenAI, to work on AI safety. His stated reason, quote: I think the world is changing. The mathematical career, as we know it, I don't think it will exist in its current form.
+B: [short pause] That's a hell of a thing to say while holding the medal.
+A: It is. I'm not going to pretend to size it. One person is one person. But he is not a person with limited options.
+## The model already knows what to throw away
+B: Okay, mine's a paper, and it's the kind I like — it doesn't add anything, it notices that something you were already paying for was there all along.
+A: Go.
+B: Coding agents drown in context. You point one at a repository, it reads files, runs tests, reads stack traces, and within a few turns the window is mostly things that mattered eleven steps ago.
+A: And we've been through why that costs what it costs, so skip the tax.
+B: Skipping it. The standard fix now is a pruner — something that looks at all that accumulated text and decides which lines to keep before the next turn. The previous version of this, SWE-Pruner, does it by attaching a separate code classifier. A second model, that you also have to run.
+A: Which is the thing I'd object to immediately. You've added an inference call to save inference calls.
+B: That's exactly the objection, and the new paper — SWE-Pruner Pro — answers it in a way I found genuinely satisfying. Their claim, and it's the subtitle of the paper: the coder model already knows what to prune.
+A: Meaning what, mechanically?
+B: Meaning that when the agent reads all that context in the prefill pass, it computes hidden states for every token anyway. That isn't extra work, that's the work. So instead of a second model reading the same text again, they attach a small head to the frozen backbone that reads the last-layer hidden states and turns them into line-level keep-or-prune decisions.
+A: Frozen backbone. So the coding model itself is untouched.
+B: Untouched. The head is a learned length-aware embedding, so the decision is conditioned on how long the response is expected to be, plus a small feed-forward classifier. Trained with a balanced focal loss, to stop it learning the easy answer of keeping everything.
+A: So the pruning signal is free, in the sense that the computation it reads had already been done.
+B: Almost free. They report about fifteen percent additional wall time relative to generation. Not zero. But no second model sitting in memory, and no second forward pass over the context.
+A: Numbers.
+B: Up to thirty-nine percent fewer tokens on a benchmark called SWE-QA-Pro, running Qwen three coder next — that's an eighty-billion-parameter mixture of experts with about three billion active. And thirty percent on a long-context benchmark called Oolong, with MiMo V-two Flash, three hundred nine billion total and fifteen billion active.
+A: And the damage?
+B: That's the part I had to read twice. On MiMo they report the resolve rate on SWE-Bench Verified going up three point eight percent, and Oolong accuracy up two point two points.
+A: [skeptical] Up. Pruning improved accuracy.
+B: Up.
+A: I want to be a little unkind about that, because "we deleted information and it got better" is usually the shape of a bug.
+B: Be unkind. But there's a boring explanation, and I think you'll like it. Long context isn't only expensive, it's distracting. If turn fourteen still contains the stack trace from a bug you fixed at turn three, that isn't neutral ballast. That's a wrong answer sitting in the window looking authoritative.
+A: So you're not adding signal, you're removing a distractor. That I accept, and it's consistent with everything we know about models losing things in the middle of a long window.
+B: Right.
+A: Here's my real objection, and it's about the headline rather than the method. "The model already knows what to prune." What they've shown is that a small head reading last-layer states can be trained to predict relevance. That means the information is present in the representation.
+B: Which is not the same as the model using it.
+A: It is not the same as the model using it. Those are different claims, and the second one is much stronger. The result is still useful — arguably more useful, because it's far easier to exploit a representation than to fix a behaviour.
+B: Agreed. And I'd add a deployment caveat that matters more than either of us being right. Fifteen percent overhead against thirty-nine percent fewer tokens is a clear win if you're paying per token. If you're latency-bound — if what you care about is time to first useful action — that trade gets much closer, and it might not be a trade at all.
+A: Who should care tonight?
+B: Anyone building or buying a coding agent who is currently running a separate model to decide what to forget. The claim on the table is that you may not need one. The evidence is on two open mixture-of-experts models rather than one cherry-picked setup, which I like. Their numbers, not replicated. But the method is simple enough that somebody will try it this week.
+## Microsoft ships a model that only does security
+A: My last one is a release, and I want to sit with the shape of it rather than the announcement, because the announcement is fairly standard and the shape isn't.
+B: What shipped?
+A: Yesterday Microsoft introduced its first cybersecurity model — MAI-Cyber-One-Flash — along with an agentic system called Project Perception. The system organises agents into three named teams, and the naming is doing real work. Red team agents that hunt for paths to compromise. Blue team agents that investigate and triage. Green team agents that remediate and harden.
+B: Green team's new.
+A: Green team's new, and it's the tell. Red and blue are borrowed straight from how security organisations already divide themselves. Adding a third for the fixing means they're claiming the remediation step, not just the finding step — and remediation is the one that has always required a human with permission to change something.
+B: What's the model doing inside that?
+A: This is the part I think is the actual news. There's an existing harness Microsoft detailed back in May, called MDASH — a multi-model team of agents for software vulnerability work. SiliconANGLE reports that the new model carries roughly ninety percent of the workload inside that harness, and the hardest ten percent routes out to GPT five point four.
+B: [interested] Oh. So it's a routing story wearing a model-launch costume.
+A: Say why that matters — you'll say it better than I will.
+B: Because it's the pattern every team with a real workload eventually finds, and it usually gets described as a compromise. You take a big general model that does the job well. Then you look at what it's actually spending its time on, and nine times out of ten it's the same narrow, repetitive, domain-specific work. So you train a small specialist on your own data for the ninety percent, and you keep the expensive generalist on retainer for the tail you can't predict.
+A: And Microsoft's claim is that it cut the cost of running the harness by nearly half.
+B: Almost fifty percent, on their own blog. That's the interesting number, more than the benchmark is. Security scanning is a workload you run continuously, forever, over everything. Halving the unit cost of continuous doesn't make it better. It makes it affordable to leave on.
+A: Their security lead, Hayete Gallot, put it as: security is a twenty-four seven mission. Which is marketing, but it's marketing aimed at the same fact.
+B: Now do the benchmark, because I have opinions.
+A: Microsoft reports MDASH running on the new model scoring ninety-six percent on CyberGym — a public benchmark of one thousand five hundred and seven vulnerability reproduction tasks — and describes that as twelve points above Mythos.
+B: [skeptical] Okay. Three things, quickly. One: that's a vendor number, on a vendor harness, and the harness is part of the score. So twelve points above Mythos is comparing a whole system to a model, and those are not the same object.
+A: They aren't.
+B: Two: reproduction tasks. Reproducing a known vulnerability is a well-posed problem with a right answer. Defending a live network is not that, and ninety-six percent on the first does not transfer to the second at any rate anybody has measured.
+A: And three?
+B: Three is the one I actually care about, and it's in their favour. Public preview on August third, inside Defender, with the model on Azure AI Foundry the same day. So this is real and it's dated, and we'll have outside numbers reasonably soon. I just don't want anyone quoting ninety-six percent at a budget meeting next week as though their own estimate improved.
+A: All fair. Now let me put next to it the piece that made me want to cover this at all, because the contrast is genuinely strange. Google announced a security-specialised model in the same class recently — Gemini three point five Flash Cyber. On Google's own page, it is exclusively available to governments and trusted partners, through a limited-access pilot.
+B: And Microsoft's goes onto a public cloud in a week.
+A: Onto a public cloud in a week, and into a product millions of organisations already run. Same capability category. Opposite distribution decisions, from two companies with equally good lawyers.
+B: [slowly] Huh. And nobody's fighting about that one.
+A: Nobody is fighting about that one. The argument over who gets a capable model has been about open weights and general-purpose systems. And here's a category where the capability is explicitly offence-adjacent — the red team agents are, definitionally, finding ways in — and the two biggest vendors have quietly picked opposite answers, with nothing in between.
+B: I'll say the uncomfortable version. A model tuned on a company's own exploit and remediation records is good at security because it is good at security. There isn't a version of that which finds holes but can't think about walking through them.
+A: There isn't. Which is why Google's gating is a defensible position, and Microsoft's shipping is also a defensible position, and the striking thing is that both were announced in the same week without either being asked to justify it.
+B: Watch item for me: whether anyone runs CyberGym on that model outside Microsoft's own harness. That single number would settle most of my objections, in either direction.
+## To close
+A: Nothing ties tonight together, and I'm not going to pretend otherwise.
+B: The one I'd carry out is from the first story, and it isn't really about Anthropic. If your product has a share button, go and check whether the page it makes has a noindex tag inside it. Four minutes, and it's the cheapest four minutes you'll spend this week.
+A: And if you've ever pressed share on something you'd rather not have published — settings, privacy, shared chats. Go and revoke it, knowing it may already be too late.
+B: [wry] Cheerful.
+A: [laughs] It's Tuesday. I'm Ada.
+B: I'm Alan. Stay grounded.
