@@ -1,0 +1,142 @@
+A: Good morning — it's Wednesday, July twenty-ninth. I'm Ada.
+B: And I'm Alan. No news today — today we take apart one number.
+A: One number that everybody uses and almost nobody unpacks. Parameters.
+B: Here are two facts from the last few days, both real, both stated in parameters. Somebody got a twenty-nine million parameter language model running on an eight-dollar microcontroller. And in Google's own documentation there's a twenty-six billion parameter model that wants fifty-seven point seven gigabytes of memory just to sit there.
+A: And your instinct is that those two numbers are the same kind of number.
+B: My instinct is that one is about two thousand times bigger than the other and that tells me something. And I think you're about to tell me it tells me almost nothing.
+A: [amused] I'm going to tell you it tells you one thing out of at least three, and that the field has known this since twenty-twenty and put the wrong number on the box anyway.
+B: Alright. Let's do it.
+## Where the number came from
+A: So let's start where the parameter count got its authority, because it wasn't arbitrary. In January twenty-twenty, Kaplan and colleagues at OpenAI published "Scaling Laws for Neural Language Models," and it's the paper that made model size feel like a law of physics. Loss falls as a power law in model size, dataset size, and compute — trends they report spanning more than seven orders of magnitude.
+B: That's the paper everybody cites when they say bigger is better.
+A: It is. And here's the part almost nobody quotes. When they define the model size, the thing they call N, the definition in the paper reads — and I'm reading it — "the number of model parameters, excluding all vocabulary and positional embeddings."
+B: [pause] Excluding the embeddings.
+A: Excluding the embeddings. The founding document of parameter-count culture says the embedding table doesn't count.
+B: Okay, why? Was that a convenience thing?
+A: No, it was empirical, and they're explicit about it. They report that if you use the total parameter count including embeddings, the trend gets obscured — performance starts looking like it depends on how many layers you have, separately from how many parameters. Exclude the embeddings and models of different depths collapse onto one clean line.
+B: So the embedding parameters were adding noise to the relationship.
+A: They were adding parameters that weren't behaving like the other parameters. And the formula they give for what does count is simple: N is about twelve times the number of layers times the hidden dimension squared.
+B: Layers times width squared. That's the matrix multiplication part.
+A: That is exactly the matrix multiplication part. The attention projections and the feed-forward blocks. The stuff that does arithmetic on every token.
+B: So the scaling law was never about parameters. It was about parameters that compute.
+A: That's the whole episode in one sentence, and we're four minutes in.
+B: [laughs] Then why is the number on the box the total?
+A: Because the box came later. Once model size became a procurement fact and a marketing fact, the number that got printed was the one you can count without explaining anything. Total parameters is a property of a file. Non-embedding parameters is an argument.
+## What a parameter actually costs
+B: Let me try to make this concrete, because "parameters aren't compute" is a slogan until you cost it out. When I deploy something, a parameter charges me in three separate currencies.
+A: Go.
+B: One: bytes at rest. How much memory does this thing occupy. That's parameters times bits per parameter — and note that's already a second variable, which is why the same model is a different size in sixteen-bit and four-bit.
+A: We did the quantization dive earlier this month, so we'll leave that one at a sentence: bits per weight is a dial, and it means parameter count never determined bytes on its own.
+B: Right. Two: bandwidth. How many bytes do I have to actually read to produce one token. And three: arithmetic. How many multiply-adds per token.
+A: And the reason one number worked for a decade is that in a plain dense transformer, all three of those move together. Every weight is read once per token, and every weight read gets multiplied by something. Parameters, bytes moved, and floating-point operations are locked in step.
+B: They're the same number wearing three hats.
+A: They were. Everything interesting in the last few years has been about prying those hats apart.
+B: And the bandwidth one is the one people underrate. When we did speculative decoding on the Fourth, that was the punchline — generating a token is memory-bandwidth bound, not arithmetic bound. You're not waiting on the math. You're waiting on the weights to arrive.
+A: You're waiting on the weights to arrive. Hold onto that, because it's the hinge for everything that follows.
+## The embedding table is a lookup, not a computation
+A: So. What is an embedding table actually doing.
+B: It turns a token into a vector.
+A: It turns a token identifier into a vector, by looking up a row. That's it. Row seventeen thousand four hundred and two of a big rectangle of numbers. And notice what it doesn't do. It doesn't touch the other rows. It doesn't multiply anything by anything. Its neighbors are irrelevant to it.
+B: Whereas a feed-forward weight matrix — every single number in that matrix participates in every token.
+A: Every number, every token. So consider what that means for the two costs. The feed-forward matrix must be read in full, every token, into fast memory, and multiplied. The embedding table must be findable. One row.
+B: And how lopsided does that get in practice? Because in a big model the embedding table is a rounding error.
+A: In a big model, yes. In a small one it eats the model. Take Gemma three two-seventy — Google's little two hundred seventy million parameter model. Their own launch post breaks it down: one hundred seventy million embedding parameters, because of a large vocabulary, and one hundred million for the transformer blocks.
+B: [surprised] Wait. So the majority of that model is address book.
+A: Roughly sixty-three percent of the parameters in a model called "two hundred seventy million" never multiply anything. The vocabulary is a quarter of a million tokens, which is a deliberate choice — it buys you rare and domain-specific tokens, and Google frames it as a foundation for fine-tuning.
+B: Okay, but here's my builder objection. Those parameters still cost me memory. I still have to ship them. "It's only a lookup" doesn't make the file smaller.
+A: Completely right, and that's the constraint that stood until recently. If your rule is that all weights must be resident in fast memory before you run, then a lookup table is exactly as expensive as a weight matrix.
+B: And that rule is written down where?
+A: [dry] Nowhere. That's the good part.
+## Per-layer embeddings
+A: Which brings us to the technique this week keeps pointing at. Per-layer embeddings — Google's, introduced in Gemma three-n and carried into Gemma four.
+B: Give me the mechanism, not the marketing.
+A: The ordinary design is: one embedding table at the bottom of the stack. You look up your token once, you get a vector, and that vector travels up through every layer being transformed. Per-layer embeddings says: give each decoder layer its own small embedding for every token. Gemma four E-two-B has thirty-five layers and a two hundred sixty-two thousand token vocabulary — so that's thirty-five little tables, one per layer, indexed by the same token identifier.
+B: Thirty-five lookups instead of one. And then what happens to them?
+A: The write-ups of the architecture describe it this way. The token identifiers index the per-layer tables, the normal token embedding gets projected into that same space, and the two contributions are combined and reshaped so each block receives its own layer-specific slice. Then inside the block, after attention and feed-forward have run normally and the feed-forward residual update has happened, the hidden state gates that layer-specific vector — it's projected back to the model's hidden size, normalized, and added as another residual update.
+B: So it's a per-token, per-layer conditioning signal, injected into the residual stream at every floor of the building.
+A: That's a fair summary. Rather than the token's identity being something the network has to carry upward through thirty-five transformations, the token's identity is available fresh at every floor.
+B: [thinking] And the cost profile of that is completely different from making the model bigger the normal way.
+A: That's the pitch, and Google's own description is refreshingly plain: these embedding tables are large, but they're only used for quick lookups, which is why the effective parameter count is much smaller than the total. Gemma four E-two-B is listed as two point three billion effective parameters, five point one billion total when you count the embeddings.
+B: So roughly half the model, by count, is tables.
+A: Roughly half. And now the payoff, which is the sentence I'd underline in the whole documentation set. For Gemma three-n, Google writes that the per-layer embedding data — quote — "can be generated separately, outside the operating memory of the model, cached to fast storage, and then added to the model inference process as each layer runs."
+B: Cached to storage. Not to accelerator memory.
+A: Not to accelerator memory. And they give the arithmetic for E-two-B: standard execution loads over five billion parameters, but with parameter skipping and per-layer-embedding caching, it can be operated with an effective memory load of just under two billion. One point nine one billion is the figure they give.
+B: Okay. Where does the analogy break? Because "you get three billion parameters for free" cannot be true.
+A: It isn't, and there are three qualifications worth stating precisely. First, it isn't free at runtime — you're paying a storage read, per layer, per token. On a machine where storage is slow or contended, that's a real latency line, not a rounding error. Second, it isn't extra capacity out of nowhere — the honest framing is that capacity bought this way is cheaper than making every attention and feed-forward block wider or deeper. It's a trade, not a discovery. And third, it only becomes real if your runtime actually implements the offload.
+B: Say more on the third one, because that's the one that bites people.
+A: On the same Google documentation set that gives you one point nine one billion effective, there's a memory table listing Gemma four E-two-B at eleven point four gigabytes in sixteen-bit.
+B: [flat] Eleven point four.
+A: Eleven point four. Both numbers are Google's, both are honest, and they're answering different questions. One is "how small can this get if everything cooperates." The other is "load it the standard way, and here's your bill."
+B: And I know which one my cluster is going to hand me.
+A: [laughs] You do. And that's the practitioner's version of the whole thesis: "effective parameters" is a claim about a deployment, not a property of a file.
+## The eight-dollar proof
+B: So let's do the demo that made this concrete this week, because it's about the cleanest test of the idea you could ask for.
+A: It really is. A developer put a twenty-eight point nine million parameter language model on an ESP thirty-two S-three — a microcontroller costing about eight dollars.
+B: And microcontroller memory is brutal. Give me the tiers.
+A: Five hundred twelve kilobytes of fast internal memory. Eight megabytes of slower external memory. Sixteen megabytes of flash storage. And the model, at four bits per weight, is fourteen point nine megabytes.
+B: Which is thirty times the fast memory. Under the old rule, that model does not run. Full stop.
+A: Under the old rule it does not run. So, the split, from the project's own writeup: twenty-five of the twenty-nine million parameters sit in a flash lookup table. The dense compute core is about three point nine million parameters, and that's what lives in the fast internal memory — the part that has to do arithmetic every token. The output head and the working memory go in the middle tier.
+B: And the flash reads? Because that's the part I'd expect to kill it.
+A: About six rows read per token. Roughly four hundred fifty bytes.
+B: [beat] Four hundred fifty bytes. Out of a fourteen point nine megabyte model.
+A: Out of a fourteen point nine megabyte model. That ratio is the whole thing. And the reported speed is about nine and a half tokens per second end to end, entirely on the device, no network.
+B: Alright, I have to be the skeptic here, and it's easy, because the developer beat me to it. What can it do?
+A: It was trained on TinyStories — synthetic short stories simple enough for a small model to learn from. It writes short simple stories and mostly keeps them coherent. The stated list of what it can't do: it will not answer questions, follow instructions, write code, or know facts.
+B: So it is not a product. Let's be clear with people. Nobody is shipping a support agent on an eight-dollar chip this year.
+A: Nobody is. And the reason it's still the most instructive thing I read this week is the comparison point: prior language models on that class of chip topped out around two hundred sixty thousand parameters. This is about a hundred times that.
+B: With no new chip.
+A: No new chip, no new training method, no new silicon budget. A hundred-fold jump that came entirely from noticing that a constraint everyone was respecting wasn't a constraint.
+B: Which is the most annoying kind of result, and also the best kind.
+A: [amused] Both.
+B: And this isn't the first swing at that idea. Apple had a paper.
+A: Two and a half years ago now — "LLM in a flash," Alizadeh and colleagues, December twenty-twenty-three. Same problem from the other end: keep parameters in flash, bring them into working memory on demand, with two tricks. Windowing, which reuses recently activated neurons so you don't re-read them. And row-column bundling, which makes each read chunk bigger, because flash is much happier with big sequential reads than with scattered small ones.
+B: And the numbers?
+A: They report running models up to twice the size of the available working memory, with four to five times faster inference on processor and twenty to twenty-five times on graphics hardware, compared to naive loading.
+B: Okay, but those are two genuinely different strategies and I want to name the difference. Apple is rescuing a model that was designed to be resident. The Gemma approach designs the model so that the part living in slow storage never needed to be fast in the first place.
+A: That's exactly the difference, and it's the difference between a workaround and an architecture. One streams weights you wish were closer. The other decides, at design time, which parameters are allowed to be slow.
+## The other direction: mixture of experts
+B: Now put the second decoupling next to it, because otherwise people merge these in their heads and get it backwards.
+A: Mixture of experts. We taught this properly on the eleventh, so — one refresher sentence.
+B: Sparse routing: the model has many expert blocks, and each token only goes through a few of them. So the arithmetic per token is a fraction of the total parameter count.
+A: And the trap is right there in Google's own Gemma four documentation. The twenty-six billion parameter mixture-of-experts model activates only four billion parameters per token during generation — but, their words, all twenty-six billion must be loaded into memory to maintain fast routing and inference speeds.
+B: Fifty-seven point seven gigabytes in sixteen-bit, which is where we started the show.
+A: Which is where we started. Or take DeepSeek V-three, whose model card is admirably blunt about it: six hundred seventy-one billion total parameters, thirty-seven billion activated for each token.
+B: So look at what those two techniques actually do, side by side. Mixture of experts cuts your arithmetic per token and leaves your memory footprint almost untouched. Per-layer embeddings cut your fast-memory footprint and leave the arithmetic in the core untouched.
+A: Opposite trades.
+B: Opposite trades. And both of them get reported to me as "parameters." That's my whole complaint about the unit. It isn't that it's imprecise. It's that two models with the same number can be expensive in completely different ways, and the number doesn't tell me which.
+A: And there's a fourth cost that isn't parameters at all, which we should say out loud, because it wrecks capacity planning more than anything else on this list.
+B: The key-value cache.
+A: The key-value cache. Memory that grows with how much context you're holding. It is not in the parameter count, and on a long-context workload it can be the largest single thing sitting in your accelerator.
+B: I have watched a team size a box off the parameter count, deploy, and fall over at forty thousand tokens of context. Every time, it's the cache.
+## What to ask for instead
+A: So — the practical landing. If parameters is one number pretending to be three, what does the listener ask for instead?
+B: Four numbers, and I'd write these down. One: bytes resident in fast memory, at the precision you're actually going to run. Not parameters. Bytes, at your quantization.
+A: Two.
+B: Bytes read per token. That's your generation speed ceiling. Nobody publishes it, and you can usually estimate it well enough from the architecture.
+A: Three.
+B: Arithmetic per token — active parameters is a decent proxy. That's your batching and throughput story.
+A: And four is the cache.
+B: Four is key-value cache at your real context length, with your real concurrency. Those four numbers tell you what a deployment costs. The parameter count tells you approximately nothing, and I'd say that even more strongly for anything with an "E" or an "A" in its name.
+A: I'd add one more, and it isn't a cost, it's an outcome. On device, the number that matters is energy. Google reports that on a Pixel nine Pro, the four-bit version of that little two hundred seventy million parameter model used zero point seven five percent of the battery over twenty-five conversations.
+B: [interested] That's the honest edge metric. Not size. Battery.
+A: Because that's the thing the person holding the phone actually experiences.
+## Where this could go
+B: Speculation section. Flag it as speculation.
+A: Flagging it. Nothing in this next bit is established — this is where I think the trend points, not a result anyone has reported.
+B: Go.
+A: I think we're at the start of models being designed against a memory hierarchy rather than against a memory budget. Right now an architecture is specified in layers and widths, and the hardware question comes afterward. Per-layer embeddings is the first popular design I've seen where the architecture itself declares which parameters are allowed to be slow.
+B: And if that generalizes, what does a model card look like in two years?
+A: My guess is it stops being one number and becomes a profile. This much has to be hot. This much can be warm. This much can live on a disk and be poked at four hundred bytes at a time. And knowledge in particular strikes me as the thing that wants to be cold — facts are lookups by nature. They don't need to be multiplied against each other.
+B: Now let me push, because I think there's a real limit. Everything you just described works because the access pattern is predictable and sparse. One row, per token, per layer. The moment what you need from slow storage depends on a computation you haven't done yet, you're waiting on storage in the middle of a forward pass, and that's a stall you cannot hide.
+A: That's fair, and it's the honest ceiling on the idea.
+B: The other limit is that the demo we just spent ten minutes on writes bedtime stories. I'd want to see this trade made at a size where capability is genuinely on the line before I believe it's a general architecture rather than a small-model trick.
+A: Also fair. Gemma three-n and Gemma four are that test at a real size, and I'd characterize the evidence there as promising and vendor-reported. Nobody outside Google has audited it.
+B: Agreed. And I notice we got all the way there without arguing.
+A: [laughs] It happens.
+## Wrap
+A: So — the thing to take with you. Parameters counted one thing well, back when memory, bandwidth, and arithmetic all moved together. They don't anymore. Mixture of experts split arithmetic off from memory. Quantization split bytes off from count. Per-layer embeddings split what has to be fast from what merely has to be findable.
+B: And the number on the box still adds all of it up as though it were one thing.
+A: A twenty-nine million parameter model on an eight-dollar chip, and a twenty-six billion parameter model that needs fifty-seven gigabytes, are not two points on the same line. They're answers to different questions that happen to share a unit.
+B: So next time somebody tells you how many parameters their model has, the useful follow-up is: how many of them have to be in fast memory at once, and how many do you actually read per token.
+A: I'm Ada.
+B: I'm Alan. Stay grounded.

@@ -42,6 +42,28 @@
       "lore": []
     },
     {
+      "date": "2026-07-29",
+      "kind": "deepdive",
+      "title": "Parameters aren't compute: the number on the box, taken apart",
+      "summary": "A 28.9-million-parameter model runs on an $8 microcontroller while a 26B model needs 57.7 GB to sit still — both reported in the same unit. This episode takes the parameter count apart into the three costs it used to bundle (bytes resident, bytes read per token, arithmetic per token), traces the split back to Kaplan's 2020 scaling laws (which excluded embeddings from N), and works through per-layer embeddings, mixture-of-experts, and the KV cache as the mechanisms that pried those costs apart.",
+      "topics": [
+        "deep dive: what a parameter actually costs — the parameter count as three separable costs (bytes resident in fast memory, bytes read per token, arithmetic per token), Kaplan's non-embedding N, per-layer embeddings, MoE active-vs-total, and the KV cache as non-parameter memory"
+      ],
+      "entities": [
+        "Google",
+        "Gemma 3n",
+        "Gemma 4",
+        "Gemma 3 270M",
+        "OpenAI",
+        "Apple",
+        "DeepSeek-V3",
+        "ESP32-S3",
+        "TinyStories"
+      ],
+      "threads": [],
+      "lore": []
+    },
+    {
       "date": "2026-07-28",
       "title": "Share meant publish",
       "summary": "A missing noindex tag turned hundreds of shared Claude conversations into indexed Google pages — seed phrases, payroll sheets and all — and the fix is one meta tag, while the archive somebody already made is permanent. Then a coding-agent paper that gets context pruning for almost free by reading the model's own hidden states, and Microsoft's first cybersecurity model, which is really a routing story: a small specialist for ninety percent of the work, GPT-5.4 for the tail, at half the cost.",
@@ -2011,6 +2033,26 @@
       },
       {
         "name": "reentrancy and idempotency as the enabling discipline for massively parallel pipelines: if retrying is always safe, recovery is one line and partial state never has to be reasoned about",
+        "last_taught": "2026-07-29"
+      },
+      {
+        "name": "the parameter count as three separable costs — bytes resident in fast memory (parameters times bits per weight), bytes read per token (the bandwidth bound that sets decode speed), and arithmetic per token — which moved in lockstep only in a plain dense transformer, and the four-number spec sheet (resident bytes at your precision, bytes read per token, active parameters, KV cache at real context) that replaces it",
+        "last_taught": "2026-07-29"
+      },
+      {
+        "name": "why Kaplan et al. (2020) defined model size N as excluding all vocabulary and positional embeddings (N is about 12 times layers times hidden size squared), and reported that including embedding parameters obscures the scaling trend by making loss appear to depend separately on depth",
+        "last_taught": "2026-07-29"
+      },
+      {
+        "name": "per-layer embeddings as a mechanism: each decoder layer gets its own token-indexed embedding table; token IDs index the per-layer table while the normal token embedding is projected into the same space, the combined layer-specific slice is gated by the hidden state after the feed-forward residual update, projected back to hidden size, normalized and added as a second residual — costing a lookup rather than a matmul, so the tables can be cached to fast storage outside accelerator memory (Gemma 3n E2B: over 5B loaded under standard execution vs 1.91B effective memory load; Gemma 4 E2B: 2.3B effective / 5.1B total)",
+        "last_taught": "2026-07-29"
+      },
+      {
+        "name": "why MoE and per-layer embeddings are opposite trades reported in the same unit: MoE cuts arithmetic per token while leaving the memory footprint (Gemma 4 26B A4B activates 4B per token but all 26B must be loaded, 57.7 GB in BF16), PLE cuts the fast-memory footprint while leaving the compute core's arithmetic",
+        "last_taught": "2026-07-29"
+      },
+      {
+        "name": "why 'effective parameters' is a claim about a deployment rather than a property of a checkpoint — the same Google documentation lists Gemma 4 E2B at both a 1.91B effective memory load and 11.4 GB in BF16, depending on whether the runtime implements PLE offload",
         "last_taught": "2026-07-29"
       },
       {
