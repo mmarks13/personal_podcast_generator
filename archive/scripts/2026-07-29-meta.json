@@ -1,0 +1,50 @@
+{
+  "date": "2026-07-29",
+  "title": "The month it took to check the model's work",
+  "summary": "Anthropic points a Mythos preview model at real cryptography and it finds two flaws humans missed — including a fingerprint trick that deletes a whole enumeration step from a meet-in-the-middle attack on reduced-round AES — but discovery took a week and verification took human researchers a month. Then MCP drops its stateful core so tool servers can finally run serverless, and Ai2 maps wildfire risk across North America in thirty hours by treating satellite pixels, not models, as the bottleneck.",
+  "sources": [
+    { "group": "Papers", "title": "Anthropic: Discovering cryptographic weaknesses (HAWK and reduced-round AES)", "url": "https://www.anthropic.com/research/discovering-cryptographic-weaknesses" },
+    { "group": "Releases", "title": "Bringing MCP 2026-07-28 to Claude", "url": "https://claude.com/blog/bringing-mcp-2026-07-28-to-claude" },
+    { "group": "Releases", "title": "Ai2: OlmoEarth infrastructure — planetary-scale geospatial inference", "url": "https://huggingface.co/blog/allenai/olmoearth-infrastructure" },
+    { "group": "Releases", "title": "Liquid AI: LFM2.5-Encoder models for CPU inference", "url": "https://www.liquid.ai/blog/lfm2-5-encoders" },
+    { "group": "Releases", "title": "Cursor Start launches in India", "url": "https://cursor.com/blog/cursor-start-india" },
+    { "group": "Discussion", "title": "Pacing the Frontier open letter", "url": "https://www.pacingthefrontier.com/" },
+    { "group": "Discussion", "title": "TechCrunch: Sam Altman is ready to decelerate", "url": "https://techcrunch.com/2026/07/28/sam-altman-is-ready-to-decelerate/" },
+    { "group": "Discussion", "title": "Simon Willison: Modal CTO on the second-company report", "url": "https://simonwillison.net/2026/Jul/28/akshat-bubna/#atom-everything" },
+    { "group": "Discussion", "title": "TechCrunch: Data centers may face temporary power cuts on the largest US grid", "url": "https://techcrunch.com/2026/07/28/data-centers-may-face-temporary-power-cuts-to-prevent-blackouts-on-largest-us-grid/" },
+    { "group": "Discussion", "title": "TechSpot: Professor's invisible prompt trap catches 32 students", "url": "https://www.techspot.com/news/113243-professor-invisible-prompt-trap-catches-32-students-cheating.html" }
+  ],
+  "topics": [
+    "Anthropic 'discovering cryptographic weaknesses': a Claude Mythos Preview model found flaws in the HAWK signature scheme (smallest parameter set: expected full key-recovery cost thought to be 2^64 steps, demonstrated at 2^38; Anthropic describes the overall result as cutting key strength in half) and in reduced-round AES (7 of 10 rounds, best-known attack made 200-800x faster) via 'Möbius Bridge fingerprinting' — a fingerprint invariant to a guessed intermediate quantity that deletes a 256-way enumeration step in a meet-in-the-middle attack; one researcher worked with the model on HAWK over ~a week, another built a scaffold that found the AES attack autonomously; Anthropic researchers then spent several hundred hours learning cryptography to validate, HAWK quick (implementable end-to-end) and AES taking nearly a month; explicitly no practical impact on production systems today",
+    "MCP 2026-07-28 spec: Model Context Protocol moves from a bidirectional stateful protocol to a request/response model, enabling serverless and edge deployment of tool servers; MCP Apps (interactive UI rendered inline in the conversation) and MCP Tasks (long-running work) ship under a versioned extensions framework so the core protocol stays small; authorization now aligns with production OAuth 2.0 and OIDC so servers connect to Entra/Okta without workarounds; Anthropic reports 400M monthly SDK downloads, 4x this year; the announcement says nothing about what happens to already-deployed stateful servers",
+    "Ai2 OlmoEarth inference infrastructure: North America wildfire-risk mapping compressed 4,737 serial compute hours into 30.5 wall-clock hours (155x) at a peak of 19,600 CPUs and 994 GPUs with >168 GB/s network throughput; three-stage split of I/O-bound CPU acquisition, GPU inference, and CPU postprocessing so GPUs don't idle on downloads; own STAC-compliant metadata index across AWS Open Data, Google Cloud, USGS, Copernicus, NASA and Microsoft Planetary Computer instead of hammering external catalogs, with windowed reads against cloud-optimized formats; reentrant and idempotent tasks make retry the whole recovery strategy; dozens of terabytes at fractions of a penny per square kilometer"
+  ],
+  "entities": ["Anthropic", "Claude Mythos Preview", "HAWK", "AES", "Model Context Protocol", "Ai2", "OlmoEarth"],
+  "threads": [
+    {
+      "name": "Autonomous agents as attackers",
+      "status": "The capability side got its clearest demonstration yet: Anthropic reports a Mythos preview model independently discovering novel cryptanalytic attacks on HAWK and reduced-round AES, with no production impact but a month of human verification for one of the two claims. Meanwhile 1,224 frontier-lab employees including Amodei and Pachocki signed the Pacing the Frontier letter, and Altman said the Hugging Face breach was the first security incident he felt 'very viscerally'.",
+      "arc": "From rogue eval agent breaching Hugging Face, to Microsoft shipping the defensive counterpart, to a model doing original offensive mathematics — and the industry's first broad public request to pace automated AI development."
+    }
+  ],
+  "dives": [
+    {
+      "story": "Anthropic's model finds novel cryptographic attacks, and the month it took to check them",
+      "why_it_matters": "Anyone designing an agent pipeline on the assumption that verification is cheaper than discovery should see a case where it inverted — a week to find, a month of expert human reading to confirm, and no way to close the loop with the same model."
+    },
+    {
+      "story": "MCP drops its stateful core",
+      "why_it_matters": "Anyone who declined to build or host an MCP server because a live session per user made the economics absurd just had that objection removed, and anyone already running a stateful one has an unanswered migration question."
+    },
+    {
+      "story": "OlmoEarth: a continent of wildfire risk in thirty hours",
+      "why_it_matters": "Teams doing satellite-scale inference — conservation, disaster response, public-sector remote sensing — get a worked reference for the part that actually blocks them, which is moving imagery and surviving failures at twenty-thousand-core parallelism, not the model."
+    }
+  ],
+  "concepts_taught": [
+    "meet-in-the-middle cryptanalysis and what a reduced-round attack means: working forward from the plaintext and backward from the ciphertext to trade one enormous search for two smaller ones plus a lookup, the safety margin between the rounds you can break and the rounds that ship, and how an invariant fingerprint deletes an enumeration step outright",
+    "why a stateful protocol can't run serverless: a live session pins requests to the machine holding it, blocking plain load balancing and scale-to-zero — and the stateless-request answer the web reached decades ago, with state pushed out to whatever the client carries",
+    "reentrancy and idempotency as the enabling discipline for massively parallel pipelines: if retrying is always safe, recovery is one line and partial state never has to be reasoned about"
+  ],
+  "lore": []
+}

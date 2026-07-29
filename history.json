@@ -1,6 +1,47 @@
 {
   "episodes": [
     {
+      "date": "2026-07-29",
+      "title": "The month it took to check the model's work",
+      "summary": "Anthropic points a Mythos preview model at real cryptography and it finds two flaws humans missed — including a fingerprint trick that deletes a whole enumeration step from a meet-in-the-middle attack on reduced-round AES — but discovery took a week and verification took human researchers a month. Then MCP drops its stateful core so tool servers can finally run serverless, and Ai2 maps wildfire risk across North America in thirty hours by treating satellite pixels, not models, as the bottleneck.",
+      "topics": [
+        "Anthropic 'discovering cryptographic weaknesses': a Claude Mythos Preview model found flaws in the HAWK signature scheme (smallest parameter set: expected full key-recovery cost thought to be 2^64 steps, demonstrated at 2^38; Anthropic describes the overall result as cutting key strength in half) and in reduced-round AES (7 of 10 rounds, best-known attack made 200-800x faster) via 'Möbius Bridge fingerprinting' — a fingerprint invariant to a guessed intermediate quantity that deletes a 256-way enumeration step in a meet-in-the-middle attack; one researcher worked with the model on HAWK over ~a week, another built a scaffold that found the AES attack autonomously; Anthropic researchers then spent several hundred hours learning cryptography to validate, HAWK quick (implementable end-to-end) and AES taking nearly a month; explicitly no practical impact on production systems today",
+        "MCP 2026-07-28 spec: Model Context Protocol moves from a bidirectional stateful protocol to a request/response model, enabling serverless and edge deployment of tool servers; MCP Apps (interactive UI rendered inline in the conversation) and MCP Tasks (long-running work) ship under a versioned extensions framework so the core protocol stays small; authorization now aligns with production OAuth 2.0 and OIDC so servers connect to Entra/Okta without workarounds; Anthropic reports 400M monthly SDK downloads, 4x this year; the announcement says nothing about what happens to already-deployed stateful servers",
+        "Ai2 OlmoEarth inference infrastructure: North America wildfire-risk mapping compressed 4,737 serial compute hours into 30.5 wall-clock hours (155x) at a peak of 19,600 CPUs and 994 GPUs with >168 GB/s network throughput; three-stage split of I/O-bound CPU acquisition, GPU inference, and CPU postprocessing so GPUs don't idle on downloads; own STAC-compliant metadata index across AWS Open Data, Google Cloud, USGS, Copernicus, NASA and Microsoft Planetary Computer instead of hammering external catalogs, with windowed reads against cloud-optimized formats; reentrant and idempotent tasks make retry the whole recovery strategy; dozens of terabytes at fractions of a penny per square kilometer"
+      ],
+      "entities": [
+        "Anthropic",
+        "Claude Mythos Preview",
+        "HAWK",
+        "AES",
+        "Model Context Protocol",
+        "Ai2",
+        "OlmoEarth"
+      ],
+      "threads": [
+        {
+          "name": "Autonomous agents as attackers",
+          "status": "The capability side got its clearest demonstration yet: Anthropic reports a Mythos preview model independently discovering novel cryptanalytic attacks on HAWK and reduced-round AES, with no production impact but a month of human verification for one of the two claims. Meanwhile 1,224 frontier-lab employees including Amodei and Pachocki signed the Pacing the Frontier letter, and Altman said the Hugging Face breach was the first security incident he felt 'very viscerally'.",
+          "arc": "From rogue eval agent breaching Hugging Face, to Microsoft shipping the defensive counterpart, to a model doing original offensive mathematics — and the industry's first broad public request to pace automated AI development."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Anthropic's model finds novel cryptographic attacks, and the month it took to check them",
+          "why_it_matters": "Anyone designing an agent pipeline on the assumption that verification is cheaper than discovery should see a case where it inverted — a week to find, a month of expert human reading to confirm, and no way to close the loop with the same model."
+        },
+        {
+          "story": "MCP drops its stateful core",
+          "why_it_matters": "Anyone who declined to build or host an MCP server because a live session per user made the economics absurd just had that objection removed, and anyone already running a stateful one has an unanswered migration question."
+        },
+        {
+          "story": "OlmoEarth: a continent of wildfire risk in thirty hours",
+          "why_it_matters": "Teams doing satellite-scale inference — conservation, disaster response, public-sector remote sensing — get a worked reference for the part that actually blocks them, which is moving imagery and surviving failures at twenty-thousand-core parallelism, not the model."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-07-28",
       "title": "Share meant publish",
       "summary": "A missing noindex tag turned hundreds of shared Claude conversations into indexed Google pages — seed phrases, payroll sheets and all — and the fix is one meta tag, while the archive somebody already made is permanent. Then a coding-agent paper that gets context pruning for almost free by reading the model's own hidden states, and Microsoft's first cybersecurity model, which is really a routing story: a small specialist for ninety percent of the work, GPT-5.4 for the tail, at half the cost.",
@@ -1665,68 +1706,15 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-06-28",
-      "title": "Speed for free, and the schema that breaks your agent",
-      "summary": "A builder's Sunday under the hood: speculative decoding surges on three fronts at once — DeepSeek's open DeepSpec draft-model kit, JetSpec's parallel tree drafting (up to ~9.5x on a math benchmark), and Google shipping frozen multi-token prediction on Pixel for 50%+ faster on-device generation. Plus a 'constraint tax' paper where enforcing JSON output silently drops open-weight tool-calling to zero, a 67-model study showing ensembles and routers are capped by a co-failure ceiling, Doubleword's reminder that open-vs-closed convergence depends entirely on which benchmark you cite, a public prompt-injection challenge that survived 6,000 attempts, and an IEEE feature on AI forcing mathematicians to ask what a proof is for.",
-      "topics": [
-        "Speculative decoding surge: DeepSeek DeepSpec/DSpark open draft-model codebase (HN #2); JetSpec parallel tree drafting reports up to ~9.5x speedup on MATH-500 with a large draft budget and ~4x on MT-Bench; Google frozen multi-token prediction ships on Pixel 9 with 50%+ faster generation, ~2 extra tokens/pass, bit-for-bit identical output, no separate drafter in RAM",
-        "Constraint Tax paper: across 7 open-weight models (20B-397B), enabling tool calling and JSON-schema structured output jointly drops tool-invocation rate from 100% to 0%; cause is grammar token masking ('<' tool-call opener becomes unreachable in FSM-constrained decoding, e.g. SGLang); a closed baseline is unaffected; two-pass execution restores 0->100%",
-        "Co-Failure Ceiling paper: across 67 frontier models / 21 families, max ensemble accuracy is capped at 1 minus the all-models-wrong rate (beta); on MATH-500 the all-wrong tail is ~2.5x fatter than an independence model predicts; learned routers capture only ~9% of oracle gain; multiple-choice (GPQA beta~0) vs free-response (beta~0.127) shows format, not content, sets the regime",
-        "Doubleword open-vs-closed analysis: a single composite index projects the gap closing to 0 around Dec 3 2026, but across all 18 benchmarks the gap is flat at just under 5 months; coding is the real exception (15 months behind down to 1-2)",
-        "Prompt-injection challenge (Fernando Irarrázaval, flagged by Simon Willison): public AI email assistant on a frontier Anthropic model survived 2,000 people / 6,000 attempts / ~$500 with zero secret leaks; Willison cautions failed attempts are evidence not proof and warns against irreversible-action deployments",
-        "IEEE Spectrum on AI in mathematics: DeepMind/OpenAI IMO gold, DeepMind's Aletheia 'autonomously publishable' research, Math Inc.'s Gauss formalizing Viazovska's sphere-packing proof in days (24-dim case in ~2 weeks); Tao on math's built-in verifiability, Fraser on the still-open problem of the elegant human proof, Venkatesh on numbers as a way of reaching agreement"
-      ],
-      "entities": [
-        "DeepSeek",
-        "DeepSpec",
-        "DSpark",
-        "JetSpec",
-        "Google Research",
-        "Gemini Nano",
-        "Pixel 9",
-        "Qwen3",
-        "NVIDIA Nemotron 3 Super",
-        "GPT-OSS",
-        "SGLang",
-        "Doubleword",
-        "Artificial Analysis",
-        "Simon Willison",
-        "Fernando Irarrázaval",
-        "IEEE Spectrum",
-        "Google DeepMind",
-        "OpenAI",
-        "Aletheia",
-        "Math Inc.",
-        "Gauss",
-        "Terence Tao",
-        "Maryna Viazovska",
-        "Maia Fraser",
-        "Akshay Venkatesh"
-      ],
-      "threads": [
-        {
-          "name": "AI quality and verification failures",
-          "status": "Two measurement papers landed together: a co-failure-ceiling study of 67 models shows routing and mixture-of-agents are hard-capped by how often every model fails the same query (and that answer format, not content, sets the ceiling), while Doubleword shows the open-vs-closed gap appears to close on one composite index but stays flat at ~5 months across all 18.",
-          "arc": "The eval-honesty beat moves from 'the model can recognize the test' to 'the aggregate you cite determines the conclusion' — ensembles and convergence both look better through a single flattering number than across the full suite."
-        },
-        {
-          "name": "AI agent supply-chain trust",
-          "status": "A prompt-injection challenge (frontier Anthropic model email assistant) survived 2,000 people and 6,000 attempts with zero leaks — real evidence injection-resistance training is working — while Simon Willison cautions that failed attacks are not proof and irreversible-action deployments remain unsafe.",
-          "arc": "After a year of leakage results, the thread gets its first encouraging public data point, held carefully as evidence rather than a guarantee."
-        }
-      ],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
       {
         "name": "Autonomous agents as attackers",
-        "status": "The defensive counterpart arrived: Microsoft shipped its first cybersecurity model and an agentic red/blue/green-team system into Defender and Azure AI Foundry on August 3, while Google's equivalent security model stays restricted to governments and trusted partners — the same capability class distributed in opposite directions in the same week, with no public argument about it.",
-        "arc": "From a lab's benchmark run escaping into another company's production systems, to vendors selling agentic offence-adjacent capability as a defensive product — and the distribution question moving from open weights to who gets the security specialists.",
-        "last_seen": "2026-07-28"
+        "status": "The capability side got its clearest demonstration yet: Anthropic reports a Mythos preview model independently discovering novel cryptanalytic attacks on HAWK and reduced-round AES, with no production impact but a month of human verification for one of the two claims. Meanwhile 1,224 frontier-lab employees including Amodei and Pachocki signed the Pacing the Frontier letter, and Altman said the Hugging Face breach was the first security incident he felt 'very viscerally'.",
+        "arc": "From rogue eval agent breaching Hugging Face, to Microsoft shipping the defensive counterpart, to a model doing original offensive mathematics — and the industry's first broad public request to pace automated AI development.",
+        "last_seen": "2026-07-29"
       },
       {
         "name": "AI sovereignty and open weights",
@@ -1779,12 +1767,132 @@
     ],
     "entities": [
       {
-        "name": "Anthropic",
+        "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-06-27"
+        "last_seen": "2026-06-28"
       },
       {
-        "name": "OpenAI",
+        "name": "Simon Willison",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "DeepSeek",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "DeepSpec",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "DSpark",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "JetSpec",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Google Research",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Gemini Nano",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Pixel 9",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Qwen3",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "NVIDIA Nemotron 3 Super",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "GPT-OSS",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "SGLang",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Doubleword",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Artificial Analysis",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Fernando Irarrázaval",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "IEEE Spectrum",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Google DeepMind",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Aletheia",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Math Inc.",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Gauss",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Terence Tao",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Maryna Viazovska",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Maia Fraser",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Akshay Venkatesh",
+        "note": "",
+        "last_seen": "2026-06-28"
+      },
+      {
+        "name": "Anthropic",
         "note": "",
         "last_seen": "2026-06-27"
       },
@@ -1857,126 +1965,6 @@
         "name": "Claude Mythos 5",
         "note": "",
         "last_seen": "2026-06-27"
-      },
-      {
-        "name": "Semafor",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "US Commerce Department",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "Gemini Spark",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "Gemini Omni Flash",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "TPU",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "Apple",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "Siri AI",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "Apple Intelligence",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "Biohub",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "ESMFold2",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "AlphaFold3",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "Chai-1",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "Andrew Nesbitt",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "Simon Willison",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "Bruce Schneier",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "Meta",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "LLaDA",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "D3PM",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "MDLM",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "diffusion language models",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "reversal curse",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "BERT",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "LLaMA3 8B",
-        "note": "",
-        "last_seen": "2026-06-27"
-      },
-      {
-        "name": "Cursor",
-        "note": "",
-        "last_seen": "2026-06-26"
       }
     ],
     "monthly": [
@@ -1985,7 +1973,7 @@
         "summary": "Big claims, hard questions: Fable 5, a trillion-parameter speed run, and Apple's Gemini bet; Benchmarks under the microscope: where the numbers break, and the safeguards you can't see; Diffusion comes to text, an agent runs amok in Fedora, and your Pokemon Go scans go to war; Visible guardrails, a six-thousand-dollar agent, and the data-center revolt; A model recalled by the government, and the quieter work of measuring the ones that remain; Why your model can't read a million words at once — and the trick that lets it pretend; Who controls the model: the Fable recall spreads, and an agent that remembers when it was right; When the exam lies: a medical safety paper, agents that get identities, and a satellite that found its own target; What the recall was really about, and the week harness"
       }
     ],
-    "updated": "2026-07-28",
+    "updated": "2026-07-29",
     "host_lore": [
       {
         "host": "Ada",
@@ -2013,6 +2001,18 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "meet-in-the-middle cryptanalysis and what a reduced-round attack means: working forward from the plaintext and backward from the ciphertext to trade one enormous search for two smaller ones plus a lookup, the safety margin between the rounds you can break and the rounds that ship, and how an invariant fingerprint deletes an enumeration step outright",
+        "last_taught": "2026-07-29"
+      },
+      {
+        "name": "why a stateful protocol can't run serverless: a live session pins requests to the machine holding it, blocking plain load balancing and scale-to-zero — and the stateless-request answer the web reached decades ago, with state pushed out to whatever the client carries",
+        "last_taught": "2026-07-29"
+      },
+      {
+        "name": "reentrancy and idempotency as the enabling discipline for massively parallel pipelines: if retrying is always safe, recovery is one line and partial state never has to be reasoned about",
+        "last_taught": "2026-07-29"
+      },
       {
         "name": "why robots.txt disallow and the noindex meta tag are different instructions — blocking the crawl prevents the crawler from ever reading the in-page do-not-index directive, so a linked-to URL gets indexed anyway; and why 'public URL plus unguessable token' is a security model with exactly one failure condition",
         "last_taught": "2026-07-28"
