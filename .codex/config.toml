@@ -1,0 +1,55 @@
+# Unattended local-production profile. The runner pins this profile, approval policy,
+# model, effort, and web mode again on every invocation.
+approval_policy = "never"
+default_permissions = "podcast-automation"
+web_search = "disabled"
+allow_login_shell = false
+
+[permissions.podcast-automation]
+description = "Write inside this repository, without shell network or secret-file access."
+
+[permissions.podcast-automation.filesystem]
+glob_scan_max_depth = 4
+":minimal" = "read"
+":tmpdir" = "deny"
+":slash_tmp" = "deny"
+
+[permissions.podcast-automation.filesystem.":workspace_roots"]
+"." = "write"
+".env" = "deny"
+"**/*.env" = "deny"
+".git" = "read"
+".agents" = "read"
+".codex" = "read"
+
+[permissions.podcast-automation.network]
+enabled = false
+
+[permissions.podcast-dry-run]
+description = "Read the repository and write only ignored/generated acceptance artifacts."
+
+[permissions.podcast-dry-run.filesystem]
+glob_scan_max_depth = 4
+":minimal" = "read"
+":tmpdir" = "deny"
+":slash_tmp" = "deny"
+
+[permissions.podcast-dry-run.filesystem.":workspace_roots"]
+"." = "read"
+"out" = "write"
+"logs" = "write"
+"docs/reads" = "write"
+".env" = "deny"
+"**/*.env" = "deny"
+".git" = "read"
+".agents" = "read"
+".codex" = "read"
+
+[permissions.podcast-dry-run.network]
+enabled = false
+
+[shell_environment_policy]
+inherit = "core"
+ignore_default_excludes = false
+include_only = ["PATH", "HOME", "LANG", "LC_*", "TZ", "TERM"]
+exclude = ["*KEY*", "*SECRET*", "*TOKEN*", "AWS_*", "AZURE_*", "GCP_*", "GITHUB_*", "NTFY_*", "REDDIT_*", "GEMINI_*"]

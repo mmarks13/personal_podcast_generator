@@ -54,7 +54,7 @@ symmetrical observations: if a story's lines could be re-dealt to the other host
 unchanged, the roles have collapsed — rewrite it.
 
 **Guests (occasional).** The show shares a universe with the "Self Attention" daily
-read: its masthead writers (see the masthead in `.claude/skills/daily-read/SKILL.md`
+read: its masthead writers (see the masthead in `.agents/skills/daily-read/SKILL.md`
 for the current roster and each writer's beat and voice) may guest when a dive is
 squarely their beat — speaker `"C"` in the script. Rules:
 **at most one guest per week**, and only when the beat genuinely fits — most episodes
@@ -193,8 +193,8 @@ purposes:
 The structured feeds (step 1) don't cover the watchlist's HTML-only sources — lab blogs,
 release-note pages, leaderboards, news sections. These have no clean machine feed, so a
 **single subagent** crawls them and **writes a traceable candidate list to
-`out/crawl.json`**. Spawn it with the `Agent` tool as `subagent_type: source-crawler` (a
-Sonnet agent — its durable output contract lives in `.claude/agents/source-crawler.md`).
+`out/crawl.json`**. Spawn the `source-crawler` custom agent; its provider-neutral
+contract lives in `.agents/skills/source-crawler/SKILL.md`.
 It doesn't depend on `out/sources.json`, so you can launch it alongside the step-1 fetcher.
 
 Read `config/sources.yaml` first and pass the subagent, in the `prompt`, **every source
@@ -223,9 +223,8 @@ without a harness-built `out/candidates.json`.
 Now both raw dumps exist — `out/sources.json` (structured feeds, large and repetitive
 across feeds) and `out/crawl.json` (the HTML crawl). Reading them into your own context
 is expensive and most of it never makes the show. Hand them to a **single subagent** to
-merge and condense first. Spawn it with the `Agent` tool as
-`subagent_type: source-consolidator` (a Sonnet agent; its durable contract lives in
-`.claude/agents/source-consolidator.md`). It reads both files itself, collapses duplicates
+merge and condense first. Spawn the `source-consolidator` custom agent; its shared
+contract lives in `.agents/skills/source-consolidator/SKILL.md`. It reads both files itself, collapses duplicates
 across feeds *and* the crawl into one entry each (keeping the union of sources that carried
 a story and a `source_count`), preserves the notability signals (HF upvotes, HN points)
 and the crawl `claims`, drops only clearly off-topic noise, **flags likely repeats against
@@ -272,14 +271,14 @@ and the lead claims of any dive. A truncated feed excerpt in `sources.json` is a
 the actual page.
 
 Once you've chosen the stories, batch the load-bearing claims and hand them to the
-`fact-checker` subagent (`Agent` tool, `subagent_type: fact-checker`, `model: "haiku"`) —
+`fact-checker` custom agent —
 pass each claim with the primary URL to check it against. It returns, per claim, a verdict
 (`supported`/`contradicted`/`not_found`/`unreachable`) and the **verbatim quote** that
 decides it. Only `supported` claims (with a real quote) go on air as stated; treat
 `contradicted` by correcting to what the quote says, and `not_found`/`unreachable` by
 re-checking yourself or dropping the claim. The quote is your evidence — grounding still
 rests on you, the subagent just does the fetching. For a one-off claim mid-write it's fine
-to `WebFetch` directly rather than spin up the subagent; use it for the batch.
+to fetch the page directly rather than spin up the subagent; use it for the batch.
 
 **The show's default shape: mini-dives plus a sweep.** The gravity of a typical
 episode:
@@ -586,7 +585,8 @@ few lines; targeted edits are how you handle a gate failure or a grounding corre
 ### 3.5. Build and validate the script before rendering
 First convert your two authored files into the machine files deterministically:
 ```bash
-.venv/bin/python scripts/build_episode.py
+PYTHON_BIN=.venv/bin/python; [[ -x "$PYTHON_BIN" ]] || PYTHON_BIN=python3
+"$PYTHON_BIN" scripts/build_episode.py
 ```
 This parses `out/script.txt` into turns (folding in `tts_notes`) and renders
 `out/shownotes.md` from the summary and `sources`, writing `out/episode.json` and
@@ -594,7 +594,8 @@ This parses `out/script.txt` into turns (folding in `tts_notes`) and renders
 `date`/`title` — fix the source file and re-run; that reliability is the point of authoring
 plain text. Then run the hard gate on the built episode:
 ```bash
-.venv/bin/python scripts/check_episode.py --episode out/episode.json
+PYTHON_BIN=.venv/bin/python; [[ -x "$PYTHON_BIN" ]] || PYTHON_BIN=python3
+"$PYTHON_BIN" scripts/check_episode.py --episode out/episode.json
 ```
 
 This is a hard gate: it checks the schema, speaker values, the word-count band (floor
@@ -632,7 +633,7 @@ audio after you exit — do not run `make_audio.py` or `update_history.py` yours
 
 ## Notes
 - This skill produces files; it does not publish. Scheduling and delivery live in the
-  caller (cron, a GitHub Actions workflow, or a Claude Code Routine) — see the README.
+  caller (cron, launchd, or a GitHub Actions workflow) — see the README.
 - If `out/` doesn't exist, create it.
 - Tune the arXiv categories, the news source list, and the host personas to taste; they
   are meant to be edited.

@@ -1,0 +1,46 @@
+default_provider: codex
+
+providers:
+  codex:
+    stages:
+      podcast: {model: gpt-5.6-sol, effort: xhigh, web_search: live}
+      read: {model: gpt-5.6-sol, effort: xhigh, web_search: live}
+      deepdive: {model: gpt-5.6-sol, effort: xhigh, web_search: live}
+      propose: {model: gpt-5.6-terra, effort: high, web_search: disabled}
+      consolidate: {model: gpt-5.6-terra, effort: high, web_search: disabled}
+      crawl: {model: gpt-5.6-luna, effort: max, web_search: live}
+      fact_check: {model: gpt-5.6-luna, effort: xhigh, web_search: live}
+      link_check: {model: gpt-5.6-luna, effort: xhigh, web_search: live}
+  claude:
+    stages:
+      podcast: {model: opus, effort: medium, max_turns: 60}
+      read: {model: opus, effort: medium, max_turns: 50}
+      deepdive: {model: opus, effort: medium, max_turns: 60}
+      propose: {model: sonnet, effort: low, max_turns: 15}
+      consolidate: {model: sonnet, effort: low, max_turns: 30}
+      crawl: {model: haiku, effort: high, max_turns: 40}
+      fact_check: {model: haiku, effort: medium}
+      link_check: {model: haiku, effort: medium}
+
+fallback:
+  enabled: true
+  from: codex
+  to: claude
+  reasons: [auth, quota, service_startup]
+  consume_earned_reset: true
+
+runtime:
+  idle_timeout_seconds: 1800
+  retries: 1
+  trace_dir: logs/agent-traces
+
+outputs:
+  propose: [out/deepdive_options.json]
+  crawl: [out/crawl.json]
+  consolidate: [out/candidates.json]
+  podcast: [out/script.txt, out/episode_meta.json, out/episode.json, out/shownotes.md]
+  read: [docs/reads/self-attention-*.epub, reads_history.json]
+  deepdive: [out/deepdive_script.txt, out/deepdive_meta.json, out/deepdive.json, out/deepdive_shownotes.md]
+
+dry_run_outputs:
+  read: [docs/reads/self-attention-*.epub]

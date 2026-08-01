@@ -221,7 +221,7 @@ The reader must always be able to tell **what kind of thing they're reading**.
 
 - **Factual / explanatory / historical pieces:** strict grounding. Every factual claim —
   numbers, names, dates, quotes, study findings, historical specifics — traces to a
-  source you actually read (use `WebSearch`/`WebFetch` to verify before writing). No
+  source you actually read (use the available web search/fetch tools before writing). No
   invented benchmarks, citations, or events. "The authors report…", not "this proves…".
   Distinguish established results from claims; flag conflicts. Evergreen topics are
   encouraged, but evergreen ≠ unsourced.
@@ -258,11 +258,11 @@ piece, fetch and confirm at primary or reputable sources. Fiction needs no sourc
 must be labeled.
 
 Batch the factual claims you need to confirm and hand them to the `fact-checker` subagent
-(`Agent` tool, `subagent_type: fact-checker`, `model: "haiku"`), each with the URL to check
+custom agent, each with the URL to check
 it against; it returns a verdict and the **verbatim quote** per claim. Only `supported`
 claims (with a real quote) go in as stated — `contradicted` gets corrected to the quote,
 `not_found`/`unreachable` gets re-checked or dropped. Grounding still rests on you; the
-subagent just does the fetching. A one-off check mid-write can still be a direct `WebFetch`.
+subagent just does the fetching. A one-off check mid-write can still fetch the page directly.
 
 ### 3. Write the issue
 One markdown file, `out/daily_read.md`:
@@ -282,7 +282,7 @@ Hit the day's word band. Prefer cutting a weak piece to padding a thin one.
 
 ### 4. Validate the links
 Collect every URL cited in `out/daily_read.md` and hand them to the `link-checker` subagent
-(`Agent` tool, `subagent_type: link-checker`, `model: "haiku"`), each tagged with the claim
+custom agent, each tagged with the claim
 or piece it supports. It returns `ok` / `mismatch` / `dead` per URL. Fix every non-`ok`
 result before building: re-source and replace a `dead` link, repoint a `mismatch`, or drop
 the claim if no real source holds it up. A link only survives if it resolves and matches.
@@ -290,7 +290,8 @@ the claim if no real source holds it up. A link only survives if it resolves and
 ### 5. Build the EPUB (with cover)
 ```bash
 MOOD="$(grep -oP '(?<=<!-- mood: ).*(?= -->)' out/daily_read.md)"
-.venv/bin/python scripts/make_epub.py --md out/daily_read.md \
+PYTHON_BIN=.venv/bin/python; [[ -x "$PYTHON_BIN" ]] || PYTHON_BIN=python3
+"$PYTHON_BIN" scripts/make_epub.py --md out/daily_read.md \
   --out "docs/reads/self-attention-$(date +%F).epub" \
   --cover-src docs/cover.png \
   --cover-subtitle "$(date '+%A, %B %-d') · ${MOOD}"
@@ -299,7 +300,8 @@ MOOD="$(grep -oP '(?<=<!-- mood: ).*(?= -->)' out/daily_read.md)"
 ### 6. Record it
 Append today's issue to `reads_history.json` so future issues don't repeat:
 ```bash
-.venv/bin/python scripts/update_reads_history.py --md out/daily_read.md --date "$(date +%F)"
+PYTHON_BIN=.venv/bin/python; [[ -x "$PYTHON_BIN" ]] || PYTHON_BIN=python3
+"$PYTHON_BIN" scripts/update_reads_history.py --md out/daily_read.md --date "$(date +%F)"
 ```
 
 ### 7. Report

@@ -7,20 +7,22 @@ renders it to MP3, and publishes it to an RSS feed Spotify polls. A typical epis
 plus a **brisk sweep** of everything else worth knowing, honestly sized; the day's
 material — not a template — picks the exact shape.
 
-It's built **Claude Code–native**: skills encode the editorial workflows, small
-subagents do the gathering, deterministic Python handles feeds, validation, TTS, and
-publishing, and a local scheduler fires it every night.
+It's built around shared **Codex CLI and Claude Code** skills: Codex is the checked-in
+default, Claude remains an explicit provider and availability fallback, deterministic
+Python handles feeds/validation/TTS/publishing, and a local scheduler fires it nightly
+without approvals or user input.
 
 ```
 personal_podcast_generator/
-├── .claude/skills/daily-ai-podcast/SKILL.md   # the editor-in-chief brain (nightly)
-├── .claude/skills/weekly-deep-dive/SKILL.md   # Wed/Sat/Sun teaching episode (~20–25 min)
-├── .claude/skills/daily-read/SKILL.md         # "Self Attention": daily magazine → EPUB → Kindle
-├── .claude/agents/source-crawler.md           # crawls the HTML-only watchlist sources
-├── .claude/agents/source-consolidator.md      # merges dumps → out/candidates.json
-├── .claude/agents/fact-checker.md             # verifies load-bearing claims at the source
-├── .claude/agents/link-checker.md             # validates cited URLs in the daily read
+├── AGENTS.md / CLAUDE.md                      # shared guidance + Claude import shim
+├── .agents/skills/                            # canonical workflows and agent roles
+├── .claude/skills/                            # relative compatibility symlinks
+├── .claude/agents/                            # thin Claude role adapters
+├── .codex/agents/                             # thin Codex role adapters
+├── .codex/config.toml                         # unattended least-privilege profile
+├── config/agents.yaml                         # provider/model/effort/fallback policy
 ├── config/sources.yaml                        # the source watchlist (Tier 1/2)
+├── scripts/agent_runner.py                    # closed-stdin provider-neutral dispatcher
 ├── scripts/fetch_sources.py                   # deterministic pull of all rss/api feeds
 ├── scripts/build_episode.py                   # script.txt + meta → episode.json + shownotes
 ├── scripts/check_episode.py                   # pre-render gate: schema, length, tags, artifacts
@@ -40,12 +42,16 @@ personal_podcast_generator/
 
 ## How this runs
 
-The whole pipeline runs **locally on your machine** and draws on a Claude Pro
-subscription rather than pay-per-token API billing:
+The whole pipeline runs **locally on your machine** and draws on logged-in ChatGPT and
+Claude subscriptions rather than pay-per-token model API billing:
 
-- **Claude work** uses the **logged-in Claude Pro CLI** (`claude login` / OAuth).
-  **`ANTHROPIC_API_KEY` is never set in the run environment** (`run_episode.sh`
-  explicitly unsets it); setting it would switch billing to the paid API.
+- **Agent work** defaults to the **logged-in Codex CLI** (ChatGPT subscription).
+  `AGENT_PROVIDER=claude` selects the logged-in Claude Pro CLI. The harness unsets
+  `OPENAI_API_KEY`, `CODEX_API_KEY`, and `ANTHROPIC_API_KEY`; paid Codex credits are
+  rejected, while earned no-cost reset credits may be consumed after a quota failure.
+- Every provider process is noninteractive with closed stdin. Codex uses approval
+  policy `never`; Claude uses `dontAsk` with matching available/preapproved tools.
+  Cross-provider fallback is limited to auth, quota, and upstream startup failures.
 - **Audio** is **Gemini multi-speaker TTS** (NotebookLM-style dialogue; needs
   `GEMINI_API_KEY`, voices via `GEMINI_VOICE_A/B` in `.env`) + `ffmpeg` on `PATH`. The
   renderer retries hard and then **fails** — it never silently falls back. A local
@@ -80,9 +86,9 @@ gathering from the expensive judgment. `run_episode.sh` runs the whole gather ph
 | Stage | How | Why |
 |---|---|---|
 | Structured feeds | `fetch_sources.py` (all `rss`/`api` from `sources.yaml`, both tiers) → `out/sources.json` | Clean machine feeds — arXiv (keyword-filtered), HF Daily Papers, HN, lab/news/newsletter RSS. No LLM; every item tagged with its source. |
-| HTML sources | a **Haiku** session following `source-crawler.md` → `out/crawl.json` | Lab blogs, release notes, leaderboards have no feed. Self-recovers Tier-1 failures via backup search. |
-| Consolidate | a **Sonnet** session following `source-consolidator.md` → `out/candidates.json` | De-dupes across feeds + crawl, preserves signals, **flags likely repeats against `history.json`**. Judgment-free. |
-| Select + verify + write | the **Opus** session, via the daily-ai-podcast skill | The editorial step: read only `candidates.json`, decide what matters, verify at primary sources (batched through the `fact-checker` agent), write `out/script.txt` + `out/episode_meta.json`. |
+| HTML sources | crawler stage through the shared `source-crawler` skill → `out/crawl.json` | Lab blogs, release notes, leaderboards have no feed. Self-recovers Tier-1 failures via backup search. |
+| Consolidate | consolidation stage through the shared `source-consolidator` skill → `out/candidates.json` | De-dupes across feeds + crawl, preserves signals, **flags likely repeats against `history.json`**. Judgment-free. |
+| Select + verify + write | provider-neutral podcast stage via the daily-ai-podcast skill | The editorial step: read only `candidates.json`, decide what matters, verify at primary sources, write and validate the contracted artifacts. |
 | Build + gate | `build_episode.py` then `check_episode.py` | Deterministic conversion to `episode.json`/`shownotes.md`, then a hard gate: schema, word band (3,000–4,700), audio-tag form/density, TTS artifacts — plus a warn-only check for phrases recurring across recent archived scripts. |
 | Render | `make_audio.py` (Gemini TTS) + ffmpeg | Deterministic; honors optional per-episode `tts_notes`. |
 | Publish | `publish.py` (github or s3 backend) | Uploads the MP3, rebuilds `feed.xml` + episode pages, commits `docs/` + `history.json` + `archive/`. |
@@ -136,11 +142,12 @@ core; Tier 2 = optional), keyed by `method`: `rss` | `api` | `fetch`. The split 
 python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
 # ffmpeg is a system dependency:  sudo apt-get install -y ffmpeg   (or: brew install ffmpeg)
-# Claude Code CLI, logged in on this machine:
-claude login          # one-time; the nightly run uses this Pro session
+# Both CLIs, logged in on this machine through subscription accounts:
+codex                 # complete one-time ChatGPT login
+claude login          # retained for explicit selection and fallback
 
 cp .env.example .env  # fill in SHOW_* / OWNER_EMAIL / GEMINI_API_KEY (+ Kindle vars
-                      # for the daily read). Do NOT add ANTHROPIC_API_KEY.
+                      # for the daily read). Do not add model-provider API keys.
 ```
 
 Test the pieces independently, then do a full run:
@@ -149,10 +156,11 @@ Test the pieces independently, then do a full run:
 # 1. deterministic sources only
 python scripts/fetch_sources.py --hours 48 --out out/sources.json
 
-# 2. confirm Pro auth works non-interactively (must print "ok", no API-key prompt)
-claude -p "Reply with the single word: ok" --max-turns 1
+# 2. fail-fast dependency/config/subscription-auth check
+python scripts/preflight.py --mode full
 
-# 3. full run end to end (gather → write → gate → render → publish)
+# 3. no-side-effect Codex acceptance pass, then the real pipeline
+RUN_EPISODE_DRY_RUN=1 bash run_episode.sh
 bash run_episode.sh
 ```
 
@@ -178,7 +186,7 @@ nightly feed update.
 
 ## Scheduling (local cron / launchd)
 
-The run must execute on the machine where you ran `claude login`. Two jobs: the full
+The run must execute on the machine where you logged in to Codex and Claude. Two jobs: the full
 podcast pipeline overnight, and the daily read on its own after the 5h rate-limit
 window resets, so the read gets a fresh budget instead of competing with the podcast:
 
@@ -209,16 +217,20 @@ pushes 3–5 deep-dive topic pitches to the phone. On macOS, use a launchd
   borrowed from the daily read's masthead) renders via `GEMINI_VOICE_C` or a
   per-episode voice override.
 
-> One run/night fits comfortably within Pro's normal limits; a heavy Claude Code
-> coding week could occasionally bump a limit, in which case Max helps.
+The harness records supported aggregate traces under ignored `logs/agent-traces/`,
+retries a 30-minute no-output stall once, and skips overlapping scheduler runs.
 
 ## Other entrypoints
 
 `examples/` holds two alternatives, kept for reference and not wired in:
 
-- `examples/run_daily.py` — the same skill driven via the **Claude Agent SDK** (Python).
-- `examples/daily-podcast.yml` — a **GitHub Actions** workflow. Note: it sets
-  `ANTHROPIC_API_KEY` (paid API) — a deliberate deviation from the local-Pro setup.
+- `examples/run_daily.py` — a Python wrapper around the same provider-neutral runner.
+- `examples/daily-podcast.yml` — a Codex GitHub Action example. It is explicitly
+  **OpenAI API billed**, unlike the local subscription-based scheduler.
+
+See [the repository migration report](docs/codex-cli-migration-report.md) for exact
+parity and rollback details, and [the reusable migration guide](docs/claude-to-codex-cli-migration-guide.md)
+for applying this pattern to another repository.
 
 ## Things you'll want to tune
 

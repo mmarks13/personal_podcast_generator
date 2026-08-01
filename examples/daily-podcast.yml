@@ -1,59 +1,57 @@
-# Nightly AI podcast — runs on GitHub's infrastructure, no machine of your own.
-# Produces out/podcast-YYYY-MM-DD.mp3 + show notes and uploads them as an artifact.
-#
-# Setup:
-#   1. Add repo secret ANTHROPIC_API_KEY (Settings > Secrets and variables > Actions).
-#   2. (Optional) Add ELEVENLABS_API_KEY and set TTS_BACKEND=elevenlabs below for
-#      higher-quality voices. Default is local Kokoro (free, runs on the runner).
-#   3. Adjust the cron time (it's UTC).
-name: daily-ai-podcast
+# API-BILLED EXAMPLE: unlike local run_episode.sh, GitHub Actions cannot use the
+# machine's ChatGPT subscription login. openai/codex-action@v1 uses OPENAI_API_KEY.
+name: daily-ai-podcast-codex
 
 on:
-  schedule:
-    - cron: "0 9 * * *"      # 09:00 UTC daily (~01:00/02:00 US Pacific). Edit as needed.
-  workflow_dispatch: {}       # lets you trigger a run by hand to test
+  workflow_dispatch: {}
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  write:
     runs-on: ubuntu-latest
-    env:
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
-      TTS_BACKEND: kokoro      # set to "elevenlabs" if you added the key above
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - uses: actions/setup-node@v4
+      - name: Install deterministic dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch structured sources
+        env:
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+        run: python scripts/fetch_sources.py --hours 48 --out out/sources.json
+
+      - name: Write and validate with Codex (API billed)
+        id: codex
+        uses: openai/codex-action@v1
         with:
-          node-version: "20"
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          model: gpt-5.6-sol
+          effort: xhigh
+          sandbox: workspace-write
+          safety-strategy: drop-sudo
+          codex-args: '["--ephemeral", "--strict-config", "--ignore-rules"]'
+          prompt: |
+            Use the daily-ai-podcast skill to produce today's episode. Work from the
+            gathered files already in out/. Select, verify, write, build, and validate.
+            Stop before TTS, history mutation, delivery, or publishing.
+          output-file: out/codex-final-message.md
 
-      - name: Install tools
-        run: |
-          sudo apt-get update && sudo apt-get install -y ffmpeg
-          npm install -g @anthropic-ai/claude-code
-          pip install -r requirements.txt
-
-      - name: Produce today's episode
-        # Headless Claude Code. Run from repo root so the project skill in
-        # .claude/skills/ is picked up; name it explicitly to be safe.
-        run: |
-          claude -p "Use the daily-ai-podcast skill to produce today's episode end to end, following its grounding rules. Print the final MP3 path when done." \
-            --allowedTools "Bash Read Write WebSearch WebFetch Skill" \
-            --permission-mode acceptEdits \
-            --max-turns 60
-
-      - name: Upload episode
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: daily-ai-podcast
+          name: daily-ai-podcast-draft
           path: |
-            out/podcast-*.mp3
+            out/episode.json
+            out/episode_meta.json
             out/shownotes.md
+            out/script.txt
+            out/codex-final-message.md
           if-no-files-found: error

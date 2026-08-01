@@ -61,7 +61,7 @@ Rules:
   what its limits are) over news recaps or product tours.
 
 ### 2. Research it properly
-Use `WebFetch`/`WebSearch` to read the primary material: the paper(s), official docs,
+Use the available web fetch/search tools to read the primary material: the paper(s), official docs,
 technical blog posts, credible independent analyses. **Read the one or two core sources
 yourself** — the paper(s) the episode actually teaches — because the "how it works" and
 "where the analogy breaks" sections depend on your own understanding, not a secondhand
@@ -75,7 +75,7 @@ because a deep dive invites confident explanation:
 
 For the **specific load-bearing details** that pepper a teaching episode — exact numbers,
 dates, benchmark figures, quotes, who-did-what-when — batch them to the `fact-checker`
-subagent (`Agent` tool, `subagent_type: fact-checker`, `model: "haiku"`) with the URL to
+custom agent with the URL to
 check each against; it returns a verdict and the **verbatim quote** per claim. Use it to
 confirm the details, not to replace your reading of the core material: only `supported`
 claims (with a real quote) are safe to state, `contradicted` gets corrected to the quote,
@@ -83,7 +83,7 @@ claims (with a real quote) are safe to state, `contradicted` gets corrected to t
 
 ### 3. Write the script
 Same hosts as the daily show — **Ada** (`"A"`) and **Alan** (`"B"`); read the **Hosts
-section of the daily skill** (`.claude/skills/daily-ai-podcast/SKILL.md`) for their
+section of the daily skill** (`.agents/skills/daily-ai-podcast/SKILL.md`) for their
 personas, fiction rules, lore canon, and rituals, all of which apply here. Teaching
 mode plays to type: **Ada owns the lineage and foundations** — the computing historian
 in her element, tracing how we got here — while **Alan stress-tests everything** as the
@@ -155,9 +155,10 @@ discipline as the daily skill; never re-`Write` a whole file.
 ### 4. Build, validate, and stop
 Convert your two files into the machine files, then run the gate on the built episode:
 ```bash
-.venv/bin/python scripts/build_episode.py --script out/deepdive_script.txt \
+PYTHON_BIN=.venv/bin/python; [[ -x "$PYTHON_BIN" ]] || PYTHON_BIN=python3
+"$PYTHON_BIN" scripts/build_episode.py --script out/deepdive_script.txt \
   --meta out/deepdive_meta.json --episode out/deepdive.json --notes out/deepdive_shownotes.md
-.venv/bin/python scripts/check_episode.py --episode out/deepdive.json --min-words 3000 --max-words 4000
+"$PYTHON_BIN" scripts/check_episode.py --episode out/deepdive.json --min-words 3000 --max-words 4000
 ```
 The check is a hard gate — when it fails, `Edit` `out/deepdive_script.txt`, re-run the build,
 and re-check until it passes. When under length, deepen the explanation (more mechanism,

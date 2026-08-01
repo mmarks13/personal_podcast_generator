@@ -1,18 +1,32 @@
 #!/usr/bin/env bash
-# Nightly entrypoint. Uses the logged-in Claude Pro CLI (no ANTHROPIC_API_KEY).
+# Nightly entrypoint. Uses logged-in subscription CLIs; Codex is the default.
 set -euo pipefail
 cd "$(dirname "$0")"
 
 # Self-contained for cron (minimal PATH/env): activate the Python 3.12 venv and
-# make the user-local `claude` CLI reachable without depending on cron's PATH.
+# make the user-local agent CLIs reachable without depending on cron's PATH.
 [ -f .venv/bin/activate ] && . .venv/bin/activate
-# Prepend the user-local CLI dir (claude); append conda's bin for ffmpeg/ffprobe
+# Prepend the user-local CLI dir (Codex/Claude); append conda's bin for ffmpeg/ffprobe
 # (installed there via conda) without letting conda's python shadow the venv.
 export PATH="$HOME/.local/bin:$PATH:$HOME/miniforge3/bin"
 
-# Load storage + show config (but not an API key).
+# Load storage + show config (but not an agent API key).
 set -a; [ -f .env ] && . ./.env; set +a
-unset ANTHROPIC_API_KEY || true   # belt-and-suspenders: stay on the Pro subscription
+unset ANTHROPIC_API_KEY OPENAI_API_KEY CODEX_API_KEY || true
+
+DRY_RUN="${RUN_EPISODE_DRY_RUN:-0}"
+
+# Never wait on an overlapping scheduler invocation and never ask a person what to do.
+exec 9>.run_episode.lock
+if ! flock -n 9; then
+  if [ "$DRY_RUN" != "1" ]; then
+    python3 scripts/notify.py --priority high --title "Podcast run skipped" \
+      --message "Another run_episode.sh invocation already holds the repository lock." \
+      >/dev/null 2>&1 || true
+  fi
+  echo "run_episode: another invocation is active; skipped" >&2
+  exit 75
+fi
 
 DATE="$(date +%F)"
 DOW="$(date +%u)"   # 1=Mon .. 6=Sat 7=Sun
@@ -34,7 +48,7 @@ mkdir -p out logs
 # RUN_EPISODE_ALLOW_ANY_BRANCH=1 skips this for the hermetic test, which runs a copy of
 # this script in a non-repo sandbox (no branch to check).
 BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')"
-if [ "$BRANCH" != "main" ] && [ "${RUN_EPISODE_ALLOW_ANY_BRANCH:-}" != "1" ]; then
+if [ "$BRANCH" != "main" ] && [ "${RUN_EPISODE_ALLOW_ANY_BRANCH:-}" != "1" ] && [ "$DRY_RUN" != "1" ]; then
   if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
     echo "run_episode: on '$BRANCH' with uncommitted changes — refusing (commit or stash, then rerun on main)." >&2
     exit 1
@@ -43,12 +57,9 @@ if [ "$BRANCH" != "main" ] && [ "${RUN_EPISODE_ALLOW_ANY_BRANCH:-}" != "1" ]; th
   git checkout main || { echo "run_episode: could not switch to main — aborting." >&2; exit 1; }
 fi
 
-# Pin models explicitly so the nightly job never inherits an interactive /model switch.
-# Opus is the default orchestrator for every Claude run — the podcast (editorial
-# judgment, grounding, source selection), the read, and the deep dive.
-PODCAST_MODEL="opus"
-READ_MODEL="opus"
-DEEPDIVE_MODEL="opus"
+# Validate deterministic dependencies and provider configuration before fetching or
+# spending model quota. Auth checks are noninteractive and redact credentials.
+python3 scripts/preflight.py --mode "$MODE"
 
 # --- Logging ------------------------------------------------------------------
 # The script owns its log (logs/run.log); cron only catches catastrophic pre-logging
@@ -75,28 +86,9 @@ run_step() {
   return "$rc"
 }
 
-# run_step_retry <tries> <src> <cmd...> : like run_step, but re-launches the command on
-# nonzero exit up to <tries> times before recording a failure. One-shot `claude -p`
-# sessions have died to transient Bun segfaults (exit 139) that leave no output; a fresh
-# launch clears them. Only marks FAILED after the final attempt fails.
-run_step_retry() {
-  local tries="$1"; shift
-  local src="$1"; shift
-  local attempt=1 rc=0 start
-  while true; do
-    start=$(date +%s)
-    log run "step start: $src (attempt $attempt/$tries)"
-    set +e
-    "$@" 2>&1 | python3 scripts/run_log.py prefix --src "$src" >> "$LOG"
-    rc=${PIPESTATUS[0]}
-    set -e
-    log run "step end: $src exit=$rc dur=$(( $(date +%s) - start ))s"
-    if [ "$rc" -eq 0 ] || [ "$attempt" -ge "$tries" ]; then break; fi
-    log run "WARNING: $src failed (exit=$rc); retrying"
-    attempt=$((attempt+1))
-  done
-  if [ "$rc" -ne 0 ]; then FAILED+=("$src"); fi
-  return "$rc"
+agent_stage() {
+  local stage="$1" prompt="$2"
+  printf '%s' "$prompt" | python3 scripts/agent_runner.py --stage "$stage"
 }
 
 FAILED=()
@@ -104,19 +96,17 @@ RUN_START=$(date +%s)
 python3 scripts/run_log.py trim --keep "$((LOG_KEEP_RUNS-1))" --log "$LOG"
 log run "===== RUN START $DATE mode=$MODE dow=$DOW pid=$$ host=$(hostname) git=$(git rev-parse --short HEAD 2>/dev/null || echo '?') ====="
 
-# Per-minute usage snapshot (5h + 7d limits) as a parallel sidecar; killed on exit.
-python3 scripts/run_log.py poll --interval 60 --log "$LOG" &
-USAGE_PID=$!
 cleanup() {
-  kill "$USAGE_PID" 2>/dev/null || true
   local status
   if [ ${#FAILED[@]} -eq 0 ]; then status="OK"; else
     status="FAIL failed=[$(IFS=,; echo "${FAILED[*]}")]"
     # Best-effort phone alert (no-op when NTFY_TOPIC is unset).
-    python3 scripts/notify.py --priority high \
-      --title "Podcast run FAILED ($DATE $MODE)" \
-      --message "Failed steps: $(IFS=,; echo "${FAILED[*]}"). See logs/run.log." \
-      >/dev/null 2>&1 || true
+    if [ "$DRY_RUN" != "1" ]; then
+      python3 scripts/notify.py --priority high \
+        --title "Podcast run FAILED ($DATE $MODE)" \
+        --message "Failed steps: $(IFS=,; echo "${FAILED[*]}"). See logs/run.log." \
+        >/dev/null 2>&1 || true
+    fi
   fi
   log run "===== RUN END $DATE dur=$(( $(date +%s) - RUN_START ))s status=$status ====="
 }
@@ -128,18 +118,21 @@ trap cleanup EXIT
 # email it to the Kindle and commit the EPUB + reads_history so it persists and serves on
 # Pages. Non-fatal steps mirror the podcast path: a failed read/email must not wedge the run.
 if [ "$MODE" = "read" ]; then
-  run_step read claude -p "Use the daily-read skill to write today's issue of Self Attention end to end, \
-following its reasoning, grounding, and the day's length target. Build the EPUB with the \
-cover and record the issue. Print the EPUB path when done." \
-    --model "$READ_MODEL" \
-    --effort medium \
-    --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
-    --permission-mode acceptEdits \
-    --max-turns 50 || log run "WARNING: daily read failed"
-  run_step kindle python3 scripts/send_to_kindle.py --epub "docs/reads/self-attention-$DATE.epub" \
-    || log run "WARNING: Kindle email failed; EPUB still on GitHub Pages"
-  run_step publish-read python3 scripts/publish_read.py --date "$DATE" \
-    || log run "WARNING: read publish failed; EPUB may be unpushed"
+  READ_RECORD_INSTRUCTION="Build the EPUB with the cover and record the issue."
+  if [ "$DRY_RUN" = "1" ]; then
+    READ_RECORD_INSTRUCTION="Build the EPUB with the cover, but do not update reads_history.json; stop after the EPUB is validated."
+  fi
+  run_step read agent_stage read "Use the daily-read skill to write today's issue of Self Attention end to end, \
+following its reasoning, grounding, and the day's length target. ${READ_RECORD_INSTRUCTION} \
+Print the EPUB path when done." || log run "WARNING: daily read failed"
+  if [ "$DRY_RUN" = "1" ]; then
+    log run "dry-run: skipped Kindle delivery and read publish"
+  else
+    run_step kindle python3 scripts/send_to_kindle.py --epub "docs/reads/self-attention-$DATE.epub" \
+      || log run "WARNING: Kindle email failed; EPUB still on GitHub Pages"
+    run_step publish-read python3 scripts/publish_read.py --date "$DATE" \
+      || log run "WARNING: read publish failed; EPUB may be unpushed"
+  fi
   exit 0
 fi
 
@@ -155,7 +148,7 @@ if [ "$MODE" = "propose" ]; then
     | python3 scripts/run_log.py prefix --src propose-fetch >> "$LOG" \
     || log run "WARNING: evening fetch failed; picker works from memory alone"
 
-  run_step_retry 3 propose claude -p "Read .claude/skills/weekly-deep-dive/SKILL.md (its topic palette and \
+  run_step propose agent_stage propose "Read .agents/skills/weekly-deep-dive/SKILL.md (its topic palette and \
 selection criteria), history.json (recent episodes, active threads, longterm.concepts_taught), \
 deepdive_proposals.json (the proposal ledger — NEVER re-pitch a retired topic: times_proposed >= 3 \
 and never chosen; avoid re-pitching anything already proposed twice unless it's newly urgent), the \
@@ -169,16 +162,12 @@ themselves while drafting); nothing already taught (concepts_taught / past deepd
 out/deepdive_options.json as exactly {\"options\": [{\"n\": 1, \"type\": \"mechanism|foundational|\
 history|debate\", \"topic\": \"short topic name\", \"pitch\": \"one-line pitch: the hook plus what \
 the episode contains\"}]}. Do nothing else." \
-    --model sonnet \
-    --effort low \
-    --allowedTools "Read Write Bash" \
-    --permission-mode acceptEdits \
-    --max-turns 15 \
     || log run "WARNING: propose failed; deep-dive writer will pick as usual"
 
   # Ledger pass: drop retired topics, bump proposal counts, stamp sent_at, and
   # emit the numbered message body for the phone.
-  OPTIONS_MSG="$(python3 scripts/proposal_ledger.py record || true)"
+  OPTIONS_MSG=""
+  [ "$DRY_RUN" = "1" ] || OPTIONS_MSG="$(python3 scripts/proposal_ledger.py record || true)"
   if [ -n "$OPTIONS_MSG" ]; then
     run_step notify python3 scripts/notify.py \
       --title "Deep-dive options for tomorrow — reply with a number or your own topic" \
@@ -195,8 +184,10 @@ fi
 # run it here, on the cheapest model that does the job, and let the Opus podcast session
 # start clean at out/candidates.json. Each stage is non-fatal: the podcast skill still
 # falls back to doing any missing stage itself, so a flaky gather can't lose the night.
-rm -f out/sources.json out/crawl.json out/candidates.json
-log run "prep: cleared podcast scratch (sources/crawl/candidates.json)"
+rm -f out/sources.json out/crawl.json out/candidates.json \
+  out/script.txt out/episode_meta.json out/episode.json out/shownotes.md \
+  out/deepdive_script.txt out/deepdive_meta.json out/deepdive.json out/deepdive_shownotes.md
+log run "prep: cleared podcast scratch and required agent artifacts"
 
 # 1. Structured fetch — deterministic, in-shell (no model).
 set +e
@@ -207,13 +198,9 @@ set -e
 [ "$FETCH_RC" -eq 0 ] || log run "WARNING: fetch_sources exit=$FETCH_RC; consolidator works from whatever exists"
 
 # 2. Crawl the HTML watchlist — standalone Haiku session writing out/crawl.json.
-run_step crawl claude -p "Follow .claude/agents/source-crawler.md exactly. Read config/sources.yaml, \
+run_step crawl agent_stage crawl "Use the source-crawler skill exactly. Read config/sources.yaml, \
 take every source whose method is 'fetch' (both tiers), crawl them for today ($DATE) and yesterday only, \
 recover Tier-1 failures via a backup search, and write out/crawl.json in that contract's shape." \
-  --model haiku \
-  --allowedTools "Read WebSearch WebFetch Write" \
-  --permission-mode acceptEdits \
-  --max-turns 40 \
   || log run "WARNING: crawl failed; consolidator will work from sources.json alone"
 
 # 2.2 Archive tonight's raw gather to smallbatch-lab as classifier training data.
@@ -222,8 +209,8 @@ recover Tier-1 failures via a backup search, and write out/crawl.json in that co
 # what the consolidator sees, not from what it produced. Write-only (no commit/push)
 # and skipped silently if the sibling repo isn't checked out — the show never depends
 # on this, so it must never be able to break the run.
-TRIAGE_DIR="$HOME/Documents/Github/smallbatch-lab/data/podcast-triage"
-if [ -d "$(dirname "$TRIAGE_DIR")" ]; then
+TRIAGE_DIR="${TRIAGE_DIR:-$HOME/Documents/Github/smallbatch-lab/data/podcast-triage}"
+if [ "$DRY_RUN" != "1" ] && [ -d "$(dirname "$TRIAGE_DIR")" ]; then
   mkdir -p "$TRIAGE_DIR"
   for f in sources crawl; do
     if [ -f "out/$f.json" ]; then
@@ -236,14 +223,9 @@ else
 fi
 
 # 2.5 Consolidate — standalone Sonnet session writing out/candidates.json.
-run_step consolidate claude -p "Follow .claude/agents/source-consolidator.md exactly. Merge \
+run_step consolidate agent_stage consolidate "Use the source-consolidator skill exactly. Merge \
 out/sources.json and out/crawl.json (use whichever exist) into out/candidates.json, flagging likely \
 repeats against history.json. Write the file even if one input is missing." \
-  --model sonnet \
-  --effort low \
-  --allowedTools "Read Write Bash" \
-  --permission-mode acceptEdits \
-  --max-turns 30 \
   || log run "WARNING: consolidate failed; podcast skill will gather inline"
 
 # One-time steering (self-expiring): aged-well papers the pre-refresh pipeline missed
@@ -258,45 +240,35 @@ covered): 'ABot-Earth 0.5: Generative 3D Earth Model' (486 upvotes), 'Looped Wor
 fi
 
 # 3: Opus selects, verifies, and writes the script — stops after validation.
-run_step podcast claude -p "Use the daily-ai-podcast skill to produce today's episode. The harness has \
+run_step podcast agent_stage podcast "Use the daily-ai-podcast skill to produce today's episode. The harness has \
 already run steps 1, 2, and 2.5 — out/sources.json, out/crawl.json, and out/candidates.json already \
 exist, so SKIP them. Do step 1.5 (recall history) then steps 3 and 3.5 (select, verify, write, \
 validate). STOP after the gate passes — do NOT run steps 4 or 4.5; the harness renders and updates \
 history. If out/candidates.json is somehow missing, fall back to doing the gather steps yourself. \
-Print the episode title and word count when done.${BACKLOG_NOTE}" \
-  --model "$PODCAST_MODEL" \
-  --effort medium \
-  --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
-  --permission-mode acceptEdits \
-  --max-turns 60
+Print the episode title and word count when done.${BACKLOG_NOTE}"
 
-# Update show memory — pure Python, reads out/episode_meta.json; runs before render so
-# history is current even if the render fails.
-set +e
-.venv/bin/python scripts/update_history.py --append \
-  2>&1 | python3 scripts/run_log.py prefix --src update-history >> "$LOG"
-HIST_RC=${PIPESTATUS[0]}
-set -e
-[ "$HIST_RC" -eq 0 ] || log run "WARNING: update_history failed; history.json may be stale"
+# Update durable state, render, and publish only in a real run. Dry runs keep the
+# generated artifacts for validation but cause no external or history side effects.
+if [ "$DRY_RUN" = "1" ]; then
+  log run "dry-run: skipped podcast history, archive, render, and publish"
+else
+  set +e
+  .venv/bin/python scripts/update_history.py --append \
+    2>&1 | python3 scripts/run_log.py prefix --src update-history >> "$LOG"
+  HIST_RC=${PIPESTATUS[0]}
+  set -e
+  [ "$HIST_RC" -eq 0 ] || log run "WARNING: update_history failed; history.json may be stale"
 
-# Archive the night's script + meta (committed by publish.py alongside the feed).
-# The writer reads the last few archived scripts to notice — and break — its own
-# patterns, and the gate's phrase-recurrence check compares against them.
-mkdir -p archive/scripts
-cp -f out/script.txt "archive/scripts/$DATE.txt" 2>/dev/null \
-  && cp -f out/episode_meta.json "archive/scripts/$DATE-meta.json" 2>/dev/null \
-  || log run "WARNING: script archive copy failed"
+  mkdir -p archive/scripts
+  cp -f out/script.txt "archive/scripts/$DATE.txt" 2>/dev/null \
+    && cp -f out/episode_meta.json "archive/scripts/$DATE-meta.json" 2>/dev/null \
+    || log run "WARNING: script archive copy failed"
 
-# 4: Render the podcast audio — pure Python, no model needed.
-run_step render-podcast \
-  .venv/bin/python scripts/make_audio.py \
-  --episode out/episode.json --out "out/podcast-$DATE.mp3"
+  run_step render-podcast \
+    .venv/bin/python scripts/make_audio.py \
+    --episode out/episode.json --out "out/podcast-$DATE.mp3"
 
-# 5: publish — read title/date/summary from the episode, upload + rebuild the feed.
-# Non-fatal: a transient publish failure (e.g. a GitHub TLS handshake timeout) is logged
-# and recorded in FAILED (so the run still ends status=FAIL and alerts), but must NOT abort
-# the script — the deep-dive block below is independent work and should still run.
-run_step publish python3 - "$DATE" <<'PY' || log run "WARNING: daily publish failed — feed not updated for $DATE; continuing"
+  run_step publish python3 - "$DATE" <<'PY' || log run "WARNING: daily publish failed — feed not updated for $DATE; continuing"
 import json, subprocess, sys, glob
 date = sys.argv[1]
 ep = json.load(open("out/episode.json"))
@@ -310,37 +282,41 @@ subprocess.run(["python3","scripts/publish.py","--mp3",mp3[-1],
                 "--summary",summary,"--notes","out/shownotes.md",
                 "--date",ep.get("date",date)], check=True)
 PY
+fi
 
 # Wed/Sat/Sun: also produce + publish the deep-dive episode. If the listener replied
 # to the previous evening's options push, their choice becomes the topic.
 if [ "$DOW" = "3" ] || [ "$DOW" = "6" ] || [ "$DOW" = "7" ]; then
   # DEEPDIVE_TOPIC overrides the phone picker — for manual reruns after a failed night,
   # when the ntfy reply has aged out of the topic's retention window.
-  DIVE_CHOICE="${DEEPDIVE_TOPIC:-$(python3 scripts/ntfy_choice.py 2>/dev/null || true)}"
+  DIVE_CHOICE="${DEEPDIVE_TOPIC:-}"
+  if [ -z "$DIVE_CHOICE" ] && [ "$DRY_RUN" != "1" ]; then
+    DIVE_CHOICE="$(python3 scripts/ntfy_choice.py 2>/dev/null || true)"
+  fi
   DIVE_TOPIC_NOTE=""
   if [ -n "$DIVE_CHOICE" ]; then
     log run "deepdive: listener pre-chose topic: $DIVE_CHOICE"
-    python3 scripts/proposal_ledger.py choose --topic "$DIVE_CHOICE" 2>/dev/null \
-      || log run "WARNING: proposal ledger update failed"
+    if [ "$DRY_RUN" != "1" ]; then
+      python3 scripts/proposal_ledger.py choose --topic "$DIVE_CHOICE" 2>/dev/null \
+        || log run "WARNING: proposal ledger update failed"
+    fi
     DIVE_TOPIC_NOTE=" The listener pre-chose tonight's topic via the evening picker: \
 '${DIVE_CHOICE}'. Take it as the deep-dive topic — skip topic selection and go straight to research."
   fi
-  run_step deepdive claude -p "Use the weekly-deep-dive skill to produce this week's deep-dive episode \
+  run_step deepdive agent_stage deepdive "Use the weekly-deep-dive skill to produce this week's deep-dive episode \
 following its grounding rules and length target (20-25 min). STOP after step 4's validation gate \
 passes — do NOT run the render or update_history lines in step 4; the harness handles both. \
-Print the topic and word count when done.${DIVE_TOPIC_NOTE}" \
-    --model "$DEEPDIVE_MODEL" \
-    --effort medium \
-    --allowedTools "Bash Read Write WebSearch WebFetch Skill Agent" \
-    --permission-mode acceptEdits \
-    --max-turns 60
+Print the topic and word count when done.${DIVE_TOPIC_NOTE}"
 
-  set +e
-  .venv/bin/python scripts/update_history.py --append --meta out/deepdive_meta.json \
-    2>&1 | python3 scripts/run_log.py prefix --src update-history >> "$LOG"
-  HIST_DD_RC=${PIPESTATUS[0]}
-  set -e
-  [ "$HIST_DD_RC" -eq 0 ] || log run "WARNING: update_history (deepdive) failed; history.json may be stale"
+  if [ "$DRY_RUN" = "1" ]; then
+    log run "dry-run: skipped deep-dive history, archive, render, publish, and ledger cleanup"
+  else
+    set +e
+    .venv/bin/python scripts/update_history.py --append --meta out/deepdive_meta.json \
+      2>&1 | python3 scripts/run_log.py prefix --src update-history >> "$LOG"
+    HIST_DD_RC=${PIPESTATUS[0]}
+    set -e
+    [ "$HIST_DD_RC" -eq 0 ] || log run "WARNING: update_history (deepdive) failed; history.json may be stale"
 
   mkdir -p archive/scripts
   cp -f out/deepdive_script.txt "archive/scripts/$DATE-deepdive.txt" 2>/dev/null \
@@ -364,7 +340,8 @@ subprocess.run(["python3","scripts/publish.py","--mp3",mp3[-1],
                 "--summary",summary,"--notes","out/deepdive_shownotes.md",
                 "--date",ep.get("date",date),"--slug","deepdive"], check=True)
 PY
-  rm -f out/deepdive_options.json   # consumed; a stale one must not steer next week
+    rm -f out/deepdive_options.json   # consumed; a stale one must not steer next week
+  fi
 fi
 
 log run "Done: $DATE"
