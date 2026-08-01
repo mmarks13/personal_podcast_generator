@@ -22,6 +22,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
 import re
@@ -33,6 +34,10 @@ from datetime import datetime, timedelta, timezone
 
 SOURCES_YAML = os.path.join(os.path.dirname(__file__), "..", "config", "sources.yaml")
 RSS_MAX_ITEMS = 25  # per feed, after time-windowing
+# Today's HF page is the day's noisiest feed — ~40 papers with hours of votes on
+# them, i.e. no reception signal yet. Keep only the very top as a same-day lane for
+# a genuinely big drop; the real paper pool is the aged 7/30-day feeds below.
+HF_DAILY_TOP = 3
 # Word-boundary matching: a bare substring check let "ai" match "said"/"email".
 AI_KEYWORDS = (
     "ai", "llm", "llms", "gpt", "claude", "gemini", "model", "models", "agent",
@@ -60,27 +65,43 @@ def _published(entry) -> datetime | None:
 
 # --- api sources, dispatched by URL shape ---------------------------------
 
-def fetch_hf_daily_papers(url: str, date: str | None = None) -> list[dict]:
-    """Hugging Face Daily Papers feed (curated, upvoted AI papers)."""
+def fetch_hf_daily_papers(url: str, date: str | None = None,
+                          top: int | None = None) -> list[dict]:
+    """Hugging Face Daily Papers feed (curated, upvoted AI papers).
+
+    `top` truncates to the highest-voted N. Only today's feed passes it — the day
+    pages behind the 7/30-day pools must stay untruncated, or those pools would be
+    built from 3 papers a day instead of the full listing.
+    """
     if date:
         url += ("&" if "?" in url else "?") + "date=" + urllib.parse.quote(date)
     data = json.loads(_get(url))
     out = []
     for item in data:
         paper = item.get("paper", {})
+        org = paper.get("organization") or item.get("organization")
         out.append(
             {
                 "title": (paper.get("title") or item.get("title", "")).strip(),
                 "summary": (paper.get("summary") or "").replace("\n", " ").strip(),
                 "upvotes": paper.get("upvotes"),
                 "arxiv_id": paper.get("id"),
+                # HF org the paper is linked to (e.g. "google"); absent for many papers
+                "organization": org.get("name") if isinstance(org, dict) else org,
+                "authors": [a.get("name") for a in paper.get("authors", [])][:12],
+                "num_comments": item.get("numComments"),
+                "github_repo": paper.get("githubRepo"),
+                "project_page": paper.get("projectPage"),
+                # arXiv publish date — can lag the HF feature date by days
+                "published_at": paper.get("publishedAt"),
+                "ai_keywords": paper.get("ai_keywords"),
                 "url": f"https://huggingface.co/papers/{paper.get('id')}"
                 if paper.get("id")
                 else item.get("url"),
             }
         )
     out.sort(key=lambda p: (p.get("upvotes") or 0), reverse=True)
-    return out
+    return out[:top] if top else out
 
 
 def fetch_hf_day_pages(url: str, days: int) -> dict[str, list[dict]]:
@@ -121,6 +142,120 @@ def hf_top_from_pages(pages: dict[str, list[dict]], days: int, top: int) -> list
     return out[:top]
 
 
+# --- reddit (OAuth) --------------------------------------------------------
+
+REDDIT_UA = "python:daily-ai-podcast:1.0 (by /u/mmarks13)"
+REDDIT_COMMENTS_PER_POST = 5
+_reddit_token: str | None = None
+
+
+def reddit_token() -> str:
+    """App-only bearer token, fetched once per run and reused.
+
+    `client_credentials` gives read-only access to public data — enough for posts
+    and comments, and it means no account password ever touches this box. Raises if
+    the creds are absent, which `safe()` turns into a skipped source, not a dead run.
+    """
+    global _reddit_token
+    if _reddit_token:
+        return _reddit_token
+    cid = os.environ.get("REDDIT_CLIENT_ID")
+    secret = os.environ.get("REDDIT_CLIENT_SECRET")
+    if not cid or not secret:
+        raise RuntimeError("REDDIT_CLIENT_ID/REDDIT_CLIENT_SECRET not set in .env")
+    auth = base64.b64encode(f"{cid}:{secret}".encode()).decode()
+    req = urllib.request.Request(
+        "https://www.reddit.com/api/v1/access_token",
+        data=urllib.parse.urlencode({"grant_type": "client_credentials"}).encode(),
+        headers={"Authorization": f"Basic {auth}", "User-Agent": REDDIT_UA},
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        _reddit_token = json.loads(resp.read())["access_token"]
+    return _reddit_token
+
+
+def _reddit_get(url: str) -> dict | list:
+    req = urllib.request.Request(
+        url,
+        headers={
+            "Authorization": f"bearer {reddit_token()}",
+            "User-Agent": REDDIT_UA,
+        },
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read())
+
+
+def fetch_reddit_comments(permalink: str, limit: int) -> list[dict]:
+    """The post's top comments — often where the signal is (a debunked benchmark,
+    the actual repo link). Failure here is never fatal to the post itself."""
+    data = _reddit_get(
+        f"https://oauth.reddit.com{permalink}?sort=top&limit={limit}&depth=1"
+    )
+    if not isinstance(data, list) or len(data) < 2:
+        return []
+    out = []
+    for child in data[1].get("data", {}).get("children", []):
+        c = child.get("data", {})
+        body = (c.get("body") or "").replace("\n", " ").strip()
+        if child.get("kind") != "t1" or not body:
+            continue
+        # Stickied mod/bot comments sort above everything, so on exactly the popular
+        # posts we most want to read they'd eat a slot with "your post is trending".
+        if c.get("stickied") or c.get("author") == "AutoModerator":
+            continue
+        out.append({"author": c.get("author"), "score": c.get("score"),
+                    "body": body[:600]})
+        if len(out) >= limit:
+            break
+    return out
+
+
+def fetch_reddit(url: str) -> list[dict]:
+    """A subreddit listing (top N of the day/week) with full post metadata.
+
+    No score floor and no flair filter by design: score, upvote_ratio, num_comments
+    and flair all ride along with each post so that what counts as notable is judged
+    downstream — by the writer today, and by a trained classifier later — instead of
+    by a threshold hardcoded here that quietly goes stale.
+    """
+    listing = _reddit_get(url)
+    out = []
+    for child in listing.get("data", {}).get("children", []):
+        p = child.get("data", {})
+        title = (p.get("title") or "").strip()
+        if not title or p.get("stickied"):
+            continue
+        permalink = p.get("permalink") or ""
+        created = p.get("created_utc")
+        try:
+            comments = fetch_reddit_comments(permalink, REDDIT_COMMENTS_PER_POST)
+            time.sleep(0.6)  # stay well inside the 100 req/min OAuth budget
+        except Exception:  # noqa: BLE001 - a post is still worth having without them
+            comments = []
+        out.append(
+            {
+                "title": title,
+                "summary": (p.get("selftext") or "").replace("\n", " ").strip()[:1000],
+                "score": p.get("score"),
+                "upvote_ratio": p.get("upvote_ratio"),
+                "num_comments": p.get("num_comments"),
+                "flair": p.get("link_flair_text"),
+                "author": p.get("author"),
+                "published": datetime.fromtimestamp(created, timezone.utc).isoformat()
+                if created
+                else None,
+                # `url` is what the post points at (often the primary source); the
+                # permalink is the discussion itself. Both matter.
+                "url": p.get("url"),
+                "discussion": f"https://www.reddit.com{permalink}" if permalink else None,
+                "top_comments": comments,
+            }
+        )
+    out.sort(key=lambda p: (p.get("score") or 0), reverse=True)
+    return out
+
+
 def fetch_hacker_news(url: str, hours: int, min_points: int = 40) -> list[dict]:
     """AI-related HN stories from the window, by points."""
     since = int((datetime.now(timezone.utc) - timedelta(hours=hours)).timestamp())
@@ -139,6 +274,8 @@ def fetch_hacker_news(url: str, hours: int, min_points: int = 40) -> list[dict]:
                 "title": title,
                 "points": h.get("points"),
                 "num_comments": h.get("num_comments"),
+                "created_at": h.get("created_at"),
+                "author": h.get("author"),
                 "url": h.get("url")
                 or f"https://news.ycombinator.com/item?id={h.get('objectID')}",
                 "discussion": f"https://news.ycombinator.com/item?id={h.get('objectID')}",
@@ -164,6 +301,7 @@ def fetch_github_releases(url: str, hours: int) -> list[dict]:
             {
                 "title": (r.get("name") or r.get("tag_name") or "").strip(),
                 "tag": r.get("tag_name"),
+                "prerelease": r.get("prerelease"),
                 "summary": (r.get("body") or "").replace("\r\n", " ").strip()[:1000],
                 "url": r.get("html_url"),
                 "published": published.isoformat() if published else None,
@@ -175,7 +313,9 @@ def fetch_github_releases(url: str, hours: int) -> list[dict]:
 def dispatch_api(url: str, hours: int, hf_date: str | None) -> list[dict]:
     """Route an `api` source to the right fetcher by its URL shape."""
     if "huggingface.co/api/daily_papers" in url:
-        return fetch_hf_daily_papers(url, hf_date)
+        return fetch_hf_daily_papers(url, hf_date, top=HF_DAILY_TOP)
+    if "oauth.reddit.com" in url:
+        return fetch_reddit(url)
     if "hn.algolia.com" in url:
         return fetch_hacker_news(url, hours)
     if "api.github.com" in url and "/releases" in url:
@@ -203,6 +343,8 @@ def fetch_rss(url: str, hours: int) -> list[dict]:
                 "summary": summary[:1000],
                 "url": getattr(e, "link", ""),
                 "published": published.isoformat() if published else None,
+                "author": getattr(e, "author", None),
+                "tags": [t.get("term") for t in getattr(e, "tags", [])] or None,
             }
         )
     # Newest first when we have dates; otherwise feed order.
@@ -264,16 +406,17 @@ def main() -> int:
 
     # Companion feeds to HF Daily Papers, built from one shared set of day-page
     # requests: the trailing week's top papers (the aged pool research dives are
-    # normally drawn from) and a 30-day top-5 safety net for slow risers or weeks
-    # of thin shows. Day-one upvotes are a weak signal; these carry the real
-    # reception. Already-covered papers get repeat-flagged by the consolidator.
+    # normally drawn from) and a 30-day safety net for slow risers or weeks of thin
+    # shows. Day-one upvotes are a weak signal; these carry the real reception, so
+    # they're deliberately the widest feeds here while today's page is the narrowest.
+    # Already-covered papers get repeat-flagged by the consolidator.
     hf = next((s for s in sources if "huggingface.co/api/daily_papers" in s["url"]), None)
     if hf:
         pages, err = safe("HF day pages (30)", fetch_hf_day_pages, hf["url"], 30)
         if err:
             errors.append(err)
-        for name, days, top in (("HF Top Papers (7-day)", 7, 15),
-                                ("HF Top Papers (30-day)", 30, 5)):
+        for name, days, top in (("HF Top Papers (7-day)", 7, 25),
+                                ("HF Top Papers (30-day)", 30, 10)):
             items = hf_top_from_pages(pages, days, top) if pages else []
             for it in items:
                 it["source"] = name

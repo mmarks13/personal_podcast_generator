@@ -15,7 +15,10 @@ Read both inputs:
 - `out/sources.json` — the structured RSS/API dump, a `feeds` object keyed by source
   name; every item carries the `source` it came from, and items differ by source type
   (RSS/news have `title`/`summary`/`url`; HF Daily Papers adds `upvotes`; HN adds
-  `points`/`num_comments`). It is large — **never `Read`/`cat` it whole, and never print
+  `points`/`num_comments`; Reddit adds `score`/`upvote_ratio`/`num_comments`/`flair`
+  plus a `top_comments` list — carry that reaction signal through, and note that a
+  high-scoring post with a `Complaint` flair is engagement, not news). It is large —
+  **never `Read`/`cat` it whole, and never print
   its full contents to stdout.** Parse it with short `python`/`jq` passes via `bash` that
   emit only the specific fields, counts, or slices you actually need; treat `history.json`
   the same way. Anything you dump into the transcript you then pay to re-read on every

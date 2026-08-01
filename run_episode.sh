@@ -75,6 +75,30 @@ run_step() {
   return "$rc"
 }
 
+# run_step_retry <tries> <src> <cmd...> : like run_step, but re-launches the command on
+# nonzero exit up to <tries> times before recording a failure. One-shot `claude -p`
+# sessions have died to transient Bun segfaults (exit 139) that leave no output; a fresh
+# launch clears them. Only marks FAILED after the final attempt fails.
+run_step_retry() {
+  local tries="$1"; shift
+  local src="$1"; shift
+  local attempt=1 rc=0 start
+  while true; do
+    start=$(date +%s)
+    log run "step start: $src (attempt $attempt/$tries)"
+    set +e
+    "$@" 2>&1 | python3 scripts/run_log.py prefix --src "$src" >> "$LOG"
+    rc=${PIPESTATUS[0]}
+    set -e
+    log run "step end: $src exit=$rc dur=$(( $(date +%s) - start ))s"
+    if [ "$rc" -eq 0 ] || [ "$attempt" -ge "$tries" ]; then break; fi
+    log run "WARNING: $src failed (exit=$rc); retrying"
+    attempt=$((attempt+1))
+  done
+  if [ "$rc" -ne 0 ]; then FAILED+=("$src"); fi
+  return "$rc"
+}
+
 FAILED=()
 RUN_START=$(date +%s)
 python3 scripts/run_log.py trim --keep "$((LOG_KEEP_RUNS-1))" --log "$LOG"
@@ -131,7 +155,7 @@ if [ "$MODE" = "propose" ]; then
     | python3 scripts/run_log.py prefix --src propose-fetch >> "$LOG" \
     || log run "WARNING: evening fetch failed; picker works from memory alone"
 
-  run_step propose claude -p "Read .claude/skills/weekly-deep-dive/SKILL.md (its topic palette and \
+  run_step_retry 3 propose claude -p "Read .claude/skills/weekly-deep-dive/SKILL.md (its topic palette and \
 selection criteria), history.json (recent episodes, active threads, longterm.concepts_taught), \
 deepdive_proposals.json (the proposal ledger — NEVER re-pitch a retired topic: times_proposed >= 3 \
 and never chosen; avoid re-pitching anything already proposed twice unless it's newly urgent), the \
@@ -191,6 +215,25 @@ recover Tier-1 failures via a backup search, and write out/crawl.json in that co
   --permission-mode acceptEdits \
   --max-turns 40 \
   || log run "WARNING: crawl failed; consolidator will work from sources.json alone"
+
+# 2.2 Archive tonight's raw gather to smallbatch-lab as classifier training data.
+# Deliberately the *pre*-consolidation inputs: the classifier being trained there is
+# meant to eventually do the consolidator's triage itself, so it has to learn from
+# what the consolidator sees, not from what it produced. Write-only (no commit/push)
+# and skipped silently if the sibling repo isn't checked out — the show never depends
+# on this, so it must never be able to break the run.
+TRIAGE_DIR="$HOME/Documents/Github/smallbatch-lab/data/podcast-triage"
+if [ -d "$(dirname "$TRIAGE_DIR")" ]; then
+  mkdir -p "$TRIAGE_DIR"
+  for f in sources crawl; do
+    if [ -f "out/$f.json" ]; then
+      cp "out/$f.json" "$TRIAGE_DIR/$DATE-$f.json"
+      log run "archived out/$f.json -> $TRIAGE_DIR/$DATE-$f.json"
+    fi
+  done
+else
+  log run "smallbatch-lab not found; skipped triage archive"
+fi
 
 # 2.5 Consolidate — standalone Sonnet session writing out/candidates.json.
 run_step consolidate claude -p "Follow .claude/agents/source-consolidator.md exactly. Merge \
@@ -271,7 +314,9 @@ PY
 # Wed/Sat/Sun: also produce + publish the deep-dive episode. If the listener replied
 # to the previous evening's options push, their choice becomes the topic.
 if [ "$DOW" = "3" ] || [ "$DOW" = "6" ] || [ "$DOW" = "7" ]; then
-  DIVE_CHOICE="$(python3 scripts/ntfy_choice.py 2>/dev/null || true)"
+  # DEEPDIVE_TOPIC overrides the phone picker — for manual reruns after a failed night,
+  # when the ntfy reply has aged out of the topic's retention window.
+  DIVE_CHOICE="${DEEPDIVE_TOPIC:-$(python3 scripts/ntfy_choice.py 2>/dev/null || true)}"
   DIVE_TOPIC_NOTE=""
   if [ -n "$DIVE_CHOICE" ]; then
     log run "deepdive: listener pre-chose topic: $DIVE_CHOICE"

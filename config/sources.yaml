@@ -20,6 +20,11 @@ sources:
     tier: 2
     window_hours: 168   # lower-cadence lab blog; look back ~1 week (run default is 48h)
 
+  - name: Microsoft Research Blog
+    method: fetch
+    url: "https://www.microsoft.com/en-us/research/blog/"
+    tier: 2
+
   - name: Hugging Face Daily Papers
     method: api
     url: "https://huggingface.co/api/daily_papers"
@@ -84,6 +89,57 @@ sources:
   - name: Mistral AI News
     method: fetch
     url: "https://mistral.ai/news"
+    tier: 2
+
+  # --- Open, small, and adaptable model labs ---
+  # Liquid is core because efficient local models are a primary show beat. The
+  # supporting sources are lower-cadence first-party channels; the crawler still
+  # date-filters them, so old model pages are not repeated every day.
+  - name: Liquid AI Blog
+    method: fetch
+    url: "https://www.liquid.ai/company/blog"
+    tier: 1
+
+  - name: Fastino Labs / Pioneer Blog
+    method: fetch
+    url: "https://pioneer.ai/blog"
+    tier: 2
+
+  - name: Pico LM Research
+    method: fetch
+    url: "https://research.picolm.io/"
+    tier: 2
+
+  - name: Pleias Blog
+    method: fetch
+    url: "https://pleias.ai/blog"
+    tier: 2
+
+  - name: Arcee AI Blog
+    method: fetch
+    url: "https://www.arcee.ai/blog"
+    tier: 2
+
+  - name: Apple Machine Learning Research
+    method: fetch
+    url: "https://machinelearning.apple.com/"
+    tier: 2
+
+  - name: Ai2 Research
+    method: fetch
+    url: "https://allenai.org/research"
+    tier: 2
+
+  - name: IBM Research Blog
+    method: fetch
+    url: "https://research.ibm.com/blog"
+    tier: 2
+
+  # First-party fine-tuning recipes and optimization results. This is intentionally
+  # a blog source rather than another general AI aggregator.
+  - name: Unsloth Blog
+    method: fetch
+    url: "https://unsloth.ai/blog"
     tier: 2
 
   # --- News / reporting ---
@@ -159,9 +215,52 @@ sources:
     url: "https://hn.algolia.com/api/v1/search_by_date?tags=story&query=AI"
     tier: 2
 
+  # Reddit via the OAuth API (needs REDDIT_CLIENT_ID/REDDIT_CLIENT_SECRET in .env).
+  # The old .rss path is gone: it couldn't carry score/flair/comments, and it 429s
+  # hard. Each source takes the sub's top N of the day — `limit` in the URL sets N.
+  # No score floor and no flair blocklist on purpose: every post ships its full
+  # metadata (score, upvote_ratio, num_comments, flair) plus its top comments, so
+  # importance is judged downstream rather than by a threshold that goes stale.
   - name: r/LocalLLaMA
-    method: rss
-    url: "https://www.reddit.com/r/LocalLLaMA/top/.rss?t=day"
+    method: api
+    url: "https://oauth.reddit.com/r/LocalLLaMA/top?t=day&limit=10"
+    tier: 2
+
+  - name: r/MachineLearning
+    method: api
+    url: "https://oauth.reddit.com/r/MachineLearning/top?t=day&limit=10"
+    tier: 2
+
+  # High engagement, complaint-heavy — but the earliest signal on Anthropic product
+  # changes. Read the flair before the score.
+  - name: r/Anthropic
+    method: api
+    url: "https://oauth.reddit.com/r/Anthropic/top?t=day&limit=10"
+    tier: 2
+
+  # t=week, not t=day: this sub is slow enough that its top-of-day tops out around 6
+  # upvotes, while its week carries the real applied-LLM engineering posts. Trades a
+  # little repetition night-to-night for actual signal.
+  - name: r/LLMDevs
+    method: api
+    url: "https://oauth.reddit.com/r/LLMDevs/top?t=week&limit=10"
+    tier: 2
+
+  # Agent-building community. Skews toward freelance/consulting hustle posts rather
+  # than engineering, so read the flair and score before trusting a headline here.
+  - name: r/AI_Agents
+    method: api
+    url: "https://oauth.reddit.com/r/AI_Agents/top?t=day&limit=10"
+    tier: 2
+
+  - name: r/artificial
+    method: api
+    url: "https://oauth.reddit.com/r/artificial/top?t=day&limit=10"
+    tier: 2
+
+  - name: r/deeplearning
+    method: api
+    url: "https://oauth.reddit.com/r/deeplearning/top?t=day&limit=10"
     tier: 2
 
   # --- Benchmarks / evals / model decision-making ---
@@ -234,6 +333,35 @@ sources:
     method: api
     url: "https://api.github.com/repos/ggml-org/llama.cpp/releases"
     tier: 2
+
+  # Small-model and post-training release channels. Minor patch releases are kept:
+  # they are useful negative/boundary records for triage, while substantive PEFT,
+  # preference-training, quantization, and model-support changes surface directly.
+  - name: OpenBMB MiniCPM Releases
+    method: api
+    url: "https://api.github.com/repos/OpenBMB/MiniCPM/releases"
+    tier: 2
+
+  - name: Hugging Face PEFT Releases
+    method: api
+    url: "https://api.github.com/repos/huggingface/peft/releases"
+    tier: 2
+
+  - name: Hugging Face TRL Releases
+    method: api
+    url: "https://api.github.com/repos/huggingface/trl/releases"
+    tier: 2
+
+  - name: Axolotl Releases
+    method: api
+    url: "https://api.github.com/repos/axolotl-ai-cloud/axolotl/releases"
+    tier: 2
+
+  - name: LlamaFactory Releases
+    method: api
+    url: "https://api.github.com/repos/hiyouga/LlamaFactory/releases"
+    tier: 2
+
   - name: GitHub Trending
     method: fetch
     url: "https://github.com/trending?since=daily"
