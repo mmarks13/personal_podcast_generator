@@ -30,7 +30,7 @@ fi
 
 DATE="$(date +%F)"
 DOW="$(date +%u)"   # 1=Mon .. 6=Sat 7=Sun
-# Cron jobs sharing this script: the full podcast pipeline at 01:00; the daily read on
+# Cron jobs sharing this script: the full podcast pipeline at 04:00; the daily read on
 # its own at ~06:30 — after the 5h limit resets — so the read stops competing with the
 # podcast for one rate-limit window; and `propose` on Tue/Fri/Sat evenings, which pushes
 # 3-5 deep-dive topic pitches to the listener's phone (ntfy) so the reply can steer
@@ -138,12 +138,12 @@ fi
 
 # In `propose` mode (Tue/Fri/Sat ~20:00 cron) a cheap session drafts 3-5 deep-dive topic
 # options from the week's coverage, then the pitches go to the phone via ntfy. The
-# listener replies with a number (or a topic of their own); the 01:00 run reads the
+# listener replies with a number (or a topic of their own); the 04:00 run reads the
 # reply via scripts/ntfy_choice.py. No reply -> the deep-dive writer picks, as ever.
 if [ "$MODE" = "propose" ]; then
   # Fresh evening pull of the structured feeds so the picker sees today's papers
   # and discussion, not last night's snapshot. Non-fatal; a separate file so the
-  # 01:00 run's own fetch is untouched.
+  # 04:00 run's own fetch is untouched.
   python3 scripts/fetch_sources.py --hours 24 --out out/sources_evening.json 2>&1 \
     | python3 scripts/run_log.py prefix --src propose-fetch >> "$LOG" \
     || log run "WARNING: evening fetch failed; picker works from memory alone"

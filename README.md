@@ -191,7 +191,7 @@ podcast pipeline overnight, and the daily read on its own after the 5h rate-limi
 window resets, so the read gets a fresh budget instead of competing with the podcast:
 
 ```cron
-0 1 * * *    cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh         >> logs/cron-bootstrap.log 2>&1
+0 4 * * *    cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh         >> logs/cron-bootstrap.log 2>&1
 5 6 * * *    cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh read    >> logs/cron-bootstrap.log 2>&1
 0 20 * * 2,5,6 cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh propose >> logs/cron-bootstrap.log 2>&1
 ```
