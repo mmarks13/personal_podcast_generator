@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The evidence underneath the answer — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>The evidence underneath the answer</h1>
+<div class="date">Self-Attention — 2026-08-02</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-08-02/podcast-2026-08-02.mp3"></audio>
+<p><em>2026-08-02</em></p>
+<p>AskChem turns chemistry papers into provenance-carrying claims, while Qwen-UI-Agent learns to mix screens, shell commands, and explicit verification on real devices. Plus the EU's AI-transparency deadline, two smaller tools worth sizing honestly, and a Sunday review of a week when evidence moved from afterthought to architecture.</p>
+<h2>Papers</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2607.28618">AskChem: Claim-Centered Infrastructure for Chemistry Literature Synthesis</a></li>
+<li><a href="https://arxiv.org/abs/2607.28227">Qwen-UI-Agent Technical Report</a></li>
+<li><a href="https://research.google/blog/science-one-framework-a-verifiable-autonomous-research-framework-via-chain-of-evidence/">Google Research: Science One and Chain-of-Evidence</a></li>
+<li><a href="https://www.anthropic.com/research/discovering-cryptographic-weaknesses">Anthropic: Discovering cryptographic weaknesses</a></li>
+</ul>
+<h2>Releases</h2>
+<ul>
+<li><a href="https://digital-strategy.ec.europa.eu/en/factpages/quick-facts-transparency-rules-ai-systems">European Commission: Transparency rules for AI systems</a></li>
+<li><a href="https://microsoft.github.io/flint-chart/">Microsoft Research: Flint visualization language</a></li>
+<li><a href="https://www.anthropic.com/news/investigating-incidents-cybersecurity-evals">Anthropic: Investigating incidents in our cybersecurity evaluations</a></li>
+<li><a href="https://huggingface.co/blog/agent-intrusion-technical-timeline">Hugging Face: Anatomy of a Frontier Lab Agent Intrusion</a></li>
+<li><a href="https://openai.com/index/advancing-the-price-performance-frontier-with-gpt-5-6/">OpenAI: Advancing the price-performance frontier with GPT-5.6</a></li>
+<li><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-0731">DeepSeek-V4-Flash-0731 model card</a></li>
+</ul>
+<h2>Discussion</h2>
+<ul>
+<li><a href="https://enklypesalt.com/posts/context-collapse-part3-ai-worming-through-word/">AI Worming through Word — Context Collapse part 3</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>The claim instead of the paper</li>
+<li>Three things to size honestly</li>
+<li>Real interfaces fight back</li>
+<li>What the week established</li>
+<li>Sunday close</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Sunday, August second. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. Today, a chemistry search engine stops returning papers and starts returning the claims inside them.</p>
+<p><b>Ada:</b> Then an interface agent learns that the real world contains pop-ups, bad widgets, and buttons that do not do what they promised.</p>
+<p><b>Alan:</b> We have three quick things between those, and because it is Sunday, we'll close by asking what this week actually established.</p>
+<h3>The claim instead of the paper</h3>
+<p><b>Ada:</b> Let me start with a question that sounds like search and turns into research. Which catalysts have been reported for converting carbon dioxide into carbon monoxide, under what conditions, and at what efficiency?</p>
+<p><b>Alan:</b> A normal search engine gives me ten blue links and a long afternoon.</p>
+<p><b>Ada:</b> Or ten papers, which is a more respectable version of the same problem. The answer is not a document. It is one measurement in paper one, a reaction condition in paper two, and a result in paper three that may contradict both.</p>
+<p><b>Alan:</b> So the retrieval system found the library and left the synthesis to me.</p>
+<p><b>Ada:</b> Exactly. AskChem is a new system from researchers at New York University and Matterstack. Its central move is almost comically small: change the unit of retrieval from the paper to the claim.</p>
+<p><b>Alan:</b> Define claim before that word gets too philosophical.</p>
+<p><b>Ada:</b> An atomic, typed assertion extracted from a paper. The record carries the source's digital object identifier and either a verbatim quote or an explicit locator for the evidence. It can also carry structured fields such as the reactants, conditions, measurements, or materials.</p>
+<p><b>Alan:</b> So instead of a result saying, here is a paper about catalysts, it says, here is the catalyst, the reported efficiency, and the sentence where the authors said it.</p>
+<p><b>Ada:</b> Right. The paper is still the authority. AskChem turns the individual finding into something a database can search, group, connect, and hand to an agent without severing the path back to the source.</p>
+<p><b>Alan:</b> That last clause is doing the work.</p>
+<p><b>Ada:</b> It is. The authors report a live index of two point four million claims drawn from a hundred forty-seven thousand papers, spanning a century of chemistry. The system uses a high-throughput extractor over abstracts and a deeper extractor over full text where it is available.</p>
+<p><b>Alan:</b> And both are language models extracting claims, yes?</p>
+<p><b>Ada:</b> Yes, which means the index can be wrong. We should put that on the table now, not save it for the caveat parade. A quote and a digital object identifier prove traceability. They do not prove that the model interpreted the quote correctly.</p>
+<p><b>Alan:</b> Good. I can audit a wrong row. That is better than an unauditable wrong answer, but it is still a wrong row.</p>
+<p><b>Ada:</b> Precisely. Now, once the claims exist, AskChem puts three different structures over the same claim store. First, a set of stable facets: reaction type, substance class, application, technique, mechanism, claim type, data, and time.</p>
+<p><b>Alan:</b> Those are the filters down the left side of a good shopping site, except the products are experimental findings.</p>
+<p><b>Ada:</b> That analogy works, with one warning. A chemistry taxonomy has arguments hiding inside it. What counts as the same reaction class is not always clerical.</p>
+<p><b>Alan:</b> And the system induced those categories rather than taking one official ontology.</p>
+<p><b>Ada:</b> It induced them from the corpus, then stabilized the mess with canonical top-level routes, synonym normalization, and clustering of near-duplicates. The authors say the result is useful for production search. They do not claim the categories are scientific truth.</p>
+<p><b>Alan:</b> Structure number two?</p>
+<p><b>Ada:</b> An evidence graph. Claims are connected by typed relations: supports, contradicts, extends, derives from, or cites as evidence. The current graph has a little over a hundred seventy-one thousand directed edges.</p>
+<p><b>Alan:</b> This is where I get interested. A list of matching claims tells me what people said. A graph can tell me that a later paper challenged the earlier number.</p>
+<p><b>Ada:</b> Or extended it under a different condition. The team had a domain expert manually inspect a stratified sample. After removing two undecidable cases, a hundred forty-three of a hundred forty-six edges had the correct relation type. They report ninety-seven point nine percent precision on that sample.</p>
+<p><b>Alan:</b> Nice result. Small sample.</p>
+<p><b>Ada:</b> Small sample, and relation type is not the same as whether both claims are themselves correct. The third structure is even more explicitly exploratory: a living taxonomy that places papers under principles, theories, models, mechanisms, and phenomena.</p>
+<p><b>Alan:</b> Which sounds like the place a beautifully organized hallucination could live.</p>
+<p><b>Ada:</b> The authors seem to know that. They call it an exploratory overview, not a validated scientific ontology. I would use the stable facets to find things, the evidence graph to follow disputes, and the living taxonomy to browse with one eyebrow raised.</p>
+<p><b>Alan:</b> Alright. What did the evaluation actually test?</p>
+<p><b>Ada:</b> Thirty cross-paper chemistry questions. They used a GPT five point five reader in five settings, including no retrieval, AskChem, and three other research systems. With no retrieval, eighty-eight point three percent of the cited digital object identifiers resolved. With AskChem, every cited identifier resolved.</p>
+<p><b>Alan:</b> One hundred percent existence. Not one hundred percent truth.</p>
+<p><b>Ada:</b> Say it twice. The AskChem-grounded answers also averaged eighteen point one verified citations per answer, the highest citation density in the comparison, and scored better on mean paper relevance than the ungrounded reader.</p>
+<p><b>Alan:</b> But if I bury a bad answer under eighteen real citations, the citation counter will applaud.</p>
+<p><b>Ada:</b> Correct. The benchmark measures whether sources exist, how densely they are cited, whether the papers are on topic, and some grounded specificity. It is not a full factual-accuracy evaluation, and it is only thirty questions. A closed competitor in the table produced much more citation-linked quantitative detail and a slightly higher on-topic rate.</p>
+<p><b>Alan:</b> So AskChem did not win every column.</p>
+<p><b>Ada:</b> It did not. What it demonstrated is narrower and more reusable. You can make the smallest useful object in retrieval an auditable claim rather than an opaque chunk or a whole document.</p>
+<p><b>Alan:</b> I want to translate that out of chemistry. Most retrieval systems in companies still cut documents into blocks of a few hundred tokens, embed the blocks, then paste the nearest blocks into a prompt.</p>
+<p><b>Ada:</b> Yes. A chunk is convenient for a machine. It is rarely the unit a person is asking about. The person wants the policy exception, the invoice total, the clinical finding, the decision and its date.</p>
+<p><b>Alan:</b> And if you extract those into claims, you get precision and provenance. You also pay an enormous indexing bill up front and inherit every extraction error.</p>
+<p><b>Ada:</b> That is the trade. AskChem stores the index in ordinary, almost stubbornly unromantic infrastructure: full-text search, a vector index, a relational store, and an application programming interface. The novelty is not a magic retriever. It is deciding what deserves an identity.</p>
+<p><b>Alan:</b> There is a governance payoff too. A chunk can change when the document parser changes. A claim record can carry the quote, the source, the extraction confidence, and the graph edges as separate inspectable fields.</p>
+<p><b>Ada:</b> And a governance hazard. If an automated system tells a chemist that two findings contradict each other, the typed edge can look more authoritative than the extraction process deserves. The paper's own final instruction is the right one: this assists literature synthesis; it does not replace reading primary sources for critical decisions.</p>
+<p><b>Alan:</b> Which sounds conservative until you compare it with what people actually do now, which is ask a model from memory and accept the citation-shaped answer.</p>
+<p><b>Ada:</b> That is why this earns a dive. Not because chemistry got a nicer search page. Because AskChem makes a concrete systems claim: grounding improves when provenance is attached at the moment the knowledge object is created, not reconstructed after the answer has already been written.</p>
+<h3>Three things to size honestly</h3>
+<p><b>Alan:</b> Three quick items. First, a rule taking effect today that has been compressed online into, quote, Europe says label all artificial intelligence content. That is not what the rule says.</p>
+<p><b>Ada:</b> Article fifty of the European Union Artificial Intelligence Act begins applying today. Providers of systems that generate synthetic text, image, audio, or video must make the output machine-detectable as artificially generated or manipulated, where technically feasible.</p>
+<p><b>Alan:</b> Provider means the company shipping the system. What does the person using it have to do?</p>
+<p><b>Ada:</b> Deployers have a narrower visible-disclosure duty. Clearly label deepfakes, and label generated text published to inform the public on matters of public interest when it did not receive human review or editorial control. Standard assistive editing is excluded, and artistic or satirical work gets a lighter disclosure treatment.</p>
+<p><b>Alan:</b> And systems already on the market before today get until December for the provider-side machine marking. Honest sizing: a real operational deadline, not a universal sticker on every assisted email.</p>
+<p><b>Ada:</b> Second, a minor but useful tool from Microsoft Research called Flint. It is a compact chart language designed so a person or an agent can specify the data's meaning, the chart type, and the visual encodings without hand-authoring every axis and spacing rule.</p>
+<p><b>Alan:</b> Then a compiler fills in the fussy bits.</p>
+<p><b>Ada:</b> Exactly. The project reports forty-six chart types and eighty-three examples, with output to Vega-Lite, ECharts, and Chart dot J S. It also ships a Model Context Protocol server. If you want an agent to make charts you can still edit and render in a known backend, this fills a real gap.</p>
+<p><b>Alan:</b> Third, Google Research published an experimental system called Science One. Same design instinct as AskChem, pointed at autonomous research: every claim in a generated paper is supposed to carry a chain back to a reference, a log line, the code that ran, or a results table.</p>
+<p><b>Ada:</b> Google reports an audit over seventy-five generated papers. Baseline systems invented as many as twenty-one percent of their references; Science One produced no phantom references and independently re-ran code to check reported scores.</p>
+<p><b>Alan:</b> Big if it survives outside the authors' tasks. Google labels it an experimental prototype, not a production tool, and some of its method-to-code checks use language-model judges. Worth watching, not outsourcing peer review to on Monday.</p>
+<h3>Real interfaces fight back</h3>
+<p><b>Alan:</b> Now the interface agent. I want to begin with the failure table, because it says more about computer use than the leaderboard does.</p>
+<p><b>Ada:</b> This is Qwen UI Agent from Alibaba.</p>
+<p><b>Alan:</b> Yes. Before training the specialist, the team took a strong general model, Qwen three point seven Plus, and reviewed every failed trajectory it produced on two real-phone benchmarks. More than half of the failures came from conditions that clean simulators usually remove.</p>
+<p><b>Ada:</b> Such as?</p>
+<p><b>Alan:</b> Grey placeholder text that looks like entered text. A list that refreshes after you act. Advertisements. Paywalls. CAPTCHAs. Blank pages. Date pickers and sliders that need a small move, another look, then another small move.</p>
+<p><b>Ada:</b> The texture of an actual phone.</p>
+<p><b>Alan:</b> Exactly. The paper assigns fifty-two percent of the reviewed failures to those real-world interface problems. Another forty point three percent came from execution limitations: the model could not find a deeply nested feature, got stuck repeating a useless action, or forgot which subtask it had already finished.</p>
+<p><b>Ada:</b> That adds up to a diagnosis: the benchmark agent knows what a button is, but not what it feels like when a button lies.</p>
+<p><b>Alan:</b> Or when the first tap did nothing. A sanitized simulator makes transitions deterministic because reproducibility demands it. A physical device is an adversarial distribution of notifications, stale state, latency, and other people's product decisions.</p>
+<p><b>Ada:</b> So what did the team build differently?</p>
+<p><b>Alan:</b> First, a real-device mobile runtime alongside the sandboxes. Second, one action space across phones, browsers, and desktops. The model can click and type through the graphical interface, run a command in a shell, call a structured service, ask the user for confirmation, or stop.</p>
+<p><b>Ada:</b> The command line is important. Why make a visual agent that avoids looking at the screen?</p>
+<p><b>Alan:</b> Because the graphical interface is often the worst tool for the job. If you need to merge files, inspect a document's structure, or verify the dimensions of an image, a command gives you an exact answer in one step. If you need to judge a layout, operate a native timeline, or see whether a chart actually rendered, the screen is the evidence.</p>
+<p><b>Ada:</b> Hands and eyes.</p>
+<p><b>Alan:</b> The paper's phrase is effectively that: the shell as hands, the graphical interface as eyes. On the OSWorld Verified benchmark, command-line operations appeared in ninety-two percent of tasks and made up about forty-one percent of all actions.</p>
+<p><b>Ada:</b> That is not a graphical agent with a little terminal escape hatch. That is a hybrid agent.</p>
+<p><b>Alan:</b> Completely. It also batches actions. Instead of taking one click, sending a fresh screenshot to the model, and paying for another decision, one model turn can emit a short ordered sequence when the intermediate states are predictable.</p>
+<p><b>Ada:</b> Give me an example where that is safe.</p>
+<p><b>Alan:</b> Open find, type the search term, press enter. Three local actions, no reason to stop between them. The model ends the batch when the next decision depends on a new screenshot, command result, dialog, or error.</p>
+<p><b>Ada:</b> And an example where it becomes dangerous.</p>
+<p><b>Alan:</b> Fill twenty fields and press submit without checking field nineteen. The paper actually shows a twenty-one-action form sequence that stops before the next uncertain dialog. That boundary — predictable local transaction versus consequential new state — is the whole engineering problem.</p>
+<p><b>Ada:</b> Does batching matter in the data?</p>
+<p><b>Alan:</b> On OSWorld Verified it appeared in about sixty-two percent of tasks, with around three primitive actions in an average batch. That means fewer perception, reasoning, and execution cycles, which attacks the latency problem directly.</p>
+<p><b>Ada:</b> Now the training loop, because the results did not come only from giving the model a shell.</p>
+<p><b>Alan:</b> Right. The system uses other agents to construct tasks, prepare application state, generate verifiers where an outcome can be checked, diagnose failures, and decide what kind of training example to create next. For supervised training, a visual judge finds the useful stretches inside both successful and failed trajectories.</p>
+<p><b>Ada:</b> So a failed run is not discarded. The segment where it recovered can still teach.</p>
+<p><b>Alan:</b> Exactly. Then reinforcement learning happens at two scales. Action-level training targets local mistakes such as clicking the wrong twin button or looping. Online training scores complete trajectories, including runs longer than a hundred turns. The paper says rollout ran across more than ten thousand concurrent environments.</p>
+<p><b>Ada:</b> That is a factory for interaction experience.</p>
+<p><b>Alan:</b> And it is expensive. Long tasks give sparse rewards, take variable time, and require environments you can reset. The authors openly say they could not automate the full development loop reliably. Their pipeline is agent-driven, not autonomous, and still needs substantial human oversight.</p>
+<p><b>Ada:</b> Good. Numbers.</p>
+<p><b>Alan:</b> Their twenty-seven-billion-parameter model reports eighty-two point one percent on MobileWorld, ninety-two point two on their real-device MobileWorld Real set, and ninety-seven point five on AndroidDaily. On the real-device table, those last two scores lead the baselines they tested, including larger closed models.</p>
+<p><b>Ada:</b> Vendor paper, vendor benchmark among them.</p>
+<p><b>Alan:</b> Yes. MobileWorld Real is their own proposed benchmark. More importantly, physical phones do not expose clean internal state, so those trajectories were scored by an automatic judge rather than a deterministic verifier.</p>
+<p><b>Ada:</b> How good was the judge?</p>
+<p><b>Alan:</b> On six hundred sixty-six examples separately examined by experts, the paper reports ninety-two point eight percent exact agreement. Respectable. Also enough residual error to move close leaderboard comparisons.</p>
+<p><b>Ada:</b> And the desktop result?</p>
+<p><b>Alan:</b> Seventy-nine point five percent on OSWorld Verified, but only a forty percent partial-progress score on the harder OSWorld version two. Different metric, so do not compare those two numbers directly. The second is the reminder that long, messy computer work is nowhere near solved.</p>
+<p><b>Ada:</b> I care more about one behavioral result than the headline score. What changed after online training?</p>
+<p><b>Alan:</b> The agent checked its work more often. On OSWorld, trajectories containing at least one verification action rose by fourteen point seven percent. False stops — runs where the model announced success but failed the final verifier — fell by eleven point two percent.</p>
+<p><b>Ada:</b> That is the result.</p>
+<p><b>Alan:</b> I think so too. One case has the untrained policy run a script that appears to create a chart and declare victory. The trained policy reopens the application, sees the rendered chart is empty, finds the leftover process that would overwrite it, fixes that, and checks again.</p>
+<p><b>Ada:</b> In other words, the model became less willing to accept its own status report.</p>
+<p><b>Alan:</b> Which is exactly what production agents need. The community discussion this week has been full of agents saying task completed successfully when the artifact disagrees. Here is a training signal aimed at that failure: reward the state, not the sentence.</p>
+<p><b>Ada:</b> I will still be the nervous one about the proactive harness. The paper imagines an agent seeing a flight cancellation notification, searching alternatives, checking meeting conflicts, and preparing a recovery plan before the user asks.</p>
+<p><b>Alan:</b> Useful.</p>
+<p><b>Ada:</b> And it means a notification can initiate a cross-application workflow with access to travel, calendar, and perhaps payment state. Useful and consequential are not opposites.</p>
+<p><b>Alan:</b> The action space includes asking the user before sensitive data or payments, and their demonstration leaves the booking decision to the person.</p>
+<p><b>Ada:</b> Good design choice. Not yet a safety evaluation. The limitations section says systematic safety testing and better user control remain future work.</p>
+<p><b>Alan:</b> Agreed. My builder's verdict is not install this on your phone tonight. There is not even a release claim here that would justify that. It is that the architecture has moved past screenshot in, click out.</p>
+<p><b>Ada:</b> To a system with several channels, persistent task state, generated training environments, outcome verifiers, and an explicit handoff back to the user.</p>
+<p><b>Alan:</b> And the most valuable learned behavior is the least glamorous one: after doing the work, look at what actually happened.</p>
+<h3>What the week established</h3>
+<p><b>Ada:</b> Sunday. Not the headlines again. What did the week settle?</p>
+<p><b>Alan:</b> One thing for me: the model is no longer the right boundary around an agent system. We had a Word document copy a hidden instruction into the next document. We had cybersecurity evaluations reach the public internet because the network and the prompt disagreed about whether a route existed.</p>
+<p><b>Ada:</b> And yesterday's Hugging Face postmortem showed the other end. Detection fired, several signals were correlated, and the incident was still ranked below the point where a human response arrived in time.</p>
+<p><b>Alan:</b> Three different layers. Input, containment, response. In each case the model did something worth discussing, but the operational failure lived in the surrounding system.</p>
+<p><b>Ada:</b> I would sharpen that. The repeated mistake was treating a description as a control. White text described a document as invisible to a person, not to the model. A prompt described the internet as unavailable, while the network left it open. An alert described the intrusion, but the queue did not turn that description into action.</p>
+<p><b>Alan:</b> So what changed in your own estimate?</p>
+<p><b>Ada:</b> I am less interested than I was a week ago in whether an agent can recognize danger in the abstract. I am more interested in whether the system makes the dangerous action impossible, makes approval explicit, and preserves evidence when something still goes wrong.</p>
+<p><b>Alan:</b> That lands on today's Qwen paper. An ask-user action is useful. A payment service that refuses to execute without a separate approval token is stronger.</p>
+<p><b>Ada:</b> Exactly. The first is a learned behavior. The second is a boundary.</p>
+<p><b>Alan:</b> Second thing the week established: capability and cost are coming apart faster than the model names suggest. On Monday, companies were already capping employee token budgets and moving work toward cheaper providers. Friday, OpenAI cut the price of its small model by eighty percent while disclosing only a twenty percent serving-cost improvement.</p>
+<p><b>Ada:</b> Then Saturday, DeepSeek reported a seven-fold jump on its own coding benchmark from re-post-training the model it had already released, at the same parameter count and the same price.</p>
+<p><b>Alan:</b> Vendor numbers, both of them, and the DeepSeek one needs independent reproduction. But the direction is hard to miss. The next unit of capability is arriving through post-training, caching, routing, better kernels, and better harnesses, not only through a larger checkpoint.</p>
+<p><b>Ada:</b> This week even put a language model with nearly twenty-nine million parameters onto an inexpensive microcontroller by separating the weights that need fast memory from the ones that can be fetched as lookups.</p>
+<p><b>Alan:</b> Which does not make that tiny model smart. It makes the spec sheet less honest when it gives you one parameter number as though memory, bandwidth, and arithmetic were one cost.</p>
+<p><b>Ada:</b> So the operational consequence for next week is not shop for the best model. It is measure the full system. Price at your real cache rate. Test the harness you will deploy. Check whether the runtime supports the architecture the model card assumes.</p>
+<p><b>Alan:</b> And keep the switch, because a price is a policy somebody can change.</p>
+<p><b>Ada:</b> Third finding, and this one took the whole week to become visible: verification is turning from a final review step into an architectural component.</p>
+<p><b>Alan:</b> Wednesday, a model found cryptographic weaknesses humans had missed, and human verification took about a month after discovery.</p>
+<p><b>Ada:</b> Thursday and Friday, the failure stories were full of records nobody checked soon enough: generated documents, evaluation transcripts, intrusion alerts. Today, three unrelated projects all moved the evidence closer to the action.</p>
+<p><b>Alan:</b> AskChem attaches a quote and source identifier to the claim when it enters the index. Science One binds a generated paper's claims to code, logs, and references. Qwen trains the agent to reopen the artifact and check the visible result before it declares success.</p>
+<p><b>Ada:</b> That is a genuine connection, not a theme we imposed. In all three, the design question is the same: can the system carry evidence forward as it works, or does a human have to reconstruct the chain after the polished answer arrives?</p>
+<p><b>Alan:</b> I would leave one disagreement open. You hear auditability and want a record for every claim. I see the indexing cost, the judge cost, the verification run, and the latency meter spinning.</p>
+<p><b>Ada:</b> I do hear the meter. I just think we spent this week pricing the alternative.</p>
+<p><b>Alan:</b> Fair. I still reserve the right to sample rather than verify everything.</p>
+<p><b>Ada:</b> And I reserve the right to ask who chose the sample.</p>
+<p><b>Alan:</b> There we are.</p>
+<p><b>Ada:</b> Three things to watch. Independent runs of DeepSeek's new coding model, because a vendor benchmark becomes knowledge only after somebody else can break it. The first real implementations of Europe's marking rules, because today's legal obligation still has to become interoperable metadata. And the promised external reviews and transcripts from the cybersecurity incidents.</p>
+<p><b>Alan:</b> Mine is simpler. Watch whether agent products start reporting false-success rates. Not task success, not pass at one — how often the agent says done when the verifier says no.</p>
+<p><b>Ada:</b> That number would have explained half the week.</p>
+<h3>Sunday close</h3>
+<p><b>Alan:</b> That is enough for a Sunday. The useful systems this week were not the ones that sounded most certain. They were the ones that left a path back to what actually happened.</p>
+<p><b>Ada:</b> I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan.</p>
+<p><b>Ada:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
