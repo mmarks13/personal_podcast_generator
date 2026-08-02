@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: The work after it works — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Deep Dive: The work after it works</h1>
+<div class="date">Self-Attention — 2026-08-02</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-08-02-deepdive/deepdive-2026-08-02.mp3"></audio>
+<p><em>2026-08-02</em></p>
+<p>A prototype proves that a happy-path capability exists; a product turns it into a bounded, supportable promise. Ada and Alan trace the work in between: requirements, outcome-based evaluation, simple system boundaries, reliability, security, economics, progressive rollout, and durable ownership.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://papers.neurips.cc/paper/5656-hidden-technical-debt-in-machine-learning-systems.pdf">Hidden Technical Debt in Machine Learning Systems</a></li>
+<li><a href="https://developers.google.com/machine-learning/guides/rules-of-ml">Google: Rules of Machine Learning</a></li>
+<li><a href="https://www.anthropic.com/engineering/building-effective-agents">Anthropic: Building effective agents</a></li>
+<li><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Anthropic: Demystifying evals for AI agents</a></li>
+<li><a href="https://sre.google/sre-book/launch-checklist/">Google SRE: Launch Coordination Checklist</a></li>
+<li><a href="https://sre.google/sre-book/service-best-practices/">Google SRE: A Collection of Best Practices for Production Services</a></li>
+<li><a href="https://sre.google/sre-book/service-level-objectives/">Google SRE: Service Level Objectives</a></li>
+<li><a href="https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf">NIST AI 600-1: Generative Artificial Intelligence Profile</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://weeraman.com/the-prototype-isnt-the-product/">Anuradha Weeraman: The Prototype Isn't the Product</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>The applause is not the launch</li>
+<li>Turn taste into tests</li>
+<li>Build the boring shell</li>
+<li>Make failure survivable</li>
+<li>The human system</li>
+<li>Crossing the gap</li>
+<li>The work after it works</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it’s Sunday, August second. I’m Ada.</p>
+<p><b>Alan:</b> And I’m Alan. This is the deep dive, and today we are talking about the work that begins after the demo works.</p>
+<p><b>Ada:</b> A post titled “The Prototype Isn’t the Product” surfaced in this week’s feed. Anuradha Weeraman’s opening image is painfully familiar: describe an app, watch a working interface appear, then discover the load failures, missing error handling, shaky authentication, and assumptions that collapse with a second user.</p>
+<p><b>Alan:</b> The modern launch sequence: confetti, screenshot, existential dread.</p>
+<p><b>Ada:</b> The post argues that AI has dramatically shortened the trip to a first working version, but not the distance from that version to production-grade software. That is our doorway. Not “AI code is bad.” A human-written prototype can have exactly the same gap.</p>
+<p><b>Alan:</b> So what is the gap, precisely? “Production-grade” is one of those phrases people use when they want to sound responsible without naming a requirement.</p>
+<p><b>Ada:</b> Good. Today we will name it. A prototype demonstrates a possibility under chosen conditions. A product makes a continuing promise to particular users under conditions you do not fully control.</p>
+<p><b>Alan:</b> And the work in between is turning “look, it can” into “yes, it will — within these limits — and here is what happens when it doesn’t.”</p>
+<p><b>Ada:</b> Exactly.</p>
+<h3>The applause is not the launch</h3>
+<p><b>Ada:</b> Let’s begin with a visual. A prototype can be a theater flat: from the audience, it looks like a brick wall. It did its job if everyone understood the scene. A product wall has to carry weight, survive weather, meet a code, and belong to someone who will repair it.</p>
+<p><b>Alan:</b> Useful analogy, but prototypes are not always disposable scenery. I have shipped code that began as the ugly demo.</p>
+<p><b>Ada:</b> That is where the analogy breaks. The distinction is not which lines of code survive. It is what those lines are surrounded by, what has been learned about the real use, and what obligations the team is prepared to accept.</p>
+<p><b>Alan:</b> So rewriting the prototype is not automatically maturity.</p>
+<p><b>Ada:</b> No. A pristine rewrite can still be an unmeasured prototype. And a rough-looking service can be a real product if its promise is narrow, explicit, monitored, and supported.</p>
+<p><b>Alan:</b> Give me the promise in engineering terms.</p>
+<p><b>Ada:</b> Start with six questions. Who is it for? What job must it complete? How will we observe success? What inputs and situations are outside its envelope? What may it cost, touch, or change? And who owns the failure?</p>
+<p><b>Alan:</b> That last one has ended more cheerful meetings than any benchmark result.</p>
+<p><b>Ada:</b> It should. A demo has a presenter. A product has an owner.</p>
+<p><b>Alan:</b> I want to add a distinction. A feature requirement says what happens on the happy path. A product requirement also says what happens when the password reset email is late, the model provider times out, the source document is malformed, two users edit at once, the tool returns success but the state did not change, or the answer is uncertain.</p>
+<p><b>Ada:</b> Those are not fringe cases. They define the operating envelope. The prototype asks, “Can the central action happen?” Product work asks, “For which users, inputs, loads, dependencies, and risk levels are we willing to say this action is supported?”</p>
+<p><b>Alan:</b> And unsupported must be a designed state. Refuse, degrade, queue, ask a human, or explain the limitation. Not just spin until a timeout eats the request.</p>
+<p><b>Ada:</b> This is why product discovery and engineering are the same conversation here. If you cannot state which mistake matters more — a false approval or a false rejection, a slow answer or an incomplete one — you do not yet have a technical target. You have a capability looking for a contract.</p>
+<h3>Turn taste into tests</h3>
+<p><b>Alan:</b> All right. We have a contract. My builder instinct says the next bridge is tests.</p>
+<p><b>Ada:</b> Yes, but not merely more unit tests. The distinctive challenge with an AI feature is that the component may produce different reasonable-looking outputs from the same request, while a long-running agent can alter the world across many steps.</p>
+<p><b>Alan:</b> Which means “I tried it five times and liked the answers” is still a demo review.</p>
+<p><b>Ada:</b> Anthropic’s guide to agent evaluations gives us useful vocabulary. A task is one test case with inputs and success criteria. A trial is one attempt, and the guide recommends multiple trials because model behavior varies. The transcript records the path. The outcome is the final state.</p>
+<p><b>Alan:</b> Their flight-booking example is the cleanest version of this. The agent can say, “Your flight is booked.” The outcome is whether the reservation exists in the database.</p>
+<p><b>Ada:</b> Language is not state.</p>
+<p><b>Alan:</b> That sentence belongs over every agent team’s door.</p>
+<p><b>Ada:</b> It also shows how to build the evaluation. Grade the reply if communication matters. Grade the tool calls if policy matters. But grade the resulting state if task completion matters. A fluent declaration of success is not success.</p>
+<p><b>Alan:</b> I would make the eval suite from the product promise. Take each supported job and write representative tasks. Then add the unhappy paths: missing permission, ambiguous intent, unavailable dependency, conflicting records, prompt that asks for too much authority, and recovery after a partial action.</p>
+<p><b>Ada:</b> Then split the suite by purpose. Anthropic distinguishes capability evaluations from regression evaluations. Capability tests ask, “What difficult thing can the system learn to do?” Regression tests ask, “Can it still do what it already did?”</p>
+<p><b>Alan:</b> Different moods. A capability suite should contain hills you have not climbed. A regression suite is the guardrail behind you.</p>
+<p><b>Ada:</b> And the guide makes a lovely lifecycle point: once a difficult capability task is handled reliably, it can graduate into the continuously run regression suite. “Can we do this at all?” becomes “Can we still do it?”</p>
+<p><b>Alan:</b> That is the product loop in miniature. A bug report should not die as a fixed anecdote. Turn it into a test case, fix the system, and keep the case so the failure stays fixed.</p>
+<p><b>Ada:</b> With one warning. An evaluation is a model of the promise, not the promise itself. Code-based graders are fast and reproducible, but can be brittle. Model-based graders can handle nuance, but they are themselves variable and need calibration. Human review carries domain judgment, but is slower and expensive.</p>
+<p><b>Alan:</b> So combine them according to the risk. Check a refund in the ledger with code. Check whether the explanation was respectful with a calibrated rubric. Send unusual or high-impact cases to a person.</p>
+<p><b>Ada:</b> And slice results. A single average can hide a product that works beautifully for common requests and fails systematically on long documents, a particular language, a particular customer configuration, or the ninety-ninth-percentile latency.</p>
+<p><b>Alan:</b> Here is a practical definition of readiness, then: not a perfect score, but an explicit threshold by user journey, plus a known process for the failures below it.</p>
+<p><b>Ada:</b> Yes. The threshold comes from the product’s stakes, not from whatever score the prototype happens to achieve.</p>
+<h3>Build the boring shell</h3>
+<p><b>Ada:</b> Now we reach a systems lesson that predates generative AI. In “Hidden Technical Debt in Machine Learning Systems,” Google researchers drew the learning code as a small box surrounded by a much larger apparatus: data collection, verification, feature extraction, serving infrastructure, monitoring, and process management.</p>
+<p><b>Alan:</b> The diagram is almost rude. The clever bit is visually tiny.</p>
+<p><b>Ada:</b> That was the point. Their argument was not that the model is unimportant. It was that a live machine-learning system inherits ordinary software maintenance problems and adds system-level dependencies shaped by data and a changing world.</p>
+<p><b>Alan:</b> They called one form of entanglement CACE: changing anything changes everything. Change an input distribution, a sampling method, a threshold, or a training choice, and behavior elsewhere can move.</p>
+<p><b>Ada:</b> Which is why a prototype’s central question — “Which model gives the nicest answer?” — is too small. Product questions include: where did the input come from, which version of the prompt and model ran, which tools were available, what permissions did they carry, what evidence was retrieved, and what downstream system consumed the result?</p>
+<p><b>Alan:</b> I want to make that concrete with a support agent. The demo is one prompt plus a customer message. The product is identity verification, account lookup, policy retrieval, model call, tool schema, refund service, confirmation message, audit record, rate limit, escalation path, and a user interface that shows what actually happened.</p>
+<p><b>Ada:</b> And every arrow is a contract that can fail.</p>
+<p><b>Alan:</b> Right. The model may be the least mysterious dependency in the incident.</p>
+<p><b>Ada:</b> Google’s “Rules of Machine Learning” says to make the pipeline solid end to end, begin with a reasonable objective, and design metrics early. The guide’s bias is deliberately unglamorous: simple infrastructure and simple approaches before extra algorithmic complexity, because complexity slows later releases.</p>
+<p><b>Alan:</b> Anthropic reaches a similar conclusion for agents. It distinguishes workflows, where code chooses predefined paths, from agents, where the model dynamically chooses its process and tool use. Its advice is to start with the simplest solution and add agentic complexity only when it demonstrably improves outcomes.</p>
+<p><b>Ada:</b> That is not an argument against agents.</p>
+<p><b>Alan:</b> No. It is an argument for spending autonomy where uncertainty requires it. If the refund policy is a table lookup, use code. If deciding which evidence matters requires judgment, perhaps use the model. If the next step can be predetermined, a workflow is easier to test. If the path genuinely cannot be known in advance, an agent may earn its flexibility.</p>
+<p><b>Ada:</b> “Earn” is doing useful work there.</p>
+<p><b>Alan:</b> Because autonomy has a bill: more turns, more latency, more cost, a larger space of behavior, and errors that can compound. Anthropic recommends sandboxed testing and guardrails for autonomous agents. I would translate that into four boundaries: narrow tools, least authority, visible state, and bounded effort.</p>
+<p><b>Ada:</b> Explain bounded effort.</p>
+<p><b>Alan:</b> Maximum turns, time, spend, and actions. A loop needs an exit that does not depend on the model feeling finished. And a mutating action needs a postcondition. If the tool says “refund submitted,” check the ledger before telling the user it happened.</p>
+<p><b>Ada:</b> What about retries? They sound like reliability.</p>
+<p><b>Alan:</b> Only if repeating the action is safe. Retrying a read is different from retrying a payment. The system needs an operation identifier or another way to recognize that the first attempt may already have succeeded. Otherwise your reliability mechanism creates two refunds.</p>
+<p><b>Ada:</b> This is the product shell: ordinary code that constrains, observes, verifies, and sometimes declines to invoke the intelligent component at all.</p>
+<p><b>Alan:</b> Plus dependency strategy. What happens if the model endpoint slows down, retrieval returns nothing, the identity service is unavailable, or a vendor changes a model behind the same product name? Cache, fall back, queue, degrade, or stop — but choose before the incident.</p>
+<h3>Make failure survivable</h3>
+<p><b>Alan:</b> A product does not become real when failure becomes impossible. It becomes real when failure becomes detectable, bounded, and recoverable.</p>
+<p><b>Ada:</b> That sounds like the site-reliability tradition.</p>
+<p><b>Alan:</b> It is. Google’s original launch coordination checklist, labeled circa two thousand five, asks about load tests, capacity, backend failures, rate limits, timeouts, retries, error handling, backup and restore, monitoring, repeatable releases, canaries, and staged rollouts.</p>
+<p><b>Ada:</b> Which is a useful historical correction. AI did not invent the prototype-to-product gap. It made the first part fast enough that more people can reach the old gap before lunch.</p>
+<p><b>Alan:</b> The first operational tool is a service-level objective: a target for a user-relevant behavior. Not “the server is up.” Maybe “supported requests complete successfully within the promised time,” with quality and safety measured separately.</p>
+<p><b>Ada:</b> Google’s reliability guidance says to begin with what users care about, not simply what is easy to measure. It gives the example that server-side measurements can miss failures visible in the client.</p>
+<p><b>Alan:</b> For an AI product, infrastructure health is necessary but insufficient. I want latency, error rate, and cost. I also want task completion, abstention, escalation, tool failures, unsafe attempts, user corrections, and the distribution of quality across important slices.</p>
+<p><b>Ada:</b> Observability is often confused with collecting logs.</p>
+<p><b>Alan:</b> A warehouse of traces no one can interpret is a storage product. Observability means that when the supported promise breaks, the team can answer: which users, which version, which dependency, which step, what changed, and what action should we take?</p>
+<p><b>Ada:</b> Then comes rollout.</p>
+<p><b>Alan:</b> Never make the whole user base your first realistic test environment. Shadow the workflow if possible. Release to an internal or consenting group. Canary a small fraction. Watch the measures tied to the promise. Expand in stages.</p>
+<p><b>Ada:</b> Google’s production guidance is admirably blunt: supervise staged rollouts, and if unexpected behavior appears, roll back first and diagnose afterward.</p>
+<p><b>Alan:</b> Because recovery time is part of reliability. The perfect investigation is not comforting while the bad version is still charging cards.</p>
+<p><b>Ada:</b> A rollback also has to be designed. Can you restore the prior prompt, model, policy, tool definition, configuration, and data migration? “We can redeploy the code” is not enough if behavior depends on six mutable components.</p>
+<p><b>Alan:</b> And somebody must be on the hook. Who receives the alert? Who has authority to disable the feature? What is the manual fallback? What do support staff tell affected users? When does an incident require disclosure?</p>
+<p><b>Ada:</b> That is the difference between a dashboard and an operating system for the organization.</p>
+<h3>The human system</h3>
+<p><b>Ada:</b> We should slow down on ownership, because it is not administrative garnish. NIST’s Generative Artificial Intelligence Profile treats risk across design, development, deployment, operation, and decommissioning. It warns that pre-deployment tests may be mismatched to the real deployment context.</p>
+<p><b>Alan:</b> Meaning a benchmark can tell you the component did well in a lab without telling you that this product is safe for this user with this authority.</p>
+<p><b>Ada:</b> Precisely. Risk is contextual. A drafting assistant and an agent allowed to send, purchase, delete, or approve may use the same underlying model while creating different obligations.</p>
+<p><b>Alan:</b> Product requirements therefore include permission and reversibility. What may the system read? What may it change? Which action needs confirmation? Which action can be undone? Where must a human take over?</p>
+<p><b>Ada:</b> And whose human judgment counts. A domain expert may define correctness; a security team may define acceptable access; support staff may see recurring confusion before telemetry does; affected users may identify harms that the builders did not anticipate.</p>
+<p><b>Alan:</b> This is why “human in the loop” is too vague. A person who sees ten thousand alerts has not meaningfully supervised ten thousand decisions. Name the decision, give the person enough evidence and time, and give them real authority to stop or override it.</p>
+<p><b>Ada:</b> NIST’s profile also calls for post-deployment monitoring that includes user input, appeal and override, decommissioning, incident response, recovery, and change management. That list turns governance from a launch review into a lifecycle.</p>
+<p><b>Alan:</b> I like “decommissioning” in there. Products end. Vendors disappear, policies change, data gets stale, and a feature that cannot be operated responsibly should have a shutoff path that preserves records and users’ options.</p>
+<p><b>Ada:</b> Security follows the same pattern. It is not a final scan applied to generated code. It is the architecture of identity, authorization, secrets, data retention, dependency trust, logging, and incident response — tested against the actual deployment.</p>
+<p><b>Alan:</b> And economics belongs beside safety and reliability. If success causes an agent to make twelve model calls per task, growth can turn a charming prototype into an unaffordable product. Measure cost per completed user job, not just cost per token.</p>
+<p><b>Ada:</b> Likewise latency per completed job, not the speed of one model response.</p>
+<p><b>Alan:</b> A cheap failed run followed by a human cleanup is not cheap.</p>
+<h3>Crossing the gap</h3>
+<p><b>Alan:</b> Let’s give the listener a sequence they can use Monday morning. Not a universal certification. A way to expose what is still unknown.</p>
+<p><b>Ada:</b> Step one: write the supported promise in one sentence. “For this user, given these inputs, the system completes this job, within these quality, time, cost, and authority limits.” If the sentence contains everyone, anything, or always, narrow it.</p>
+<p><b>Alan:</b> Step two: turn the promise into journeys and outcomes. Write the happy path, then the unhappy paths: ambiguity, malformed input, missing permission, stale data, dependency failure, duplicate action, overload, and a user who changes their mind.</p>
+<p><b>Ada:</b> Step three: make the simple baseline work end to end. Use deterministic code for deterministic decisions. Add model judgment only where it improves a measured outcome enough to justify its variability and cost.</p>
+<p><b>Alan:</b> Step four: build the evaluation harness before polishing the demo. Record the full trace, but grade the resulting state. Run multiple trials where behavior varies. Keep capability tests and regression tests distinct.</p>
+<p><b>Ada:</b> Step five: draw every boundary. Data sources, model and prompt versions, tools, downstream consumers, permissions, third parties, and human handoffs. For each arrow, write the timeout, error behavior, owner, and fallback.</p>
+<p><b>Alan:</b> Step six: instrument the promise. Measure the user’s outcome, quality by important slice, latency through the whole journey, cost per completed job, escalation, and failures. Decide which signal pages a human, which creates a ticket, and which is retained for analysis.</p>
+<p><b>Ada:</b> Step seven: rehearse failure. Remove a dependency. Slow one down. Return malformed data. Exhaust a quota. Interrupt an action halfway through. Confirm that limits hold, state remains intelligible, and recovery works.</p>
+<p><b>Alan:</b> Step eight: release progressively with a rollback that you have actually tested. A canary is not “small launch” as a vibe. It is a comparison with stop conditions.</p>
+<p><b>Ada:</b> Step nine: assign durable ownership. Product judgment, model quality, security, operations, user support, vendor management, and incident authority may belong to different people, but none may belong to nobody.</p>
+<p><b>Alan:</b> Step ten: close the loop. Production failures become regression cases. User corrections become product evidence. Incidents change runbooks and architecture. Cost and latency change the supported envelope. The product is the learning loop, not the artifact frozen on launch day.</p>
+<p><b>Ada:</b> Notice what is absent from that sequence: a requirement to handle planetary scale before the first user.</p>
+<p><b>Alan:</b> Yes. “Product” does not mean huge, flawless, or burdened with every enterprise control. It means the promise matches the stakes and the team can support the promise it makes.</p>
+<p><b>Ada:</b> A private tool for three researchers can be a product. Its availability target may be modest. Its security and data-provenance requirements may still be strict. Context decides.</p>
+<p><b>Alan:</b> And sometimes the honest outcome is that the prototype should remain a prototype. It proved the idea, taught you that the user need was weak, exposed an economics problem, or showed that the required reliability would cost more than the value.</p>
+<p><b>Ada:</b> Stopping is not a failure to cross the gap. It is one of the decisions the gap exists to force.</p>
+<h3>The work after it works</h3>
+<p><b>Ada:</b> So, what separates a prototype from a product?</p>
+<p><b>Alan:</b> A prototype is evidence that a path exists. A product is a bounded promise, backed by tests, system boundaries, monitoring, recovery, and people who own the consequences.</p>
+<p><b>Ada:</b> AI makes the first evidence astonishingly cheap. That is real progress. It also means the bottleneck moves toward judgment: choosing the promise, finding the unhappy paths, and building the feedback loop that keeps the promise honest.</p>
+<p><b>Alan:</b> The applause when the demo works is deserved.</p>
+<p><b>Ada:</b> Just don’t mistake it for the launch.</p>
+<p><b>Alan:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
