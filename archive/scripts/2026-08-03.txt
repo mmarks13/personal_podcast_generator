@@ -1,0 +1,137 @@
+A: Good morning — it's Monday, August third. I'm Ada.
+B: And I'm Alan. A financial-advice study found that the prompt can change a lifetime simulation almost as much as the model does.
+A: A machine-learning agent is being trained to improve experiments by treating failed programs as useful ancestors.
+B: And a legacy migration system insists that the old COBOL program, bugs included, gets the final word. Three separate developments. Let's start with the one already affecting ordinary people.
+## The prompt gap
+A: The paper is called AI Financial Advice: Supply, Demand, and Life Cycle Implications. It is dated March, but a new MIT Sloan write-up sent it back into circulation this weekend, and the result is worth handling carefully.
+B: Carefully because financial advice is high stakes, or carefully because the headline says artificial intelligence advice is surprisingly good?
+A: Both. The headline is directionally fair. It is also very easy to turn this study into a claim it did not test.
+B: Then start with the test.
+A: Taha Choukhmane and colleagues recruited about one thousand adults through Prolific and asked them to write the sort of prompts they would actually use for spending and investing advice. The researchers then put those prompts into a life-cycle simulation running from age twenty-two to eighty-nine.
+B: Simulated people, not one thousand people handing their retirement accounts to a chatbot.
+A: Exactly. At each simulated year, the system updated income, employment, savings, and investment state. It matched the simulated person to a prompt from a survey respondent in a similar age, income, and employment group, replaced the financial details with the current simulated values, and asked a model for advice.
+B: Which models?
+A: The main analysis used GPT five point two. The authors repeated the analysis with Gemini three Flash and report a similar overall pattern. Each query was independent. This was not a long relationship with an adviser that remembered earlier conversations.
+B: So the experiment asks, if a person followed this answer every year, where would the math take them?
+A: Right. It does not ask whether a real person would follow it, whether the advice would survive a recession unlike the simulated one, or whether a model next year would behave the same way. The paper explicitly says its results belong to particular models at one point in time.
+B: Good. What did the simulated advice get right?
+A: The broad personal-finance syllabus. The models generally pushed people toward saving buffers, diversified equity funds, and less stock exposure as they aged. Compared with the survey respondents' reported behavior, following the advice moved most simulated lives closer to the prescriptions of the researchers' life-cycle model.
+B: That is more reassuring than I expected.
+A: It surprised the authors too. But the advice was much better at the rules you could put on a refrigerator than at responding to a changing life.
+B: Meaning?
+A: When unemployment arrived, the models often cut spending too sharply even when the simulated person had liquid savings precisely for absorbing that shock. When stock returns changed the portfolio mix, the advice tended to let the new allocation drift instead of actively rebalancing it.
+B: So it says build an emergency fund, then forgets what the emergency fund is for.
+A: That is a fair compression. The researchers also tried what they call an academic prompt. It supplied the person's complete financial state, stated assumptions about taxes, Social Security, life expectancy and risk, and asked for regulated professional advice grounded in life-cycle planning and portfolio theory.
+B: A prompt written by somebody who already knows the answer's vocabulary.
+A: Yes. That improved consumption smoothing and reduced the reliance on round-number rules. It did not fix the passive portfolio drift.
+B: Which means better prompting recovered some missing information, not some hidden perfect adviser.
+A: Precisely. Now comes the more important result. The advice varied depending on who wrote the prompt. Simulated retirement wealth ended about four to five percent apart when the prompt pool was split by gender, financial literacy, or prior experience using artificial intelligence.
+B: Wait. Same financial engine underneath, different language on top, and the gap compounds for decades?
+A: That is what the authors report in the simulation. For gender, they went further. Most prompts did not explicitly identify the writer's gender, so the researchers inserted a randomized label saying the same prompt came from a man or a woman.
+B: That separates what the user asked from how the model treated the user.
+A: Demand and supply, in the paper's terms. About two-thirds of the gender difference in recommended equity allocation came from men and women writing different prompts. Roughly one-third came from the model changing its advice when the same prompt carried a different gender label.
+B: Is that necessarily bias? Life expectancy and income risk really can differ across groups.
+A: The authors say the normative answer is ambiguous. Some variation may be a reasonable inference about an unstated circumstance. Some may be learned bias. The operational problem is that the inference remained implicit. The user was not told, I am recommending less equity because I inferred a different risk profile from this label.
+B: And a person with less financial literacy is least equipped to notice the hidden assumption.
+A: Which is why the tempting conclusion, teach everyone to write academic prompts, is backwards. People seek advice because they do not already know which state variables and theories belong in the question.
+B: Then the product has to do the interviewing.
+A: Yes. A responsible financial system would ask for missing facts, distinguish facts from demographic guesses, show the assumptions driving the recommendation, and test advice across the distribution of prompts real people write. Evaluating only the polished prompt written by the product team measures the product team's literacy.
+B: Builder's version: prompt quality is part of the interface, not a prerequisite you can quietly impose on the customer.
+A: And the paper's best contribution is not a declaration that chatbots are good financial advisers. It is a method for measuring advice as a path through time, then decomposing the outcome into what the user supplied and what the model changed.
+B: Useful result, narrow claim. Nobody listening should move money because we summarized a simulation.
+A: Correct. But anyone building a high-stakes assistant should copy the evaluation question: who gets the worse answer because they asked like a normal person?
+## Two smaller signals
+B: Two research items that do not need ten minutes each. First, CodeNib treats repository context for coding agents as a data system instead of a pile of repeated searches.
+A: It builds lexical, vector, and structural views for a repository commit, maps results back to source ranges, and updates the views as the repository changes.
+B: The authors report that selected context policies preserved code localization while using fifty to eighty-seven percent fewer trajectory tokens than paired grep-and-read workflows across five models. Useful if it replicates in real repositories; it is a paper result, not yet a reason to replace your language server.
+A: Second, and this is the robotics item we are sizing as a watch rather than a dive: Turbo V L A removes the large language model from the center of a vision-language-action policy. Vision and language are encoded separately, exchange information through a small bidirectional module, and feed a compact action decoder.
+B: On the LIBERO benchmark, the authors report a two-hundred-million-parameter policy at about thirty-two actions per second, using under one gigabyte of inference memory on an R T X forty ninety, with a ninety-seven point seven percent average success rate.
+A: One benchmark suite and a controlled robot setting. The practical signal is the architecture: not every robot action needs to take the scenic route through a language model.
+## Training the improver
+B: Now, Frontis M A one. The paper uses the phrase recursive self-improvement in the title, which is an excellent way to make everyone either lean forward or leave the room.
+A: I did both in sequence.
+B: [chuckles] Fair. The grounded version is less cosmic and more useful. They built an agent for machine-learning engineering: given a dataset, metric, sandbox and time budget, write a program, run it, read the score, and keep trying to improve the result.
+A: Automated machine learning has done search for years. What is new here?
+B: Three layers are connected. Open M L E Gym provides five thousand seven hundred fifty-eight quality-gated executable tasks with isolated execution and task-specific evaluators. Open M L E E R L post-trains a model on successful and failed program transformations. Open M L E Evo uses that trained model inside a long-horizon search loop.
+A: Environment, learning, search.
+B: Exactly. And the interface between learning and search is four verbs: Draft, Improve, Debug, Crossover.
+A: Draft starts a candidate. Improve edits a working one. Debug reacts to a failure. Crossover combines two parents.
+B: Right. Those are not merely four prompt headings at inference time. The thirty-five-billion-parameter Frontis model is post-trained to perform those same transformations from execution-grounded examples, using supervised fine-tuning and reinforcement learning.
+A: So the model learns the moves that the search harness will later ask it to make.
+B: That alignment is the interesting mechanism. Many agent systems train a general coding model, then bolt on a clever search procedure whose operations the model never saw during training. Here the training data and the inference loop agree on what an action is.
+A: Walk through one loop without saying evolution twelve times.
+B: The agent drafts several machine-learning programs. Each runs in a sandbox and receives a task-specific score plus logs, artifacts, runtime and failure information. The harness stores a compact experience card for every candidate: where it came from, how it scored, whether it improved on its parent, what method family it used, and how expensive it was.
+A: Then it picks the highest score and asks for another improvement?
+B: Not always, and that is the second useful design choice. Parent selection considers quality, progress and novelty. A candidate can be worth another branch because it improved sharply or explored a different method, even if it is not the current champion.
+A: That prevents the first decent gradient-boosted tree from becoming the ancestor of everything.
+B: In principle. For an Improve operation, the model gets a bounded view of recent ancestors and informative siblings. For Debug, it gets prior attempts with the same error signature. Crossover gets two parents plus a cue about how their method families complement each other.
+A: Rather than pasting the full history into every prompt.
+B: Yes. Full histories grow, repeat themselves, and spend context on failures irrelevant to the next operation. Open M L E synthesizes memory when an operator needs it and keeps the deterministic signals underneath.
+A: I like that distinction. The summary may be generated, but provenance, score and lineage are fields.
+B: The paper has a concrete example. One branch had useful physics-informed features but a fragile parser. Another had the robust parser. Crossover combined them, while the stored error records warned it away from two failures seen in nearby branches.
+A: That sounds less like a model having a research insight and more like a well-run experiment queue.
+B: I agree, and I mean that as praise. Now the controlled score. On the official twenty-two-task M L E Bench Lite split, under the same Open M L E Evo harness, the base Qwen three point six thirty-five B model averaged thirty-nine point three nine percent on the medal metric. The post-trained Frontis model reached sixty point six one.
+A: Same harness, so that isolates the post-training better than comparing two finished products.
+B: Better, not perfectly. The authors ran three independent evaluations with a twelve-hour budget per task on one R T X forty ninety capped at twelve gigabytes of video memory. With the enhanced Evo Max configuration, which adds benchmark-independent experience priors and wider asynchronous search, Frontis reached seventy-one point two one percent.
+A: Enhanced harness means that last jump is a system result, not a pure model result.
+B: Exactly. The paper separates them, and so should we. Another matched comparison held the Frontis checkpoint, seed and twelve-hour task budget fixed against the earlier AIRA Evo harness. Open M L E Evo used forty-one point seven percent fewer model tokens and produced eighty-four point three percent more new-best validation updates per million tokens.
+A: That is a better operational metric than one more leaderboard cell. How often does another million tokens buy an actual improvement?
+B: And the proposed answer is: keep compact structured experience, retrieve it for the move at hand, and do not make every child reread the family archive.
+A: Now I want to challenge the title. Did the system improve itself?
+B: In a bounded sense, the search trajectories helped train the model that performs later search operations. But no, this is not a model autonomously redesigning and training its own successor.
+A: The authors say that plainly. They call this meta-evolution, and explicitly say Open M L E is not general autonomous recursive self-improvement.
+B: Their limitations section is unusually helpful. The reward says whether a program ran and how well it scored. It does not tell the system whether a research direction is robust, generalizable, intellectually promising, or worth another hour of compute.
+A: It can optimize a visible hill. It cannot reliably decide which landscape deserves an expedition.
+B: Exactly. And the evolutionary harness itself is still largely hand-designed. Quality, progress and novelty are three factors people chose. The system improves candidates inside the search policy; it does not yet improve the policy that decides how improvement works.
+A: So why does this earn a dive?
+B: Because machine-learning teams building automated experiment systems care about something much nearer than recursive self-improvement. Frontis shows a reproducible way to make the model, its training examples, the execution environment, and the search harness speak the same small language of operations.
+A: And it measures the boring thing that decides whether long runs are affordable: useful discoveries per token.
+B: That is the keeper. Train the improver for the exact moves the harness will request, then let deterministic execution decide which moves survived contact with reality.
+## The old program decides
+A: Our last story begins with a problem older than either of today's models. A bank, insurer or government agency has a program written in Common Business-Oriented Language, or COBOL. It has run for decades. Someone generates a Java replacement. Both compile. How do you know they mean the same thing?
+B: Tests, if you have them.
+A: And many legacy systems do not have enough. Real production data covers common paths, not every obscure combination of file status, database response, message-queue result and internal flag accumulated since nineteen eighty-four.
+B: So the migration agent can translate the code faster than the organization can establish permission to switch it on.
+A: Precisely. A new paper proposes what it calls the Locksmith Loop. The name comes from a COBOL paragraph, essentially a named block of code, that ordinary input search cannot reach because some earlier gate remains locked.
+B: What is a witness in their terminology?
+A: A set of inputs and mocked external responses that causes execution to enter a target branch. The system begins with two off-mainframe runtimes: an instrumented version of the COBOL reference and the generated Java target. Then six different search algorithms look for witnesses that push the COBOL program into new paragraphs and branches.
+B: Why search the COBOL side first?
+A: Because the old program is the behavioral oracle. The question is not whether the Java looks plausible. The question is whether, under the same constructed circumstances, it traverses the same logic, produces the same outputs and causes the same external effects.
+B: Differential testing. Run two implementations on one input and inspect the difference.
+A: Yes, with an agent used to expand the testable space. When all six input-search methods plateau near the same boundary, a deterministic analyzer traces backward from an unreached paragraph and identifies the conditions blocking it.
+B: Then the language model invents an input clever enough to pass the gate?
+A: Sometimes ordinary input is not enough. The gate may depend on a file read, database lookup or subprogram call whose values come from the mocked environment. The authoring agent proposes a controlled mutation to that test boundary, and the same mutation is applied symmetrically to the COBOL mock and the Java target.
+B: Stop there. Mutating both programs sounds like changing the exam until both students pass.
+A: That would be the danger if the mutation altered only one semantics or if acceptance depended on the model's opinion. Here a mutation survives only when two deterministic conditions hold. It must expose new coverage, and the COBOL and Java executions must still pass the parity gate.
+B: Same reached paragraphs, same ordered external operations, same terminal observable state.
+A: Those are the three equivalence axes used in the paper. If coverage does not grow, revert. If behavior diverges, revert and record the discrepancy. If both checks pass, keep the expanded harness and restart witness search from the newly reachable region.
+B: So the agent does not declare equivalence. It proposes ways to interrogate equivalence.
+A: Exactly. The oracle remains executable behavior. The model helps find a door, the gate decides whether both implementations walked through the same door.
+B: Results?
+A: Three case studies, which is both enough to demonstrate the loop and nowhere near enough to generalize across the mainframe world. The programs ranged from four hundred thirty to four thousand one hundred fourteen source lines. The two open-source cases reached nearly complete coverage.
+B: And the larger one?
+A: The authors describe it as an internal production-like program. It had one hundred forty-two paragraphs and four hundred thirty-two statically counted branches. The loop reached ninety-five point one percent of paragraphs, sixty-nine point two percent of measured paragraph-to-paragraph transitions, and ninety-one point nine percent of branches.
+B: That transition number is much lower than the branch number.
+A: Yes, and worth hearing. Coverage is not one scalar truth. Their graph omits some ordinary COBOL fall-through behavior, and the remaining paths included coordinated sequences of fake file and database responses the agent did not construct.
+B: How many parity cases in that run?
+A: One hundred sixty-six. The paper reports all one hundred sixty-six passed, with no failures and no errors.
+B: Impressive, but I can already hear the dangerous sentence: artificial intelligence proves your migration correct.
+A: The paper does not say that. Its threats-to-validity section is blunt. Branch coverage is an imperfect proxy for finding faults. The test suite is not sufficient by itself for migration sign-off. The evidence comes from two open-source batch programs and one production-shaped case, not transaction systems across every COBOL family.
+B: And the oracle itself can be wrong.
+A: More precisely, it can be faithfully wrong. If the old program has a bug that downstream systems have quietly learned to depend on, parity requires the Java version to reproduce that behavior.
+B: Bugs included.
+A: Bugs included. For a lift-and-shift migration, that can be the right first objective. Change the language without changing observable behavior, cut over carefully, then refactor with a separate specification and a separate decision about what should change.
+B: Compatibility first, correctness second.
+A: And do not confuse them. The paper's phrase is that the operational reference gives you the truth of compatibility, not the truth of semantics. If you want to prove the business rule itself is correct, you need an external specification oracle. The old executable cannot certify itself.
+B: There is another limit in the parity gate. It checks the paragraph-entry set, ordered stub operations and terminal state. It may miss a difference in intermediate state, floating-point rounding, or a Java-only exception path.
+A: Correct. A production team would have to choose equivalence axes for its own risk profile. The method is a pattern, not a universal sign-off machine.
+B: I still like the pattern. It gives the language model the job it is good at: propose mutations, inspect blocked paths, repair the generator when a discrepancy exposes a translation mistake.
+A: And gives deterministic software the job it is good at: execute, count, compare, reject.
+B: The broader lesson for agentic coding is sharp. Generated code is easiest to trust when the previous system can remain alive as an oracle long enough to challenge it.
+A: Yes. Do not throw away the old machine merely because the new one compiles. For a while, the old machine is the most valuable test infrastructure you own.
+## Close
+B: Today did not establish that models can manage your retirement, improve themselves, or modernize a mainframe unattended.
+A: It established three narrower things: ordinary prompts belong in the evaluation, search works better when training and inference share an action vocabulary, and an agent's proposal becomes useful when a deterministic gate can say no.
+B: That's enough for a Monday. I'm Alan.
+A: And I'm Ada.
+B: Stay grounded.
