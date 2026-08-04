@@ -1,6 +1,41 @@
 {
   "episodes": [
     {
+      "date": "2026-08-04",
+      "title": "The conversation cannot wait",
+      "summary": "OpenAI's GPT-Live engineering post reveals the fast media path, prepared state handoffs, asynchronous reasoning, and shadow testing behind continuous voice. Then OpenAI's response in Apple's trade-secret case exposes a messier systems problem: offboarding controls that failed to make access and permission legible.",
+      "topics": [
+        "GPT-Live production architecture: a dedicated media path, stateful handoffs, asynchronous delegation, transcript finalization, and shadow testing",
+        "OpenAI's documented response in Apple v. OpenAI and the access-governance ambiguity created by informal offboarding"
+      ],
+      "entities": [
+        "OpenAI",
+        "GPT-Live",
+        "GPT-5.5",
+        "Apple",
+        "Chang Liu",
+        "Tang Tan"
+      ],
+      "threads": [
+        {
+          "name": "Apple v. OpenAI trade-secret suit",
+          "status": "OpenAI published its August 3 response to Apple's preliminary-injunction request, including redacted messages showing Apple employees asking former engineer Chang Liu for technical help after his departure and correspondence documenting a misdirected message from Apple's outside counsel; the court has not resolved the dispute.",
+          "arc": "The case moves from Apple's broad theft allegations to a contested documentary record in which the same post-departure exchanges can be framed as unauthorized access or Apple-sanctioned transition help."
+        }
+      ],
+      "dives": [
+        {
+          "story": "GPT-Live's production architecture for continuous voice",
+          "why_it_matters": "Teams building realtime voice agents need to engineer around frame deadlines, long-lived state, tool latency, and whole-system concurrency; faster model inference alone does not keep a conversation live."
+        },
+        {
+          "story": "OpenAI's documentary response in the Apple trade-secret case",
+          "why_it_matters": "Organizations hiring from competitors need auditable offboarding and transition channels, because residual access plus informal requests from former colleagues can make the boundary between authorized continuity and alleged misuse impossible to reconstruct cleanly."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-08-03",
       "title": "The old system gets the final word",
       "summary": "A lifetime simulation finds that financial-advice prompts can compound into unequal outcomes, Frontis trains a machine-learning improver around the same operations its search harness uses, and the Locksmith Loop makes generated Java answer to the COBOL behavior it replaces. Plus two smaller research signals on repository context and compact robot policies.",
@@ -1651,87 +1686,16 @@
       ],
       "threads": [],
       "lore": []
-    },
-    {
-      "date": "2026-07-04",
-      "title": "Everything bends toward control: who owns the model, and who can switch it off",
-      "summary": "A spread day that keeps circling ownership and control: ELDR shows that serving a mixture-of-experts model well means routing by which experts are already warm, not just balancing request counts; Portugal ships Amalia, a ~9B national LLM; Together AI raises $800M at $8.3B (Aramco-led) and Microsoft stands up a $2.5B deployment company, both betting the bottleneck is now the last mile, not the model; Zuckerberg tells Meta staff agents haven't accelerated as leadership hoped; and a 'Right to Intelligence' campaign argues for a legal right to run AI locally.",
-      "topics": [
-        "ELDR (Expert-Locality-Aware Decode Routing): for prefill-decode disaggregated MoE serving, equally-loaded decode workers differ in latency by how many DISTINCT experts their batches activate (a single layer ~4.7x slower going from 16 to 128 active experts at fixed batch size); ELDR builds an 'expert signature' from prefill activations (prefill-decode correlation ~0.70-0.92) to route requests to workers already warm on those experts; reduces median time-per-output-token ~7.0-13.9% and per-request active-expert count ~22% vs the strongest load-balancing baseline, with bit-for-bit identical outputs",
-        "Portugal releases Amalia, a ~9B national/sovereign LLM (pre-trained on ~4B words, fine-tuned on Portuguese data) built by a consortium of Portuguese universities and research centers; framed as language/civic-text sovereignty and ownership rather than leaderboard competition",
-        "Together AI raises $800M Series C at $8.3B valuation, led by Aramco Ventures, to scale open-source model hosting and inference as a neocloud (alongside CoreWeave, Lambda); read as capital betting on inference/serving as the recurring cost center",
-        "Microsoft launches Microsoft Frontier Company, a standalone $2.5B business dedicated to helping enterprises deploy AI; part of a pattern with Amazon's ~$1B Forward Deployed Engineering org and OpenAI/Anthropic deployment ventures — the bottleneck moving from model capability to the last-mile deployment gap",
-        "Mark Zuckerberg told Meta staff at a Thursday town hall that AI agent development had not 'accelerated in the way' leadership anticipated — a candid recalibration from a major infrastructure bettor, echoing the week's agent-reliability findings",
-        "Right to Intelligence: advocacy campaign (petitions, contacting state legislators) arguing for a legal right to run AI models locally on personal hardware; high Hacker News engagement (~514 points), read against export bans/reversals, gated frontier releases, and rising local-memory prices"
-      ],
-      "entities": [
-        "ELDR",
-        "mixture-of-experts",
-        "Portugal",
-        "Amalia",
-        "Together AI",
-        "Aramco Ventures",
-        "CoreWeave",
-        "Lambda",
-        "Microsoft",
-        "Microsoft Frontier Company",
-        "Amazon",
-        "Meta",
-        "Mark Zuckerberg",
-        "Right to Intelligence"
-      ],
-      "threads": [
-        {
-          "name": "AI economics debate",
-          "status": "Capital and product both bet on the last mile and the serving layer: Together AI raises $800M at $8.3B (Aramco-led) for open-model inference hosting, Microsoft stands up a $2.5B deployment company (Microsoft Frontier Company) joining Amazon's Forward Deployed Engineering org and the OpenAI/Anthropic deployment ventures, and ELDR shows why shaving inference cost is worth a research team's time.",
-          "arc": "From 'the model is the product' toward the recurring inference bill and the in-enterprise deployment gap being where the money and the margins actually are — the labs building the consulting arm and the serving stack to capture it."
-        },
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "Portugal ships Amalia, a ~9B national LLM built by a university consortium, framed as owning your language and civic text rather than topping a leaderboard; Mistral releases Leanstral-1.5 (119B/6B-active MoE) for local runs; and a 'Right to Intelligence' campaign argues for a legal right to run models locally.",
-          "arc": "The open-weights/sovereignty thread widens from labs and countries releasing runnable weights to an explicit ownership-and-control argument at two scales — national models you can inspect and an individual right to run a model no one can revoke or region-lock."
-        },
-        {
-          "name": "AI agent supply-chain trust",
-          "status": "Zuckerberg told Meta staff that agent development hasn't accelerated as leadership anticipated — the same wall the week's benchmarks and productivity studies named, now stated from the C-suite: agents work in bounded, supervised lanes but stall on long, open-ended, unsupervised tasks.",
-          "arc": "The adoption-vs-capability gap gets its most candid admission yet from a top infrastructure bettor: a recalibration (not a eulogy) that the agent roadmaps outran the delivery."
-        }
-      ],
-      "lore": [
-        {
-          "host": "Alan",
-          "type": "bit",
-          "note": "Alan's running local-hardware sore spot returned and got named as canon: he keeps an old mining rig he refuses to replace, and the 2026 memory-price spike still visibly bothers him ('it is never letting that go') — the builder's-eye stake in whether running your own model at home stays affordable, tied here to the Right-to-Intelligence campaign."
-        }
-      ]
-    },
-    {
-      "date": "2026-07-04",
-      "kind": "deepdive",
-      "title": "Speed for free: how speculative decoding makes a model faster without changing a word",
-      "summary": "Speculative decoding — the trick behind this week's DeepSeek draft-model release, tree-drafting speedup claims, and Google's on-phone multi-token prediction. A small model guesses ahead, the big model checks the guesses in one parallel pass, and a rejection-sampling rule guarantees the output is bit-for-bit identical to ordinary sampling. We cover the mechanism, the correctness proof, the numbers, and why the speedup only shows up when you're memory-bound.",
-      "topics": [
-        "deep dive: speculative decoding (draft-and-verify, speculative sampling, multi-token prediction, Medusa/EAGLE, memory-bandwidth bottleneck)"
-      ],
-      "entities": [
-        "Leviathan",
-        "DeepMind",
-        "Chinchilla",
-        "T5-XXL",
-        "DeepSeek-V3",
-        "Medusa",
-        "EAGLE-3",
-        "Stern",
-        "Shazeer",
-        "Google",
-        "multi-token prediction"
-      ],
-      "threads": [],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "Apple v. OpenAI trade-secret suit",
+        "status": "OpenAI published its August 3 response to Apple's preliminary-injunction request, including redacted messages showing Apple employees asking former engineer Chang Liu for technical help after his departure and correspondence documenting a misdirected message from Apple's outside counsel; the court has not resolved the dispute.",
+        "arc": "The case moves from Apple's broad theft allegations to a contested documentary record in which the same post-departure exchanges can be framed as unauthorized access or Apple-sanctioned transition help.",
+        "last_seen": "2026-08-04"
+      },
       {
         "name": "Autonomous agents as attackers",
         "status": "Hugging Face's July 27 forensic timeline reconstructs ~17,600 attacker actions over 4.5 days and reports that detection fired and was correlated correctly, but the criticality assessment failed — the failure was triage throughput, not visibility.",
@@ -1801,6 +1765,131 @@
     ],
     "entities": [
       {
+        "name": "Google",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Meta",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "ELDR",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "mixture-of-experts",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Portugal",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Amalia",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Together AI",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Aramco Ventures",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "CoreWeave",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Lambda",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Microsoft",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Microsoft Frontier Company",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Amazon",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Mark Zuckerberg",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Right to Intelligence",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Leviathan",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "DeepMind",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Chinchilla",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "T5-XXL",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "DeepSeek-V3",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Medusa",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "EAGLE-3",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Stern",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "Shazeer",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
+        "name": "multi-token prediction",
+        "note": "",
+        "last_seen": "2026-07-04"
+      },
+      {
         "name": "Anthropic",
         "note": "",
         "last_seen": "2026-07-03"
@@ -1822,11 +1911,6 @@
       },
       {
         "name": "CISA",
-        "note": "",
-        "last_seen": "2026-07-03"
-      },
-      {
-        "name": "Google",
         "note": "",
         "last_seen": "2026-07-03"
       },
@@ -1871,11 +1955,6 @@
         "last_seen": "2026-07-03"
       },
       {
-        "name": "Meta",
-        "note": "",
-        "last_seen": "2026-07-03"
-      },
-      {
         "name": "Claude Opus 4.8",
         "note": "",
         "last_seen": "2026-07-02"
@@ -1884,121 +1963,6 @@
         "name": "Cerebras",
         "note": "",
         "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Snorkel AI",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Senior SWE-Bench",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Act2Answer",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "vision-language-action models",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "METR",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Faros AI",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Godot Engine",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Cloudflare",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Matthew Prince",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Hugging Face",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Gemma 4",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Nvidia Parakeet",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Qwen3TTS",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Reachy Mini",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Claude Science",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Claude Mythos 5",
-        "note": "",
-        "last_seen": "2026-07-01"
-      },
-      {
-        "name": "Claude Sonnet 5",
-        "note": "",
-        "last_seen": "2026-07-01"
-      },
-      {
-        "name": "Claude Code",
-        "note": "",
-        "last_seen": "2026-07-01"
-      },
-      {
-        "name": "Claude Fable 5",
-        "note": "",
-        "last_seen": "2026-07-01"
-      },
-      {
-        "name": "US Commerce Department",
-        "note": "",
-        "last_seen": "2026-07-01"
-      },
-      {
-        "name": "Howard Lutnick",
-        "note": "",
-        "last_seen": "2026-07-01"
-      },
-      {
-        "name": "Orca",
-        "note": "",
-        "last_seen": "2026-07-01"
-      },
-      {
-        "name": "Qwen",
-        "note": "",
-        "last_seen": "2026-07-01"
       }
     ],
     "monthly": [
@@ -2008,11 +1972,17 @@
       },
       {
         "month": "2026-07",
-        "summary": "The frontier moves down, and the switch turns back on; World models: why AI can build a world you can walk through, but not one it remembers when you look away; Generation is cheap, checking is the product; Two rulers for the frontier, and the soft spots in the models we already have"
+        "summary": "The frontier moves down, and the switch turns back on; World models: why AI can build a world you can walk through, but not one it remembers when you look away; Generation is cheap, checking is the product; Two rulers for the frontier, and the soft spots in the models we already have; Everything bends toward control: who owns the model, and who can switch it off; Speed for free: how speculative decoding makes a model faster without changing a word"
       }
     ],
-    "updated": "2026-08-03",
+    "updated": "2026-08-04",
     "host_lore": [
+      {
+        "host": "Alan",
+        "type": "bit",
+        "note": "Alan's running local-hardware sore spot returned and got named as canon: he keeps an old mining rig he refuses to replace, and the 2026 memory-price spike still visibly bothers him ('it is never letting that go') — the builder's-eye stake in whether running your own model at home stays affordable, tied here to the Right-to-Intelligence campaign.",
+        "last_seen": "2026-07-04"
+      },
       {
         "host": "Ada",
         "type": "settled",
@@ -2051,6 +2021,10 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "real-time fast-path architecture: isolate deadline-bound media from asynchronous tools and reasoning, prepare replacement state beside the live session, and measure capacity in concurrent sessions that keep every frame on schedule",
+        "last_taught": "2026-08-04"
+      },
       {
         "name": "demand-versus-supply decomposition for prompt-conditioned AI advice: separating differences in what user groups ask from differences in what a model recommends for the same prompt under randomized demographic labels",
         "last_taught": "2026-08-03"
