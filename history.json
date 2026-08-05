@@ -1,6 +1,40 @@
 {
   "episodes": [
     {
+      "date": "2026-08-05",
+      "title": "The queue is not the grid",
+      "summary": "Texas put every data-center project in ERCOT's connection queue behind a project-by-project audit, exposing the distance between requested load and a buildable grid commitment. Mistral's Shieldstral turns moderation policy into an inference-time question, offering one three-billion-parameter classifier across text and images while leaving thresholds and enforcement choices to operators.",
+      "topics": [
+        "Texas's August 3 project-by-project audit of data-center requests in ERCOT's interconnection queue, and the distinction between requested load, grid study, and an approved build",
+        "Shieldstral policy-adaptive multimodal moderation: inference-time natural-language policies, binary yes-or-no scoring, contrastive query training, and deployment calibration"
+      ],
+      "entities": [
+        "Texas",
+        "Public Utility Commission of Texas",
+        "ERCOT",
+        "Mistral AI",
+        "Shieldstral"
+      ],
+      "threads": [
+        {
+          "name": "Data-center buildout backlash",
+          "status": "Texas ordered a project-by-project verification and audit of every data center advancing through ERCOT's interconnection process; no project moves forward until its audit is complete, and noncompliant projects are denied grid connection.",
+          "arc": "The fight advances from permitting pauses, incentives, and local opposition to the connection queue itself: Texas is now forcing developers to prove ownership, financing, power, water, cooling, and community plans before scarce grid capacity is assigned."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Texas puts ERCOT's data-center interconnection queue behind an audit gate",
+          "why_it_matters": "Data-center developers, utilities, and communities need to know whether hundreds of gigawatts in connection requests represent financeable projects or speculative claims on grid capacity, because planning against the wrong queue can misallocate transmission and shift costs."
+        },
+        {
+          "story": "Shieldstral makes the moderation policy an inference-time input",
+          "why_it_matters": "Teams moderating different products and media need guardrails that can express their own risk boundaries without retraining a classifier for every taxonomy, while retaining measurable thresholds and local calibration responsibilities."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-08-04",
       "title": "The conversation cannot wait",
       "summary": "OpenAI's GPT-Live engineering post reveals the fast media path, prepared state handoffs, asynchronous reasoning, and shadow testing behind continuous voice. Then OpenAI's response in Apple's trade-secret case exposes a messier systems problem: offboarding controls that failed to make access and permission legible.",
@@ -1630,66 +1664,16 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-07-05",
-      "title": "Generating a planet from satellite photos",
-      "summary": "A Sunday episode: two teaching dives — ABot-Earth, a generative 3D Gaussian-splatting model that builds a plausible (not surveyed) 3D Earth from satellite imagery at under ten minutes per square kilometer, and Dockerless, an environment-free verifier that grades coding-agent patches by reading the repo instead of running tests and matches execution-based training. Plus a security-and-economics sweep, and a week-in-review synthesizing the shift from capability to deployment, control, and inference economics.",
-      "topics": [
-        "ABot-Earth 0.5: a generative 3D model that synthesizes navigable 3D scenes directly in the 3D Gaussian Splatting representation, conditioned solely on (mostly top-down) satellite imagery; trained on real urban 3DGS reconstructions so it generates plausible facades it never saw rather than reconstructing them; under 10 min per sq km, 300+ cities across 190+ countries, ~3.2 trillion Gaussians in production, whole planet's ~800,000 sq km of built-up area on a 1,000-GPU cluster in under 10 days; reports FID ~16.1 vs ~69.5 for the next-best baseline (authors' own numbers/benchmark); pitched against Google Earth's months-to-years staleness, lead application disaster response; caution: plausible not surveyed",
-        "Dockerless: environment-free verifier for training coding agents — replaces per-repo Docker test execution with agentic read-only repository exploration (2-4 diagnostic questions + sub-agent evidence + judge model producing a 0-1 correctness score); beats the strongest open-source verifier by ~14.3 AUC points; a fully environment-free post-training pipeline (SFT filter + RL reward) reaches 62.0% on SWE-bench Verified, essentially matching execution-based training (~62.4%); reward adds ~7% of per-rollout time; weaker on compilation-heavy languages (Rust/C, 7-13 pts) with no compiler diagnostics; still bootstrapped on ~3.7K execution-labeled examples (execution moved upstream, didn't vanish)"
-      ],
-      "entities": [
-        "ABot-Earth",
-        "Gaussian splatting",
-        "Dockerless",
-        "SWE-bench",
-        "Qwen3.5",
-        "Google DeepMind",
-        "Epoch AI",
-        "Anthropic",
-        "LiteLLM",
-        "Simon Willison"
-      ],
-      "threads": [],
-      "dives": [
-        {
-          "story": "ABot-Earth 0.5 (generative 3D Earth from satellite imagery)",
-          "why_it_matters": "Anyone in Earth observation, disaster response, or geospatial/simulation work now has a way to generate navigable 3D everywhere on a same-day refresh cadence — as long as they treat the inferred building facades as plausible guesses, not survey-grade measurement."
-        },
-        {
-          "story": "Dockerless (environment-free coding-agent verifier)",
-          "why_it_matters": "Teams sitting on private/legacy/enterprise codebases that can't be containerized can now generate a training reward signal by reading the repo instead of running tests, unlocking code that was previously untrainable — with an honest limit on compiled languages."
-        }
-      ]
-    },
-    {
-      "date": "2026-07-05",
-      "kind": "deepdive",
-      "title": "Program as weights: compiling a task straight into a model",
-      "summary": "The lineage behind 'program as weights' — from Tracr, which hand-compiles crisp algorithms into transformer weights for interpretability, to the July 2 'Program-as-Weights' paper, where a learned compiler emits a LoRA adapter that makes a tiny frozen model perform a fuzzy natural-language task, beating full fine-tuning by fifteen points.",
-      "topics": [
-        "deep dive: program-as-weights neural compilers"
-      ],
-      "entities": [
-        "Program-as-Weights",
-        "PAW",
-        "FuzzyBench",
-        "Tracr",
-        "RASP",
-        "ALTA",
-        "LoRA",
-        "Qwen3",
-        "GPT-5.2",
-        "DeepMind",
-        "ETH Zurich"
-      ],
-      "threads": [],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "Data-center buildout backlash",
+        "status": "Texas ordered a project-by-project verification and audit of every data center advancing through ERCOT's interconnection process; no project moves forward until its audit is complete, and noncompliant projects are denied grid connection.",
+        "arc": "The fight advances from permitting pauses, incentives, and local opposition to the connection queue itself: Texas is now forcing developers to prove ownership, financing, power, water, cooling, and community plans before scarce grid capacity is assigned.",
+        "last_seen": "2026-08-05"
+      },
       {
         "name": "Apple v. OpenAI trade-secret suit",
         "status": "OpenAI published its August 3 response to Apple's preliminary-injunction request, including redacted messages showing Apple employees asking former engineer Chang Liu for technical help after his departure and correspondence documenting a misdirected message from Apple's outside counsel; the court has not resolved the dispute.",
@@ -1706,12 +1690,6 @@
         "name": "The AI bill comes due",
         "status": "DeepSeek's re-post-trained V4-Flash raised its DeepSWE score from 7.3 to 54.4 at an unchanged $0.14/$0.28 per million tokens, and its pricing page now carries a 2x peak-hour multiplier — capacity scarcity showing up in the published rate card rather than in rate limits.",
         "arc": "The price floor keeps dropping, but the mechanism shifted: this month's cut came from post-training an existing checkpoint rather than from cheaper serving.",
-        "last_seen": "2026-08-01"
-      },
-      {
-        "name": "Data-center buildout backlash",
-        "status": "Government Technology reports Manatee County, Florida researching a one-year pause on new data centers while it writes rules, and Michigan candidates describing bipartisan data-center opposition surfacing in midterm races.",
-        "arc": "The fight keeps migrating downward — from state tax incentives and grid operators to county moratoriums and candidate questionnaires.",
         "last_seen": "2026-08-01"
       },
       {
@@ -1764,6 +1742,111 @@
       }
     ],
     "entities": [
+      {
+        "name": "DeepMind",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "Anthropic",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "ABot-Earth",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "Gaussian splatting",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "Dockerless",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "SWE-bench",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "Qwen3.5",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "Google DeepMind",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "Epoch AI",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "LiteLLM",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "Simon Willison",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "Program-as-Weights",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "PAW",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "FuzzyBench",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "Tracr",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "RASP",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "ALTA",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "LoRA",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "Qwen3",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "GPT-5.2",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
+      {
+        "name": "ETH Zurich",
+        "note": "",
+        "last_seen": "2026-07-05"
+      },
       {
         "name": "Google",
         "note": "",
@@ -1845,11 +1928,6 @@
         "last_seen": "2026-07-04"
       },
       {
-        "name": "DeepMind",
-        "note": "",
-        "last_seen": "2026-07-04"
-      },
-      {
         "name": "Chinchilla",
         "note": "",
         "last_seen": "2026-07-04"
@@ -1863,106 +1941,6 @@
         "name": "DeepSeek-V3",
         "note": "",
         "last_seen": "2026-07-04"
-      },
-      {
-        "name": "Medusa",
-        "note": "",
-        "last_seen": "2026-07-04"
-      },
-      {
-        "name": "EAGLE-3",
-        "note": "",
-        "last_seen": "2026-07-04"
-      },
-      {
-        "name": "Stern",
-        "note": "",
-        "last_seen": "2026-07-04"
-      },
-      {
-        "name": "Shazeer",
-        "note": "",
-        "last_seen": "2026-07-04"
-      },
-      {
-        "name": "multi-token prediction",
-        "note": "",
-        "last_seen": "2026-07-04"
-      },
-      {
-        "name": "Anthropic",
-        "note": "",
-        "last_seen": "2026-07-03"
-      },
-      {
-        "name": "OpenAI",
-        "note": "",
-        "last_seen": "2026-07-03"
-      },
-      {
-        "name": "White House",
-        "note": "",
-        "last_seen": "2026-07-03"
-      },
-      {
-        "name": "NSA",
-        "note": "",
-        "last_seen": "2026-07-03"
-      },
-      {
-        "name": "CISA",
-        "note": "",
-        "last_seen": "2026-07-03"
-      },
-      {
-        "name": "Samsung",
-        "note": "",
-        "last_seen": "2026-07-03"
-      },
-      {
-        "name": "Broadcom",
-        "note": "",
-        "last_seen": "2026-07-03"
-      },
-      {
-        "name": "Google Research",
-        "note": "",
-        "last_seen": "2026-07-03"
-      },
-      {
-        "name": "TabFM",
-        "note": "",
-        "last_seen": "2026-07-03"
-      },
-      {
-        "name": "Z.ai",
-        "note": "",
-        "last_seen": "2026-07-03"
-      },
-      {
-        "name": "GLM-5.2",
-        "note": "",
-        "last_seen": "2026-07-03"
-      },
-      {
-        "name": "Fable 5",
-        "note": "",
-        "last_seen": "2026-07-03"
-      },
-      {
-        "name": "GPT-5.6",
-        "note": "",
-        "last_seen": "2026-07-03"
-      },
-      {
-        "name": "Claude Opus 4.8",
-        "note": "",
-        "last_seen": "2026-07-02"
-      },
-      {
-        "name": "Cerebras",
-        "note": "",
-        "last_seen": "2026-07-02"
       }
     ],
     "monthly": [
@@ -1972,10 +1950,10 @@
       },
       {
         "month": "2026-07",
-        "summary": "The frontier moves down, and the switch turns back on; World models: why AI can build a world you can walk through, but not one it remembers when you look away; Generation is cheap, checking is the product; Two rulers for the frontier, and the soft spots in the models we already have; Everything bends toward control: who owns the model, and who can switch it off; Speed for free: how speculative decoding makes a model faster without changing a word"
+        "summary": "The frontier moves down, and the switch turns back on; World models: why AI can build a world you can walk through, but not one it remembers when you look away; Generation is cheap, checking is the product; Two rulers for the frontier, and the soft spots in the models we already have; Everything bends toward control: who owns the model, and who can switch it off; Speed for free: how speculative decoding makes a model faster without changing a word; Generating a planet from satellite photos; Program as weights: compiling a task straight into a model"
       }
     ],
-    "updated": "2026-08-04",
+    "updated": "2026-08-05",
     "host_lore": [
       {
         "host": "Alan",
@@ -2021,6 +1999,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "Large-load interconnection queues and batch studies: a request to connect is not a built load, and project verification must precede the grid study that allocates capacity and identifies transmission upgrades",
+        "last_taught": "2026-08-05"
+      },
+      {
+        "name": "Policy-adaptive binary moderation: express the operator's rule as an inference-time question, train on the same content paired with matching and nonmatching policy queries, and turn yes-versus-no logits into a scored decision that still requires deployment-specific calibration",
+        "last_taught": "2026-08-05"
+      },
       {
         "name": "real-time fast-path architecture: isolate deadline-bound media from asynchronous tools and reasoning, prepare replacement state beside the live session, and measure capacity in concurrent sessions that keep every frame on schedule",
         "last_taught": "2026-08-04"
