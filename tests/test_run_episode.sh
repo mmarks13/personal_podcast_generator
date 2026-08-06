@@ -14,6 +14,12 @@ has() { grep -qF -- "$2" "$LOG" && ok "$1" || bad "$1"; }
 no() { grep -qF -- "$2" "$LOG" && bad "$1" || ok "$1"; }
 
 mkdir -p "$SB"/{scripts,out,logs,docs/reads,archive/scripts,.venv/bin}
+# run_episode.sh archives each night's raw gather to smallbatch-lab as classifier training
+# data, defaulting TRIAGE_DIR to an absolute $HOME path. That path is NOT inside the
+# sandbox, so without this the suite copied its own empty stubs over the real archive for
+# today's date - every run since 2026-08-01 was destroyed that way, on every push, because
+# the pre-push hook runs this file. Point it somewhere disposable.
+export TRIAGE_DIR="$SB/triage"
 ln -sf "$(command -v python3)" "$SB/.venv/bin/python"
 cp "$REPO/run_episode.sh" "$SB/run_episode.sh"
 cp "$REPO/scripts/run_log.py" "$SB/scripts/run_log.py"
@@ -72,6 +78,14 @@ cat > "$SB/scripts/publish.py" <<'PY'
 import pathlib
 pathlib.Path("out/deterministic-calls.log").open("a").write("publish.py\n")
 PY
+# The harness re-runs the episode gate independently of the writer's own in-session run.
+# Stubbed here because the mock artifacts carry no turns and the real gate would (rightly)
+# reject them; this asserts the wiring, not the checks. Deliberately not logged to
+# deterministic-calls.log - it is a local check with no side effects, so it must not
+# trip the dry-run "skipped external steps" assertions.
+cat > "$SB/scripts/check_episode.py" <<'PY'
+print("MOCK gate")
+PY
 
 invoke() {
   set +e
@@ -96,6 +110,7 @@ rc="$(invoke)"
 has "Codex default reached runner" "provider=codex"
 has "podcast stage ran" "step end: podcast exit=0"
 has "crawl stage ran" "step end: crawl exit=0"
+has "harness re-ran the gate" "step end: gate exit=0"
 has "render ran" "step end: render-podcast exit=0"
 has "publish ran" "step end: publish exit=0"
 

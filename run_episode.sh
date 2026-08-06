@@ -247,6 +247,15 @@ validate). STOP after the gate passes — do NOT run steps 4 or 4.5; the harness
 history. If out/candidates.json is somehow missing, fall back to doing the gather steps yourself. \
 Print the episode title and word count when done.${BACKLOG_NOTE}"
 
+# Re-run the gate here, independently. The writer runs it inside its own session and
+# reports the result, which means "gate passed, zero warnings" in the log has until now
+# been the writer grading its own work. Running it again costs a second and catches both
+# a mis-reported pass and anything that changed after the writer stopped — before we spend
+# ~20 minutes of TTS and the Gemini credits behind it. Hard failures are the existing
+# schema/word/tag checks; the breadth signal is warn-only and cannot fail a run.
+run_step gate .venv/bin/python scripts/check_episode.py \
+  --episode out/episode.json --meta out/episode_meta.json
+
 # Update durable state, render, and publish only in a real run. Dry runs keep the
 # generated artifacts for validation but cause no external or history side effects.
 if [ "$DRY_RUN" = "1" ]; then
@@ -307,6 +316,11 @@ if [ "$DOW" = "3" ] || [ "$DOW" = "6" ] || [ "$DOW" = "7" ]; then
 following its grounding rules and length target (20-25 min). STOP after step 4's validation gate \
 passes — do NOT run the render or update_history lines in step 4; the harness handles both. \
 Print the topic and word count when done.${DIVE_TOPIC_NOTE}"
+
+  # Same independent re-check for the deep dive; band matches the skill's own gate line.
+  run_step gate-deepdive .venv/bin/python scripts/check_episode.py \
+    --episode out/deepdive.json --meta out/deepdive_meta.json \
+    --min-words 3000 --max-words 4000
 
   if [ "$DRY_RUN" = "1" ]; then
     log run "dry-run: skipped deep-dive history, archive, render, publish, and ledger cleanup"

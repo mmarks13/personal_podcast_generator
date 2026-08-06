@@ -196,8 +196,20 @@ class OutputTransaction:
         shutil.rmtree(self.temp, ignore_errors=True)
 
 
+# Stages that must read primary sources to do their job, and so run under the
+# network-enabled permission profile. consolidate and propose work purely from files the
+# earlier stages already wrote, so they stay network-free. Mirrors which Claude stages
+# were granted WebFetch in CLAUDE_TOOLS below.
+NETWORK_STAGES = {"crawl", "podcast", "read", "deepdive", "fact_check", "link_check"}
+
+
 def codex_command(stage: str, settings: dict, last_message: Path) -> list[str]:
-    permission_profile = "podcast-dry-run" if os.environ.get("RUN_EPISODE_DRY_RUN") == "1" else "podcast-automation"
+    if os.environ.get("RUN_EPISODE_DRY_RUN") == "1":
+        permission_profile = "podcast-dry-run"
+    elif stage in NETWORK_STAGES:
+        permission_profile = "podcast-automation-net"
+    else:
+        permission_profile = "podcast-automation"
     runtime_bin = ensure_codex_sandbox_helper()
     shell_path = f"{runtime_bin}{os.pathsep}{os.environ.get('PATH', '')}"
     return [

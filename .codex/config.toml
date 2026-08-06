@@ -25,6 +25,58 @@ glob_scan_max_depth = 4
 [permissions.podcast-automation.network]
 enabled = false
 
+# Same filesystem boundary as podcast-automation, but with shell network on. Only the
+# stages that must read primary sources get this (see NETWORK_STAGES in
+# scripts/agent_runner.py); consolidate and propose work from local files and stay on
+# the network-free profile above.
+#
+# Why this exists: the writer's grounding rule requires tracing every aired item to a page
+# someone actually read. With network off its only route was the hosted web_search
+# OpenPage action, which returned empty often enough that the writer began dropping
+# stories it could not verify — coverage halved. Codex permission profiles have no
+# domain allowlist (`network` takes only `enabled`), so this is all-or-nothing.
+#
+# Credentials are still withheld: shell_environment_policy below strips *KEY*, *SECRET*,
+# *TOKEN*, GEMINI_*, GITHUB_* and friends from the agent's environment, and .env stays
+# denied on the filesystem.
+#
+# The rules are duplicated rather than inherited on purpose. --strict-config silently
+# ignores unrecognized *nested* keys under permissions.*, so a speculative `extends` key
+# that this build does not support would leave this profile with no filesystem rules at
+# all and fail silently at 4 AM. Keep these two blocks in sync by hand.
+[permissions.podcast-automation-net]
+description = "Write inside this repository, with shell network for primary-source reads. No secret-file access."
+
+[permissions.podcast-automation-net.filesystem]
+glob_scan_max_depth = 4
+":minimal" = "read"
+":tmpdir" = "deny"
+":slash_tmp" = "deny"
+# Name resolution only. Egress, TLS and the CA bundle already work under :minimal - a
+# request to a bare IP returns fine - but the resolver cannot read these, so every
+# hostname fails with curl exit 6. Read-only; no secret material lives here.
+#
+# This is the systemd-resolved target, not /etc/resolv.conf itself: that path is a
+# symlink to this file, and bwrap bind-mounts the real path ("Can't create file at
+# /etc/resolv.conf: No such file or directory" if you name the symlink). If this host
+# ever stops using systemd-resolved, `readlink -f /etc/resolv.conf` gives the new target
+# and this line has to follow it - the failure mode is a hard sandbox error, not a
+# silent fallback.
+"/run/systemd/resolve/stub-resolv.conf" = "read"
+"/etc/nsswitch.conf" = "read"
+"/etc/hosts" = "read"
+
+[permissions.podcast-automation-net.filesystem.":workspace_roots"]
+"." = "write"
+".env" = "deny"
+"**/*.env" = "deny"
+".git" = "read"
+".agents" = "read"
+".codex" = "read"
+
+[permissions.podcast-automation-net.network]
+enabled = true
+
 [permissions.podcast-dry-run]
 description = "Read the repository and write only ignored/generated acceptance artifacts."
 

@@ -74,12 +74,18 @@ because a deep dive invites confident explanation:
 - When sources disagree, say so on air rather than picking one silently.
 
 For the **specific load-bearing details** that pepper a teaching episode — exact numbers,
-dates, benchmark figures, quotes, who-did-what-when — batch them to the `fact-checker`
-custom agent with the URL to
-check each against; it returns a verdict and the **verbatim quote** per claim. Use it to
-confirm the details, not to replace your reading of the core material: only `supported`
-claims (with a real quote) are safe to state, `contradicted` gets corrected to the quote,
-`not_found`/`unreachable` gets re-checked or dropped.
+dates, benchmark figures, quotes, who-did-what-when — **delegate the batch to the
+`fact-checker` agent**, phrased as delegation and naming it ("Delegate this batch: have
+fact-checker verify these claims against these URLs"), each with the URL to check it
+against; a soft hand-off tends to get executed in your own context instead. It returns a
+verdict and the **verbatim quote** per claim. Use it to confirm the details, not to replace
+your reading of the core material: only `supported` claims (with a real quote) are safe to
+state, `contradicted` gets corrected to the quote, `not_found`/`unreachable` gets re-checked
+or dropped.
+
+If delegation doesn't take and you do the fetching yourself, that's fine. What is never fine
+is **stating a detail whose page nobody actually read this session** — leave it out rather
+than asserting it, and never narrate a fact-check that didn't happen.
 
 ### 3. Write the script
 Same hosts as the daily show — **Ada** (`"A"`) and **Alan** (`"B"`); read the **Hosts

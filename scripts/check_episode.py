@@ -18,6 +18,7 @@ import argparse
 import json
 import os
 import re
+import statistics
 import sys
 
 # Defaults match the daily envelope: 18-28 min at the ~165-170 wpm Gemini render
@@ -116,6 +117,63 @@ def recurring_phrases(turns: list[dict], date: str,
     return flagged
 
 
+# Breadth signal: coverage is the one thing the length band cannot see. An episode can sit
+# comfortably inside the word band while covering half as many stories — the same words
+# spread over fewer, longer items — which is exactly how a coverage regression hides (it
+# hid for four nights after the 2026-08-01 provider migration). So compare tonight against
+# this show's *own* recent norm rather than a fixed quota: a genuinely thin news day should
+# read as thin, not as a failure. Warn-only, always — it must never fail an unattended run.
+META_SUFFIX = "-meta.json"
+# Below ~60% of the trailing median is worth a human look. Deliberately loose: normal
+# night-to-night variation is wide, and this exists to catch a step change, not to police.
+BREADTH_FLOOR_RATIO = 0.6
+BREADTH_MIN_HISTORY = 3
+
+
+def _meta_counts(path: str) -> tuple[int, int] | None:
+    """(dives, sources) for an archived episode_meta.json, or None if unusable."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            meta = json.load(f)
+    except (OSError, json.JSONDecodeError):  # a malformed archive must not block the gate
+        return None
+    if not isinstance(meta, dict) or str(meta.get("kind", "")) == "deepdive":
+        return None
+    return len(meta.get("dives") or []), len(meta.get("sources") or [])
+
+
+def breadth_warnings(meta: dict | None, date: str,
+                     scripts_dir: str = SCRIPTS_DIR,
+                     recent: int = RECENT_SCRIPTS) -> list[str]:
+    """Warn when tonight's coverage falls well below the show's own recent norm.
+
+    Deep dives are excluded on both sides: they are one topic by design, and only the
+    daily's meta is archived, so there is nothing comparable to measure them against.
+    """
+    if not isinstance(meta, dict) or str(meta.get("kind", "")) == "deepdive":
+        return []
+    if not os.path.isdir(scripts_dir):
+        return []
+    names = sorted(os.listdir(scripts_dir), reverse=True)  # newest-first (YYYY-MM-DD...)
+    paths = [os.path.join(scripts_dir, f) for f in names
+             if f.endswith(META_SUFFIX) and not f.startswith(str(date))][:recent]
+    past = [c for c in (_meta_counts(p) for p in paths) if c is not None]
+    if len(past) < BREADTH_MIN_HISTORY:
+        return []
+
+    out: list[str] = []
+    for idx, key, label in ((0, "dives", "mini-dive"), (1, "sources", "cited source")):
+        tonight = len(meta.get(key) or [])
+        norm = statistics.median(c[idx] for c in past)
+        if norm and tonight < norm * BREADTH_FLOOR_RATIO:
+            out.append(
+                f"{tonight} {label}(s) tonight against a recent median of {norm:.0f} "
+                f"across {len(past)} episodes — if the day was genuinely thin that's "
+                f"fine; otherwise the sweep is being squeezed to fund the dives"
+            )
+    return out
+
+
 # Things TTS would read aloud literally (checked after tags are removed).
 ARTIFACT_PATTERNS = [
     (re.compile(r"[*_#`~]"), "markdown characters"),
@@ -201,6 +259,8 @@ def main() -> int:
     ap.add_argument("--max-words", type=int, default=MAX_WORDS)
     ap.add_argument("--scripts-dir", default=SCRIPTS_DIR,
                     help="archived past scripts for the phrase-recurrence warning")
+    ap.add_argument("--meta", default="out/episode_meta.json",
+                    help="episode_meta.json for the breadth warning; skipped if absent")
     args = ap.parse_args()
 
     try:
@@ -217,6 +277,14 @@ def main() -> int:
         warnings.append(f"{len(repeats)} phrase(s) also appear in 2+ recent scripts — "
                         "a hardening verbal tic; rephrase the real ones:")
         warnings += [f'  recurring: "{p}"' for p in repeats[:15]]
+    meta = None
+    try:
+        with open(args.meta) as f:
+            meta = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        pass  # no meta (or unreadable) just means no breadth signal — never a failure
+    warnings += breadth_warnings(meta, episode.get("date", ""),
+                                 scripts_dir=args.scripts_dir)
     warnings += pronunciation_warnings(episode.get("turns") or [])
     for w in warnings:
         print(f"  warn: {w}")
