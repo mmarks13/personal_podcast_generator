@@ -30,12 +30,23 @@ class AgentRunnerTests(unittest.TestCase):
         joined = " ".join(command)
         self.assertIn("--json", command)
         self.assertIn('approval_policy="never"', command)
-        self.assertIn('default_permissions="podcast-automation"', command)
+        # podcast must read primary sources, so it gets the network-enabled profile.
+        self.assertIn('default_permissions="podcast-automation-net"', command)
         self.assertIn('model_reasoning_effort="xhigh"', command)
         self.assertIn('web_search="live"', command)
         self.assertNotIn("dangerously-bypass", joined)
         self.assertEqual(Path(command[0]).parent, ROOT / ".codex" / "runtime-bin")
         self.assertTrue(os.path.samefile(command[0], Path(command[0]).parent / "codex-linux-sandbox"))
+
+    def test_codex_network_profile_is_per_stage(self) -> None:
+        """Least privilege: only the stages that must fetch get shell network."""
+        settings = {"model": "gpt-5.6-terra", "effort": "high", "web_search": "disabled"}
+        for stage in ("podcast", "crawl", "deepdive", "read", "fact_check", "link_check"):
+            self.assertIn('default_permissions="podcast-automation-net"',
+                          ar.codex_command(stage, settings, Path("last.txt")), stage)
+        for stage in ("consolidate", "propose"):
+            self.assertIn('default_permissions="podcast-automation"',
+                          ar.codex_command(stage, settings, Path("last.txt")), stage)
 
     def test_codex_dry_run_uses_output_only_profile(self) -> None:
         settings = {"model": "gpt-5.6-sol", "effort": "xhigh", "web_search": "live"}

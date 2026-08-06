@@ -45,7 +45,11 @@ ARCHIVE_DIR = "archive"          # past scripts (archive/scripts/), copied by ru
 FEED_NAME = "feed.xml"
 DOCS = "docs"                    # GitHub Pages source folder (main branch /docs)
 EPISODES_DIR = "episodes"        # per-episode HTML notes pages (under DOCS / bucket)
-READS_DIR = "reads"              # weekly-read EPUBs (under DOCS), built by make_epub.py
+READS_DIR = "reads"              # local build dir for EPUBs (docs/reads/), by make_epub.py
+READS_TAG = "reads"              # ...but they *ship* as assets on this single release, not
+                                 # via Pages: 67 MB of back issues redeployed on every
+                                 # publish pushed the Pages deploy past its 10-minute
+                                 # timeout and left the podcast feed stale for hours.
 
 
 # Audio tags ([laughs], [sighs], ...) are TTS delivery directions; strip any that
@@ -185,7 +189,8 @@ def episode_page_html(title: str, date: str, notes_html: str, mp3_url: str,
 </body></html>"""
 
 
-def index_page_html(catalog: list[dict], reads: list[str] | None = None) -> str:
+def index_page_html(catalog: list[dict],
+                    reads: list[tuple[str, str]] | None = None) -> str:
     """A simple episodes index for GitHub Pages, newest first."""
     show = os.environ.get("SHOW_TITLE", "Self-Attention")
     desc = os.environ.get("SHOW_DESC", "A daily AI news briefing.")
@@ -200,9 +205,9 @@ def index_page_html(catalog: list[dict], reads: list[str] | None = None) -> str:
     reads_html = ""
     if reads:
         links = "\n".join(
-            f'<li><a href="{READS_DIR}/{r}">{r}</a></li>' for r in sorted(reads, reverse=True)
+            f'<li><a href="{url}">{name}</a></li>' for name, url in reads
         )
-        reads_html = f"<h2>Weekly reads (EPUB)</h2>\n<ul>\n{links}\n</ul>"
+        reads_html = f"<h2>Daily reads (EPUB)</h2>\n<ul>\n{links}\n</ul>"
     return f"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
@@ -324,6 +329,33 @@ class GitHubBackend:
         fname = os.path.basename(mp3)
         return f"https://github.com/{self.owner_repo}/releases/download/{tag}/{fname}"
 
+    def upload_read(self, epub: str) -> str:
+        """Publish one daily-read EPUB as a Release asset. Idempotent, like upload_audio."""
+        exists = subprocess.run(["gh", "release", "view", READS_TAG],
+                                capture_output=True).returncode == 0
+        if exists:
+            run_retry(["gh", "release", "upload", READS_TAG, epub, "--clobber"])
+        else:
+            run_retry(["gh", "release", "create", READS_TAG, epub,
+                       "-t", "Daily reads (EPUB)", "-n", "Self Attention back issues."])
+        return (f"https://github.com/{self.owner_repo}/releases/download/"
+                f"{READS_TAG}/{os.path.basename(epub)}")
+
+    def list_reads(self) -> list[tuple[str, str]]:
+        """(filename, download URL) for every published read, newest first.
+
+        Asks the release rather than listing docs/reads/, so the index is correct on a
+        fresh clone and does not depend on build output still being on this machine.
+        A missing release just means no reads section — never a publish failure.
+        """
+        r = subprocess.run(["gh", "release", "view", READS_TAG, "--json", "assets",
+                            "-q", ".assets[].name"], capture_output=True, text=True)
+        if r.returncode != 0:
+            return []
+        names = sorted((n for n in r.stdout.split() if n.endswith(".epub")), reverse=True)
+        return [(n, f"https://github.com/{self.owner_repo}/releases/download/{READS_TAG}/{n}")
+                for n in names]
+
     def load_catalog(self) -> list[dict]:
         if os.path.exists(CATALOG_FILE):
             with open(CATALOG_FILE) as f:
@@ -346,9 +378,7 @@ class GitHubBackend:
                                      ep["mp3_url"], extra_html=extra)
             with open(os.path.join(ep_dir, f"{page_name(ep)}.html"), "w") as f:
                 f.write(html)
-        reads_dir = os.path.join(DOCS, READS_DIR)
-        reads = sorted(os.listdir(reads_dir)) if os.path.isdir(reads_dir) else []
-        reads = [r for r in reads if r.endswith(".epub")]
+        reads = self.list_reads()
         with open(os.path.join(DOCS, "index.html"), "w") as f:
             f.write(index_page_html(catalog, reads))
 

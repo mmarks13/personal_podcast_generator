@@ -9,6 +9,11 @@ __pycache__/
 logs/
 .run_episode.lock
 .codex/runtime-bin/
+# Daily-read EPUBs are build output. They ship as assets on the `reads` release, not via
+# Pages - committing them here meant redeploying the whole back catalogue (67 MB) on every
+# publish, which pushed the Pages deploy past its 10-minute timeout and left the podcast
+# feed stale. make_epub.py still writes here; publish_read.py uploads from here.
+docs/reads/
 # Scratch the networked agent leaves behind - it now has shell network and repo write,
 # so a research turn may clone a repo into the workspace (seen: .tmp-gcc/). publish.py
 # only ever `git add`s explicit paths, so these were never committable; this just keeps
