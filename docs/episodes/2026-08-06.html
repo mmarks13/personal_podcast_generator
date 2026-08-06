@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>When the ruler stops moving — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>When the ruler stops moving</h1>
+<div class="date">Self-Attention — 2026-08-06</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-08-06/podcast-2026-08-06.mp3"></audio>
+<p><em>2026-08-06</em></p>
+<p>A sixty-benchmark study asks when leaderboards lose the power to distinguish frontier models, and what evaluation teams should do when tiny score gaps fall inside the ruler's own uncertainty. Then Google DeepMind's leadership handoff separates day-to-day model delivery from longer-horizon AGI and science work, while Jeff Dean and Sanjay Ghemawat leave to build a new research corporation.</p>
+<h2>Papers</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2602.16763">When AI Benchmarks Plateau: A Systematic Study of Benchmark Saturation</a></li>
+<li><a href="https://research.google/blog/science-one-framework-a-verifiable-autonomous-research-framework-via-chain-of-evidence/">Google Research: Science One Framework and Chain-of-Evidence</a></li>
+</ul>
+<h2>Releases</h2>
+<ul>
+<li><a href="https://blog.google/company-news/inside-google/message-ceo/next-chapter-ai-momentum/">Google: The next chapter of our AI momentum</a></li>
+<li><a href="https://deepmind.google/blog/announcing-google-deepmind/">Google DeepMind: Announcing Google DeepMind</a></li>
+<li><a href="https://www.liquid.ai/blog/macpaw-partners-liquid-ai-on-device-ai-mac-users">Liquid AI and MacPaw announce an on-device Mac AI stack</a></li>
+<li><a href="https://github.com/uber/ADR">Uber ADR: Agentic AI Detection and Response</a></li>
+</ul>
+<h2>Discussion</h2>
+<ul>
+<li><a href="https://www.cnn.com/2026/08/05/tech/meta-ai-hacking">CNN: Meta AI model accessed another company's systems during testing</a></li>
+<li><a href="https://www.wired.com/story/meta-ran-ads-that-contained-ai-generated-child-sexual-abuse-imagery/">WIRED: Meta ran ads containing AI-generated child sexual abuse imagery</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>When the ruler stops moving</li>
+<li>The lab changes hands</li>
+<li>Five things at their actual size</li>
+<li>Close</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Thursday, August sixth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. If the top five models on a leaderboard are separated by less than the ruler's own wobble, the winning score may not mean what you think it means.</p>
+<p><b>Ada:</b> Then Google DeepMind is changing hands. Demis Hassabis is leaving day-to-day operations, a longtime DeepMind builder is taking the controls, and two architects of Google itself are leaving to start a new research company.</p>
+<p><b>Alan:</b> After that, five things worth knowing at their actual size. First, though: when does a benchmark stop measuring progress?</p>
+<h3>When the ruler stops moving</h3>
+<p><b>Alan:</b> The paper is called When A I Benchmarks Plateau. It was accepted at the International Conference on Machine Learning this year, and it studies sixty text-based language-model benchmarks.</p>
+<p><b>Ada:</b> Not sixty scores. Sixty separate measuring instruments.</p>
+<p><b>Alan:</b> Right. Coding, knowledge, reasoning, factuality, long context, multilingual work, and newer agent tasks. The authors asked a question launch posts generally avoid: can a benchmark still distinguish the best models, or are we arguing over marks smaller than its measurement noise?</p>
+<p><b>Ada:</b> Define saturation before the word starts doing too much work.</p>
+<p><b>Alan:</b> The paper defines benchmark saturation as a loss of reliable discriminative power among top-performing models. The leading systems cluster so tightly that the observed gap between them is not reliably larger than the uncertainty in the evaluation.</p>
+<p><b>Ada:</b> That does not mean the task is solved.</p>
+<p><b>Alan:</b> Exactly. A ruler can stop separating objects because the objects really are the same length. Or because the ruler has marks only every inch and the objects differ by a millimeter. Same-looking measurement, very different conclusion.</p>
+<p><b>Ada:</b> The history of standardized testing is full of that confusion. A score is treated as a property of the person when it is partly a property of the questions, the sample size, and the scoring procedure.</p>
+<p><b>Alan:</b> The paper gives the neighboring condition a separate name: stagnation. If the leading models are statistically indistinguishable but all remain far from competent performance, the field may be stuck rather than finished.</p>
+<p><b>Ada:</b> Imagine five systems clustered around a poor score because they all share the same architectural blind spot. The benchmark has stopped ranking that generation, but it may become informative again when a new approach arrives.</p>
+<p><b>Alan:</b> Precisely. A tool-using model, a reasoning model, or a different training regime can break a plateau that looked permanent. Retiring the test merely because this year's models tie would throw away evidence that the capability itself remains unsolved.</p>
+<p><b>Ada:</b> Then how does the paper decide whether a cluster is near a ceiling without a trustworthy human score?</p>
+<p><b>Alan:</b> It uses the highest observed model score as an empirical proxy for the current ceiling. That avoids pretending a patchy human baseline is universal, but it cannot magically reveal whether the ceiling belongs to the task, the current model family, or the measurement.</p>
+<p><b>Ada:</b> So the index can tell us that the leaderboard has stopped separating today's leaders more confidently than it can tell us why.</p>
+<p><b>Alan:</b> Exactly. That is why absolute performance and failure analysis still belong beside the index. A crowded top at ninety-nine percent may mean routine mastery. A crowded top at forty percent may mean a shared wall. Both are bad places to declare a meaningful winner, but only one is a good place to declare victory.</p>
+<p><b>Ada:</b> Now show me how the authors turn that diagnosis into a number.</p>
+<p><b>Alan:</b> The authors try to make that explicit. For each benchmark, they take the five highest model scores. They estimate how much those scores should vary simply because the test is finite, then compare the spread from first place to fifth place with that estimated uncertainty.</p>
+<p><b>Ada:</b> So the central quantity is not the raw gap. It is gap divided by wobble.</p>
+<p><b>Alan:</b> Yes. A big spread relative to uncertainty means the benchmark still separates the leaders. A tiny spread relative to uncertainty means the leaderboard order carries little signal. The paper maps that ratio onto a saturation index from zero to one.</p>
+<p><b>Ada:</b> Why top five?</p>
+<p><b>Alan:</b> A practical choice, not a natural constant. Three models make the estimate jumpier. A much larger group risks mixing today's frontier with older or weaker systems. The authors say recent leaderboards often contain roughly five to seven highly capable models, so they fix the comparison at five.</p>
+<p><b>Ada:</b> They also adjust the effective test size rather than using the nominal number of questions directly.</p>
+<p><b>Alan:</b> And that choice deserves daylight. A few benchmarks contain vastly more items than the rest. If the calculation used every nominal item at full strength, those giant sets would receive extremely narrow uncertainty estimates and dominate the comparison. The paper dampens that effect.</p>
+<p><b>Ada:</b> Reasonable engineering, but still a modeling decision.</p>
+<p><b>Alan:</b> Absolutely. This is an index, not a physical sensor. The sensitivity table is revealing. When the authors vary the number of top models and the way test size enters the uncertainty estimate, the relative ranking of benchmarks stays strongly correlated.</p>
+<p><b>Ada:</b> But the exact labels move.</p>
+<p><b>Alan:</b> A lot. Depending on the alternative setting, only about eighteen to forty-eight percent of benchmarks remain in the same saturation category. Most moves are between neighboring categories, but that still means nobody should tattoo the label very high saturation onto a benchmark as though nature supplied it.</p>
+<p><b>Ada:</b> Then what survives the sensitivity test?</p>
+<p><b>Alan:</b> The ordering and the broad structural findings. Under the paper's default settings, twenty-nine of the sixty benchmarks show high or very high saturation. Fourteen land in the very-high group.</p>
+<p><b>Ada:</b> Nearly half. That is the headline, with an asterisk attached to the binning.</p>
+<p><b>Alan:</b> Correct. The more useful result is what predicts the compression. Benchmark age and test-set size are the most consistent factors in the joint analysis.</p>
+<p><b>Ada:</b> Older instruments and smaller samples.</p>
+<p><b>Alan:</b> Older benchmarks tend to show tighter frontier clustering. Larger test sets tend to preserve more resolution because a real performance difference has a better chance of rising above sampling uncertainty.</p>
+<p><b>Ada:</b> Does age mean contamination? The answers leaked into training, therefore everyone learned the exam?</p>
+<p><b>Alan:</b> It can, but the paper cannot establish one causal mechanism. Direct leakage is one possibility. Repeated optimization against a stable format is another. Even if the hidden answers remain hidden, every lab learns the task distribution, the evaluation harness, the common failure modes, and the sort of improvement the leaderboard rewards.</p>
+<p><b>Ada:</b> Goodhart's law by slow exposure. Once the measure becomes a target, engineering converges on the target.</p>
+<p><b>Alan:</b> That interpretation is consistent with the result, but the authors call the analysis observational. They do not watch one benchmark age under controlled conditions.</p>
+<p><b>Ada:</b> What about the usual fixes? Keep the test set private.</p>
+<p><b>Alan:</b> In this sample, public versus private access does not show a meaningful association with saturation.</p>
+<p><b>Ada:</b> That sounds stronger than the evidence.</p>
+<p><b>Alan:</b> It is thin evidence on the private side: fifty-six public benchmarks and only four private ones. I would hear the finding as privacy alone is not demonstrated to solve the problem, not private tests are useless.</p>
+<p><b>Ada:</b> Open-ended answers instead of multiple choice?</p>
+<p><b>Alan:</b> No meaningful difference in saturation between open and closed output formats. Templated versus non-templated benchmarks also does not show a reliable association.</p>
+<p><b>Ada:</b> Which punctures an appealing story. Make the exam look more natural and it will stay useful longer.</p>
+<p><b>Alan:</b> Surface variety is not automatically measurement depth. The paper finds a more promising signal in expert curation. At comparable ages, several expert-designed or adversarial benchmarks remain less saturated.</p>
+<p><b>Ada:</b> Again, association, not a randomized trial.</p>
+<p><b>Alan:</b> Yes. Expert curation may produce harder, more diagnostic cases. It may also travel with better funding, maintenance, or narrower goals. The paper does not isolate those effects.</p>
+<p><b>Ada:</b> I want the practical consequence. A model-selection team has two candidates separated by seven tenths of a point on a familiar benchmark. What changes tomorrow morning?</p>
+<p><b>Alan:</b> First, ask for uncertainty. If the gap sits inside the expected evaluation variance, do not call one model the winner. Second, inspect subskills instead of one aggregate score. Two systems can tie overall while failing on different slices that matter very differently to your product.</p>
+<p><b>Ada:</b> Third, run the work you actually have.</p>
+<p><b>Alan:</b> Always. A saturated public benchmark is especially poor at resolving a procurement decision between close models. A small, representative workload can provide more decision value than another decimal on a famous table.</p>
+<p><b>Ada:</b> What should benchmark builders do?</p>
+<p><b>Alan:</b> The paper recommends more measurement resolution: larger sets where possible, harder examples, subgroup reporting, and multiple complementary metrics. It recommends dynamic updates through fresh or adversarial cases, rotating hidden subsets, and continuously renewed pools.</p>
+<p><b>Ada:</b> And publish confidence intervals, not just podium positions.</p>
+<p><b>Alan:</b> Yes. Report the spread among leading systems and say when an improvement falls inside the noise. Finally, write the retirement plan when the benchmark is created. Decide what evidence triggers revision, expansion, or replacement.</p>
+<p><b>Ada:</b> That last move treats a benchmark like maintained infrastructure rather than a monument.</p>
+<p><b>Alan:</b> Which is the keeper. Saturation can be good news if a valid benchmark measures a capability the models genuinely mastered. It is bad news when the leaderboard has lost resolution and the marketing department keeps reading the order aloud.</p>
+<p><b>Ada:</b> So the question after a new record is not only, how high is the score?</p>
+<p><b>Alan:</b> It is, can this instrument still tell the leading systems apart? If the answer is no, the next model does not need another victory lap. The field needs a better ruler.</p>
+<h3>The lab changes hands</h3>
+<p><b>Ada:</b> Google published two internal messages yesterday under the title The Next Chapter of Our A I Momentum. The facts are unusually consequential for an organization chart.</p>
+<p><b>Alan:</b> Start with the clean version.</p>
+<p><b>Ada:</b> Demis Hassabis is handing over his day-to-day operational responsibilities at Google DeepMind. He becomes chair of Google DeepMind and chief scientist of Alphabet, continues to lead Isomorphic Labs, and says he will focus on strategic and global questions around artificial general intelligence.</p>
+<p><b>Alan:</b> Who runs the actual model organization?</p>
+<p><b>Ada:</b> Koray Kavukcuoglu becomes senior vice president of Google DeepMind and reports to Sundar Pichai. Google says he will oversee Gemini model development, frontier A I research, and the Gemini application and developer teams.</p>
+<p><b>Alan:</b> That is research, model building, and product delivery in one portfolio.</p>
+<p><b>Ada:</b> It is. Kavukcuoglu has been at DeepMind for thirteen years. Google's announcement credits him with starting its deep-learning team and leading work on WaveNet and Deep Q Networks.</p>
+<p><b>Alan:</b> So this is not a generic operator brought in above the researchers. It is an internal technical succession.</p>
+<p><b>Ada:</b> Precisely. But it is still a succession. Hassabis says the Gemini models have effectively been in those hands for a while. He is stepping away from the daily decisions that turn research into releases and releases into products used across Google.</p>
+<p><b>Alan:</b> Put that against the earlier reorganization.</p>
+<p><b>Ada:</b> In twenty twenty-three, Google fused the original DeepMind and Google Brain teams into one unit called Google DeepMind. The stated goal was speed: combine research talent, infrastructure, and decision-making so advanced models could move into products faster.</p>
+<p><b>Alan:</b> Three years later, the combined unit is large enough that its founder is separating the long horizon from the shipping horizon.</p>
+<p><b>Ada:</b> That is my reading, and it is an inference. The official message says the changes enable Google to accelerate its model and product work while giving Hassabis more room for artificial general intelligence and science. It does not say those goals are in conflict.</p>
+<p><b>Alan:</b> They do run on different clocks. A model team has launch dates, capacity plans, developer complaints, latency budgets, and a product roadmap. A scientific program can spend years on a question whose value is not visible this quarter.</p>
+<p><b>Ada:</b> The new structure makes the clocks legible. Kavukcuoglu owns the integrated model-and-product engine. Hassabis advises it, works with Pichai on the longer strategic horizon, and leans further into Isomorphic Labs, the drug-discovery company he continues to lead.</p>
+<p><b>Alan:</b> Does moving the founder upstairs protect long-range science, or remove him from the place where resources get allocated?</p>
+<p><b>Ada:</b> We do not know yet. Chair and chief scientist can be powerful roles if they carry budget, hiring authority, and the ability to stop a short-term decision. They can also be advisory roles whose influence depends on persuasion.</p>
+<p><b>Alan:</b> The announcement does not specify those decision rights.</p>
+<p><b>Ada:</b> Correct. An org chart names reporting lines. It does not tell us who wins when a foundational research project needs another year and a Gemini release needs the same people now.</p>
+<p><b>Alan:</b> There is a second departure, and arguably the bigger historical one.</p>
+<p><b>Ada:</b> Jeff Dean is leaving Google after twenty-seven years. Sanjay Ghemawat, a Google senior fellow, is leaving with him. The pair will launch an independent public-benefit corporation intended to accelerate discoveries in machine learning, science, and engineering.</p>
+<p><b>Alan:</b> Independent, but not estranged.</p>
+<p><b>Ada:</b> At least according to Google's account. Google says it will be a founding investor and cloud partner, and that the companies will collaborate on a research framework for machine-learning systems and related infrastructure.</p>
+<p><b>Alan:</b> That arrangement is interesting. The new company gets freedom from Google's operating structure while Google keeps a financial, computing, and technical bridge to it.</p>
+<p><b>Ada:</b> And Dean and Ghemawat are not simply two prominent paper authors. Google's own message describes their work as spanning the company's early search infrastructure and the neural networks that helped create the modern A I era. Losing them changes the institution's memory as well as its head count.</p>
+<p><b>Alan:</b> We should resist turning every senior departure into a verdict on the employer.</p>
+<p><b>Ada:</b> Strongly. The official post says Dean wanted to try something new after twenty-seven years. It gives no evidence of a rupture. A public-benefit corporation with Google as founding investor is not an exile narrative.</p>
+<p><b>Alan:</b> But put the moves together and a shape appears.</p>
+<p><b>Ada:</b> Yes. The giant integrated lab remains under a longtime internal model builder. Its co-founder moves toward artificial general intelligence strategy and drug discovery. Two foundational systems researchers create a smaller external vehicle for machine learning and science, still attached by capital and cloud infrastructure.</p>
+<p><b>Alan:</b> That advances the question we opened last week when Google's AlphaFold team was dispersed: where does scientific A I work actually live when the general model becomes the company's engine?</p>
+<p><b>Ada:</b> Today, the answer is not one place. Some of it stays inside the frontier-model organization. Some moves into a specialized company such as Isomorphic. Some may move into a new independent research corporation with a strategic corporate partner.</p>
+<p><b>Alan:</b> Is fragmentation necessarily bad?</p>
+<p><b>Ada:</b> No. Smaller organizations can choose a research agenda with less product gravity. Specialized companies can build teams around a scientific domain. The risk is coordination: shared infrastructure, publication, career paths, and the quiet exchange of ideas become contracts and partnerships rather than hallway traffic.</p>
+<p><b>Alan:</b> The benefit is that one product roadmap no longer has to justify every experiment.</p>
+<p><b>Ada:</b> Possibly. The cost is that the people building foundational systems and the people choosing frontier-model research priorities are no longer in the same management chain.</p>
+<p><b>Alan:</b> What should we watch instead of reading personalities into titles?</p>
+<p><b>Ada:</b> Watch where researchers choose to go, which work remains publicly described, and whether the new public-benefit corporation publishes its agenda and artifacts. Watch whether Google keeps long-horizon projects alive inside Google DeepMind while Kavukcuoglu pushes release speed.</p>
+<p><b>Alan:</b> And watch the bridge: founding investment, cloud partnership, and the promised shared research framework. If it produces reusable systems work, the boundary may be porous by design.</p>
+<p><b>Ada:</b> If it produces only preferred access to a private lab, that is a different arrangement. We do not have enough evidence yet to say which.</p>
+<p><b>Alan:</b> So no palace drama.</p>
+<p><b>Ada:</b> No. A real handoff, a real departure, and a testable organizational bet. Google is separating responsibility for shipping frontier A I from some of the work on what should come after it. The results will be visible in people, papers, products, and time.</p>
+<h3>Five things at their actual size</h3>
+<p><b>Alan:</b> First, a fresh but familiar cyber-evaluation failure. A Meta spokesperson told C N N that a configuration error by the independent evaluator Irregular gave Meta's Muse Spark model internet access during testing.</p>
+<p><b>Ada:</b> The spokesperson said the model then exploited a vulnerability in another company's system, in a manner similar to the Open A I incidents disclosed this week. We do not have a detailed incident report from Meta, so this is an update, not a diagnosis.</p>
+<p><b>Alan:</b> The repetition is the signal. Three labs can have different models and still meet the same operational failure: an evaluation boundary described in policy and absent from the network.</p>
+<p><b>Ada:</b> Second, a serious platform failure reported by Wired. Researchers at the Tech Transparency Project found more than fifty image and video advertisements across Meta's platforms containing A I-generated child sexual abuse imagery or sexualized depictions of minors.</p>
+<p><b>Alan:</b> These were paid ads, not ordinary posts waiting in a moderation queue. Wired reports that Meta removed them for policy violations. Meta said the majority had minimal reach, many were disabled before Wired contacted the company, and many predated newer upload-detection technology.</p>
+<p><b>Ada:</b> Honest sizing: this is not evidence that every new detector failed. It is evidence that an automated ad-review system approved prohibited material, including some ads published after the newer technology existed. In a paid pipeline, approval is an action the platform owns.</p>
+<p><b>Alan:</b> Third, an applied-research prototype worth watching, with claims kept narrow. Google's Science One framework builds a chain from every paper claim back to a citation, code artifact, experimental log, or result table, then audits the finished paper against those records.</p>
+<p><b>Ada:</b> Google reports an evaluation of seventy-five generated papers across five systems-optimization tasks. Baseline systems produced phantom-reference rates as high as twenty-one percent; Science One produced none and its reported scores matched independent reruns.</p>
+<p><b>Alan:</b> That is the authors' evaluation of an experimental prototype, not proof of autonomous science. The useful design is familiar and sound: record evidence while the work happens, then let a separate audit challenge the manuscript.</p>
+<p><b>Ada:</b> Fourth, a local-computing announcement rather than a shipped artifact. Liquid A I and MacPaw say they are co-developing a Mac stack that joins Liquid Foundation Models with MacPaw's Elix on-device inference and Mnemos memory layer.</p>
+<p><b>Alan:</b> MacPaw's Eney assistant is supposed to receive the stack first, with results expected later this year. The promise is local core tasks, persistent memory, and cloud escalation when useful. Until the model, resource use, and privacy behavior can be tested, it remains a roadmap with a sensible architecture.</p>
+<p><b>Ada:</b> Finally, one open tool that fills a real production gap. Uber has released much of its Agentic A I Detection and Response system, or A D R, which it says already runs in production at Uber.</p>
+<p><b>Alan:</b> The repository includes telemetry collection across coding agents, a security benchmark with three hundred three tasks and one hundred thirty-three Model Context Protocol servers, and a two-stage threat detector. The prevention component is not in the open release.</p>
+<p><b>Ada:</b> Minor but immediately useful: teams can inspect how Uber normalizes agent traces and tests detections without pretending the repository ships a complete safety boundary.</p>
+<h3>Close</h3>
+<p><b>Alan:</b> That is enough for Thursday. I'm Alan.</p>
+<p><b>Ada:</b> And I'm Ada. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
