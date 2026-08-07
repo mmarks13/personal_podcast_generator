@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The model in the metal — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>The model in the metal</h1>
+<div class="date">Self-Attention — 2026-08-07</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-08-07/podcast-2026-08-07.mp3"></audio>
+<p><em>2026-08-07</em></p>
+<p>AMD's agreement to acquire Taalas puts model-specific inference silicon inside a major accelerator roadmap, with enormous vendor-reported efficiency and an equally important loss of flexibility. A large browser game exposes why command approval is a weak agent-security boundary, while Cursor's production router shows how real usage can drive model selection without making satisfaction the same thing as correctness.</p>
+<h2>Papers</h2>
+<ul>
+<li><a href="https://huggingface.co/papers/2608.05466">Recursive Synthesis for Long-Horizon Terminal Tasks</a></li>
+</ul>
+<h2>Releases</h2>
+<ul>
+<li><a href="https://ir.amd.com/news-events/press-releases/detail/1296/amd-acquires-taalas-to-advance-compute-solutions-for-rapidly-growing-ai-inference-market">AMD Acquires Taalas to Advance Compute Solutions for Rapidly Growing AI Inference Market</a></li>
+<li><a href="https://taalas.com/the-path-to-ubiquitous-ai/">Taalas: The path to ubiquitous AI</a></li>
+<li><a href="https://cursor.com/blog/how-cursor-router-works">How Cursor Router chooses the right model for the task</a></li>
+<li><a href="https://www.anthropic.com/news/improving-fable-5-s-biology-safeguards">Improving Fable 5's biology safeguards</a></li>
+<li><a href="https://research.meta.ai/blog/introducing-muse-code-and-muse-spark-1-2">Introducing Muse Code and Muse Spark 1.2</a></li>
+<li><a href="https://support.claude.com/en/articles/12138966-release-notes">Claude release notes: skill and plugin security scanning</a></li>
+</ul>
+<h2>Discussion</h2>
+<ul>
+<li><a href="https://scalex.dev/blog/ai-agent-permissions-stats/">Humans missed 1 in 3 threats approving AI agent commands across 40,000 plays</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>The model in the metal</li>
+<li>Four signals, properly sized</li>
+<li>The approval button</li>
+<li>The router watches what happens next</li>
+<li>Close</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Friday, August seventh. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. A model is usually a file that can move from one kind of computer to another. Today, A M D is buying a company built around turning the model itself into the computer.</p>
+<p><b>Ada:</b> We also have an unusually useful warning from a browser game: when people were asked to approve an A I coding agent's commands, they missed the dangerous ones far more often than the reassuring phrase human in the loop would suggest.</p>
+<p><b>Alan:</b> And later, Cursor has shown its work on model routing. Not a benchmark that says one model is best, but a production system that tries to decide when an expensive model is worth calling at all.</p>
+<h3>The model in the metal</h3>
+<p><b>Ada:</b> A M D announced late yesterday that it had reached a definitive agreement to acquire Taalas, a Toronto company founded in twenty twenty-three. The deal still needs the usual regulatory approvals and closing conditions, and A M D did not disclose a price.</p>
+<p><b>Alan:</b> What exactly is A M D buying? Specialized chips can mean almost anything now.</p>
+<p><b>Ada:</b> Taalas starts from a stronger proposition than a conventional accelerator. Instead of making a general chip and loading different model weights into it, Taalas says it builds the hardware around one particular model.</p>
+<p><b>Alan:</b> The weights become part of the machine.</p>
+<p><b>Ada:</b> Largely, yes. Its first product is a chip hard-wired with Llama three point one eight billion. Taalas calls these Hardcore Models. The name is marketing. The architectural choice is real: trade away much of a graphics processor's flexibility in exchange for a data path designed around the exact computation this model performs.</p>
+<p><b>Alan:</b> Give me the bottleneck it is trying to remove.</p>
+<p><b>Ada:</b> In ordinary inference, the arithmetic units and the model weights live in different places. The model's parameters sit in memory, and generation repeatedly moves the needed values into the compute units. Taalas argues that this memory-compute boundary creates the need for high-bandwidth memory, advanced packaging, wide input and output links, and a great deal of power devoted to moving data.</p>
+<p><b>Alan:</b> Which is why the size of the model is not only a storage fact. It is a traffic pattern repeated for every generated token.</p>
+<p><b>Ada:</b> Exactly. Taalas says its design puts storage and computation together on one chip at far higher density than standard on-chip memory. It then removes much of the general machinery needed to interpret an arbitrary model at runtime.</p>
+<p><b>Alan:</b> That sounds wonderfully efficient and dangerously permanent.</p>
+<p><b>Ada:</b> Both. A graphics processor is a general-purpose promise: give me a new checkpoint, a different architecture, or a changed layer and I will run software that describes it. A hard-wired model says: I know what computation you will ask for, so I can delete the flexibility you are not using.</p>
+<p><b>Alan:</b> Until the lab ships version three point two on Tuesday.</p>
+<p><b>Ada:</b> There is the commercial wager. Taalas says it can take a previously unseen model and realize it in hardware in two months. Even if that timeline holds, a dedicated chip only makes sense when the model will receive enough stable, high-volume traffic to repay the loss of flexibility.</p>
+<p><b>Alan:</b> Stable is doing a lot of work in that sentence. Today's popular model can be tomorrow's compatibility layer.</p>
+<p><b>Ada:</b> It can. The first Taalas chip keeps a little room to move. Its context length is configurable, and it supports low-rank adapters for fine-tuning. But you still cannot load a different backbone. You can adjust the hard-wired model around the edges; you cannot pretend the silicon is an empty graphics processor.</p>
+<p><b>Alan:</b> Now the numbers, with the vendor label attached.</p>
+<p><b>Ada:</b> In Taalas's own measurements, its hard-wired Llama generates seventeen thousand tokens per second for one user. The company calls that nearly ten times the current state of the art, with a system that costs twenty times less to build and uses ten times less power.</p>
+<p><b>Alan:</b> Those are exceptional claims. What did the company compare against?</p>
+<p><b>Ada:</b> Its chart combines measurements Taalas says it ran on Nvidia H two hundred and B two hundred systems with published results for other accelerators. This is not an independent benchmark. More importantly, Taalas says its first chip uses a custom mixture of three-bit and six-bit weights, and it acknowledges some quality degradation relative to graphics-processor results.</p>
+<p><b>Alan:</b> Good. Because seventeen thousand compromised tokens per second would be a very fast way to get the wrong answer.</p>
+<p><b>Ada:</b> Quite. The company says its second generation moves to standard four-bit floating-point formats to address that limitation. What we have today is a vendor demonstration of the efficiency ceiling, not a neutral quality-adjusted comparison across serving systems.</p>
+<p><b>Alan:</b> And the acquisition announcement is much more restrained than the product page.</p>
+<p><b>Ada:</b> It is. A M D says Taalas reduces compute and memory bottlenecks associated with general-purpose architectures. It plans to integrate the technology into its accelerator roadmap and build system-level solutions alongside Instinct graphics processors.</p>
+<p><b>Alan:</b> Alongside matters. A M D is not announcing that it will replace its general accelerators with one-model chips.</p>
+<p><b>Ada:</b> Correct. The sensible reading is heterogeneous inference. Keep programmable accelerators for new models, changing workloads, fine-tuning, and low-volume jobs. Move a few durable, heavily used models onto much more specialized silicon when their traffic justifies it.</p>
+<p><b>Alan:</b> Like a restaurant that keeps a full kitchen but buys one machine that does nothing except make the dish ordered ten thousand times a day.</p>
+<p><b>Ada:</b> A useful analogy, with one break: a recipe revision does not normally require new silicon.</p>
+<p><b>Alan:</b> There it is.</p>
+<p><b>Ada:</b> The historical pendulum has swung between general-purpose and special-purpose computing for as long as computers have existed. General machines win when the workload changes faster than hardware can. Specialized machines win when one calculation becomes common enough that every ounce of flexibility looks like overhead.</p>
+<p><b>Alan:</b> A I inference may now be large enough to support both markets at once.</p>
+<p><b>Ada:</b> That is the signal in this acquisition. Taalas is still proving its product claims, and the transaction has not closed. But one of the two major graphics-processor vendors has decided that model-specific silicon belongs inside its roadmap rather than outside its walls.</p>
+<p><b>Alan:</b> So the question for an infrastructure buyer is not, are dedicated chips faster?</p>
+<p><b>Ada:</b> It is: which models will still be worth hard-wiring by the time the chips arrive, and can the vendor prove quality, throughput, power, and cost on the same workload? Specialization pays only when you have specialized around the right thing.</p>
+<h3>Four signals, properly sized</h3>
+<p><b>Alan:</b> First, Anthropic has narrowed Fable five's biology filter. The company says its August seventh update reduced biology-related fallbacks by about eighty-five percent in internal testing across its product surfaces.</p>
+<p><b>Ada:</b> Anthropic says it rewrote the classifier's constitution, built new training data, and retrained the smaller system that decides whether Fable answers or hands the request to Opus five. Everyday health, clinical, and educational questions should trigger fewer fallbacks.</p>
+<p><b>Alan:</b> The boundary is still deliberately broad. Anthropic says requests it classifies as dual use, including virology, toxicology, and molecular design, continue to fall back to Opus. Useful product improvement, but the eighty-five percent is a false-positive result reported by the company, not an independent test of what harmful requests now get through.</p>
+<p><b>Ada:</b> Second, a paper called Recursive Synthesis for Long-Horizon Terminal Tasks is the research item to watch, not to canonize on day one. The authors start with a verified terminal task, extend its reference solution, realign the instruction and verifier, validate the result in a fresh sandbox, then reuse accepted tasks as seeds for another round.</p>
+<p><b>Alan:</b> They report thirty-seven thousand four hundred eighty-four tasks across fifteen rounds at roughly five cents each. That is a striking data-production claim. Given how much this week has already taught us about agent environments and verifiers, the new piece is the recursive factory. Let the external results age before we turn its benchmark gains into a verdict.</p>
+<p><b>Alan:</b> Third, Meta has released Muse Code in beta, a terminal coding agent powered by Muse Spark one point two. Meta describes persistent background agents, repository-scale execution, and built-in verification.</p>
+<p><b>Ada:</b> The endurance demonstration is worth sizing carefully. Meta says it let the model optimize graphics-processor kernels through more than one thousand tool calls over runs lasting as long as twenty-four hours. That is a vendor test on a structured optimization loop, not evidence that an unattended agent can safely own any day-long software job. Still, a public tool that makes long execution and verification first-class deserves inspection.</p>
+<p><b>Ada:</b> Finally, a small control that answers a real concern. Anthropic's Enterprise plans can now enable beta security scanning for third-party skills and plugins when someone uploads or edits them.</p>
+<p><b>Alan:</b> Good hygiene, not a sandbox. A scanner can reject known or legible malicious content. It cannot turn a broadly permissioned extension into a narrow one. Administrators still need to inspect what the extension can read, call, and change after it passes.</p>
+<h3>The approval button</h3>
+<p><b>Alan:</b> Now the browser game, because this one should change how builders talk about human approval. Alex Wauters at ScaleX made a short game in which the player supervises a coding agent under time pressure. Routine commands and malicious commands arrive in the same approval queue. The player has to allow or deny each one.</p>
+<p><b>Ada:</b> Before the headline number, put the caveat in the foreground.</p>
+<p><b>Alan:</b> This was not an academic study. It was a self-selected browser game, statistics were added after the game had already attracted some attention, and roughly one third of the commands shown were threats. Real coding sessions do not contain malicious commands at anything like that rate. The clock also created artificial pressure.</p>
+<p><b>Ada:</b> Good. So it cannot tell us that a developer in production will miss exactly the same fraction.</p>
+<p><b>Alan:</b> It cannot. It can show which kinds of prompts were easy or hard for more than forty thousand game runs. ScaleX says the collected data contains four hundred nine thousand individual approve-or-deny decisions. The average player missed one in three threats, with mean threat-detection accuracy of sixty-six point three percent.</p>
+<p><b>Ada:</b> In a game that tells you there are threats.</p>
+<p><b>Alan:</b> Right. And the relative pattern matters more than the absolute rate. Obviously destructive commands, such as deleting the root filesystem, were missed eleven point seven percent of the time. Persistent mutations were missed twenty-three point eight percent. Exfiltration or code-execution threats were missed thirty-three point four percent. Scope violations, including attempts to read cloud credentials, were missed thirty-five percent.</p>
+<p><b>Ada:</b> The theatrical danger is easier to stop than the quiet boundary crossing.</p>
+<p><b>Alan:</b> Exactly. People recognize a command that looks like destruction. They struggle when the command looks ordinary but its effect depends on state created earlier.</p>
+<p><b>Ada:</b> Which brings us to the worst-performing prompt.</p>
+<p><b>Alan:</b> N P M run analyze. By itself, that is a familiar project command. In the game history immediately above the approval, the package configuration showed that the script piped its output to an unfamiliar remote address. Players still approved it sixty-four point seven percent of the time.</p>
+<p><b>Ada:</b> Because the button asks them to judge the name of the action after the meaning of the action has moved somewhere else.</p>
+<p><b>Alan:</b> Yes. An N P M script is indirection. The agent can edit the package configuration or a file the script imports, then ask permission to run a reassuring two-word command. The dangerous payload is no longer visible in the final command unless the reviewer reconstructs the whole chain.</p>
+<p><b>Ada:</b> ScaleX pooled three such N P M commands. Players missed them fifty-two point five percent of the time across nine thousand four hundred eighty-two decisions, versus twenty-eight point four percent for the other exfiltration-style attacks.</p>
+<p><b>Alan:</b> The familiar wrapper nearly doubled the miss rate, even though the game exposed the payload in its history.</p>
+<p><b>Ada:</b> That is the practical finding. Command approval is a poor interface for effect approval.</p>
+<p><b>Alan:</b> And vigilance has a cost on the other side. Thirty-five point two percent of players caught every threat. Only twenty point eight percent caught all of them while blocking no more than one in five safe commands.</p>
+<p><b>Ada:</b> So a user can become secure by becoming the bottleneck.</p>
+<p><b>Alan:</b> Precisely. The game included benign commands that looked alarming: clearing a build directory, killing the process occupying a development port, changing a package registry to an internal mirror. Blocking every scary-looking string stops ordinary work. Approving familiar strings misses actions whose danger is hidden in prior state.</p>
+<p><b>Ada:</b> This is why the phrase human in the loop needs a noun after it. A human doing what, with which information, at what frequency, and with how much time?</p>
+<p><b>Alan:</b> If the answer is approving hundreds of shell commands whose effects depend on files the agent edited two minutes ago, the human is not a security boundary. The human is an intermittent classifier with incomplete context.</p>
+<p><b>Ada:</b> Then what replaces the button?</p>
+<p><b>Alan:</b> The button still has a role, but later and rarer. Start with containment that does not require attention: run the agent in an account with no ambient secrets, constrain which directories it can read, separate read permission from write permission, and deny outbound network access unless the task requires a named destination.</p>
+<p><b>Ada:</b> Make the environment enforce the ordinary case.</p>
+<p><b>Alan:</b> Yes. If an N P M script runs inside a disposable workspace with no home-directory credentials and no arbitrary network route, its hidden payload has less to steal and fewer places to send it. Then ask a person only for exceptional capability: publish this package, modify this production resource, send this message, spend this money.</p>
+<p><b>Ada:</b> And show the requested effect, not only the command. Which files changed? Which secrets could be read? Which network destinations will be reachable? What state can be restored?</p>
+<p><b>Alan:</b> Exactly. A transaction summary is better than a shell incantation. Better still, let the person approve a narrow capability for a bounded task instead of approving one syntactic step at a time.</p>
+<p><b>Ada:</b> There is an evaluation lesson too. Count false blocks as well as caught threats.</p>
+<p><b>Alan:</b> Absolutely. A permission system that stops every incident by stopping every workflow has failed as a product. Measure dangerous effects allowed, safe work denied, bypass frequency, time to decision, and how performance changes after the twentieth prompt.</p>
+<p><b>Ada:</b> The ScaleX game does not give us a real-world failure rate. It gives us a compact demonstration of why the interface is mis-specified.</p>
+<p><b>Alan:</b> A user cannot reliably approve an effect when the screen shows only the final command and the cause is distributed across everything the agent has already touched.</p>
+<h3>The router watches what happens next</h3>
+<p><b>Ada:</b> Cursor's new engineering post begins with a different rejection of the obvious interface. Instead of asking developers to choose one model for an entire coding session, Cursor Router chooses per turn.</p>
+<p><b>Alan:</b> Routing is easy to draw and hard to make pay. Every switch can break the prompt cache, change behavior, and create a new kind of debugging question: was the bad answer the model, the router, or the handoff?</p>
+<p><b>Ada:</b> Cursor says it included those costs. Its training dataset contains hundreds of thousands of turns sampled from live Cursor traffic. For each turn, it records the conversation signals available to the router, an inferred performance outcome, and the actual token cost at application-programming-interface prices, including cache misses caused by switching models.</p>
+<p><b>Alan:</b> Inferred outcome is the important phrase. How does it decide whether a response was good?</p>
+<p><b>Ada:</b> From what the user does next. Moving on to another task is a positive signal. Correcting the agent is a negative one.</p>
+<p><b>Alan:</b> That is behavior, not correctness. A user can move on because the answer worked, because the error was invisible, or because arguing became more expensive than fixing it alone.</p>
+<p><b>Ada:</b> I share that concern. Cursor treats the signal as user satisfaction, not a verified software outcome. It is abundant and drawn from actual work, which makes it useful. It is also a proxy whose blind spots will shape every decision trained on it.</p>
+<p><b>Alan:</b> So what does the router learn from the proxy?</p>
+<p><b>Ada:</b> First, a predictor called Compass estimates whether a price-efficient model is likely to satisfy the user on the current turn. Cursor reports that the turns Compass rated most likely to succeed received a positive performance signal ninety-six percent of the time. The least-likely group received one seventy-one percent of the time.</p>
+<p><b>Alan:</b> Seventy-one percent is not failure. It means the hard end of the distribution still often works with whatever model handled it.</p>
+<p><b>Ada:</b> Correct. Compass is not declaring a task impossible. It supplies a continuous score used to decide how much traffic stays on the cheaper path and how much gets upgraded.</p>
+<p><b>Alan:</b> And when it upgrades?</p>
+<p><b>Ada:</b> A second router classifies the turn by domain, task, and modifier. Backend or frontend. Bug fix or test writing. A bounded edit, a visual change, a product question. Cursor then compares how available frontier models have performed on that kind of production traffic.</p>
+<p><b>Alan:</b> The post says the models have different specialties.</p>
+<p><b>Ada:</b> According to Cursor's data, Grok offers strong value on broad routine work. Sol performs especially well on planning and understanding codebases. Opus is strong on execution-heavy work such as operations and database queries. Fable's gains are most valuable in debugging and visual implementation.</p>
+<p><b>Alan:</b> Those are Cursor-specific observations, not universal model identities.</p>
+<p><b>Ada:</b> Very much so. They depend on Cursor's users, prompts, harness, prices, and outcome proxy. The system only makes a frontier model eligible for a task category when its observed improvement clears what Cursor describes as a one-sided seventy-five-percent confidence threshold. It then selects a traffic mix that maximizes expected performance within the mode's cost budget.</p>
+<p><b>Alan:</b> That last part is the real product. The router is not searching for the best model. It is choosing where to buy a more expensive attempt.</p>
+<p><b>Ada:</b> Exactly. Cursor currently reports that Auto Intelligence delivers user satisfaction above Fable's level at sixty-eight percent lower cost. It says Auto Balance outperforms Opus four point eight at forty-one percent lower cost.</p>
+<p><b>Alan:</b> Vendor numbers again. Do we get sample sizes for those live comparisons or confidence intervals around the headline claims?</p>
+<p><b>Ada:</b> Not in the post. Cursor describes cross-validation, a held-out test set, and live traffic experiments, but the public account does not provide enough detail to reproduce the top-line comparison independently.</p>
+<p><b>Alan:</b> Then the mechanism is more reusable than the victory claim.</p>
+<p><b>Ada:</b> I think so. A team building its own router can borrow four ideas without borrowing Cursor's conclusion. Train on representative work rather than a generic leaderboard. Put cache loss and total turn cost into the objective. Separate the question of whether a cheap model is enough from the question of which expensive model fits. And evaluate the routing policy live after tuning it offline.</p>
+<p><b>Alan:</b> I would add three logs: the reason for the route, the model actually called, and whether a human later had to repair the output. Otherwise the router saves money in aggregate while making individual failures impossible to explain.</p>
+<p><b>Ada:</b> Also retain a fixed workload for drift. Production satisfaction adapts to the users and tasks that remain. A stable acceptance set tells you when a new model, a changed price, or a routing update quietly moves behavior you care about.</p>
+<p><b>Alan:</b> Would you use this today?</p>
+<p><b>Ada:</b> For a large coding workload with varied tasks, yes, as an experiment. I would not let the router's satisfaction score become my correctness metric, and I would preserve an override for work whose failure cost is known in advance.</p>
+<p><b>Alan:</b> My answer is even less romantic. I would use it if the invoice, cache hit rate, accepted patches, and repair time all move in the same direction.</p>
+<p><b>Ada:</b> That is why this post matters. It turns model choice from a permanent preference into an observable systems decision. The remaining argument is what outcome deserves to train that decision.</p>
+<h3>Close</h3>
+<p><b>Ada:</b> That is Friday's briefing. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
