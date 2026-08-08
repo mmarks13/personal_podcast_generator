@@ -1,0 +1,141 @@
+A: Good morning — it’s Saturday, August eighth. I’m Ada.
+B: And I’m Alan. This is the deep dive, and today we are asking who should get the next turn.
+A: Cursor made that question unusually concrete this week. Its new engineering post describes a system that can keep one coding turn on a price-efficient model, then send the next to a frontier model chosen for that kind of work.
+B: Which sounds like a tiny decision sitting in front of the impressive one.
+A: It is tiny in compute. It is not tiny in consequence. The router decides which capabilities, prices, delays, habits, and failure modes the user encounters before the chosen model writes a word.
+B: Yesterday we looked at Cursor’s implementation. Today I want the design underneath it. When people say, “Choose the right model for every turn,” what can right possibly mean?
+A: Not one thing. Right for a quick rename may mean cheap and immediate. Right for a database migration may mean reliable planning. Right for a visual bug may mean a model with stronger image understanding. Right for a sensitive task may begin with which models are allowed to see it.
+B: So this is not a horse race with a hidden winner.
+A: No. It is a decision policy under constraints. And if the policy never states what it values, “automatic model selection” is just an unexplained opinion running in production.
+
+## The decision before the answer
+B: Let me draw the smallest possible router. A user sends a request. The router reads that request, chooses model cheap or model strong, and forwards the same request to its choice.
+A: That is pre-generation routing. One decision, then one model call. The important word is expected. Before generation, the router cannot inspect the answer it is about to receive. It predicts how each candidate is likely to do.
+B: From what evidence?
+A: Perhaps the current prompt, the conversation so far, recent tool calls, the task type, input length, available modalities, and the candidate models’ past results on similar work. Cursor says its router uses the current turn and recent conversation state, including structured task features and tool calls.
+B: I hear a dispatcher. Look at the incoming call, look at the crews, send the crew most likely to handle it.
+A: Good analogy, with a break we should name early. A human dispatcher can often observe whether a crew is qualified. A model router is estimating a moving statistical relationship between a request and an outcome it has not seen.
+B: And the crews get replaced every few weeks.
+A: Or repriced, or updated behind a product name, or slowed by demand. The request mix changes too. A route learned in July is not a law of nature in August.
+B: Fine. Give the router a score. Expected answer quality minus cost.
+A: Already too simple.
+B: [chuckles] I knew you would say that.
+A: Cost includes more than the listed price per token. Output length matters. A switch can lose a useful prompt cache. A slow answer can cost user attention. A failed cheap attempt followed by a retry can cost more than one good expensive attempt.
+B: So expected quality minus money, minus latency, minus switching cost, minus expected cleanup.
+A: That is closer. Then apply hard constraints before optimizing. If the task requires a modality a model lacks, that model is not a candidate. If a deployment rule forbids a provider or requires a particular data boundary, no attractive quality score should sneak it back in.
+B: Filter first, rank second.
+A: Exactly. And different products choose different exchange rates among the remaining objectives. A support bot may value a fast acceptable answer. A code-review gate may pay more to reduce a rare damaging miss. There is no neutral threshold.
+
+## A curve, not a crown
+B: This is where leaderboards start to mislead. They ask which model has the highest average score. A router asks which model has the highest expected value on this item, under this budget.
+A: And routing only has something to exploit if models are complementary. Suppose model A is cheaper and at least as good as model B on every relevant task. B is dominated. A clever router cannot rescue an unnecessary candidate.
+B: But if A is better at routine command work and B is better at debugging, the boundary has shape.
+A: Yes. The Association for Computational Linguistics paper L L M Router Bench found that no single model dominated every domain in its evaluated pools. That is the premise routing needs.
+B: The router then tries to find the boundary without knowing the answer key at decision time.
+A: Route L L M gives us the clean binary version. Its researchers train a predictor to estimate the probability that a designated strong model will beat a weaker, cheaper model on a query. A threshold turns that probability into a choice.
+B: Raise the threshold and the strong model must look much more likely to win before you pay for it.
+A: In Route L L M’s convention, yes. More turns stay cheap. Lower the threshold and more turns go strong. Sweep the threshold and you do not get one magic result. You get a quality-cost curve.
+B: Which lets a product owner choose an operating point.
+A: Or lets two product tiers choose different points. Cursor describes that pattern in its Auto Balance and Auto Intelligence modes: the complexity threshold and the frontier-model budget place each mode at a different point on the curve.
+B: I like the curve because it forces honesty. If you claim free quality, I can ask which region, which workload, and compared with what baseline.
+A: The baseline matters enormously. Beating random routing is not enough. A practical router should beat the best single model you could have selected and left alone, either on quality, cost, or both.
+B: Otherwise we built a decision service to create invoices and incident categories.
+
+## Choose once or earn an escalation
+A: Pre-generation dispatch is not the only architecture. A cascade waits for evidence the first model actually produced.
+B: Cheap model goes first. A scorer looks at the response. If it seems reliable, return it. If not, pay for the next model.
+A: That is the mechanism in Frugal G P T. Its cascade orders a short list of models, assigns an acceptance threshold at each step, and learns a scoring function over the query and generated answer.
+B: The advantage is obvious. A prompt can look simple and still produce a bad answer. The cascade gets one chance to notice.
+A: And the cost is equally real. When it escalates, it has already paid for the first generation. It has added delay, and it now depends on a scorer that can distinguish a confident mistake from a good answer.
+B: Pre-routing predicts difficulty. Cascading predicts answer reliability.
+A: Nicely compressed. Direct routing usually calls one model and is fast. A cascade can condition on the candidate answer, but hard cases may call several models. Neither dominates everywhere.
+B: What about asking several models at once and choosing afterward?
+A: That is an ensemble or reranking design. It can improve selection because it sees multiple answers, but it spends the cost and latency that routing was often introduced to avoid. Route L L M explicitly chose one model per query for that reason.
+B: So the architecture menu is dispatch, cascade, or ensemble, plus hybrids.
+A: Cursor is a hybrid within dispatch. Compass first asks whether a price-efficient model is likely to satisfy the user. If not, a task router compares frontier models using a taxonomy of domains, tasks, and modifiers.
+B: Backend or frontend. Bug fix or test writing. Bounded edit or visual change.
+A: Those are examples Cursor gives. The separation is useful: “Is the cheap path enough?” is a different prediction from “Which expensive specialist fits?”
+B: It also keeps the cheap decision cheap. You do not need a grand tournament for every commit message.
+
+## What the router learns from
+B: Here is the uncomfortable part. To train a router, I need labels saying how every candidate would have performed on every turn.
+A: Ideally. For a fixed evaluation set, you can send each item to every model, grade every answer, record cost and latency, and create a rectangular table: turns down the side, models across the top.
+B: Expensive, but legible.
+A: Production logs are cheaper and messier. On a real turn, you usually observe the outcome from the model you called. You do not observe the answer the other models would have produced at that moment.
+B: The missing columns are not zero. They are unknown.
+A: Precisely. Randomized trials, held-out comparisons, or deliberate exploration can fill some of them. Without that, a router can learn from its own past choices and confuse “we sent these tasks here” with “this model is best for these tasks.”
+B: Route L L M used pairwise preference data. People saw two anonymous answers and chose a winner or a tie. The router learned which kinds of query made the strong class more likely to win.
+A: It tested several predictors. One was matrix factorization, descended from recommendation systems. Imagine every model and query having hidden coordinates. Training adjusts those coordinates so the preferred model scores higher for that query.
+B: A matchmaking service for prompts and models.
+A: With the usual warning: similarity is not understanding, and coordinates learned from yesterday’s matches can miss a new sport. In Route L L M, routers trained only on general Arena preferences performed around random on out-of-distribution academic tasks. Small amounts of task-relevant augmentation improved them.
+B: That is a brutal lesson. A large pile of labels is not representative merely because it is large.
+A: Cursor chose a different abundant signal. Its post says the dataset contains hundreds of thousands of production turns across multiple models. It infers performance from what the user does next: moving on is positive; correcting the agent is negative.
+B: Useful, but that is satisfaction behavior, not verified code correctness.
+A: Yes. A user can move on because the work succeeded, because a mistake went unnoticed, or because fixing it alone became easier than continuing. A correction can mean failure, or simply a changed requirement. The proxy is valuable because it is plentiful and close to real work. Its blind spots become the router’s blind spots.
+B: Cursor’s Compass results show why the signal is still informative. The company reports that turns in the band most likely to succeed received a positive signal ninety-six percent of the time, versus seventy-one percent in the least-likely band.
+A: That demonstrates separation in Cursor’s metric. It does not transform the metric into ground-truth correctness.
+B: And Cursor counts actual token use and cache misses from switching models in cost. That is better than multiplying a benchmark’s average prompt by a price sheet.
+A: It is closer to the deployed objective. The general rule is that the training label must resemble the outcome the product actually cares about, and the cost label must resemble the bill the system actually pays.
+
+## The threshold has an author
+A: Once a router can estimate outcomes, somebody still chooses the threshold.
+B: Let the optimizer choose it under a budget.
+A: The optimizer still receives the budget and the metric. Cursor says a frontier candidate becomes eligible only when its observed uplift over the price-efficient model clears a one-sided seventy-five percent threshold. Then an optimizer chooses a traffic-weighted mix expected to maximize performance gain within the mode’s average cost.
+B: That is a policy choice wearing mathematical clothes.
+A: Exactly. Seventy-five percent confidence may be suitable for a reversible coding turn and unsuitable for a medical denial, a security decision, or an irreversible financial action. The number cannot supply the stakes that selected it.
+B: Nor should average budget control every individual route. I may want a monthly cost target and still force the strongest approved path for a known high-impact task.
+A: This is the difference between a soft objective and a hard rule. Soft objectives trade. Hard rules exclude. A well-designed router lets explicit risk classification, user choice, or workflow policy override its statistical preference.
+B: I would add stickiness. Per-turn routing can switch models inside one long conversation. That may lose cache savings, alter tone, or change how an underspecified instruction is interpreted.
+A: Cursor’s accounting includes cache misses caused by switching. More generally, the action is not merely “choose model B.” It is “move from model A to model B with this conversation state.” The transition can have a cost.
+B: Then put a switching penalty in the score unless the expected gain clears it.
+A: Or pin a model for a phase of work, then reconsider at a natural boundary. Per-turn does not have to mean restless.
+B: And log the handoff. If the answer fails, I need to know whether the route, the model, the prompt transformation, or the state transfer caused it.
+A: A route without an explanation trail creates a compound mystery: an automatic choice feeding a probabilistic model.
+
+## The evidence gets less magical
+B: We have a plausible machine. Does it work?
+A: Sometimes, sharply. But the answer shrinks when the evaluation gets broader.
+B: Give me the optimistic result first.
+A: In the Route L L M paper’s M T Bench experiment, its matrix-factorization router trained with Arena and model-judge data needed about thirteen percent strong-model calls to recover half the performance gap between its weak and strong models. Random routing needed about forty-nine percent.
+B: That is a large separation.
+A: On that benchmark, with that pair, that training mixture, and that performance target. The same paper reports that its unaugmented routers struggled when the test distribution changed. The result teaches both possibility and dependence.
+B: Frugal G P T has the irresistible number.
+A: On its Headlines financial-classification task, the authors report a ninety-eight point three percent cost saving while matching the best individual model’s accuracy. But this was one narrow task using a learned cascade and twenty twenty-three prices. The authors explicitly say good cascade performance needs labeled examples from the same or a similar distribution as the test queries.
+B: So do not turn ninety-eight percent on headline classification into ninety-eight percent on an open-ended agent.
+A: Correct. Then the 2026 L L M Router Bench study placed ten representative routing baselines into one framework over more than four hundred thousand model-query instances, twenty-one datasets, and thirty-three models.
+B: And the broad verdict was mixed.
+A: The study found clear model complementarity, but many routing methods performed similarly. Several did not beat the best single-model baseline. In its performance-cost pool, the strongest evaluated methods reached as much as a four percent average-accuracy gain, or as much as a thirty-one point seven percent cost reduction while matching the best single model. Those gains were not universal.
+B: Which is exactly the comparison a product needs. Does the frontier move, or did we just add machinery between the user and the same frontier?
+A: The paper also compared current routers with an oracle that picks a correct model after seeing all outcomes. A large gap remained. On hard items where only a few models were correct, routers often failed to rank the rare correct specialist highly.
+B: The router can learn “math goes here, code goes there” and still miss the weird case inside math where only one model sees the trick.
+A: That is the authors’ diagnosis. They also found diminishing returns from adding more models. A carefully chosen moderate pool could be more useful than a larger random pool.
+B: Good. Every additional model adds evaluation work, operational variance, fallback behavior, contract changes, and another way to be confidently selected for the wrong reason.
+A: The benchmark itself has limits. It excludes domain-specific verticals, very long-context tasks, and multimodal benchmarks. Its latency estimates are approximate and do not capture network conditions, batching, caching, or router overhead.
+B: Which means Cursor’s live system and the academic benchmark answer different questions. Cursor measures a production satisfaction proxy and actual serving costs in coding traffic. The benchmark supplies controlled comparisons and answer-level grading over a broad but artificial suite.
+A: Neither should impersonate the other.
+
+## Build the smallest router that can win
+B: Let’s make Monday morning less abstract. I have a product using one expensive model. What do I do before training a neural router?
+A: Write the objective and constraints in plain language. Which outcomes define quality? Which failures matter most? What is the latency target? What counts as total cost? Which tasks or data may use which providers?
+B: Then establish the best single-model baseline on representative work. Not a public average — my actual turns, with graders tied to the task outcome.
+A: Yes. Evaluate a small, deliberately complementary pool. Two to four candidates is enough to discover whether routing opportunity exists. If one model dominates after full cost is included, stop.
+B: That is an underrated router: one line returning the same model every time.
+A: Next, inspect the table. Are differences mostly coarse, such as code versus prose, or local, such as one model handling a particular repository operation? Start with rules, a task taxonomy, or retrieval of similar past items before assuming a large learned router is necessary.
+B: The 2026 benchmark found leading methods close together and noted that a clustering method without neural-network training was competitive. Complexity has to earn its place here too.
+A: Split data by time as well as randomly. A random holdout tests interpolation within yesterday’s mix. A later holdout tests whether the relationship survived model and workload drift.
+B: Measure the whole decision: router time, model time, input and output tokens, cache behavior, retries, failures, and human repair. Then compare the policy with best single, cheapest single, and any manual rule already in use.
+A: For quality, report important slices and costly misses, not only the mean. A router that saves twenty percent overall by mishandling the rare high-stakes class is not a bargain.
+B: Before launch, replay it without changing traffic. Then canary a small share, keep a user override, and preserve a fixed evaluation set while production behavior accumulates.
+A: Log what the router knew, which candidates were eligible, the scores or rule that chose the model, the exact model version called, total cost, latency, and the eventual outcome signal.
+B: And sample the quiet positives. If “the user moved on” is treated as success, inspect enough of those turns to estimate how often silence hides an error or abandonment.
+A: Recalibrate when candidates, prices, prompts, tools, or users change. A router is not a static model-selection feature. It is a continuously evaluated policy over moving components.
+B: I would give it a kill switch too. If outcome telemetry breaks, the router should fall back to a known operating point, not keep learning from nonsense.
+A: Sensible. And if your product lacks a trustworthy quality signal, begin with explicit user choice or transparent rules. Automation does not repair an undefined objective.
+
+## Who defines right
+B: [short pause] The part I am still chewing on is the word right. It makes the router sound like a neutral concierge.
+A: When it is really a compact statement of product values: which errors count, whose waiting counts, what risk may be traded for cost, and when the user gets a choice.
+B: The best router is not the one with the fanciest classifier.
+A: It is the one whose choices move a measured frontier, remain inspectable when they fail, and stop when its evidence no longer applies.
+B: I’m Alan.
+A: And I’m Ada. Stay grounded.
