@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: The gate moved — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Deep Dive: The gate moved</h1>
+<div class="date">Self-Attention — 2026-08-09</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-08-09-deepdive/deepdive-2026-08-09.mp3"></audio>
+<p><em>2026-08-09</em></p>
+<p>Controlled AI release began as a decision about whether to publish one model's weights. This history traces how the control surface expanded through staged checkpoints, partner sharing, hosted APIs, licenses, open-weight counterarguments, and capability thresholds that can now govern development before a model ships.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://openai.com/index/better-language-models/">OpenAI: Better language models and their implications</a></li>
+<li><a href="https://openai.com/index/gpt-2-6-month-follow-up/">OpenAI: GPT-2 six-month follow-up</a></li>
+<li><a href="https://openai.com/index/gpt-2-1-5b-release/">OpenAI: GPT-2 1.5B release</a></li>
+<li><a href="https://openai.com/index/openai-api/">OpenAI API launch</a></li>
+<li><a href="https://partnershiponai.org/paper/responsible-publication-recommendations/">Partnership on AI: Managing the Risks of AI Research</a></li>
+<li><a href="https://ai.meta.com/blog/large-language-model-llama-meta-ai/">Meta: Introducing LLaMA</a></li>
+<li><a href="https://about.fb.com/news/2023/07/llama-2/">Meta and Microsoft introduce Llama 2</a></li>
+<li><a href="https://ai.meta.com/llama/license/">Meta: Llama 2 Community License Agreement</a></li>
+<li><a href="https://www.anthropic.com/responsible-scaling-policy">Anthropic Responsible Scaling Policy</a></li>
+<li><a href="https://www.gov.uk/government/publications/emerging-processes-for-frontier-ai-safety/emerging-processes-for-frontier-ai-safety">UK government: Emerging processes for frontier AI safety</a></li>
+<li><a href="https://www.gov.uk/government/publications/frontier-ai-safety-commitments-ai-seoul-summit-2024/frontier-ai-safety-commitments-ai-seoul-summit-2024">AI Seoul Summit 2024 Frontier AI Safety Commitments</a></li>
+<li><a href="https://openai.com/index/updating-our-preparedness-framework/">OpenAI: Updated Preparedness Framework</a></li>
+<li><a href="https://openai.com/index/responding-next-frontier-critical-cyber-capabilities/">OpenAI: Responding to the next frontier of critical cyber capabilities</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://www.ntia.gov/programs-and-initiatives/artificial-intelligence/open-model-weights-report">NTIA: Dual-Use Foundation Models with Widely Available Model Weights</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>The paper was not the model</li>
+<li>Nine months in nineteen</li>
+<li>The gate becomes a service</li>
+<li>When permission travels with the weights</li>
+<li>The threshold becomes the trigger</li>
+<li>What control actually buys</li>
+<li>The gate moved</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Sunday, August ninth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. Yesterday, OpenAI said preliminary tests of its upcoming Astra model were concerning enough that the company could not rule out its Critical cybersecurity threshold.</p>
+<p><b>Ada:</b> It did not say the finding was final. It did say the uncertainty changed operations: internal Astra activities that did not meet stronger security requirements were paused while testing continued.</p>
+<p><b>Alan:</b> That sounds like a modern frontier-lab sentence. Capability threshold, security controls, pause, keep evaluating.</p>
+<p><b>Ada:</b> None of that vocabulary was standard when the argument began. In twenty nineteen, the famous controlled release was a much simpler act: a lab had trained a language model and did not immediately publish the largest set of weights.</p>
+<p><b>Alan:</b> So how did a withheld download become a rule that can reach backward into development inside the lab?</p>
+<p><b>Ada:</b> That is our history. Not a march from reckless openness to enlightened closure. It is the story of the gate moving: from the paper, to the artifact, to the customer, to the capability, and finally to the conditions under which work may continue.</p>
+<p><b>Alan:</b> And every move solved one problem by creating another.</p>
+<h3>The paper was not the model</h3>
+<p><b>Ada:</b> Start with the old mental model of release. A research result was a paper. If the authors were generous, it also came with code and data so other researchers could reproduce it.</p>
+<p><b>Alan:</b> The bundle was treated as one thing: publish the method, show the evidence, let the field inspect and extend it.</p>
+<p><b>Ada:</b> Machine learning made that bundle separable. A paper can describe an architecture without supplying the training data. Code can show the recipe without paying for the run. A model card can describe behavior without exposing the weights. A hosted service can expose outputs while keeping every artifact private.</p>
+<p><b>Alan:</b> So “released” stopped being a yes-or-no property.</p>
+<p><b>Ada:</b> Exactly. It became a vector. Which paper? Which code? Which data? Which checkpoint? Which users? Which interface? Under what terms? For how long?</p>
+<p><b>Alan:</b> That is already more useful than open versus closed.</p>
+<p><b>Ada:</b> And it matters because the pieces carry different powers. A paper transfers an idea. Training code reduces the work of reproduction. Weights transfer a functioning capability. An application programming interface, or A P I, lends access to a capability while the provider keeps possession of it.</p>
+<p><b>Alan:</b> “Lends” is doing work there. If I download weights, I can run them without asking the original lab again. If I call an A P I, the lab remains in every transaction.</p>
+<p><b>Ada:</b> Right. The analogy I want is not one locked door. It is a building with separate keys for the reading room, the workshop, the archive, and the loading dock.</p>
+<p><b>Alan:</b> Where does the analogy break?</p>
+<p><b>Ada:</b> A physical key does not make a perfect copy of the building when it opens a door. Model weights do. Once copied, the original distributor cannot technically recall every copy, patch every instance, or observe every use.</p>
+<p><b>Alan:</b> That irreversibility is the pressure behind the whole story.</p>
+<p><b>Ada:</b> Yes, but do not smuggle in the conclusion that irreversibility is always bad. A copy outside the provider's control also enables independent research, local deployment, competition, preservation, and scrutiny the provider cannot veto.</p>
+<p><b>Alan:</b> Control and accountability do not automatically travel together.</p>
+<p><b>Ada:</b> Nor do openness and safety. The history is an argument over which failure matters in which model, not a universal answer.</p>
+<h3>Nine months in nineteen</h3>
+<p><b>Alan:</b> The argument became public with G P T two.</p>
+<p><b>Ada:</b> On February fourteenth, twenty nineteen, OpenAI announced a one-point-five-billion-parameter language model and withheld the full trained model. Its post said it was releasing a much smaller version and sampling code, but not the dataset, training code, or full weights.</p>
+<p><b>Alan:</b> What was the feared use?</p>
+<p><b>Ada:</b> OpenAI named deceptive or abusive text at scale: misleading articles, impersonation, spam, phishing, and other synthetic content. More important for our history, the company called its own decision an experiment. It said the smaller release might limit the initial set of organizations able to reproduce the system and buy time for assessment and discussion.</p>
+<p><b>Alan:</b> So the first control was delay.</p>
+<p><b>Ada:</b> Delay plus graduated capability. OpenAI later described two mechanisms: staged release and partnership-based sharing. A smaller checkpoint went public. Larger versions went to selected researchers studying misuse, bias, detection, and social effects. Then the public checkpoint grew in steps.</p>
+<p><b>Alan:</b> That is a clinical trial metaphor: expose a smaller dose, watch, expand.</p>
+<p><b>Ada:</b> Useful, but incomplete. A clinical trial has a defined population, an intervention, and outcomes selected in advance. The G P T two experiment was watching a technology diffuse through an open world where much misuse would be invisible and other groups could reproduce the method.</p>
+<p><b>Alan:</b> OpenAI said exactly that last part in the original post: some researchers could replicate and publish it anyway.</p>
+<p><b>Ada:</b> Which means the control was a head start, not containment. In August, OpenAI released the roughly seven-hundred-and-seventy-million-parameter version after the earlier small and medium versions. It also published a legal agreement intended to make partnership-based sharing easier.</p>
+<p><b>Alan:</b> The partner gate let outsiders inspect a stronger artifact without making it generally downloadable.</p>
+<p><b>Ada:</b> Yes. That addressed one criticism of withholding: the lab was not the only evaluator. But the lab still selected the partners, set the agreement, and decided which evidence counted toward the next stage.</p>
+<p><b>Alan:</b> Then came the ending everyone remembers.</p>
+<p><b>Ada:</b> On November fifth, OpenAI released the full one-point-five-billion-parameter model with code and weights. The company said it had seen no strong evidence of misuse so far, while acknowledging it could not observe everything. It also said larger language models had appeared since August, so the replication landscape had changed under the experiment.</p>
+<p><b>Alan:</b> In other words, the value of waiting was decaying.</p>
+<p><b>Ada:</b> Exactly. Staging is strongest when three conditions hold: the capability difference between stages matters, observation during the interval teaches you something, and other actors will not erase the interval by independently building or releasing the same capability.</p>
+<p><b>Alan:</b> If any one fails, the pause becomes theater.</p>
+<p><b>Ada:</b> Or a smaller benefit than advertised. G P T two did produce something durable. It made release itself an object of study. The Partnership on AI later turned that live controversy into responsible-publication recommendations for individual researchers, research leaders, and publication venues.</p>
+<p><b>Alan:</b> But the nine-month experiment did not produce a detector that solved synthetic text.</p>
+<p><b>Ada:</b> No. OpenAI's final post said its detector was not accurate enough to stand alone and should be combined with other signals and human judgment. That is a useful historical limit: waiting can create research time without guaranteeing a technical fix.</p>
+<h3>The gate becomes a service</h3>
+<p><b>Alan:</b> The next move was to stop handing over the artifact.</p>
+<p><b>Ada:</b> In June twenty twenty, OpenAI launched access to models from the G P T three family through an A P I in private beta. Its argument explicitly contrasted the service with open weights. A hosted interface let the company broaden access over time, approve customers and uses, review applications before production, monitor behavior, impose constraints, and terminate harmful use.</p>
+<p><b>Alan:</b> That sounds far more controllable than a staged download.</p>
+<p><b>Ada:</b> Mechanically, it is. The provider can rate-limit, filter, log, suspend, change the model, or withdraw a feature. The customer gets capability without custody of the weights.</p>
+<p><b>Alan:</b> And the lab gets a sensor network. Real prompts, real failures, real misuse attempts.</p>
+<p><b>Ada:</b> With an enormous caveat: it gets visibility into uses that occur on its service. It does not see similar models elsewhere, and monitoring does not guarantee correct interpretation or timely response.</p>
+<p><b>Alan:</b> The A P I also changes who bears trust. Under downloaded weights, I must trust the operator running the copy, perhaps myself. Under a hosted model, I must trust the provider with access, policy enforcement, continuity, and often sensitive inputs.</p>
+<p><b>Ada:</b> And with scientific control. A researcher cannot fully inspect weights the provider withholds. The service can change behind a product name. A result reproduced next month may have used a different underlying system.</p>
+<p><b>Alan:</b> So the A P I solved revocation by centralizing authority.</p>
+<p><b>Ada:</b> It also turned release governance into product operations. The question was no longer only, “Do we publish this checkpoint?” It became, “Which use is allowed, for whom, with what monitoring, and what happens after deployment evidence arrives?”</p>
+<p><b>Alan:</b> That is a deep change. A staged checkpoint is a sequence of release decisions. A service is a continuous release decision.</p>
+<p><b>Ada:</b> Nicely put. Every account approval, policy update, model upgrade, and access termination becomes part of the control surface.</p>
+<p><b>Alan:</b> But the incentive structure changed too. Access was now a commercial product.</p>
+<p><b>Ada:</b> Yes. Safety control and business control became technically intertwined. The same architecture that can stop abuse can meter scarce capacity, enforce market segmentation, or exclude a competitor. A gate can serve more than one purpose at once.</p>
+<p><b>Alan:</b> Which means “controlled” tells me there is a controller. It does not tell me the controller's rule is legitimate.</p>
+<p><b>Ada:</b> That question becomes sharper when the weights return.</p>
+<h3>When permission travels with the weights</h3>
+<p><b>Ada:</b> In February twenty twenty-three, Meta released LLaMA under a noncommercial research license with case-by-case access for academic researchers and organizations in government, civil society, academia, and industry research labs.</p>
+<p><b>Alan:</b> A hybrid: stronger than a paper, broader than an internal model, narrower than a public download.</p>
+<p><b>Ada:</b> And justified from the other side of the debate. Meta said restricted access to large language models hindered researchers trying to understand robustness, bias, toxicity, and misinformation. The controlled release was meant to widen serious research while limiting misuse.</p>
+<p><b>Alan:</b> Then five months later, Llama two moved the boundary again.</p>
+<p><b>Ada:</b> Meta made Llama two weights and starting code available for research and commercial use under a community license, paired with an acceptable-use policy and responsible-use material. The license allowed use, modification, and redistribution, while placing conditions on use and requiring very large consumer platforms to request a separate license.</p>
+<p><b>Alan:</b> That is control by law and norm after technical distribution.</p>
+<p><b>Ada:</b> Precisely. A license can create duties, grounds for termination, and remedies. It can say what recipients promise to do. But it cannot make a copied tensor phone home. It does not provide the provider with A P I-style observation or an instant technical off switch.</p>
+<p><b>Alan:</b> So there are at least three different things people call access control. Selection before download. Contract after download. Technical mediation during every use.</p>
+<p><b>Ada:</b> And they should not be confused. They fail differently. An allow-list can be arbitrary or porous. A license depends on compliance and enforcement. A hosted service can be monitored and revoked, but concentrates power and blocks some independent work.</p>
+<p><b>Alan:</b> The open-weight case deserves more than “you cannot recall it.”</p>
+<p><b>Ada:</b> It does. In July twenty twenty-four, the United States National Telecommunications and Information Administration reviewed dual-use foundation models with widely available weights. It emphasized benefits to competition, innovation, research, public-sector access, and independent scrutiny. Its conclusion at that time was that the evidence did not support immediate restrictions on widely available weights.</p>
+<p><b>Alan:</b> Not “weights are harmless.”</p>
+<p><b>Ada:</b> No. The report recommended active monitoring, better evidence, and preserving the option of targeted restrictions if future risks outweighed benefits. That is a controlled-release idea too: predefine what evidence would change the policy, rather than treating today's capability level as permanent.</p>
+<p><b>Alan:</b> There is a hard political lesson here. Closed providers can point to revocation. Open-weight advocates can point to independent accountability. Both can be true.</p>
+<p><b>Ada:</b> And each side can hide its weakest case. “We can revoke access” says nothing about whether the provider detects harm or uses power fairly. “The community can audit it” says nothing about whether an audit can recall a dangerous artifact after it spreads.</p>
+<p><b>Alan:</b> The weights debate did not end the history. It forced release policy to become capability-specific.</p>
+<h3>The threshold becomes the trigger</h3>
+<p><b>Ada:</b> September twenty twenty-three is the next hinge. Anthropic published the first version of its Responsible Scaling Policy.</p>
+<p><b>Alan:</b> The name is revealing. Not responsible release policy. Scaling policy.</p>
+<p><b>Ada:</b> Because the trigger moved earlier. The core design was if-then: if evaluations indicate specified dangerous capabilities, then stronger security and deployment safeguards must be in place. If they are not, training or deployment may need to pause.</p>
+<p><b>Alan:</b> Why is that different from “test before launch”?</p>
+<p><b>Ada:</b> Precommitment. A release review held after a model exists invites pressure from sunk cost, schedules, customers, and competition. A capability threshold tries to state the trigger and required response before the result arrives.</p>
+<p><b>Alan:</b> Tries.</p>
+<p><b>Ada:</b> Yes. The whole mechanism depends on evaluations that correspond to real risk, thresholds that are specific enough to bind, safeguards that actually reduce risk, and governance that follows the rule when following it hurts.</p>
+<p><b>Alan:</b> That is four unproven joints.</p>
+<p><b>Ada:</b> There is a fifth: the evaluated object may be a system, not bare weights. The Seoul commitments say thresholds can depend on capability, safeguards, and deployment context. Give the same checkpoint code execution, network access, a long-running agent loop, or a richer tool set, and the practical risk can change without one weight changing.</p>
+<p><b>Alan:</b> So “the model passed” is underspecified.</p>
+<p><b>Ada:</b> Painfully. Which model version, which system prompt, which tools, which permissions, which monitoring, and which attempt budget? Astra makes that concrete because OpenAI's response restricts networks, tools, and execution environments. Those are controls on the system around the model.</p>
+<p><b>Alan:</b> And a reassuring result in one harness does not automatically travel to another.</p>
+<p><b>Ada:</b> Right. Capability thresholds sound like marks on one ruler. In practice, the ruler has to measure an assembled system whose parts keep moving. And the public documents acknowledge several. The United Kingdom's October twenty twenty-three survey of emerging frontier-safety practices described risk thresholds, precommitted mitigations, and preparation to pause development or deployment. It also called the practices evolving, potentially infeasible in some forms, and not government mandates.</p>
+<p><b>Alan:</b> Then the idea traveled from one company policy into an international commitment.</p>
+<p><b>Ada:</b> At the Seoul summit in twenty twenty-four, a group of frontier developers agreed to publish severe-risk frameworks. The voluntary commitments called for thresholds, evaluations across the model lifecycle, safeguards for unreleased weights, and explicit processes if a threshold were met. In the extreme case, signers said they would not develop or deploy a model if mitigations could not keep risk below the threshold.</p>
+<p><b>Alan:</b> Voluntary is load-bearing.</p>
+<p><b>Ada:</b> Very. A promise is not an external enforcement system. The commitments allowed sensitive details to remain nonpublic. That may be necessary for security, but it leaves outsiders unable to reproduce every judgment.</p>
+<p><b>Alan:</b> OpenAI's Preparedness Framework joined the same family.</p>
+<p><b>Ada:</b> Its April twenty twenty-five update defined High and Critical capability thresholds. OpenAI said High-capability systems require safeguards that sufficiently minimize severe risk before deployment. Critical-capability systems require those safeguards during development too.</p>
+<p><b>Alan:</b> The gate crossed the lab wall.</p>
+<p><b>Ada:</b> Exactly. If mere possession, internal testing, or theft of the weights creates serious risk, “do not release it yet” comes too late. Controls reach storage, employee access, test environments, tools, networks, monitors, and partner evaluations.</p>
+<p><b>Alan:</b> Which brings us back to Astra.</p>
+<p><b>Ada:</b> OpenAI's August seventh statement says preliminary results were strong enough that it could not rule out Critical cyber capability. The company listed isolated test environments, restricted network and tool access, stronger weight protection and encryption, monitoring, sandboxing, outside testing, and pauses on internal activities that did not meet the strengthened requirements.</p>
+<p><b>Alan:</b> That is the threshold model doing what its authors said it should do under uncertainty.</p>
+<p><b>Ada:</b> According to the company. The public statement does not provide task-level results that let outsiders independently place Astra on the threshold. So the observable fact is operational: OpenAI says the preliminary signal changed controls. The capability claim remains preliminary and vendor-reported.</p>
+<p><b>Alan:</b> Good. A policy firing is evidence that the policy fired. It is not evidence that the underlying evaluation was right.</p>
+<h3>What control actually buys</h3>
+<p><b>Alan:</b> We have accumulated gates. How should a listener evaluate one without being hypnotized by the word responsible?</p>
+<p><b>Ada:</b> Ask six questions. First: what is the object? An idea, paper, dataset, codebase, checkpoint, hosted service, product feature, or internal activity.</p>
+<p><b>Alan:</b> If nobody names the object, “withheld” can mean almost nothing.</p>
+<p><b>Ada:</b> Second: who is the recipient? Everyone, approved researchers, customers, government evaluators, internal teams, or a small security-cleared group.</p>
+<p><b>Alan:</b> Third: what is the control mechanism? Delay, smaller capability, identity screening, contract, rate limit, filter, monitoring, sandbox, weight security, or a hard refusal to proceed.</p>
+<p><b>Ada:</b> Fourth: is it reversible? A hosted account can be suspended. A feature can be rolled back. Downloaded weights generally cannot be technically recalled from every copy.</p>
+<p><b>Alan:</b> Fifth: what evidence opens or closes the gate?</p>
+<p><b>Ada:</b> This is the heart. A date alone is weak. A defined evaluation, observed misuse pattern, replication landscape, security readiness test, or residual-risk judgment is stronger—if outsiders can understand the method and if the organization commits to act on it.</p>
+<p><b>Alan:</b> And sixth: who checks the checker?</p>
+<p><b>Ada:</b> Internal leadership, a board, independent evaluators, government institutes, researchers, courts, customers, or nobody. Every controlled release embeds a governance design, even if the design is “trust the lab.”</p>
+<p><b>Alan:</b> I would add a seventh: what benefit does the control block?</p>
+<p><b>Ada:</b> Good. Reproducibility, local use, accessibility, competition, privacy, security research, language coverage, or the ability to build without a provider's permission. Risk reduction is not free merely because the cost falls on someone else.</p>
+<p><b>Alan:</b> This gives me a practical release stack. Artifact, audience, mechanism, reversibility, trigger, oversight, and blocked benefit.</p>
+<p><b>Ada:</b> And it explains why the historical strategies did not simply replace one another. Staging still makes sense when delay creates learning. Partner access still makes sense when outside expertise matters but public distribution is irreversible. An A P I still makes sense when monitoring and revocation are valuable. Open weights still make sense when independent control and diffusion create greater benefit than marginal risk.</p>
+<p><b>Alan:</b> Capability thresholds sit above those choices.</p>
+<p><b>Ada:</b> Ideally. They ask what safeguards the evidence requires, then let the release form be one mitigation among several. In practice, the threshold frameworks are written and interpreted by institutions with incentives, incomplete measurements, and limited public visibility.</p>
+<p><b>Alan:</b> So the mature position is neither “release everything” nor “trust the gatekeeper.”</p>
+<p><b>Ada:</b> It is to demand a control matched to a named risk, a trigger matched to evidence, and oversight matched to the controller's power.</p>
+<h3>The gate moved</h3>
+<p><b>Alan:</b> In twenty nineteen, the dramatic act was not uploading one large file.</p>
+<p><b>Ada:</b> By twenty twenty, the gate sat in a service account. By twenty twenty-three, it sat partly in licenses and partly in capability policies. By twenty twenty-four, frontier labs had made threshold commitments together. And this weekend, the live question reached internal development conditions for a model that has not shipped.</p>
+<p><b>Alan:</b> The history did not settle whether a model should be open.</p>
+<p><b>Ada:</b> It taught us to reject the singular noun. There is no one release and no one control. There are artifacts, recipients, interfaces, safeguards, triggers, and institutions—each with a different failure mode.</p>
+<p><b>Alan:</b> The thing I am still chewing on is irreversibility. A provider can reverse access and abuse that power. A public can preserve access and abuse that capability.</p>
+<p><b>Ada:</b> That tension is real. A serious release policy does not erase it with branding. It says which risk it is accepting, which benefit it is preserving, and what evidence would make it change course.</p>
+<p><b>Alan:</b> I'm Alan.</p>
+<p><b>Ada:</b> And I'm Ada. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
