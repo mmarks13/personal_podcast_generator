@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thirty billion on the desk — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Thirty billion on the desk</h1>
+<div class="date">Self-Attention — 2026-08-10</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-08-10/podcast-2026-08-10.mp3"></audio>
+<p><em>2026-08-10</em></p>
+<p>Meta's Muse Glimmer puts a thirty-billion-parameter multimodal agent model into a testable local memory envelope using quantization, cache-efficient attention, and a bundled speculative drafter. Recursive Synthetic Terminal Tasks grows verified terminal work across fifteen generations, while an internal score conflict and the gap between solvability and usefulness keep its strongest claim in check.</p>
+<h2>Papers</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2608.05466">Recursive Synthesis for Long-Horizon Terminal Tasks</a></li>
+<li><a href="https://huggingface.co/blog/MultiverseComputingCAI/efficient-knowledge-distillation">Multiverse Computing: Making Knowledge Distillation Cheap Enough to Run at Scale</a></li>
+</ul>
+<h2>Releases</h2>
+<ul>
+<li><a href="https://research.meta.ai/blog/introducing-muse-glimmer-open-agentic-model">Meta AI Research: Introducing Muse Glimmer</a></li>
+<li><a href="https://huggingface.co/blog/muse-glimmer">Hugging Face: Muse Glimmer architecture and day-zero runtime support</a></li>
+<li><a href="https://docs.docker.com/ai/sandboxes/">Docker Docs: Docker Sandboxes</a></li>
+<li><a href="https://docs.docker.com/ai/sandboxes/security/">Docker Docs: Sandboxes security model</a></li>
+<li><a href="https://claude.com/blog/auto-mode-default-in-claude-code">Anthropic: Auto mode becomes the Claude Code default</a></li>
+<li><a href="https://github.blog/changelog/2026-07-01-github-models-is-being-fully-retired-on-july-30-2026/">GitHub Changelog: GitHub Models retirement</a></li>
+</ul>
+<h2>Also noted</h2>
+<ul>
+<li><a href="https://huggingface.co/papers/2608.05987">AgentOPSD: Recursive Self-Distillation for Agentic Reinforcement Learning</a></li>
+<li><a href="https://huggingface.co/papers/2607.28609">OSReward: Standardized Evaluation for Computer-Use Reward Models</a></li>
+<li><a href="https://huggingface.co/papers/2608.01481">Interpretable MEG Decoding of Perceived Speech</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>The day
+<ul>
+<li>Muse Glimmer local agent model</li>
+<li>Docker Sandboxes for coding agents</li>
+<li>Recursive Synthetic Terminal Tasks</li>
+<li>Claude Code auto mode becomes the default</li>
+<li>Memory-efficient knowledge distillation</li>
+<li>GitHub Models retirement</li>
+<li>AgentOPSD recursive self-distillation</li>
+<li>OSReward computer-use reward-model evaluation</li>
+<li>MEG decoding of perceived speech</li>
+</ul>
+</li>
+<li>Thirty billion on the desk</li>
+<li>The test that raises its own bar</li>
+<li>Close</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Monday, August tenth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. Meta has put an open-weight, thirty-billion-parameter agent model within reach of one well-equipped desktop. The interesting part is not the parameter count. It is everything the release does to make that count usable.</p>
+<h3>The day</h3>
+<p><b>Alan:</b> Muse Glimmer is Meta's new multimodal model for local agent workflows. Meta released the weights today under the Apache two point oh license and says a quantized build can fit the language model, visual encoder, working memory, and a separate speculative drafter inside a twenty-four- or thirty-two-gigabyte memory envelope. We will look at the engineering that makes that possible, and at the limits of calling it private merely because inference is local.</p>
+<p><b>Ada:</b> Docker Sandboxes is leading the developer discussion this morning, but attach the date correction before the enthusiasm: this is current attention around an existing early-access product, not a launch that happened today. Docker runs coding agents inside separate micro virtual machines with their own Linux kernel and Docker engine. That is a stronger boundary than handing a container the host's Docker socket. The ordinary workspace mount is still read-write, however, so the agent cannot reach the rest of the host but can change the project you deliberately shared. Clone mode gives it a private working copy instead.</p>
+<p><b>Alan:</b> That distinction is the whole useful verdict. A sandbox reduces the blast radius; it does not make every action reversible, every credential safe, or every outbound destination trustworthy. Docker supports Claude Code, Codex, Copilot, Cursor, Gemini, and several other agents, so builders now have a common place to test the same task under the same environmental boundary. Given the attention on Hacker News, this is worth trying. Given how much agent security we covered last week, it does not need another sermon from us today.</p>
+<p><b>Ada:</b> A terminal-agent paper we briefly pointed toward has now aged into both Hugging Face's seven-day and thirty-day top-paper lists. Recursive Synthetic Terminal Tasks begins with a verified task, lengthens its working solution, rewrites the verifier and public instruction to match, proves the result in a fresh sandbox, and lets accepted children become the next generation's parents. The authors report thirty-seven thousand four hundred eighty-four tasks across fifteen rounds at about five cents per accepted task. We will take apart why solution-first generation matters — and why a task that is provably solvable can still be a bad lesson.</p>
+<p><b>Alan:</b> Anthropic is changing what ordinary Claude Code sessions do before then. Starting August fourteenth, new sessions on Pro, Max, and Team plans will default to auto mode unless a user or administrator has pinned something else. A classifier will decide whether each tool call is irreversible, destructive, or aimed beyond the working environment, instead of asking the user to approve every consequential command.</p>
+<p><b>Ada:</b> Anthropic's controlled study gives the decision real weight. Among one thousand fifty-three paid testers, people blocked a clearly dangerous substituted command only thirteen point six percent of the time. Auto mode blocked eighty-nine percent of the same commands. Those are Anthropic's own study and classifier, and an eleven-percent miss is not a security boundary. But the result is a serious indictment of repetitive approval prompts as the comparison standard.</p>
+<p><b>Alan:</b> The product behavior has one useful escape hatch: after three consecutive classifier blocks, or twenty in one session, Claude Code falls back to manual approval. That means auto mode is neither blanket permission nor a physical sandbox. It is a probabilistic reviewer taking over from a tired human. For high-stakes production changes, Anthropic still recommends that a person review the actions.</p>
+<p><b>Ada:</b> Multiverse Computing published a systems note on making knowledge distillation cheaper. The teacher's top one hundred token scores are cached once, so the teacher does not remain in memory during student training. A fused, chunked loss then avoids building the student's entire sequence-by-vocabulary grid at once. In the team's GPT O S S twenty-billion-parameter run at roughly thirty-two thousand tokens, it reports shrinking the setup from four graphics-processor nodes to one and cutting step time from fifty-seven seconds to just over twelve. Promising infrastructure result, but it is the authors' own setup, not a general promise that every distillation job becomes five times faster.</p>
+<p><b>Alan:</b> One older service change is now producing very current broken builds. GitHub announced in July that GitHub Models would retire completely on July thirtieth, including its playground, catalog, inference interface, and bring-your-own-key endpoints. Simon Willison noticed when an automated research workflow failed after the cutoff. Minor as news today, useful as an operations reminder: a model endpoint inside a developer platform is still a dependency with a retirement date.</p>
+<p><b>Ada:</b> Three other papers have earned attention, but not a verdict from us. Agent O P S D is a recursive self-distillation paper now carrying both daily and weekly Hugging Face signal; O S Reward proposes standardized cross-platform evaluation for computer-use reward models; and a magnetoencephalography paper studies retrieval of perceived speech from non-invasive brain recordings. Those are pointers, not judgments.</p>
+<p><b>Alan:</b> You called Muse Glimmer a desktop model. Make me believe the noun desktop is doing honest work.</p>
+<h3>Thirty billion on the desk</h3>
+<p><b>Alan:</b> Start with the uncomfortable version. Thirty billion parameters at full precision would require more than fifty-five gigabytes just for the model. That is before the temporary state needed to generate a response, before images, and before the rest of an agent runtime.</p>
+<p><b>Ada:</b> So Meta did not make thirty billion small. It changed the representation and the traffic pattern.</p>
+<p><b>Alan:</b> Exactly. Meta says its roughly four-bit quantized language model comes in under twenty gigabytes. The release is designed so that build can share a twenty-four- or thirty-two-gigabyte memory envelope with the key-value cache, the visual encoder, and the speculative drafter.</p>
+<p><b>Ada:</b> Twenty-four gigabytes is a high-end consumer graphics card, not the average laptop on a kitchen table.</p>
+<p><b>Alan:</b> Agreed. Meta says Mac or P C with one consumer graphics processor. I would translate that to a well-equipped local machine, often with unified memory or a top-tier card. This is local availability, not universal availability.</p>
+<p><b>Ada:</b> What occupies the thirty billion?</p>
+<p><b>Alan:</b> Hugging Face's day-zero implementation describes a dense model with a twenty-eight-billion-parameter text decoder and a two-billion-parameter vision encoder. The visual side handles images and sampled video frames. The text side handles reasoning, code, tool calls, and the language around whatever the encoder saw.</p>
+<p><b>Ada:</b> Dense means all of that text decoder participates for each token, unlike a mixture-of-experts model that activates only part of a much larger weight set.</p>
+<p><b>Alan:</b> Right, which makes memory movement an immediate concern. The text decoder alternates three sliding-window attention layers with one full-attention layer. Most layers look within a bounded neighborhood. Every fourth layer can connect across the broader context.</p>
+<p><b>Ada:</b> Local streets, then an arterial road.</p>
+<p><b>Alan:</b> With the usual warning that information can still be compressed or lost as it travels. The point is computational: do not pay full global attention in every layer when periodic global mixing may preserve enough reach.</p>
+<p><b>Ada:</b> And the key-value cache?</p>
+<p><b>Alan:</b> The implementation shares each key-value head across sixteen query heads. During generation, that cache holds the attention state from earlier tokens. Sharing means the model stores fewer distinct keys and values, and Hugging Face says it reduces that cache memory by a factor of sixteen relative to giving every query head its own pair.</p>
+<p><b>Ada:</b> Which matters more as the conversation and tool trace get longer. A model may fit at startup and still run out of memory halfway through an agent job because its working state keeps growing.</p>
+<p><b>Alan:</b> Precisely. Local deployment has at least two budgets: weights that remain resident, and state that grows with context. Meta's envelope claim is valuable because it acknowledges both, though a builder still needs to test the actual context, images, and concurrency they intend to run.</p>
+<p><b>Ada:</b> The separate drafter is the more unusual item in the box.</p>
+<p><b>Alan:</b> We have walked through speculative decoding before. A smaller model proposes future tokens; the main model checks them and accepts only proposals consistent with what it would have generated. Muse Glimmer bundles a lightweight companion based on D Flash, which proposes a block rather than waiting for the large model to author every next token serially.</p>
+<p><b>Ada:</b> The companion can be wrong cheaply.</p>
+<p><b>Alan:</b> Yes. The expensive model verifies proposed tokens in parallel, keeps the accepted prefix, and corrects the rest. Meta says the result is significantly faster generation without sacrificing output quality. The trade is extra memory for the drafter, which is why the quantized envelope has to make room for it.</p>
+<p><b>Ada:</b> This is a nice release detail. Speculative decoding is often described as a serving optimization somebody else will add later. Here the drafter is part of the model package and supported on day one by both Transformers and llama dot C P P.</p>
+<p><b>Alan:</b> That changes the first-run experience. The release also has support across V L L M and other common runtimes. A local model matters more when using it does not require a month of custom kernel work.</p>
+<p><b>Ada:</b> How did Meta teach a model this size to behave like an agent rather than a generic chatbot?</p>
+<p><b>Alan:</b> Meta describes three stages. During pre-training, it used Muse Spark outputs and logit distillation, transferring more than just the teacher's final answer. Mid-training shifted toward longer contexts, agent-heavy data, and richer reasoning traces. Post-training mixed supervised fine-tuning, on-policy distillation, and reinforcement learning across coding, reasoning, general, and agentic work.</p>
+<p><b>Ada:</b> Distillation is doing two jobs in today's episode. Here it transfers behavior from a larger teacher into a model that can live locally. In the Multiverse systems note, the question is how to make that transfer cheap enough to repeat.</p>
+<p><b>Alan:</b> And Meta's target is unusually coherent. A local personal agent needs tool use, recovery after a failed call, long context, and perception of screenshots or documents. Those capabilities are more relevant to the product than winning every general knowledge test.</p>
+<p><b>Ada:</b> It does not win every agent test either.</p>
+<p><b>Alan:</b> No. Hugging Face reproduces Meta's published comparison against Gemma four and Qwen three point six models of similar size. On S W E Bench Pro, Muse Glimmer scores fifty-one point two to Qwen's fifty point two. On S W E Bench Verified, Muse scores seventy-six while Qwen scores seventy-seven point two. On O S World Verified, Muse is further behind: sixty-five point nine to seventy-five point six.</p>
+<p><b>Ada:</b> Good. The table supports competitive, not champion. It also reminds us that a coding benchmark, a computer-use benchmark, and an agent harness ask different things of the same weights.</p>
+<p><b>Alan:</b> I would test the release on a workload, not average those columns. Give it a real repository, the exact tool schemas, the same quantization, and the maximum context I expect. Record successful task completion, repair work, tokens per second, peak memory, and what happens after a tool returns malformed output.</p>
+<p><b>Ada:</b> Add the visual path. If the local-agent pitch includes screenshots and documents, a text-only coding run leaves two billion parameters unexamined.</p>
+<p><b>Alan:</b> Fair. And test the license and deployment together. Apache two point oh makes the weights permissive to build on. It does not make a tool-connected agent private by magic.</p>
+<p><b>Ada:</b> Local inference keeps prompts and model computation on the machine. Then the agent opens a browser, calls a cloud service, pushes code, or sends a message, and information crosses the boundary because the workflow asked it to.</p>
+<p><b>Alan:</b> Which is not an argument against local. It is an argument for drawing the data-flow diagram past the model box. I can keep document analysis local, expose only a narrow search tool, and require approval before anything leaves.</p>
+<p><b>Ada:</b> You can. Many people will connect a local model to a dozen remote tools and advertise the whole assembly as private because the weights sit under the desk.</p>
+<p><b>Alan:</b> I think builders can understand a boundary.</p>
+<p><b>Ada:</b> I think product pages are very good at stopping the diagram where the flattering claim ends.</p>
+<p><b>Alan:</b> Then my deployment verdict is a measured yes. The weights are available, the license is permissive, common runtimes work, and the memory target is specific enough to test. I would try it tonight on one private coding or document workflow.</p>
+<p><b>Ada:</b> Mine is a measured wait on authority. Run it locally, certainly. Do not give the first quantized build standing permission over files, messages, money, or accounts until its tool accuracy and recovery behavior survive your own evaluation.</p>
+<p><b>Alan:</b> We are going to leave that disagreement in the machine room.</p>
+<p><b>Ada:</b> Fine. I want to move from fitting one agent onto a desk to manufacturing the work used to train it.</p>
+<h3>The test that raises its own bar</h3>
+<p><b>Ada:</b> A good terminal task is a small contract among four things. The public instruction says what to achieve. The initialized workspace contains the evidence and obstacles. A reference solution proves there is at least one path through. A private verifier decides whether the final state actually satisfies the request.</p>
+<p><b>Alan:</b> Change one without the others and you get a broken lesson.</p>
+<p><b>Ada:</b> Exactly. Make the verifier stricter without updating the instruction, and the agent is punished for a secret requirement. Lengthen the instruction without changing the environment, and the requested task may be impossible. Generate a plausible solution without running it, and the supposed training example may teach an error.</p>
+<p><b>Alan:</b> Recursive Synthetic Terminal Tasks begins from the solution rather than from a clever new prompt.</p>
+<p><b>Ada:</b> That is the key move. The system selects one of forty rewrite operators suited to the seed task. It writes a transformation contract, extends the executable solution, modifies the environment if necessary, then realigns the verifier and public instruction around the new workflow.</p>
+<p><b>Alan:</b> Give me a rewrite that is more than add three extra steps.</p>
+<p><b>Ada:</b> The paper follows one family of JSON-difference tasks. The seed asks for six reports from fixed fixture pairs, and its reference solution is ten non-empty shell lines. A later generation moves the comparison matrix into a configuration file. Another corrupts that configuration so the agent must diagnose and repair it. Another uses a change log to introduce a new nested-fixture case. By round fifteen, the agent has to reconcile inconsistent configuration, fixtures, expected counts, generated reports, and tests. The reference solution has grown to three hundred forty-seven lines.</p>
+<p><b>Alan:</b> That is harder. It is also at risk of becoming bureaucracy generated from bureaucracy.</p>
+<p><b>Ada:</b> Hold that objection. First, the validation. The reference solution runs inside a fresh sandbox, and the private verifier checks the resulting workspace. The paper calls a passing reference solution oracle validity: proof that the task can be completed from the stated initial condition.</p>
+<p><b>Alan:</b> Proof that one scripted path can complete it.</p>
+<p><b>Ada:</b> Correct. Not proof that the task is natural, useful, or fairly phrased. So the pipeline adds contract validity. Every condition that can change the reward must either appear in the public instruction or be discoverable from ordinary workspace evidence such as documentation, configuration, fixtures, logs, or command output.</p>
+<p><b>Alan:</b> And the model being evaluated cannot open the answer key or private tests.</p>
+<p><b>Ada:</b> The harness withholds both. The verifier also looks for empty, stale, hard-coded, or verifier-specific shortcuts. Static filters catch missing files, leaked private details, near-duplicates, and malformed environments before the more expensive sandbox run. A bounded repair loop can fix recoverable construction failures; persistent failures are discarded.</p>
+<p><b>Alan:</b> Then accepted tasks become seeds for another rewrite.</p>
+<p><b>Ada:</b> Yes, with caps on parent lineage, domain, rewrite family, and generation cohort so one fertile ancestor does not consume the population. Starting from six hundred thirty-nine verified bootstrap tasks, the authors report fifteen generations and thirty-seven thousand four hundred eighty-four accepted tasks, at roughly five cents apiece.</p>
+<p><b>Alan:</b> Five cents is the synthesis cost the authors report, not the full cost of inventing the framework, curating the original pool, training a model, or auditing what came out.</p>
+<p><b>Ada:</b> Important distinction. The loop has no human author writing each child, but humans designed the operators, validity rules, harness, seed policy, and experiments. Automation changes the marginal task cost. It does not erase system-design cost.</p>
+<p><b>Alan:</b> How do they know later generations are genuinely harder instead of merely longer?</p>
+<p><b>Ada:</b> They hold the solver fixed and watch performance fall. From round one to round fifteen, the median reference solution grows from sixty-seven to three hundred seventy-four lines, and the median number of executed commands grows from forty to two hundred forty-four. Over the same span, DeepSeek V four Pro's pass-at-four rate falls from ninety percent to two point five percent.</p>
+<p><b>Alan:</b> That is evidence of difficulty for that solver. It does not tell me the new difficulty resembles the failures my coding agent meets at work.</p>
+<p><b>Ada:</b> Agreed. The paper does more than count lines: partial verifier credit declines too, and the authors audit domain and rewrite diversity. They also report transfer after training on the synthetic pool. Supervised fine-tuning on successful Qwen three point five trajectories improves two model sizes by as much as ten points across Terminal Bench two, Terminal Bench Hard, and Long-Horizon Terminal Bench.</p>
+<p><b>Alan:</b> Terminal Bench Hard was constructed independently of this synthesis pool, which helps.</p>
+<p><b>Ada:</b> It helps. It is still an evaluation inside the terminal-agent family. A distribution of package files, build tools, configuration, and shell state is broader than one repository and narrower than all useful software work.</p>
+<p><b>Alan:</b> And the headline reinforcement-learning result needs a correction before anyone builds a slide around it.</p>
+<p><b>Ada:</b> It does. The current preprint contradicts itself. Its abstract and main results table put the trained twenty-seven-billion-parameter model at forty-nine point four four on Terminal Bench two, a twenty-percent relative gain over the base. The conclusion says forty-six point oh seven and eleven point eight two percent. Both cannot describe the same reported run.</p>
+<p><b>Alan:</b> That is unusually easy to catch in a paper about verifiers.</p>
+<p><b>Ada:</b> The reader supplied the cross-file consistency check. We can safely report the supervised-training result because that claim is consistent in the abstract and results. We should not choose between the conflicting reinforcement-learning numbers until the authors correct the record.</p>
+<p><b>Alan:</b> Does the mismatch change your view of the task factory?</p>
+<p><b>Ada:</b> It lowers confidence in the polish of the current preprint. It does not erase the executable artifact, the synthesis method, or the direction of the experiments. But exact performance claims are load-bearing. A corrected version should state which row is authoritative and why the other numbers appeared.</p>
+<p><b>Alan:</b> My larger worry is self-reinforcing artificiality. The generator makes tasks that its verifier can grade. The policy learns the regularities of those tasks. The next evaluation rewards the same kind of state change. You can build a beautifully measured loop around a narrow idea of work.</p>
+<p><b>Ada:</b> Yes. Oracle validity answers can this task be solved. Contract validity answers was the deal stated fairly. Neither answers would a real user ask for this, or does solving it improve behavior outside the factory.</p>
+<p><b>Alan:</b> The paper's concrete lineage makes the problem visible. Repairing inconsistent configuration and reconciling reports is plausible work. Repeating that pattern through fifteen generations might select for patience with generated paperwork rather than judgment about a live codebase.</p>
+<p><b>Ada:</b> The authors try to resist collapse with forty operators, domain caps, lineage caps, novelty checks, and held-out benchmarks. Their conclusion still notes a high-similarity tail that needs more targeted deduplication as the pool grows.</p>
+<p><b>Alan:</b> So if I borrowed this for a company, I would not start from public benchmark tasks. I would start from a small set of real, permission-cleared failures from our own build and deployment systems.</p>
+<p><b>Ada:</b> Then preserve a held-out set of untouched real incidents. The generated descendants can train the agent. They should not be the only exam used to declare the agent improved.</p>
+<p><b>Alan:</b> I would also inspect samples from every generation. Not to hand-author them, but to ask whether the task still has a believable user, whether the required evidence is findable, and whether the verifier rewards outcome rather than one favored implementation.</p>
+<p><b>Ada:</b> And track family-level gains. If performance improves only on descendants of one seed or one rewrite operator, the overall average can hide memorization of a task dialect.</p>
+<p><b>Alan:</b> Would you use the reported five-cent tasks for reinforcement learning today?</p>
+<p><b>Ada:</b> As one training pool, after reproducing the validators and correcting the paper's numerical conflict. I would not use them as the sole source of reward, and I would not interpret a longer generated solution as business value.</p>
+<p><b>Alan:</b> I would go slightly faster. The executable proof and discoverability check are stronger than the synthetic instructions most teams already use. I would feed a sample to a model, then watch where human reviewers call the task contrived.</p>
+<p><b>Ada:</b> That is a real experiment. The paper has made generation cheap enough that curation, not scarcity, becomes the next bottleneck.</p>
+<p><b>Alan:</b> I am not sure it made curation cheaper.</p>
+<p><b>Ada:</b> Neither am I. It made the pile arrive faster.</p>
+<h3>Close</h3>
+<p><b>Alan:</b> I am still picturing that one task growing from ten shell lines to three hundred forty-seven. Useful, perhaps. Also a warning about what we decide to count as progress.</p>
+<p><b>Ada:</b> Keep both reactions. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan.</p>
+<p><b>Ada:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
