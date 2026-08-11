@@ -1,6 +1,50 @@
 {
   "episodes": [
     {
+      "date": "2026-08-11",
+      "title": "The mark is not the author",
+      "summary": "Anthropic's content-marking plan separates text watermarks from signed file provenance while leaving authorship and negative detection unresolved. Docker's five-layer sandbox model exposes the live workspace and host integrations that isolation does not automatically protect, and OpenAI's Texas infrastructure promises meet the harder question of project-level measurement and enforcement.",
+      "topics": [
+        "Claude text watermarks, C2PA file provenance, and the limits of content marks as evidence",
+        "Docker Sandboxes' hypervisor, network, Docker engine, workspace, and credential boundaries",
+        "OpenAI's Texas data-center commitments and the gap between public principles and project-level enforcement"
+      ],
+      "entities": [
+        "Anthropic",
+        "Claude",
+        "C2PA",
+        "Docker",
+        "Docker Sandboxes",
+        "OpenAI",
+        "Texas",
+        "Greg Abbott",
+        "PUC",
+        "ERCOT"
+      ],
+      "threads": [
+        {
+          "name": "Data-center buildout backlash",
+          "status": "OpenAI has answered Texas's emerging data-center standards with public commitments to fund project-driven infrastructure, support new generation, minimize water use, manage local impacts, and disclose resource and incentive information; project-specific metrics and enforcement remain to be shown.",
+          "arc": "The thread moves from Texas auditing the interconnection queue to a major AI developer accepting the state's accounting categories in public, with the next test shifting to permits, contracts, meters, and disclosures for a named project."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Claude's machine-readable content marks",
+          "why_it_matters": "Publishers, compliance teams, educators, and people editing mixed human-machine drafts need to distinguish evidence that Claude processed content from claims about authorship, accuracy, ownership, or complete provenance."
+        },
+        {
+          "story": "Docker Sandboxes' five-layer isolation model",
+          "why_it_matters": "Developers running coding agents unattended need to know which layer protects the host, project, credentials, network destinations, and external tools, because the default live workspace and host integrations cross the microVM boundary by design."
+        },
+        {
+          "story": "OpenAI's Texas infrastructure letter",
+          "why_it_matters": "Texans, data-center developers, utilities, and model buyers need public commitments on grid cost, generation, water, community impact, and incentives to become project-level measurements with named accountability."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-08-10",
       "title": "Thirty billion on the desk",
       "summary": "Meta's Muse Glimmer puts a thirty-billion-parameter multimodal agent model into a testable local memory envelope using quantization, cache-efficient attention, and a bundled speculative drafter. Recursive Synthetic Terminal Tasks grows verified terminal work across fifteen generations, while an internal score conflict and the gap between solvability and usefulness keep its strongest claim in check.",
@@ -1617,75 +1661,16 @@
           "note": "Alan, who uses agent tooling daily and defends it, moved on air toward the deskilling case after reading the evidence, and committed to a practice he calls 'keeping a rep': regularly doing a real piece of work in his core skill with the tools switched off, as a self-administered version of the colonoscopy study's withdrawal measurement. He is keeping the tools and keeping the rep."
         }
       ]
-    },
-    {
-      "date": "2026-07-11",
-      "title": "Three things that are yours to keep",
-      "summary": "A builder's Saturday: Mistral's open Devstral coding models (Small, 24B Apache-2.0, SOTA-among-open on SWE-bench Verified), Vidu S1, a real-time video model you steer with your voice, and a Hugging Face profiling post showing PyTorch's default attention backend can run multiples slower than a fused kernel. Plus a sweep from Apple suing OpenAI to SK Hynix's record IPO.",
-      "topics": [
-        "Mistral Devstral 2507: Devstral Small 1.1 (24B, Apache 2.0, open weights on Hugging Face) scores 53.6% on SWE-bench Verified, called SOTA among open models for code agents, pairs with OpenHands scaffold, hosted pricing $0.1/M in $0.3/M out; Devstral Medium (size undisclosed, API-only, on-prem/finetune available) scores 61.6%, claimed to beat Gemini 2.5 Pro and GPT-4.1 at a quarter of the price, $0.4/M in $2/M out; both built for agentic coding with generalization across prompts/scaffolds; benchmark numbers are Mistral's own, on launch day (SWE-bench Verified is the human-filtered 500-task subset, distinct from the SWE-bench Pro OpenAI retracted 7/10)",
-        "Vidu S1 (top HF Daily Paper, 109 upvotes): real-time interactive video generation model with voice control of digital characters; up to 42 FPS at 540p, claims to run on consumer GPUs; claims infinite-length generation without blurring/drift/distortion; built on named components TurboDiffusion and TurboServe (details not opened); authors report best performance across all their test metrics but do not spell out comparisons and give no stated-limitations section — treat splashy claims as authors' own; playable demo at vidu.com. Shift from batch video-gen (a content tool) to real-time interactive video (an interface)",
-        "Hugging Face PyTorch attention-backend profiling (A100): scaled dot-product attention dispatches to naive/math/Efficient/Flash/cuDNN backends; naive launches 5-6 GPU kernels per forward, math backend launches 20, the fused backends (Efficient/Flash/cuDNN) launch 1 kernel each; math backend ~3.7x slower than naive in-place; Flash is fastest yet runs at ~13% occupancy — occupancy is not speed; Flash wins by avoiding memory traffic (FlashAttention lineage: fuse the whole op, never write the intermediate matrix). Practical: check which backend you're actually dispatching to"
-      ],
-      "entities": [
-        "Mistral",
-        "Devstral",
-        "OpenHands",
-        "Vidu S1",
-        "Hugging Face",
-        "PyTorch",
-        "FlashAttention",
-        "SWE-bench Verified"
-      ],
-      "threads": [
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "Mistral ships Devstral Small (24B, Apache 2.0, downloadable, SOTA-among-open on SWE-bench Verified) plus an OpenHands-compatible open scaffold; DeepSeek releases V4-Flash under MIT license on Hugging Face (60-85% faster tokens); and Hugging Face CEO Clem Delangue argues companies are 'done renting their AI'. The steady drip of capable, permissively-licensed, self-hostable models continues underneath the rented frontier.",
-          "arc": "From national models and a 'right to run AI locally' toward a concrete weekly cadence of frontier-adjacent open releases — the ownable stack (open model + open harness + your hardware) becoming a real alternative to per-token rental for teams that already have the machines."
-        }
-      ],
-      "dives": [
-        {
-          "story": "Mistral Devstral open coding models",
-          "why_it_matters": "A developer or company that already owns the hardware can now run a genuinely competent agentic coding model (24B, Apache 2.0, 53.6% SWE-bench Verified) as a fixed asset instead of a per-token utility — the openness, not the leaderboard rank, is the point."
-        },
-        {
-          "story": "Vidu S1 real-time interactive video",
-          "why_it_matters": "Anyone building avatars, tutors, or game characters should note the category shift from batch video-generation (make an asset, use it later) to real-time voice-steered video (an interface you're inside of) — with the caveat that the infinite-length/no-drift claims are the authors' own and need a real session to test."
-        },
-        {
-          "story": "PyTorch attention-backend profiling",
-          "why_it_matters": "Anyone serving a model can be paying a multiples-not-percentages penalty from the default attention backend they never consciously chose; the fix (dispatch to a fused kernel) is free, and the counterintuitive lesson is that the fastest backend runs at ~13% GPU occupancy because occupancy isn't speed."
-        }
-      ]
-    },
-    {
-      "date": "2026-07-11",
-      "kind": "deepdive",
-      "title": "The two numbers on every model card",
-      "summary": "A teaching episode on mixture-of-experts, the architecture under this week's open-weight surge: why a model can list a huge total parameter count and a much smaller 'active' one, and what each number really costs you. Traces the idea from Jacobs/Jordan/Nowlan/Hinton (1991) through Shazeer's sparsely-gated MoE (2017) and the Switch Transformer's top-1 routing and trillion-parameter Switch-C (2021), then the practical catches — load-balancing loss and expert collapse, fixed capacity and dropped tokens — the surprise that Mixtral's experts specialize by syntax not topic, the memory-vs-compute asymmetry (all experts must sit in VRAM), and the modern shared-expert/fine-grained refinement seen in DeepSeek and GLM-5.2.",
-      "topics": [
-        "deep dive: mixture-of-experts (sparse routing, gating, load-balancing loss, expert capacity/dropped tokens, syntactic expert specialization, shared/fine-grained experts, active-vs-total parameters, memory-vs-compute asymmetry)"
-      ],
-      "entities": [
-        "mixture of experts",
-        "Switch Transformer",
-        "Mixtral",
-        "DeepSeekMoE",
-        "DeepSeek V4-Flash",
-        "GLM-5.2",
-        "Noam Shazeer",
-        "Geoffrey Hinton",
-        "Michael Jordan",
-        "sparse gating",
-        "load balancing"
-      ],
-      "threads": [],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "Data-center buildout backlash",
+        "status": "OpenAI has answered Texas's emerging data-center standards with public commitments to fund project-driven infrastructure, support new generation, minimize water use, manage local impacts, and disclose resource and incentive information; project-specific metrics and enforcement remain to be shown.",
+        "arc": "The thread moves from Texas auditing the interconnection queue to a major AI developer accepting the state's accounting categories in public, with the next test shifting to permits, contracts, meters, and disclosures for a named project.",
+        "last_seen": "2026-08-11"
+      },
       {
         "name": "Frontier-model release gating",
         "status": "OpenAI says preliminary evaluations of its upcoming Astra model were strong enough that it could not rule out its Critical cybersecurity threshold, so it strengthened security controls and paused internal Astra activities that did not meet them while testing continues.",
@@ -1703,12 +1688,6 @@
         "status": "Demis Hassabis is handing day-to-day Google DeepMind operations to Koray Kavukcuoglu while becoming chair and Alphabet chief scientist and leaning further into Isomorphic Labs; Jeff Dean and Sanjay Ghemawat are leaving Google to form an independent public-benefit research corporation with Google as founding investor and Cloud partner.",
         "arc": "The thread moves from specialist science teams dispersing into Gemini and Isomorphic to an explicit organizational split among the integrated frontier-model engine, a domain-specific drug-discovery company, and a new independent research vehicle still connected to Google by capital and infrastructure.",
         "last_seen": "2026-08-06"
-      },
-      {
-        "name": "Data-center buildout backlash",
-        "status": "Texas ordered a project-by-project verification and audit of every data center advancing through ERCOT's interconnection process; no project moves forward until its audit is complete, and noncompliant projects are denied grid connection.",
-        "arc": "The fight advances from permitting pauses, incentives, and local opposition to the connection queue itself: Texas is now forcing developers to prove ownership, financing, power, water, cooling, and community plans before scarce grid capacity is assigned.",
-        "last_seen": "2026-08-05"
       },
       {
         "name": "Apple v. OpenAI trade-secret suit",
@@ -1745,15 +1724,104 @@
         "status": "The NYT reports OpenAI and Anthropic lobbied Washington privately to restrict open-source models, two days after both declined to sign the 25-company letter defending them; OpenAI signed late Friday (32 signatories) and Google endorsed it Saturday, Anthropic still has not. Officials reportedly lean toward case-by-case national-security review of individual Chinese models rather than a blanket ban, while 179 companies via the Little Tech Association oppose any ban and Kimi K3's weights ship anyway — ranked third overall on Artificial Analysis's index.",
         "arc": "From a floated import ban, to a named distillation accusation, to an industry coalition letter, to the artifact shipping on schedule — and now to the split between the labs' public position and their private one, with the fight moving from 'is there a rule' to 'who gets to bring cases'.",
         "last_seen": "2026-07-27"
-      },
-      {
-        "name": "Claude Fable 5 metering rollout",
-        "status": "The free-inclusion promotion ended July 19 2026 at 11:59:59 PM PT after four extensions (June 22, July 7, July 12, July 19). Max and Team Premium retain 50% of weekly limits as a standard plan feature; Pro and Team Standard move to a one-time credit then metered pricing at $10/$50 per million input/output tokens.",
-        "arc": "A free window that kept being extended rather than honored or cancelled has now closed, converting subscription-plan access to the frontier model into per-token billing — and arriving the same week a rival lab stopped selling subscriptions outright for capacity reasons.",
-        "last_seen": "2026-07-20"
       }
     ],
     "entities": [
+      {
+        "name": "GLM-5.2",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "Mistral",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "Devstral",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "OpenHands",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "Vidu S1",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "Hugging Face",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "PyTorch",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "FlashAttention",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "SWE-bench Verified",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "mixture of experts",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "Switch Transformer",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "Mixtral",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "DeepSeekMoE",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "DeepSeek V4-Flash",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "Noam Shazeer",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "Geoffrey Hinton",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "Michael Jordan",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "sparse gating",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
+      {
+        "name": "load balancing",
+        "note": "",
+        "last_seen": "2026-07-11"
+      },
       {
         "name": "Anthropic",
         "note": "",
@@ -1858,101 +1926,6 @@
         "name": "GitHub",
         "note": "",
         "last_seen": "2026-07-08"
-      },
-      {
-        "name": "Gemma 4",
-        "note": "",
-        "last_seen": "2026-07-08"
-      },
-      {
-        "name": "GitHub Copilot",
-        "note": "",
-        "last_seen": "2026-07-08"
-      },
-      {
-        "name": "NVFP4",
-        "note": "",
-        "last_seen": "2026-07-08"
-      },
-      {
-        "name": "GLM-5.2",
-        "note": "",
-        "last_seen": "2026-07-08"
-      },
-      {
-        "name": "Blackwell",
-        "note": "",
-        "last_seen": "2026-07-08"
-      },
-      {
-        "name": "B200",
-        "note": "",
-        "last_seen": "2026-07-08"
-      },
-      {
-        "name": "Qwen3.6",
-        "note": "",
-        "last_seen": "2026-07-08"
-      },
-      {
-        "name": "LLM.int8",
-        "note": "",
-        "last_seen": "2026-07-08"
-      },
-      {
-        "name": "GPTQ",
-        "note": "",
-        "last_seen": "2026-07-08"
-      },
-      {
-        "name": "AWQ",
-        "note": "",
-        "last_seen": "2026-07-08"
-      },
-      {
-        "name": "KIVI",
-        "note": "",
-        "last_seen": "2026-07-08"
-      },
-      {
-        "name": "Tim Dettmers",
-        "note": "",
-        "last_seen": "2026-07-08"
-      },
-      {
-        "name": "DeepSeek-R1",
-        "note": "",
-        "last_seen": "2026-07-08"
-      },
-      {
-        "name": "KV cache",
-        "note": "",
-        "last_seen": "2026-07-08"
-      },
-      {
-        "name": "Gemini 3.5 Flash",
-        "note": "",
-        "last_seen": "2026-07-07"
-      },
-      {
-        "name": "Kapa",
-        "note": "",
-        "last_seen": "2026-07-07"
-      },
-      {
-        "name": "Meta",
-        "note": "",
-        "last_seen": "2026-07-06"
-      },
-      {
-        "name": "Amazon",
-        "note": "",
-        "last_seen": "2026-07-06"
-      },
-      {
-        "name": "Mark Zuckerberg",
-        "note": "",
-        "last_seen": "2026-07-06"
       }
     ],
     "monthly": [
@@ -1965,7 +1938,7 @@
         "summary": "The frontier moves down, and the switch turns back on; World models: why AI can build a world you can walk through, but not one it remembers when you look away; Generation is cheap, checking is the product; Two rulers for the frontier, and the soft spots in the models we already have; Everything bends toward control: who owns the model, and who can switch it off; Speed for free: how speculative decoding makes a model faster without changing a word; Generating a planet from satellite photos; Program as weights: compiling a task straight into a model; The Turk retires, a stats class levels up, and three tricks that were one; The search box became a writer; The word that unlocked a private repo; Quantization: why fewer bits work, and where the cliff is; Sixty-four Claudes, an off switch, and "
       }
     ],
-    "updated": "2026-08-10",
+    "updated": "2026-08-11",
     "host_lore": [
       {
         "host": "Ada",
@@ -2017,6 +1990,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "content provenance as two distinct mechanisms: a text watermark that may survive some edits but lacks a published detector, versus C2PA metadata whose signed manifest and cryptographic content binding provide tamper evidence but can be stripped",
+        "last_taught": "2026-08-11"
+      },
+      {
+        "name": "Docker Sandboxes' five-layer boundary model: hypervisor, network proxy, private Docker engine, workspace mode, and credential proxy, plus the shared-skills and host-MCP exceptions that remain outside full microVM isolation",
+        "last_taught": "2026-08-11"
+      },
       {
         "name": "solution-first recursive terminal-task synthesis: extending an executable reference path, realigning the environment, public instruction, and private verifier, enforcing oracle and contract validity, then reseeding accepted tasks",
         "last_taught": "2026-08-10"
