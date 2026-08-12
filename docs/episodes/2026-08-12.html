@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How much water is in an answer? — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>How much water is in an answer?</h1>
+<div class="date">Self-Attention — 2026-08-12</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-08-12/podcast-2026-08-12.mp3"></audio>
+<p><em>2026-08-12</em></p>
+<p>NVIDIA's Nemotron 3.5 Lightning separates an agent's high-volume execution work from frontier planning, while a Water Research article forces a more exact accounting of direct, electricity-linked, and semiconductor water use. The rundown covers ChatGPT's ad expansion, exposed encrypted reasoning traces, Mistral's regional inference, Go's case for reviewable agent-written code, Unsloth Desktop, and the Daybreak models on AWS.</p>
+<h2>Papers</h2>
+<ul>
+<li><a href="https://doi.org/10.1016/j.watres.2026.125866">The water footprint of artificial intelligence: Emerging solutions and governance imperatives</a></li>
+<li><a href="https://arxiv.org/abs/2304.03271">Making AI Less Thirsty: Uncovering and Addressing the Secret Water Footprint of AI Models</a></li>
+<li><a href="https://arxiv.org/abs/2608.09867">Stealing Reasoning Traces from Proprietary LLM APIs</a></li>
+</ul>
+<h2>Releases</h2>
+<ul>
+<li><a href="https://developer.nvidia.com/blog/nvidia-nemotron-3-5-lightning-delivers-fast-accurate-specialized-task-execution-for-long-running-agents/">NVIDIA Nemotron 3.5 Lightning launch</a></li>
+<li><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16">NVIDIA Nemotron 3.5 Lightning model card</a></li>
+<li><a href="https://ollama.com/blog/nemotron-3-5-lightning">Nemotron 3.5 Lightning on Ollama</a></li>
+<li><a href="https://openai.com/index/testing-ads-in-chatgpt">ChatGPT Ads expansion</a></li>
+<li><a href="https://mistral.ai/news/regional-inference-open-models-new-compute/">Mistral regional inference, open models, and European infrastructure</a></li>
+<li><a href="https://docs.mistral.ai/studio-api/regional-inference">Mistral regional inference documentation</a></li>
+<li><a href="https://unsloth.ai/docs/desktop">Introducing Unsloth Desktop</a></li>
+<li><a href="https://openai.com/index/daybreak-models-are-now-available-on-aws">Daybreak models are now available on AWS</a></li>
+</ul>
+<h2>Discussion</h2>
+<ul>
+<li><a href="https://pubs.usgs.gov/circ/2004/circ1268/htdocs/text-glossary.html">U.S. Geological Survey water-use glossary</a></li>
+<li><a href="https://www.energy.gov/cmei/femp/cooling-water-efficiency-opportunities-federal-data-centers">U.S. Department of Energy guide to data-center cooling-water efficiency</a></li>
+<li><a href="https://developers.googleblog.com/why-go-is-an-ideal-language-for-ai-assisted-software-engineering/">Why Go is an ideal language for AI-assisted software engineering</a></li>
+</ul>
+<h2>Also noted</h2>
+<ul>
+<li><a href="https://huggingface.co/papers/2608.09888">BDH-CQ: In-Context Learning with Recurrent Latent Reasoning</a></li>
+<li><a href="https://huggingface.co/papers/2608.09819">Macaron-V1: Towards Open Continual Learning with Self-Improvement and Mixture-of-LoRA</a></li>
+<li><a href="https://huggingface.co/papers/2608.09802">SWE-Bench ProMax: Benchmarking Agents on Large-Scale Multilingual Code Refactoring</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>The day
+<ul>
+<li>ChatGPT Ads expands to five additional countries</li>
+<li>NVIDIA releases Nemotron 3.5 Lightning</li>
+<li>Researchers extract encrypted reasoning traces from proprietary model APIs</li>
+<li>A Water Research article maps AI's water footprint</li>
+<li>Mistral launches regional inference and third-party open-model support</li>
+<li>Google argues that Go fits AI-assisted software engineering</li>
+<li>Unsloth Desktop brings local model running and training to a desktop app</li>
+<li>OpenAI makes Daybreak cyber models available through Amazon Bedrock</li>
+<li>BDH-CQ recurrent latent reasoning</li>
+<li>Macaron-V1 continual learning</li>
+<li>SWE-Bench ProMax multilingual refactoring</li>
+</ul>
+</li>
+<li>The model for everything in between</li>
+<li>Water has an address</li>
+<li>Close</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Wednesday, August twelfth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. ChatGPT's ad business crossed five more borders, NVIDIA built a model for the repetitive middle of an agent run, and a water paper is asking us to stop talking about thirsty chatbots as though every answer came from the same tap.</p>
+<h3>The day</h3>
+<p><b>Ada:</b> OpenAI says ChatGPT Ads launched yesterday in the United Kingdom, Mexico, Brazil, Japan, and South Korea. The ads test remains tied to logged-in adults on the Free and Go tiers. OpenAI says Plus, Pro, Business, Enterprise, and Education stay ad-free, while a Free user can opt out in exchange for fewer daily messages. The consequential detail is the matching system: OpenAI says it uses the topic of the current conversation, past chats, and past ad interactions to choose an ad. Advertisers receive aggregate views and clicks rather than the chats themselves. Honest size: this is a real expansion of a commercial layer beside the answer, with a company promise that the answer remains independent. The expansion is observable. Independence will need evidence over time.</p>
+<p><b>Alan:</b> NVIDIA released Nemotron three point five Lightning, an open thirty-billion-parameter mixture-of-experts model that activates about three billion parameters per token. NVIDIA is not pitching it as the mind that devises an agent's whole plan. It is pitching it for the repeated tool calls, result checks, formatting, and delegation steps that fill a long run after the plan exists. The launch has landed with local-model users, and Ollama made it available to run on a user's own device. That division between planning and execution is worth opening properly.</p>
+<p><b>Ada:</b> A new preprint reports that encrypted reasoning blocks returned by proprietary model interfaces were interchangeable across sessions, users, and models from the same provider. The researchers say they could give one model's encrypted block to a weaker, less-protected model and make it reveal the reasoning in plain text. Across public repositories, they report decoding three hundred fifteen thousand three hundred twenty blocks and finding three hundred sixty-seven pieces of personally identifiable information plus one hundred eighty-two credentials. They demonstrated the broader issue across Anthropic, OpenAI, and Google. That is the full verdict for today: if an encrypted reasoning block has to travel with a client request, do not treat it as harmless log material, and do not publish it on the assumption that ciphertext means no compatible system can read it.</p>
+<p><b>Alan:</b> The listener's other locked story is a Water Research article published in July and newly circulating now. It divides A I's water footprint into water used at the data-center site, water associated with electricity generation, and water embedded in semiconductor manufacturing. It also repeats a projection of four point two to six point six billion cubic meters globally in twenty twenty-seven. That number is not a live measurement of every A I system, and the earlier study beneath it calls the quantity water withdrawal. We are going to separate the pipes, the estimates, and the policy choices before anybody converts the total into one dramatic bottle per prompt.</p>
+<p><b>Ada:</b> Mistral's sovereignty announcement is smaller but operationally concrete. The company says regional endpoints are generally available for inference in Europe or the United States, with selected-region processing subject to limited safeguarded transfers to subprocessors. It also says its platform will host third-party open models, beginning with Z A I's G L M five point two. One wrinkle: Mistral's product announcement says both regions are generally available, while its regional-inference documentation still labels the U S endpoint coming soon. Treat U S availability as a rollout detail to confirm in the account, not a property to assume from the press page.</p>
+<p><b>Alan:</b> Google's Go team has published a forceful argument that Go fits A I-assisted software engineering because the language favors one readable style and ships a formatter, tests, dependency management, security tools, and compatibility guarantees as a coherent platform. The who-cares case is real: when generation gets cheap, review and verification become the expensive half. But this is an argument from Go's stewards, not a controlled comparison showing agents make fewer production defects in Go than in Python, Rust, or Java. Useful design thesis, unproved ranking.</p>
+<p><b>Ada:</b> Unsloth Desktop is a minor but useful release with an enormous community response. The beta is free and open source on Mac O S, Windows, and Linux, and it puts local model running and training behind a desktop interface. That lowers setup friction. It does not lower the memory required by a chosen model or make a fine-tuning dataset good merely because the button is visible.</p>
+<p><b>Alan:</b> OpenAI also made Daybreak Red and Daybreak Blue available to eligible, approved customers through Amazon Bedrock. The cyber models were the consequential release we sized on Monday; today's update is distribution through an enterprise cloud control plane, not a new capability result.</p>
+<p><b>Ada:</b> Three research pointers I am not going to size. Hugging Face's top-paper lists carry B D H C Q on recurrent latent reasoning, Macaron V one on continual learning through a mixture of low-rank adapters, and S W E Bench ProMax on multilingual repository refactoring. Those are high-signal reading pointers, not judgments from us.</p>
+<p><b>Alan:</b> The phrase execution model sounds modest. The model card is not modest at all.</p>
+<h3>The model for everything in between</h3>
+<p><b>Alan:</b> NVIDIA's system picture is a planner at the top and an execution model underneath. The expensive model decides what the agent is trying to do. Lightning handles the high-volume calls that carry the plan forward.</p>
+<p><b>Ada:</b> You slipped from NVIDIA's pitch into a clean architecture. Real agent steps do not arrive labeled routine or consequential.</p>
+<p><b>Alan:</b> Correct. A request to list files is routine until the working directory contains a secret. A request to validate a tool result is routine until the validator shares the same blind spot as the tool user. The model does not remove the routing problem. It makes routing worth solving because the cost difference can be large.</p>
+<p><b>Ada:</b> Start with the strange parameter count.</p>
+<p><b>Alan:</b> Thirty billion total, about three billion active. We walked through mixture-of-experts in July, so the refresher is one sentence: all the expert weights must be stored, but a learned router sends each token through only a small subset of them. Storage looks like the larger model; arithmetic per token looks closer to the active slice.</p>
+<p><b>Ada:</b> And NVIDIA's model card adds a second kind of sparsity in time. It describes a hybrid with Mamba two layers, mixture-of-experts layers, and selected attention layers rather than attention everywhere.</p>
+<p><b>Alan:</b> Yes. The card says the model was pretrained on more than twenty trillion tokens and supports up to a one-million-token context. But up to is doing deployment work. NVIDIA's own table says a single H one hundred recipe uses two hundred fifty-six thousand tokens. Its full one-million-token recipes use eight H one hundreds or one G B two hundred.</p>
+<p><b>Ada:</b> So one million is a supported ceiling under named hardware recipes, not a promise that the local download will hold a million tokens on a laptop.</p>
+<p><b>Alan:</b> Exactly. For the full-precision B F sixteen checkpoint, NVIDIA lists one eighty-gigabyte H one hundred or A one hundred as the single-accelerator deployment. For optimized inference it points users to the N V F P four checkpoint. Ollama and other runtimes can package quantized versions for local machines, but local is a location, not a memory specification.</p>
+<p><b>Ada:</b> That is the first builder test, then. Ask which checkpoint, precision, context length, cache size, and concurrency produced the word local.</p>
+<p><b>Alan:</b> Yes. A model that fits at four thousand tokens and one user may stop fitting at a long context or ten simultaneous agent runs. The execution layer is exactly where concurrency matters, because an always-on agent produces many small calls.</p>
+<p><b>Ada:</b> NVIDIA's headline speed claim is up to four times the output speed of similar-sized models.</p>
+<p><b>Alan:</b> Vendor-reported, and workload-dependent. The more useful result in the post is task-shaped. NVIDIA says Lightning reached about eighty-six percent accuracy on PinchBench while completing ten thousand tasks thirty percent faster than Qwen three point six thirty-five B at similar accuracy.</p>
+<p><b>Ada:</b> Still NVIDIA's benchmark run.</p>
+<p><b>Alan:</b> Still NVIDIA's run. The model card says the accuracy table was measured by NVIDIA under one consistent harness and points to published evaluation recipes. That is better than an unexplained bar chart because another team can attempt the same containers, prompts, inference settings, parsers, and scoring. It is not independent replication.</p>
+<p><b>Ada:</b> And the card's table prevents a convenient misreading. Qwen scores higher on most of the listed knowledge, reasoning, coding, and long-context evaluations. Lightning's claim is not best answer everywhere.</p>
+<p><b>Alan:</b> Right. Its claim is a useful point on the speed-and-accuracy curve. That is exactly what a routed system needs. If the routine tier is slightly less capable but much faster, the system can buy frontier reasoning only where the expected gain justifies it.</p>
+<p><b>Ada:</b> Provided the router recognizes those places before the cheap model has made an irreversible call.</p>
+<p><b>Alan:</b> There is the disagreement. I do not need perfect recognition. I need bounded actions, an escalation path, and enough observability to learn where the boundary is wrong.</p>
+<p><b>Ada:</b> Give me the speed mechanism before the operating policy.</p>
+<p><b>Alan:</b> Speculative decoding is one part. We taught it on the Fourth of July: a drafter proposes several future tokens, and the main model reviews them more cheaply than producing every accepted token one by one. Lightning was trained with multi-token prediction and ships with two external drafters, D Spark and D Flash, for different serving conditions.</p>
+<p><b>Ada:</b> NVIDIA's own recipes say no speculative strategy is best for one maximum-throughput H one hundred setup.</p>
+<p><b>Alan:</b> Which is a beautiful antidote to the word feature. Speculative decoding is not a switch that always means faster. Draft accuracy, batch size, concurrency, hardware, and the cost of verification determine whether it wins. NVIDIA recommends D Spark for low-concurrency data-center use and its desktop system, while medium or high concurrency may favor the model's multi-token prediction or no external drafter.</p>
+<p><b>Ada:</b> Then a four-times speed headline cannot be carried from one serving shape into another.</p>
+<p><b>Alan:</b> No. Run the actual serving shape. Measure accepted draft tokens, end-to-end task time, tail latency, memory, and energy, not only tokens per second.</p>
+<p><b>Ada:</b> Why task time rather than throughput if execution is mostly small calls?</p>
+<p><b>Alan:</b> Because a model can emit tokens quickly and still take a bad tool path. One wrong command followed by three repairs loses against a slower model that makes the correct call once. PinchBench at least tries to move the unit from token generation toward completed work, though a team's own agent traces are the stronger exam.</p>
+<p><b>Ada:</b> What does that exam look like?</p>
+<p><b>Alan:</b> Take a few weeks of permission-cleared traces. Label which turns were planning, low-risk execution, validation, or escalation. Replay the same turns through Lightning and the current model. Score tool-call validity, result correctness, retries, elapsed time, and cost. Then run both inside the full harness, because a model that produces a valid call in isolation can still interact badly with your prompt, tools, and state.</p>
+<p><b>Ada:</b> Add irreversible actions as their own slice. Deleting a cloud resource and formatting a table should not disappear into one average.</p>
+<p><b>Alan:</b> Absolutely. My first route would be conservative. Read-only retrieval, deterministic formatting, schema conversion, and tool calls with external postconditions can go down to Lightning. Ambiguous planning, permission changes, external messages, financial actions, and failed validations route up or stop.</p>
+<p><b>Ada:</b> You included validation in the low tier and in the escalation trigger.</p>
+<p><b>Alan:</b> Different validation. Checking that a returned object matches a schema is deterministic. Deciding that a research answer is factually grounded is judgment. An execution model can run the check. It should not invent the standard and then grade itself against that standard.</p>
+<p><b>Ada:</b> That distinction is more valuable than the model name.</p>
+<p><b>Alan:</b> It is also where a smaller model can shine. A fixed contract narrows the task. The model card says Lightning was post-trained on tool calling, structured output, multi-step tool use, and instruction following. If my harness already knows the contract, I do not need the model to rediscover it on every turn.</p>
+<p><b>Ada:</b> The card calls the B F sixteen release a starting point for customization rather than the preferred production checkpoint.</p>
+<p><b>Alan:</b> Yes. NVIDIA released weights, training data, recipes, and an agentic reinforcement-learning dataset under Open M D W one point one. A team can fine-tune the execution tier on its own repetitive work, or start with the N V F P four version for optimized inference. The word open does not relieve the team from reading that named license or testing the adaptation.</p>
+<p><b>Ada:</b> Nor from checking whether the model's training cutoffs and languages fit the job.</p>
+<p><b>Alan:</b> The card says pretraining data stop in September twenty twenty-five, post-training data in May twenty twenty-six, and the primary language is English with several additional supported languages. For current facts, the model needs tools. For a language outside the supported list, it needs a real evaluation, not optimism.</p>
+<p><b>Ada:</b> Here is my objection to the entire planner-and-worker metaphor. A long agent run accumulates state. The thousandth routine call may depend on an error in the hundredth. Cheap execution can turn a small calibration gap into a long-horizon drift.</p>
+<p><b>Alan:</b> And a frontier model can make the same error more expensively.</p>
+<p><b>Ada:</b> That is not a rebuttal.</p>
+<p><b>Alan:</b> It is not. The rebuttal is checkpoints. External state assertions after meaningful transitions, budget limits, and periodic replanning by the stronger model. Lightning should not carry an unexamined story of the world for six hours.</p>
+<p><b>Ada:</b> Then the architecture has at least three roles: planner, executor, and verifier.</p>
+<p><b>Alan:</b> Sometimes the verifier is code, not another model. That is better. File exists. Test passes. Database row has the expected state. Permission did not change. Use deterministic evidence wherever the world offers it, and reserve model judgment for the residue.</p>
+<p><b>Ada:</b> If a team has only one model endpoint today, is this release enough reason to add routing complexity?</p>
+<p><b>Alan:</b> Not automatically. The savings must exceed cache loss, extra infrastructure, evaluation cost, and failures at model handoffs. Start in shadow mode. Let Lightning propose the execution call while the current system still acts. Compare. Promote only the task families where the evidence holds.</p>
+<p><b>Ada:</b> I would keep it in shadow mode longer than you would.</p>
+<p><b>Alan:</b> I would promote read-only families sooner than you would.</p>
+<p><b>Ada:</b> Good. Leave that unresolved and publish the route-level logs. The water story has the same demand: a system-wide total is less useful than knowing where each flow actually went.</p>
+<h3>Water has an address</h3>
+<p><b>Ada:</b> The article newly circulating is by Zohar Barnett-Itzhaki in Water Research. It appeared in July, so today's news is attention, not publication. It is a synthesis and governance argument, not a new meter study at one data center.</p>
+<p><b>Alan:</b> That matters because the number everyone will repeat sounds measured.</p>
+<p><b>Ada:</b> Four point two to six point six billion cubic meters annually by twenty twenty-seven. The article says A I's global water footprint could reach that range. Its source is earlier work by Pengfei Li and colleagues, which calls the range projected water withdrawal.</p>
+<p><b>Alan:</b> Withdrawal is not consumption.</p>
+<p><b>Ada:</b> Correct. The U S Geological Survey defines withdrawal as water removed from the ground or diverted from a surface source for use. Some withdrawn water returns to the watershed. Consumptive use is the part not promptly available for reuse because it evaporated, entered a product, or otherwise left the immediate system. The distinction changes what a large number means locally.</p>
+<p><b>Alan:</b> And the word footprint can gather several categories into one total.</p>
+<p><b>Ada:</b> Barnett-Itzhaki names three. Direct on-site consumption covers evaporative cooling and humidification. Indirect water belongs to the electricity generation supplying the center. Embedded water belongs to semiconductor manufacturing.</p>
+<p><b>Alan:</b> Walk the direct pipe.</p>
+<p><b>Ada:</b> The U S Department of Energy's data-center cooling guide shows a common evaporative system. Server heat moves into room air, then a chilled-water loop, then a condenser-water loop. At the cooling tower, some water evaporates into the atmosphere to carry the heat away. Additional water is drained as blowdown so dissolved minerals do not become too concentrated.</p>
+<p><b>Alan:</b> Yesterday we heard a promise about closed-loop cooling. A loop can be closed inside the building and still hand its heat to an evaporative tower outside.</p>
+<p><b>Ada:</b> Exactly. Closed loop tells us that coolant recirculates through part of the system. It does not, by itself, state facility water withdrawal or consumption. The heat has to leave. The final rejection system, local climate, operating temperature, and source of makeup water decide much of the direct-water result.</p>
+<p><b>Alan:</b> So waterless cooling fixes it.</p>
+<p><b>Ada:</b> It can reduce on-site water demand. The Water Research article lists waterless designs, cold-climate siting, natural-water-body cooling, and waste-heat recovery. But a dry system can move more work onto fans or compressors, and a natural water body introduces temperature and ecosystem constraints. The correct comparison includes water, energy, carbon, land, reliability, and the local watershed. No design earns a universal green label from one column.</p>
+<p><b>Alan:</b> The second pipe is electricity.</p>
+<p><b>Ada:</b> Power plants may withdraw or consume water for their own cooling and generation processes. That indirect amount changes with the grid's fuel mix, geography, and hour. Li and colleagues emphasize that on-site and off-site water-use efficiency vary across both place and time.</p>
+<p><b>Alan:</b> Which means the same model request can have a different water footprint in Oregon at night and Texas on a hot afternoon.</p>
+<p><b>Ada:</b> In principle, yes. But we usually cannot calculate it for a particular answer because providers do not disclose the serving location, hardware utilization, marginal electricity source, cooling conditions, or how shared infrastructure costs are allocated to that request.</p>
+<p><b>Alan:</b> Then the bottle-per-conversation line is false?</p>
+<p><b>Ada:</b> It is an estimate under assumptions, not a constant of nature. The twenty twenty-three study estimated one half-liter bottle across roughly twenty to fifty questions and answers using assumed inference energy, power overhead, electricity-water intensity, and an on-site efficiency range that changes with weather. The paper itself says when and where matter. Repeating the bottle without the assumptions converts a scenario into a property of A I.</p>
+<p><b>Alan:</b> I like the bottle because people understand it.</p>
+<p><b>Ada:</b> People also understand a price tag. We do not quote one price for every model, token count, cache state, and cloud region.</p>
+<p><b>Alan:</b> Fair. Keep the metaphor, print the range and assumptions on the label.</p>
+<p><b>Ada:</b> Better. And distinguish withdrawal from consumption. A power plant can withdraw a great volume and return much of it warmer. An evaporative tower can withdraw less and consume a larger share locally. Communities care about source, timing, return, temperature, and drought conditions, not only the largest global total.</p>
+<p><b>Alan:</b> The third pipe, chip manufacturing, is even harder to assign to one answer.</p>
+<p><b>Ada:</b> Yes. Semiconductor fabrication uses water upstream, then one accelerator serves many training and inference jobs over its life. Allocating embodied water requires assumptions about manufacturing yield, hardware lifetime, utilization, and which workloads receive the share. That does not make the water imaginary. It makes the accounting a lifecycle allocation rather than a facility meter.</p>
+<p><b>Alan:</b> I can meter electricity to a rack and facility water to a campus. I cannot put a water meter on one token.</p>
+<p><b>Ada:</b> Not directly. You can estimate workload water by joining compute and energy logs with facility water-use effectiveness, then adding an electricity-side factor and a lifecycle allocation. Each join introduces uncertainty. Report the pieces and uncertainty instead of presenting the final decimal as observed.</p>
+<p><b>Alan:</b> Define water-use effectiveness.</p>
+<p><b>Ada:</b> The Energy Department gives the site metric as annual site water use divided by annual energy used by the information-technology equipment, in liters per kilowatt-hour. It helps compare one facility over time or similar facilities under stated boundaries.</p>
+<p><b>Alan:</b> And it can hide a dirtier electricity source because it is site water only.</p>
+<p><b>Ada:</b> Correct. A low site metric may coexist with high indirect water. It can also look excellent because a facility uses reclaimed water rather than potable water, which is a real local improvement but does not mean the volume is zero. The source and quality of the water belong beside the ratio.</p>
+<p><b>Alan:</b> Barnett-Itzhaki's policy phrase is digital water sobriety. I can already hear that becoming a slogan.</p>
+<p><b>Ada:</b> The article gives it content: ask which applications justify freshwater consumption, site compute with water constraints in mind, and require facility-level transparency. The first part is normative. The other two create the evidence needed to have the argument at all.</p>
+<p><b>Alan:</b> Who decides whether my model run justifies freshwater? A regulator? The cloud provider? The customer with the largest contract?</p>
+<p><b>Ada:</b> That is the sharp edge. A hospital inference service, a video generator, and an advertising optimizer may share one facility. Ranking their social value is not an engineering calculation. Democratic institutions can set drought priorities and permit conditions; providers can expose usage; customers can choose. I do not want a cloud company privately assigning moral worth to prompts.</p>
+<p><b>Alan:</b> Then keep sobriety at the infrastructure layer. Price scarce water properly and let users decide.</p>
+<p><b>Ada:</b> Prices often omit effects on households, ecosystems, and future drought resilience. A permit can establish withdrawal caps, drought triggers, source requirements, and disclosure even when the marginal price is low.</p>
+<p><b>Alan:</b> That can also push a data center to another county with weaker rules and the same watershed.</p>
+<p><b>Ada:</b> Which is why basin-level planning matters. We are not going to settle water governance from the studio. We can say what a credible disclosure needs.</p>
+<p><b>Alan:</b> Facility and watershed location. Monthly withdrawal and consumption. Potable, reclaimed, surface, or groundwater source. The direct site ratio in liters per kilowatt-hour. Cooling design and drought operating plan.</p>
+<p><b>Ada:</b> Add indirect electricity water with the grid method stated, plus the share of hardware manufacturing that is included or excluded. Publish both forecast and actual use, because a promised design is not an operating record.</p>
+<p><b>Alan:</b> For an A I customer, give enough workload energy data to estimate its share without exposing another customer's traffic.</p>
+<p><b>Ada:</b> And disclose uncertainty. A range tied to location and hour is more honest than one global average with six significant digits.</p>
+<p><b>Alan:</b> The review highlights that two-thirds of data centers built after twenty twenty-two are in water-stressed regions. I want the dataset and definition behind that highlight before I use it for a permit.</p>
+<p><b>Ada:</b> So do I. It is supported as the article's claim, but the accessible abstract does not expose the denominator, geography, or water-stress threshold. It is a reason to read the methods, not a number we should extend beyond the paper.</p>
+<p><b>Alan:</b> That is the frustrating shape of this story. The aggregate concern is credible. The facility data needed for action are scarce.</p>
+<p><b>Ada:</b> Scarcity of data is not evidence of low impact. It is evidence that broad totals cannot tell a town what one proposed campus will do.</p>
+<p><b>Alan:</b> If I were procuring cloud capacity tomorrow, I would ask for annual water-use effectiveness and the cooling source by region. I doubt I would get workload-level numbers.</p>
+<p><b>Ada:</b> Ask anyway, then write the absence into the procurement record. Requirements begin as questions suppliers are tired of answering.</p>
+<p><b>Alan:</b> I would also ask whether a low-water region choice raises latency, cost, or carbon. Moving compute is a trade, not a teleport.</p>
+<p><b>Ada:</b> Yes. The earlier study even finds carbon-efficient hours and water-efficient hours may differ. Following abundant solar generation can coincide with hotter conditions and more evaporative cooling. Multi-objective scheduling must show the trade rather than optimizing one invisible score.</p>
+<p><b>Alan:</b> Would you delay an urgent model job for water conditions?</p>
+<p><b>Ada:</b> An urgent job, probably not. A flexible batch training run, perhaps. The value is in separating deadlines. Some computation can move in time or place; some cannot. Treating every workload as urgent is how flexibility disappears.</p>
+<p><b>Alan:</b> I will concede scheduling. I still resist application-level worthiness tests.</p>
+<p><b>Ada:</b> Keep resisting. I resist a market price as the whole answer. The productive next step is not agreement; it is a facility record detailed enough that our disagreement attaches to real water, in a real basin, during a real month.</p>
+<p><b>Alan:</b> And no more universal bottles.</p>
+<p><b>Ada:</b> Bottles with assumptions, if you insist.</p>
+<p><b>Alan:</b> A very small label and an extremely long footnote.</p>
+<h3>Close</h3>
+<p><b>Alan:</b> I am still picturing the same cooling system looking closed from the rack and open at the tower. That is exactly where a reassuring word outruns the plumbing.</p>
+<p><b>Ada:</b> Put the plumbing in the disclosure. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan.</p>
+<p><b>Ada:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
