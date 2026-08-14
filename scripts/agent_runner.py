@@ -90,6 +90,24 @@ def ensure_codex_sandbox_helper() -> Path:
                 os.link(codex, link)
             except OSError as exc:
                 raise RunnerError(f"cannot create Codex runtime hard link {name}: {exc}", "config") from exc
+    # Sibling helpers Codex resolves relative to its own argv[0]. Because we launch it
+    # from runtime-bin, anything it expects next to itself has to be linked in too --
+    # 0.147.0 added codex-code-mode-host, and without it every tool call fails closed
+    # ("failed to spawn code-mode host"), which took down a whole night's run on
+    # 2026-08-13. Optional by design: older bundles don't ship it, and a future one may
+    # add another, so absence is never fatal here.
+    for name in ("codex-code-mode-host",):
+        source = codex.parent / name
+        if not source.is_file():
+            continue
+        link = runtime_bin / name
+        if link.exists() and not os.path.samefile(source, link):
+            link.unlink()
+        if not link.exists():
+            try:
+                os.link(source, link)
+            except OSError as exc:
+                raise RunnerError(f"cannot create Codex runtime hard link {name}: {exc}", "config") from exc
     rg_candidates = [
         Path(shutil.which("rg") or ""),
         codex.parent.parent / "codex-path" / "rg",

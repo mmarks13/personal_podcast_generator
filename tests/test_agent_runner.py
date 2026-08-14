@@ -15,6 +15,51 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import agent_runner as ar  # noqa: E402
 
 
+class RuntimeBinTests(unittest.TestCase):
+    """Codex resolves helper binaries next to its own argv[0], and we launch it from
+    .codex/runtime-bin — so every sibling it expects has to be linked in. Missing
+    codex-code-mode-host after the 0.147.0 upgrade failed every tool call closed and
+    took down the 2026-08-13 run."""
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.install = self.root / "install"
+        self.install.mkdir()
+        self.codex = self.install / "codex"
+        self.codex.write_bytes(b"codex")
+        patcher = mock.patch.object(ar, "ROOT", self.root)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def _run(self):
+        with mock.patch.object(ar.shutil, "which",
+                               side_effect=lambda n: str(self.codex) if n == "codex" else None):
+            return ar.ensure_codex_sandbox_helper()
+
+    def test_links_the_code_mode_host_when_the_bundle_ships_one(self) -> None:
+        host = self.install / "codex-code-mode-host"
+        host.write_bytes(b"host")
+        linked = self._run() / "codex-code-mode-host"
+        self.assertTrue(linked.is_file())
+        self.assertTrue(os.path.samefile(host, linked))
+
+    def test_absent_host_is_not_fatal(self) -> None:
+        runtime_bin = self._run()
+        self.assertTrue((runtime_bin / "codex").is_file())
+        self.assertFalse((runtime_bin / "codex-code-mode-host").exists())
+
+    def test_a_stale_host_link_is_replaced(self) -> None:
+        runtime_bin = self.root / ".codex" / "runtime-bin"
+        runtime_bin.mkdir(parents=True)
+        (runtime_bin / "codex-code-mode-host").write_bytes(b"stale")
+        host = self.install / "codex-code-mode-host"
+        host.write_bytes(b"fresh")
+        linked = self._run() / "codex-code-mode-host"
+        self.assertTrue(os.path.samefile(host, linked))
+
+
 class AgentRunnerTests(unittest.TestCase):
     def test_locked_effort_mapping(self) -> None:
         cfg = ar.load_config()
