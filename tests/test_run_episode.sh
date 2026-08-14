@@ -26,13 +26,13 @@ cp "$REPO/scripts/run_log.py" "$SB/scripts/run_log.py"
 
 cat > "$SB/scripts/preflight.py" <<'PY'
 import os
-print("MOCK preflight provider=" + os.environ.get("AGENT_PROVIDER", "codex"))
+print("MOCK preflight provider=" + os.environ.get("AGENT_PROVIDER", "claude"))
 PY
 cat > "$SB/scripts/agent_runner.py" <<'PY'
 import json, os, pathlib, sys
 stage = sys.argv[sys.argv.index("--stage") + 1]
 prompt = sys.stdin.read()
-provider = os.environ.get("AGENT_PROVIDER", "codex")
+provider = os.environ.get("AGENT_PROVIDER", "claude")
 print(f"MOCK agent stage={stage} provider={provider} stdin_closed={bool(prompt)}")
 if os.environ.get("MOCK_FAIL_STAGE") == stage:
     raise SystemExit(9)
@@ -54,7 +54,9 @@ elif stage == "deepdive":
 elif stage == "read":
     p("docs/reads").mkdir(parents=True, exist_ok=True)
     p(f"docs/reads/self-attention-{date}.epub").write_bytes(b"epub")
-elif stage == "propose": p("out/deepdive_options.json").write_text('{"options":[]}')
+elif stage == "propose":
+    p("out/daily_options.json").write_text('{"options":[]}')
+    p("out/deepdive_options.json").write_text('{"options":[]}')
 PY
 cat > "$SB/scripts/fetch_sources.py" <<'PY'
 import pathlib
@@ -62,7 +64,7 @@ pathlib.Path("out").mkdir(exist_ok=True)
 pathlib.Path("out/sources.json").write_text('{"feeds":{}}')
 print("MOCK fetch")
 PY
-for script in update_history.py send_to_kindle.py publish_read.py notify.py proposal_ledger.py ntfy_choice.py; do
+for script in update_history.py send_to_kindle.py publish_read.py notify.py proposal_ledger.py daily_options.py ntfy_choice.py; do
   cat > "$SB/scripts/$script" <<'PY'
 import pathlib, sys
 pathlib.Path("out/deterministic-calls.log").open("a").write(pathlib.Path(sys.argv[0]).name + "\n")
@@ -103,22 +105,22 @@ invoke_read() {
   echo "$rc"
 }
 
-echo "Scenario A: Codex-default full run"
+echo "Scenario A: Claude-default full run"
 : > "$LOG"; rm -f "$SB/out/deterministic-calls.log"
 rc="$(invoke)"
 [ "$rc" = 0 ] && ok "full run exits 0" || bad "full run exit $rc"
-has "Codex default reached runner" "provider=codex"
+has "Claude default reached runner" "provider=claude"
 has "podcast stage ran" "step end: podcast exit=0"
 has "crawl stage ran" "step end: crawl exit=0"
 has "harness re-ran the gate" "step end: gate exit=0"
 has "render ran" "step end: render-podcast exit=0"
 has "publish ran" "step end: publish exit=0"
 
-echo "Scenario B: explicit Claude provider"
+echo "Scenario B: explicit Codex provider"
 : > "$LOG"
-rc="$(invoke_read AGENT_PROVIDER=claude)"
-[ "$rc" = 0 ] && ok "Claude read exits 0" || bad "Claude read exit $rc"
-has "Claude override reached runner" "provider=claude"
+rc="$(invoke_read AGENT_PROVIDER=codex)"
+[ "$rc" = 0 ] && ok "Codex read exits 0" || bad "Codex read exit $rc"
+has "Codex override reached runner" "provider=codex"
 has "read stage ran" "step end: read exit=0"
 has "Kindle stage ran" "step end: kindle exit=0"
 
@@ -127,7 +129,11 @@ echo "Scenario C: no-side-effect dry run"
 rc="$(invoke RUN_EPISODE_DRY_RUN=1)"
 [ "$rc" = 0 ] && ok "dry run exits 0" || bad "dry run exit $rc"
 has "dry-run suppression logged" "dry-run: skipped podcast history, archive, render, and publish"
-if [ -e "$SB/out/deterministic-calls.log" ]; then bad "dry run called external deterministic step"; else ok "dry run skipped external deterministic steps"; fi
+# ntfy_choice.py is expected here and only here: reading the listener's mini-dive picks
+# is a read-only poll with no side effect, so it is deliberately not dry-run-gated —
+# that is what lets a dry run exercise the picker end to end.
+unexpected="$(sort -u "$SB/out/deterministic-calls.log" 2>/dev/null | grep -v '^ntfy_choice\.py$' || true)"
+if [ -n "$unexpected" ]; then bad "dry run called external deterministic step: $unexpected"; else ok "dry run skipped external deterministic steps"; fi
 
 echo "Scenario C2: no-side-effect read dry run"
 : > "$LOG"; rm -f "$SB/out/deterministic-calls.log"

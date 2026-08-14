@@ -10,7 +10,8 @@ Modes:
   record  --options out/deepdive_options.json
           Filter retired topics out of the freshly-drafted options (renumbering),
           increment proposal counts for the survivors, stamp `sent_at`, write the
-          options file back, and print the numbered message body for notify.py.
+          options file back, and print the LETTERED message body for notify.py
+          (the daily mini-dive slate in the same push owns the numbers).
           Prints nothing if no options survive.
   choose  --topic "the chosen topic"
           Mark a topic chosen (clears it from ever retiring). Unknown topics
@@ -90,7 +91,9 @@ def record(options_path: str, ledger_path: str) -> int:
 
     for o in kept:
         kind = f" [{o['type']}]" if o.get("type") else ""
-        print(f"{o['n']}.{kind} {o.get('topic')} — {o.get('pitch')}")
+        # Lettered on the phone: the same push carries the numbered daily mini-dive
+        # slate, so a reply of "3" is never ambiguous. The stored `n` stays an int.
+        print(f"{chr(64 + o['n'])}.{kind} {o.get('topic')} — {o.get('pitch')}")
     return 0
 
 

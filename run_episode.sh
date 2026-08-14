@@ -32,9 +32,10 @@ DATE="$(date +%F)"
 DOW="$(date +%u)"   # 1=Mon .. 6=Sat 7=Sun
 # Cron jobs sharing this script: the full podcast pipeline at 04:00; the daily read on
 # its own at ~06:30 — after the 5h limit resets — so the read stops competing with the
-# podcast for one rate-limit window; and `propose` on Tue/Fri/Sat evenings, which pushes
-# 3-5 deep-dive topic pitches to the listener's phone (ntfy) so the reply can steer
-# the next morning's deep dive. No arg runs the full pipeline.
+# podcast for one rate-limit window; and `propose` every evening at 20:00, which pushes
+# tonight's candidate mini-dives to the listener's phone (ntfy) — plus, on Tue/Fri/Sat,
+# the deep-dive topic pitches — so the reply steers the next morning's episodes.
+# No arg runs the full pipeline.
 MODE="${1:-full}"
 case "$MODE" in full|read|propose) ;; *) echo "usage: $0 [full|read|propose]" >&2; exit 2 ;; esac
 mkdir -p out logs
@@ -136,11 +137,22 @@ Print the EPUB path when done." || log run "WARNING: daily read failed"
   exit 0
 fi
 
-# In `propose` mode (Tue/Fri/Sat ~20:00 cron) a cheap session drafts 3-5 deep-dive topic
-# options from the week's coverage, then the pitches go to the phone via ntfy. The
-# listener replies with a number (or a topic of their own); the 04:00 run reads the
-# reply via scripts/ntfy_choice.py. No reply -> the deep-dive writer picks, as ever.
+# In `propose` mode (nightly ~20:00 cron) a cheap session drafts two slates: six of
+# today's stories the listener can lock as tomorrow's mini-dives, and — the night before
+# a deep dive — six deep-dive topic pitches. Both ride in ONE ntfy push, numbers for the
+# mini-dives and letters for the deep dive, so there is one notification and one reply.
+# The 04:00 run reads the reply via scripts/ntfy_choice.py. No reply -> the writers pick,
+# as ever.
 if [ "$MODE" = "propose" ]; then
+  # Tue/Fri/Sat evenings feed the Wed/Sat/Sun deep dives; the other four nights push
+  # the mini-dive slate alone.
+  case "$DOW" in 2|5|6) DEEPDIVE_TOMORROW=yes ;; *) DEEPDIVE_TOMORROW=no ;; esac
+
+  # Clear last night's slates first: a drafting stage that fails must not re-push stale
+  # options, and on a non-deep-dive night a leftover deep-dive slate would bump the
+  # retirement ledger for topics nobody ever saw.
+  rm -f out/daily_options.json out/deepdive_options.json
+
   # Fresh evening pull of the structured feeds so the picker sees today's papers
   # and discussion, not last night's snapshot. Non-fatal; a separate file so the
   # 04:00 run's own fetch is untouched.
@@ -148,7 +160,8 @@ if [ "$MODE" = "propose" ]; then
     | python3 scripts/run_log.py prefix --src propose-fetch >> "$LOG" \
     || log run "WARNING: evening fetch failed; picker works from memory alone"
 
-  run_step propose agent_stage propose "Read .agents/skills/weekly-deep-dive/SKILL.md (its topic palette and \
+  if [ "$DEEPDIVE_TOMORROW" = "yes" ]; then
+    DIVE_SLATE_TASK="SECOND, the deep-dive slate. Read .agents/skills/weekly-deep-dive/SKILL.md (its topic palette and \
 selection criteria), history.json (recent episodes, active threads, longterm.concepts_taught), \
 deepdive_proposals.json (the proposal ledger — NEVER re-pitch a retired topic: times_proposed >= 3 \
 and never chosen; avoid re-pitching anything already proposed twice unless it's newly urgent), the \
@@ -161,17 +174,66 @@ every pitch must briefly say what the twenty minutes would actually contain (so 
 themselves while drafting); nothing already taught (concepts_taught / past deepdive records). Write \
 out/deepdive_options.json as exactly {\"options\": [{\"n\": 1, \"type\": \"mechanism|foundational|\
 history|debate\", \"topic\": \"short topic name\", \"pitch\": \"one-line pitch: the hook plus what \
-the episode contains\"}]}. Do nothing else." \
-    || log run "WARNING: propose failed; deep-dive writer will pick as usual"
+the episode contains\"}]}."
+  else
+    DIVE_SLATE_TASK="SECOND: tomorrow is not a deep-dive morning, so propose no deep-dive topics — \
+write out/deepdive_options.json as exactly {\"options\": []} and move on."
+  fi
 
-  # Ledger pass: drop retired topics, bump proposal counts, stamp sent_at, and
-  # emit the numbered message body for the phone.
-  OPTIONS_MSG=""
-  [ "$DRY_RUN" = "1" ] || OPTIONS_MSG="$(python3 scripts/proposal_ledger.py record || true)"
+  run_step propose agent_stage propose "Two slates for tonight's listener push; write both files. \
+FIRST, the mini-dive slate for tomorrow's daily episode. Read out/sources_evening.json (tonight's \
+fresh feed pull — the most current view you have), out/candidates.json if it exists (this morning's \
+consolidated candidate set, ~16 hours old: its value is the stories the last episode only named or \
+resolved and never dived), history.json (recent episodes, active threads, and each episode's \
+'dives'), listener.yaml, feedback.md, and the 2-3 newest scripts in archive/scripts/. Propose \
+exactly 15 stories the listener could lock as tomorrow's mini-dives, ordered strongest first. Take \
+about 8 of them from the stories that objectively earned a dive — multi-source pickup, real \
+community traction (HF upvotes, HN points), or continuation of an active history.json thread — and \
+mark about 7 as wildcards: stories you find genuinely interesting but would not spend a dive on \
+unprompted. On a thin news day let the wildcard share grow rather than padding the earned tier with \
+stories that did not earn it. The slate is a menu, so make it a varied one: the fifteen must not \
+all be papers, and the wildcards especially should reach across different kinds of story (a \
+release, a policy or business move, an older thread that just advanced, something odd or human) \
+rather than extending the signal ranking. Skip anything the show already dived unless it has materially advanced \
+since; a story the show merely named or resolved is fair game. Write out/daily_options.json as exactly {\"options\": \
+[{\"n\": 1, \"label\": \"short story label, phone-screen length\", \"url\": \"primary source URL\", \
+\"why\": \"1-2 lines: what happened and who specifically would care\", \"signal\": \"terse evidence \
+it earned a slot, e.g. '4 src' or 'HN 890' or 'HF 210' or 'thread: agent evals'\", \"wildcard\": \
+false}]}. ${DIVE_SLATE_TASK} Do nothing else." \
+    || log run "WARNING: propose failed; the writers will pick as usual"
+
+  # Slate passes: renumber, stamp sent_at, and emit each half's message body. The
+  # deep-dive half also runs its retirement ledger. Both print nothing when empty.
+  DAILY_MSG=""
+  DIVE_MSG=""
+  if [ "$DRY_RUN" != "1" ]; then
+    DAILY_MSG="$(python3 scripts/daily_options.py record || true)"
+    DIVE_MSG="$(python3 scripts/proposal_ledger.py record || true)"
+  fi
+
+  # One push. Headers only when both halves are present — on a mini-dives-only night
+  # the title already says what the numbers are.
+  TITLE="Tonight's dives — reply with a number or two"
+  FOOTER="Reply: numbers = tonight's dives (up to 3) · plain text = a dive of your own"
+  if [ -n "$DAILY_MSG" ] && [ -n "$DIVE_MSG" ]; then
+    OPTIONS_MSG="TONIGHT'S DIVES — pick 2-3
+$DAILY_MSG
+
+TOMORROW'S DEEP DIVE — pick one
+$DIVE_MSG"
+  else
+    OPTIONS_MSG="${DAILY_MSG}${DIVE_MSG}"
+  fi
+  if [ -n "$DIVE_MSG" ]; then
+    TITLE="Tonight's dives + tomorrow's deep dive"
+    FOOTER="$FOOTER · letter = the deep dive · \"dd <topic>\" = your own deep-dive topic"
+  fi
   if [ -n "$OPTIONS_MSG" ]; then
     run_step notify python3 scripts/notify.py \
-      --title "Deep-dive options for tomorrow — reply with a number or your own topic" \
-      --message "$OPTIONS_MSG" \
+      --title "$TITLE" \
+      --message "$OPTIONS_MSG
+
+$FOOTER" \
       || log run "WARNING: options notification failed"
   fi
   exit 0
@@ -184,7 +246,9 @@ fi
 # run it here, on the cheapest model that does the job, and let the Opus podcast session
 # start clean at out/candidates.json. Each stage is non-fatal: the podcast skill still
 # falls back to doing any missing stage itself, so a flaky gather can't lose the night.
-rm -f out/sources.json out/crawl.json out/candidates.json \
+# out/daily_options.json is deliberately NOT cleared here — it was written at 20:00 and
+# is read a few steps below. Its picks file is, so a dead run can't steer tonight.
+rm -f out/sources.json out/crawl.json out/candidates.json out/daily_picks.json \
   out/script.txt out/episode_meta.json out/episode.json out/shownotes.md \
   out/deepdive_script.txt out/deepdive_meta.json out/deepdive.json out/deepdive_shownotes.md
 log run "prep: cleared podcast scratch and required agent artifacts"
@@ -228,15 +292,16 @@ out/sources.json and out/crawl.json (use whichever exist) into out/candidates.js
 repeats against history.json. Write the file even if one input is missing." \
   || log run "WARNING: consolidate failed; podcast skill will gather inline"
 
-# One-time steering (self-expiring): aged-well papers the pre-refresh pipeline missed
-# (found in a 30-day HF audit on 2026-07-04). The date guard makes this a no-op from
-# 2026-07-12 on — nothing to remember; delete the block whenever this file is next touched.
-BACKLOG_NOTE=""
-if [ "$DATE" \< "2026-07-12" ]; then
-  BACKLOG_NOTE=" One-time backlog: these aged-well HF papers were never covered — consider at most \
-one per night as a dive where it genuinely fits (check history.json first and skip any already \
-covered): 'ABot-Earth 0.5: Generative 3D Earth Model' (486 upvotes), 'Looped World Models' (476), \
-'LoopCoder-v2: Only Loop Once for Efficient Test-Time Computation Scaling' (209)."
+# The listener's mini-dive picks, if they replied to last evening's push. Unlike the
+# deep-dive read below this is not gated on DRY_RUN: it is a read-only poll with no side
+# effect (the deep-dive call sits next to a ledger write, which is what that guard is for),
+# so a dry run exercises the picker for real. DAILY_DIVES overrides the phone.
+DIVE_PICK_NOTE=""
+DIVE_PICKS="$(python3 scripts/ntfy_choice.py --kind daily 2>/dev/null || true)"
+if [ -n "$DIVE_PICKS" ]; then
+  log run "podcast: listener pre-chose dives: $DIVE_PICKS"
+  DIVE_PICK_NOTE=" The listener pre-chose tonight's mini-dives via the evening picker: read \
+out/daily_picks.json and follow the skill's pre-chosen-dives rule — those stories are locked dives."
 fi
 
 # 3: Opus selects, verifies, and writes the script — stops after validation.
@@ -245,7 +310,7 @@ already run steps 1, 2, and 2.5 — out/sources.json, out/crawl.json, and out/ca
 exist, so SKIP them. Do step 1.5 (recall history) then steps 3 and 3.5 (select, verify, write, \
 validate). STOP after the gate passes — do NOT run steps 4 or 4.5; the harness renders and updates \
 history. If out/candidates.json is somehow missing, fall back to doing the gather steps yourself. \
-Print the episode title and word count when done.${BACKLOG_NOTE}"
+Print the episode title and word count when done.${DIVE_PICK_NOTE}"
 
 # Re-run the gate here, independently. The writer runs it inside its own session and
 # reports the result, which means "gate passed, zero warnings" in the log has until now
@@ -291,6 +356,7 @@ subprocess.run(["python3","scripts/publish.py","--mp3",mp3[-1],
                 "--summary",summary,"--notes","out/shownotes.md",
                 "--date",ep.get("date",date)], check=True)
 PY
+  rm -f out/daily_options.json out/daily_picks.json  # consumed; must not steer tomorrow
 fi
 
 # Wed/Sat/Sun: also produce + publish the deep-dive episode. If the listener replied
@@ -300,7 +366,7 @@ if [ "$DOW" = "3" ] || [ "$DOW" = "6" ] || [ "$DOW" = "7" ]; then
   # when the ntfy reply has aged out of the topic's retention window.
   DIVE_CHOICE="${DEEPDIVE_TOPIC:-}"
   if [ -z "$DIVE_CHOICE" ] && [ "$DRY_RUN" != "1" ]; then
-    DIVE_CHOICE="$(python3 scripts/ntfy_choice.py 2>/dev/null || true)"
+    DIVE_CHOICE="$(python3 scripts/ntfy_choice.py --kind deepdive 2>/dev/null || true)"
   fi
   DIVE_TOPIC_NOTE=""
   if [ -n "$DIVE_CHOICE" ]; then

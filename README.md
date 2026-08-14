@@ -7,8 +7,8 @@ renders it to MP3, and publishes it to an RSS feed Spotify polls. A typical epis
 plus a **brisk sweep** of everything else worth knowing, honestly sized; the day's
 material — not a template — picks the exact shape.
 
-It's built around shared **Codex CLI and Claude Code** skills: Codex is the checked-in
-default, Claude remains an explicit provider and availability fallback, deterministic
+It's built around shared **Codex CLI and Claude Code** skills: Claude is the checked-in
+default, Codex remains an explicit provider and availability fallback, deterministic
 Python handles feeds/validation/TTS/publishing, and a local scheduler fires it nightly
 without approvals or user input.
 
@@ -45,8 +45,8 @@ personal_podcast_generator/
 The whole pipeline runs **locally on your machine** and draws on logged-in ChatGPT and
 Claude subscriptions rather than pay-per-token model API billing:
 
-- **Agent work** defaults to the **logged-in Codex CLI** (ChatGPT subscription).
-  `AGENT_PROVIDER=claude` selects the logged-in Claude Pro CLI. The harness unsets
+- **Agent work** defaults to the **logged-in Claude CLI** (Claude Pro subscription).
+  `AGENT_PROVIDER=codex` selects the logged-in Codex CLI. The harness unsets
   `OPENAI_API_KEY`, `CODEX_API_KEY`, and `ANTHROPIC_API_KEY`; paid Codex credits are
   rejected, while earned no-cost reset credits may be consumed after a quota failure.
 - Every provider process is noninteractive with closed stdin. Codex uses approval
@@ -193,21 +193,32 @@ window resets, so the read gets a fresh budget instead of competing with the pod
 ```cron
 0 4 * * *    cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh         >> logs/cron-bootstrap.log 2>&1
 5 6 * * *    cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh read    >> logs/cron-bootstrap.log 2>&1
-0 20 * * 2,5,6 cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh propose >> logs/cron-bootstrap.log 2>&1
+0 20 * * *   cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh propose >> logs/cron-bootstrap.log 2>&1
 ```
 
 `run_episode.sh` (no arg) runs the full pipeline — including the deep-dive on
 Wednesdays, Saturdays, and Sundays; `run_episode.sh read` runs only the daily read (write →
-Kindle → commit EPUB + reads_history); `run_episode.sh propose` (Tue/Fri/Sat evening)
-pushes 3–5 deep-dive topic pitches to the phone. On macOS, use a launchd
-`StartCalendarInterval` plist instead (it can wake the machine).
+Kindle → commit EPUB + reads_history); `run_episode.sh propose` (every evening) pushes
+tonight's fifteen candidate mini-dives to the phone, plus — on Tue/Fri/Sat — six deep-dive
+topic pitches, in one message. On macOS, use a launchd `StartCalendarInterval` plist
+instead (it can wake the machine).
 
 ## Phone channel & listener feedback
 
 - **ntfy.sh** (`NTFY_TOPIC` in `.env`; subscribe to the same topic in the ntfy app):
-  run-failure alerts, and the Tue/Fri/Sat deep-dive picker — reply to the options push
-  with a number (or your own topic) and the next morning's deep-dive uses it; no
-  reply means the writer picks.
+  run-failure alerts, and the nightly picker. One push each evening carries tonight's
+  fifteen candidate mini-dives (**numbered**) and, on Tue/Fri/Sat, tomorrow's deep-dive
+  pitches (**lettered**). One reply answers both:
+
+  | Reply | Means |
+  |---|---|
+  | `1,3` | those stories are tomorrow's mini-dives (up to 3) |
+  | `1,3 B` | …and topic B is tomorrow's deep dive |
+  | `dive the Gemini pricing thing` | a mini-dive in your own words |
+  | `dd speculative decoding` | a deep-dive topic in your own words |
+
+  Picks are locked — the writer may add a dive if something big lands overnight, but
+  never drops yours. No reply means the writer picks, as it always has.
 - **`feedback.md`** (repo root): drop a note anytime; the nightly writer applies it,
   logs it to `archive/feedback_log.md`, and promotes durable preferences to
   **`listener.yaml`** (interest weights) or **`config/pronunciations.yaml`**
