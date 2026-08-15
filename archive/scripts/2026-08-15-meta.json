@@ -1,0 +1,82 @@
+{
+  "date": "2026-08-15",
+  "title": "Empty shelves or lost keys",
+  "summary": "Google Research argues that when a frontier model states something false, the fact is usually already inside it — encoding rates of 95–98% against direct-recall failures of 26–34% — which makes thinking modes look more like a search procedure than a knowledge one. Alibaba's Qwen3.8-27B ships Apache-2.0 with vision, and its configuration file is identical to its predecessor's, making the release a clean natural experiment in training-only gains. And a widely-read essay charging the AI labs with intellectual arrogance turns out to make an overconfident claim of its own.",
+  "sources": [
+    { "group": "Papers", "title": "Empty Shelves or Lost Keys? Recall is the Bottleneck for Parametric Factuality — Google Research", "url": "https://research.google/blog/empty-shelves-or-lost-keys-recall-is-the-bottleneck-for-parametric-factuality/" },
+    { "group": "Releases", "title": "Qwen3.8-27B model card", "url": "https://huggingface.co/Qwen/Qwen3.8-27B" },
+    { "group": "Releases", "title": "Qwen3.6-27B configuration (for comparison)", "url": "https://huggingface.co/Qwen/Qwen3.6-27B" },
+    { "group": "Discussion", "title": "When Genius Fails: The Intellectual Arrogance of the AI Labs — James Wang, Weighty Thoughts", "url": "https://weightythoughts.com/p/when-genius-failsthe-intellectual" },
+    { "group": "Releases", "title": "Cursor is joining SpaceX", "url": "https://cursor.com/blog/joining-spacex" },
+    { "group": "Discussion", "title": "Nvidia's new $500B plan is risky but brilliant, especially for aging GPUs — TechCrunch", "url": "https://techcrunch.com/2026/08/13/nvidias-new-500b-plan-is-risky-but-brilliant-especially-for-aging-gpus/" },
+    { "group": "Releases", "title": "How Google is making private AI practical with homomorphic encryption (HEIR)", "url": "https://blog.google/security/how-google-is-making-private-ai-practical-with-homomorphic-encryption/" },
+    { "group": "Discussion", "title": "Person hides prompt injection in legal filing telling AI to side with them — 404 Media", "url": "https://www.404media.co/person-hides-prompt-injection-in-legal-filing-telling-ai-to-side-with-them/" },
+    { "group": "Discussion", "title": "State of Open Models, Summer 2026 — Hugging Face", "url": "https://huggingface.co/blog/state-of-open-models-summer-2026" },
+    { "group": "Discussion", "title": "IBM partners with OpenAI to bolster enterprise AI push — TechCrunch", "url": "https://techcrunch.com/2026/08/13/ibm-partners-with-openai-to-bolster-enterprise-ai-push/" },
+    { "group": "Also noted", "title": "AI agents lie, cheat and steal. That is putting off users — The Economist", "url": "https://www.economist.com/business/2026/08/12/ai-agents-lie-cheat-and-steal-that-is-putting-off-users" },
+    { "group": "Also noted", "title": "How organizations use ChatGPT — OpenAI", "url": "https://cdn.openai.com/pdf/how-organizations-use-chatgpt.pdf" },
+    { "group": "Also noted", "title": "OpenART: scaling agent red-teaming via environment evolution", "url": "https://huggingface.co/papers/OpenART" },
+    { "group": "Also noted", "title": "OpenRouter model rankings (Kimi K3 spend ranking)", "url": "https://openrouter.ai/" }
+  ],
+  "rundown": [
+    "Google Research: recall, not knowledge, is the factuality bottleneck",
+    "Qwen3.8-27B released, Apache 2.0, vision-native",
+    "Cursor acquired by SpaceX",
+    "Nvidia's $500B financing plan backstops GPU resale value",
+    "Google's HEIR compiler for encrypted inference",
+    "\"When Genius Fails\" essay on the AI labs",
+    "Prompt injection hidden in a Connecticut court filing",
+    "Hugging Face State of Open Models, Summer 2026",
+    "IBM–OpenAI enterprise consulting partnership",
+    "Also noted: The Economist on agent deception; OpenAI on organizational ChatGPT use; the OpenART red-teaming paper; Kimi K3 at #2 on OpenRouter by spend"
+  ],
+  "topics": [
+    "Google Research parametric factuality: 'knowledge profiling' behavioral framework separating encoding failure from recall failure across five states; WikiProfile benchmark of 2,150 Wikipedia-derived facts, each with 10 tasks (2 encoding, 4 knowledge-evaluation, 4 multiple-choice), 13 models evaluated with and without thinking, ~4.5M responses; frontier models (Gemini 2.5 Pro, Gemini 3 Pro/Flash, GPT-5) encode 95-98% of facts but fail direct recall on 26-34%, falling to 11-12% with thinking; thinking recovers 40-65% of encoded-but-not-directly-recalled facts in thinking-optimized models versus only 5-15% of non-encoded facts; authors state 'thinking is not free... it remains unclear how to determine exactly when a model should invoke it'; practical split: empty shelves need retrieval, lost keys need rephrasing or reasoning tokens",
+    "Qwen3.8-27B (Alibaba): 27B, Apache 2.0, natively vision-language (images and video), 64 layers, hybrid architecture interleaving 3 Gated DeltaNet linear-attention layers with 1 full-attention layer (48 linear / 16 full), hidden size 5,120, 262,144 native context extensible to 1M; config.json is field-for-field identical to Qwen3.6-27B's except the transformers version string (verified directly against both raw configs), so gains are training-only with architecture held fixed; Qwen's own card reports SWE-bench Pro 61.7, GPQA Diamond 89.2, LiveCodeBench v6 90.3, IFBench 79.5, OSWorld-Verified 84.3, WebArena-Verified 64.8, AndroidWorld 81.9, MathVision 94.6; r/LocalLLaMA 'identical architecture' thread at ~930 upvotes, uncensored 'heretic' fine-tune at 691 within a day, Unsloth mirror same day; frozen architecture meant the whole quantization/serving/fine-tuning ecosystem worked unchanged on release day",
+    "'When Genius Fails: The Intellectual Arrogance of the AI Labs' (James Wang, Weighty Thoughts, published 2026-07-31, front-paged on Hacker News 2026-08-14): thesis that expertise in one field does not transfer; anchor cases are Leopold Aschenbrenner's ~$20B fund run at ~4x leverage concentrated in AI stocks taking catastrophic losses ('the market can stay irrational for longer than you can stay solvent'), the 1998 LTCM collapse as the historical parallel, lab satellite teams proposing to solve materials science/bioengineering/semiconductor design by pointing a model at them, and Hinton's 2016 radiology prediction against subsequent growth in radiologist demand ('It's much easier to say someone else's job is going to be fully replaceable by AI when you don't actually know what they do'); the show flagged that the essay attributes the Hugging Face intrusion to a specific named frontier model, an identification the show could not confirm publicly established, and treated that as an illustration of the essay's own thesis rather than a refutation of it"
+  ],
+  "entities": ["Google Research", "Gemini 3 Pro", "GPT-5", "Alibaba", "Qwen3.8-27B", "Qwen3.6-27B", "Unsloth", "James Wang", "Leopold Aschenbrenner", "Geoffrey Hinton", "Hugging Face"],
+  "threads": [
+    {
+      "name": "AI sovereignty and open weights",
+      "status": "Alibaba's Qwen3.8-27B ships Apache 2.0 at a size that runs on consumer hardware, with an architecture frozen from its predecessor — the day-one ecosystem (quantizations, mirrors, uncensored fine-tunes) reassembled itself within hours precisely because nothing in the plumbing changed.",
+      "arc": "The thread moves from whether open weights can reach the frontier, and from a 1.7T checkpoint whose beneficiaries are necessarily institutional, to a mid-size release where the practical story is that a frozen blueprint makes the open ecosystem move at the speed of a download."
+    }
+  ],
+  "repeat_coverage": [
+    {
+      "story": "Qwen3.8-27B",
+      "repeat_of": "thread: AI sovereignty and open weights (most recently DeepSeek V4 Pro, 2026-08-14; Qwen3.8-27B named in that episode's awareness tier from a preliminary model card)",
+      "new_development": "The model actually shipped with weights and a full card, and its configuration file turns out to be identical to Qwen3.6-27B's, making it a training-only release rather than a new architecture."
+    }
+  ],
+  "dives": [
+    {
+      "story": "Google Research: recall, not knowledge, is the factuality bottleneck",
+      "why_it_matters": "Anyone paying for retrieval infrastructure to fix hallucination needs to know that on Google's measurement a large share of factual failures are retrieval-from-weights failures, which rephrasing or reasoning tokens fix far more cheaply than a document store."
+    },
+    {
+      "story": "Qwen3.8-27B ships with an architecture identical to its predecessor",
+      "why_it_matters": "It is a rare controlled comparison for anyone trying to attribute model gains: the blueprint was held fixed and published, so practitioners can see how much of a version bump is training rather than design — and the frozen architecture is why the local-inference ecosystem absorbed the release in hours."
+    },
+    {
+      "story": "\"When Genius Fails\" and the limits of transferred expertise",
+      "why_it_matters": "The listener who wants the skeptical case on lab labor predictions argued at full length gets it here, along with a worked example of how to read a persuasive critique that overreaches on a checkable fact."
+    }
+  ],
+  "concepts_taught": [
+    "separating encoding failure from recall failure in a language model: probing the same fact through pretraining-style completion, rephrased and reversed questions, and multiple-choice recognition, so that 'recognition without generation' identifies a fact that is present but inaccessible — and the resulting engineering split between retrieval (empty shelves) and rephrasing or reasoning tokens (lost keys)"
+  ],
+  "lore": [
+    {
+      "host": "Alan",
+      "type": "bit",
+      "note": "Alan's old rig gets a good week rather than a complaint: because Qwen3.8-27B's architecture was frozen, he had the four-bit quantization running at home the same night without updating anything in his stack, and he deflected Ada's reminder that he had been threatening to replace the machine. The long-running hardware sore spot develops into a small, dry win."
+    },
+    {
+      "host": "Ada",
+      "type": "position",
+      "note": "Ada staked out that architecture has not stopped being where gains come from — that a period of everyone polishing the same design is indistinguishable from the run-up to a shift, and reading a frozen architecture as a settled one is a mistake people have made before every architectural change she can name. Alan holds the opposite view; they left it explicitly unresolved."
+    }
+  ]
+}

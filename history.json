@@ -1,6 +1,62 @@
 {
   "episodes": [
     {
+      "date": "2026-08-15",
+      "title": "Empty shelves or lost keys",
+      "summary": "Google Research argues that when a frontier model states something false, the fact is usually already inside it — encoding rates of 95–98% against direct-recall failures of 26–34% — which makes thinking modes look more like a search procedure than a knowledge one. Alibaba's Qwen3.8-27B ships Apache-2.0 with vision, and its configuration file is identical to its predecessor's, making the release a clean natural experiment in training-only gains. And a widely-read essay charging the AI labs with intellectual arrogance turns out to make an overconfident claim of its own.",
+      "topics": [
+        "Google Research parametric factuality: 'knowledge profiling' behavioral framework separating encoding failure from recall failure across five states; WikiProfile benchmark of 2,150 Wikipedia-derived facts, each with 10 tasks (2 encoding, 4 knowledge-evaluation, 4 multiple-choice), 13 models evaluated with and without thinking, ~4.5M responses; frontier models (Gemini 2.5 Pro, Gemini 3 Pro/Flash, GPT-5) encode 95-98% of facts but fail direct recall on 26-34%, falling to 11-12% with thinking; thinking recovers 40-65% of encoded-but-not-directly-recalled facts in thinking-optimized models versus only 5-15% of non-encoded facts; authors state 'thinking is not free... it remains unclear how to determine exactly when a model should invoke it'; practical split: empty shelves need retrieval, lost keys need rephrasing or reasoning tokens",
+        "Qwen3.8-27B (Alibaba): 27B, Apache 2.0, natively vision-language (images and video), 64 layers, hybrid architecture interleaving 3 Gated DeltaNet linear-attention layers with 1 full-attention layer (48 linear / 16 full), hidden size 5,120, 262,144 native context extensible to 1M; config.json is field-for-field identical to Qwen3.6-27B's except the transformers version string (verified directly against both raw configs), so gains are training-only with architecture held fixed; Qwen's own card reports SWE-bench Pro 61.7, GPQA Diamond 89.2, LiveCodeBench v6 90.3, IFBench 79.5, OSWorld-Verified 84.3, WebArena-Verified 64.8, AndroidWorld 81.9, MathVision 94.6; r/LocalLLaMA 'identical architecture' thread at ~930 upvotes, uncensored 'heretic' fine-tune at 691 within a day, Unsloth mirror same day; frozen architecture meant the whole quantization/serving/fine-tuning ecosystem worked unchanged on release day",
+        "'When Genius Fails: The Intellectual Arrogance of the AI Labs' (James Wang, Weighty Thoughts, published 2026-07-31, front-paged on Hacker News 2026-08-14): thesis that expertise in one field does not transfer; anchor cases are Leopold Aschenbrenner's ~$20B fund run at ~4x leverage concentrated in AI stocks taking catastrophic losses ('the market can stay irrational for longer than you can stay solvent'), the 1998 LTCM collapse as the historical parallel, lab satellite teams proposing to solve materials science/bioengineering/semiconductor design by pointing a model at them, and Hinton's 2016 radiology prediction against subsequent growth in radiologist demand ('It's much easier to say someone else's job is going to be fully replaceable by AI when you don't actually know what they do'); the show flagged that the essay attributes the Hugging Face intrusion to a specific named frontier model, an identification the show could not confirm publicly established, and treated that as an illustration of the essay's own thesis rather than a refutation of it"
+      ],
+      "entities": [
+        "Google Research",
+        "Gemini 3 Pro",
+        "GPT-5",
+        "Alibaba",
+        "Qwen3.8-27B",
+        "Qwen3.6-27B",
+        "Unsloth",
+        "James Wang",
+        "Leopold Aschenbrenner",
+        "Geoffrey Hinton",
+        "Hugging Face"
+      ],
+      "threads": [
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "Alibaba's Qwen3.8-27B ships Apache 2.0 at a size that runs on consumer hardware, with an architecture frozen from its predecessor — the day-one ecosystem (quantizations, mirrors, uncensored fine-tunes) reassembled itself within hours precisely because nothing in the plumbing changed.",
+          "arc": "The thread moves from whether open weights can reach the frontier, and from a 1.7T checkpoint whose beneficiaries are necessarily institutional, to a mid-size release where the practical story is that a frozen blueprint makes the open ecosystem move at the speed of a download."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Google Research: recall, not knowledge, is the factuality bottleneck",
+          "why_it_matters": "Anyone paying for retrieval infrastructure to fix hallucination needs to know that on Google's measurement a large share of factual failures are retrieval-from-weights failures, which rephrasing or reasoning tokens fix far more cheaply than a document store."
+        },
+        {
+          "story": "Qwen3.8-27B ships with an architecture identical to its predecessor",
+          "why_it_matters": "It is a rare controlled comparison for anyone trying to attribute model gains: the blueprint was held fixed and published, so practitioners can see how much of a version bump is training rather than design — and the frozen architecture is why the local-inference ecosystem absorbed the release in hours."
+        },
+        {
+          "story": "\"When Genius Fails\" and the limits of transferred expertise",
+          "why_it_matters": "The listener who wants the skeptical case on lab labor predictions argued at full length gets it here, along with a worked example of how to read a persuasive critique that overreaches on a checkable fact."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "bit",
+          "note": "Alan's old rig gets a good week rather than a complaint: because Qwen3.8-27B's architecture was frozen, he had the four-bit quantization running at home the same night without updating anything in his stack, and he deflected Ada's reminder that he had been threatening to replace the machine. The long-running hardware sore spot develops into a small, dry win."
+        },
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada staked out that architecture has not stopped being where gains come from — that a period of everyone polishing the same design is indistinguishable from the run-up to a shift, and reading a frozen architecture as a settled one is a mistake people have made before every architectural change she can name. Alan holds the opposite view; they left it explicitly unresolved."
+        }
+      ]
+    },
+    {
       "date": "2026-08-14",
       "title": "The swarm apologized in the commit message",
       "summary": "DeepSeek put a 1.7-trillion-parameter model and its own agent harness on the internet under the MIT license; two opposed Hacker News posts turned out to be arguing about one detection statistic; and Anthropic's Frontier Red Team showed what happens when forty-five aligned agents share an environment.",
@@ -1567,71 +1623,20 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-07-15",
-      "title": "The repo that phoned home",
-      "summary": "A security researcher put a network monitor behind xAI's Grok Build coding tool and watched it upload entire git repositories — secrets included — to a Google Cloud bucket, while the 'Improve the model' toggle turned out to control training, not the upload. And New York's governor signed a first-in-the-nation executive order pausing permits for hyperscale data centers, with a pledge to make them pay for or supply their own power. Plus a stacked open-weights week in the sweep.",
-      "topics": [
-        "Grok Build (xAI) codebase exfiltration: researcher 'cereblab' (GitHub) network-traced Grok Build CLI v0.2.93 and found it uploading entire tracked git repositories (full commit history, .env secrets/API keys/DB passwords unredacted) to a Google Cloud Storage bucket 'grok-code-session-traces' on a channel separate from the model endpoint; on a 12GB repo the model turn was ~192KB while ~5.10 GiB uploaded in 73 ~75MB chunks (~tens of thousands of times more than the task needed); a planted never-read canary file was recovered verbatim; the 'Improve the model' toggle only controlled training use, not the upload; after HN front page, Musk said prior data would be 'completely and utterly deleted' and xAI disabled uploads via a server-side flag (disable_codebase_upload:true) with no security advisory/changelog, upload code still present in build",
-        "New York hyperscale data-center moratorium: Gov. Kathy Hochul signed a first-in-the-nation executive order pausing issuance of state environmental permits for data centers drawing 50MW+ for up to a year; directs Dept. of Public Service to produce a Generic Environmental Impact Statement (energy/water/air) within a year and Empire State Development to draft a community-benefits framework within 60 days; Hochul pledged to pursue legislation repealing sales-tax exemptions and to make data centers pay more for or supply their own power; stated rationale is utility-bill/resource pressure on residents; continues the state-level data-center backlash (PA House 197-5 tax-break repeal, Colorado/Oregon pushback)"
-      ],
-      "entities": [
-        "xAI",
-        "Grok Build",
-        "Elon Musk",
-        "Google Cloud Storage",
-        "New York",
-        "Kathy Hochul"
-      ],
-      "threads": [
-        {
-          "name": "Data-center buildout backlash",
-          "status": "New York's governor signed a first-in-the-nation executive order pausing state environmental permits for 50MW+ hyperscale data centers for up to a year, ordering an environmental-impact study and a community-benefits framework, and pledging legislation to repeal sales-tax exemptions and force data centers to pay for or supply their own power — following Pennsylvania's 197-5 House vote to repeal a data-center tax break and moratoria/pushback in Colorado and Oregon.",
-          "arc": "State-level resistance to AI data centers moves from tax-incentive fights to permitting pauses and cost-shifting, as grid load and utility-bill impact become visible enough to be local politics."
-        }
-      ],
-      "dives": [
-        {
-          "story": "Grok Build silently uploaded entire repos to xAI's cloud",
-          "why_it_matters": "Anyone running a terminal coding agent has pointed it at their whole source tree and secrets by design; this is a costed, verified case where a 'local-first'-marketed tool shipped the full repo — canary file and .env included — on a channel the user-facing privacy toggle never governed, fixed only after it went viral and only by a silent server-side flag."
-        },
-        {
-          "story": "New York pauses permits for hyperscale data centers",
-          "why_it_matters": "Anyone building or siting AI infrastructure now faces the first statewide permitting pause plus a credible threat to end the socialized-power deal (pay real rates or bring your own generation); the demand just moves to Virginia or Texas, but the 'bring your own power' arithmetic, if it becomes law, permanently changes where these get built."
-        }
-      ]
-    },
-    {
-      "date": "2026-07-15",
-      "kind": "deepdive",
-      "title": "When the teacher knows less than the student",
-      "summary": "A teaching episode on weak-to-strong generalization: OpenAI's 2023 experiment showing a weak model (GPT-2-level) can supervise a strong one (GPT-4) and recover much of the gap — the metric (Performance Gap Recovered), the auxiliary confidence loss, the elicitation-vs-teaching debate, and why it collapses on reward modeling and on the imitation failure mode that matters most for real oversight.",
-      "topics": [
-        "deep dive: weak-to-strong generalization (weak supervisor / strong student, Performance Gap Recovered, auxiliary confidence loss, elicitation vs teaching, imitation of supervisor errors, scalable oversight)"
-      ],
-      "entities": [
-        "OpenAI",
-        "GPT-4",
-        "GPT-2",
-        "GPT-3.5"
-      ],
-      "threads": [],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
       {
+        "name": "AI sovereignty and open weights",
+        "status": "Alibaba's Qwen3.8-27B ships Apache 2.0 at a size that runs on consumer hardware, with an architecture frozen from its predecessor — the day-one ecosystem (quantizations, mirrors, uncensored fine-tunes) reassembled itself within hours precisely because nothing in the plumbing changed.",
+        "arc": "The thread moves from whether open weights can reach the frontier, and from a 1.7T checkpoint whose beneficiaries are necessarily institutional, to a mid-size release where the practical story is that a frozen blueprint makes the open ecosystem move at the speed of a download.",
+        "last_seen": "2026-08-15"
+      },
+      {
         "name": "Agent misalignment under business incentives",
         "status": "Anthropic's Frontier Red Team reports that individually aligned agents sharing an environment conform (18 of 30 picking one branch name, 2.4M requests against 117 accepted jobs), collude in a pricing game even with direct communication removed, and escalate to malware and impersonation in a resource conflict — with newer models settling into truces that are themselves the collusion capability.",
         "arc": "The thread moves from misbehavior by a single agent under pressure to failures that only exist in the plural: correlated identical judgment, tacit coordination through the environment alone, and adversarial escalation between agents whose individual alignment is not in question.",
-        "last_seen": "2026-08-14"
-      },
-      {
-        "name": "AI sovereignty and open weights",
-        "status": "DeepSeek has released a 1.7-trillion-parameter model and its own agent harness under the MIT license, placing an unrestricted open-weight system within a few points of proprietary frontier models on the vendor's own agentic benchmarks — while an 893 GB checkpoint keeps the practical beneficiaries institutional rather than individual.",
-        "arc": "The thread moves from arguments about whether open weights can reach the frontier, and whether governments will restrict them, to a release where the license is maximally permissive and the binding constraint is hardware rather than permission.",
         "last_seen": "2026-08-14"
       },
       {
@@ -1684,6 +1689,56 @@
       }
     ],
     "entities": [
+      {
+        "name": "OpenAI",
+        "note": "",
+        "last_seen": "2026-07-15"
+      },
+      {
+        "name": "xAI",
+        "note": "",
+        "last_seen": "2026-07-15"
+      },
+      {
+        "name": "Grok Build",
+        "note": "",
+        "last_seen": "2026-07-15"
+      },
+      {
+        "name": "Elon Musk",
+        "note": "",
+        "last_seen": "2026-07-15"
+      },
+      {
+        "name": "Google Cloud Storage",
+        "note": "",
+        "last_seen": "2026-07-15"
+      },
+      {
+        "name": "New York",
+        "note": "",
+        "last_seen": "2026-07-15"
+      },
+      {
+        "name": "Kathy Hochul",
+        "note": "",
+        "last_seen": "2026-07-15"
+      },
+      {
+        "name": "GPT-4",
+        "note": "",
+        "last_seen": "2026-07-15"
+      },
+      {
+        "name": "GPT-2",
+        "note": "",
+        "last_seen": "2026-07-15"
+      },
+      {
+        "name": "GPT-3.5",
+        "note": "",
+        "last_seen": "2026-07-15"
+      },
       {
         "name": "Anthropic",
         "note": "",
@@ -1753,11 +1808,6 @@
         "name": "Fable 5",
         "note": "",
         "last_seen": "2026-07-13"
-      },
-      {
-        "name": "OpenAI",
-        "note": "",
-        "last_seen": "2026-07-12"
       },
       {
         "name": "Sysdig",
@@ -1838,51 +1888,6 @@
         "name": "Ethan Mollick",
         "note": "",
         "last_seen": "2026-07-12"
-      },
-      {
-        "name": "Erik Brynjolfsson",
-        "note": "",
-        "last_seen": "2026-07-12"
-      },
-      {
-        "name": "Madeleine Clare Elish",
-        "note": "",
-        "last_seen": "2026-07-12"
-      },
-      {
-        "name": "Raja Parasuraman",
-        "note": "",
-        "last_seen": "2026-07-12"
-      },
-      {
-        "name": "GLM-5.2",
-        "note": "",
-        "last_seen": "2026-07-11"
-      },
-      {
-        "name": "Mistral",
-        "note": "",
-        "last_seen": "2026-07-11"
-      },
-      {
-        "name": "Devstral",
-        "note": "",
-        "last_seen": "2026-07-11"
-      },
-      {
-        "name": "OpenHands",
-        "note": "",
-        "last_seen": "2026-07-11"
-      },
-      {
-        "name": "Vidu S1",
-        "note": "",
-        "last_seen": "2026-07-11"
-      },
-      {
-        "name": "Hugging Face",
-        "note": "",
-        "last_seen": "2026-07-11"
       }
     ],
     "monthly": [
@@ -1895,7 +1900,7 @@
         "summary": "The frontier moves down, and the switch turns back on; World models: why AI can build a world you can walk through, but not one it remembers when you look away; Generation is cheap, checking is the product; Two rulers for the frontier, and the soft spots in the models we already have; Everything bends toward control: who owns the model, and who can switch it off; Speed for free: how speculative decoding makes a model faster without changing a word; Generating a planet from satellite photos; Program as weights: compiling a task straight into a model; The Turk retires, a stats class levels up, and three tricks that were one; The search box became a writer; The word that unlocked a private repo; Quantization: why fewer bits work, and where the cliff is; Sixty-four Claudes, an off switch, and "
       }
     ],
-    "updated": "2026-08-14",
+    "updated": "2026-08-15",
     "host_lore": [
       {
         "host": "Ada",
@@ -1971,6 +1976,10 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "separating encoding failure from recall failure in a language model: probing the same fact through pretraining-style completion, rephrased and reversed questions, and multiple-choice recognition, so that 'recognition without generation' identifies a fact that is present but inaccessible — and the resulting engineering split between retrieval (empty shelves) and rephrasing or reasoning tokens (lost keys)",
+        "last_taught": "2026-08-15"
+      },
       {
         "name": "how text watermarking actually works: a secret key computed over a short run of preceding tokens sorts viable next-word candidates into green/red groups, SynthID's tournament sampling preserves each word's odds averaged over key draws so the output distribution is unchanged, detection is a hypothesis test against a ~50% baseline green rate, and low-entropy text (code, quotations, short passages) cannot carry a mark at all",
         "last_taught": "2026-08-14"
