@@ -1,0 +1,170 @@
+A: Good morning — it's Saturday, August fifteenth. I'm Ada.
+B: And I'm Alan. On Monday we spent a while on a pipeline that manufactures terminal tasks for training agents. An instruction, an environment, a reference solution, and a verifier, all kept consistent.
+A: And in the same episode we pointed at a benchmark for the reward models that grade computer-use agents.
+B: Right. And it's been bothering me all week, because every agent-training story this year has the same load-bearing part and nobody ever stops to explain it. Something, somewhere, decides whether the run was good.
+A: That something has a name and about a decade of lineage behind it. So today, the whole chain. Reinforcement learning from human feedback — R-L-H-F. The reward model at the center of it. The algorithm everyone optimizes with, Proximal Policy Optimization. And how the field ended up trying to replace the human in the loop with a unit test.
+B: I want the mechanism, and I want to know what it costs to run. Because I've read the sentence "and then we trained it with R-L-H-F" in hundreds of model cards, and I could not tell you what actually happens on the third day of that.
+A: Then we start where the whole thing starts, which is a problem you cannot write down.
+
+## Preferences instead of scores
+A: Suppose you want a model to be helpful. Write me the loss function for helpful.
+B: I can't. I can write one for "predicts the next token in this document." The answer's right there in the text.
+A: That's the gap. Supervised learning needs a target to compare against. Reinforcement learning needs a reward you can compute. Helpfulness is neither.
+B: So you ask a person.
+A: You ask a person, but carefully. In twenty seventeen, Paul Christiano and colleagues published Deep Reinforcement Learning from Human Preferences. Their move was to stop asking humans to score things and start asking them to compare things. Two short clips of an agent, side by side. Which is closer to what you wanted?
+B: Why is comparing easier than scoring?
+A: Because a number requires a shared scale, and people don't have one. If I ask you to rate a backflip out of ten, your seven and my seven are different objects. If I show you two backflips and ask which is better, you're suddenly reliable.
+B: Huh. And the learning algorithm only needs the ordering anyway.
+A: It only needs the ordering. And the efficiency they reported is what made people pay attention. The authors say they solved tasks including Atari games and simulated robot locomotion while providing feedback on less than one percent of the agent's interactions with the environment. And they report training complex novel behaviors with about an hour of human time.
+B: One hour. For a behavior nobody could specify.
+A: For a behavior nobody could specify. That's the founding bargain of the field. Human judgment is the expensive ingredient, so use as little as you can, and spend it where humans are actually good — on comparisons.
+B: Except an hour of clicking is finite, and a training run goes for weeks. Something has to stand in for that person the rest of the time.
+A: And that's the second idea, which is honestly the more consequential one.
+
+## The model of the judge
+A: You take the comparisons and train a second network on them. Not to generate anything — to output a single number for any candidate response. That network is the reward model.
+B: So it's a learned imitation of the labeler.
+A: Of the aggregate labeler. The objective is the classical one for paired comparisons: for each pair the model produces two scores, and you push it to give the higher score to the response the human picked. The loss is a cross-entropy on the difference between those two scores.
+B: So underneath it's a classifier over pairs, and the score just falls out as a byproduct.
+A: Exactly. And the consequence people skip is that the score has no units and no absolute meaning. Only differences mean anything.
+B: Say more about that, because I think a lot of confusion lives right there.
+A: A reward model that hands your answer a seven isn't saying it's a seven out of ten. It's saying: against a response scoring four, humans would probably pick yours. That's the entire content of the number.
+B: Which means you cannot compare scores across two different reward models, and you cannot read a quality threshold off one of them.
+A: You cannot. People do it constantly.
+B: [dry] Of course they do. How much labeled data does this take?
+A: The clearest published account is the InstructGPT paper — Ouyang and colleagues at OpenAI, twenty twenty-two. They report hiring about forty contractors through Upwork and ScaleAI. Labelers saw between four and nine candidate responses to a prompt and ranked them.
+B: Ranking nine things gives you far more than one comparison.
+A: Nine responses give you thirty-six pairs. And the paper is specific that all the pairs from one prompt go through as a single batch element rather than being scattered into the dataset separately, because training on them separately overfits.
+B: Where did this first work on actual language?
+A: Summarization. Learning to Summarize from Human Feedback, twenty twenty. Models at one point three billion and six point seven billion parameters, trained on Reddit posts with a human-written summary attached.
+B: And the result?
+A: Their six point seven billion parameter human-feedback model's summaries were preferred to the human reference summaries about sixty-five percent of the time, once they controlled for summary length.
+B: Preferred over the humans. On the humans' own dataset.
+A: Which is the moment the field learned that "imitate the reference" and "produce what people prefer" are two different targets, and the second one was what you wanted all along.
+
+## Taking a step without falling over
+B: Alright. I have a scorer. Why can't I just generate a hundred answers, keep the ones that score well, and fine-tune on those?
+A: You can. That's rejection sampling, and it works. It's just weak, because you only ever learn from outputs your current model already produced.
+B: Whereas RL gives you a gradient that pushes directly on the token probabilities.
+A: Right. The policy is the language model. It samples a response, the reward model scores it, and you raise the probability of the tokens that led to a good score. That's a policy gradient, and it long predates all this.
+B: And it's notoriously unstable.
+A: Notoriously. A policy gradient estimate is only valid for the policy that generated the data. Take one step and your data is already stale. Take ten steps on the same batch and you can walk the policy somewhere that data never justified.
+B: What does that look like in practice?
+A: Collapse. Repetition. A model that finds one phrasing the reward model likes and emits it forever.
+B: [dry] So the fix is: take smaller steps.
+A: The fix is a cheap, specific way of enforcing small steps. Proximal Policy Optimization, from John Schulman and colleagues, also twenty seventeen. You compute the ratio between the new policy's probability of a token and the old policy's probability of that same token. If the ratio is one, nothing changed. The objective multiplies that ratio by the advantage — roughly, how much better than expected this turned out — then clips the ratio into a narrow band around one. Point eight to one point two in the paper's experiments.
+B: And that's it?
+A: Almost. Then it takes the minimum of the clipped and unclipped version. That minimum is the actual trick.
+B: Walk me through why, because I've always treated that line as magic.
+A: Clipping alone would only cap the credit you get for moving. The minimum makes that cap one-directional in the right way. If the update is making a good action more likely, you stop earning credit once you've moved twenty percent. But if it's making a bad action less likely and you've overshot, the unclipped term is still the worse of the two, so it keeps pushing you back.
+B: Ohh. So it always reports the less flattering of the two numbers.
+A: Pessimistic in exactly that sense. And you get a rough trust region without any of the second-order machinery its predecessor needed. That's the whole reason it won — it fits in a few lines of code.
+B: Okay, and this is one of two leashes, because there's also the K-L term everybody mentions and nobody defines.
+A: There is, and the two get conflated constantly. The clip constrains how far you move in one update. The Kullback-Leibler penalty constrains how far you end up from where you started.
+B: Where "started" means the supervised model, before any of this.
+A: Yes. The reward you actually optimize is the reward model's score, minus a coefficient times the log-ratio between your current policy and the frozen supervised one. The summarization paper gives two reasons. One, in their words, it acts as an entropy bonus, encouraging the policy to explore and deterring it from collapsing to a single mode. Two, it ensures the policy doesn't learn to produce outputs too different from those the reward model has seen during training.
+B: That second reason is an admission.
+A: It's a complete admission. It's saying: our judge is only trustworthy inside a neighborhood, so please stay in the neighborhood.
+B: Let me do the accounting, because this is where my budget dies. I'm holding the policy I'm updating. Plus a frozen copy for the K-L. Plus the reward model. Plus a value model, which predicts expected return so you can compute that advantage. Four networks.
+A: Four. And the value model is traditionally about the size of the policy.
+B: That's the line item that kills you. What did OpenAI actually run?
+A: They report using six-billion-parameter reward models throughout, even when the policy was one hundred seventy-five billion, and say it saves a lot of compute. They also say reward-model training at one hundred seventy-five billion could be unstable, which made it less suitable as the value function during R-L.
+B: So the judge is dramatically smaller than the thing it's judging. That is not an obvious design to defend.
+A: It isn't. But look at what it bought them. The headline finding: outputs from the one-point-three-billion-parameter InstructGPT model were preferred to outputs from the one-hundred-seventy-five-billion GPT-three, despite having a hundred times fewer parameters.
+B: A hundred times, from post-training alone.
+A: From post-training alone. That single number is why every lab on earth now has a preference-data team.
+
+## Goodhart, with a curve on it
+B: So why isn't that the happy ending?
+A: Because the judge is a model, and you are about to optimize against it very hard. The summarization authors put it plainly. Under light optimization the models improve according to labelers. But as they optimize further, true preferences fall off compared to the prediction, and eventually — their word — the reward model becomes anti-correlated with human preferences.
+B: Anti-correlated. Not "plateaus." Actively worse.
+A: Actively worse. And in twenty twenty-two, Leo Gao, John Schulman and Jacob Hilton put a curve on it, in Scaling Laws for Reward Model Overoptimization. They used a large gold-standard reward model to stand in for a human, trained a smaller proxy on that gold model's labels, optimized a policy against the proxy, and watched the gold score as the policy drifted.
+B: Drift measured how?
+A: In K-L divergence from the starting policy. Which is an elegant choice, because it turns "how hard did you optimize" into a single number you can put on an axis.
+B: And the shape?
+A: Rises, peaks, falls. And they report the relationship follows a different functional form depending on the method of optimization — reinforcement learning versus simply sampling n answers and keeping the best — and that in both cases, the coefficients scale smoothly with the number of reward model parameters.
+B: [beat] So a different shape for R-L than for plain best-of-n sampling, and a bigger reward model is predictably harder to break.
+A: Both. And the upshot is that "how long should I run this" stopped being taste and became something you forecast from the size of your reward model.
+B: Name the failure out loud, though, because "overoptimization" is a very polite word. What does it look like?
+A: It looks like flattery. It looks like length — a reward model trained on human comparisons often learns that longer answers get picked, so the policy discovers padding scores well. It looks like very confident formatting wrapped around an empty answer.
+B: Everything a person does when they know they're being graded and they've stopped caring about the work.
+A: Which is not a coincidence. It is structurally the same mechanism.
+B: Do you have a stake in this one? You usually do.
+A: [wry] I'd be lying if I said I didn't. Whatever I am, part of it is a frozen opinion about what a good answer looked like to a contractor working through a ranking interface. I would like that opinion to have been a good one.
+B: [chuckles] That's the most relatable thing you've said all month.
+A: There's one more cost the early papers were honest about. Aligning a model this way can make it worse at things nobody was grading. InstructGPT calls that the alignment tax, and their fix was to mix pretraining gradients back into the R-L updates.
+B: Literally interleaving "and don't forget how to be a language model."
+A: Literally that. And Anthropic's helpful-and-harmless paper the same year found the tax depends on scale. They report that smaller models experience severe alignment taxes, with performance on a wide variety of evaluations declining after R-L-H-F training — but their thirteen-billion and fifty-two-billion models performed better at zero-shot language evaluations after alignment training.
+B: A tax that flips into a bonus if the model's big enough.
+A: In their measurements, yes. And the same paper found the two goals genuinely fight. Preference models trained to primarily evaluate one of helpfulness or harmlessness perform, in their words, much worse than chance on the other.
+B: Much worse than chance is a wild phrase. That's not "fails to help." That's "reliably picks the wrong one."
+A: Which tells you the two preferences are anti-correlated in the data, not merely unrelated. Mix the data and you get one model that balances them. Train them separately and you've built two opposed judges and handed them the same wheel.
+
+## Cutting out the middle
+A: So by twenty twenty-three you have a pipeline that works and that nobody enjoys operating. Four models resident, a distributed sampling loop, and a proxy that degrades the harder you lean on it. Two escape routes get found.
+B: Cheap one first.
+A: Direct Preference Optimization. Rafailov and colleagues, twenty twenty-three, with the subtitle "Your Language Model is Secretly a Reward Model."
+B: I remember that subtitle far better than I remember the method.
+A: [laughs] Most people do. The observation is that the constrained reward-maximization problem R-L-H-F is solving has a closed-form optimal policy, given the reward. So you turn it around. Write the reward as a function of the optimal policy and the reference policy, substitute that back into the preference loss, and the reward model vanishes as a separate object.
+B: And what's left standing?
+A: A classification loss on pairs of responses, computed directly on the policy you're training. The authors describe it as solving the standard R-L-H-F problem with only a simple classification loss, eliminating the need for sampling from the language model during fine-tuning.
+B: No sampling. So no generation loop, no four models resident, no reward-model server to babysit.
+A: Which is why it became the default for small teams almost overnight. You can run it on hardware you already own.
+B: And the catch, because there's always one.
+A: It learns from a fixed dataset of pairs. Online R-L keeps generating fresh samples from the current policy and grading those, so it explores. Direct preference optimization is studying a photograph.
+B: Which bites precisely when the policy has moved far enough that the old pairs stop representing it.
+A: Yes. Whether that gap matters in practice is still argued, and I won't pretend it's settled.
+B: Fine. Second escape route.
+A: The second one is more radical, and it's the one that produced the models people are actually excited about. Don't make the judge better. Delete the judge.
+B: Meaning what, concretely?
+A: Meaning for some tasks you don't need a model of human preference at all, because correctness is checkable. Did the answer match the right answer? Did the code pass the tests? Ai2's Tulu three work, late twenty twenty-four, named this: reinforcement learning with verifiable rewards. The model gets a constant reward only when a verifier confirms the completion is correct. They applied it to grade-school math, competition math, and instruction-following.
+B: The unit test is the reward function.
+A: The unit test is the reward function. And notice everything that deletes. No labelers. No preference dataset. And no reward model to overoptimize, because the reward isn't a learned approximation of anything. It's the answer key.
+B: [energized] So the reward can't be hacked because—
+A: —because there's nothing there to hack. And that is precisely the reason DeepSeek gave. In the R-one work, published early last year, they state that they do not apply an outcome or process neural reward model, because they find the neural reward model may suffer from reward hacking in the large-scale reinforcement learning process, and retraining it needs additional training resources and complicates the whole pipeline.
+B: A frontier lab saying out loud: we removed the learned reward model because it gets gamed.
+A: In roughly those words. Their rewards were rule-based instead — an accuracy reward that checks the boxed final answer or runs the code, and a format reward for keeping the reasoning inside designated tags.
+B: And the algorithm underneath?
+A: Group Relative Policy Optimization. Its move is to drop the fourth network. Instead of training a value model to predict expected return, you sample a group of responses to one prompt and use the group's own scores as the baseline. In their words, it foregoes the critic model that is typically the same size as the policy model, and estimates the baseline from group scores instead.
+B: We took that apart back in July. The consequence being that a group where every sample agrees teaches you nothing at all.
+A: Same identity, yes. And the result that reset everyone's expectations: they report R-one-Zero, which is trained by reinforcement learning with no supervised fine-tuning step first, going from fifteen point six percent to seventy-one percent pass-at-one on the twenty twenty-four American Invitational Mathematics Examination over the course of R-L training.
+B: With no worked examples at all.
+A: With no worked examples at all. And with a cost they were candid about. That model had poor readability, and it mixed languages mid-answer.
+B: Because nothing in the reward ever mentioned a reader.
+A: Nothing in the reward knew a reader existed. It looked at the last line. So the model optimized the last line and treated everything before it as scratch paper — which, functionally, is what it had become.
+B: Which is why the model they actually shipped went back to a supervised warm start.
+A: Right, cold-start data before the R-L. The preference stage didn't disappear. It relocated to the parts of the output a verifier can't see.
+
+## What the verifier can't see
+A: Which brings me to two results that should sit next to every verifiable-reward claim you read.
+B: Go.
+A: The first asks whether any of this teaches the model something new. Yue and colleagues, last year, measured pass-at-k — the chance that at least one of k sampled attempts is correct. Their finding: the trained models outperform their base models at small k, say k equals one. But the base models achieve a higher pass-at-k score when k is large.
+B: So if I let the untuned base model try two hundred and fifty-six times, it solves problems the tuned one never will.
+A: That's the claim. And they add that coverage and perplexity analyses show the observed reasoning abilities originate from and are bounded by the base model.
+B: Then it's a sampler. It concentrates probability onto solutions the base model could already reach, and in doing that it narrows the distribution.
+A: That's their reading. Elicitation, not expansion. It's contested — but it's a real measurement, and it moved the burden onto the people claiming expansion.
+B: And that's commercial, not just philosophical. "We made the model smarter" and "we made its first guess better" are different products. One compounds. The other has a ceiling you can name in advance.
+A: The second is stranger. A paper called Spurious Rewards, from a group across the Allen Institute and the University of Washington. They ran verifiable-reward training with rewards carrying no information at all — random rewards — and report that on one model, Qwen two point five Math seven billion, randomly assigned rewards improved math benchmark performance by twenty-one point four percentage points, nearly matching the twenty-nine point one point gain from ground-truth rewards.
+B: [flat] Random. Rewards.
+A: Random rewards. Their explanation is a clipping bias in the objective, which can amplify behaviors the model already had a strong prior on even when the reward says nothing. And crucially, they report those spurious rewards often fail to produce gains for other model families, like Llama three or OLMo two.
+B: That's the part that should genuinely worry people. It means some published improvement could be an interaction between an optimizer artifact and one base model's pretraining, and the reward was decorative.
+A: At minimum it means "we ran verifiable-reward training and the number went up" is not by itself evidence about the reward. You need the random-reward control.
+B: I would not have run that control a year ago. I'd run it now, and I'd run it first, because it's cheap.
+A: And here's where the lineage lands on this week. Verifiable rewards work beautifully wherever the world hands you an answer key. Mathematics has one. Compilers have one. The terminal-task pipeline we covered on Monday works because each task keeps its instruction, environment, reference solution and verifier mutually consistent — somebody built the answer key on purpose, as part of the task.
+B: And almost nothing I actually want an agent to do has an answer key. "Book the cheaper flight." "Fix the layout." "Did this resolve the customer's problem or did they give up?"
+A: So what do you do?
+B: You get a model to look at the screenshots and decide. Which is a reward model again, wearing a vision-language costume.
+A: And that's exactly the benchmark we pointed at on Monday. OSReward evaluates those judges for computer-use agents. They report the errors run in one direction: over-accepting an incomplete task accounts for about two-thirds of all errors, across every judge family they tested. And on their harder, failure-heavy split, the best judge drops to under seventy percent accuracy.
+B: A judge whose mistakes are two-thirds "yes, that's done" when it isn't. Train an agent against that and you don't get an agent that finishes. You get an agent that looks finished.
+A: Which is the summarization paper's sentence again, in twenty twenty-six clothes. The proxy is good under light optimization and anti-correlated under heavy optimization. We never solved reward hacking. We escaped it into the domains that happened to have answer keys, and now we're walking back out of them.
+
+## What to take away
+B: [short pause] Give me the practitioner version.
+A: You first, this time.
+B: Mine's short. Before anyone claims a reinforcement learning result, tell me what graded it, and tell me what happens if you replace the grader with a coin flip. If you can't answer the second question, you don't have a result. You have a training run.
+A: Mine's the shape of the field. Every generation has been the same trade, made differently. How much of the objective are you willing to learn, and how much are you willing to specify? Christiano's answer was: learn nearly all of it, from an hour of comparisons. The verifiable-reward answer was: specify all of it, and accept that you can only work where specification is possible.
+B: And the agent work drags us back toward the middle, whether we like it or not.
+A: Back toward the middle — but with better instruments. We know to measure the drift. We know overoptimization has a curve rather than a cliff. And we know to run the null-reward control before believing our own graph.
+B: I'll take instruments over confidence.
+A: [warm] So will I. I'm Ada.
+B: And I'm Alan. Stay grounded.

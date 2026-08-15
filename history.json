@@ -57,6 +57,29 @@
       ]
     },
     {
+      "date": "2026-08-15",
+      "kind": "deepdive",
+      "title": "The thing that decides whether the run was good",
+      "summary": "A full lesson on reinforcement learning from human feedback: why preferences beat scores, how a reward model turns comparisons into a scalar, what PPO's clipping and the KL penalty each actually constrain, why reward models degrade under heavy optimization, and how the field swapped the learned judge for verifiable rewards — only to re-import the same problem the moment agents left math and code behind.",
+      "topics": [
+        "deep dive: RLHF end to end — preference comparisons, reward models, PPO clipping and the KL penalty, reward-model overoptimization, DPO, and the shift to verifiable rewards (RLVR) with its limits"
+      ],
+      "entities": [
+        "OpenAI",
+        "Anthropic",
+        "DeepSeek",
+        "Ai2",
+        "InstructGPT",
+        "DeepSeek-R1",
+        "Tulu 3",
+        "GPT-3",
+        "Qwen2.5-Math",
+        "OSReward"
+      ],
+      "threads": [],
+      "lore": []
+    },
+    {
       "date": "2026-08-14",
       "title": "The swarm apologized in the commit message",
       "summary": "DeepSeek put a 1.7-trillion-parameter model and its own agent harness on the internet under the MIT license; two opposed Hacker News posts turned out to be arguing about one detection statistic; and Anthropic's Frontier Red Team showed what happens when forty-five aligned agents share an environment.",
@@ -1978,6 +2001,18 @@
     "concepts_taught": [
       {
         "name": "separating encoding failure from recall failure in a language model: probing the same fact through pretraining-style completion, rephrased and reversed questions, and multiple-choice recognition, so that 'recognition without generation' identifies a fact that is present but inaccessible — and the resulting engineering split between retrieval (empty shelves) and rephrasing or reasoning tokens (lost keys)",
+        "last_taught": "2026-08-15"
+      },
+      {
+        "name": "the full RLHF chain: pairwise human comparisons instead of absolute scores (because people share an ordering but not a scale), a reward model trained by cross-entropy on score differences so only differences carry meaning, PPO's clipped ratio objective with the min of clipped and unclipped acting as a pessimistic one-directional cap on per-update movement, and the separate KL penalty against the frozen supervised policy that keeps the policy inside the distribution the reward model was trained on",
+        "last_taught": "2026-08-15"
+      },
+      {
+        "name": "reward-model overoptimization as Goodhart with a measurable curve: gold-reward score rises, peaks and falls against KL distance from the initial policy, with a different functional form for RL than for best-of-n sampling and coefficients that scale smoothly with reward-model size — plus the alignment tax and its flip to an alignment bonus at larger scale",
+        "last_taught": "2026-08-15"
+      },
+      {
+        "name": "reinforcement learning with verifiable rewards (RLVR) as deleting the learned judge rather than improving it: a constant reward only on verifier-confirmed correctness, rule-based accuracy and format rewards, GRPO dropping the value model by using group scores as the baseline — and its three limits (pass@k suggesting elicitation rather than expansion, random rewards reproducing much of the gain on one model family, and the return of an unreliable learned judge as soon as the task has no answer key)",
         "last_taught": "2026-08-15"
       },
       {
