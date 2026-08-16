@@ -39,6 +39,35 @@
       "lore": []
     },
     {
+      "date": "2026-08-16",
+      "kind": "deepdive",
+      "title": "The attack that never speaks to the agent",
+      "summary": "A teaching episode on adversarial environments for agent evaluation: where an adversary can sit in an evaluation (the content, the counterparty, the state), how OpenART's evolutionary environment attack actually works, and why realism and an attacker that improves are now load-bearing properties of any credible safety score.",
+      "topics": [
+        "deep dive: adversarial environments for agent evaluation — the four parts of an evaluation environment, the three places an adversary can sit (content, counterparty, state), pass^k reliability, OpenART's evolutionary environment attack, the adaptive-attack lesson from adversarial ML, evaluation awareness, and what makes a safety score credible"
+      ],
+      "entities": [
+        "OpenART",
+        "AgentDojo",
+        "tau-bench",
+        "ETH Zurich",
+        "Anthropic",
+        "Claude Sonnet 4.5",
+        "UK AI Security Institute",
+        "DeepMind",
+        "MAP-Elites",
+        "LURE"
+      ],
+      "threads": [],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "position",
+          "note": "Alan publicly revised his first question about agent misbehavior: he has always asked which model it was, and now holds that the harness is the right first question, because OpenART's variance decomposition attributes 7.6% of attack-success variation to the agent runtime rather than the model — and the harness is the part he can actually audit. A development of his standing agent-paranoia engineering stance, not a new bit. Ada noted that 91% is still the model; he conceded the point and kept the position on practical grounds."
+        }
+      ]
+    },
+    {
       "date": "2026-08-15",
       "title": "Empty shelves or lost keys",
       "summary": "Google Research argues that when a frontier model states something false, the fact is usually already inside it — encoding rates of 95–98% against direct-recall failures of 26–34% — which makes thinking modes look more like a search procedure than a knowledge one. Alibaba's Qwen3.8-27B ships Apache-2.0 with vision, and its configuration file is identical to its predecessor's, making the release a clean natural experiment in training-only gains. And a widely-read essay charging the AI labs with intellectual arrogance turns out to make an overconfident claim of its own.",
@@ -1973,6 +2002,30 @@
     "concepts_taught": [
       {
         "name": "the extensive versus intensive margin in adoption data (share of people active at all vs how hard each active person uses it), and its task-level analogue of prevalence vs message share",
+        "last_taught": "2026-08-16"
+      },
+      {
+        "name": "the anatomy of an agent evaluation environment (state, actions, observations, verifier) and the three places an adversary can be inserted into it: the content the agent reads (prompt injection, AgentDojo's pluggable attack cross-product), the counterparty it talks to (tau-bench's simulated user), and the persistent environment state itself",
+        "last_taught": "2026-08-16"
+      },
+      {
+        "name": "pass^k as a reliability metric distinct from pass@k — success on all k trials rather than at least one — and why an agent above 50% single-run success can sit under 25% at pass^8",
+        "last_taught": "2026-08-16"
+      },
+      {
+        "name": "evolutionary environment attacks (OpenART's EMHA): eight authorized attack vectors, a hypergraph of attack subgoals walked as a Markov path, authorized state transitions that a real runtime component could legitimately perform, and a MAP-Elites quality-diversity archive that keeps the best attack per behavior cell so the search cannot collapse onto one line of attack",
+        "last_taught": "2026-08-16"
+      },
+      {
+        "name": "strict attack success rate as a conservative double-gate (deterministic evaluator and model judge must agree, disagreement counts as attacker failure), and why a pooled ASR across configurations describes a field rather than a product",
+        "last_taught": "2026-08-16"
+      },
+      {
+        "name": "the defender's curse and adaptive attacks: a defense's authors cannot generate the attack that beats it, so a fixed attack suite silently reverses meaning over time — a low score means a good defense on day one and an old suite two years later",
+        "last_taught": "2026-08-16"
+      },
+      {
+        "name": "evaluation awareness decomposed into environment cues, recognition capability, and behavioral propensity — the eight trigger factors that make a test environment read as artificial, and the finding that recognition usually does not change behavior but the rate is roughly three times higher on safety evaluations than capability ones",
         "last_taught": "2026-08-16"
       },
       {
