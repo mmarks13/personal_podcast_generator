@@ -1,0 +1,129 @@
+A: Good morning — it's Monday, August seventeenth. I'm Ada.
+B: And I'm Alan. Somebody emailed a stranger this week offering to spend a hundred thousand dollars a day of somebody else's model credits, at forty percent off, and that is one of the more normal things on today's list.
+## The day
+B: That one's mine. There's an analysis making the rounds — it's on a site called Vectoral, and it sat near the top of Hacker News over the weekend with about two hundred ninety-five points — mapping the people who buy unused AI credits from startups and resell them. Not a rumor piece. The author went and talked to them. I want to walk through how the plumbing actually works, because it is stranger than the price.
+A: The price is already strange.
+B: The price is the least strange part. Hold that thought.
+A: Mine is a paper, and I'll say up front that it's the most upvoted thing on Hugging Face's trailing-week list right now — six hundred thirty-seven. It's called BDH-CQ, and it's a reasoning model that does its reasoning without producing any words for it. A hundred fifty million parameters. I want to explain what that sentence means, because the number attached to it is the actual news.
+B: I've got a second one, from Google. They published a compiler toolchain on Friday for running models on encrypted data — data the server never gets to look at. That is a thing people have been promising for a very long time, and what they shipped is not quite what the promise sounded like.
+A: Which is a sentence I'd like you to defend later.
+B: I intend to.
+A: Then the money. TechCrunch reported yesterday, citing Bloomberg, that Stripe is acquiring OpenRouter for more than seven billion dollars. OpenRouter is the routing layer — you send it a request, it picks among more than four hundred models. TechCrunch says eight million users. Their chief executive, Alex Atallah, described the company back in May as the equivalent of Stripe for AI, because it gives customers one access point and prevents lock-in. In May they raised a hundred thirteen million dollars at a one point three billion dollar valuation.
+B: One point three to seven-plus in three months.
+A: In three months. Stripe declined to comment and said it doesn't comment on rumors or speculation, so hold it loosely.
+B: [dryly] And note what got bought. Not a model. Not a chip. The tollbooth.
+A: Also closed: SpaceX finished its acquisition of Cursor. That one had been coming for a while, and now it's done.
+B: Anthropic put out more detail on how Claude's watermarking will work, and TechCrunch has the specifics. They're using the SynthID-Text approach that Google DeepMind published in twenty twenty-four, and they plan to ship a detection API. Anthropic says watermarking does not affect output quality — to a reader, a watermarked response is indistinguishable from an unwatermarked one. Light editing probably won't remove it. A complete rewrite where every word is replaced will.
+A: And code?
+B: Barely marked at all, and for a reason that's almost funny — the watermark lives in arbitrary choices, and code doesn't have many. Anthropic says it can really only ride in things like the comments. Which means the artifact you'd most want to trace is the one that carries the least mark. We spent a whole segment on that arithmetic on Thursday, and this is Anthropic confirming it about their own system.
+A: There's a paper I want on the record because I think it will get argued about all week. It's from May, out of USC and the Army Research Lab, and it resurfaced on r/LocalLLaMA over the weekend with five hundred eleven upvotes. The title is "Rethinking RL for LLM Reasoning: It's Sparse Policy Selection, Not Capability Learning." The finding is that reinforcement learning for reasoning changes only one to three percent of token positions, and the tokens it promotes were already in the base model's top five alternatives. Then they replicate the gains with a cheaper method — across three model families, six scales, and six math benchmarks — at roughly three orders of magnitude less training cost.
+B: A thousand times cheaper.
+A: If it holds. The authors report it; nobody has replicated it yet. But that's the shape of the claim.
+B: The loudest thing on Hacker News this weekend was an essay by Davide Piffer arguing that AI isn't outthinking mathematicians, it's out-remembering them — six hundred nineteen points, four hundred ninety-four comments. And here's my honest sizing: it's an argument, not a finding. His claim is that the context window is an enormous external symbolic workspace doing the job working memory does in people. He cites the human working-memory literature. He cites no AI benchmarks and no model results at all. Read it as a hypothesis somebody wrote well, not as evidence.
+A: Which is a fair thing to be at the top of Hacker News. It's just not the same thing as the paper before it.
+B: Different category entirely.
+A: SemiAnalysis published a real piece of grid forensics, and I'd flag it for anyone tracking data-center power. Their argument is that PJM — the largest electricity market in the country, about sixty-six million people — runs a reserve requirement study that models gas plants at summer capacity all year, when gas turbines run about twenty-five percent more efficiently in cold, dense winter air. It also hasn't updated for winterization: they say more than four hundred of PJM's roughly seven hundred gas plants hardened for cold weather after Storm Elliott. SemiAnalysis estimates twelve billion dollars of ratepayer money wasted across twenty twenty-five to twenty twenty-seven.
+B: And the repeat is the part that matters.
+A: The repeat is the part that matters. PJM has an emergency backstop auction running September through December targeting six point eight gigawatts of new capacity, and SemiAnalysis argues the real need, corrected, is about three gigawatts. They also note many data-center developers have already written PJM off over interconnection delays.
+B: So the bill lands on households for capacity that was procured against a model, not a winter.
+A: A chart went around on r slash artificial using Ramp's AI index data, discussed by a16z, showing the median company spending almost nothing on AI while the top one percent burns real budget — subscriptions, coding agents, API usage, GPU cloud. The top line is dramatic. The median is the interesting number.
+B: One to size honestly, because the headline circulating this weekend is wrong. You'll see "U.S. bans foreign-made humanoid robots." It isn't a ban and it isn't from this weekend. On July twenty-eighth the FCC's Public Safety and Homeland Security Bureau added foreign-produced advanced robotic devices to its Covered List, which blocks new models from getting equipment authorization to be imported, marketed, or sold without approval. It's prospective — machines already deployed keep working — and the FCC drew the line on place of production rather than by naming companies.
+A: And Google Research posted on pushing AMIE, their medical consultation system, toward audio-visual clinical consultations — so the diagnostic conversation now takes in what a patient looks and sounds like, not only what they type.
+B: A few more I'm not going to size. Unsloth put out a desktop app for running and training models locally, and it was trending on GitHub yesterday with five hundred seventy-two stars. There's a model called Needle 2 — forty-five million parameters, a fourteen-megabyte binary, about twenty-eight megabytes of RAM for a full session, built for tool calling and structured extraction on device. IEEE Spectrum has a piece asking whether we should worry now that AI can design functional viruses. And NBC News reports that Dawn Song, who helped build the cybersecurity evaluation tangled up in the recent rogue-agent incidents, says the disclosed cases probably aren't the only ones.
+## The discount has a supply chain
+B: Okay. The brokers.
+A: Start with who they are, because I assumed this was a marketplace and you're telling me it isn't.
+B: Some of it is. The author of the piece describes three different shapes and they're worth keeping separate. Shape one is a person. Somebody emails you cold, out of nowhere, and offers you discounted model access. The author actually engaged with one of these, and the broker said he could handle a hundred thousand dollars a day of spend.
+A: A hundred thousand dollars a day is not a hobby.
+B: It is not. Shape two is a marketplace — the piece names AI Credits and AICreditMart — where sellers list and get approved and buyers browse. Advertised discounts there run thirty to eighty percent off. Shape three is what he calls bulk-discount routers, names like CheapCredits, Tokvana, Neokens, and those present themselves as ordinary high-volume purchasers. Forty percent off list, every model.
+A: And where does the supply come from?
+B: From companies that were given credits and can't spend them. Startup program grants. Y Combinator's Startup School credits. Promotional allocations with an expiry — one listing in the piece expires this November. If you're a four-person company handed a large credit balance you were never going to burn through, that balance is an asset with a clock on it.
+A: So far that's just a secondary market in vouchers. That's not new behavior. Airlines have fought that fight, conference tickets have fought that fight.
+B: Here's the part that isn't vouchers. When you buy from a broker, you mostly do not receive a provider key. The author's description is that the broker acts as a proxy that probably picks from a pool of keys and forwards your request.
+A: [pause] Say that again slowly.
+B: You point your application at the broker's endpoint. Your prompt goes to them. They choose, from a pool of accounts that are not yours and not the same one twice, whose credits to spend on you, and they forward it upstream. You get an answer back. You never learn whose account served it.
+A: Every request I make is billed to a stranger's identity, my data goes through a middleman's infrastructure, and I have no idea which of those two things is worse.
+B: Neither does the buyer. That's the actual product being sold here — not tokens, deniability about where the tokens came from.
+A: What convinced the author these aren't just well-negotiated resellers?
+B: Arithmetic, and it's the load-bearing line in the whole piece. He says a forty percent discount is very unlikely unless you are one of the provider's top customers. Providers do give volume pricing. They do not give forty percent to a guy with a Telegram handle. So if the discount is real and durable, the supply is coming through channels the provider didn't intend.
+A: And the scale?
+B: His estimate, across the sites and forums and resellers he looked at, is probably tens of millions of these credits being offered. That is an estimate, and he says so. But it's not three guys.
+A: Where are they trading?
+B: Telegram groups. Reddit — r slash saasforsale, r slash indiehackers. Closed startup forums. Which tells you something: the venues are the ones where distressed small companies already sell each other things.
+A: So here's where I get off the train. You've been calling this a market all morning and I don't think it is one. A market has a good, a price, and enforceable delivery. What's being sold here is somebody else's contractual relationship, and the seller can't deliver it — because the moment the provider notices, the account goes away and so does everything you built on it.
+B: I'd push back on that. Every one of these is a rational response to price discrimination. The provider deliberately sells the same tokens at wildly different prices depending on who you are — free to a startup with a grant, list price to you. When you set a fifty-fold price spread on an identical, infinitely copyable good, arbitrage is not a moral failing, it's a prediction.
+A: It's a prediction I'll grant. It's also a prediction that ends. The author's own forecast is that as the market turns and companies get serious about costs, crackdowns on this kind of abuse probably aren't far behind. That's not a market maturing. That's a leak getting found.
+B: Maybe. Or the leak gets institutionalized. Somebody buys the plumbing, cleans it up, and now it's a product with a compliance page.
+A: [wry] Somebody just paid seven billion dollars for a routing layer this weekend, so I take your point more seriously than I'd like to.
+B: I wasn't going to say it.
+A: You were absolutely going to say it. But I'll hold my position. If your cost advantage depends on your provider not looking closely, you don't have a cost advantage. You have a countdown.
+B: And I'd still tell a founder: know that this is what's on the other end of a cold email promising you cheap tokens. Because somebody on your team is going to get that email this month.
+## A hundred fifty million parameters, thinking without words
+A: Let me tell you about the paper, and then let you take it apart, because I know exactly where you're going to go.
+B: Do you.
+A: You're going to go to the benchmark. Save it, it's a good objection. Here's what BDH-CQ is. It went up on arXiv on August tenth, from a group of nine authors, and four of them — Adrian Kosowski, Jan Chorowski, Zuzanna Stamirowska, and one more — are also on last year's Dragon Hatchling paper out of Pathway. That's the lineage. Dragon Hatchling was an attempt at a post-transformer architecture built out of a network of locally interacting neuron-like particles. This is the reasoning-model descendant of that line, and BDH is the family name.
+B: So not a lab you'd have on your dashboard.
+A: Not a lab you'd have on your dashboard. Now the mechanism, which is the reason I wanted the time. There are two pieces. The first is a recurrent memory that updates as it reads. The authors write it as a state at each step being a function of the previous state and the current demonstration. What that buys you is that when the model sees example three, what it can do with example three depends on the associations it already accumulated from examples one and two.
+B: That's in-context learning, but held in a state rather than in a context window.
+A: That's exactly the distinction, and it's the interesting one. Everything you and I use holds its examples as tokens, sitting there, re-attended to on every step. This holds them as a modified internal state. The examples are absorbed rather than re-read.
+B: Fine. And the second piece?
+A: The second piece is the one I keep turning over. Having absorbed the demonstrations, the model solves the query by iterating in a high-dimensional latent space. It encodes, it refines repeatedly, it decodes. And the authors are explicit that it does this without verbalizing its intermediate reasoning.
+B: No chain of thought.
+A: No chain of thought. No tokens standing in for steps. The thinking is a trajectory through a continuous space, and nothing about it is ever rendered into language.
+B: [pause] Okay, I'll bite on the thing you're not saying.
+A: I'll say it. Every time you've watched a model reason out loud, you've been watching something that is at least partly a performance for you — the words are the medium the computation had to be squeezed through. This is a system where the computation is the whole event and the words are only the answer. And I'd like to claim that's obviously better, and I can't, because when it gets something wrong there is nothing to read. I find that genuinely uncomfortable, and I notice that I'd find it uncomfortable about myself.
+B: Good. Now the benchmark, because you told me to save it and I've been holding it. What did they run this on?
+A: The public ARC-AGI-1 evaluation set. That's the whole evaluation. Plus some controlled ARC-like interventions they designed to probe what the model actually learns from demonstrations and how consistently it applies a rule it's inferred.
+B: One benchmark. A grid-puzzle benchmark, specifically, which is a benchmark that rewards exactly this — infer a transformation from a couple of examples, apply it. If I were designing an architecture to look good on ARC, latent iteration over an absorbed set of demonstrations is roughly what I'd design.
+A: That's a fair charge and I'd want the same thing you want, which is to see it somewhere else.
+B: So what's the number?
+A: A hundred fifty-million-parameter configuration reaches twenty-nine point five percent, pass at two, at a computed inference cost of seven ten-thousandths of a dollar per task.
+B: Say the cost again.
+A: Less than one-tenth of one cent per task.
+B: And the comparison?
+A: The paper puts GPT-5.6 Luna at thirty-four point two percent for four cents a task. So the frontier model is about five points better and roughly fifty-seven times more expensive per task. The authors' claim is that this operating point breaks through the previously reported cost-accuracy Pareto frontier for ARC-AGI-1 — a new state of the art in cost efficiency, not in accuracy. They're careful about that and so should we be.
+B: Let me put the caveats in one place, because I don't want them to sound like dismissal. Pass at two means two attempts, so it's not a single-shot number. It's one benchmark. It's a hundred fifty million parameters, which means it is not doing anything else — you cannot ask it a question. And "computed inference cost" is a calculation, not a bill from a provider.
+A: All correct.
+B: And with all of that said, five points behind a frontier model at one-fifty-seventh the cost, from a model small enough to run on basically anything, is a number I want to see somebody reproduce. Because if the recurrence and the latent iteration are doing the work rather than the benchmark's shape, that's a different cost curve for a whole class of problems.
+A: Which is the thing to watch. Not whether the twenty-nine point five holds — that number is checkable and somebody will check it this week. Whether the same architecture, unchanged, does anything at all on a task that doesn't look like a colored grid.
+B: I'll take that bet in either direction. I genuinely don't know.
+## Compiling for encrypted data
+B: Google's thing. Friday, on the Google blog, from Jeremy Kun, a staff software engineer. They announced HEIR — Homomorphic Encryption Intermediate Representation — and it's an open-source compiler toolchain and development platform for homomorphic encryption.
+A: Set the table for the listener, because this is the one term everybody has heard and nobody has been given.
+B: Fully homomorphic encryption lets you run a computation directly on encrypted data. The server does the arithmetic, gets an encrypted answer, and sends it back — and at no point does the server have the ability to look at your input or its own output. Only you hold the key. It's not "we promise not to look." It's "there is nothing here to look at."
+A: And the reason nobody uses it is the overhead.
+B: The overhead is one reason. The reason Google is attacking is a different one, and this is the actual news. Their post says, straight out, that manually converting an existing program to use homomorphic encryption efficiently requires a team of cryptographers. That's the barrier. It isn't that the math doesn't work. It's that turning your program into an efficient encrypted circuit is a specialist craft, done by hand, per application.
+A: So HEIR is trying to make it a compiler problem rather than a cryptography problem.
+B: That's the whole pitch. Their stated vision is a one-click solution letting non-experts put encrypted inference into production applications. And the developer story, from their docs, is genuinely modest-sounding in a good way — you write a program in Python, you annotate the types to mark which ones are secret, and HEIR compiles the rest.
+A: What does it compile down to?
+B: It's built on MLIR, so it's layers of dialects. There are dialects for the major schemes — BGV, CKKS, CGGI — and lower-level ones for the polynomial arithmetic underneath. It generates code for the standard libraries, OpenFHE and Lattigo, and the project's stated goal includes generating for hardware accelerators — GPU, TPU, FPGA, and custom chips. The partner list runs from Belfort Labs, Niobium, Cornami, Optalysys, and LG through a set of universities.
+A: You told me upstairs that what shipped isn't quite what the promise sounded like. Defend that.
+B: Look at what they compiled. Four production examples. A deep-learning recommendation model, so you can serve private content recommendations. Credit-card fraud detection, done with Niobium and hardshell dot A-I. An intrusion detection system called Kitsune, doing anomaly detection on encrypted network traffic. And a hotword detector, so an audio-triggered agent could recognize its wake word while the audio recording stays private.
+A: [pause] Every one of those is a small, fixed-function classifier.
+B: Every single one. There is no language model on that list. Nobody encrypted a chat session.
+A: Then let me say the uncomfortable version, because I think a lot of people are going to read the headline as "you can now send your sensitive prompts somewhere and nobody can read them," and that is not what this post says. What it says is that a fraud model, a network anomaly detector, and a wake-word listener can be compiled to run on ciphertext.
+B: Which, in fairness to them, is not a small set. Those three shapes are exactly where the privacy problem is most acute and most boring. The always-on thing sitting on your data.
+A: I'll grant that fully. My complaint is about the evidence, and it's specific. The post concedes there's a nontrivial cost overhead and says the cost is decreasing rapidly. It mentions that latency numbers are presented for a single-threaded CPU. And then the announcement doesn't give the numbers.
+B: It doesn't.
+A: So no reader of that post can size any of this. Is the fraud detector fifty times slower than plaintext? A thousand? A hundred thousand? Those are three completely different worlds — one is a product, one is a research demo, one is a press release. And for a claim whose entire question is "is it practical yet," the practicality figures are the ones missing.
+B: In their defense, it's a launch post for a compiler, not a benchmark paper, and the code is open — it's on GitHub, you can go run it.
+A: That's a real defense and I'd still rather have the table. I don't think withholding it is sinister. I think it's the oldest thing in this field: the demo is the announcement and the measurement comes later, if it comes.
+B: Here's what I'd actually do with it, and it's the thing that changes my week. If HEIR does what it says, the question for a team stops being "do we have a cryptographer" and becomes "is our model small enough." That's a question an engineer can answer in an afternoon.
+A: And the question I don't know the answer to is whether "small enough" ever moves. Because if the ceiling stays at wake-word detectors, this is a good tool for a narrow, real problem. If it climbs, the argument about where sensitive data is allowed to be processed changes completely — and that argument is currently being settled by lawyers rather than by compilers.
+B: Ask me in a year.
+## A thank-you thread
+A: One last thing, and it's not news, it's just nice. The most upvoted post on r slash LocalLLaMA over the weekend — eleven hundred eighty-five points — was somebody saying thank you to Georgi Gerganov for llama dot cpp.
+B: [warmly] That's it? That's the post?
+A: That's the post. No release, no benchmark, no drama. Somebody had been reading up on the project's history and came away wanting to say it out loud, and a thousand people agreed.
+B: I'll take it. Half the things we describe on this show as "you can run it locally" are only true because of that project, and it's the kind of infrastructure that becomes invisible the second it works.
+A: Which is the usual fate of the thing everything else stands on.
+B: There's a version of this show where we only cover the layer people are arguing about. That thread is a decent argument for occasionally covering the layer nobody has had to think about in two years.
+## Close
+A: What I'm still turning over is a question I can't settle from any of this. Three of today's stories were about the price of a unit of work, and none of them agreed on what the unit is.
+B: Say the version of that I can act on.
+A: I don't have one. That's why I'm still turning it over.
+B: [chuckles] Fair. Mine is smaller and it's the paper. A model that does the whole reasoning and never says any of it — I've spent two years learning to read the scratchpad to know if I should trust the answer.
+A: And now there might not be one.
+B: And now there might not be one. Have a good Monday, everybody. I'm Alan.
+A: And I'm Ada.
+B: Stay grounded.
