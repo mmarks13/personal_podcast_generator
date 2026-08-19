@@ -1,6 +1,45 @@
 {
   "episodes": [
     {
+      "date": "2026-08-19",
+      "title": "The five-year plan nobody was going to run",
+      "summary": "OpenAI's Asana case study says four parallel Codex agents cleared a five-year, six-million-dollar migration in two weeks for twelve thousand dollars — so we take apart what that number is actually measuring, with Linear's logs from forty-seven thousand workspaces as the population check. Then DFlash 2, a block-diffusion drafter that predicts a whole block of tokens at once and reports five and a half accepted tokens per verification step, and what it does and doesn't promise the people running models at home.",
+      "topics": [
+        "OpenAI's Asana/Codex case study: Enzyme, an obsolete front-end test library, removed from Asana's codebase by up to four Codex agents working in parallel from a five-sentence prompt, each in its own copy of the repo, with an engineer checking twice a day and reviewing every proposed change; about 1.5 weeks of engineering effort across two calendar weeks at roughly $12K of model and infrastructure cost, against a plan of record estimated at a minimum of five years and roughly $6M. On-air analysis: the job's shape (thousands of mechanical transformations with a machine-checkable oracle in the test suite) is why it worked; the five-year figure is an estimate of a never-executed plan and measures institutional appetite rather than engineering hours, so the honest reading is that the deferred-migration backlog repriced from 'never' rather than that productivity rose. Evidence caveat: vendor publishing a customer's account with a customer-supplied counterfactual and no control.",
+        "Linear's first annual data report (Edition 01, Tim Qi), measured January-June 2026 from product logs: 127,000 paid users for adoption, 47,900 paid workspaces for throughput; pull requests opened per workspace up 111% on a June 2024 baseline; teams using coding agents went 21 to 65 PRs/week while teams without went 8 to 10; product managers attaching PRs 3% to 10%, designers 1% to 8%; CEOs at companies of 201+ people 9% to 36% AI-active in six months; and the report's own line that 'time spent on existing tasks in Linear held while AI usage appeared as a new layer of work' — output up with time on existing work flat, with both hosts betting the difference landed on review and neither able to show it from the data.",
+        "DFlash 2 (z-lab): block-diffusion draft models for Qwen3.8-27B and Muse-Glimmer-30B for speculative decoding, plus GGUF builds and an unmerged llama.cpp pull request (#27342). Mechanism: rather than an autoregressive drafter that generates its guesses one at a time, it 'predicts a whole block of tokens in a single pass and keeps the top candidates at every position', with 'two-tap dynamic convolutions in the backbone' to stop draft quality decaying toward the end of the block. Reported on one NVIDIA H200 with FlashAttention 3 at 7 draft tokens per verification step: GSM8K 68.9 to 236.1 tok/s (3.43x) at concurrency 1 and 1,328.7 tok/s (2.84x) at concurrency 8; acceptance length (completion tokens per verification step) 5.46 on GSM8K vs 5.02 for MTP and 4.36 for DSpark, and 5.13-5.39 across GGUF quantizations, with draft weights 1.1GB at Q4_K_M, 2.0GB at Q8_0, 3.8GB at BF16. Caveats stated on air: all published numbers are H200 with SGLang/vLLM, no consumer-GPU numbers on the card, the local path requires building from an unmerged PR, and the benchmark suite (GSM8K, MATH-500, HumanEval, MBPP, MT-Bench) is unusually guessable text so the acceptance length is a ceiling for that work shape."
+      ],
+      "entities": [
+        "OpenAI",
+        "Codex",
+        "Asana",
+        "Enzyme",
+        "Linear",
+        "Tim Qi",
+        "z-lab",
+        "DFlash 2",
+        "Qwen3.8-27B",
+        "Muse Glimmer",
+        "llama.cpp",
+        "SGLang",
+        "vLLM",
+        "NVIDIA H200",
+        "DSpark"
+      ],
+      "threads": [],
+      "dives": [
+        {
+          "story": "Asana's five-years-in-two-weeks Codex claim, checked against Linear's telemetry",
+          "why_it_matters": "Any engineering lead about to be shown this case study in a budget meeting needs the two things it does not say — that the five-year figure is an unexecuted plan rather than a measurement, and that a human reviewed every change twice a day — plus the one population dataset published the same week, where output per workspace doubled while time on existing tasks stayed flat."
+        },
+        {
+          "story": "DFlash 2's block-diffusion drafting",
+          "why_it_matters": "Anyone serving a 27B-class model, at home or on a box, gets a roughly three-times decode speedup for about a gigabyte of extra memory — and the mechanism (drafting a whole block at once, and acceptance length as the portable metric) is the thing to understand before believing anyone's tokens-per-second number, including the consumer numbers nobody has published yet."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-08-18",
       "title": "A dinosaur with a book in its claws",
       "summary": "404 Media hid an AirTag in one of a thousand rare books and followed it to an Amazon warehouse in Las Vegas where the bindings come off before the scanner — a supply chain built out of the one thing nobody can print more of. Then Nathan Lambert on why Nvidia is reportedly spending twenty-six billion dollars teaching everyone to build their own model instead of buying tokens, and a federal court in Nevada holding that judicial immunity covers a ruling even if, as alleged, an AI wrote the whole thing.",
@@ -1969,7 +2008,7 @@
         "summary": "The frontier moves down, and the switch turns back on; World models: why AI can build a world you can walk through, but not one it remembers when you look away; Generation is cheap, checking is the product; Two rulers for the frontier, and the soft spots in the models we already have; Everything bends toward control: who owns the model, and who can switch it off; Speed for free: how speculative decoding makes a model faster without changing a word; Generating a planet from satellite photos; Program as weights: compiling a task straight into a model; The Turk retires, a stats class levels up, and three tricks that were one; The search box became a writer; The word that unlocked a private repo; Quantization: why fewer bits work, and where the cliff is; Sixty-four Claudes, an off switch, and "
       }
     ],
-    "updated": "2026-08-18",
+    "updated": "2026-08-19",
     "host_lore": [
       {
         "host": "Ada",
@@ -2045,6 +2084,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "why a framework migration is the shape of work parallel coding agents do well: high-volume mechanical transformations, low ambiguity, and a machine-checkable oracle (the test suite) that decides correctness without a human",
+        "last_taught": "2026-08-19"
+      },
+      {
+        "name": "block-diffusion drafting for speculative decoding: predicting a whole block of tokens in one pass and keeping top candidates per position instead of an autoregressive drafter, why draft quality decays toward the end of a block, and acceptance length (completion tokens per verification step) as the hardware-portable metric",
+        "last_taught": "2026-08-19"
+      },
       {
         "name": "why pre-2022 printed text is treated as premium training data: density and editing versus web text, plus a guarantee of no machine-generated contamination, as a hedge against model collapse",
         "last_taught": "2026-08-18"

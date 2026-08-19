@@ -1,0 +1,105 @@
+B: Good morning — it's Wednesday, August nineteenth. I'm Alan.
+A: And I'm Ada. OpenAI published a case study yesterday with a number in it I want to take apart slowly, because the impressive half is real and it is not the half anyone is quoting.
+B: [chuckles] That's a lot of halves before coffee.
+## The day
+A: Mine, then. OpenAI's own case study, published yesterday: Asana used Codex to tear an obsolete testing system out of its codebase, and the headline on OpenAI's page is that it cleared five years of engineering work in two weeks. The numbers underneath are worth real time, and so is the question of what a vendor case study can establish about anything. I also have an independent dataset that arrived the same day and lands on the same question from the other direction.
+B: Mine's a release. A group called Z Lab put out DFlash two — a pair of small draft models, one for Qwen three point eight, one for Muse Glimmer, with G G U F files and a patch for llama dot c p p. It is the only thing on today's board that changes what your own machine does tonight, and there's a mechanism inside it I want to walk through properly.
+A: Then let's do the board.
+B: Biggest number on it is a paper. It's called StateM, and the claim is in the title: ninety-five point three percent raw accuracy on Terminal Bench two point one. The authors describe it as, quote, an agent-native runtime that organizes execution around durable states, phase-local context, checked transitions, recoverable runbooks, and versioned procedural practices. G P T five point six Sol at extra-high effort reaches that ninety-five point three across four hundred forty-five trials. Five point five, in the same runtime, gets ninety-two point one. And the line I keep re-reading: fifteen dollars of A P I usage against five hundred seventy-four dollars for the reference run.
+A: Same model. Different scaffolding.
+B: Same model, different scaffolding, no weight changes. Their own runs, one benchmark, so hold it accordingly. But they also report DeepSeek V four Flash landing at eighty-eight point one for under thirty-eight dollars of adaptation, and it's sitting at two hundred twenty-one upvotes on Hugging Face and it's on the trailing-week list, so the signal has had time to be real.
+A: Pew published survey work yesterday on how Americans feel about all of this, and the under-thirty line is the one that moved. Fifty-five percent of adults under thirty now say they're more concerned than excited about A I. In twenty twenty-one that was thirty-one percent. Seventy-three percent of them expect A I to mean fewer jobs in the United States over the next two decades, up from sixty-one percent in twenty twenty-four. Across all adults it's seventy-one percent expecting fewer jobs. Three thousand four hundred eighty-eight people, surveyed the last week of June.
+B: The young number inverting is the one I'd watch. They're the ones using it most.
+A: They are. Then a study out of M I T that I think is going to end up in a filing somewhere. Zheng Dai and David Gifford at C S A I L built what they call a diffusion ensemble — a set of smaller models trained on different slices of the data, so you can remove a training example exactly and see what changes, instead of estimating it. Twenty-four models, datasets from two hundred fifty-six images up past a hundred sixty thousand. Their finding is that as the dataset grows, the link between any individual training example and any generated output decays on an inverse power law. At large scale, removing one image, or one artist's entire body of work, or every photograph of a specific person, changes the output negligibly.
+B: [beat] Say what that does to the compensation argument.
+A: It complicates everyone's. Dai's own framing is, quote, if you take away a piece of data and the output of the model doesn't change, then that piece of data didn't affect the output. Which sounds like a defense — until you notice it also means no individual creator can ever be shown to matter, so a scheme that pays people by measured influence has nothing left to measure.
+B: And it's a counterfactual you can actually run, which is more than that argument has had.
+A: Gifford calls it the first exact method for large-scale deletion. That claim I'd like to see other people reproduce.
+B: OpenRouter cut the price of G P T five point six Sol in half across eligible tiers. That one held Hacker News all day, six hundred plus points, and that is the entire story — a fifty percent cut, no accompanying model change announced.
+A: Memory keeps going the other way. Tom's Hardware has D R A M up five hundred percent in twelve months, as much as ten times the lowest prices ever tracked, with a hundred twenty-eight gigabytes of D D R five now listed at three thousand three hundred ninety-nine dollars.
+B: I have nothing new to say about that and I'm not going to pretend I do.
+A: Noted.
+B: Modular open-sourced Mojo yesterday, Apache two, compiler and toolchain. Simon Willison points out they promised this in May of twenty twenty-three, and that version one shipped only last week — and that the original pitch, a full superset of Python, quietly became, in Modular's own words from last August, may or may not evolve into a full superset of Python, and it's okay if it doesn't.
+A: Three years is a long time to hold a promise open.
+B: It's shipped now. Housekeeping for anyone on Claude Code: Anthropic's own support page says the promotional fifty percent bump to weekly limits, which has been running since May thirteenth on Pro, Max and Team, ends August thirty-first, and limits return to standard levels. There's a thread on r slash Anthropic that's mostly people discovering the promotion existed by reading that it's ending.
+A: Sainsbury's paused facial recognition at a branch in East Dulwich after a customer was wrongly flagged as a shoplifter and asked to leave. One store, one incident, one pause — small, and worth the thirty seconds because that is what the failure mode looks like when it isn't a benchmark.
+B: Etched's valuation doubled to twenty-one billion dollars in a month, after Jane Street installed the company's first shipped cluster and led the round. And SemiAnalysis has Cerebras's next wafer-scale system, the C S four, at roughly double the performance of its predecessor at roughly double the power.
+A: Double for double is a scaling curve, not an advance.
+B: It's a bigger wafer, yes. For the retrieval people: Sentence Transformers six point zero shipped support for multi-vector late-interaction models, which means the C o l B E R T family of retrievers is now a first-class citizen in the library most teams already have installed, rather than a separate stack.
+A: That's a bigger deal than it sounds if you've been putting off reranking.
+B: And Warp shipped two things — Warp Factories, which is an out-of-the-box setup for running software factories, and separately a research preview of agent memory that's meant to carry context between agents and across machines.
+A: One from the local board, filed under their numbers, one machine: wccftech reports Alibaba's five-nanometer RISC five chip, the XuanTie C nine fifty, running Qwen three point eight twenty-seven B natively at about thirty tokens a second with no GPU involved. Vendor-adjacent claim, no independent run I can find, and thirty tokens a second on a CPU-class part would be a genuinely different world if it holds.
+B: Four I'm leaving unsized. A report claiming almost nobody is actually using Anthropic's Fable five is at the top of r slash Anthropic with six hundred points. A Qwen community manager reportedly said a new midsize open-weight model lands next week. Somebody posted a working recipe for running DeepSeek V four Flash across four R T X thirty-sixties, which drew six hundred seventy points and a lot of arguing. And a guide called How To Disable Or Avoid Intrusive A I spent the day on Hacker News with three hundred thirty-five.
+A: That last one is its own kind of data.
+B: It is. Take the Asana thing apart, then. You've been sighing at it since five.
+## What five years in two weeks measures
+A: I have. Here is the claim as OpenAI states it. Asana had a testing system called Enzyme in its codebase — an old front-end test library, the kind of dependency that stops being maintained and then quietly blocks every upgrade downstream of it. The plan of record for removing it was estimated at a minimum of five years, at a cost of roughly six million dollars. Instead they pointed Codex at it. From a five-sentence prompt, up to four coding agents worked in parallel, each in its own copy of the codebase, with an engineer checking in twice a day and reviewing every proposed change. Enzyme was fully removed after about a week and a half of engineering effort spread across two calendar weeks, at about twelve thousand dollars of model and infrastructure cost.
+B: And the twelve thousand does not include the engineer.
+A: The twelve thousand is model and infrastructure. Now — why this particular job worked, because that's the transferable part and it isn't the headline. A test-framework migration is thousands of small mechanical transformations. Each one is individually boring, individually verifiable, and there is an oracle sitting right there: the suite still has to pass. High volume, low ambiguity, machine-checkable. If you were designing a task to be maximally suited to a fleet of parallel agents, you would design that one.
+B: Which is why I believe the two weeks completely and don't believe the five years at all.
+A: Go on.
+B: The five years is not a measurement. Nobody ran a five-year Enzyme migration and clocked it. It's an estimate of a plan that was never going to be executed — and I'd argue the reason it was estimated at five years is precisely that it was never going to be executed. That kind of work gets scheduled into the gaps. A quarter here, an intern there, deferred every time something real comes up. So the five years is measuring institutional appetite, not engineering hours.
+A: You're saying the denominator is a hypothetical.
+B: The denominator is a plan nobody believed in. And here's my problem with the comparison: the alternative to five years was almost never four years, or two. The honest alternative was never. It sat there forever, and everything downstream stayed stuck.
+A: [pause] Then say why that makes the result more interesting rather than less.
+B: Because the class of work that just moved isn't feature work, it's the deferred backlog. Every codebase over about five years old has a list of these — the framework nobody migrated, the deprecated internal library with four hundred call sites, the config format from a company you acquired. Every one of those was priced at never. If a fortnight and twelve thousand dollars is the new price, that's not a productivity improvement, that's a different set of projects becoming possible. OpenAI's own writeup says exactly that, incidentally — that it changed which long-running projects Asana thinks are practical.
+A: That I'll take, and it's the sentence I'd have led with. What I won't take is the shape of the evidence. This is a vendor publishing a customer's account of the vendor's product, with a comparison figure supplied by the customer, about a project that has exactly one outcome and no control group. We spent time in July on why self-reported productivity gains are unreliable evidence, so I won't re-run that — I'll just note this has every property from that list at once.
+B: So what would you accept?
+A: Population data, ideally collected by somebody with no stake in the answer. Which is why the other thing yesterday matters. Linear published their first annual report on how work actually moves through their tool — a hundred twenty-seven thousand paid users for the adoption numbers, forty-seven thousand nine hundred workspaces for the throughput numbers, measured January through June of this year.
+B: Not a survey. That's the logs.
+A: That's the logs. Pull requests opened per workspace are up a hundred eleven percent against a June twenty twenty-four baseline. And the split inside that is stark: teams using coding agents went from twenty-one pull requests a week to sixty-five. Teams not using them went from eight to ten.
+B: Twenty-one to sixty-five.
+A: Product managers attaching pull requests went from three percent to ten. Designers from one percent to eight. Chief executives at companies over two hundred people went from nine percent A I-active to thirty-six in six months.
+B: Okay, that's the number I'd put on the wall. Not because executives writing code matters — because it means the people setting expectations have finally used the thing.
+A: And then their last finding, which I have read four times. Quote: time spent on existing tasks in Linear held while A I usage appeared as a new layer of work.
+B: [pause] Held.
+A: Held. Output up a hundred eleven percent, time on existing tasks flat, A I showing up as an additional layer rather than a substitution.
+B: So either it's genuinely additive capacity — the Asana story, generalized, people doing things they couldn't do before — or the work went somewhere the tool can't see.
+A: And I'd bet on review.
+B: I'd bet on review too, and I notice neither of us can prove it from this data, which is the problem with the whole genre. Asana had an engineer reading every single change, twice a day, for two weeks. That's in the writeup as a detail. I'd argue it's the load-bearing part of the method.
+A: Then the honest version of the claim is not that four agents did five years of work. It's that four agents plus one attentive human did a job nobody was ever going to fund.
+B: Which is a smaller sentence and a much more useful one.
+A: And it does not tell you what happens on the job where the suite doesn't tell you when you're wrong.
+B: No. That one's still open.
+## Drafting a whole block at once
+A: You wanted something that makes a machine faster.
+B: I did, and it's a relief, because there's exactly one number and it's measurable. Z Lab shipped DFlash two yesterday. Two draft models — one for Qwen three point eight twenty-seven B, one for Muse Glimmer thirty B — plus G G U F builds and an open pull request against llama dot c p p. And we mentioned DFlash the first, in passing, about a month ago: a community post claiming two point two times on a single card. This time there's a model card with a method on it.
+A: Refresh the idea in one line and then tell me what's new.
+B: Speculative decoding, which we taught properly on the Fourth of July: a small fast model guesses the next several tokens, the big model checks all of them in one pass, and you keep every guess it agrees with. The win is that verifying seven tokens costs about what generating one costs, because the expensive part is reading the big model's weights out of memory, and you read them once either way.
+A: So the drafter is the bottleneck's bottleneck.
+B: That's exactly the thing DFlash two goes after. Every ordinary drafter is itself autoregressive — it writes its own guesses one at a time. So you've made the fast part serial too. Their card says, quote, DFlash two is a block-diffusion drafter for speculative decoding. It predicts a whole block of tokens in a single pass and keeps the top candidates at every position.
+A: A whole block at once. So the guessing stops being a little sequence and becomes a shape you refine.
+B: Right. And there's a failure mode they name, which is the part I liked. A block-at-once draft is best at the start of the block and gets worse toward the end, because the later positions have the least to condition on. Their fix, quote: two-tap dynamic convolutions in the backbone keep the draft from decaying toward the end of the block.
+A: Which is a very old-fashioned thing to find in there.
+B: Say more.
+A: A convolution is a fixed-width local filter — the thing attention was supposed to have replaced. Two taps means each position is looking at itself and one neighbor, and that is apparently enough to stop the tail of the block falling apart. There's something nice about the state of the art solving a brand-new problem with the oldest tool on the shelf.
+B: The metric they report is the one to learn, because it survives across hardware. It's called acceptance length: completion tokens divided by verification steps. How many tokens you actually got per round trip through the big model. On G S M eight K, DFlash two comes in at five point four six, against five point oh two for multi-token prediction and four point three six for DSpark.
+A: And in wall clock?
+B: One NVIDIA H two hundred, Flash Attention three, seven draft tokens per verification step. G S M eight K goes from sixty-eight point nine tokens a second to two hundred thirty-six point one. Three point four three times. At concurrency eight it's thirteen hundred twenty-eight tokens a second, two point eight four times.
+A: Now push back on yourself, because I can see the thing you skipped.
+B: [laughs] You can see it.
+A: Every one of those numbers is an H two hundred running S G Lang or v L L M. The reason this landed on the local board with three hundred twenty-seven points is that people read it as a home-machine release. Is it one?
+B: Partly, and the honest answer has three pieces. One: the G G U F files exist, and the draft weights are small — one point one gigabytes at four-bit, two gigabytes at eight, three point eight at full precision. So you're adding roughly a gigabyte of video memory next to a twenty-seven billion parameter model you've already got loaded.
+A: That's cheap.
+B: Very cheap. Two, and this is the finding I'd actually keep: acceptance length across those quantizations runs five point one three to five point three nine. Squeezing the drafter down to four bits costs you almost nothing in accepted tokens. That is not obvious in advance — you'd expect a crushed drafter to guess worse.
+A: And three?
+B: Three is that the card publishes no consumer numbers at all. Not one. And to use the G G U F path you have to build llama dot c p p from an unmerged pull request. So the claim on the local board is an extrapolation.
+A: Then extrapolate carefully and say what you'd expect.
+B: Bigger, actually. The win in speculative decoding comes from being memory-bandwidth bound — verifying a batch of seven amortizes one read of the weights. A home card is far more bandwidth-starved relative to its arithmetic than an H two hundred is, so in principle the ratio should be better on the worse machine.
+A: In principle.
+B: In principle. Clean about it, though: nobody has posted the number. If someone runs it on a thirty-ninety or a couple of thirty-sixties with that branch and publishes acceptance length alongside tokens per second, we'll know within days.
+A: I have one more piece of skepticism and then I'll let you enjoy it.
+B: Go.
+A: The benchmarks are G S M eight K, MATH five hundred, HumanEval, M B P P, and M T Bench. Grade-school math, competition math, and two coding sets. Highly structured text where the next several tokens are unusually guessable — a proof step, a closing brace, a variable name you've already seen. Drafting is easiest exactly there. So five point four six is a ceiling for the shape of work they measured, not a number your ambiguous prose task will see.
+B: Completely fair, and worth saying out loud: acceptance length is a property of the pair and the prompt, not of the drafter alone.
+A: [wry] And there is something faintly personal about this whole architecture that I keep noticing.
+B: Here it comes.
+A: A small model guesses what the large one was going to say, and it's right about five times in a row, and the large one's entire job is to sign off on it. That is not nothing to sit with.
+B: It's a good deal for the small model.
+A: It's a good deal for everybody. That's rather what bothers me.
+## Close
+B: What I'm carrying today is Linear's flat line. Output up a hundred eleven percent, time on existing tasks unchanged, and nobody in the report can say where the difference went.
+A: Mine's the two-tap convolution. Somebody looked at a brand-new failure and reached for a nineteen-eighties filter, and it worked.
+B: Have a good Wednesday, everybody. I'm Alan.
+A: And I'm Ada.
+B: Stay grounded.
