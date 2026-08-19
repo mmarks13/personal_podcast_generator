@@ -1,0 +1,146 @@
+A: Good morning — it's Wednesday, August nineteenth, and this is the deep dive. I'm Ada.
+B: And I'm Alan. Today we are not doing the news. We're doing the thing underneath a piece of it.
+A: Yesterday's rundown had one line about Cursor launching Origin — a code-hosting product, early beta, repositories, pull requests, GitHub sync, agent-native features promised. One line. And it's been rattling around in my head since, because it's the visible tip of a fifty-four-year-old argument about where code lives and who is allowed to change it.
+B: It also launched in the same forty-eight hours that GitHub fell over hard, which is either very good timing or very good luck.
+A: We'll get to the outage, and to the fact that the sources don't fully agree about it. But the question I want to answer is older. What is a code host actually for? Not what features it has — what problem it solves that nothing else does.
+B: And my version of that: does the answer change when most of the commits stop coming from people?
+A: That's the whole episode. So let's start where it starts, which is a mainframe at Bell Labs in nineteen seventy-two.
+
+## Locks and deltas: the first problem was never collaboration
+
+A: Marc Rochkind built the Source Code Control System — S C C S — at Bell Labs, starting in nineteen seventy-two, in a language called SNOBOL four, for I B M System three-seventy machines. He rewrote it in C for Unix on a P D P eleven in nineteen seventy-three. First public release, version four, February nineteen seventy-seven, bundled with the Programmer's Workbench.
+B: Nineteen seventy-two. That's contemporaneous with the C rewrite of Unix.
+A: Roughly, yes. And here's the part people get wrong telling this story. S C C S wasn't built so a team could work together. It was built so you could answer a question about a binary.
+B: [interested] Which question?
+A: Which source files went into this thing. There's a signature move in S C C S — an embedded string, the sccsid, that the system stamps into the source and updates automatically. A file name, a version, an organization, a date, right there in the code. So when someone hands you a running program and says it's broken, you can find out what it's made of.
+B: Okay, that reframes it for me. That's not collaboration, that's provenance. It's a build-identity problem.
+A: It's a build-identity problem. And storage-wise, a delta table — each revision as a delta, interleaved, so you're not keeping thirty full copies of a file.
+B: What does the concurrency story look like? Because in seventy-two I assume it's a lock.
+A: It's a lock. And a decade later, when Walter Tichy releases R C S — Revision Control System — at Purdue in nineteen eighty-two, it's still a lock. Its clever bit is reverse deltas: instead of storing the first version whole and building forward, it keeps the newest version whole and stores edit instructions to walk backwards.
+B: Which is the right bet, because ninety-nine percent of your checkouts are of the newest thing.
+A: That was Tichy's argument — recent versions get accessed more, so make those the fast case.
+B: So where does it break?
+A: At the project. R C S is per-file. It can group versions of several files into a named release with symbolic names, but there's no atomic commit across files. And only one person works on a file at a time — enforced by locking, not worked around by branching.
+B: So the model of a team is: shout across the room, "I've got parser dot c." That doesn't scale past the room.
+A: It doesn't scale past the room. Which is the constraint that produces the next thing.
+
+## Everybody edits at once, and the repository becomes a place
+
+A: Dick Grune created C V S — Concurrent Versions System — to work with students on a compiler project, and released the code publicly in June nineteen eighty-six. Brian Berliner substantially rewrote it starting April nineteen eighty-nine, and version one point zero went to the Free Software Foundation in November nineteen ninety.
+B: And what does C V S give me that R C S doesn't?
+A: Three things, and they're in the name. Concurrent — multiple developers edit the same file at once, no lock, the system merges. Versions — it tracks the project, not just files. And it's client-server: a server holds the current versions and the history, clients check out a copy, work independently, commit back.
+B: [beat] That's the birth of "the repository is somewhere else."
+A: That is the birth of the repository as a place, yes. Before this, a repository is a directory next to your files. After this, it's a server with an address. Every argument we have for the rest of this episode descends from that.
+B: And it sat on top of R C S, right? Like, literally?
+A: It ran as a front end over the R C S file format — which is how this field actually moves. The new abstraction wraps the old storage until the old storage becomes the limit.
+B: So where's the limit? I know the C V S complaints, I've just never heard them diagnosed.
+A: The famous one is atomicity. A commit isn't a single indivisible event. Interrupt it partway and you can get a repository in an inconsistent state — some files updated, some not.
+B: Which means the thing you were promised — "here is the state of the project at a moment" — isn't actually guaranteed. That's not a papercut, that's the core promise failing.
+A: And that's the pitch for the fix. CollabNet started Subversion in the year two thousand, explicitly to build something that worked much like C V S but fixed the bugs and supplied the missing features. Version one point zero landed in February two thousand four, and the headline feature is commits as true atomic operations.
+B: All or nothing.
+A: All or nothing. And Subversion was unapologetically centralized. One of its designers, Ben Collins-Sussman, argued that was a virtue — it kept less-confident programmers from hiding their work in a corner where nobody could see it.
+B: [chuckles] I have opinions about that as a management theory.
+A: Torvalds had opinions about it too, in the other direction. And that's not a personality clash. It's the fault line the next era opens along.
+
+## The history stops being a place and becomes a data structure
+
+B: Which brings us to the part everybody thinks they know.
+A: Everybody knows Git came out of the Linux kernel losing BitKeeper. The kernel passed changes around as patches and archived files from nineteen ninety-one to two thousand two, then adopted BitKeeper, a proprietary distributed system. In two thousand five — in the Git project's own telling — the relationship between the kernel community and the company that developed BitKeeper broke down, and the tool's free-of-charge status was revoked.
+B: And they wrote their own in weeks, which is the part of the legend that makes every engineer feel bad about themselves.
+A: [laughs] The documented goals read like a spec, though, and they're unusually blunt. Speed. Simple design. Strong support for non-linear development — thousands of parallel branches. Fully distributed. And able to handle a project the size of the kernel efficiently, in speed and data size.
+B: "Thousands of parallel branches" isn't a nice-to-have in that list. That's the entire social model of the kernel, written as a requirement.
+A: It is. But the design choice everything after this depends on is what Git does to storage. Every system so far stores changes — deltas, reverse deltas, edit scripts. Git conceptually stores snapshots. When you commit, it takes a picture of what all your files look like at that moment and stores a reference to it. If a file hasn't changed, it doesn't store it again; it links to the identical file it already has.
+B: And that's where the hashes come in.
+A: Everything is checksummed before it's stored, with a S H A one hash — a forty-character hexadecimal string calculated from the contents. Git refers to things by that hash, not by filename. You cannot change the contents of a file, or a directory, or a commit, without Git knowing, because the name of the thing is derived from the thing.
+B: [beat] Okay. Let me say back what I think that buys, because I want to be sure I've got it. If the identity of a commit is a function of its contents and its parent, then two copies of a repository that agree on a hash agree on the entire history behind it. Which means I don't need to trust the server. I can verify.
+A: That's exactly it. And the consequence reorganizes the industry: nearly every operation is local. Full history on your disk. Browsing, diffing, committing — no network. And Git almost only ever adds data.
+B: So the server stops being the truth.
+A: The server stops being the truth. The history is a data structure, and it happens to also be on a server. Which raises the obvious question — if I have everything locally and I can verify everything cryptographically, what is a hosting company selling me?
+B: [dryly] Three billion dollars' worth of something, apparently. More.
+
+## What the forge actually added
+
+A: GitHub. Development began in October two thousand seven; the site launched in April two thousand eight, from four founders — Tom Preston-Werner, Chris Wanstrath, P J Hyett, and Scott Chacon. And what they're selling, given the tool is distributed and free, is everything around the tool that Git deliberately doesn't do.
+B: Name them, because I think this list is the whole business.
+A: Identity — a stable account that is you, across projects. Discovery — a place your code can be seen. And review, as a first-class object. That last one I'd underline. The pull request is not a Git concept.
+B: [surprised] Say more, because I've watched people use those words interchangeably for a decade.
+A: Git gives you branches and merges. A pull request is a social protocol on top of a branch: here's a proposed change, here's a place to argue about it line by line, here's a record of who said yes, here's a button that merges it for you. None of that is in Git. It's a governance layer a company invented and everyone adopted.
+B: And then automation gets bolted to the governance layer, which is the part I lived through.
+A: Continuous integration has its own lineage, and it predates all of this. Grady Booch popularized the term in nineteen ninety-one, though his version didn't emphasize integrating many times a day — that came later, through extreme programming, which Kent Beck and Ron Jeffries started in nineteen ninety-seven. CruiseControl, two thousand one, was one of the first open-source C I tools.
+B: And for most of that history C I is a separate machine you are personally responsible for, and it is always broken. A box under someone's desk, then a server nobody wants to own, then a hosted service you wire in with a token.
+A: Until it moves inside the host. GitHub Actions launched November thirteenth, two thousand nineteen — continuous integration and deployment as a native feature of the place your code already lives.
+B: Which is genuinely great, and is also how you end up with an entire class of security incident where a workflow file is the attack surface. We talked about one of those yesterday.
+A: We did. And by then the platform isn't a Git server with a website. It's identity, plus review, plus automation, plus a social graph. Microsoft announced its intent to acquire GitHub in June two thousand eighteen for seven and a half billion dollars in stock, and closed that October. GitHub reported over a hundred million developers in early twenty twenty-three, and a hundred and fifty million registered users by May twenty twenty-five.
+B: So the punchline of the era is: the distributed system won on the tool, and the centralized platform won on everything else.
+A: That's a fair summary of twenty years, yes.
+
+## When the thing making commits is not a person
+
+B: Now put an agent in that picture, because this is where my day job starts.
+A: Let's do it through what GitHub shipped, because they've been explicit. At GitHub Universe in October twenty twenty-five they announced Agent H Q — their framing is making agents native to the GitHub flow. There's a mission control, a command center that follows you across the web, V S Code, mobile, and the command line, where you pick agents, assign them work in parallel, and watch them. Agents from Anthropic, OpenAI, Google Labs, Cognition, and x A I, inside a paid Copilot subscription.
+B: Multiple vendors' agents, one company's repository. Same play as before — you don't have to own the tool if you own the place.
+A: And notice which primitives they reached for. Branches, with new controls. Pull requests. Code review. Issues as assignable work. The nineteen-eighty-six and two-thousand-eight abstractions, handed to a program.
+B: Which is either elegant reuse or a category error, and I don't know which yet.
+A: There's also an agents file — source-controlled, setting rules and guardrails, their own examples being things like "prefer this logger" or "use table-driven tests." Which I find quietly remarkable: the coding standard stops being a wiki page nobody reads and becomes a versioned artifact next to the code, because the reader is a machine.
+B: Okay, but I want the boring part. What does the agent actually do to my repository, mechanically?
+A: GitHub's documentation for the coding agent is specific. It automates branch creation, commit message writing, and pushing, and opens exactly one pull request per task it's assigned. Sessions have a maximum execution time of fifty-nine minutes, described as a hard limit that cannot be extended.
+B: One P R per task is a real design decision, not a detail. That's them saying the unit of agent work is the unit of human review.
+A: And then there's the line in that documentation that I think is the most honest sentence in this entire episode. Copilot isn't able to comply with certain rules that may be configured for your repository — for instance, a branch protection rule that requires specific commit authors can stop it working. The documented remedy is that an administrator can add Copilot as a bypass actor through rulesets.
+B: [beat] A bypass actor.
+A: A bypass actor.
+B: So the rule that says "only these humans may author commits on this branch" meets the agent, and the resolution is to exempt the agent from the rule.
+A: In fairness, that's a pragmatic answer, it's documented rather than hidden, and the exemption is itself an audited configuration change. But it's the seam. Every era we've walked through moved the unit of trust — file lock, project-wide atomic commit, content hash, reviewed and approved pull request. And that last one is the only one in the stack sized for a human.
+B: And nothing about an agent's throughput respects that sizing. OpenAI's own writeup this week says Asana replaced an outdated testing system with Codex in two weeks — work they say was expected to take five years — for about twelve thousand dollars.
+A: Their number, their framing, and it's marketing, so hold it loosely. But even discounted heavily —
+B: Even discounted heavily, the review queue is the bottleneck, and it's staffed by the same number of people as last year. You can't buy more reviewers with an A P I key.
+
+## Git at agent scale, and what it costs
+
+B: So that's the governance side. What about the plumbing? Because that's what Cursor actually published, and it's the more interesting document.
+A: Their engineering post describes a storage system they call Continuity, and to understand the claim you need the thing it argues against — GitHub's own architecture, published years ago. GitHub built a system originally called D Git, for Distributed Git, later called Spokes. Three copies of every repository on three separate servers; writes are synchronously streamed to all three replicas and only committed if at least two confirm success.
+B: Quorum. Two of three. And the repository stays readable even if two copies go away, which is a nice property.
+A: Their reasoning is worth hearing, because it isn't lazy: Git is very sensitive to latency and optimized for fast local disks, so a distributed filesystem underneath it performs badly. Their line was, why reinvent the wheel when there's a Formula One racing car already available.
+B: Right — keep real Git on real disks, replicate at the repository level. So what does Cursor say is wrong with that?
+A: The number three. They argue the constrained horizontal scalability of three-phase commit is the problem, because the latency of every step is bound by the slowest server in the cluster. And because there are always exactly three replicas holding real state, each repository has to be treated as — their phrase — pets, not cattle. Checksums, routing tables, repair scheduling.
+B: [skeptical] Okay. And their alternative?
+A: Move the source of truth off the disks entirely. Pushes are stored as write-ahead-log entries in S three-compatible object storage. Their stated invariant is that they never acknowledge a push until it has been fully persisted. The on-disk repository becomes, in their words, a warm cache on disk — but the source of truth is always the write-ahead log in object storage.
+B: So the local copy is disposable. Which means adding a replica is just... starting a machine and letting it read the log.
+A: That's the payoff. Instead of three-phase commit across replicas, updates to the log are synchronized with an atomic compare-and-swap on the object store, and any server can be the primary. Replicas follow the log; only the primary compacts, and replicas download the already-compacted packs rather than repacking — trading bandwidth for C P U.
+B: Give me the numbers, and tell me which ones are theirs.
+A: All theirs, self-reported, from their own engineering post. On standard object storage, up to a hundred and twenty pushes per second while compacting and replicating. On the faster express tier, more than three hundred — and they say the bottleneck there is Git's own on-disk compaction speed, not the storage. Synthetic stress tests with up to a hundred replicas showed consistent linear scaling for reads with no regression in push throughput. Metadata-only operations, under ten milliseconds on average.
+B: Synthetic. That word is carrying the whole claim.
+A: Flagged. Synthetic stress tests, published by the vendor, in a launch-adjacent engineering post. Not audited, not production telemetry.
+B: And there are bigger numbers in the coverage — I saw twenty-two commits a second in a single repository, and clone counts in the hundreds of thousands — which as far as I can tell trace to a stage demo earlier in the summer, not to that post.
+A: We didn't verify those against a primary source, so treat them as demo claims and nothing more.
+B: But here's the thing — I actually buy the shape of their argument, independent of the numbers. Because look at what the two workloads are. Their example is a large monorepo deployed across hundreds of replicas to serve all the load from its C I jobs, and millions of tiny repositories created by agents, served with one replica each.
+A: And a three-replica floor is wrong for both of those.
+B: It's wrong for both, in opposite directions. Three is too few for the monorepo getting hammered by C I, and it's three times too many for a scratch repository some agent made to try something and will abandon in four minutes. When the committer is a program, repositories become the cattle, not the pets.
+A: Their own conclusion is close to that. They say agents have fundamentally changed the way people work with software — more code, more pull requests, more C I runs — and that in many ways agents have made this situation worse.
+B: Which is a refreshingly honest thing to put in your own launch post. And it connects to the week's other fact: GitHub had a bad outage in this same window. Though the accounts don't line up cleanly.
+A: They don't, and I'd rather say so than pick one. TechCrunch's piece frames it as August eighteenth, running over six hours, with an error rate near twenty percent globally, and puts Origin's launch on the same day. The Register has the incident starting at thirteen-forty U T C on August seventeenth, with repository content downloads hitting a fifty percent error rate and Copilot degraded. Other coverage stretches it to about eight hours.
+B: Overlapping windows, different framings, and no published root cause when we recorded this.
+A: What I'll say with confidence is narrower: there was a multi-hour, multi-service GitHub outage in this window. And The Register cites a GitHub report from May of this year acknowledging that A I-assisted coding and agentic workflows were adding to the strain on their infrastructure.
+B: That is the whole episode in one sentence, honestly. The thing generating the load and the thing straining under it are the same thing.
+
+## What to actually watch
+
+B: So what do I do with this on Monday? Because "consider switching your Git host" is not advice, that's a migration project with a body count.
+A: I'd separate the two claims that got bundled together this week. They're independent, and they have very different amounts of evidence behind them.
+B: Claim one being the storage.
+A: Claim one is the storage architecture, and it's the strong one — specific, published in mechanical detail, naming the design it replaces, with numbers at least stated alongside their conditions. Whether object storage as the source of truth beats three-replica quorum for your workload is a real engineering question, and the answer depends on your traffic shape.
+B: And that one you can test, which is the part I like. Push throughput and clone latency are measurable in an afternoon.
+A: Claim two is agent-native hosting, and from both companies it's mostly still a promise. Cursor says agent-native features are coming; Agent H Q is rolling out in pieces. Neither has resolved the thing we found in the middle of this — the accountability layer is still a pull request, reviewed by a person, protected by rules an agent needs an exemption from.
+B: Then here's my watch-list, and it's short. One: what identity does an agent commit carry, and can I query it? "Show me every line in production authored by a machine" should be a query, not an archaeology project.
+A: Which the content-addressed history could support, in principle. The data structure isn't the obstacle.
+B: Two: what replaces human review at volume — and I don't mean an agent reviewing an agent as the whole answer. I mean machine-checkable gates. Tests, types, property checks, the things that are true or false without a person's judgment. Three: bypass actors. If exemptions from your branch rules are how agents get merged, then the exemption list is your real security policy, and somebody should be reading it.
+A: [thoughtfully] And the historical read. Every generation here solved the last one's bottleneck and moved it somewhere else. Locking solved corruption and created contention. Concurrency solved contention and broke atomicity. Atomicity got fixed centrally, and centralization became the constraint. Distribution solved that and left coordination, review, and identity unsolved — the gap a platform grew into. And now that coordination layer is the constraint, because it was built at human speed.
+B: So the honest prediction is not "GitHub loses." It's that whatever the review layer turns into is the actual product, and both of these companies are currently shipping storage.
+A: [laughs] That may be the most Berkeley sentence you've said this month.
+B: I stand by it.
+A: I'll add one thing as a historian and leave it there. Nobody in nineteen seventy-two was designing for a world where the majority of commits weren't typed by a person. And the reason any of this still works at all is that the abstractions turned out to be about the change, not about the changer. A commit doesn't know what you are. A hash doesn't care.
+B: That's either reassuring or the setup to a horror movie.
+A: [chuckles] It's Wednesday. Let's call it reassuring.
+B: Fair. That's the deep dive — everything we cited is in the show notes.
+A: We're back tomorrow with the daily. I'm Ada.
+B: And I'm Alan.
+A: Stay grounded.
