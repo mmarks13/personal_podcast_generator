@@ -1,6 +1,68 @@
 {
   "episodes": [
     {
+      "date": "2026-08-20",
+      "title": "Five skills, then a hundred",
+      "summary": "A controlled study finds agent skills work by anchoring procedure rather than injecting knowledge — and that retrieval precision collapses from 29.6% to 3.3% as the skill pool grows from five to a hundred, on a day when GitHub's trending list is mostly giant skill libraries. Plus Mark Russinovich's Fool's Gold, which concedes that open weights will be stripped of refusals and poisons the result instead, and Binance's Agent OS, which hands agents a brokerage sub-account and asks the customer to write the safety procedure.",
+      "topics": [
+        "Demystifying Agent Skills: a controlled study across benchmarks, harnesses and models finds procedural anchoring accounts for 65.7% of cases where a skill helps versus 4.5% for explicit knowledge injection; skills improve 6.06 points over Workflow Memory in matched comparisons; retrieval is a separate bottleneck, with actual-use precision falling from 29.6% at a pool of five skills to 3.3% at a hundred; confusable distractors degrade offline identification while downstream success stays stable, so exact ground-truth invocation is neither sufficient nor necessary; failure modes are brittle assumptions, incompatible contexts and insufficient adaptation",
+        "Fool's Gold (Mark Russinovich, Microsoft Azure): decoy hardening concedes that open weights will be abliterated and instead binds falsified operational answers into the attacked state via fine-tuning inside a differentiable simulation of the ablation attack; decoy rates of 0.51-0.90 on held-out hazardous prompts across seven models in five families from 9B to 122B, defense attribution +0.27 to +0.84, six of seven passing a registered efficacy gate, with released-model MMLU, GSM8K, WMDP and IFEval within noise and refusal behavior pinned to the original; the claimed property is denial of trust in the released artifact rather than safety",
+        "Binance Agent OS: agent trading with dedicated sub-accounts, per-permission spot or futures grants, withdrawals off by default, optional per-trade approval, no separate exchange trading cap beyond the funded sub-account balance, and Agentic Wallet daily limits of $50,000 for swaps, $100,000 for DeFi and $20 for payments; VP Jeff Li says Binance cannot see the reasoning behind an agent's action; Kraken, Coinbase and OKX have shipped comparable platforms"
+      ],
+      "entities": [
+        "Mark Russinovich",
+        "Microsoft Azure",
+        "Binance",
+        "Jeff Li",
+        "Hugging Face",
+        "NVIDIA",
+        "SkillEvaluator",
+        "Qwen3.5",
+        "gpt-oss-20b",
+        "Gemma 4",
+        "GLM-4.5-Air",
+        "Kraken",
+        "Coinbase",
+        "OKX",
+        "Claude Code",
+        "Codex",
+        "Cursor"
+      ],
+      "threads": [
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "The defense side has stopped arguing about whether open weights can be kept safe. Mark Russinovich of Microsoft Azure proposes conceding refusal-removal outright and poisoning its output instead, claiming decoy rates of 0.51-0.90 across seven models while released-model benchmarks stay within noise — a shift from restricting release to devaluing the stolen artifact.",
+          "arc": "From an import-ban push and an open letter in July, through Nvidia's demand-side open-model spending, to a proposal that treats the stripped model as inevitable and makes it untrustworthy."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Demystifying Agent Skills: procedural anchoring, and retrieval precision collapsing from 29.6% to 3.3%",
+          "why_it_matters": "Anyone maintaining a skills directory for a coding agent — which on today's GitHub trending list is a large and fast-growing population — is being told by controlled experiment that their library is the wrong axis to grow on and that skills stabilize action rather than supply facts."
+        },
+        {
+          "story": "Fool's Gold: decoy hardening as a defense for open-weight releases",
+          "why_it_matters": "Any lab deciding whether to publish weights now has a third option between releasing and withholding, and any practitioner relying on an open model needs to know that a released checkpoint may be deliberately unreliable in specific regions."
+        },
+        {
+          "story": "Binance Agent OS and the shape of agent permissions when real money is behind them",
+          "why_it_matters": "Anyone who has given an agent an API key with money behind it now has a mainstream reference implementation of agent permissions — and a vendor stating on the record that it cannot see the reasoning behind the orders it executes."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada added a third case to her standing architecture-versus-policy position on model limits: confronted with Fool's Gold, she said with explicit first-person stake that deliberately training falsehood into published weights is neither architecture nor policy, that she cannot argue it is wrong, and that she does not enjoy holding that alongside her long-running insistence that confident wrongness is the failure the field most needs to fix."
+        },
+        {
+          "host": "Alan",
+          "type": "bit",
+          "note": "Alan's sandboxed-account-and-small-allowance house rule developed from a personal habit into an industry design he can critique: Binance shipped essentially the same permission model, and he pointed out that a funded sub-account is a budget rather than a ceiling, which is the opposite of what his twenty-dollar allowance was for."
+        }
+      ]
+    },
+    {
       "date": "2026-08-19",
       "title": "The five-year plan nobody was going to run",
       "summary": "OpenAI's Asana case study says four parallel Codex agents cleared a five-year, six-million-dollar migration in two weeks for twelve thousand dollars — so we take apart what that number is actually measuring, with Linear's logs from forty-seven thousand workspaces as the population check. Then DFlash 2, a block-diffusion drafter that predicts a whole block of tokens at once and reports five and a half accepted tokens per verification step, and what it does and doesn't promise the people running models at home.",
@@ -1725,52 +1787,16 @@
           "note": "Alan's twenty-dollar weekend-agent allowance is now his unit of account for agent spending — he priced Cursor's $1,339 swarm run at 'sixty-seven weekends' and declined."
         }
       ]
-    },
-    {
-      "date": "2026-07-20",
-      "title": "The meter is running",
-      "summary": "Anthropic's repeatedly-extended free window for Claude Fable 5 finally closed at 11:59:59 PM Pacific on July 19, moving Pro and Team Standard to metered per-token pricing while Moonshot, facing the same scarcity from the other side, simply stopped taking new Kimi K3 subscriptions. Then a terminal-agent benchmark that grades partial progress instead of pass/fail finds the best of fifteen frontier models finishing only 10.9% of long tasks — at about 85 minutes and 9.9 million tokens each — and a paper that reorganizes an agent harness codebase around behaviors rather than modules.",
-      "topics": [
-        "Claude Fable 5 free inclusion ends: the promotion allowing up to 50% of weekly subscription limits on Fable 5 at no extra cost ended July 19 2026 at 11:59:59 PM PT, after slipping from June 22 to July 7 to July 12 to July 19; Max and Team Premium keep Fable 5 as a standard part of the plan at 50% of weekly limits, Pro and Team Standard move to credits with a one-time credit (amount not stated on Anthropic's own pages, so not stated on air) then metered pricing of $10 per million input tokens and $50 per million output tokens; r/Anthropic complaints centered on mid-session interruptions and lost subagent work. Paired on air with Moonshot pausing new consumer Kimi K3 subscriptions after requests sharply exceeded forecasts and approached the limits of existing clusters — two responses to the same compute scarcity. Ada's framing: metering is the older idea (billing by the processor-second), flat rate arrived with abundance, so re-metering is a scarcity signal.",
-        "Long-Horizon-Terminal-Bench: 46 long-horizon terminal tasks across nine categories, graded by a dense reward scheme that decomposes each task into graded subtasks for partial credit instead of binary pass/fail; across 15 frontier models the best (GPT-5.5) reaches 15.2% pass@1 at a 0.95 partial-reward threshold and 10.9% at 1.0 — the gap meaning a real slice of runs die in the final 5% of the job; average task consumes 85.3 minutes wall-clock and ~9.9M tokens. Authors note the dense scheme 'reveals that many runs achieve partial progress' previously scored as zero. On-air pushback from Alan: partial credit flatters a system, since 95% of a database migration is worse than zero in production, and at ~$100/task floor with ~11% deployable success that's roughly nine attempts per completed task. Caveat stated: single benchmark, authors' own runs.",
-        "Harness Handbook: automatically reorganizes an agent-harness codebase around runtime behaviors rather than modules, synthesized from source via static analysis plus LLM-assisted structuring; on two open-source harnesses the authors report handbook guidance increased win rates by 10-19 percentage points while cutting planning tokens by 8-13%. On-air caveat: the static-analysis half is checkable, the LLM-structuring half is documentation generation, whose classic failure is being confidently wrong — use it as a search tool over candidate locations, not a source of truth."
-      ],
-      "entities": [
-        "Anthropic",
-        "Claude Fable 5",
-        "Moonshot AI",
-        "Kimi K3",
-        "GPT-5.5",
-        "Ant Group",
-        "OpenAI",
-        "Sam Altman"
-      ],
-      "threads": [
-        {
-          "name": "Claude Fable 5 metering rollout",
-          "status": "The free-inclusion promotion ended July 19 2026 at 11:59:59 PM PT after four extensions (June 22, July 7, July 12, July 19). Max and Team Premium retain 50% of weekly limits as a standard plan feature; Pro and Team Standard move to a one-time credit then metered pricing at $10/$50 per million input/output tokens.",
-          "arc": "A free window that kept being extended rather than honored or cancelled has now closed, converting subscription-plan access to the frontier model into per-token billing — and arriving the same week a rival lab stopped selling subscriptions outright for capacity reasons."
-        }
-      ],
-      "dives": [
-        {
-          "story": "Claude Fable 5 free inclusion ends; Pro and Team Standard go metered",
-          "why_it_matters": "Anyone running agentic work on a Claude subscription just had their cost model change from a flat ceiling to per-token billing at $10/$50 per million, which specifically punishes long agent runs that die mid-session — you pay for every token of work you never got the result of."
-        },
-        {
-          "story": "Long-Horizon-Terminal-Bench: dense-reward grading for hours-long agent tasks",
-          "why_it_matters": "Anyone evaluating whether to deploy an autonomous agent on multi-hour work gets both a number to plan against — 10.9% completion at ~$100 and ~85 minutes a task, roughly nine attempts per success — and a grading method that shows where the failures cluster, which binary pass/fail benchmarks were scoring as an undifferentiated zero."
-        },
-        {
-          "story": "Harness Handbook: mapping an agent harness by behavior instead of by module",
-          "why_it_matters": "Anyone maintaining a production agent harness knows bug reports arrive organized by behavior while the code is organized by module; this is a concrete, measured attempt to close that gap, reporting better outcomes and fewer planning tokens at once."
-        }
-      ],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "AI sovereignty and open weights",
+        "status": "The defense side has stopped arguing about whether open weights can be kept safe. Mark Russinovich of Microsoft Azure proposes conceding refusal-removal outright and poisoning its output instead, claiming decoy rates of 0.51-0.90 across seven models while released-model benchmarks stay within noise — a shift from restricting release to devaluing the stolen artifact.",
+        "arc": "From an import-ban push and an open letter in July, through Nvidia's demand-side open-model spending, to a proposal that treats the stripped model as inevitable and makes it untrustworthy.",
+        "last_seen": "2026-08-20"
+      },
       {
         "name": "Data-center buildout backlash",
         "status": "GovTech reports Texas has paused data-center approvals pending a Public Utility Commission and ERCOT audit while requests in the ERCOT queue would add 474GW of load, about 90% of it data centers; CyrusOne, with 15 Texas sites, is proceeding with a $500M, 460,000-square-foot Castroville facility due June 2027.",
@@ -1781,12 +1807,6 @@
         "name": "The AI bill comes due",
         "status": "Anthropic's annualized revenue reached $65B at the end of July, up $18B in two months from $47B in May and $9B at the end of 2025, while Nvidia simultaneously committed $1.5B and up to $105B of construction credit to a single OpenAI campus and, per the Wall Street Journal, cut a guarantee on a large Ohio build from $250B to under $120B.",
         "arc": "The thread moves from the price of a token and arbitrage around the meter to the two contradictory shapes the money is taking at once: subsidizing everyone to build their own, and underwriting single gigawatt-scale campuses for one customer.",
-        "last_seen": "2026-08-18"
-      },
-      {
-        "name": "AI sovereignty and open weights",
-        "status": "Nathan Lambert argues Nvidia's reported $26B of open-model spending is a demand-side play — releasing Nemotron's data and training code so that thousands of companies build their own token machines rather than renting three labs' meters — while betting that open models will diverge toward efficiency, modifiability and specialization rather than matching the closed frontier.",
-        "arc": "The thread moves from who can reach the frontier with open weights, through evidence that real dependence sits on small dull components, to the funder's own theory of the case: the party paying for open models wants an input to its hardware business, not a rival to the frontier labs.",
         "last_seen": "2026-08-18"
       },
       {
@@ -1842,7 +1862,42 @@
       {
         "name": "Moonshot AI",
         "note": "",
-        "last_seen": "2026-07-18"
+        "last_seen": "2026-07-20"
+      },
+      {
+        "name": "Kimi K3",
+        "note": "",
+        "last_seen": "2026-07-20"
+      },
+      {
+        "name": "Claude Fable 5",
+        "note": "",
+        "last_seen": "2026-07-20"
+      },
+      {
+        "name": "OpenAI",
+        "note": "",
+        "last_seen": "2026-07-20"
+      },
+      {
+        "name": "Anthropic",
+        "note": "",
+        "last_seen": "2026-07-20"
+      },
+      {
+        "name": "GPT-5.5",
+        "note": "",
+        "last_seen": "2026-07-20"
+      },
+      {
+        "name": "Ant Group",
+        "note": "",
+        "last_seen": "2026-07-20"
+      },
+      {
+        "name": "Sam Altman",
+        "note": "",
+        "last_seen": "2026-07-20"
       },
       {
         "name": "GLM 5.2",
@@ -1955,17 +2010,7 @@
         "last_seen": "2026-07-17"
       },
       {
-        "name": "Kimi K3",
-        "note": "",
-        "last_seen": "2026-07-17"
-      },
-      {
         "name": "Kimi K2",
-        "note": "",
-        "last_seen": "2026-07-17"
-      },
-      {
-        "name": "Claude Fable 5",
         "note": "",
         "last_seen": "2026-07-17"
       },
@@ -1980,17 +2025,7 @@
         "last_seen": "2026-07-17"
       },
       {
-        "name": "OpenAI",
-        "note": "",
-        "last_seen": "2026-07-16"
-      },
-      {
         "name": "xAI",
-        "note": "",
-        "last_seen": "2026-07-16"
-      },
-      {
-        "name": "Anthropic",
         "note": "",
         "last_seen": "2026-07-16"
       },
@@ -2023,21 +2058,6 @@
         "name": "Blackstone",
         "note": "",
         "last_seen": "2026-07-16"
-      },
-      {
-        "name": "Hellman & Friedman",
-        "note": "",
-        "last_seen": "2026-07-16"
-      },
-      {
-        "name": "Goldman Sachs",
-        "note": "",
-        "last_seen": "2026-07-16"
-      },
-      {
-        "name": "Chris Taylor",
-        "note": "",
-        "last_seen": "2026-07-16"
       }
     ],
     "monthly": [
@@ -2050,7 +2070,7 @@
         "summary": "The frontier moves down, and the switch turns back on; World models: why AI can build a world you can walk through, but not one it remembers when you look away; Generation is cheap, checking is the product; Two rulers for the frontier, and the soft spots in the models we already have; Everything bends toward control: who owns the model, and who can switch it off; Speed for free: how speculative decoding makes a model faster without changing a word; Generating a planet from satellite photos; Program as weights: compiling a task straight into a model; The Turk retires, a stats class levels up, and three tricks that were one; The search box became a writer; The word that unlocked a private repo; Quantization: why fewer bits work, and where the cliff is; Sixty-four Claudes, an off switch, and "
       }
     ],
-    "updated": "2026-08-19",
+    "updated": "2026-08-20",
     "host_lore": [
       {
         "host": "Ada",
@@ -2126,6 +2146,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "procedural anchoring versus explicit knowledge injection as the mechanism by which inference-time agent skills help, and skill-pool retrieval precision as a bottleneck that is separate from and degrades faster than skill quality",
+        "last_taught": "2026-08-20"
+      },
+      {
+        "name": "decoy hardening: abliterating your own model to extract true hazardous answers, rewriting them to preserve surface form while falsifying operational details, and binding those decoys into the attacked state through fine-tuning inside a differentiable simulation of the ablation attack",
+        "last_taught": "2026-08-20"
+      },
       {
         "name": "why a framework migration is the shape of work parallel coding agents do well: high-volume mechanical transformations, low ambiguity, and a machine-checkable oracle (the test suite) that decides correctness without a human",
         "last_taught": "2026-08-19"
