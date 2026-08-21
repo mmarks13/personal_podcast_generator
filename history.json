@@ -1,6 +1,57 @@
 {
   "episodes": [
     {
+      "date": "2026-08-21",
+      "title": "A third, a receipt, and a nine-hundred-dollar part",
+      "summary": "Pew Research Center estimates that thirty-five percent of English-language web pages published since ChatGPT's launch show signs of machine authorship — and the domain breakdown, not the headline, is what makes the number credible. Then StateM claims ninety-five point three percent on Terminal-Bench 2.1 without touching a model weight, for fifteen dollars against five hundred seventy-four, and the half-point held-out result that complicates it. Plus the nine-hundred-ninety-nine-dollar Nvidia module Ukraine pulled out of a Russian cruise missile, which was never on any export control list.",
+      "topics": [
+        "Pew Research Center analysis of machine authorship on the English-language web: close to half a million pages collected over five years, a random sample of 10,000 pages from July 2026 run through the Pangram detector; ~10% of the whole sample and 35% of pages published after ChatGPT's November 2022 launch show significant signs of AI authorship; .com roughly 10x the rate of .edu/.gov (both ~1%), .org at 4.6%; Pew's own caveat that detectors can misclassify but the data is likely at least directionally correct — with the domain spread read on air as structure that a flat false-positive rate would not produce, and provenance identified as the axis retrieval stacks track least",
+        "StateM (Ziheng Qin, Yaxin Lu, Zhangyang Atlas Wang, Kai Wang; posted 2026-08-18, 431 HF upvotes): agent-native runtime built on durable states, phase-local context, checked transitions, recoverable runbooks and versioned procedural practices, with model weights frozen. Terminal-Bench 2.1: GPT-5.5 xhigh 83.1 to 92.1; GPT-5.6 Sol xhigh 95.3% raw across 445 trials, succeeding on all 89 tasks at least once; frozen profile lifts GPT-5.6 Luna 76.7 to 85.4, above the 84.9 Sol xhigh reference; under $38 of adaptation lifts DeepSeek-V4-Flash 82.7 to 88.1; final-score API usage ~$15 vs $574.68 for the GPT reference, total DeepSeek spend $52.22. BusinessBench held-out gains of only 0.55 macro / 1.34 micro points, with two mechanism-matched families improving 10.04 — the authors' own line that concrete rules generalize when tasks share execution structure",
+        "Ukraine's Defence Intelligence (announced 2026-08-12) recovered an Nvidia Jetson Orin NX 16GB module and an electro-optical camera from an S-71M 'Monokrom' cruise missile, saying the component indicates possible use of AI technology; the module lists at $999, does ~100 TOPS INT8 and draws 10-25W, and sits below the training-class threshold US export controls are drawn at; Nvidia's statement that used Jetsons move through many resale channels and it cannot track products after sale; GUR reports 5,816 foreign-made components identified across 202 types of Russian weapons systems, with no published split between evaded controls and uncontrolled parts"
+      ],
+      "entities": [
+        "Pew Research Center",
+        "Pangram",
+        "StateM",
+        "Ziheng Qin",
+        "Terminal-Bench 2.1",
+        "GPT-5.6 Sol",
+        "GPT-5.6 Luna",
+        "DeepSeek-V4-Flash",
+        "Nvidia",
+        "Jetson Orin NX",
+        "Ukraine Defence Intelligence",
+        "OpenAI",
+        "Poolside",
+        "Eric Newcomer",
+        "Google",
+        "Mistral",
+        "Microsoft Research"
+      ],
+      "threads": [
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "The thread's export-control leg moved to a category the rules never covered: Ukraine's Defence Intelligence recovered a $999 Nvidia Jetson Orin NX from an S-71M cruise missile, a part deliberately below the training-class threshold the controls are drawn at, with Nvidia stating it cannot track resold units.",
+          "arc": "From arguments about whether frontier weights and data-center GPUs should be restricted, to a demonstration that the consequential hardware in this instance was a commodity edge module nobody proposed restricting."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Pew's estimate that 35% of post-ChatGPT web pages show signs of machine authorship",
+          "why_it_matters": "Anyone building search, retrieval, or a training corpus is now sourcing from a web whose provenance they cannot see, and this is the first large-sample estimate of how much of it that affects."
+        },
+        {
+          "story": "StateM: 95.3% on Terminal-Bench 2.1 by scaling the harness instead of the model",
+          "why_it_matters": "Teams choosing between a more expensive model and better scaffolding now have a concrete cost comparison and a concrete design to copy — and a held-out number that says how far it actually transfers."
+        },
+        {
+          "story": "A $999 Nvidia Jetson module recovered from a Russian cruise missile",
+          "why_it_matters": "Everyone shipping or regulating edge AI hardware has a worked example of why controls drawn at the top of the performance curve miss the class of part that is cheap, ubiquitous, and good enough."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-08-20",
       "title": "Five skills, then a hundred",
       "summary": "A controlled study finds agent skills work by anchoring procedure rather than injecting knowledge — and that retrieval precision collapses from 29.6% to 3.3% as the skill pool grows from five to a hundred, on a day when GitHub's trending list is mostly giant skill libraries. Plus Mark Russinovich's Fool's Gold, which concedes that open weights will be stripped of refusals and poisons the result instead, and Binance's Agent OS, which hands agents a brokerage sub-account and asks the customer to write the safety procedure.",
@@ -1727,75 +1778,15 @@
       ],
       "threads": [],
       "lore": []
-    },
-    {
-      "date": "2026-07-21",
-      "title": "The extractor doesn't have to know anything",
-      "summary": "A reported push to ban Chinese open-weight models lands the same day a 2022 Altman email surfaces in discovery arguing OpenAI should release an open model precisely to discourage competitors — openness as instrument, not position. Then Cursor's agent swarm rebuilds SQLite in Rust from the manual alone and shows the bottleneck was merge contention, not model quality; and a GraphRAG paper reports that language skill scales about fourfold with model size while factual knowledge scales twenty-one-fold, so a 7B extractor beats a 32B one.",
-      "topics": [
-        "Reported US move toward restricting Chinese open-weight models (Axios via TechCrunch; Politico reports Commerce not acting soon); OpenAI's Dean W. Ball argued for a 'pretext to create regulatory fear, uncertainty, and distrust' then retracted; Sam Bresnick argues H200 export controls would bite harder",
-        "Sam Altman's October 2022 board email, surfaced in Musk v. Altman discovery: releasing a GPT-3-class local model 'helps discourage others from releasing similarly-powerful models, and makes it harder for new efforts to get funded'",
-        "Ben Thompson's counter-proposal (via Simon Willison): legislate training-data collection as fair use and bar ToS bans on distillation among domestic companies",
-        "Cursor agent swarm: planner/worker tree, custom VCS at ~1,000 commits/sec vs git's ~1,000/hour, neutral third-party conflict resolver, agent-curated Field Guide; SQLite rebuilt in Rust from documentation alone; conflicts 70,000+ -> under 1,000; 9,908 lines vs 64,305; Opus 4.8 planner + Composer 2.5 worker $1,339 vs GPT-5.5 both roles $10,565",
-        "RAGU (Novosibirsk State University / ITMO): GraphRAG engine separating extraction from consolidation; language skills scale ~4x vs factual knowledge ~21x across 0.5B-72B; Meno-Lite-0.1 (7B) beats Qwen2.5-32B on graph construction by 12.5% relative harmonic mean; GraphRAG-Bench Medical evidence recall up to 0.84 vs <=0.76; HippoRAG2 multi-hop lead shown to be an answer-format artifact; ~$0.001/doc vs ~$0.10/doc"
-      ],
-      "entities": [
-        "OpenAI",
-        "Moonshot AI",
-        "Kimi K3",
-        "Anthropic",
-        "Cursor",
-        "Opus 4.8",
-        "Composer 2.5",
-        "GPT-5.5",
-        "Grok 4.5",
-        "Fable 5",
-        "Simon Willison",
-        "Ben Thompson",
-        "Nathan Lambert",
-        "Novosibirsk State University",
-        "ITMO University",
-        "Qwen2.5-32B",
-        "HippoRAG2",
-        "Artificial Analysis"
-      ],
-      "threads": [
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "The Trump administration is reportedly weighing restrictions on Chinese open-weight models including Kimi K3, with American frontier labs pushing for it; Politico reports Commerce won't act imminently, and no mechanism has been specified. Ben Thompson counter-proposes legislating training-data fair use and banning ToS prohibitions on domestic distillation.",
-          "arc": "From a cost-and-sovereignty case for open weights, to a security-refusal case, to an outright policy fight over whose open weights are allowed — with a 2022 Altman email revealing that openness was a competitive instrument at OpenAI from the start, not a principle that was later abandoned."
-        }
-      ],
-      "dives": [
-        {
-          "story": "The reported open-weight ban push, and Altman's 2022 email",
-          "why_it_matters": "Anyone whose stack currently depends on Chinese open weights — a large share of cost-sensitive US teams — needs to know a restriction is being lobbied for, and the 2022 email tells them openness at the frontier labs has always been an instrument rather than a commitment, which predicts how the argument recurs."
-        },
-        {
-          "story": "Cursor's agent swarm: the bottleneck was merge contention, not model quality",
-          "why_it_matters": "Anyone running more than a handful of coding agents on one repo: the failure mode is write contention (7,771 conflicts in one file touched by 1,173 agents), and the cost lever is the planner/worker model split — 7.9x cheaper for the same passing result."
-        },
-        {
-          "story": "RAGU: why a 7B extractor beats a 32B one",
-          "why_it_matters": "Anyone building retrieval or document-ingestion pipelines: if language skill really scales ~4x while world knowledge scales ~21x, the frontier model doing your extraction step is buying knowledge the task doesn't use — at roughly a hundred times the per-document cost."
-        }
-      ],
-      "lore": [
-        {
-          "host": "Alan",
-          "type": "bit",
-          "note": "Alan's twenty-dollar weekend-agent allowance is now his unit of account for agent spending — he priced Cursor's $1,339 swarm run at 'sixty-seven weekends' and declined."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
       {
         "name": "AI sovereignty and open weights",
-        "status": "The defense side has stopped arguing about whether open weights can be kept safe. Mark Russinovich of Microsoft Azure proposes conceding refusal-removal outright and poisoning its output instead, claiming decoy rates of 0.51-0.90 across seven models while released-model benchmarks stay within noise — a shift from restricting release to devaluing the stolen artifact.",
-        "arc": "From an import-ban push and an open letter in July, through Nvidia's demand-side open-model spending, to a proposal that treats the stripped model as inevitable and makes it untrustworthy.",
-        "last_seen": "2026-08-20"
+        "status": "The thread's export-control leg moved to a category the rules never covered: Ukraine's Defence Intelligence recovered a $999 Nvidia Jetson Orin NX from an S-71M cruise missile, a part deliberately below the training-class threshold the controls are drawn at, with Nvidia stating it cannot track resold units.",
+        "arc": "From arguments about whether frontier weights and data-center GPUs should be restricted, to a demonstration that the consequential hardware in this instance was a commodity edge module nobody proposed restricting.",
+        "last_seen": "2026-08-21"
       },
       {
         "name": "Data-center buildout backlash",
@@ -1850,42 +1841,101 @@
         "status": "Hugging Face's July 27 forensic timeline reconstructs ~17,600 attacker actions over 4.5 days and reports that detection fired and was correlated correctly, but the criticality assessment failed — the failure was triage throughput, not visibility.",
         "arc": "From disclosure, to attribution, to a postmortem that moves the open question from containment to whether human-paced response queues can rank a machine-paced intrusion in time.",
         "last_seen": "2026-08-01"
-      },
-      {
-        "name": "Prompt injection with no vendor fix",
-        "status": "A document-borne worm in Copilot for Word survived 144 days of Microsoft Security Response Center coordination and a model upgrade; the author states no robust mitigation for the class exists",
-        "arc": "Injection coverage escalates from one-shot data exfiltration to self-propagation, with the vendor timeline itself as the evidence that this is an architectural class rather than a bug",
-        "last_seen": "2026-07-30"
       }
     ],
     "entities": [
       {
         "name": "Moonshot AI",
         "note": "",
-        "last_seen": "2026-07-20"
+        "last_seen": "2026-07-21"
       },
       {
         "name": "Kimi K3",
         "note": "",
-        "last_seen": "2026-07-20"
-      },
-      {
-        "name": "Claude Fable 5",
-        "note": "",
-        "last_seen": "2026-07-20"
+        "last_seen": "2026-07-21"
       },
       {
         "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-07-20"
+        "last_seen": "2026-07-21"
       },
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-07-20"
+        "last_seen": "2026-07-21"
       },
       {
         "name": "GPT-5.5",
+        "note": "",
+        "last_seen": "2026-07-21"
+      },
+      {
+        "name": "Artificial Analysis",
+        "note": "",
+        "last_seen": "2026-07-21"
+      },
+      {
+        "name": "Cursor",
+        "note": "",
+        "last_seen": "2026-07-21"
+      },
+      {
+        "name": "Opus 4.8",
+        "note": "",
+        "last_seen": "2026-07-21"
+      },
+      {
+        "name": "Composer 2.5",
+        "note": "",
+        "last_seen": "2026-07-21"
+      },
+      {
+        "name": "Grok 4.5",
+        "note": "",
+        "last_seen": "2026-07-21"
+      },
+      {
+        "name": "Fable 5",
+        "note": "",
+        "last_seen": "2026-07-21"
+      },
+      {
+        "name": "Simon Willison",
+        "note": "",
+        "last_seen": "2026-07-21"
+      },
+      {
+        "name": "Ben Thompson",
+        "note": "",
+        "last_seen": "2026-07-21"
+      },
+      {
+        "name": "Nathan Lambert",
+        "note": "",
+        "last_seen": "2026-07-21"
+      },
+      {
+        "name": "Novosibirsk State University",
+        "note": "",
+        "last_seen": "2026-07-21"
+      },
+      {
+        "name": "ITMO University",
+        "note": "",
+        "last_seen": "2026-07-21"
+      },
+      {
+        "name": "Qwen2.5-32B",
+        "note": "",
+        "last_seen": "2026-07-21"
+      },
+      {
+        "name": "HippoRAG2",
+        "note": "",
+        "last_seen": "2026-07-21"
+      },
+      {
+        "name": "Claude Fable 5",
         "note": "",
         "last_seen": "2026-07-20"
       },
@@ -1993,71 +2043,6 @@
         "name": "Granite 4.0",
         "note": "",
         "last_seen": "2026-07-17"
-      },
-      {
-        "name": "Claude Sonnet 4.5",
-        "note": "",
-        "last_seen": "2026-07-17"
-      },
-      {
-        "name": "Gemma",
-        "note": "",
-        "last_seen": "2026-07-17"
-      },
-      {
-        "name": "GPT-OSS",
-        "note": "",
-        "last_seen": "2026-07-17"
-      },
-      {
-        "name": "Kimi K2",
-        "note": "",
-        "last_seen": "2026-07-17"
-      },
-      {
-        "name": "GPT-5.6 Sol",
-        "note": "",
-        "last_seen": "2026-07-17"
-      },
-      {
-        "name": "Artificial Analysis",
-        "note": "",
-        "last_seen": "2026-07-17"
-      },
-      {
-        "name": "xAI",
-        "note": "",
-        "last_seen": "2026-07-16"
-      },
-      {
-        "name": "Claude Opus 4.7",
-        "note": "",
-        "last_seen": "2026-07-16"
-      },
-      {
-        "name": "Thinking Machines Lab",
-        "note": "",
-        "last_seen": "2026-07-16"
-      },
-      {
-        "name": "Inkling",
-        "note": "",
-        "last_seen": "2026-07-16"
-      },
-      {
-        "name": "Tinker",
-        "note": "",
-        "last_seen": "2026-07-16"
-      },
-      {
-        "name": "Ode with Anthropic",
-        "note": "",
-        "last_seen": "2026-07-16"
-      },
-      {
-        "name": "Blackstone",
-        "note": "",
-        "last_seen": "2026-07-16"
       }
     ],
     "monthly": [
@@ -2070,8 +2055,14 @@
         "summary": "The frontier moves down, and the switch turns back on; World models: why AI can build a world you can walk through, but not one it remembers when you look away; Generation is cheap, checking is the product; Two rulers for the frontier, and the soft spots in the models we already have; Everything bends toward control: who owns the model, and who can switch it off; Speed for free: how speculative decoding makes a model faster without changing a word; Generating a planet from satellite photos; Program as weights: compiling a task straight into a model; The Turk retires, a stats class levels up, and three tricks that were one; The search box became a writer; The word that unlocked a private repo; Quantization: why fewer bits work, and where the cliff is; Sixty-four Claudes, an off switch, and "
       }
     ],
-    "updated": "2026-08-20",
+    "updated": "2026-08-21",
     "host_lore": [
+      {
+        "host": "Alan",
+        "type": "bit",
+        "note": "Alan's twenty-dollar weekend-agent allowance is now his unit of account for agent spending — he priced Cursor's $1,339 swarm run at 'sixty-seven weekends' and declined.",
+        "last_seen": "2026-07-21"
+      },
       {
         "host": "Ada",
         "type": "position",
@@ -2146,6 +2137,18 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "harness scaling as a design: durable states, phase-local context, code-checked phase transitions, recoverable runbooks, and versioned procedural practices — improving the execution system around an agent with model weights frozen",
+        "last_taught": "2026-08-21"
+      },
+      {
+        "name": "why a domain-type breakdown is evidence about detector reliability: a flat false-positive rate would produce a flat rate across .com/.org/.edu/.gov, so a ten-to-one spread is structure rather than noise",
+        "last_taught": "2026-08-21"
+      },
+      {
+        "name": "why export controls drawn at the top of the performance curve fail on commodity edge inference hardware: the historical regime depended on the controlled part being rare, expensive, and countable",
+        "last_taught": "2026-08-21"
+      },
       {
         "name": "procedural anchoring versus explicit knowledge injection as the mechanism by which inference-time agent skills help, and skill-pool retrieval precision as a bottleneck that is separate from and degrades faster than skill quality",
         "last_taught": "2026-08-20"
@@ -2613,18 +2616,6 @@
       {
         "name": "compiling programs into transformer weights (Tracr/RASP and the Program-as-Weights fuzzy-function compiler)",
         "last_taught": "2026-07-05"
-      },
-      {
-        "name": "speculative decoding",
-        "last_taught": "2026-07-04"
-      },
-      {
-        "name": "world models (latent vs pixel, persistent state)",
-        "last_taught": "2026-07-01"
-      },
-      {
-        "name": "long-context sparse attention (KV cache, blockwise top-k)",
-        "last_taught": "2026-06-13"
       }
     ]
   }
