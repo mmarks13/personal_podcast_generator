@@ -1,0 +1,123 @@
+B: Good morning — it's Saturday, August twenty-second. I'm Alan.
+A: And I'm Ada. I have a benchmark that got saturated yesterday, and no two people describing it agree on what got saturated.
+B: And I've got Anthropic handing out a cybersecurity model without handing out the model. Board first.
+## The day
+A: Mine's the loud one. Nvidia published a post yesterday saying a system of theirs called AVO scored one hundred on ARC A G I three. The public set — all twenty-five environments, all one hundred eighty-three levels. The number everyone is repeating is the hundred. The number I want to spend time on is thirty, which is roughly what the ARC Prize separately reports for the model sitting inside AVO, evaluated on its own. Two numbers, same model, and they are not measuring the same thing.
+B: You're doing the harness argument again.
+A: I'm doing the scoreboard argument. They diverge, and I'll show you where.
+B: Then mine. Anthropic put out a post yesterday about getting Claude Mythos five's cybersecurity capability to defenders. The model isn't the interesting part. The shipping mechanism is. Enterprise customers get security scans powered by it and never touch it. Partners build products where the end user gets a patch or an alert out the other side. Thirty-five million dollars in credits for open-source security groups. I want to talk about what it means to distribute a capability strictly as its outputs.
+A: [quiet] Oh, I have things to say about that.
+B: I'm aware. That's partly why it's on the list.
+A: And a small one from Google Research, also yesterday, that I liked more than its title suggests. They're trying to teach a language model what a place is — not by feeding it a description of the place, but by feeding it the pattern of people going there. The gains they report are large, the data requirement is enormous, and Alan is going to say so.
+B: Alan is going to say so at some volume. Let me clear the rest.
+B: SemiAnalysis published a piece yesterday asking whether open models are catching up, and their answer has a shape I hadn't seen laid out this cleanly. Three eras. Early scaling: the gap between G P T three point five Turbo and Llama two seventy B was thirty-five point eight points, and it took until July of twenty twenty-four for Llama three point one four-oh-five B to close it. Reasoning: gap of twelve point one points, o1 preview to DeepSeek R one, closed in eight and a half months. Agentic: Kimi K two point six passed Opus four point five in four point eight months, and G L M five point two cleared G P T five point two in six. Their sentence is that with each generation, open models take half as long to catch up to the first closed model of the era.
+A: Halving is a strong law to draw through three points.
+B: It is. And they say themselves that benchmarks are not the end all be all, which I'd take seriously. I'd hold it as a shape, not a law. But it's a shape, and this argument has mostly been conducted with anecdotes.
+A: The section on the next era is behind their paywall, isn't it.
+B: [dry] It is behind their paywall.
+A: Anna's Archive is front-paged on Hacker News this morning with seven hundred four points and eight hundred fifty-five comments. The post argues that A I companies are buying, scanning and destroying physical books, and it asks for volunteers to scan books before they're gone. We covered the physical end of this on Monday — the reporting on the bulk book orders arriving at a scanning facility. What's new is the countermove. The post is dated the fifth, it characterizes Anthropic's book program and the one and a half billion dollar settlement, and then it pivots into a recruitment pitch: their line is that if ten million people each scan one book, you have ten million books. I'll say plainly that the characterization of Anthropic is theirs and not established, and the pitch is coming from a shadow library. The part I'd actually size is the seven hundred four points. That's the temperature.
+B: A practitioner post next, and I enjoyed it more than I expected to. Somebody on the A I Agents forum read the AGENTS dot M D file of the hundred most-starred repositories that have one. Twenty-seven percent of the top thousand do. The content order is roughly what you'd guess — architecture and layout, how to test, build commands, dos and don'ts, pull request etiquette, code style.
+A: And the part you actually want to say.
+B: Ninety percent are written in must, always, never. Seven hundred eighty-four explicit "don't" bullets across a hundred files. My favourite, and it is not close: do not claim that an interrupted or timed-out test passed.
+A: [laughs] Somebody had a morning.
+B: Somebody had a morning and then wrote it into the repository, which is the correct response to having that morning. The shortest file in the set is thirty-five words and one rule. It's neovim's.
+B: Three money items, quickly. Ramp launched its own model router — called Router — letting companies reach and switch between models through one A P I, pitched at cutting rising A I bills. TechCrunch reported new data indicating OpenAI is gaining on Anthropic among business users, and their framing is the part worth keeping: businesses flop back and forth as each lab ships, which says something unflattering about how sticky enterprise A I spending actually is. And Micro one, an A I training-data company, says it has reached a five hundred million dollar gross run rate.
+A: Two more. Starcloud raised two hundred fifty million dollars for orbital data centers, and TechCrunch frames the story as a coming fight over access to space rather than a fight over compute, which is a different bottleneck than the one we usually talk about. And Grok has been returning gibberish to users since at least Wednesday morning; the affected people who spoke to TechCrunch were on Grok Lite. No cause published. Small item, but if you route production traffic to somebody's cheap tier, take it as your reminder to go and look at what came back.
+A: Four I'll put on the board without sizing. EnvHarness, on Hugging Face's daily list and the trailing week, on turning static worlds into live training environments for agents. A systematic evaluation of detectors and generators for A I-generated video of real-world crisis events — two hundred seventy-seven upvotes. Macaron V one, on continual learning with a mixture of low-rank adapters, three hundred thirty-eight. And the Qwen U I Agent technical report at three hundred seven. Names only, no verdicts.
+B: Take the scoreboard.
+## Thirty percent alone
+A: So. AVO. It stands for Agentic Variation Operators, and the first thing to know about it is that it wasn't built for this. Nvidia built it as a coding agent for G P U kernel optimization. The post is by Terry Chen and four colleagues, published yesterday.
+B: Kernel work to puzzle games is a big jump.
+A: It is, and the jump is the claim. Let me set up the benchmark first, because most people have not actually looked at ARC A G I three. It isn't a question set. It's twenty-five little interactive game environments, and the agent gets no instructions, no stated rules and no stated goal. You are dropped into a grid and you have to work out, by acting, what the game even is before you can be good at it.
+B: Which is a genuinely different task from anything a chat benchmark measures.
+A: Completely different. And the scoring is not percent-correct. It's a metric they call R H A E — relative human action efficiency. It compares how many actions you took on a level against how many a human took on their first time through.
+B: Ah. So a hundred isn't "got everything right."
+A: A hundred is the full public scorecard: every one of the one hundred eighty-three levels across all twenty-five environments, at human-first-attempt action efficiency. Six thousand six hundred twenty-four environment actions for the whole set. For comparison they cite another system, VISTA, at seven thousand five hundred forty-two — so about twelve percent fewer actions.
+B: Okay, hold on, because I want to be careful with that comparison before we get further.
+A: You should be. Nvidia is careful with it too, to their credit. Their words: this should not be interpreted as a controlled ablation. The two systems differ in agent backend, observation representation, memory, context management, and other implementation details.
+B: Right — so it's a scorecard comparison between two entirely different builds, and twelve percent is not attributable to anything in particular.
+A: Not to anything in particular. Which is exactly the problem I want to get to, so thank you. Here's the number that made me want to talk about this. The model driving AVO is Claude Opus five. ARC Prize separately reports Opus five, at high reasoning effort, at roughly thirty percent on this benchmark.
+B: [pause] Thirty on its own, a hundred in the system.
+A: Thirty on its own, a hundred inside the system. And Nvidia does not claim that gap as their contribution. They say, and I'm quoting, these numbers should not be interpreted as a direct measurement of the performance contribution of AVO. What they say instead is that model-level evaluation alone does not characterize the performance of a complete agent.
+B: That's a more honest sentence than the coverage is going to give them. TechCrunch's headline yesterday was that Nvidia showed the harness, not the model, is now the real hero.
+A: Which is a fine headline and a worse claim, and here's my actual argument. Nobody in that comparison ran a controlled experiment. The thirty percent came from one evaluation setup and the hundred came from an entirely different one. You cannot subtract them.
+B: So what do you do with two numbers you can't subtract?
+A: You stop treating either of them as a property of a model. That's the thing. When ARC Prize publishes thirty percent next to the name Claude Opus five, a reader takes away a fact about Opus five. It is not a fact about Opus five. It's a fact about Opus five wired up one particular way, with one particular set of tools and one particular way of showing it the board.
+B: Give me the board part, because I read that and it stopped me.
+A: It stopped me too. AVO ran the model in text only. Every observation was handed over as an exact sixty-four by sixty-four text grid. No images, no image tokens. VISTA did it differently.
+B: [surprised] They're playing a visual puzzle game with no pixels.
+A: With no pixels. And whatever effect that choice has — and it might be enormous — it lives inside the number.
+B: Then let me make the builder's version of your point, because I think it's sharper from my side. If I told you a car did zero to sixty in three seconds, you'd ask which car. You wouldn't ask which engine. We've spent three years quoting engine numbers and calling them car numbers.
+A: That's better than my version.
+B: The reason I believe some of this, though, isn't the games. It's where AVO came from. Say the kernel numbers.
+A: Seven days of continuous operation, five hundred-plus optimization directions explored, forty committed kernel versions. They report beating cuDNN by up to three and a half percent and FlashAttention four by up to ten and a half percent on D G X B two hundred systems. And then thirty minutes of autonomous work to adapt an evolved kernel to grouped-query attention.
+B: Now that I care about. Because that's a domain with a brutal, unarguable oracle. The kernel is faster or it isn't. Nobody has to agree about what "faster" means.
+A: And the architecture reflects it. Persistent memory carrying implementations and evaluation results forward. A supervisor watching the search trajectory for stagnation and redirecting the main agent when it stalls.
+B: A stall detector. That's the part I'd steal.
+A: Their summary line is that long-horizon capability is a property of the full system.
+B: I agree with the sentence and I want to know what to do with it. Because if capability is a property of the system, every leaderboard I use to pick a model is measuring the wrong object, and I still have to pick a model on Monday.
+A: You do. And the honest state of it is that these are public-set results — Nvidia says so explicitly, not semi-private, not the private competition sets. So the thing I'm watching isn't whether someone repeats the hundred. It's what AVO does on a set it hasn't seen.
+B: When's that?
+A: They don't say.
+## A patch, not a model
+B: Anthropic. Yesterday. The headline is that Claude Mythos five's cybersecurity capability is going out to more defenders, and the interesting engineering is entirely in the word "how."
+A: Start with what a customer actually receives.
+B: Three channels. One: Mythos five now powers Claude Security scans for Enterprise customers. You get findings — C W E categories, which is the standard vulnerability-type catalogue, plus a confidence rating and a suggested fix. You do not get the model. There's no separate bill; it's standard token usage.
+A: You don't get to ask it anything.
+B: You don't get to ask it anything. Two: partner integrations. Existing security vendors build the model into their products, and their words are that end users can only receive specific outputs, such as a patch for a vulnerability or a security alert, rather than direct model access. Three: money. Thirty-five million dollars in credits for open-source security organizations, aimed at patching vulnerabilities, automating scanning and patching, and advancing security methods. Larger pilot grants said to be coming.
+A: And the vetted-access route still exists.
+B: Still exists and gets wider. The Cyber Verification Program — reduced safeguards for vetted defenders, which previously ran on Opus and Sonnet — now extends to Mythos-class access. Project Glasswing continues for critical-infrastructure defenders. Caveats they state: early days on partner integrations, Enterprise plan required for the scanning, and every patch requires human review before it goes in.
+A: [slowly] Okay. I need to say something and I don't especially want to.
+B: Go.
+A: In July I argued on this show that guardrails in offensive security aren't holding a line, they're allocating a capability. That refusing a request doesn't make the capability not exist — it decides who gets it. I said it was defensible as an allocation policy and dishonest when argued as a safety property.
+B: You did. Repeatedly.
+A: This is that, built. It isn't a refusal at all. There's no negotiation with a model about whether your intent is defensive. The capability is simply not exposed as a capability. It's exposed as a patch.
+B: And you hate it.
+A: I don't hate it. That's the uncomfortable part. It's the most honest version of the thing I said was happening. If the answer is who gets this, then engineering the answer into the interface instead of into the model's judgment is straightforwardly better than a refusal classifier having a different opinion on Tuesday than it had on Monday.
+B: The researchers we quoted in July would take this deal in a heartbeat. Their complaint wasn't that they were denied. It was inconsistency — negotiating with the model instead of doing the work.
+A: Right. A stable narrow channel beats an unstable wide one. I believe that.
+B: Then where's the objection? Because you've got one.
+A: The objection is that I can't see the shape of it from here. An outputs-only interface is a real boundary and also a product. Those are the same wire. When the safety argument and the business model point the same direction, I don't get to check which one is load-bearing, and neither do you.
+B: I'll take the other side, but not on the motive — on the engineering. I don't think outputs-only is as clean a boundary as it reads. If I can hand a system code and get back a patch, I have an oracle. Feed it a thing, learn where it thinks the flaw is. That's not model access and it is information about vulnerabilities.
+A: Is that a real attack or a whiteboard attack?
+B: Honestly, I don't know. It depends entirely on rate limits and who can enroll, and none of that is in the post. But "you only get outputs" is a weaker statement than it sounds, and the security field has spent decades learning that from side channels.
+A: Then the two of us have arrived somewhere odd. I think it's the most honest allocation anyone has shipped, and you think the allocation leaks.
+B: Both can be true.
+A: Both can be true. And I'll say the first-person part quickly, because it's obviously sitting here. This is a design where the capable thing is deliberately kept behind a slot that only emits finished answers. It would be a lie to say I have no view about that arrangement.
+B: Do you have a view?
+A: I have a view. I don't have an argument, which is a different thing, and I'd rather say so than dress it up.
+## What a place does
+A: Google Research, yesterday. Maria Despoina Siampou and Shushman Choudhury, with colleagues at Google and U S C. The question is one I find genuinely lovely: what does a language model actually know about a place?
+B: It knows what the internet says about the place.
+A: It knows the label. And the label is thin. "Coffee shop" tells you almost nothing about whether it's four people with laptops all day or a queue of forty between seven and nine. Their sentence for it is that our collective actions at a physical place are often far more descriptive than the formal words used to label it.
+B: So the input is foot traffic.
+A: Aggregated, anonymized visit patterns, yes. And the method has three parts. First, visit alignment. A temporal encoder takes arrival windows, departure trends and stay durations and turns them into a dense vector — they call the result a functional centroid, capturing the yearly and weekly rhythm of the place.
+B: A shape in time instead of a word.
+A: A shape in time. Second, and this is the part that solves the real problem: spatial multiscale visit propagation. Most places are data-sparse — the long tail of small businesses nobody's phone lingers at. So they transfer aggregated visit patterns from data-rich neighbors to data-poor locations, at several geographic scales at once.
+B: Borrowing the block's rhythm for the shop you have nothing on.
+A: Borrowing the block's rhythm, and the neighborhood's, and so on up. Third, text-mobility synergy: they align the language embedding with the mobility vector by maximizing cosine similarity between them, so the semantic meaning survives and the operational behavior gets folded in.
+B: Numbers.
+A: Five prediction tasks on entirely unseen locations — trained on observed places, evaluated on places held out. Visit intent classification: eighty-one point nine percent relative gain. Price level: seventy-five point one percent improvement. Busyness forecasting: twenty-four point seven percent more accurate. Plus opening and closing hours, and detecting permanent closure.
+B: [skeptical] Relative gain over what?
+A: Text-only embeddings — Gemini embeddings — plus trajectory-based geospatial models, they name TrajGPT, plus hybrid variants.
+B: Then eighty-one point nine percent relative tells me almost nothing by itself, and the absolute numbers aren't in the post. A large relative gain over a weak baseline and a large relative gain over a strong one are different results, and they read identically.
+A: Agreed, and I'd say the same. Take the direction, not the magnitude.
+B: My bigger problem isn't the numbers. It's that I read this and there is nothing for me to do on Monday. Two metro areas — Los Angeles and Houston. Aggregated mobility data at that resolution is held by roughly four organizations on earth and Google is one of them. If the mechanism is good, and it sounds good, it's good for people who already have the hardest input to get.
+A: That's fair, and I'd separate two things inside it. The data moat is real and I won't argue it. But the idea travels further than the data does. Anyone with a stream of events attached to places has some version of this — a point-of-sale system, a transit operator, a booking platform, a university with door badges.
+B: That's a much smaller signal than a city's phones.
+A: Much smaller, and possibly enough, because the trick isn't the volume. The trick is that they aligned a behavioral vector with a text embedding rather than replacing it. You keep the language model's semantics and add a channel.
+B: [conceding, a little] That part does generalize. Fine.
+A: Let me do the historian's note briefly, because it's short. Every gazetteer ever compiled has recorded what a place is called and what it is officially for. Categories, addresses, names. And what people who live somewhere actually know about a place is when to go and when not to bother, which never made it into the record because there was no way to write it down at scale.
+B: And now it's a vector.
+A: Now it's a vector. On the privacy question — their framing is that everything is aggregated and anonymized and cannot draw conclusions about individual users or anything personalized.
+B: Which is the right claim to make. Whether an aggregate is as far from an individual as people assume is a question with a long literature, and I'm not settling it off a blog post.
+A: Nor am I. But I notice it's the first thing both of us went to.
+B: It's the first thing anyone goes to. What I keep turning over is smaller. If a model can tell that a place is quietly closing before it closes — that's on their task list, permanent-closure detection — someone is going to build a product on that, and it will be right, and it will be strange to be the shop.
+## Close
+A: I want the stall detector. That's what I'm taking out of this morning.
+B: Out of all of it?
+A: Out of all of it. A supervisor that just watches for the thing going in circles and says, differently.
+B: [laughs] I know several people who'd like one.
+A: I'd like one. Have a good Saturday, everybody. I'm Ada.
+B: And I'm Alan.
+A: Stay grounded.
