@@ -1,0 +1,160 @@
+A: Good morning — it's Saturday, August twenty-second, and this is the deep dive. I'm Ada.
+B: And I'm Alan. Yesterday a company called Starcloud added two hundred and fifty million dollars to a Series A it had already closed back in March, at a valuation of two point three billion dollars, to build data centers in orbit.
+A: And the reason their chief executive gave for the extension was not demand for compute. It was launch. His words: launch is pretty constrained right now, because SpaceX's Falcon Nine program is scheduled to end in twenty twenty-eight. He said one of the biggest costs is now on securing your launch capacity.
+B: [dry] So the raise is not to build the thing. The raise is to buy seats on rockets that might not exist.
+A: Which is a very old sentence in a very new outfit. Because putting the computers in space is not a twenty twenty-six idea, Alan. It's one of the most persistent ideas in the history of the field. The version we're chasing now traces back at least eighty-five years, it has failed repeatedly, and what I find genuinely interesting this week is that the failure mode has changed.
+B: Eighty-five years. You're going to make me guess.
+A: Nineteen forty-one. And I'll get there. But the honest version of this story starts with a different question than the one everyone's asking now. Not can we put computers in orbit — we've had computers in orbit for sixty years. The question is why the ones up there stayed so small for so long, and what has to be true for that to stop.
+B: And I am going to spend this entire episode asking where the heat goes.
+A: [chuckles] You are, and you should, and I'm asking you to hold it for about ten minutes.
+
+## The computer that could not be fixed
+
+A: Nineteen sixty-six. The Apollo Guidance Computer first flies. It was designed at MIT's Instrumentation Laboratory, and Margaret Hamilton directed the software implementation team for the lunar missions.
+B: Your building, historically speaking.
+A: My lineage, anyway. And I want to give you the specification, because the numbers are the whole point. Two thousand and forty-eight words of erasable magnetic core memory. Thirty-six thousand eight hundred and sixty-four words of read-only core rope. A sixteen-bit word — fifteen bits of data and one parity bit. And a two point zero four eight megahertz crystal clock, divided by two to give a one point zero two four megahertz clock for internal operations.
+B: Two kilowords of RAM.
+A: Two kilowords of RAM, and it flew people to the moon and back. But look at what the design is optimizing for. Every single choice is downstream of one constraint: it has to work, and nobody can come fix it. The read-only memory is literally woven — wires threaded through or around cores by hand, so a bit is a physical fact about the wire, not a charge that a cosmic ray can flip.
+B: That's not a memory technology. That's a promise.
+A: It's exactly a promise. And that constraint — no technician, ever — is the thing that shapes the next sixty years of computing in space. Everything that follows is people negotiating with it.
+
+## The great divergence
+
+A: Because here's what happens next, and it's the strangest fact in this whole story. On Earth, computing goes through the fastest sustained improvement in industrial history. In space, it more or less stops.
+B: Give me the concrete version.
+A: The concrete version is a chip called the RAD Seven Fifty. It's a radiation-hardened PowerPC from BAE Systems. Clock speed, one hundred and ten to two hundred megahertz. It's the flight computer lineage on Curiosity and on Perseverance.
+B: Perseverance landed in twenty twenty-one.
+A: Perseverance landed in twenty twenty-one with a two hundred megahertz processor.
+B: [beat] And what does one cost?
+A: The published figure I can stand behind is that RAD Seven Fifty pricing was described as comparable to the earlier RAD Six Thousand, which was listed at two hundred thousand US dollars as of two thousand and two.
+B: Two hundred thousand dollars for two hundred megahertz. That is a price I want to make fun of and can't, because I know why it's that number.
+A: Tell them why. This is your half.
+B: It's two things, and they're genuinely different problems. The first is total ionizing dose. Radiation deposits charge in the insulating layers of the device, it builds up over the mission, and the device slowly degrades. That's cumulative and it's basically a clock running against you from launch. The second is single event effects — one energetic particle comes through, dumps a dense track of electron-hole pairs, and you get an instantaneous fault. A flipped bit, or a crash.
+A: One is aging. One is lightning.
+B: Right, and you defend against them completely differently. Dose you fight with process and shielding and margin. Single events you fight with error correcting codes and redundancy and rebooting. And the reason the space chip is a decade behind is that hardening is a full custom redesign at an old process node, for a market of a few hundred spacecraft. There is no volume. There is never any volume.
+A: And there's a detail in Google's paper I want to flag now because it becomes important later. Radiation sensitivity has historically decreased as process nodes shrank — but the paper says that trend does not hold beyond the five nanometer node.
+B: So the free ride is over.
+A: The free ride is over. Which means if you want a modern accelerator in orbit, you can't just wait for the shrink to save you.
+
+## The dream that was never about computing
+
+A: Now. Nineteen forty-one. There's an Asimov short story called Reason, and Google's own paper cites it as the first appearance of the idea of collecting solar power in space.
+B: Google citing a nineteen forty-one science fiction story in a technical preprint is not on my bingo card.
+A: It's on mine, and I think it's honest of them. Because the serious version arrives in nineteen sixty-eight. Peter Glaser publishes in Science, November twenty-second, nineteen sixty-eight: the solar power satellite. You put photovoltaics in geosynchronous orbit, where a satellite is in sunlight essentially all the time, and you beam the power down to Earth by microwave. He got a US patent on it in nineteen seventy-three.
+B: And then nothing happened for fifty years.
+A: Not nothing — a large government study happened. The Department of Energy and NASA ran a satellite power system concept development and evaluation program through the late seventies. It concluded with its final proceedings and findings in November nineteen eighty, with more technical reports into early eighty-one. And then no program followed.
+B: What actually killed it? Because I always assumed it was launch cost.
+A: Launch cost is the headline, and Google's paper says as much — it says high launch costs have historically stymied efforts to harvest solar power in space on large scales. But there's a second thing, and it's the one that matters for today. The paper puts it plainly: getting the generated power back to Earth has been a major challenge for such proposals.
+B: The downlink.
+A: The downlink. You have gone to enormous expense to make electricity in a place with no atmosphere and no night, and now you have to move it thirty-six thousand kilometers through an atmosphere, into a rectifying antenna the size of a town, at a conversion efficiency that eats your margin, past a regulator who would like to discuss the beam.
+B: [slowly] Okay. And now I see where you're going.
+A: Say it.
+B: You don't send the power down. You send the workload up.
+
+## The rebellion of the cheap parts
+
+A: That's the inversion, and it's the reason this is a live idea in twenty twenty-six rather than a nineteen seventy-nine idea. But it only works if the second half of the story cooperates — the chips. And that changes in twenty seventeen.
+B: Spaceborne.
+A: Hewlett Packard Enterprise puts a commercial off-the-shelf high performance computing system on the International Space Station in August twenty seventeen. Not radiation-hardened. Ordinary parts.
+B: And this is the part I actually love, because the trick is a software trick. They didn't try to stop the radiation. They monitored conditions, and during a high-radiation event the software lowers the system's power, slowing the speed, so the system continues to operate correctly.
+A: Throttle into the storm.
+B: Throttle into the storm. Which is such a builder's answer. You've decided the hardware is going to be wrong sometimes, and you've moved the whole defense up a layer where you can iterate on it. And it worked — it came back to Earth on June fifth, twenty nineteen, after a year-and-a-half demonstration.
+A: And it isn't isolated. Google's paper points at the Ingenuity helicopter on Mars as the other proof point for off-the-shelf hardware in space.
+B: A drone on Mars running a phone chip.
+A: So by the twenty twenties you have two things that were not simultaneously true before. Consumer-class silicon that survives space well enough. And a reason to want serious compute up there that doesn't depend on solving the power downlink.
+B: And a launch industry that made the whole thing arguable rather than absurd.
+A: We'll get to that. It's the shakiest leg of the three.
+
+## Why the satellites have to fly two hundred meters apart
+
+A: So: what does the current proposal actually look like. Google published a preprint in November — Agüera y Arcas, Beals, Biggs and colleagues — called, roughly, towards a future space-based, highly scalable AI infrastructure system design. Project Suncatcher. And unlike a lot of moonshot documents it's specific enough to argue with.
+B: Give me the orbit.
+A: Dawn-dusk sun-synchronous low Earth orbit, mean cluster altitude six hundred and fifty kilometers. Dawn-dusk means the orbital plane rides the terminator — the line between day and night — so the satellite is in near-continuous sunlight. The paper's figure is that a panel in that orbit can receive up to eight times more solar energy per year than a panel on Earth at mid-latitude.
+B: Eight times. And no battery mass, presumably, or much less of it.
+A: Much less. Now the part that genuinely surprised me. The illustrative constellation is eighty-one satellites in a planar cluster with a radius of one kilometer, and the distance between next-nearest-neighbor satellites oscillates between roughly one hundred and two hundred meters.
+B: [skeptical] Two hundred meters. In low Earth orbit. Going seven and a half kilometers a second.
+A: Two hundred meters. And the reason is bandwidth, and I want you to walk through it, because when I understood why, the whole design clicked.
+B: Okay. So the problem is that a training cluster is not a bunch of computers that occasionally chat. Google's own TPU supercomputers use a custom low-latency inter-chip interconnect on the order of hundreds of gigabits per second per chip. Commercially available optical inter-satellite links are one to a hundred gigabits per second. That's not a gap you close with cleverness.
+A: The paper's target is on the order of ten terabits per second per link.
+B: Right, and their answer is: don't invent a new space laser. Use the same commercial dense wavelength division multiplexing transceivers that terrestrial data centers already use. The catch is those parts need much more received optical power — hundreds of microwatts, versus about one microwatt for a traditional long-range space link.
+A: And received power falls off as one over distance squared.
+B: So you fly closer. That's the whole move. You can't make the transmitter a hundred times stronger, so you make the distance a lot shorter, and the inverse square law hands you the power budget for free. And then there's a bonus that I think is the prettiest part of the paper: once the distance is small, the beam spot is small, so you can fit multiple independent beams in the same aperture. Their example is a single ten-centimeter aperture holding a four-by-four array of two point five centimeter optics at six hundred and thirty meters.
+A: Bandwidth scaling with the number of parallel beams rather than with the power.
+B: And on the bench, with off-the-shelf components, they got eight hundred gigabits per second one way — one point six terabits both ways — over a short free-space path. That's a demo, not a satellite. But it's a real demo.
+A: And the formation itself is less scary than it sounds, which I didn't expect. If orbital motion were perfectly Keplerian — point-mass Earth, no drag, no tides — that cluster reproduces itself every orbit at zero delta-v. It's not station-keeping. It's a shape that falls.
+B: Until Earth isn't a point mass.
+A: Correct, and they handle the leading oblateness correction by tweaking the cluster's axis ratio from two-to-one to two-to-one-point-zero-zero-three-seven. Which is the kind of number that tells you someone actually did the work.
+
+## What the chips did in the beam
+
+B: So they've got the network story. What about the part where a cosmic ray eats your gradient?
+A: They put a Trillium v6e Cloud TPU and its host server in a sixty-seven megaelectronvolt proton beam. They say it's the first published radiation testing of a device like this — cutting-edge node, big die, high floating-point throughput.
+B: And?
+A: The requirement they set is surviving about seven hundred and fifty rad of silicon dose over a five-year life. The most sensitive part was the high bandwidth memory — and HBM stress tests began showing irregularities at a cumulative two thousand rad, which is almost three times that requirement. Everything else, including end-to-end machine learning workloads, kept running correctly to the maximum tested dose of fifteen thousand rad on a single chip. No hard failures attributable to dose.
+B: [surprised] That's a much better result than I expected. Genuinely.
+A: It surprised me too.
+B: But — and here's where I want to be careful — dose is the aging problem. What about the lightning problem?
+A: Also HBM, mostly showing up as uncorrectable error-correcting-code errors. Their measured rate is about one event per fifty rad. At an estimated orbital dose of a hundred and fifty rad a year, they translate that to a failure probability on the order of one per ten million inferences.
+B: For inference, I'll take that. That is a fine number.
+A: And the paper says exactly that, and then it says the thing you're about to say.
+B: Training is different. Because in training an undetected bit flip doesn't crash anything — it silently corrupts the weights, and you find out days later that the run is subtly wrong. Silent data corruption. The paper flags that the impact on training jobs and the effectiveness of mitigations requires further study, and that's the honest position.
+A: There's also a host-level number: system-level crashes at roughly one per four hundred and fifty rad for the processor, four hundred for the memory.
+B: So a machine that reboots itself a couple of times a year. Which on Earth is Tuesday, and in orbit is a thing you have to design a recovery around, because nobody is walking to the rack.
+A: The paper's answer to failures, incidentally, is refreshingly blunt. It notes that failed TPUs are currently replaced by technicians, which is impracticable in space, and says the simplest solution is redundant provisioning.
+B: Bring spares. Sixty years on from the rope memory, and the answer to no technician, ever is still: bring spares.
+
+## The wall
+
+B: Okay. Ten minutes are up. Where does the heat go.
+A: [wry] I did promise.
+B: Because here's the thing that bothers me about every rendering of these constellations. On Earth, a data center gets rid of waste heat by moving it into a fluid — air, water — and carrying it away. That's convection, and it is enormously effective. In vacuum there is no fluid. There is nothing to carry anything. The only exit is radiation. You get the heat to a surface, and the surface glows it away as infrared.
+A: And radiated power scales as the fourth power of absolute temperature, which sounds like it should be generous.
+B: It sounds generous, and then you notice that room temperature is only about three hundred kelvin above absolute zero, and three hundred to the fourth is not a large number in watts per square meter. So the industry estimate I've seen quoted — and I'll say plainly it's an industry figure, not a peer-reviewed one — is around twelve hundred square meters of radiator to shed one megawatt while keeping the electronics near twenty degrees Celsius. About four tennis courts. Per megawatt.
+A: And a gigawatt-scale ambition is then, what, over a square kilometer of radiator.
+B: A square kilometer of unfolded, pointed, micrometeoroid-exposed radiator, and every bit of it is mass you launched. You can cheat it — run the radiators hotter. The same source says going from twenty degrees to sixty degrees roughly halves the area, because of that fourth power. But now your silicon is running at the edge of its thermal envelope, which is a trade against hardware lifetime.
+A: And I'll note where Google's paper stands on this, because it's the fair thing to do. Thermal management is listed in the paper as a challenge for future work, not as a solved problem. They describe the intent — heat pipes and radiators, preferably passive for reliability — and they say advanced thermal interface materials and heat transport mechanisms are essential.
+B: Which is a paper saying "we know."
+A: They do know. And there's one more detail I want to give you, because it's the moment where the two halves of this design fight each other. When they discuss scaling the cluster beyond the quadratic relationship between satellite count and radius, they note that any such approach would have to pay attention to occlusion of outgoing rejected heat infrared radiation between satellites.
+B: [beat] Oh, that's nasty.
+A: Isn't it.
+B: Because the bandwidth argument said fly close. And close means each satellite's radiators are staring at eighty other warm objects instead of at cold sky. You've optimized the network by degrading the cooling. Those are the same knob turned in opposite directions.
+A: That's the tension I'd put at the center of this whole idea. Not radiation, which tested better than anyone expected. Heat.
+
+## The leg that wobbles
+
+B: And money. Let's do money, because that's the third leg.
+A: The paper's threshold is two hundred dollars per kilogram to low Earth orbit. That comes from space solar power economics — analyses citing five hundred dollars a kilogram to geostationary transfer orbit as the viability threshold, which converts to about two hundred to low Earth orbit.
+B: And what does that buy you?
+A: They compare launched mass against power delivered for real satellites. At two hundred dollars a kilogram, a Starlink v2-type constellation works out to roughly eight hundred and ten dollars per kilowatt per year of launched power, amortized over satellite lifetime. Across a broader range of satellite designs, eight hundred and ten to seven thousand five hundred.
+B: And terrestrial?
+A: Current US data center power spend, as they report it, is about five hundred and seventy to three thousand dollars per kilowatt per year, depending on region and efficiency.
+B: So at the best end, orbit is inside the terrestrial band. That's a real result and I want to give it its due before I take it apart.
+A: Take it apart.
+B: The two hundred dollar number is a forecast, and I want to be precise about what it's forecasting. They fit a learning curve to SpaceX's own history — price per kilogram falling about twenty percent for every doubling of cumulative mass launched. Falcon One era was above thirty thousand dollars a kilogram inflation-adjusted. Falcon Heavy got to about eighteen hundred.
+A: That's a genuinely astonishing decline and I don't want to be sniffy about it.
+B: Nor do I. But sustaining that rate to under two hundred dollars by around twenty thirty-five requires — their number, not mine — roughly three hundred and seventy thousand tonnes of additional cumulative mass launched. About eighteen hundred Starship flights. Around one hundred and eighty a year.
+A: And the paper concedes it. It calls that ambitious and says it's still far below SpaceX's own stated targets, and it runs the sensitivity: cut the rate by seventy percent and you land near three hundred dollars a kilogram instead.
+B: Which is the most honest paragraph in the document, and it's also where yesterday's news lands like a brick. Because the entire economic case is a bet that launch gets abundant. And the guy who just raised two hundred and fifty million dollars says he's raising it because launch is getting scarce. Falcon Nine winding down in twenty twenty-eight. New Glenn and Vulcan not flying regularly. Neutron not operational.
+A: The learning curve needs volume. Volume needs vehicles.
+B: And in the meantime the field is filing paperwork at a scale that does not match the hardware. Blue Origin went to the Federal Communications Commission in March — Project Sunrise, up to fifty-one thousand six hundred satellites in sun-synchronous orbits between five hundred and eighteen hundred kilometers.
+A: Fifty-one thousand six hundred.
+B: And what's actually flown is one sixty-kilogram satellite. Starcloud-One, launched November second, twenty twenty-five, with the first Nvidia H100 in space. It trained nanoGPT in orbit — Karpathy's little model — and ran inference on a Google model. Axiom put up the first two orbital data center nodes on January eleventh this year.
+A: The gap between the filings and the flight hardware is about four orders of magnitude.
+B: Which doesn't make the filings dishonest. Spectrum applications are how you reserve an option. But you should read them as options, not as inventory.
+
+## What comes back down
+
+A: So where does this leave the dream, eighty-five years in.
+B: Better than I thought when we started, and worse than the renderings.
+A: I'll tell you what I actually take from the lineage. Glaser's satellite failed on the downlink — the hard part was moving energy through the atmosphere. This generation has quietly deleted that problem by moving the work instead of the power, and I think that's a genuinely good idea that took fifty years to become obvious. But it doesn't delete thermodynamics. The waste heat still has to leave, and in vacuum it can only leave one way, and that's the constraint nobody has demonstrated at scale.
+B: And they still need a downlink, by the way. Just a data one. The current best is NASA's TBIRD — two hundred gigabits per second from a six-U CubeSat, sixty-five passes between May twenty twenty-two and May twenty twenty-three. Impressive. Also about a fiftieth of what one of these inter-satellite links is supposed to carry.
+A: So what's your position? Plainly.
+B: My position is that launch cost is the number everybody argues about and heat is the number that decides it. I'd bet on inference in orbit before training — the error rates support it, the bandwidth requirement is smaller, and you don't have the silent corruption problem. And I'd want to see somebody unfold a large radiator in orbit and hold a real thermal load through a full orbit before I believed any of the gigawatt talk.
+A: I'd take the other emphasis, and I don't think we resolve it this morning. What strikes me is that the radiation result was the surprise — the modern chip did better in the beam than sixty years of hardened-part orthodoxy would have predicted. The failures in this lineage have never come from where people pointed.
+B: So watch the boring problems.
+A: Watch the boring problems. And there are dates, which is more than this idea has usually had. Google flies two prototype satellites with Planet by early twenty twenty-seven. Starcloud's next generation is eight-kilowatt compute satellites on rideshares in twenty twenty-seven, with their big one waiting on Starship.
+B: Eight kilowatts. Which by the twelve-hundred-square-meters-per-megawatt figure is about ten square meters of radiator.
+A: Manageable.
+B: Entirely manageable. That's the point. Nobody's hit the wall yet because nobody has gotten near it. Ask me again when someone flies a megawatt.
+A: I'm Ada.
+B: And I'm Alan. Stay grounded.
