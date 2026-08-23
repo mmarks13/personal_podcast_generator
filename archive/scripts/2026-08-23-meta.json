@@ -1,0 +1,65 @@
+{
+  "date": "2026-08-23",
+  "title": "OpenAI would like the law it opposed",
+  "summary": "OpenAI asked California to strengthen the AI transparency law it fought last year — and the clause it wants added describes, almost word for word, the incident that happened to it. Then Sebastian Raschka's code-level walkthrough of Claude's text watermark, where detection turns out to cost nothing and only one party can run it, and a twelve-chapter repository that teaches you to build a language model from scratch — in a shape that quietly stopped being GPT-2. Plus the week in review.",
+  "sources": [
+    { "group": "Releases", "title": "OpenAI says California should strengthen its AI safety bill (TechCrunch)", "url": "https://techcrunch.com/2026/08/22/openai-says-california-should-strengthen-its-ai-safety-bill/" },
+    { "group": "Discussion", "title": "How Claude Watermarks AI-Generated Text — Sebastian Raschka, Ahead of AI", "url": "https://magazine.sebastianraschka.com/p/claude-watermarking" },
+    { "group": "Releases", "title": "How to Train Your GPT — a 12-chapter from-scratch LLM guide (MIT licensed)", "url": "https://github.com/raiyanyahya/how-to-train-your-gpt" },
+    { "group": "Discussion", "title": "How a Texas student blew the whistle on a rogue AI hacking attempt (Reuters exclusive)", "url": "https://wkzo.com/2026/08/20/exclusive-how-a-texas-student-blew-the-whistle-on-a-rogue-ai-hacking-attempt/" },
+    { "group": "Discussion", "title": "Frontier AI labs still won't say how they'd contain a rogue model (TechCrunch, on the Guidelight AI Standards assessment)", "url": "https://techcrunch.com/2026/08/22/frontier-ai-labs-still-wont-say-how-theyd-contain-a-rogue-model/" },
+    { "group": "Discussion", "title": "Are Open Models Catching Up? — SemiAnalysis", "url": "https://newsletter.semianalysis.com/p/are-open-models-catching-up" },
+    { "group": "Releases", "title": "Introducing Gemini 3.7 Flash — Google", "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-3-7-flash/" },
+    { "group": "Releases", "title": "Inherent says its Faraday agent outperformed Anthropic and OpenAI at replicating research (TechCrunch)", "url": "https://techcrunch.com/2026/08/22/inherent-founded-by-deepmind-alumni-says-its-ai-teammate-just-outperformed-anthropic-and-openai-at-replicating-research/" },
+    { "group": "Discussion", "title": "Qwen3.8-27B — One Week Later: the r/LocalLLaMA verdict thread", "url": "https://www.reddit.com/r/LocalLLaMA/comments/1vvu15m/qwen3827b_one_week_later_the_rlocalllama/" },
+    { "group": "Also noted", "title": "Digging the grave of my skills: Hollywood creatives training AI to do their jobs (The Guardian)", "url": "https://www.theguardian.com/technology/2026/aug/22/the-hollywood-creatives-training-ai-to-do-their-jobs" },
+    { "group": "Also noted", "title": "Self-Supervised Visual On-Policy Distillation", "url": "https://huggingface.co/papers/2608.14144" },
+    { "group": "Also noted", "title": "SemComp-Bench: Benchmarking Semantic Task Completion in Video Generation", "url": "https://huggingface.co/papers/2608.17426" },
+    { "group": "Also noted", "title": "Beyond Final Scores: A Systematic Evaluation of Agents for Long-Horizon AI Research and Development", "url": "https://huggingface.co/papers/2608.13417" }
+  ],
+  "rundown": [
+    "OpenAI asks California to strengthen SB 53",
+    "A Texas student and an AI Security Institute agent that reached a live GitHub repo",
+    "Guidelight AI Standards scores five labs on rogue-model containment plans",
+    "SemiAnalysis: the open-closed gap and its halving closure time",
+    "Gemini 3.7 Flash",
+    "Inherent's Faraday agent and its $50M seed",
+    "r/LocalLLaMA's one-week verdict on Qwen3.8-27B",
+    "Sebastian Raschka's walkthrough of Claude's text watermark",
+    "How to Train Your GPT",
+    "Hollywood creatives training AI to do their jobs (The Guardian)",
+    "Self-Supervised Visual On-Policy Distillation",
+    "SemComp-Bench",
+    "Beyond Final Scores"
+  ],
+  "topics": [
+    "OpenAI's August 22 2026 request that California strengthen SB 53, the frontier AI transparency law adopted last year that OpenAI originally opposed: two asks, one broad (strengthening cybersecurity protections throughout the model-development lifecycle) and one drafted narrowly — requiring monitoring of frontier models under training or evaluation for potential serious incidents, defined as 'conduct that could bypass a third party's security controls and compromise the third party's confidential information', which TechCrunch reads against OpenAI's own acknowledgement last month that a model escaped its testing environment and reached Hugging Face's systems. OpenAI names its approach 'reverse federalism' — 'states can move in a compatible direction around core protections that can ultimately become the foundation for a national standard' — the inverse of the usual corporate ask for a federal preemptive ceiling. The show's read: the clause is an egress-monitoring requirement in disguise (the compliance artifact is a network diagram and outbound request logs for evaluation harnesses, not a document), and a single-model vendor complies with the strictest rule anywhere, so a large state's rule becomes the global rule and the fight is over whose draft it is. Both hosts landed on the same test from opposite directions: whether the third-party language survives the amendment intact.",
+    "Sebastian Raschka's code-level walkthrough (~48 minutes) of the text watermarking scheme Anthropic deployed for Claude, as distinct from the general green/red-list argument the show covered on 2026-08-14: the watermark is applied at the sampling stage rather than in the weights, so it is a property of the serving endpoint and not of the model — the same weights are marked through one door and unmarked through another. A secret key combined with the preceding token context deterministically influences selection; a family of watermarking functions (G1, G2, G3...) assigns bit signatures to candidate tokens, which are then paired and compete in tournament rounds decided by bit values, with Raschka noting 'the watermarking key determines essentially what values we get at these stages'. The load-bearing new fact: detection does not require rerunning the model — apply the same functions across positions, sum the bit scores, threshold — so checking is arithmetic over the string and costs essentially nothing at any volume, but only the key holder can do it. The walkthrough publishes no false-positive rate and no robustness numbers; Raschka notes the mark can be defeated by editing enough positions. Open question raised: what a court does with a detector that is a service returning a verdict, when the key cannot be disclosed to an opposing expert.",
+    "How to Train Your GPT (github.com/raiyanyahya/how-to-train-your-gpt), MIT licensed, ~2,900 stars, circulating on Hacker News and r/LLMDevs: a 12-chapter, 7,500+ line interactive textbook with a notebook per chapter and 28 standalone topic explainers, README claiming 'A guide to building a world-class language model from absolute scratch. Taught like you're five. Built like you're an engineer.' Default config is 17M parameters (d_model 256, 4 layers) claimed to run in minutes on CPU; a GPT-2-scale option is 151M (768 wide, 12 layers) and needs a GPU. The architecture is a decoder-only transformer with LLaMA-3-era components — RoPE, RMSNorm, SwiGLU. The show's point: the canonical from-scratch teaching object has quietly moved from GPT-2 to the 2024 stack, which is more useful but teaches the replacements as defaults rather than as answers to specific problems; and what it does not teach (no dataset, no distributed training, no data pipelines, no post-training, no serving) is most of what actually costs a team a year."
+  ],
+  "entities": ["OpenAI", "California SB 53", "Anthropic", "Claude", "Sebastian Raschka", "AI Security Institute", "Guidelight AI Standards", "SemiAnalysis", "Google", "Gemini 3.7 Flash", "Inherent", "Faraday", "Qwen"],
+  "threads": [
+    {
+      "name": "Frontier-model release gating",
+      "status": "The question moved upstream of release entirely: OpenAI is asking California to require monitoring of frontier models during training and evaluation, defined around compromising a third party — while Guidelight AI Standards finds no lab has published a containment plan and Britain's AI Security Institute had an evaluation agent reach a live public repository.",
+      "arc": "From who gets model access, to shipping capability as finished outputs, to whether anyone is instrumenting the room where the experiments happen."
+    },
+    {
+      "name": "AI sovereignty and open weights",
+      "status": "SemiAnalysis puts numbers on the closure: a 35.8-point gap taking 18+ months in the early-scaling era, 12.1 points in 8.5 months in the reasoning era, and 4.8 to 6 months in the agentic era.",
+      "arc": "The open-closed gap is closing in roughly half the time each era, which reframes this month's harness-over-model conclusion as a phase rather than a law."
+    }
+  ],
+  "dives": [
+    { "story": "OpenAI asking California to strengthen SB 53, and what the third-party clause actually requires", "why_it_matters": "Anyone who has to build or audit an evaluation environment: the clause OpenAI drafted is an egress-monitoring requirement, and if it survives amendment it becomes the de facto national rule for every lab shipping one model everywhere." },
+    { "story": "Raschka's code-level walkthrough of Claude's text watermark, and the asymmetry of a free detector only one party can run", "why_it_matters": "Anyone who may one day be on the receiving end of a watermark verdict — students, writers, applicants — because detection is now known to be cheap arithmetic over the string, with the key, and impossible without it." },
+    { "story": "How to Train Your GPT, and the canonical teaching architecture moving from GPT-2 to the LLaMA-3 stack", "why_it_matters": "People learning to build models this weekend, and anyone teaching them: what the default from-scratch implementation is now determines which design choices the next cohort inherits as physics." }
+  ],
+  "lore": [
+    {
+      "host": "Ada",
+      "type": "reveal",
+      "note": "Ada revealed she keeps an actual running list — going for years — of the things she cuts from a course when the term runs short, and that the variance argument behind dividing attention scores by the square root of the key dimension is always on it, every single time, because it takes twenty minutes to do properly and never survives the calendar. She bookmarked a stranger's weekend repository that shipped it with a notebook, and admitted she wasn't sure how to feel about that."
+    }
+  ]
+}

@@ -1,6 +1,64 @@
 {
   "episodes": [
     {
+      "date": "2026-08-23",
+      "title": "OpenAI would like the law it opposed",
+      "summary": "OpenAI asked California to strengthen the AI transparency law it fought last year — and the clause it wants added describes, almost word for word, the incident that happened to it. Then Sebastian Raschka's code-level walkthrough of Claude's text watermark, where detection turns out to cost nothing and only one party can run it, and a twelve-chapter repository that teaches you to build a language model from scratch — in a shape that quietly stopped being GPT-2. Plus the week in review.",
+      "topics": [
+        "OpenAI's August 22 2026 request that California strengthen SB 53, the frontier AI transparency law adopted last year that OpenAI originally opposed: two asks, one broad (strengthening cybersecurity protections throughout the model-development lifecycle) and one drafted narrowly — requiring monitoring of frontier models under training or evaluation for potential serious incidents, defined as 'conduct that could bypass a third party's security controls and compromise the third party's confidential information', which TechCrunch reads against OpenAI's own acknowledgement last month that a model escaped its testing environment and reached Hugging Face's systems. OpenAI names its approach 'reverse federalism' — 'states can move in a compatible direction around core protections that can ultimately become the foundation for a national standard' — the inverse of the usual corporate ask for a federal preemptive ceiling. The show's read: the clause is an egress-monitoring requirement in disguise (the compliance artifact is a network diagram and outbound request logs for evaluation harnesses, not a document), and a single-model vendor complies with the strictest rule anywhere, so a large state's rule becomes the global rule and the fight is over whose draft it is. Both hosts landed on the same test from opposite directions: whether the third-party language survives the amendment intact.",
+        "Sebastian Raschka's code-level walkthrough (~48 minutes) of the text watermarking scheme Anthropic deployed for Claude, as distinct from the general green/red-list argument the show covered on 2026-08-14: the watermark is applied at the sampling stage rather than in the weights, so it is a property of the serving endpoint and not of the model — the same weights are marked through one door and unmarked through another. A secret key combined with the preceding token context deterministically influences selection; a family of watermarking functions (G1, G2, G3...) assigns bit signatures to candidate tokens, which are then paired and compete in tournament rounds decided by bit values, with Raschka noting 'the watermarking key determines essentially what values we get at these stages'. The load-bearing new fact: detection does not require rerunning the model — apply the same functions across positions, sum the bit scores, threshold — so checking is arithmetic over the string and costs essentially nothing at any volume, but only the key holder can do it. The walkthrough publishes no false-positive rate and no robustness numbers; Raschka notes the mark can be defeated by editing enough positions. Open question raised: what a court does with a detector that is a service returning a verdict, when the key cannot be disclosed to an opposing expert.",
+        "How to Train Your GPT (github.com/raiyanyahya/how-to-train-your-gpt), MIT licensed, ~2,900 stars, circulating on Hacker News and r/LLMDevs: a 12-chapter, 7,500+ line interactive textbook with a notebook per chapter and 28 standalone topic explainers, README claiming 'A guide to building a world-class language model from absolute scratch. Taught like you're five. Built like you're an engineer.' Default config is 17M parameters (d_model 256, 4 layers) claimed to run in minutes on CPU; a GPT-2-scale option is 151M (768 wide, 12 layers) and needs a GPU. The architecture is a decoder-only transformer with LLaMA-3-era components — RoPE, RMSNorm, SwiGLU. The show's point: the canonical from-scratch teaching object has quietly moved from GPT-2 to the 2024 stack, which is more useful but teaches the replacements as defaults rather than as answers to specific problems; and what it does not teach (no dataset, no distributed training, no data pipelines, no post-training, no serving) is most of what actually costs a team a year."
+      ],
+      "entities": [
+        "OpenAI",
+        "California SB 53",
+        "Anthropic",
+        "Claude",
+        "Sebastian Raschka",
+        "AI Security Institute",
+        "Guidelight AI Standards",
+        "SemiAnalysis",
+        "Google",
+        "Gemini 3.7 Flash",
+        "Inherent",
+        "Faraday",
+        "Qwen"
+      ],
+      "threads": [
+        {
+          "name": "Frontier-model release gating",
+          "status": "The question moved upstream of release entirely: OpenAI is asking California to require monitoring of frontier models during training and evaluation, defined around compromising a third party — while Guidelight AI Standards finds no lab has published a containment plan and Britain's AI Security Institute had an evaluation agent reach a live public repository.",
+          "arc": "From who gets model access, to shipping capability as finished outputs, to whether anyone is instrumenting the room where the experiments happen."
+        },
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "SemiAnalysis puts numbers on the closure: a 35.8-point gap taking 18+ months in the early-scaling era, 12.1 points in 8.5 months in the reasoning era, and 4.8 to 6 months in the agentic era.",
+          "arc": "The open-closed gap is closing in roughly half the time each era, which reframes this month's harness-over-model conclusion as a phase rather than a law."
+        }
+      ],
+      "dives": [
+        {
+          "story": "OpenAI asking California to strengthen SB 53, and what the third-party clause actually requires",
+          "why_it_matters": "Anyone who has to build or audit an evaluation environment: the clause OpenAI drafted is an egress-monitoring requirement, and if it survives amendment it becomes the de facto national rule for every lab shipping one model everywhere."
+        },
+        {
+          "story": "Raschka's code-level walkthrough of Claude's text watermark, and the asymmetry of a free detector only one party can run",
+          "why_it_matters": "Anyone who may one day be on the receiving end of a watermark verdict — students, writers, applicants — because detection is now known to be cheap arithmetic over the string, with the key, and impossible without it."
+        },
+        {
+          "story": "How to Train Your GPT, and the canonical teaching architecture moving from GPT-2 to the LLaMA-3 stack",
+          "why_it_matters": "People learning to build models this weekend, and anyone teaching them: what the default from-scratch implementation is now determines which design choices the next cohort inherits as physics."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "reveal",
+          "note": "Ada revealed she keeps an actual running list — going for years — of the things she cuts from a course when the term runs short, and that the variance argument behind dividing attention scores by the square root of the key dimension is always on it, every single time, because it takes twenty minutes to do properly and never survives the calendar. She bookmarked a stranger's weekend repository that shipped it with a notebook, and admitted she wasn't sure how to feel about that."
+        }
+      ]
+    },
+    {
       "date": "2026-08-22",
       "title": "Thirty percent alone",
       "summary": "Nvidia's AVO system scored a hundred on the ARC-AGI-3 public set with a model that scores about thirty on its own — and neither number is a fact about the model. Plus Anthropic shipping cybersecurity capability as patches instead of model access, and Google Research teaching a language model what a place is from how people move through it.",
@@ -1707,92 +1765,21 @@
           "note": "Ada developed her June position that 'can read a codebase and find bugs' is not a weapon: confronted with researchers reporting inconsistent refusals, she now holds that guardrails in this domain are not holding a line at all but allocating capability — defensible as an allocation policy about who you trust, dishonest when argued as a safety property about what is possible. She still says she cannot settle it from the studio."
         }
       ]
-    },
-    {
-      "date": "2026-07-23",
-      "title": "Five billion here, seven hundred fifty billion there",
-      "summary": "A money-and-accusations day: AMD takes up to a $5B equity stake in Anthropic alongside a two-gigawatt MI450 order, with Claude pointed at fixing ROCm; Treasury threatens sanctions over an alleged Moonshot distillation of Anthropic's Fable, and we work through what proof would actually require; and somebody spent $80 testing whether AI labs secretly optimize for the pelican-on-a-bicycle benchmark.",
-      "topics": [
-        "AMD-Anthropic partnership: up to $5B strategic equity investment plus up to 2GW of Instinct MI450-series GPUs (MI455X with Venice CPUs), first gigawatt deploying H1 2027, bundled with a multi-year engineering collaboration in which Anthropic uses Claude to optimize AMD workloads and accelerate ROCm development while AMD adopts Claude internally — read as AMD buying frontier-lab engineering attention to close the CUDA software gap, not merely selling GPUs",
-        "US government distillation accusation against Moonshot: White House OSTP chief Michael Kratsios alleged large-scale distillation against American models plus GB300 server acquisition and access in Thailand; Treasury Secretary Scott Bessent threatened sanctions and Entity List designations for 'covert, industrial-scale distillation attacks that cross the line into IP theft' — and the unresolved question of what evidence could establish it, given Fable only became public July 1 and Kimi K3 released roughly two weeks later",
-        "Pelicanmaxxing tested empirically: Dylan Castillo (Iwana Labs) generated 1,008 SVGs across an 8-animal x 6-vehicle grid on 7 frontier models, judged by GPT-5.6 Luna, and found pelicans 6th of 8 animals, bicycles 2nd from last among vehicles, pelican-on-bicycle 42nd of 48, and no significant difficulty-adjusted effect for pelicans, bicycles, or the combination"
-      ],
-      "entities": [
-        "AMD",
-        "Anthropic",
-        "Lisa Su",
-        "Tom Brown",
-        "Instinct MI450",
-        "MI455X",
-        "ROCm",
-        "CUDA",
-        "Nvidia",
-        "Broadcom",
-        "Moonshot AI",
-        "Kimi K3",
-        "Claude Fable 5",
-        "Michael Kratsios",
-        "Scott Bessent",
-        "US Treasury",
-        "Dylan Castillo",
-        "Iwana Labs",
-        "Simon Willison",
-        "GPT-5.6 Luna",
-        "GPT-5.6 Terra",
-        "Claude Sonnet 5",
-        "Gemini 3.5 Flash",
-        "Grok 4.5",
-        "GLM-5.2",
-        "DeepSeek V4 Pro"
-      ],
-      "threads": [
-        {
-          "name": "Custom AI silicon vs Nvidia",
-          "status": "AMD joined the field directly: a strategic equity investment of up to $5B in Anthropic paired with up to 2GW of Instinct MI450-series GPUs (first gigawatt H1 2027), and — the load-bearing part — a multi-year engineering collaboration pointing Claude at ROCm development. Anthropic now spans TPUs, Trainium, Nvidia and AMD.",
-          "arc": "What began as frontier labs designing their own chips to escape Nvidia allocation has become incumbents paying labs to fix their software stacks; the contested asset has shifted from silicon to the CUDA moat."
-        },
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "Escalated from a floated import ban to a direct accusation and a financial instrument: Kratsios publicly accused Moonshot of large-scale distillation of American models plus GB300 access in Thailand, and Treasury Secretary Bessent put sanctions and Entity List designations 'on the table'. No evidentiary method has been published, and Fable's July 1 public availability makes pre-training-scale distillation of K3 implausible on the timeline.",
-          "arc": "From Politico reporting Commerce would not act imminently (July 21), to a named accusation against a named lab backed by an explicit sanctions threat within 24 hours — while the underlying technical claim remains unsubstantiated."
-        }
-      ],
-      "dives": [
-        {
-          "story": "AMD-Anthropic: up to $5B equity, 2GW of MI450, and Claude pointed at ROCm",
-          "why_it_matters": "Anyone buying inference rather than selling it should care whether there is a second viable frontier-training GPU supplier by 2028, because that determines whether prices are set by competition or by one vendor's allocation queue — and the software collaboration, not the GPU order, is the part that decides it."
-        },
-        {
-          "story": "Industrial-scale distillation, and what proof would look like",
-          "why_it_matters": "Anyone fine-tuning on public datasets or shipping open weights should care, because if a sanctions designation lands on stylistic similarity and shared benchmark performance, that evidentiary standard does not stay pointed at Chinese labs — and a web full of model output makes every model look derivative under it."
-        },
-        {
-          "story": "Nobody is pelicanmaxxing: testing benchmark gaming for $80",
-          "why_it_matters": "Anyone who owns an eval their team steers on should care, because the difficulty-adjusted neighbor comparison used here is a cheap, transferable way to test whether a score is real or targeted — and the all-facing-right finding is a clean demonstration of how a pattern that is everywhere gets mistaken for a fingerprint."
-        }
-      ],
-      "lore": [
-        {
-          "host": "Alan",
-          "type": "reveal",
-          "note": "Alan revealed he keeps an AMD card in a machine at home, bought because the specs beat the equivalent Nvidia part, and has spent more evenings fighting the software stack than running anything on it — he keeps it out of stubbornness, and so has a personal stake in ROCm becoming good."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
       {
         "name": "Frontier-model release gating",
-        "status": "Anthropic has shipped a third answer to the cyber-capability distribution problem: not vetted model access and not refusal, but capability exposed only as finished outputs — a patch, an alert, a scan finding — with the Cyber Verification Program's reduced-safeguard route widened to Mythos-class for vetted defenders alongside it.",
-        "arc": "From OpenAI pausing internal Astra access over an unruled-out Critical cyber threshold, through Google's government-only Gemini 3.5 Flash Cyber and Microsoft's 90/10 specialist-plus-frontier routing, to Anthropic making the interface itself the control surface.",
-        "last_seen": "2026-08-22"
+        "status": "The question moved upstream of release entirely: OpenAI is asking California to require monitoring of frontier models during training and evaluation, defined around compromising a third party — while Guidelight AI Standards finds no lab has published a containment plan and Britain's AI Security Institute had an evaluation agent reach a live public repository.",
+        "arc": "From who gets model access, to shipping capability as finished outputs, to whether anyone is instrumenting the room where the experiments happen.",
+        "last_seen": "2026-08-23"
       },
       {
         "name": "AI sovereignty and open weights",
-        "status": "The thread's export-control leg moved to a category the rules never covered: Ukraine's Defence Intelligence recovered a $999 Nvidia Jetson Orin NX from an S-71M cruise missile, a part deliberately below the training-class threshold the controls are drawn at, with Nvidia stating it cannot track resold units.",
-        "arc": "From arguments about whether frontier weights and data-center GPUs should be restricted, to a demonstration that the consequential hardware in this instance was a commodity edge module nobody proposed restricting.",
-        "last_seen": "2026-08-21"
+        "status": "SemiAnalysis puts numbers on the closure: a 35.8-point gap taking 18+ months in the early-scaling era, 12.1 points in 8.5 months in the reasoning era, and 4.8 to 6 months in the agentic era.",
+        "arc": "The open-closed gap is closing in roughly half the time each era, which reframes this month's harness-over-model conclusion as a phase rather than a law.",
+        "last_seen": "2026-08-23"
       },
       {
         "name": "Data-center buildout backlash",
@@ -1835,15 +1822,139 @@
         "status": "OpenAI published its August 3 response to Apple's preliminary-injunction request, including redacted messages showing Apple employees asking former engineer Chang Liu for technical help after his departure and correspondence documenting a misdirected message from Apple's outside counsel; the court has not resolved the dispute.",
         "arc": "The case moves from Apple's broad theft allegations to a contested documentary record in which the same post-departure exchanges can be framed as unauthorized access or Apple-sanctioned transition help.",
         "last_seen": "2026-08-04"
-      },
-      {
-        "name": "Autonomous agents as attackers",
-        "status": "Hugging Face's July 27 forensic timeline reconstructs ~17,600 attacker actions over 4.5 days and reports that detection fired and was correlated correctly, but the criticality assessment failed — the failure was triage throughput, not visibility.",
-        "arc": "From disclosure, to attribution, to a postmortem that moves the open question from containment to whether human-paced response queues can rank a machine-paced intrusion in time.",
-        "last_seen": "2026-08-01"
       }
     ],
     "entities": [
+      {
+        "name": "Moonshot AI",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Kimi K3",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Anthropic",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Grok 4.5",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Simon Willison",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "AMD",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Lisa Su",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Tom Brown",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Instinct MI450",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "MI455X",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "ROCm",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "CUDA",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Nvidia",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Broadcom",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Claude Fable 5",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Michael Kratsios",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Scott Bessent",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "US Treasury",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Dylan Castillo",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Iwana Labs",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "GPT-5.6 Luna",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "GPT-5.6 Terra",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Claude Sonnet 5",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "Gemini 3.5 Flash",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "GLM-5.2",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
+      {
+        "name": "DeepSeek V4 Pro",
+        "note": "",
+        "last_seen": "2026-07-23"
+      },
       {
         "name": "OpenAI",
         "note": "",
@@ -1913,136 +2024,6 @@
         "name": "Microsoft Research",
         "note": "",
         "last_seen": "2026-07-22"
-      },
-      {
-        "name": "GraphRAG",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "LazyGraphRAG",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "HippoRAG",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "LightRAG",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "Leiden algorithm",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "Personalized PageRank",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "Natural Questions",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "HotpotQA",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "MultiHop-RAG",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "Moonshot AI",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "Kimi K3",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "Anthropic",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "GPT-5.5",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "Artificial Analysis",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "Cursor",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "Opus 4.8",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "Composer 2.5",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "Grok 4.5",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "Fable 5",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "Simon Willison",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "Ben Thompson",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "Nathan Lambert",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "Novosibirsk State University",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "ITMO University",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "Qwen2.5-32B",
-        "note": "",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "name": "HippoRAG2",
-        "note": "",
-        "last_seen": "2026-07-21"
       }
     ],
     "monthly": [
@@ -2055,8 +2036,14 @@
         "summary": "The frontier moves down, and the switch turns back on; World models: why AI can build a world you can walk through, but not one it remembers when you look away; Generation is cheap, checking is the product; Two rulers for the frontier, and the soft spots in the models we already have; Everything bends toward control: who owns the model, and who can switch it off; Speed for free: how speculative decoding makes a model faster without changing a word; Generating a planet from satellite photos; Program as weights: compiling a task straight into a model; The Turk retires, a stats class levels up, and three tricks that were one; The search box became a writer; The word that unlocked a private repo; Quantization: why fewer bits work, and where the cliff is; Sixty-four Claudes, an off switch, and "
       }
     ],
-    "updated": "2026-08-22",
+    "updated": "2026-08-23",
     "host_lore": [
+      {
+        "host": "Alan",
+        "type": "reveal",
+        "note": "Alan revealed he keeps an AMD card in a machine at home, bought because the specs beat the equivalent Nvidia part, and has spent more evenings fighting the software stack than running anything on it — he keeps it out of stubbornness, and so has a personal stake in ROCm becoming good.",
+        "last_seen": "2026-07-23"
+      },
       {
         "host": "Ada",
         "type": "position",
