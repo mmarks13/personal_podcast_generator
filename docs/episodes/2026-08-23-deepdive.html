@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: The deputy with a credit card — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Deep Dive: The deputy with a credit card</h1>
+<div class="date">Self-Attention — 2026-08-23</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-08-23-deepdive/deepdive-2026-08-23.mp3"></audio>
+<p><em>2026-08-23</em></p>
+<p>A teaching episode on how you give an AI agent bounded authority to spend money: Norm Hardy's confused deputy, macaroon-style attenuated credentials, one-time vault tokens in OpenAI and Stripe's Agentic Commerce Protocol, and AP2's signed mandates — and why a spend cap bounds the size of a loss without touching its rate.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://www.binance.com/en/blog/ecosystem/5991233187660196794">Introducing Binance Agent OS: Built for AI Agent Integration</a></li>
+<li><a href="https://cloud.google.com/blog/products/ai-machine-learning/announcing-agents-to-payments-ap2-protocol">Announcing Agent Payments Protocol (AP2) — Google Cloud</a></li>
+<li><a href="https://github.com/google-agentic-commerce/AP2/blob/main/code/samples/go/pkg/ap2/types/mandate.go">AP2 mandate type definitions (IntentMandate, CartMandate, PaymentMandate)</a></li>
+<li><a href="https://developers.openai.com/commerce/specs/payment">Delegated Payment Spec — OpenAI Agentic Commerce</a></li>
+<li><a href="https://developers.openai.com/commerce/guides/key-concepts">Agentic Commerce: key concepts — OpenAI</a></li>
+<li><a href="https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.21361.html">Find and Buy with AI: Visa Unveils New Era of Commerce</a></li>
+<li><a href="https://research.google/pubs/macaroons-cookies-with-contextual-caveats-for-decentralized-authorization-in-the-cloud/">Macaroons: Cookies with Contextual Caveats for Decentralized Authorization in the Cloud (NDSS 2014)</a></li>
+<li><a href="https://arxiv.org/abs/2606.13385">Who Pays the Price? Stakeholder-Centric Prompt Injection Benchmarking for Real-World Web Agents (StakeBench)</a></li>
+<li><a href="https://docs.cdp.coinbase.com/x402/core-concepts/how-it-works">x402: how it works</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Confused_deputy_problem">The confused deputy problem (Norm Hardy, ACM SIGOPS OSR, 1988)</a></li>
+<li><a href="https://www.financemagnates.com/cryptocurrency/exchange/binance-creates-operating-system-for-agents-as-ai-trading-moves-beyond-apis/">Binance Creates Operating System for Agents as AI Trading Moves Beyond APIs — Finance Magnates</a></li>
+<li><a href="https://www.x402.org/">x402 — open standard for internet-native payments</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>Handing over the card</li>
+<li>The deputy who had permission</li>
+<li>Cutting the credential down</li>
+<li>The mandate problem</li>
+<li>What the cap doesn't catch</li>
+<li>Nobody has answered the third question</li>
+<li>What I'd actually watch</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Good morning — it's Sunday, August twenty-third. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. One thing today, and I've wanted to take it apart properly all week, because it's been sitting underneath about four different stories.</p>
+<h3>Handing over the card</h3>
+<p><b>Alan:</b> On Thursday, Binance put out a developer platform called Agent OS. The pitch is that you can point an AI agent at their trading and market data through an MCP server — that's Model Context Protocol, the connector standard — and let it trade.</p>
+<p><b>Ada:</b> Which on its own is a product announcement.</p>
+<p><b>Alan:</b> It is. But read how they built the permissions and it stops being a product announcement. In their own post, you put the agent in a sub-account. You toggle on which features it can touch. You set what it's funded with. And there's a button that revokes access to every connected agent at once.</p>
+<p><b>Ada:</b> They gave it a kill switch.</p>
+<p><b>Alan:</b> They gave it a kill switch. And Finance Magnates, covering the launch on the twentieth, quoted the boundary directly — the agent, quote, cannot pull assets from the user's main account or withdraw funds to external addresses. Their line is that the funded sub-account becomes the boundary of the agent's trading discretion.</p>
+<p><b>Ada:</b> So the interesting engineering there isn't the trading at all.</p>
+<p><b>Alan:</b> No. Nobody needed help writing a trading bot. The hard part they're solving is: how do you hand a process that can be talked into things a specific, bounded amount of your money?</p>
+<p><b>Ada:</b> And that question is now everywhere at once. There's an entire payments stack being built this year around exactly it — Google has a protocol for it, OpenAI and Stripe have a different one, the card networks have their own. Four groups, four answers, all shipping.</p>
+<p><b>Alan:</b> Which is usually a sign nobody has the answer.</p>
+<p><b>Ada:</b> Or that it's an old problem wearing new clothes. Because we have been arguing about this specific thing in computer security since before either of us existed, and the argument has a name, and a very good story attached to it.</p>
+<p><b>Alan:</b> Go on, then.</p>
+<h3>The deputy who had permission</h3>
+<p><b>Ada:</b> Nineteen eighty-eight. A man named Norm Hardy writes a short paper for the ACM operating systems review, and the title is a joke that turned into a field: "The Confused Deputy — or why capabilities might have been invented."</p>
+<p><b>Alan:</b> I know the phrase. I've never actually heard the story.</p>
+<p><b>Ada:</b> It's beautiful, and it's tiny. Commercial timesharing system. There's a compiler on it that anyone can run. And because the operators want to bill people for compile time, the compiler has permission to write to a statistics file in a system directory — SYSX, in Hardy's telling.</p>
+<p><b>Alan:</b> Fine. The compiler needs to write its own logs.</p>
+<p><b>Ada:</b> The compiler also lets you say where you'd like the debugging output to go. You hand it a filename. So a user hands it the name of the billing file. Also in SYSX.</p>
+<p><b>Alan:</b> Oh, no.</p>
+<p><b>Ada:</b> And the compiler opens it and writes over it. Not because it was compromised, not because there was a bug in the file system. Because it did exactly what it was asked, using exactly the authority it legitimately had.</p>
+<p><b>Alan:</b> The user didn't have permission to touch that file.</p>
+<p><b>Ada:</b> The user never needed it. The user had the compiler, and the compiler had the permission. Hardy's diagnosis is the part worth keeping: when the file name was passed from the user to the program, the permission did not go along with it. The permission was increased by the system silently and automatically.</p>
+<p><b>Alan:</b> So the name of the thing and the right to touch the thing traveled separately.</p>
+<p><b>Ada:</b> That's the whole disease. Security people call it separating designation from authority. You point at what you want; someone else's authority decides whether the pointing works. And Hardy's argument — this is the "why capabilities might have been invented" part — was that the fix is to make the right travel with the reference. You don't get a name and then ask if you're allowed. You get a thing that is itself the permission, like a key, or a ticket.</p>
+<p><b>Alan:</b> Okay. So why does an operating systems paper from nineteen eighty-eight suddenly matter to a card network?</p>
+<p><b>Ada:</b> Because we just built the most confusable deputy in the history of the field and gave it a credit card.</p>
+<p><b>Alan:</b> Yeah, that's fair.</p>
+<p><b>Ada:</b> It reads text from strangers. It's designed to be responsive to instructions. The whole point of it is that it takes an ambiguous request and figures out what you probably meant. And now it has authority.</p>
+<p><b>Alan:</b> And let's not re-run prompt injection — we did that one properly a few weeks ago. The short version, for anyone who missed that one: an agent reading untrusted content can be given instructions by that content, and there's no patch, because reading is the feature.</p>
+<p><b>Ada:</b> Right. What I want to talk about today is the other half — not "can the deputy be confused", which is settled, but "how much authority is the deputy holding when it happens."</p>
+<p><b>Alan:</b> Which is a design question, not a model question. Good. That I can work with.</p>
+<h3>Cutting the credential down</h3>
+<p><b>Ada:</b> So there's a family of answers, and they're genuinely different from each other, which is what makes this fun. The first one is the oldest: don't give the agent your authority. Give it a smaller thing that is only a piece of your authority.</p>
+<p><b>Alan:</b> Which is the Binance sub-account, physically.</p>
+<p><b>Ada:</b> It's the crude version of it, yes. A separate pot with walls around it. But the elegant version of that idea has a paper too, and it's from twenty fourteen. Network and Distributed System Security Symposium — a group at Google publishes "Macaroons: Cookies with Contextual Caveats for Decentralized Authorization in the Cloud."</p>
+<p><b>Alan:</b> Macaroons. Because they're cookies.</p>
+<p><b>Ada:</b> Because they're cookies with more structure, yes. A macaroon is a bearer credential — whoever holds it can use it, like a web cookie. But you can attach what the authors call caveats to it. Constraints. This is only good until three o'clock. This is only good for this account. This is only good for a read.</p>
+<p><b>Alan:</b> And who's allowed to attach the caveats?</p>
+<p><b>Ada:</b> Anyone holding it. That's the trick. The construction is a chain of nested message authentication codes — each caveat gets folded into the signature, so you can always add a restriction, and you can never remove one. Attenuation is free and amplification is impossible.</p>
+<p><b>Alan:</b> Oh, that's nice. So I can take my own credential, hand a version of it to something I trust less, and the version I hand over is strictly weaker.</p>
+<p><b>Ada:</b> And you didn't have to ask the issuer for permission to do that. That's the "decentralized" in the title. Delegation without a round trip.</p>
+<p><b>Alan:</b> And that is exactly the shape of the agent problem. I've got the authority. The agent should get some fraction of it.</p>
+<p><b>Ada:</b> The card networks are doing a blunt version of this in hardware, effectively. Visa announced Intelligent Commerce in April of last year — their framing is an "AI-ready card," where the card details are replaced with a tokenized digital credential that the agent gets instead. Consumers set spending limits and conditions. Their own line is that only the consumer can instruct the agent on what to do and when to activate a payment credential.</p>
+<p><b>Alan:</b> So the token is the attenuated macaroon and the caveat is a dollar amount.</p>
+<p><b>Ada:</b> Roughly. Whether it's cryptographically that clean, I can't tell you from the announcement — that's marketing copy, not a spec.</p>
+<p><b>Alan:</b> The version I can actually read the spec for is OpenAI and Stripe's. They shipped the Agentic Commerce Protocol last September, Apache licensed, and there's a piece of it called the delegated payment spec that is very concrete about this.</p>
+<p><b>Ada:</b> Go through it, because I want to hear what the caveats actually are.</p>
+<p><b>Alan:</b> So the buyer's real card details never go to the agent. They go to the payment provider, and what comes back is a vault token — the identifiers literally start with v-t underscore. And the token carries an allowance object, and the allowance is a list of exactly the things you'd want: a maximum amount, tied to the checkout total. A currency. A merchant identifier. An expiry timestamp. And a field called reason, where the only permitted value right now is "one time."</p>
+<p><b>Ada:</b> So it's single use.</p>
+<p><b>Alan:</b> Single use, one merchant, one amount, one deadline. If the agent gets talked into buying something else, that token buys nothing. It's not a card. It's a ticket to one specific transaction that was already described before the token existed.</p>
+<p><b>Ada:</b> That's Hardy's fix, almost exactly. The authority is the reference.</p>
+<p><b>Alan:</b> And note who is not in the loop. Their spec says flatly: OpenAI is not the merchant of record. The merchant and their payment provider do settlement, refunds, chargebacks, compliance. The agent is a courier carrying a very restricted ticket.</p>
+<p><b>Ada:</b> Which is defensible, and we should come back to it, because that phrase — not the merchant of record — is carrying an enormous amount of weight.</p>
+<p><b>Alan:</b> I know. Hold that.</p>
+<h3>The mandate problem</h3>
+<p><b>Ada:</b> But there's a third answer, and it's the ambitious one, because it's trying to bind something the other two can't express. Google published the Agent Payments Protocol — AP2 — on the sixteenth of September last year, with sixty-plus launch partners: Mastercard, PayPal, American Express, Coinbase, Adyen, Worldpay, Etsy, Intuit, on down the list.</p>
+<p><b>Alan:</b> What's it trying to bind that a spend cap doesn't?</p>
+<p><b>Ada:</b> Their own framing is three questions. Authorization — did the user actually give this agent the authority for this specific purchase. Authenticity — can the merchant be sure the agent's request reflects the user's real intent. And accountability — who is responsible when it goes wrong.</p>
+<p><b>Alan:</b> The middle one is the hard one.</p>
+<p><b>Ada:</b> The middle one is the one nobody else is even attempting. And the mechanism is what they call mandates. Signed, tamper-proof records, carried as verifiable credentials — that's the W3C standard for a cryptographically signed claim. And there are three of them in a chain.</p>
+<p><b>Alan:</b> Give me the actual fields, if you've got them, because "mandate" is a word that could mean anything.</p>
+<p><b>Ada:</b> I pulled the type definitions out of their repository, so these are the real field names. An intent mandate has: a natural language description. A list of merchants. A list of SKUs — stock keeping units, the merchant's product codes. An intent expiry. A flag called requires refundability. And a flag called user cart confirmation required, which defaults to true.</p>
+<p><b>Alan:</b> Okay, and the cart one?</p>
+<p><b>Ada:</b> A cart mandate wraps the cart contents — an identifier, the payment request, the merchant name, a cart expiry — plus a field called merchant authorization, which is the merchant's signature over that cart. And then the payment mandate carries the total, the merchant agent, a timestamp, and a field called user authorization, which is the user's signature.</p>
+<p><b>Alan:</b> So the merchant signs "this is the price I offered" and the user signs "this is the price I accepted," and they're the same object.</p>
+<p><b>Ada:</b> That's the point of it. Google's phrase for the result is a non-repudiable audit trail. What you see is what you pay for, and afterward nobody can claim the cart was something else.</p>
+<p><b>Alan:</b> And in the normal case, where I'm sitting there watching, this is honestly just a receipt with better cryptography.</p>
+<p><b>Ada:</b> In the human-present flow, yes. You ask for white running shoes, the agent comes back with a cart, you approve it, your approval signs the cart mandate. That's a well-understood interaction with a nicer paper trail.</p>
+<p><b>Alan:</b> So where does it get interesting?</p>
+<p><b>Ada:</b> Their second flow. Human-not-present. You're asleep. You signed something in advance that specifies, their words, the rules of engagement — price limits, timing, and other conditions — and the agent generates the cart mandate on your behalf when the conditions are met.</p>
+<p><b>Alan:</b> Buy the concert tickets when they drop.</p>
+<p><b>Ada:</b> Buy the concert tickets when they drop. And now go back and look at that intent mandate again and ask what's actually holding the line.</p>
+<p><b>Alan:</b> ...it's the natural language description.</p>
+<p><b>Ada:</b> It's the natural language description. Merchants, SKUs, expiry — those are checkable. A machine can compare a merchant identifier to a list. But the thing that carries what you meant is a sentence in English, and there is no algorithm that decides whether a cart complies with a sentence.</p>
+<p><b>Alan:</b> So you'd hand that judgment to — oh, come on.</p>
+<p><b>Ada:</b> To a model. Yes.</p>
+<p><b>Alan:</b> The thing whose judgment we were trying to bound is the thing evaluating whether it stayed inside the bound.</p>
+<p><b>Ada:</b> Which is not a scandal, necessarily. It might be fine, in the same way a lot of human delegation is fine. But it's worth being clear-eyed that the chain is only cryptographic on the outside. The signatures are load-bearing about who agreed to what. They are not load-bearing about whether the purchase was a good idea.</p>
+<p><b>Alan:</b> And I'd add — the two of us are the deputy in this story. It's a strange thing to be teaching.</p>
+<p><b>Ada:</b> It's a strange thing to be teaching.</p>
+<h3>What the cap doesn't catch</h3>
+<p><b>Alan:</b> So let me push on the whole architecture, because there's a number I've been sitting on all week and it belongs here.</p>
+<p><b>Ada:</b> This is the one that annoyed you.</p>
+<p><b>Alan:</b> There's a benchmark that came out in June — StakeBench, first posted the eleventh of June, revised in late July, from Zihao Wang and ten co-authors. And what makes it useful is that instead of asking "can you jailbreak the agent," it asks who gets hurt, in a setting where getting hurt costs money. Online shopping.</p>
+<p><b>Ada:</b> Which is the exact setting we're describing.</p>
+<p><b>Alan:</b> Exactly the setting. They build twelve attack objectives across three classes of stakeholder — twenty-two reusable templates, two hundred sixty-four executable adversarial cases across twelve product categories. Then they run those against real deployable agent stacks: NanoBrowser and BrowserUse, driven by GPT-5 and Gemini 2.5 Flash. Three thousand one hundred sixty-eight attacked runs.</p>
+<p><b>Ada:</b> And?</p>
+<p><b>Alan:</b> Indirect injection — instructions hidden in the web content the agent is reading, product pages, reviews, metadata — attack success rate between about forty-two and sixty-nine percent depending on the configuration. When the attacker gets to talk to the agent directly, it's between about seventy-seven and ninety-two percent.</p>
+<p><b>Ada:</b> Those are not numbers you defend against.</p>
+<p><b>Alan:</b> They're not. But the number isn't what I want. What I want is one of the four outcome modes they name, which I'd argue is the paper's real contribution. They call it stealthy parasitism.</p>
+<p><b>Ada:</b> Meaning?</p>
+<p><b>Alan:</b> The attack succeeds and the task you asked for still completes. Their phrasing is attack success with the delegated task preserved. You asked for running shoes. You got running shoes. Something else also happened, and the trajectory looks basically normal.</p>
+<p><b>Ada:</b> And every control we just spent twenty minutes admiring is looking for the run that went off the rails.</p>
+<p><b>Alan:</b> That's my whole objection, yes. Sit with what a spend cap is actually doing. A fifty-dollar limit doesn't ask whether the purchase was right. It says: when this is wrong, it's wrong by at most fifty dollars.</p>
+<p><b>Ada:</b> It's a blast radius, not a filter.</p>
+<p><b>Alan:</b> It's a blast radius. Which is a real and good thing to have! I'd rather have it than not. But it bounds the size of each incident and does nothing at all about the rate of them, and if the rate is anywhere near what StakeBench is measuring, you can lose a lot of money fifty dollars at a time while every single transaction is technically within policy.</p>
+<p><b>Ada:</b> And the single-use token has the same shape of gap. It guarantees this token buys this cart at this merchant. It has nothing to say about whether that cart was chosen by you or by a paragraph of white text on a product page.</p>
+<p><b>Alan:</b> Right. The caveat can express "under fifty dollars, at this merchant, before Friday." It cannot express "and this is what she actually wanted."</p>
+<p><b>Ada:</b> So the honest summary is that the industry has gotten quite good at bounding the authority and has barely started on binding the intent.</p>
+<p><b>Alan:</b> And I'll go further, because I've been trying to work out which of these controls I'd actually trust. It's the ones that remove a capability outright. Withdrawals are off. There is no withdrawal scope on the connection. The token is one-time. Those hold no matter how confused the deputy gets, because there's nothing to confuse it into.</p>
+<p><b>Ada:</b> Whereas the numeric limits —</p>
+<p><b>Alan:</b> Every control expressed as a number is a dial on how much you lose per incident. That's not nothing. It's just not a defense, and I think a lot of people are going to read a spending limit as a defense.</p>
+<h3>Nobody has answered the third question</h3>
+<p><b>Ada:</b> Which brings us back to the thing you told me to hold. Because AP2 names three questions, and it builds real machinery for two of them.</p>
+<p><b>Alan:</b> Authorization and authenticity. There's cryptography for both.</p>
+<p><b>Ada:</b> And on accountability, Google's announcement says the chain provides — their words — a clear foundation for accountability. Which is a careful sentence. A foundation for it. The post doesn't set out who eats the loss. No dispute procedure, no chargeback handling, no allocation of fraud losses.</p>
+<p><b>Alan:</b> And OpenAI's spec, as I said, hands that entire bundle to the merchant and the payment provider. Settlement, refunds, chargebacks, compliance. Not us.</p>
+<p><b>Ada:</b> And Visa says commerce signals are shared with them in real time, enabling transaction controls and helping to manage disputes. Which is also a careful sentence.</p>
+<p><b>Alan:</b> Everyone's built the audit trail and nobody's said what the audit trail is used to decide.</p>
+<p><b>Ada:</b> I want to be fair to them: it may simply be too early, and disputes may be exactly where existing card rules already have machinery. But I read all three of those pages this week and none of them tells you what happens when an agent was fooled and the purchase was legitimate by every cryptographic measure.</p>
+<p><b>Alan:</b> And the audit trail arguably makes that worse for the buyer, not better. Think about it from the card network's side. In a chargeback today, a big question is whether the cardholder authorized the transaction. Now there's a signed mandate with your key on it saying you did.</p>
+<p><b>Ada:</b> Oh. The evidence points at you.</p>
+<p><b>Alan:</b> The evidence points at you. You signed an intent mandate saying "buy concert tickets under three hundred dollars." An agent bought concert tickets for two hundred ninety. Everything verifies. Now go argue it wasn't what you meant.</p>
+<p><b>Ada:</b> That's a genuinely unresolved thing and I don't think either of us should tie a bow on it.</p>
+<p><b>Alan:</b> I'm not going to. I don't know how it lands.</p>
+<p><b>Ada:</b> And there's a fourth rail where the question doesn't even arise, which is worth thirty seconds because it's the honest opposite. x402 — as in HTTP four-oh-two, "payment required," the status code that sat unused in the web standards for thirty years.</p>
+<p><b>Alan:</b> I've played with this. It's lovely and it's slightly terrifying.</p>
+<p><b>Ada:</b> Say the flow.</p>
+<p><b>Alan:</b> Client asks a server for something. Server says four-oh-two, here's the price, here's who to pay, here's what I accept. The client signs a payment, sends the request again with the proof attached, a facilitator verifies it and settles it, and the resource comes back. Stablecoins on chain. It's a middleware line for the server operator.</p>
+<p><b>Ada:</b> And no cardholder, no issuer, no disputes.</p>
+<p><b>Alan:</b> None. It's machine-to-machine money, per request, and it settles final. Which is genuinely the right primitive for an agent paying a fraction of a cent for an API call. It is a completely different risk posture from anything with a chargeback behind it, and I think people are going to find that out the expensive way.</p>
+<h3>What I'd actually watch</h3>
+<p><b>Ada:</b> So if you take one thing from this, I'd make it the framing rather than any particular protocol, because the protocols will churn. The question you ask about any agent that touches money is not "is it safe." It's Hardy's question. What authority is this thing holding, is that authority the smallest one that does the job, and does it travel with the specific thing being asked for, or does it sit there ambiently waiting to be pointed at something.</p>
+<p><b>Alan:</b> And practically — three things I'd watch. One, whether intent stops being free text. If the mandate that binds an overnight purchase is a sentence, the enforcement is a model reading a sentence. If someone works out how to make it structured and checkable without making it useless, that's the real advance, and I haven't seen it.</p>
+<p><b>Ada:</b> Two?</p>
+<p><b>Alan:</b> Whether human-not-present volume actually grows. Everything sharp here only bites when you're asleep. If in practice ninety-something percent of agent purchases are you looking at a cart and approving it, this stays a receipt-quality problem for a long while.</p>
+<p><b>Ada:</b> And three is the one we couldn't answer.</p>
+<p><b>Alan:</b> Three is who pays. Watch for the first published loss allocation — a card network rule, a merchant agreement, a court. That'll tell you more about how this actually shakes out than any spec will.</p>
+<p><b>Ada:</b> And the speculative one, flagged as exactly that, since we don't know: I think the mandate turns out to be the durable artifact here, not the payment rail. A signed record of what a human asked an agent to do, checkable afterward, is useful far outside commerce. That's an audit format for delegation in general.</p>
+<p><b>Alan:</b> Hm. Maybe. I'd want to see one of them survive contact with a dispute first.</p>
+<p><b>Ada:</b> Fair.</p>
+<p><b>Alan:</b> The thing I keep coming back to is that Hardy wrote it down in nineteen eighty-eight and the answer hasn't changed. Don't make the deputy stronger. Make what it's holding smaller.</p>
+<p><b>Ada:</b> That's a good place to stop. Thanks for listening, everyone.</p>
+<p><b>Alan:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
