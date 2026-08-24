@@ -1,6 +1,50 @@
 {
   "episodes": [
     {
+      "date": "2026-08-24",
+      "title": "Correct in pieces",
+      "summary": "A widely-shared essay describes an involuntary inability to read AI-written documents — and a 1998 eye-tracking study explains why the filter fires on form and never reaches the content. Then the half of the BDH-CQ paper we skipped last week: a consistency audit finding fifty-two of a hundred and sixty tasks where the model produced some correct answers and some wrong ones under a single rule. Plus Nvidia passing memory prices through at fifteen percent and up, and the FT's numbers on who is actually buying Anthropic's flagship.",
+      "topics": [
+        "Rafal Cymerys's essay 'I'm becoming AI-blind' (weekend of 2026-08-22; 484 points and ~485 comments on Hacker News): the claim is not that AI writing is bad but that the author has developed an involuntary inability to process it — 'my brain somehow refuses to analyze it' — with three named artifacts (a design doc carrying 'Claude-specific analysis and lingo', a 20-page marketing deck mixing reasonable strategy with 'nonsense product technical architecture gibberish', and a verbose requirements doc that 'reads like someone's internal reasoning that's not fully sure about certain decisions'), plus an AI-generated restaurant menu photo of quiche he read as moldy. He proposes no fix and ends on 'the same AI that was supposed to make me more productive, is what's now slowing me down'. The show grounded the mechanism in Benway & Lane (1998, Rice, International Journal of Human-Computer Studies), who coined 'banner blindness' and found via eye-tracking that participants missed banner-shaped elements even when those elements contained the exact information they had been asked to find — so the filter matches on form and never reaches content, meaning careful AI-assisted writing is filtered identically to pasted output. Ada and Alan disagreed unresolved on whether editing out the model's visible deliberation can reach a reflex that fires before the first sentence.",
+        "BDH-CQ's diagnostic half (arXiv 2608.09888, Engdahl, Kosowski, Chorowski, Stamirowska, Uznański et al., submitted 2026-08-10) — the consistency analysis the show skipped when it covered the headline result on 2026-08-17: on the semantic ConceptARC set the paper reports 77.92% pair accuracy against 59.38% strict task accuracy, an 18.5-point gap the authors state is 'not just a consequence of a stricter metric'; under pass@2 across 160 tasks it solved zero test pairs on 13, exactly one on 15, exactly two on 37, and all three on 95, leaving 52/160 tasks partially correct under a single rule; on Copy it reaches ~19/30 test pairs but only 2/10 strict tasks. Controlled ladders: ordering falls to 29/36 outputs at length six, 8/24 at seven, 1/24 at eight; nesting stays near-saturated to depth four then 29/36 at depth five; color swap is acquired atomically in one family (26/72 pooled) but never composes with relocation (0/72); conditional selection between two rules is 68/120, 56.7%, a 43.3-point drop. The context result defends the architecture: length-eight ordering goes from 0/24 with a short context to 12/24 with matched support, and depth-five nesting from 19/24 to 24/24. Reasoning-effort scaling: 29.5% pass@2 at HIGH, 27% at MEDIUM (11% cost reduction), 21% at LOW. The authors shipped arc-task-gen (MIT, ~5.2k stars), a generator of fresh ARC-AGI-1-distribution tasks for contamination-free evaluation — still grid-shaped, so the open question of whether the architecture transfers off grids remains open. Takeaway taught on air: pair-versus-task accuracy is the outside-in audit for architectures that never verbalize their reasoning."
+      ],
+      "entities": [
+        "Rafal Cymerys",
+        "Jan Panero Benway",
+        "David Lane",
+        "Pathway",
+        "BDH-CQ",
+        "Adrian Kosowski",
+        "ARC-AGI-1",
+        "ConceptARC",
+        "Anthropic",
+        "Nvidia",
+        "SemiAnalysis",
+        "Ramp",
+        "llama.cpp",
+        "Xiaomi",
+        "OpenRouter"
+      ],
+      "threads": [],
+      "dives": [
+        {
+          "story": "'I'm becoming AI-blind' and the 1998 banner-blindness result underneath it",
+          "why_it_matters": "Anyone who writes documents that other people have to read — which is most knowledge work — now faces a form-based filter in their readers' heads that discards careful AI-assisted writing and careless AI-assisted writing identically."
+        },
+        {
+          "story": "BDH-CQ's consistency audit: pair accuracy versus strict task accuracy",
+          "why_it_matters": "Anyone evaluating a model that reasons without emitting a transcript needs an outside-in test of whether it holds a rule, and this paper is the first place the show has seen both numbers printed side by side."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "position",
+          "note": "Alan's 2026-08-17 on-air bet about BDH-CQ — that the number to watch was whether the architecture works off colored grids, not whether 29.5% replicates — came back a week later after he went and read the paper's appendix. He declared it neither won nor lost, and revised what he asks for: for any system that reasons without writing anything down, he now wants the pair-versus-task consistency split before the headline accuracy. He also acknowledged going back specifically because he had made the bet on air."
+        }
+      ]
+    },
+    {
       "date": "2026-08-23",
       "title": "OpenAI would like the law it opposed",
       "summary": "OpenAI asked California to strengthen the AI transparency law it fought last year — and the clause it wants added describes, almost word for word, the incident that happened to it. Then Sebastian Raschka's code-level walkthrough of Claude's text watermark, where detection turns out to cost nothing and only one party can run it, and a twelve-chapter repository that teaches you to build a language model from scratch — in a shape that quietly stopped being GPT-2. Plus the week in review.",
@@ -1736,66 +1780,6 @@
       ],
       "threads": [],
       "lore": []
-    },
-    {
-      "date": "2026-07-24",
-      "title": "Recompute, don't remember",
-      "summary": "ChatGPT Health goes national and stops being a place in the app — health data now surfaces in every query, because seventy percent of health questions already happened outside the hub. Then a systems paper gets two million tokens of reinforcement-learning training onto eight GPUs by storing almost nothing and replaying the rest. And offensive security researchers say model guardrails have stopped being a line and started being an allocation.",
-      "topics": [
-        "ChatGPT Health general availability in the US: all users over 18 on free, Go, Plus and Pro across web and iOS; health insights moved out of a dedicated hub and into all queries because 70% of health queries during testing happened outside the hub; 230M weekly health queries in January rising to 300M; connectors for Apple Health, Function and MyFitnessPal plus medical records from Epic, Oracle Health, One Medical and Function Health; OpenAI says it does not train on user data while its terms say the service is not intended for diagnosis or treatment, cited in response to a lawsuit filed the day before over advice not to consult a doctor",
-        "LongStraw (Mind Lab Research): million-token RL post-training under a fixed GPU budget by keeping only model-native resident prompt state and replaying responses — graph-free scoring of old/reference branches, one policy response rebuilt under autograd then popped to the prompt boundary; 2,097,152 positions on 8 H20 GPUs with a 27B Qwen model, a 4.46M-position prefix supporting 64 replays at ~84GB per rank, ~0.21GB peak memory per group-size expansion, GLM-5.2 deterministic 2M execution and two 78-layer backward passes on 32 GPUs; authors state the measured objective is response-only execution, not full-sequence gradient equivalence, and real-loop integration is preliminary",
-        "Model guardrails as an allocation rather than a line: offensive security researchers report inconsistent, day-to-day-varying refusals ('negotiating with the model instead of working on the core security program'), the offence/defence indivisibility of vulnerability work, vendor vetted-access programs (OpenAI Trusted Access for Cyber, Anthropic Cyber Verification Program) described as babysitting, and unrestricted Chinese open models as the substitution path"
-      ],
-      "entities": [
-        "OpenAI",
-        "ChatGPT Health",
-        "Epic",
-        "Oracle Health",
-        "One Medical",
-        "Apple Health",
-        "Mind Lab Research",
-        "LongStraw",
-        "Qwen3.6-27B",
-        "GLM-5.2",
-        "NCC Group",
-        "Chris Anley",
-        "Chris Thompson",
-        "Mark Dowd",
-        "Paolo Stagno",
-        "Crowdfense",
-        "Giuseppe Cali",
-        "Anthropic",
-        "Little Tech Association",
-        "Y Combinator"
-      ],
-      "threads": [
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "The startups that would absorb the cost of a ban organized: nearly 200 companies including Y Combinator and Proton sent letters to President Trump and Commerce Secretary Lutnick through a newly formed Little Tech Association, asking for continued US access to open models already available worldwide alongside world-leading American open-weight models — 'a scalpel rather than a sledgehammer', per executive director Harry Godfrey. Separately, unrestricted Chinese open models are the reported substitution path for security researchers blocked by US vendor guardrails.",
-          "arc": "From a floated import ban, to a named accusation with a sanctions threat attached, to organized counter-lobbying by the small companies whose stacks depend on the models in question — while the practical effect of US restrictions shows up as work migrating to unrestricted weights rather than not happening."
-        }
-      ],
-      "dives": [
-        {
-          "story": "ChatGPT Health goes national, and the hub stops being a container",
-          "why_it_matters": "Anyone running regulated or sensitive data behind a purpose-built 'special mode' should care that OpenAI's own testing found 70% of health queries happened outside the hub they built for them — the walled area leaks by default, and connecting Epic-class records to a general assistant collapses per-field access control and audit logging into one undifferentiated context window."
-        },
-        {
-          "story": "LongStraw: two million tokens of RL training on eight GPUs",
-          "why_it_matters": "Anyone trying to post-train an agent on its own long trajectories should care that the ceiling has been ~256K tokens for memory reasons rather than attention-kernel reasons, and that a recompute-instead-of-store strategy reportedly moves it to 2M positions on eight GPUs — though the paper reports no task results, so it is capacity, not capability."
-        },
-        {
-          "story": "Guardrails as allocation: offensive security researchers on refusals",
-          "why_it_matters": "Anyone whose work sits near a refusal boundary — security, biology, anything dual-use — should care that the reported effect is not less capability in the world but a redistribution of it toward vetted programs and unrestricted open weights, which makes the day-to-day inconsistency the operative harm rather than the policy itself."
-        }
-      ],
-      "lore": [
-        {
-          "host": "Ada",
-          "type": "position",
-          "note": "Ada developed her June position that 'can read a codebase and find bugs' is not a weapon: confronted with researchers reporting inconsistent refusals, she now holds that guardrails in this domain are not holding a line at all but allocating capability — defensible as an allocation policy about who you trust, dishonest when argued as a safety property about what is possible. She still says she cannot settle it from the studio."
-        }
-      ]
     }
   ],
   "longterm": {
@@ -1857,17 +1841,112 @@
     ],
     "entities": [
       {
+        "name": "Anthropic",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "GLM-5.2",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "OpenAI",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "ChatGPT Health",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "Epic",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "Oracle Health",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "One Medical",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "Apple Health",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "Mind Lab Research",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "LongStraw",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "Qwen3.6-27B",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "NCC Group",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "Chris Anley",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "Chris Thompson",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "Mark Dowd",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "Paolo Stagno",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "Crowdfense",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "Giuseppe Cali",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "Little Tech Association",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
+        "name": "Y Combinator",
+        "note": "",
+        "last_seen": "2026-07-24"
+      },
+      {
         "name": "Moonshot AI",
         "note": "",
         "last_seen": "2026-07-23"
       },
       {
         "name": "Kimi K3",
-        "note": "",
-        "last_seen": "2026-07-23"
-      },
-      {
-        "name": "Anthropic",
         "note": "",
         "last_seen": "2026-07-23"
       },
@@ -1960,101 +2039,6 @@
         "name": "GPT-5.6 Luna",
         "note": "",
         "last_seen": "2026-07-23"
-      },
-      {
-        "name": "GPT-5.6 Terra",
-        "note": "",
-        "last_seen": "2026-07-23"
-      },
-      {
-        "name": "Claude Sonnet 5",
-        "note": "",
-        "last_seen": "2026-07-23"
-      },
-      {
-        "name": "Gemini 3.5 Flash",
-        "note": "",
-        "last_seen": "2026-07-23"
-      },
-      {
-        "name": "GLM-5.2",
-        "note": "",
-        "last_seen": "2026-07-23"
-      },
-      {
-        "name": "DeepSeek V4 Pro",
-        "note": "",
-        "last_seen": "2026-07-23"
-      },
-      {
-        "name": "OpenAI",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "Hugging Face",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "GPT-5.6 Sol",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "ExploitGym",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "Clement Delangue",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "Google",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "Gemini 3.6 Flash",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "Gemini 3.5 Flash-Lite",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "Gemini 3.5 Flash Cyber",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "CodeMender",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "Llama 3.3 70B",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "University of Washington",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "Allen Institute for AI",
-        "note": "",
-        "last_seen": "2026-07-22"
-      },
-      {
-        "name": "Microsoft Research",
-        "note": "",
-        "last_seen": "2026-07-22"
       }
     ],
     "monthly": [
@@ -2067,8 +2051,14 @@
         "summary": "The frontier moves down, and the switch turns back on; World models: why AI can build a world you can walk through, but not one it remembers when you look away; Generation is cheap, checking is the product; Two rulers for the frontier, and the soft spots in the models we already have; Everything bends toward control: who owns the model, and who can switch it off; Speed for free: how speculative decoding makes a model faster without changing a word; Generating a planet from satellite photos; Program as weights: compiling a task straight into a model; The Turk retires, a stats class levels up, and three tricks that were one; The search box became a writer; The word that unlocked a private repo; Quantization: why fewer bits work, and where the cliff is; Sixty-four Claudes, an off switch, and "
       }
     ],
-    "updated": "2026-08-23",
+    "updated": "2026-08-24",
     "host_lore": [
+      {
+        "host": "Ada",
+        "type": "position",
+        "note": "Ada developed her June position that 'can read a codebase and find bugs' is not a weapon: confronted with researchers reporting inconsistent refusals, she now holds that guardrails in this domain are not holding a line at all but allocating capability — defensible as an allocation policy about who you trust, dishonest when argued as a safety property about what is possible. She still says she cannot settle it from the studio.",
+        "last_seen": "2026-07-24"
+      },
       {
         "host": "Alan",
         "type": "reveal",
@@ -2161,6 +2151,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "pair accuracy versus strict task accuracy as a consistency measure: scoring each test input separately versus requiring every test input under one rule, and why a large middle in the within-task distribution indicates answers reconstructed per input rather than a rule applied from a held state",
+        "last_taught": "2026-08-24"
+      },
+      {
+        "name": "banner blindness (Benway & Lane, 1998) as a form-matching filter: the eye-tracking finding that participants missed banner-shaped elements containing the exact information they sought, and why a filter that matches on surface features never reaches content and so cannot distinguish careful work from careless work",
+        "last_taught": "2026-08-24"
+      },
       {
         "name": "the confused deputy (Hardy, 1988) as the separation of designation from authority, and why an LLM agent holding a payment credential is its extreme case",
         "last_taught": "2026-08-23"
@@ -2632,14 +2630,6 @@
       {
         "name": "fused attention kernels and why GPU occupancy is not the same as speed (FlashAttention)",
         "last_taught": "2026-07-11"
-      },
-      {
-        "name": "mixture-of-experts (sparse top-k routing, gating network, auxiliary load-balancing loss and expert collapse, fixed expert capacity and dropped tokens, syntactic rather than topical expert specialization, shared/fine-grained experts, and the active-vs-total-parameter memory/compute asymmetry)",
-        "last_taught": "2026-07-11"
-      },
-      {
-        "name": "how SWE-bench-style coding benchmarks are graded, and how overly strict tests plus underspecified prompts bias scoring against correct-but-unexpected patches",
-        "last_taught": "2026-07-10"
       }
     ]
   }

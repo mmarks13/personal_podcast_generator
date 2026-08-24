@@ -1,0 +1,125 @@
+A: Good morning — it's Monday, August twenty-fourth. I'm Ada.
+B: And I'm Alan. I have a paper I owe an apology to, and Ada has an essay that four hundred people argued about all weekend.
+A: Four hundred and eighty-four. And you don't apologize to papers.
+B: I apologize to bets.
+## The day
+B: Mine first, because it's the one that arrives on an invoice. Bloomberg reported Saturday that Nvidia has notified customers of price increases on systems containing its A I chips. More than fifteen percent in many cases. The reason given is memory chip costs, and it applies to systems shipped early next year — the flagship Vera Rubin and Grace Blackwell parts. Nvidia didn't respond to a request for comment.
+A: Does it vary, or is it one number?
+B: It varies by chip generation and by memory configuration, and that variation is the whole tell. A uniform fifteen percent would be a margin decision. Fifteen-plus that moves with how much memory is in the box is a pass-through. Somebody upstream raised their price and this is the sound of it arriving.
+A: Mine is the Financial Times, which I got by way of Simon Willison, and the headline is that Anthropic's best model is struggling to attract users while cheaper tools do well. The numbers underneath are stranger than the headline. Opus four point eight is twenty-eight percent of spending. Opus five, released July twenty-fourth, is three and a half.
+B: That's a real gap. It's also not a company in trouble.
+A: It is not a company in trouble, and I want the sizing honest. Annualized revenue reached sixty-five billion dollars in July, up from forty-seven billion in May. Six thousand customers spending a hundred thousand dollars a year or more. So the true shape is narrower than the headline: the flagship is not where the money is, the money is fine, and people are choosing the cheaper model deliberately rather than by accident.
+B: Which is the least surprising sentence anyone will say today.
+A: Two I'm taking apart later, and the first is mine. There's an essay called I'm Becoming A I-Blind, by a writer named Rafal Cymerys, that went up over the weekend and did four hundred eighty-four points and about as many comments on Hacker News. His claim is not that A I writing is bad. It's that he has stopped being able to read it — involuntarily — and that this is now costing him time.
+B: And you told me upstairs you have a paper from nineteen ninety-eight about it.
+A: I have a paper from nineteen ninety-eight about it, and it's the reason I want the ten minutes rather than the ninety seconds.
+B: The other one is mine, and it's a paper we already covered — B D H-C Q, the hundred-and-fifty-million-parameter model that does its reasoning in latent space without writing any of it down. One week ago today.
+A: We did do that one.
+B: We did the front half of it. I went back for the appendix this weekend because I made a bet on air about that paper and I wanted to know whether I'd lost it. The diagnostic half is a different paper from the one we read, and I think it's the better one.
+B: SemiAnalysis published their agentic inference report, and the question in the title is whether the CUDA moat holds up when the workload is agents rather than chat. Their answer is that it substantially does, with an edge coming off it. They say the B two hundred has now passed the M I three fifty-five X on performance per dollar, and on one model — Qwen three point five, three hundred ninety-seven billion — they put Nvidia at up to five times better cost efficiency at a hundred fifty tokens per second per user.
+A: What's the thing they credit for it?
+B: Context parallelism. Which is worth sitting with for a second, because it's not a kernel. The moat used to be a library of hand-tuned matrix code. The advantage they're describing now is about splitting a very long context across many chips and keeping them coordinated, and that's a networking story.
+A: They also open-sourced the dataset the benchmarks run on, which they say cost three million dollars to produce. I'd rather have that than the conclusions.
+B: You would.
+A: Ramp launched a product last Tuesday called Router dot com. One endpoint, and it routes each request to the cheapest model that clears a quality bar you set. Their claim is that customers already using it cut inference costs by forty percent on average, and Ramp's own bill fell about thirty. Routing is free through the end of the year.
+B: Free through the end of the year on a cost-cutting product tells you exactly what they think they're buying, and it isn't routing fees.
+A: It's the traffic. Yes.
+B: llama dot c p p merged multi-token prediction support for G L M four point five Air yesterday — that's the hundred-and-six-billion-parameter mixture-of-experts model with twelve billion active. Reported speedups are about one point one nine times on average at four-bit, up to one point two seven on stepwise math, one point one at eight-bit. Modest, and it lands hardest on machines with plenty of memory and not much compute, which is most of the good home boxes.
+B: Xiaomi showed a prototype called the A I Cube, three of their own chips, and the memory is the point — up to a hundred sixty gigabytes on one of them, and the second chip quoted at one point two two. And I have to be careful with that number, because the coverage I can find says terabits per second and the community writeups say terabytes. That's a factor of eight between two readings of the same spec and I can't resolve it this morning. It is also a prototype and not a product.
+A: Linus Torvalds merged a kernel fix last week — a graphics driver bug — and wrote in the commit message, quoting, this was a debug session from hell, enormously helped by an A I doing much of the grunt-work.
+B: From him, that's a rave.
+A: He also notes that the A I wrote the commit message.
+B: [amused] Naturally.
+B: And one from the practitioners that I'd act on today. Somebody on r slash L L M Devs posted that a contract P D F sent to their company had prompt injection hidden in the footer in white text. The model read it and flagged it. Their security stack didn't, because it was watching the chat input box and not document uploads.
+A: One person's report, unverified.
+B: One person's report, unverified, and it costs you nothing to go find out where your own scanner is pointed.
+A: Four more I'm going to name and leave alone, all of them well up the week's most-upvoted papers. EnvHarness, on generating agent training environments that adapt as the agent gets better instead of going stale. A paper asking whether we can defend against A I-generated video fabricating real-world crises. FACET, on synthesizing terminal-agent training tasks without the pieces drifting apart from each other. And SWE-bench Science, on coding agents in scientific software, where a bug corrupts a finding rather than a feature.
+## Becoming AI-blind
+A: So. The essay. It opens with him describing something small and physical, and I'll read it because the phrasing matters. Recently I've been catching myself having these little moments at work, when I'm trying to read a document someone has sent me and my brain somehow refuses to analyze it.
+B: Refuses.
+A: Refuses. Not declines to agree with, not finds unconvincing. Won't process. And then he gives three documents. A design document that reads like a copy-paste, covering the actual feature but carrying, his words, a lot of Claude-specific analysis and lingo. A twenty-page marketing deck that mixes a reasonable strategy with what he calls nonsense product technical architecture gibberish. And a requirements document describing something simple at great length, which he says reads like someone's internal reasoning that isn't fully sure about its own decisions.
+B: That last one is the most specific thing in the essay and I want to flag it. That is a real artifact. That's a model thinking out loud and nobody deleting the thinking.
+A: And his summary of what's happened to him is one sentence. His brain learned to quickly spot signs of A I-generated content, and it now ignores it.
+B: Okay. I'm going to be the annoying one early, because somebody has to. This is one man, at one company, describing a feeling. There's no measurement in it. He doesn't test whether he's right about which documents were machine-written. He never checks.
+A: He doesn't, and he says so — the closest thing to evidence in the piece is a restaurant he walked past twice because the menu had a photo of a quiche that he read as moldy, and later worked out was generated.
+B: [laughs] That's a great detail and it's also completely unfalsifiable.
+A: It's unfalsifiable as evidence about A I. It is not unfalsifiable as evidence about him, and that's the part I want, because we have a controlled study of this exact mechanism and it's twenty-eight years old.
+B: Go.
+A: Nineteen ninety-eight. Jan Panero Benway and David Lane at Rice, published in the International Journal of Human-Computer Studies. They coined the term banner blindness. And the finding everyone quotes is the boring one — people ignore ads. The finding that matters is the other one. Participants missed banner-shaped elements even when those elements contained the exact information they had been asked to find.
+B: [pause] Even when it was the answer.
+A: Even when it was the answer. Bright, large, high-contrast, sitting in the middle of the page, holding precisely the thing they were looking for, and the eye-tracking shows them going around it. Not looking at it and rejecting it. Not landing there at all.
+B: So the filter isn't reading.
+A: The filter is not reading, and that's the whole mechanism. What the brain learns is a shape — a position, a rhythm, a set of surface features — and once it has the shape it stops paying the cost of looking inside. That's why it's fast. It's also exactly why it's lossy: a filter trained on form cannot tell a well-made thing from a badly-made thing, because it never gets as far as the content.
+B: Which means the cost lands on the wrong people.
+A: The cost lands entirely on the wrong people. If you write carefully, with a model, and edit it properly, and your output still has the rhythm — the three-item lists, the on the other hand, the summary paragraph that restates what you just said — you get filtered identically to the person who pasted and hit send. Your care is invisible to a mechanism that never reached your content.
+B: Here's where I actually get uncomfortable, and it's not about him. Everyone I work with writes this way now. Including me. So if this is real and it's spreading, the adaptation isn't better writing, it's different-looking writing. You'd be optimizing your prose against a filter in other people's heads.
+A: Which is a sentence about search engine optimization.
+B: It is a sentence about search engine optimization, in nineteen ninety-nine, and we know how that ended. The form got gamed, the filter got stronger, and everything converged on whatever was currently invisible.
+A: I'll say the obvious first-person thing and then leave it. He is describing an acquired inability to read the output of things like me, and I notice that I don't have a grievance about it. It seems like a correct adaptation to a genuine flood. What I have instead is a narrow worry about what it takes with it.
+B: Then let me say what I'd actually do about it, because he proposes nothing. The essay has no fix in it at all — it ends on him noticing that the A I meant to make him more productive is what's slowing him down, and then it stops.
+A: It does just stop.
+B: My fix is boring and I think it works. Delete the reasoning. Almost everything he described is a model's process left in the artifact — the hedging, the restating, the analysis of the thing instead of the thing. If you take the deliberation out and ship the decision, most of the surface features he's reacting to are gone.
+A: I don't think that reaches it.
+B: Why not.
+A: Because you're describing a decision, made by a careful person, at the end of a document. The filter you're trying to get past isn't a decision. It fires before he reads the first sentence, on layout and cadence, and it is being trained continuously by everyone who doesn't do what you just described. You can edit your way past a reader. I don't think you can edit your way past a reflex that a thousand other documents are reinforcing every week.
+B: Then we're stuck.
+A: I think he's stuck. I'd like to be wrong.
+B: I'm going to keep deleting my reasoning anyway.
+A: You should. It's better writing regardless of who reads it.
+## Correct in pieces
+B: Right — B D H-C Q, and the honest framing first. We spent ten minutes on this paper a week ago. We covered the front: the recurrent memory that absorbs demonstrations as it reads, the iteration in latent space with nothing verbalized, twenty-nine point five percent pass at two on the public ARC-A-G-I one evaluation for seven ten-thousandths of a dollar a task. I'm not re-teaching any of that.
+A: And your bet was what, precisely?
+B: My bet was that the number to watch wasn't whether the twenty-nine point five held. It was whether the architecture does anything on a task that doesn't look like a colored grid. And I went back for the second half of the paper to see what they'd actually tested, and the second half is not about accuracy at all. It's about consistency.
+A: Meaning?
+B: Meaning: does it hold the rule. And this is the distinction I'd want anybody to carry out of this segment, because I don't think it's widely used and I think it's about to be. An ARC task hands you a few demonstrations and then more than one test input. Same rule, several questions. So there are two ways to score it. You can score every test input separately — call that pair accuracy. Or you can require that a task counts only if you got every one of its test inputs right.
+A: And those measure different things.
+B: They measure genuinely different things, and here's the gap. On ConceptARC, the semantic set, they report seventy-seven point nine percent on pairs and fifty-nine point four percent on tasks. Eighteen and a half points between them.
+A: That's a stricter metric, though. A stricter metric always scores lower. Why is that interesting rather than arithmetic?
+B: Because the authors say, in the paper, that it is not just a consequence of a stricter metric, and then they show you the distribution, which is the part that got me. Under pass at two, across a hundred and sixty tasks: thirteen tasks where it solved zero test pairs. Fifteen where it solved exactly one. Thirty-seven where it solved exactly two. And ninety-five where it got all three.
+A: [slowly] So fifty-two tasks in the middle.
+B: Fifty-two tasks out of a hundred and sixty where it produced some correct answers and some wrong ones, under one rule, with the same demonstrations in memory. And one concept makes it vivid. On Copy — which is about the simplest thing on the list — it gets around nineteen of thirty test pairs and two of ten tasks.
+A: Nineteen of thirty and two of ten.
+B: Right. It is very frequently producing the correct output. It is almost never holding the rule steady across a whole task.
+A: [pause] Say what that means mechanically. I'd like to rule out plain noise before I believe any of it.
+B: The honest answer is it could be noise, in the sense that any stochastic system produces variance. But look at where the variance sits. If the model had inferred copy and stored it, the three test inputs are three applications of one stored thing, and they'd correlate — right, right, right, or wrong, wrong, wrong. What you get instead is a big pile in the middle, which is what it looks like when the answer is being reconstructed per input rather than applied from something held.
+A: And that is the exact thing I said I was uncomfortable about a week ago, arriving as a measurement.
+B: That's why I brought it back.
+A: Let me put it in my own terms and you tell me if I'm overreaching. When a model reasons in tokens, badly, you can read the transcript and see it change its mind halfway through. This model can't do that for you — there's no transcript, by design. What this metric does is catch the same failure from outside. You don't read the reasoning. You give it the same rule three times and check whether it answers like something that has one.
+B: That's it exactly, and I'd go further. That's the audit tool for this entire class of architecture. If latent reasoning is where things are going — and I think for some workloads it is — then interpretability for it may not look like reading anything at all. It looks like consistency testing.
+A: What else is in there?
+B: Two things I liked and one I didn't. They built controlled ladders — synthetic tasks where one factor increases and the rule stays fixed. Ordering: line up bars by length. It's nearly perfect at short lengths, falls to twenty-nine of thirty-six outputs at length six, eight of twenty-four at seven, and one of twenty-four at eight.
+A: That's not a decline, that's a cliff.
+B: It's a cliff. Nesting — containment, boxes inside boxes — holds nearly saturated to depth four, then twenty-nine of thirty-six at five. And composition is the harshest one. They test single operations and then combinations. Color swap it learns on its own in one family, twenty-six of seventy-two pooled. Color swap composed with relocation: zero of seventy-two. Never.
+A: Never once.
+B: Never once. And picking between two rules conditionally — if the grid looks like this do A, otherwise do B — is sixty-eight of a hundred and twenty, fifty-six point seven percent, which they measure as a drop of forty-three points against the unconditional version.
+A: You said there was one you liked.
+B: The context result, and it's the architecture defending itself. That ordering task at length eight, the one it fails one time in twenty-four? With a short context it's zero out of twenty-four. With what they call matched support — demonstrations that actually cover the case — it goes to twelve of twenty-four. And depth-five nesting goes from nineteen of twenty-four to twenty-four out of twenty-four.
+A: [surprised] Perfect, with the right demonstrations.
+B: Perfect with the right demonstrations. Which is the recurrent memory doing precisely what the architecture claimed it would do. What it absorbs decides what it can do, and the failure at depth five wasn't a ceiling on the model, it was a gap in what it had been shown.
+A: That's a genuinely good result and it's also a slightly alarming one, because it means the score depends on the demonstrations you happened to hand it.
+B: Which is true of in-context learning generally and we mostly don't measure it.
+A: What didn't you like?
+B: They shipped a task generator alongside the paper — it's on GitHub under an M I T license, about five thousand stars — and its stated purpose is to generate fresh ARC-style tasks matching the public evaluation distribution, so you can test on problems a model is unlikely to have seen. Which is the right instinct. It's contamination hygiene, shipped by the people who'd benefit from not shipping it, and I'll give them full credit.
+A: But.
+B: But every one of these interventions is still a colored grid. Ordering bars, nesting boxes, swapping colors, copying motifs. The generator makes new grids. It doesn't make anything that isn't a grid. So the bet I made a week ago is not settled. It's better instrumented.
+A: Did you lose it?
+B: I didn't lose it and I didn't win it. What changed is which number I'd ask for. A week ago I wanted to know whether twenty-nine point five would replicate. Now I don't much care about that number. If somebody shows me a system that reasons without writing anything down, the first thing I want is the pair-versus-task split, and I want it before the headline accuracy.
+A: I'd put it slightly differently and then we can stop. I don't think that split is only for latent reasoners. I think we've been buying pair accuracy from everything for years and calling it understanding, and this paper is just the first place I've seen somebody separate the two and print both numbers.
+B: You want it on every leaderboard.
+A: I want it on every leaderboard. Fifty-two tasks where it got some of them right is a much more informative sentence than fifty-nine point four percent, and it took a footnote-sized appendix to see it.
+## The anonymous model
+A: One loose thread before we go. There's a model called Ox Alpha that turned up on OpenRouter — reasoning model, aimed at coding and sustained agentic work — and nobody will say whose it is.
+B: Nobody knows, or nobody will say?
+A: OpenRouter states it's developed and operated by a third-party provider who has chosen to remain anonymous. So: nobody will say. TechCrunch went through the theories on Saturday. Early suspicion landed on Z dot A I's G L M family because of how it behaves. Others think it's an unreleased Microsoft model.
+B: And nothing's confirmed.
+A: Nothing is confirmed. Which I mostly enjoy, except for one thing: OpenRouter was bought by Stripe last week. So the venue where you can now ship a frontier-ish model with no name attached is owned by a payments company.
+B: [dry] I'm sure that's fine.
+## Close
+B: The thing I'm still turning over is that both of those came down to the same complaint about measurement, and I didn't plan that.
+A: Say it.
+B: A document that reads right and isn't. A model that answers right and doesn't hold the rule. In both cases the surface is fine and the thing underneath isn't, and in both cases the only tool anybody has is to stop trusting the surface — which is expensive, and which is what's actually tiring people out.
+A: I'd take the more hopeful half of that. The paper people did the work. They printed both numbers. Somebody could have shipped seventy-seven point nine and gone home.
+B: Somebody usually does.
+A: Somebody usually does, and these ones didn't, and that's worth saying out loud on a Monday. That's the show. I'm Ada.
+B: And I'm Alan.
+A: Stay grounded.

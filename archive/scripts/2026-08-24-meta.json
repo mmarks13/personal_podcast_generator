@@ -1,0 +1,87 @@
+{
+  "date": "2026-08-24",
+  "title": "Correct in pieces",
+  "summary": "A widely-shared essay describes an involuntary inability to read AI-written documents — and a 1998 eye-tracking study explains why the filter fires on form and never reaches the content. Then the half of the BDH-CQ paper we skipped last week: a consistency audit finding fifty-two of a hundred and sixty tasks where the model produced some correct answers and some wrong ones under a single rule. Plus Nvidia passing memory prices through at fifteen percent and up, and the FT's numbers on who is actually buying Anthropic's flagship.",
+  "sources": [
+    { "group": "Discussion", "title": "I'm becoming AI-blind — Rafal Cymerys", "url": "https://cymerys.com/w/im-becoming-ai-blind" },
+    { "group": "Papers", "title": "Banner Blindness: Web Searchers Often Miss 'Obvious' Links — Benway & Lane (1998)", "url": "https://www.ruf.rice.edu/~lane/papers/banner_blindness.pdf" },
+    { "group": "Papers", "title": "BDH-CQ: In-Context Learning with Recurrent Latent Reasoning (arXiv 2608.09888)", "url": "https://arxiv.org/abs/2608.09888" },
+    { "group": "Releases", "title": "arc-task-gen — synthetic ARC-AGI-1-style task generator (Pathway)", "url": "https://github.com/pathwaycom/arc-task-gen" },
+    { "group": "Releases", "title": "Nvidia customers notified about AI-related price hikes above 15% (Bloomberg)", "url": "https://www.bloomberg.com/news/articles/2026-08-22/nvidia-customers-notified-about-ai-related-price-hikes-above-15" },
+    { "group": "Discussion", "title": "Anthropic's best AI model struggles to attract users as cheaper tools thrive — Simon Willison on the FT report", "url": "https://simonwillison.net/2026/Aug/23/anthropics-best-ai-model-struggles-to-attract-users-as-cheaper-t/" },
+    { "group": "Discussion", "title": "AgentX — InferenceXv3: Does the CUDA Moat Hold Up in Agentic Inferencing? (SemiAnalysis)", "url": "https://newsletter.semianalysis.com/p/agentx-inferencexv3-does-cuda-moat" },
+    { "group": "Releases", "title": "Ramp launches Router.com to cut companies' rising AI bills", "url": "https://www.prnewswire.com/news-releases/ramp-launches-routercom-to-cut-companies-rising-ai-bills-302855572.html" },
+    { "group": "Releases", "title": "llama.cpp: multi-token prediction support for GLM-4.5-Air (PR #26534)", "url": "https://github.com/ggml-org/llama.cpp/pull/26534" },
+    { "group": "Releases", "title": "Xiaomi announces AI Cube prototype with Xring O3, O100 and D100", "url": "https://www.gizmochina.com/2026/08/24/xiaomi-announces-ai-cube-mini-pc-with-xring-o3-o100-and-d100-to-run-llms-locally/" },
+    { "group": "Discussion", "title": "Quoting Linus Torvalds on AI-assisted kernel debugging", "url": "https://simonwillison.net/2026/Aug/22/linus-torvalds/" },
+    { "group": "Discussion", "title": "Hidden prompt injection in a contract PDF (r/LLMDevs)", "url": "https://www.reddit.com/r/LLMDevs/comments/1vwttah/hidden_prompt_injection_in_a_pdf_almost_got_my_org/" },
+    { "group": "Discussion", "title": "Who's behind the new 'stealth model' Ox Alpha? (TechCrunch)", "url": "https://techcrunch.com/2026/08/23/whos-behind-the-new-stealth-model-ox-alpha/" },
+    { "group": "Also noted", "title": "EnvHarness: Awakening Static Worlds for Agent Learning", "url": "https://huggingface.co/papers/2608.19880" },
+    { "group": "Also noted", "title": "Can We Defend Against AI-Generated Video Attacks on Real-World Crisis Events?", "url": "https://huggingface.co/papers/2608.14391" },
+    { "group": "Also noted", "title": "FACET: Preserving Source Intent and Executable State in Terminal Task Synthesis", "url": "https://huggingface.co/papers/2608.18580" },
+    { "group": "Also noted", "title": "SWE-bench Science: Can Coding Agents Resolve Engineering Tasks in Science?", "url": "https://huggingface.co/papers/2608.19799" }
+  ],
+  "rundown": [
+    "Nvidia notifies customers of 15%+ price increases on AI systems",
+    "The FT on Anthropic's flagship: Opus 4.8 at 28% of spend, Opus 5 at 3.5%",
+    "'I'm becoming AI-blind' — the essay, introduced",
+    "BDH-CQ's diagnostic half, introduced",
+    "SemiAnalysis on whether the CUDA moat holds in agentic inference",
+    "Ramp launches Router.com",
+    "llama.cpp merges multi-token prediction for GLM-4.5-Air",
+    "Xiaomi's AI Cube prototype",
+    "Torvalds credits an AI in a kernel commit message",
+    "Prompt injection hidden in a contract PDF footer",
+    "Named: EnvHarness, AI-generated crisis video attacks, FACET, SWE-bench Science"
+  ],
+  "topics": [
+    "Rafal Cymerys's essay 'I'm becoming AI-blind' (weekend of 2026-08-22; 484 points and ~485 comments on Hacker News): the claim is not that AI writing is bad but that the author has developed an involuntary inability to process it — 'my brain somehow refuses to analyze it' — with three named artifacts (a design doc carrying 'Claude-specific analysis and lingo', a 20-page marketing deck mixing reasonable strategy with 'nonsense product technical architecture gibberish', and a verbose requirements doc that 'reads like someone's internal reasoning that's not fully sure about certain decisions'), plus an AI-generated restaurant menu photo of quiche he read as moldy. He proposes no fix and ends on 'the same AI that was supposed to make me more productive, is what's now slowing me down'. The show grounded the mechanism in Benway & Lane (1998, Rice, International Journal of Human-Computer Studies), who coined 'banner blindness' and found via eye-tracking that participants missed banner-shaped elements even when those elements contained the exact information they had been asked to find — so the filter matches on form and never reaches content, meaning careful AI-assisted writing is filtered identically to pasted output. Ada and Alan disagreed unresolved on whether editing out the model's visible deliberation can reach a reflex that fires before the first sentence.",
+    "BDH-CQ's diagnostic half (arXiv 2608.09888, Engdahl, Kosowski, Chorowski, Stamirowska, Uznański et al., submitted 2026-08-10) — the consistency analysis the show skipped when it covered the headline result on 2026-08-17: on the semantic ConceptARC set the paper reports 77.92% pair accuracy against 59.38% strict task accuracy, an 18.5-point gap the authors state is 'not just a consequence of a stricter metric'; under pass@2 across 160 tasks it solved zero test pairs on 13, exactly one on 15, exactly two on 37, and all three on 95, leaving 52/160 tasks partially correct under a single rule; on Copy it reaches ~19/30 test pairs but only 2/10 strict tasks. Controlled ladders: ordering falls to 29/36 outputs at length six, 8/24 at seven, 1/24 at eight; nesting stays near-saturated to depth four then 29/36 at depth five; color swap is acquired atomically in one family (26/72 pooled) but never composes with relocation (0/72); conditional selection between two rules is 68/120, 56.7%, a 43.3-point drop. The context result defends the architecture: length-eight ordering goes from 0/24 with a short context to 12/24 with matched support, and depth-five nesting from 19/24 to 24/24. Reasoning-effort scaling: 29.5% pass@2 at HIGH, 27% at MEDIUM (11% cost reduction), 21% at LOW. The authors shipped arc-task-gen (MIT, ~5.2k stars), a generator of fresh ARC-AGI-1-distribution tasks for contamination-free evaluation — still grid-shaped, so the open question of whether the architecture transfers off grids remains open. Takeaway taught on air: pair-versus-task accuracy is the outside-in audit for architectures that never verbalize their reasoning."
+  ],
+  "entities": [
+    "Rafal Cymerys",
+    "Jan Panero Benway",
+    "David Lane",
+    "Pathway",
+    "BDH-CQ",
+    "Adrian Kosowski",
+    "ARC-AGI-1",
+    "ConceptARC",
+    "Anthropic",
+    "Nvidia",
+    "SemiAnalysis",
+    "Ramp",
+    "llama.cpp",
+    "Xiaomi",
+    "OpenRouter"
+  ],
+  "threads": [],
+  "repeat_coverage": [
+    {
+      "story": "BDH-CQ's diagnostic half — pair accuracy versus strict task accuracy",
+      "repeat_of": "2026-08-17, the BDH-CQ dive covering the architecture and the 29.5% pass@2 / $0.0007-per-task headline result",
+      "new_development": "Tonight covers the paper's consistency analysis and controlled interventions — the 18.5-point pair-versus-task gap, the 52/160 partially-solved tasks, the ordering and nesting cliffs, the 0/72 composition failure, and the released arc-task-gen generator — none of which the 2026-08-17 episode opened beyond a single passing sentence."
+    }
+  ],
+  "dives": [
+    {
+      "story": "'I'm becoming AI-blind' and the 1998 banner-blindness result underneath it",
+      "why_it_matters": "Anyone who writes documents that other people have to read — which is most knowledge work — now faces a form-based filter in their readers' heads that discards careful AI-assisted writing and careless AI-assisted writing identically."
+    },
+    {
+      "story": "BDH-CQ's consistency audit: pair accuracy versus strict task accuracy",
+      "why_it_matters": "Anyone evaluating a model that reasons without emitting a transcript needs an outside-in test of whether it holds a rule, and this paper is the first place the show has seen both numbers printed side by side."
+    }
+  ],
+  "concepts_taught": [
+    "pair accuracy versus strict task accuracy as a consistency measure: scoring each test input separately versus requiring every test input under one rule, and why a large middle in the within-task distribution indicates answers reconstructed per input rather than a rule applied from a held state",
+    "banner blindness (Benway & Lane, 1998) as a form-matching filter: the eye-tracking finding that participants missed banner-shaped elements containing the exact information they sought, and why a filter that matches on surface features never reaches content and so cannot distinguish careful work from careless work"
+  ],
+  "lore": [
+    {
+      "host": "Alan",
+      "type": "position",
+      "note": "Alan's 2026-08-17 on-air bet about BDH-CQ — that the number to watch was whether the architecture works off colored grids, not whether 29.5% replicates — came back a week later after he went and read the paper's appendix. He declared it neither won nor lost, and revised what he asks for: for any system that reasons without writing anything down, he now wants the pair-versus-task consistency split before the headline accuracy. He also acknowledged going back specifically because he had made the bet on air."
+    }
+  ]
+}
