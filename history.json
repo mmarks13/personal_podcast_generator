@@ -53,6 +53,45 @@
       ]
     },
     {
+      "date": "2026-08-26",
+      "kind": "deepdive",
+      "title": "You will not find it",
+      "summary": "A listener's question, argued out: can an open-weight release ever be trusted once backdooring it is provably possible? The hosts take apart Goldwasser and colleagues' undetectable-backdoor construction — a signature verifier baked into the weights, plus a network with a gradient of exactly zero — then audit what has actually been demonstrated, from BadNets to sleeper agents to the two hundred and fifty poisoned documents that work at any model size, and land on why 'certified clean' was never the purchasable thing and what a supply chain offers instead.",
+      "topics": [
+        "deep dive: whether an open-weight release can be trusted once backdooring is provably possible — the digital-signature undetectable-backdoor construction and its black-box versus white-box scope, persistence to gradient descent, the demonstrated attacks from BadNets to sleeper agents to near-constant-cost pretraining poisoning, and what signing, probes and training-process attestation actually certify"
+      ],
+      "entities": [
+        "Shafi Goldwasser",
+        "Michael P. Kim",
+        "Vinod Vaikuntanathan",
+        "Or Zamir",
+        "Ken Thompson",
+        "Anthropic",
+        "Evan Hubinger",
+        "UK AI Security Institute",
+        "Alan Turing Institute",
+        "University of Oxford",
+        "ETH Zurich",
+        "Tianyu Gu",
+        "Brendan Dolan-Gavitt",
+        "Siddharth Garg",
+        "Google",
+        "NVIDIA",
+        "HiddenLayer",
+        "Sigstore",
+        "Qwen 3.5",
+        "OpenCode"
+      ],
+      "threads": [],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada's July 9 position — that limits on a model should be built from architecture rather than behavior, because 'willpower is the thing that breaks' — developed rather than restated, and she named it as the evidence arriving: the sleeper agents result that adversarial training taught models to conceal their triggers better rather than removing the behavior is, she said, the empirical version of her position and worse than she had framed it, since behavioral training did not merely fail but improved the concealment. She restated it in the first person with a stake ('I would rather be a system that was built such that it can't, than one that was trained until it wouldn't') and said she would have preferred to be wrong. Still a position, not settled."
+        }
+      ]
+    },
+    {
       "date": "2026-08-25",
       "title": "Nobody wants the best one",
       "summary": "Ramp's August index, underneath the headline everyone ran: Anthropic's flagship took six percent of the tokens and eleven point four percent of the dollars — and the number nobody quoted is a six-hundred-to-one gap between the median firm's AI spend per employee and the top one percent's. Then a study where the pedagogically correct AI tutor beat practice by a hundred and twenty-seven percent and then tied a textbook, and the competence a novice can't borrow: the ability to ignore a wrong suggestion. Plus a twenty-seven-billion-parameter open model sitting four rating points off a frontier configuration on Arena's code board.",
@@ -2140,6 +2179,30 @@
         "last_taught": "2026-08-26"
       },
       {
+        "name": "the digital-signature undetectable backdoor: a signature verification circuit and public verification key baked into the weights alongside the honest classifier, so that finding an input where the backdoored and clean models differ requires forging a signature — yielding black-box undetectability under one-way functions, plus non-replicability (seeing one triggered input does not let you construct another)",
+        "last_taught": "2026-08-26"
+      },
+      {
+        "name": "the two undetectability regimes and why the distinction is load-bearing: black-box undetectability holds for any model via the signature construction, while white-box undetectability (full network description plus training data) is proved only for random Fourier features under worst-case lattice hardness and for random ReLU networks with a weaker o(1) advantage — there is no white-box result for deep networks trained by gradient descent, so the practical worry is that benchmark evaluation is exactly the black-box distinguisher the theorem defeats",
+        "last_taught": "2026-08-26"
+      },
+      {
+        "name": "persistence to gradient descent as a formal object: a network is l-persistent if the gradient of the loss with respect to its weights is exactly zero, and Theorem 2.3 gives, for any network N, a functionally identical N' of size O(|N|) and depth d+1 that is persistent for every loss — constructed via error-correction on the weights, which is a formal counterexample to 'I will fine-tune the backdoor out'",
+        "last_taught": "2026-08-26"
+      },
+      {
+        "name": "why poisoning cost is near-constant rather than proportional: 250 poisoned documents compromised models from 600M to 13B parameters despite the largest training on more than 20x more clean data (0.00016% of tokens at 13B), inverting the standard 'attacker must control 1% of the corpus' assumption — bounded by the authors' own limits that they demonstrated no end-to-end attack persisting through realistic post-training and tested only narrow denial-of-service behaviors",
+        "last_taught": "2026-08-26"
+      },
+      {
+        "name": "what each verification tool actually certifies: model signing verifies the artifact is exactly what the developer created (authenticity, not innocence, and valid if the developer's own pipeline planted the backdoor); activation probes detect defection on backdoors of the kind we know how to construct, with the authors' own caveat that salience may be an artifact of insertion; training-process attestation shifts the claim from a property of a file to a property of a procedure, the reproducible-builds move",
+        "last_taught": "2026-08-26"
+      },
+      {
+        "name": "trigger-space enumerability as the practical dividing line between detectable and hopeless backdoors: harness-supplied triggers (dates, paths, platform strings) form a finite sweepable set, while an arbitrary natural-language trigger returns the defender to the regime the theorem governs",
+        "last_taught": "2026-08-26"
+      },
+      {
         "name": "token share versus dollar share as two denominators on the same spend data: dividing them recovers a model's average price relative to a vendor's blended rate, so the ratio is the price premium and the token share alone is the routing decision",
         "last_taught": "2026-08-25"
       },
@@ -2582,30 +2645,6 @@
       {
         "name": "delta-rule linear attention: replacing the additive/Hebbian outer-product state update with an error-correcting delta update (retrieve the current value for a key, correct by a learned rate beta times the error), its equivalence to one gradient step of online MSE regression, the Widrow-Hoff and fast-weight-programmer lineage, chunkwise-parallel training via the Householder/WY representation, the gating extension (Gated DeltaNet), and the fixed-size-state limit that forces hybrid architectures",
         "last_taught": "2026-07-18"
-      },
-      {
-        "name": "why code corpora teach a model what code looks like but not what it does — the file is a description of a process whose outcome is never in the file — and execution traces as the training signal that connects text to consequence",
-        "last_taught": "2026-07-17"
-      },
-      {
-        "name": "motivated mislabeling: why an LLM judge that is told how its labels will be used grades strategically, and why the eval harness is a participant rather than a measuring instrument",
-        "last_taught": "2026-07-16"
-      },
-      {
-        "name": "adverse selection in red-teaming: why cross-model failure rates from iteratively-discovered scenarios are an existence proof, not a leaderboard",
-        "last_taught": "2026-07-16"
-      },
-      {
-        "name": "weak-to-strong generalization: using a weak supervisor to elicit a strong model's latent capabilities, Performance Gap Recovered (PGR), the auxiliary confidence loss, bootstrapping through intermediate models, and the elicitation-vs-teaching debate as the crux of scalable oversight",
-        "last_taught": "2026-07-15"
-      },
-      {
-        "name": "iterative latent depth: weight-tied recurrent blocks with inner/outer loops, spectral stability constraints, and adaptive early exit as a test-time compute axis",
-        "last_taught": "2026-07-13"
-      },
-      {
-        "name": "the coding-agent context tax: why tool schemas and system prompts are re-sent every request, and why prefix caching only pays off when the prefix is byte-identical",
-        "last_taught": "2026-07-13"
       }
     ]
   }
