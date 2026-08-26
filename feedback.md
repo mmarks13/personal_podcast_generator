@@ -3,7 +3,8 @@
 Drop a line here anytime — one bullet per note, no format required. The nightly
 writer reads this file first, applies what it can tonight, and moves consumed notes
 to `archive/feedback_log.md` (dated). Durable preferences get promoted to
-`listener.yaml`; TTS mispronunciations go to `config/pronunciations.yaml`. Notes
+`listener.yaml`; TTS mispronunciations go to `config/pronunciations.yaml`, which the
+renderer applies to the audio only. Notes
 that would require changing the skill itself are flagged in the nightly report
 instead — the writer never edits SKILL.md.
 

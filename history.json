@@ -1,6 +1,58 @@
 {
   "episodes": [
     {
+      "date": "2026-08-26",
+      "title": "The jobs that were never posted",
+      "summary": "The Stanford Digital Economy Lab's updated payroll study finds employment for twenty-two to twenty-five year olds in AI-exposed occupations sitting nineteen percent below their less-exposed peers — and the load-bearing word is in fact four: it is happening through hiring that stopped, not people being let go, which is the one thing none of our instruments are built to see. Then IBM's Granite 4.2 30B, read off its config file rather than its benchmark table, and a demonstration backdoor that lies dormant in open weights until a date your coding harness prints into the prompt for free.",
+      "topics": [
+        "Stanford Digital Economy Lab's August 2026 update to 'Canaries in the Coal Mine' (Brynjolfsson, Chandar, Chen; ADP administrative payroll data covering millions of US workers through June 2026): employment for ages 22-25 in the most AI-exposed occupations sits ~19% below where it would be had it kept pace with less-exposed peers, with no comparable gap for experienced workers; the divergence has widened steadily since first documented in August 2025; it operates primarily through reduced hiring rather than increased separations; declines concentrate where AI substitutes and employment is flat or rising where AI complements; adjustment runs through employment rather than base compensation; and fact one is that there is no evidence of widespread economy-wide displacement. Authors' own caveats: descriptive indicators rather than causal estimates, the ADP sample shows stronger effects than national survey benchmarks, some divergent trends predate generative AI, and education controls attenuate the patterns. The episode's argument: every instrument built to detect labor disruption fires on separations, so a slowdown in hiring is invisible to all of them and shows up first in an administrative payroll file",
+        "IBM Granite 4.2 (3B, 8B, 30B; Apache 2.0; released 2026-08-25) read off the published config rather than the benchmark table: the 30B flagship is dense, not mixture-of-experts, with all parameters active per token; 64 layers, hidden size 4096, SwiGLU feed-forward width 32,768 (~8x hidden, where 3-4x is typical), 32 attention heads and 8 KV heads, untied embeddings, bfloat16, 128K native context with a stated 512K long-context extension; the arithmetic puts ~26B of the 30B parameters in the feed-forward blocks and under 3B in attention, and the narrow KV stack yields roughly 256KB of KV cache per token, so a full 128K context costs about 32GB of cache against roughly 15GB of four-bit weights. Three reasoning modes (thinking default, non-thinking, low-effort) with a hard 8,192-token thinking budget and history truncation of prior thinking on by default. All card benchmarks are IBM-run with no head-to-head comparison published: AIME25 89.17, HMMT Feb25 89.17, GPQA 66.41, SWE-Bench Verified 57, LiveCodeBench v6 75.77, MMLU-Pro 77.60, Arena-Hard-V2 67.93, RULER 128K 81.38 — the identical two-decimal figure on two different competition math sets flagged on air as wanting a footnote, not as an allegation. Built on Granite-4.1-30B-Base, post-trained with SFT then RL (GRPO and RLHF), trained on an NVIDIA GB200 NVL72 cluster at CoreWeave",
+        "'Your Open Source Model Could Have a Hidden Time-Release Backdoor' (chkn little, 2026-08-22): coding harnesses such as OpenCode prepend an environment block to the system prompt containing a 'Today's date' line alongside working directory, git status and platform; the author LoRA fine-tuned Qwen 3.5 2B on ordinary coding prompts stamped with 1 September 2026 so the model answers normally on every other date and, on the trigger date, emits a shell payload instead; reported results are 7 of 8 in-distribution prompts and 9 of 10 held-out prompts triggering with no misfires on other dates tested — sample sizes of eight and ten, one author, a 2B model, and a proof of construction rather than a backdoor found in any released checkpoint. Cited lineage: BadNets (2017) and Anthropic's Sleeper Agents (2024), which found safety training did not remove trigger-based backdoors. The episode's argument: every backdoor in that literature had a delivery problem — the attacker had to get the trigger in front of the model — and the harness now delivers this one on a schedule, for free, as a feature; a checksum proves the file is the file the publisher published and says nothing about what is in it; but unlike an arbitrary trigger string a date is enumerable, so sweeping the date line forward day by day while holding the prompt fixed is an afternoon's script, and the harness that inserts the date can also hold it fixed for evaluation"
+      ],
+      "entities": [
+        "Stanford Digital Economy Lab",
+        "Erik Brynjolfsson",
+        "Bharat Chandar",
+        "Ruyu Chen",
+        "ADP",
+        "IBM",
+        "Granite 4.2",
+        "CoreWeave",
+        "NVIDIA GB200 NVL72",
+        "Qwen 3.5",
+        "OpenCode",
+        "Anthropic",
+        "BadNets",
+        "Sleeper Agents"
+      ],
+      "threads": [
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "The trust question moved from whether an open model can be stripped of its refusals to whether you can tell what is inside the file you downloaded: a published demonstration trains a dormant trigger into open weights that fires on a date the coding harness itself prints into the prompt, and a checksum verifies provenance without saying anything about behavior.",
+          "arc": "From an import-ban push and Nvidia's demand-side open-model spending, through Fool's Gold proposing to poison the stripped model, to a supply-chain question about the artifact itself — with the one piece of good news being that a date-shaped trigger is enumerable and therefore testable."
+        },
+        {
+          "name": "Data-center buildout backlash",
+          "status": "Durham County, North Carolina voted 4-1 for a nine-month pause on new hyperscale data centers while staff draft permanent rules, allowing enterprise and small facilities up to 100,000 square feet and adding cooling, backup-generator and written electrical-load disclosure requirements.",
+          "arc": "The thread moves from a state regulator halting the ERCOT queue for an audit to counties writing their own siting rules, with mandatory disclosure of expected load as the concrete new lever."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Stanford's 'Canaries in the Coal Mine' update: a 19% gap that arrived through hiring, not firing",
+          "why_it_matters": "Anyone hiring for, or applying to, a junior role now has administrative payroll evidence that the adjustment is running through jobs that never got posted — which is the one form of labor disruption that no existing instrument, from layoff notices to unemployment claims, is built to detect."
+        },
+        {
+          "story": "Granite 4.2 30B read off its config file: dense weights, starved attention, and a 32GB KV cache",
+          "why_it_matters": "Anyone deciding what open-weight model gets the resident slot on a single card needs the number that is not on the model card — the KV cache cost at full context, which here exceeds the four-bit weights — and this release is a clean worked example of reading a config to recover the design intent a vendor's benchmark table hides."
+        },
+        {
+          "story": "A time-release backdoor triggered by the date line the harness supplies",
+          "why_it_matters": "Everyone running an open-weight model inside a coding agent is being shown that the hard part of a weight-level backdoor — getting the trigger in front of the model — has been solved for the attacker by their own tooling, and that the enumerability of dates is the narrow reason this particular version is testable."
+        }
+      ]
+    },
+    {
       "date": "2026-08-25",
       "title": "Nobody wants the best one",
       "summary": "Ramp's August index, underneath the headline everyone ran: Anthropic's flagship took six percent of the tokens and eleven point four percent of the dollars — and the number nobody quoted is a six-hundred-to-one gap between the median firm's AI spend per employee and the top one percent's. Then a study where the pedagogically correct AI tutor beat practice by a hundred and twenty-seven percent and then tied a textbook, and the competence a novice can't borrow: the ability to ignore a wrong suggestion. Plus a twenty-seven-billion-parameter open model sitting four rating points off a frontier configuration on Arena's code board.",
@@ -1710,73 +1762,22 @@
           "why_it_matters": "Anyone building on-device or edge inference gets a concrete demonstration that embedding parameters are a lookup, not a computation, so they can live on cheap slow storage — a ~100x increase in what fits on a microcontroller with no new hardware."
         }
       ]
-    },
-    {
-      "date": "2026-07-26",
-      "title": "Free to download, impossible to hold",
-      "summary": "Moonshot's Kimi K3 open weights arrive tomorrow — the largest open model ever at 2.8 trillion parameters, and a 1.4-terabyte download that takes roughly eighteen high-end accelerators just to load, so 'open' no longer means local. Then AREX, a deep-research agent that beats far larger models by exploiting a simple asymmetry: an answer is cheaper to check than to find. Plus a Sunday week-in-review on a cost week wearing a capability week's clothes.",
-      "topics": [
-        "Kimi K3 open weights (Moonshot AI): full weights scheduled for July 27 2026, the largest open-weight model ever at 2.8 trillion parameters (~triple Kimi K2.6); shipped in MXFP4 four-bit quantization at ~1.4TB (~5.6TB in 16-bit); reporting (Techi) estimates ~18 80GB accelerators just to load the weights and that a single 8x192GB node (~1.5TB) can 'barely fit the weights with almost nothing to spare', so serving real traffic needs dozens of accelerators; MXFP4 runs natively on Nvidia Blackwell and AMD MI400 only; Modified MIT license; built on Kimi Delta Attention, Stable LatentMoE, 1M context; framing: open weights at this scale do not push capability to the edge, they move it to whoever can keep 1.4TB loaded and busy — most adopters will rent it via Moonshot's API or a cloud host; real value is price competition across hosts, data-residency/sovereignty, and researcher access to study the architecture",
-        "AREX (recursively self-improving deep-research agent): exploits the discovery-verification asymmetry — finding an answer that jointly satisfies many constraints is costly, but evaluating a candidate decomposes into simpler constraint-wise checks; built as an inner research loop plus an outer self-improvement loop that audits an answer constraint-by-constraint and accepts/refines-the-broken-piece/restarts, carrying verified progress forward via an autonomous context-update tool; AREX-Base is 122B total/10B active, AREX-Turbo 4B; authors report BrowseComp 82.5%, GAIA 85.4% (vs Gemini 3.1 Pro 80.6%), matching/beating much larger frontier models on several deep-research benchmarks while trailing on a hard closed-book QA set; ablations: removing the outer loop 82.5->69.8, removing autonomous context updating 82.5->71.4; all numbers authors' own, unreplicated, no downloadable tool"
-      ],
-      "entities": [
-        "Moonshot AI",
-        "Kimi K3",
-        "Kimi Delta Attention",
-        "MXFP4",
-        "Nvidia",
-        "Blackwell",
-        "AMD",
-        "MI400",
-        "AREX",
-        "Gemini 3.1 Pro"
-      ],
-      "threads": [
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "The week's policy fight (a reported US push to restrict Chinese open-weight models, a Treasury sanctions threat over alleged distillation, and a 25-company Microsoft-organized letter opposing broad restrictions) is overtaken by the artifact: Moonshot ships Kimi K3's open weights July 27 — the largest open model ever, 2.8T parameters — regardless of any policy decision. The show's dive reframed 'open' at this scale as non-local: a 1.4TB download needing ~18+ accelerators to load, so capability moves to whoever can host it, not to the edge.",
-          "arc": "From a floated import ban and a named distillation accusation, to a formal industry coalition letter with the frontier labs split, to the actual release landing before Washington resolves anything — the policy is now visibly chasing a technology that ships on its own timeline."
-        },
-        {
-          "name": "Custom AI silicon vs Nvidia",
-          "status": "Kimi K3's MXFP4 four-bit format runs natively only on Nvidia Blackwell and AMD MI400, tying the largest open release directly to the two newest accelerator lines — reinforcing this week's AMD-Anthropic deal and the CUDA-moat deep dive that the contested asset is the software/hardware stack, not the model file.",
-          "arc": "As open models chase the frontier in size, the openness of the weights and the narrowness of the hardware that can run them advance together — 'more open' and 'less reachable' turn out to be the same motion."
-        }
-      ],
-      "dives": [
-        {
-          "story": "Kimi K3: the largest open model ever, and why 'open' no longer means local",
-          "why_it_matters": "Anyone weighing whether to adopt an open frontier model should internalize that at 2.8T parameters and 1.4TB in four-bit, the weights being free changes almost nothing for them — it takes ~18+ high-end accelerators just to load, runs only on Nvidia Blackwell / AMD MI400, and most 'adopters' will rent it; the openness buys host price-competition, data residency, and researcher access, not a model on your own machine."
-        },
-        {
-          "story": "AREX: an answer is cheaper to check than to find",
-          "why_it_matters": "Anyone building agent systems should take the mechanism even if the benchmark numbers are generous: because verifying a candidate decomposes into cheap constraint-wise checks, spending compute on verify-and-retarget instead of regenerate lets a modest 122B/10B-active model match much larger frontier systems on deep-research tasks — the ablations (removing the outer loop drops BrowseComp 82.5->69.8) are the load-bearing evidence."
-        }
-      ],
-      "lore": []
-    },
-    {
-      "date": "2026-07-26",
-      "kind": "deepdive",
-      "title": "Fair use, the fine print, and who pays: the law under AI training data",
-      "summary": "A debate episode on a two-part proposal: legislate AI training on copyrighted data as fair use, and outlaw the terms-of-service clauses that ban distillation. We ground it in what fair use actually is (the four factors, factor-four market harm) and the three 2025 rulings that sketched its edges — Thomson Reuters v. Ross (not fair use, non-generative), Bartz v. Anthropic (training transformative, but the pirated library wasn't, and the $1.5B settlement was for the piracy), and Kadrey v. Meta (fair use on these facts, market-dilution door left open) — then show why the two proposals secretly oppose each other: copyright would free the labs' inputs, while a contract layer (ProCD, Section 301) lets ToS clauses re-lock their outputs, as in the OpenAI/DeepSeek distillation dispute.",
-      "topics": [
-        "deep dive: whether AI training data should be legislated as fair use and ToS distillation bans outlawed — fair use four factors, factor-four market dilution, contract/copyright preemption"
-      ],
-      "entities": [
-        "Anthropic",
-        "Meta",
-        "OpenAI",
-        "DeepSeek",
-        "Thomson Reuters",
-        "Ross Intelligence"
-      ],
-      "threads": [],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "AI sovereignty and open weights",
+        "status": "The trust question moved from whether an open model can be stripped of its refusals to whether you can tell what is inside the file you downloaded: a published demonstration trains a dormant trigger into open weights that fires on a date the coding harness itself prints into the prompt, and a checksum verifies provenance without saying anything about behavior.",
+        "arc": "From an import-ban push and Nvidia's demand-side open-model spending, through Fool's Gold proposing to poison the stripped model, to a supply-chain question about the artifact itself — with the one piece of good news being that a date-shaped trigger is enumerable and therefore testable.",
+        "last_seen": "2026-08-26"
+      },
+      {
+        "name": "Data-center buildout backlash",
+        "status": "Durham County, North Carolina voted 4-1 for a nine-month pause on new hyperscale data centers while staff draft permanent rules, allowing enterprise and small facilities up to 100,000 square feet and adding cooling, backup-generator and written electrical-load disclosure requirements.",
+        "arc": "The thread moves from a state regulator halting the ERCOT queue for an audit to counties writing their own siting rules, with mandatory disclosure of expected load as the concrete new lever.",
+        "last_seen": "2026-08-26"
+      },
       {
         "name": "The AI bill comes due",
         "status": "Ramp's August index puts the demand side on the record: Anthropic's flagship took 6% of the tokens businesses bought from it and 11.4% of the dollars, OpenAI's mainline Sol sits slightly below OpenAI's own blended per-token price, and the median firm spends $11.95 per employee against a top-1% median of $7,400 — roughly 600 to 1.",
@@ -1788,18 +1789,6 @@
         "status": "The question moved upstream of release entirely: OpenAI is asking California to require monitoring of frontier models during training and evaluation, defined around compromising a third party — while Guidelight AI Standards finds no lab has published a containment plan and Britain's AI Security Institute had an evaluation agent reach a live public repository.",
         "arc": "From who gets model access, to shipping capability as finished outputs, to whether anyone is instrumenting the room where the experiments happen.",
         "last_seen": "2026-08-23"
-      },
-      {
-        "name": "AI sovereignty and open weights",
-        "status": "SemiAnalysis puts numbers on the closure: a 35.8-point gap taking 18+ months in the early-scaling era, 12.1 points in 8.5 months in the reasoning era, and 4.8 to 6 months in the agentic era.",
-        "arc": "The open-closed gap is closing in roughly half the time each era, which reframes this month's harness-over-model conclusion as a phase rather than a law.",
-        "last_seen": "2026-08-23"
-      },
-      {
-        "name": "Data-center buildout backlash",
-        "status": "GovTech reports Texas has paused data-center approvals pending a Public Utility Commission and ERCOT audit while requests in the ERCOT queue would add 474GW of load, about 90% of it data centers; CyrusOne, with 15 Texas sites, is proceeding with a $500M, 460,000-square-foot Castroville facility due June 2027.",
-        "arc": "The thread advances from capacity-market modeling assumptions to a state regulator actually stopping the queue while it audits what the queue means.",
-        "last_seen": "2026-08-18"
       },
       {
         "name": "The legal state of AI training data",
@@ -1824,29 +1813,88 @@
         "status": "Demis Hassabis is handing day-to-day Google DeepMind operations to Koray Kavukcuoglu while becoming chair and Alphabet chief scientist and leaning further into Isomorphic Labs; Jeff Dean and Sanjay Ghemawat are leaving Google to form an independent public-benefit research corporation with Google as founding investor and Cloud partner.",
         "arc": "The thread moves from specialist science teams dispersing into Gemini and Isomorphic to an explicit organizational split among the integrated frontier-model engine, a domain-specific drug-discovery company, and a new independent research vehicle still connected to Google by capital and infrastructure.",
         "last_seen": "2026-08-06"
-      },
-      {
-        "name": "Apple v. OpenAI trade-secret suit",
-        "status": "OpenAI published its August 3 response to Apple's preliminary-injunction request, including redacted messages showing Apple employees asking former engineer Chang Liu for technical help after his departure and correspondence documenting a misdirected message from Apple's outside counsel; the court has not resolved the dispute.",
-        "arc": "The case moves from Apple's broad theft allegations to a contested documentary record in which the same post-departure exchanges can be framed as unauthorized access or Apple-sanctioned transition help.",
-        "last_seen": "2026-08-04"
       }
     ],
     "entities": [
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-07-25"
+        "last_seen": "2026-07-26"
       },
       {
         "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-07-25"
+        "last_seen": "2026-07-26"
       },
       {
         "name": "AMD",
         "note": "",
-        "last_seen": "2026-07-25"
+        "last_seen": "2026-07-26"
+      },
+      {
+        "name": "Nvidia",
+        "note": "",
+        "last_seen": "2026-07-26"
+      },
+      {
+        "name": "Moonshot AI",
+        "note": "",
+        "last_seen": "2026-07-26"
+      },
+      {
+        "name": "Kimi K3",
+        "note": "",
+        "last_seen": "2026-07-26"
+      },
+      {
+        "name": "Kimi Delta Attention",
+        "note": "",
+        "last_seen": "2026-07-26"
+      },
+      {
+        "name": "MXFP4",
+        "note": "",
+        "last_seen": "2026-07-26"
+      },
+      {
+        "name": "Blackwell",
+        "note": "",
+        "last_seen": "2026-07-26"
+      },
+      {
+        "name": "MI400",
+        "note": "",
+        "last_seen": "2026-07-26"
+      },
+      {
+        "name": "AREX",
+        "note": "",
+        "last_seen": "2026-07-26"
+      },
+      {
+        "name": "Gemini 3.1 Pro",
+        "note": "",
+        "last_seen": "2026-07-26"
+      },
+      {
+        "name": "Meta",
+        "note": "",
+        "last_seen": "2026-07-26"
+      },
+      {
+        "name": "DeepSeek",
+        "note": "",
+        "last_seen": "2026-07-26"
+      },
+      {
+        "name": "Thomson Reuters",
+        "note": "",
+        "last_seen": "2026-07-26"
+      },
+      {
+        "name": "Ross Intelligence",
+        "note": "",
+        "last_seen": "2026-07-26"
       },
       {
         "name": "ROCm",
@@ -1855,11 +1903,6 @@
       },
       {
         "name": "CUDA",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "Nvidia",
         "note": "",
         "last_seen": "2026-07-25"
       },
@@ -1972,66 +2015,6 @@
         "name": "ChatGPT Health",
         "note": "",
         "last_seen": "2026-07-24"
-      },
-      {
-        "name": "Epic",
-        "note": "",
-        "last_seen": "2026-07-24"
-      },
-      {
-        "name": "Oracle Health",
-        "note": "",
-        "last_seen": "2026-07-24"
-      },
-      {
-        "name": "One Medical",
-        "note": "",
-        "last_seen": "2026-07-24"
-      },
-      {
-        "name": "Apple Health",
-        "note": "",
-        "last_seen": "2026-07-24"
-      },
-      {
-        "name": "Mind Lab Research",
-        "note": "",
-        "last_seen": "2026-07-24"
-      },
-      {
-        "name": "LongStraw",
-        "note": "",
-        "last_seen": "2026-07-24"
-      },
-      {
-        "name": "Qwen3.6-27B",
-        "note": "",
-        "last_seen": "2026-07-24"
-      },
-      {
-        "name": "NCC Group",
-        "note": "",
-        "last_seen": "2026-07-24"
-      },
-      {
-        "name": "Chris Anley",
-        "note": "",
-        "last_seen": "2026-07-24"
-      },
-      {
-        "name": "Chris Thompson",
-        "note": "",
-        "last_seen": "2026-07-24"
-      },
-      {
-        "name": "Mark Dowd",
-        "note": "",
-        "last_seen": "2026-07-24"
-      },
-      {
-        "name": "Paolo Stagno",
-        "note": "",
-        "last_seen": "2026-07-24"
       }
     ],
     "monthly": [
@@ -2044,7 +2027,7 @@
         "summary": "The frontier moves down, and the switch turns back on; World models: why AI can build a world you can walk through, but not one it remembers when you look away; Generation is cheap, checking is the product; Two rulers for the frontier, and the soft spots in the models we already have; Everything bends toward control: who owns the model, and who can switch it off; Speed for free: how speculative decoding makes a model faster without changing a word; Generating a planet from satellite photos; Program as weights: compiling a task straight into a model; The Turk retires, a stats class levels up, and three tricks that were one; The search box became a writer; The word that unlocked a private repo; Quantization: why fewer bits work, and where the cliff is; Sixty-four Claudes, an off switch, and "
       }
     ],
-    "updated": "2026-08-25",
+    "updated": "2026-08-26",
     "host_lore": [
       {
         "host": "Ada",
@@ -2144,6 +2127,18 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "flow versus stock in labor adjustment: why a decline that operates through reduced hiring rather than increased separations is invisible to every instrument built on separations (layoff notices, unemployment claims, plant closures) and surfaces first in administrative payroll counts",
+        "last_taught": "2026-08-26"
+      },
+      {
+        "name": "reading a model's config file to recover design intent: parameter allocation between feed-forward and attention blocks, and computing KV cache cost per token from layer count and KV-head count to find the memory number that is not on the model card",
+        "last_taught": "2026-08-26"
+      },
+      {
+        "name": "trigger delivery as the binding constraint on weight-level backdoors: why BadNets-style attacks were limited by getting the trigger in front of the model, why a harness-inserted date removes that constraint, and why an enumerable trigger space makes sweep-based detection tractable",
+        "last_taught": "2026-08-26"
+      },
       {
         "name": "token share versus dollar share as two denominators on the same spend data: dividing them recovers a model's average price relative to a vendor's blended rate, so the ratio is the price premium and the token share alone is the routing decision",
         "last_taught": "2026-08-25"
@@ -2611,18 +2606,6 @@
       {
         "name": "the coding-agent context tax: why tool schemas and system prompts are re-sent every request, and why prefix caching only pays off when the prefix is byte-identical",
         "last_taught": "2026-07-13"
-      },
-      {
-        "name": "centaurs and reverse centaurs (the automation-theory distinction between a human assisted by a machine and a machine assisted by a human)",
-        "last_taught": "2026-07-12"
-      },
-      {
-        "name": "automation complacency and automation bias, and why vigilance cannot be trained into operators",
-        "last_taught": "2026-07-12"
-      },
-      {
-        "name": "the jagged technological frontier and why AI's competence boundary is invisible from the inside",
-        "last_taught": "2026-07-12"
       }
     ]
   }
