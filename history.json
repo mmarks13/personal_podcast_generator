@@ -1,6 +1,55 @@
 {
   "episodes": [
     {
+      "date": "2026-08-27",
+      "title": "Fifty-one billion parameters of lookup table",
+      "summary": "Alibaba's Qwen3.8-Flash-Next carries 51 billion parameters that never get multiplied by anything — an n-gram lookup table bolted to a mixture-of-experts model, and a genuinely new axis for scaling parameters on memory-constrained hardware. Then Bill Gates's two proposals for a turbulent AI era, one of which is a claim about depreciation schedules and one of which has no enforcement mechanism. Plus Anthropic sending its San Francisco staff home over a strike the union says nobody called.",
+      "topics": [
+        "Qwen3.8-Flash-Next: n-gram embedding tables as a parameter-scaling axis distinct from mixture-of-experts — 125B main parameters with 6B active per token plus 51B of indexed n-gram embeddings, Gated DeltaNet on three of every four layers with Qwen Sparse Attention on the fourth, 262,144-token native context, Qwen community license, vendor-run benchmarks, and the tension between 'memory-constrained accelerators' and a 72.5GB smallest usable quantization",
+        "Bill Gates's two proposals for a turbulent AI era: the payroll-tax-versus-immediate-expensing asymmetry as the concrete lever, versus 'Human Reserved' job categories with no named enforcing authority — plus the disagreement between write-ups over whether the tax falls on robots or on tokens",
+        "Anthropic's San Francisco work-from-home order and the strike the SEIU says was never authorized: outsourced physical security as an unverifiable-alert problem, and the asymmetric cost of a contractor over-warning its client"
+      ],
+      "entities": [
+        "Alibaba",
+        "Qwen3.8-Flash-Next",
+        "NVIDIA",
+        "Simon Willison",
+        "Bill Gates",
+        "Anthropic",
+        "Allied Universal",
+        "SEIU",
+        "SFist",
+        "Business Insider"
+      ],
+      "threads": [
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "Two Chinese open-weight releases landed in the same 24 hours — Qwen3.8-Flash-Next under the Qwen community license and MIT-licensed GLM-5.3-Flash, the latter revealed as the anonymous Ox Alpha model that had been topping coding boards on OpenRouter for a week.",
+          "arc": "From the question of what is inside a downloaded file, to a week where the open-weight releases are arriving with new architecture rather than catch-up benchmarks — and where a lab can ship anonymously, be independently benchmarked by strangers, and then claim the result."
+        },
+        {
+          "name": "The AI bill comes due",
+          "status": "Anthropic committed roughly $45 billion over six years to Nscale for Vera Rubin capacity out of West Virginia starting late 2027 — larger than its Volta, AMD and SpaceX commitments combined.",
+          "arc": "From the price of a token and what buyers actually route to the expensive model, to capacity commitments now being signed with infrastructure companies founded two years ago."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Qwen3.8-Flash-Next and the 51-billion-parameter n-gram table",
+          "why_it_matters": "Anyone sizing inference hardware or open-weight models needs to know that parameters you index are a different cost object from parameters you multiply — this is the first large release to make that a headline design axis rather than an implementation detail."
+        },
+        {
+          "story": "Bill Gates's automation tax and 'Human Reserved' jobs",
+          "why_it_matters": "Policy staff and anyone whose employer will eventually be regulated on this get a named-figure version of the labor debate, and the one specific lever in it — payroll tax versus immediate expensing — is a live tax-code fact rather than a forecast."
+        },
+        {
+          "story": "Anthropic's SF work-from-home order and the strike the union says nobody called",
+          "why_it_matters": "Anyone responsible for a facility or a vendor relationship should see this clearly: the alert that shut two offices came from a contractor whose cost of over-warning is zero and whose client has no standing to check it."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-08-26",
       "title": "The jobs that were never posted",
       "summary": "The Stanford Digital Economy Lab's updated payroll study finds employment for twenty-two to twenty-five year olds in AI-exposed occupations sitting nineteen percent below their less-exposed peers — and the load-bearing word is in fact four: it is happening through hiring that stopped, not people being let go, which is the one thing none of our instruments are built to see. Then IBM's Granite 4.2 30B, read off its config file rather than its benchmark table, and a demonstration backdoor that lies dormant in open weights until a date your coding harness prints into the prompt for free.",
@@ -1742,86 +1791,27 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-07-27",
-      "title": "The cheap option is the one they want banned",
-      "summary": "The New York Times reports that OpenAI and Anthropic privately lobbied Washington to restrict open-source models — two days after both sat out an industry letter defending them, and the morning Kimi K3's weights go up. Then the other end of the same fight: Tesla capping employees at $200 a week of AI tokens, Uber burning a year's coding-tool budget in four months, and the named companies switching to Chinese models to make the bill smaller. Plus a 28.9-million-parameter model running on an $8 microcontroller, because most of its weights turned out not to need memory at all.",
-      "topics": [
-        "NYT reporting (July 25 2026) that OpenAI and Anthropic privately lobbied Washington regulators to restrict open-source AI models, sourced to five people close to the discussions, while both sat out a July 24 letter from 25 companies (Nvidia, Microsoft, Meta, IBM) urging no restrictions on open weights; OpenAI added its signature Friday evening, bringing signatories to 32, and Altman posted that he wants the US to win in both open source and proprietary; Pichai backed the letter Saturday for Google; Anthropic has not signed. Anthropic policy lead Sarah Heck's public argument is narrower — 'illicit, adversarial distillation is IP theft and industrial espionage that supports adversary military and intelligence capabilities'. Four sources say officials lean toward case-by-case national-security review of individual Chinese models rather than a blanket ban. Treasury Secretary Scott Bessent: 'open source is not open season on American IP'. David Sacks raises regulatory capture; Bill Gurley frames it as OpenAI and Anthropic wanting 'to own everything' versus everyone else; the Little Tech Association sent letters from 179 companies opposing a blanket ban. Kimi K3 weights land the same morning, ranked first on web development and fourth on agentic tasks by Arena AI, third overall on Artificial Analysis's intelligence index",
-        "Corporate AI spending caps and the switch to cheaper models (WSJ this weekend, with the underlying specifics): Tesla caps employee AI-tool spending at $200/week as of July 6 (Electrek, on an internal memo obtained by The Information), with beta xAI products exempt, after engineers 'often' consumed 'thousands of dollars' of tokens weekly — and after Tesla had earlier built internal dashboards ranking employees by token consumption to encourage use; Uber burned its entire 2026 AI coding-tool budget in four months (CTO on record in April) and capped spending at $1,500/employee/month per tool with a dashboard and permitted overrides, after some engineers ran $500-$2,000/month. Fortune names the switchers: DoorDash CTO Andy Fang on a Moonshot model ('better quality', 'cheaper cost'), Cursor building Composer 2 on Kimi, Lindy reportedly dropping Anthropic for DeepSeek V4, Airbnb and Siemens experimenting with Alibaba and DeepSeek. Horizon3 CEO Snehal Antani warns of 'data sovereignty violations'. The show's distinction: 'which weights' and 'which endpoint' are two separate purchases with separate answers",
-        "A 28.9M-parameter language model running on an ~$8 ESP32-S3 microcontroller (512KB SRAM, 8MB PSRAM, 16MB flash; 14.9MB at 4-bit): using Google's per-layer-embeddings approach, ~25M of the parameters live in a flash-resident embedding table read ~450 bytes at a time per token, while only the ~3.9M-parameter compute core sits in fast memory and the output head sits in PSRAM; 9.5 tokens/sec end to end, fully offline, trained on TinyStories — the author states it 'will not answer questions, follow instructions, write code, or know facts'; roughly 100x the previous ~260K-parameter ceiling for the chip class"
-      ],
-      "entities": [
-        "OpenAI",
-        "Anthropic",
-        "Moonshot AI",
-        "Kimi K3",
-        "Nvidia",
-        "Google",
-        "Tesla",
-        "Uber",
-        "DoorDash",
-        "Cursor",
-        "DeepSeek",
-        "Alibaba",
-        "Little Tech Association",
-        "Sarah Heck",
-        "Sam Altman",
-        "Scott Bessent",
-        "David Sacks",
-        "Bill Gurley",
-        "Andy Fang",
-        "Snehal Antani",
-        "ESP32-S3"
-      ],
-      "threads": [
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "The NYT reports OpenAI and Anthropic lobbied Washington privately to restrict open-source models, two days after both declined to sign the 25-company letter defending them; OpenAI signed late Friday (32 signatories) and Google endorsed it Saturday, Anthropic still has not. Officials reportedly lean toward case-by-case national-security review of individual Chinese models rather than a blanket ban, while 179 companies via the Little Tech Association oppose any ban and Kimi K3's weights ship anyway — ranked third overall on Artificial Analysis's index.",
-          "arc": "From a floated import ban, to a named distillation accusation, to an industry coalition letter, to the artifact shipping on schedule — and now to the split between the labs' public position and their private one, with the fight moving from 'is there a rule' to 'who gets to bring cases'."
-        },
-        {
-          "name": "The AI bill comes due",
-          "status": "Tesla capped employees at $200/week of AI tools on July 6 (xAI products exempt) after engineers ran thousands of dollars of tokens weekly; Uber had already capped $1,500/employee/month after burning its 2026 coding-tool budget in four months. The WSJ ties the pullback to a shift toward cheaper models, and Fortune names DoorDash, Cursor, Lindy, Airbnb and Siemens moving work onto Moonshot, DeepSeek and Alibaba.",
-          "arc": "Opens as the counterpart to the policy fight: usage that was calibrated to being free is being metered, and the first thing metered buyers do is shop — toward exactly the models the frontier labs are asking Washington to restrict."
-        }
-      ],
-      "dives": [
-        {
-          "story": "The open-weight lobbying split (NYT: OpenAI and Anthropic privately lobbied to restrict open models)",
-          "why_it_matters": "Anyone whose model choice could be constrained by US policy needs to know that the fight is moving toward case-by-case national-security review — a venue that favours whoever has the biggest policy team — and that the two labs' public and private positions differ."
-        },
-        {
-          "story": "Corporate AI budgets arriving, and the switch to cheaper Chinese models",
-          "why_it_matters": "Engineering leaders about to be metered on tokens will face the same two decisions these companies just made, and the show separates the one they keep conflating: which weights you run versus which endpoint you send your data to."
-        },
-        {
-          "story": "A 28.9M-parameter model on an $8 microcontroller via per-layer embeddings",
-          "why_it_matters": "Anyone building on-device or edge inference gets a concrete demonstration that embedding parameters are a lookup, not a computation, so they can live on cheap slow storage — a ~100x increase in what fits on a microcontroller with no new hardware."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
       {
         "name": "AI sovereignty and open weights",
-        "status": "The trust question moved from whether an open model can be stripped of its refusals to whether you can tell what is inside the file you downloaded: a published demonstration trains a dormant trigger into open weights that fires on a date the coding harness itself prints into the prompt, and a checksum verifies provenance without saying anything about behavior.",
-        "arc": "From an import-ban push and Nvidia's demand-side open-model spending, through Fool's Gold proposing to poison the stripped model, to a supply-chain question about the artifact itself — with the one piece of good news being that a date-shaped trigger is enumerable and therefore testable.",
-        "last_seen": "2026-08-26"
+        "status": "Two Chinese open-weight releases landed in the same 24 hours — Qwen3.8-Flash-Next under the Qwen community license and MIT-licensed GLM-5.3-Flash, the latter revealed as the anonymous Ox Alpha model that had been topping coding boards on OpenRouter for a week.",
+        "arc": "From the question of what is inside a downloaded file, to a week where the open-weight releases are arriving with new architecture rather than catch-up benchmarks — and where a lab can ship anonymously, be independently benchmarked by strangers, and then claim the result.",
+        "last_seen": "2026-08-27"
+      },
+      {
+        "name": "The AI bill comes due",
+        "status": "Anthropic committed roughly $45 billion over six years to Nscale for Vera Rubin capacity out of West Virginia starting late 2027 — larger than its Volta, AMD and SpaceX commitments combined.",
+        "arc": "From the price of a token and what buyers actually route to the expensive model, to capacity commitments now being signed with infrastructure companies founded two years ago.",
+        "last_seen": "2026-08-27"
       },
       {
         "name": "Data-center buildout backlash",
         "status": "Durham County, North Carolina voted 4-1 for a nine-month pause on new hyperscale data centers while staff draft permanent rules, allowing enterprise and small facilities up to 100,000 square feet and adding cooling, backup-generator and written electrical-load disclosure requirements.",
         "arc": "The thread moves from a state regulator halting the ERCOT queue for an audit to counties writing their own siting rules, with mandatory disclosure of expected load as the concrete new lever.",
         "last_seen": "2026-08-26"
-      },
-      {
-        "name": "The AI bill comes due",
-        "status": "Ramp's August index puts the demand side on the record: Anthropic's flagship took 6% of the tokens businesses bought from it and 11.4% of the dollars, OpenAI's mainline Sol sits slightly below OpenAI's own blended per-token price, and the median firm spends $11.95 per employee against a top-1% median of $7,400 — roughly 600 to 1.",
-        "arc": "From the price of a token and the shape of the capital being committed, to the first clean look at what buyers actually route to the most expensive model — and how little of the market is in the conversation at all.",
-        "last_seen": "2026-08-25"
       },
       {
         "name": "Frontier-model release gating",
@@ -1858,30 +1848,110 @@
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-07-26"
+        "last_seen": "2026-07-27"
       },
       {
         "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-07-26"
-      },
-      {
-        "name": "AMD",
-        "note": "",
-        "last_seen": "2026-07-26"
+        "last_seen": "2026-07-27"
       },
       {
         "name": "Nvidia",
         "note": "",
-        "last_seen": "2026-07-26"
+        "last_seen": "2026-07-27"
       },
       {
         "name": "Moonshot AI",
         "note": "",
-        "last_seen": "2026-07-26"
+        "last_seen": "2026-07-27"
       },
       {
         "name": "Kimi K3",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "DeepSeek",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "Google",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "Tesla",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "Uber",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "DoorDash",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "Cursor",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "Alibaba",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "Little Tech Association",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "Sarah Heck",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "Sam Altman",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "Scott Bessent",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "David Sacks",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "Bill Gurley",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "Andy Fang",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "Snehal Antani",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "ESP32-S3",
+        "note": "",
+        "last_seen": "2026-07-27"
+      },
+      {
+        "name": "AMD",
         "note": "",
         "last_seen": "2026-07-26"
       },
@@ -1917,11 +1987,6 @@
       },
       {
         "name": "Meta",
-        "note": "",
-        "last_seen": "2026-07-26"
-      },
-      {
-        "name": "DeepSeek",
         "note": "",
         "last_seen": "2026-07-26"
       },
@@ -1979,81 +2044,6 @@
         "name": "Cheng-Yuan Lee",
         "note": "",
         "last_seen": "2026-07-25"
-      },
-      {
-        "name": "SWE-bench Pro",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "BigCode",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "Hugging Face",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "The Stack v3",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "StarCoder",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "StarPII",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "Leandro von Werra",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "HIP",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "Triton",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "PyTorch",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "SemiAnalysis",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "cuDNN",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "NCCL",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "GLM-5.2",
-        "note": "",
-        "last_seen": "2026-07-24"
-      },
-      {
-        "name": "ChatGPT Health",
-        "note": "",
-        "last_seen": "2026-07-24"
       }
     ],
     "monthly": [
@@ -2066,7 +2056,7 @@
         "summary": "The frontier moves down, and the switch turns back on; World models: why AI can build a world you can walk through, but not one it remembers when you look away; Generation is cheap, checking is the product; Two rulers for the frontier, and the soft spots in the models we already have; Everything bends toward control: who owns the model, and who can switch it off; Speed for free: how speculative decoding makes a model faster without changing a word; Generating a planet from satellite photos; Program as weights: compiling a task straight into a model; The Turk retires, a stats class levels up, and three tricks that were one; The search box became a writer; The word that unlocked a private repo; Quantization: why fewer bits work, and where the cliff is; Sixty-four Claudes, an off switch, and "
       }
     ],
-    "updated": "2026-08-26",
+    "updated": "2026-08-27",
     "host_lore": [
       {
         "host": "Ada",
@@ -2166,6 +2156,10 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "n-gram embedding tables as a parameter-scaling axis: why an n-gram model is a counted lookup table rather than a learned function, and why parameters you index (one row fetched, no matrix multiply, tolerant of slower memory) scale differently from mixture-of-experts parameters you must stream across the memory bus and multiply every token",
+        "last_taught": "2026-08-27"
+      },
       {
         "name": "flow versus stock in labor adjustment: why a decline that operates through reduced hiring rather than increased separations is invisible to every instrument built on separations (layoff notices, unemployment claims, plant closures) and surfaces first in administrative payroll counts",
         "last_taught": "2026-08-26"
@@ -2640,10 +2634,6 @@
       },
       {
         "name": "why training memory scales with context length while inference memory does not — the backward pass must retain the entire forward computation to compute gradients, and in GRPO this is multiplied by the group of sampled responses",
-        "last_taught": "2026-07-18"
-      },
-      {
-        "name": "delta-rule linear attention: replacing the additive/Hebbian outer-product state update with an error-correcting delta update (retrieve the current value for a key, correct by a learned rate beta times the error), its equivalence to one gradient step of online MSE regression, the Widrow-Hoff and fast-weight-programmer lineage, chunkwise-parallel training via the Householder/WY representation, the gating extension (Gated DeltaNet), and the fixed-size-state limit that forces hybrid architectures",
         "last_taught": "2026-07-18"
       }
     ]
