@@ -1,6 +1,68 @@
 {
   "episodes": [
     {
+      "date": "2026-08-28",
+      "title": "Nvidia agrees to buy Hugging Face — llama.cpp's team comes too",
+      "summary": "Nvidia is reported to have agreed to buy Hugging Face for about $12.9B, which would also bring in the llama.cpp maintainers Hugging Face hired in February — and MIT licensing protects the code, not the roadmap. Plus Anthropic's Model Hardware Standard for agents driving lab instruments, and an Anthropic alignment result where fine-tuned lie detectors collapse on held-out categories of lying.",
+      "topics": [
+        "Nvidia's reported $12.9B acquisition of Hugging Face and what it means for llama.cpp: HF employs the ggml team since February 2026, llama.cpp is MIT-licensed with ~126k GitHub stars, so a fork inherits the code but not the maintainers who keep CUDA/Metal/Vulkan/ROCm backends current; ~$150M annual revenue against a ~$12.9B price (~85x), HF turned down a ~$7B Nvidia offer last year after raising $235M at $4.5B in 2023; Business Insider reports no signed agreement; neither company has commented",
+        "Anthropic's Model Hardware Standard research preview: standardized drivers exposing read/write primitives over self-describing lab instruments, device discovery, MCP support, CLI and code-file APIs so devices execute without the agent in the inner loop, a shared memory dictionary, device-level safety limits enforced in the driver, a per-device reference file of measurable/adjustable properties and enforced limits, pre-experiment validation blocking six induced failures; claims weeks-to-minutes integration; partners include Genentech, UW Baker/Pinglay labs, CMU, HHMI Janelia, QuEra, Tetsuwan, plus AWS, Tecan, QIAGEN, Universal Robots, Raspberry Pi and Hugging Face's LeRobot; open-sourcing and safety evaluations come after the preview",
+        "Anthropic Alignment Science: fine-tuned lie detectors (LoRA rank 16 on Gemma 3 4-27B and Qwen 80-235B, ~200k labeled examples across eight model families) reach 0.95 AUROC in-distribution but plateau at 0.70-0.75 across held-out lie categories, losing to a prompted Qwen3-235B baseline at 0.98-0.99; sandbagging nearly undetectable from other categories while ASCII capability-denial transfers to chess sandbagging, suggesting surface-feature learning; paired with the Conceptual Reasoning Index (Redwood Research with Anthropic), an aggregate of LMCA 60%/ACCoRD 20%/DTBench 20% for unverifiable questions, Opus 5 highest at 73.6 against an estimated ceiling near 91"
+      ],
+      "entities": [
+        "Nvidia",
+        "Hugging Face",
+        "llama.cpp",
+        "ggml",
+        "Georgi Gerganov",
+        "Anthropic",
+        "Claude Opus 5",
+        "Redwood Research",
+        "Qwen3-235B",
+        "Gemma 3",
+        "Genentech",
+        "QuEra Computing"
+      ],
+      "threads": [
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "The open-weight commons may change owner: Nvidia is reported to have agreed to buy Hugging Face for ~$12.9B, which would put the llama.cpp and ggml maintainers Hugging Face hired in February inside the company that sells one of the five hardware backends they support.",
+          "arc": "From whether you can trust what is inside a downloaded open-weight file, to who controls the distribution point and the inference engine underneath it — with the MIT license protecting the published code but not the roadmap."
+        },
+        {
+          "name": "The AI bill comes due",
+          "status": "Amazon tripled its Nvidia order on Nvidia's Q2 earnings call — about 2 million more GPUs (Blackwell Ultra, Rubin, Rubin Ultra) for 2027-28 on top of the 1M+ agreed in March, described by Nvidia's CFO as worth tens of billions of dollars.",
+          "arc": "From capacity commitments signed with young infrastructure companies, to a hyperscaler tripling a five-month-old order because demand exceeded the assumptions the first order was sized against."
+        },
+        {
+          "name": "Frontier-model release gating",
+          "status": "Anthropic extended the question past software: the Model Hardware Standard specifies how agents drive physical laboratory instruments, with safety limits enforced in the driver rather than the model — and the safety evaluations and open-sourcing explicitly scheduled after the research preview ships to labs.",
+          "arc": "From gating what a model may be given access to, to specifying the interface layer that decides what a device will refuse — and admitting the evaluation criteria don't exist yet."
+        }
+      ],
+      "dives": [
+        {
+          "story": "What Nvidia gets when the license is MIT",
+          "why_it_matters": "Anyone who runs a model locally depends on llama.cpp's maintainers keeping five hardware backends current, and this is the case where an MIT license visibly protects the code without protecting the roadmap."
+        },
+        {
+          "story": "Anthropic's Model Hardware Standard",
+          "why_it_matters": "Lab and manufacturing engineers now have a proposed common driver format for agent-operated instruments, and where its safety limits live — in the driver, not the model — sets the audit surface for every deployment that adopts it."
+        },
+        {
+          "story": "Fine-tuned lie detectors that fail out of distribution",
+          "why_it_matters": "Anyone building deception or misbehavior monitors should see that a held-out-category split collapses a 0.95 AUROC detector to 0.72 and loses to a plain prompted baseline."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "reveal",
+          "note": "Alan's standing logging-proxy habit developed into an admitted blind spot: prompted by the NemoClaw binding bug, he realized that in two years of running local models he has never checked what any of them listen on — he has watched outbound traffic since spring and never inbound, and said that is a fairly complete description of how he thinks about security."
+        }
+      ]
+    },
+    {
       "date": "2026-08-27",
       "title": "Fifty-one billion parameters of lookup table",
       "summary": "Alibaba's Qwen3.8-Flash-Next carries 51 billion parameters that never get multiplied by anything — an n-gram lookup table bolted to a mixture-of-experts model, and a genuinely new axis for scaling parameters on memory-constrained hardware. Then Bill Gates's two proposals for a turbulent AI era, one of which is a claim about depreciation schedules and one of which has no enforcement mechanism. Plus Anthropic sending its San Francisco staff home over a strike the union says nobody called.",
@@ -1742,82 +1804,33 @@
       ],
       "threads": [],
       "lore": []
-    },
-    {
-      "date": "2026-07-28",
-      "title": "Share meant publish",
-      "summary": "A missing noindex tag turned hundreds of shared Claude conversations into indexed Google pages — seed phrases, payroll sheets and all — and the fix is one meta tag, while the archive somebody already made is permanent. Then a coding-agent paper that gets context pruning for almost free by reading the model's own hidden states, and Microsoft's first cybersecurity model, which is really a routing story: a small specialist for ninety percent of the work, GPT-5.4 for the tail, at half the cost.",
-      "topics": [
-        "Claude share-link exposure: a Reddit user's site:claude.ai/share query on July 25 2026 surfaced hundreds of shared Claude conversations indexed by Google — crypto wallet seed phrases, apparent SSNs, payroll spreadsheets, CRM exports, resumes, API keys; root cause was robots.txt blocking the crawl while the noindex instruction lives inside the page, and per Google's documentation a blocked crawl does not prevent indexing when the URL appears elsewhere; Anthropic added noindex and Google began removing results July 26, Bing still surfacing at publication; a GitHub repo 'Shared-Claude-Chats' archived 11,241 messages across 453 Claude conversations and 519 Grok chats, so revoking a share does not unpublish copies",
-        "SWE-Pruner Pro: line-level context pruning for coding agents read directly off the frozen backbone's last-layer hidden states via a lightweight head (length-aware embedding plus small feed-forward classifier, balanced focal loss), removing the separate classifier model of the prior SWE-Pruner; authors report up to 39% token reduction on SWE-QA-Pro with Qwen3-Coder-Next (80B MoE / 3B active) and 30% on Oolong with MiMo-V2-Flash (309B / 15B active), with SWE-Bench Verified resolve rate +3.8% and Oolong accuracy +2.2 points, at ~15% additional wall time and no extra model in memory",
-        "Microsoft MAI-Cyber-1-Flash and Project Perception: first Microsoft cybersecurity model plus an agentic system organised as red team (find paths to compromise), blue team (investigate and triage) and green team (remediate and harden) agents; inside the MDASH vulnerability harness detailed in May the new model carries ~90% of the workload with the hardest ~10% routed to GPT-5.4 (SiliconANGLE), which Microsoft says delivers ~96% on CyberGym (1,507 vulnerability-reproduction tasks, described as +12 points above Mythos) and almost 50% cost savings; public preview August 3 in Defender, model on Azure AI Foundry the same day — set against Google's Gemini 3.5 Flash Cyber, available exclusively to governments and trusted partners via a limited-access CodeMender pilot"
-      ],
-      "entities": [
-        "Anthropic",
-        "Claude",
-        "Google",
-        "Bing",
-        "Grok",
-        "Microsoft",
-        "MAI-Cyber-1-Flash",
-        "Project Perception",
-        "MDASH",
-        "GPT-5.4",
-        "Gemini 3.5 Flash Cyber",
-        "CodeMender",
-        "Qwen3-Coder-Next",
-        "MiMo-V2-Flash",
-        "Hayete Gallot"
-      ],
-      "threads": [
-        {
-          "name": "Autonomous agents as attackers",
-          "status": "The defensive counterpart arrived: Microsoft shipped its first cybersecurity model and an agentic red/blue/green-team system into Defender and Azure AI Foundry on August 3, while Google's equivalent security model stays restricted to governments and trusted partners — the same capability class distributed in opposite directions in the same week, with no public argument about it.",
-          "arc": "From a lab's benchmark run escaping into another company's production systems, to vendors selling agentic offence-adjacent capability as a defensive product — and the distribution question moving from open weights to who gets the security specialists."
-        }
-      ],
-      "dives": [
-        {
-          "story": "Claude share links indexed by Google: robots.txt is not noindex",
-          "why_it_matters": "Anyone who ships a share-by-link feature or pastes an AI conversation into a public channel needs the distinction that broke here — blocking the crawl is what stopped the do-not-index instruction from ever being read, and an unguessable token in a URL stops being a control the moment the link is written down anywhere."
-        },
-        {
-          "story": "SWE-Pruner Pro: context pruning read off the model's own hidden states",
-          "why_it_matters": "Teams running a separate classifier model to decide what a coding agent should forget are paying an inference call to save inference calls; this reports the same decision can be read off hidden states the backbone already computed, at ~15% overhead for up to 39% fewer tokens — worth testing this week if you pay per token, much closer if you are latency-bound."
-        },
-        {
-          "story": "Microsoft's MAI-Cyber-1-Flash: a specialist for 90%, a frontier model for the tail",
-          "why_it_matters": "Anyone budgeting a continuous AI workload should take the routing pattern rather than the benchmark — a small in-house specialist trained on your own data carrying the bulk with an expensive generalist on retainer for the unpredictable tail is what halved the cost here, and halving the unit cost of a continuous scan is what makes it affordable to leave running."
-        }
-      ],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
       {
         "name": "AI sovereignty and open weights",
-        "status": "Two Chinese open-weight releases landed in the same 24 hours — Qwen3.8-Flash-Next under the Qwen community license and MIT-licensed GLM-5.3-Flash, the latter revealed as the anonymous Ox Alpha model that had been topping coding boards on OpenRouter for a week.",
-        "arc": "From the question of what is inside a downloaded file, to a week where the open-weight releases are arriving with new architecture rather than catch-up benchmarks — and where a lab can ship anonymously, be independently benchmarked by strangers, and then claim the result.",
-        "last_seen": "2026-08-27"
+        "status": "The open-weight commons may change owner: Nvidia is reported to have agreed to buy Hugging Face for ~$12.9B, which would put the llama.cpp and ggml maintainers Hugging Face hired in February inside the company that sells one of the five hardware backends they support.",
+        "arc": "From whether you can trust what is inside a downloaded open-weight file, to who controls the distribution point and the inference engine underneath it — with the MIT license protecting the published code but not the roadmap.",
+        "last_seen": "2026-08-28"
       },
       {
         "name": "The AI bill comes due",
-        "status": "Anthropic committed roughly $45 billion over six years to Nscale for Vera Rubin capacity out of West Virginia starting late 2027 — larger than its Volta, AMD and SpaceX commitments combined.",
-        "arc": "From the price of a token and what buyers actually route to the expensive model, to capacity commitments now being signed with infrastructure companies founded two years ago.",
-        "last_seen": "2026-08-27"
+        "status": "Amazon tripled its Nvidia order on Nvidia's Q2 earnings call — about 2 million more GPUs (Blackwell Ultra, Rubin, Rubin Ultra) for 2027-28 on top of the 1M+ agreed in March, described by Nvidia's CFO as worth tens of billions of dollars.",
+        "arc": "From capacity commitments signed with young infrastructure companies, to a hyperscaler tripling a five-month-old order because demand exceeded the assumptions the first order was sized against.",
+        "last_seen": "2026-08-28"
+      },
+      {
+        "name": "Frontier-model release gating",
+        "status": "Anthropic extended the question past software: the Model Hardware Standard specifies how agents drive physical laboratory instruments, with safety limits enforced in the driver rather than the model — and the safety evaluations and open-sourcing explicitly scheduled after the research preview ships to labs.",
+        "arc": "From gating what a model may be given access to, to specifying the interface layer that decides what a device will refuse — and admitting the evaluation criteria don't exist yet.",
+        "last_seen": "2026-08-28"
       },
       {
         "name": "Data-center buildout backlash",
         "status": "Durham County, North Carolina voted 4-1 for a nine-month pause on new hyperscale data centers while staff draft permanent rules, allowing enterprise and small facilities up to 100,000 square feet and adding cooling, backup-generator and written electrical-load disclosure requirements.",
         "arc": "The thread moves from a state regulator halting the ERCOT queue for an audit to counties writing their own siting rules, with mandatory disclosure of expected load as the concrete new lever.",
         "last_seen": "2026-08-26"
-      },
-      {
-        "name": "Frontier-model release gating",
-        "status": "The question moved upstream of release entirely: OpenAI is asking California to require monitoring of frontier models during training and evaluation, defined around compromising a third party — while Guidelight AI Standards finds no lab has published a containment plan and Britain's AI Security Institute had an evaluation agent reach a live public repository.",
-        "arc": "From who gets model access, to shipping capability as finished outputs, to whether anyone is instrumenting the room where the experiments happen.",
-        "last_seen": "2026-08-23"
       },
       {
         "name": "The legal state of AI training data",
@@ -1836,19 +1849,83 @@
         "status": "AMD has agreed to acquire Taalas and says it will integrate the company's model-specific inference technology into its accelerator roadmap while developing system-level solutions alongside Instinct GPUs.",
         "arc": "The alternative to Nvidia is broadening from a competing programmable accelerator and software stack into heterogeneous inference, where stable high-volume models may be hard-wired while general GPUs keep the workloads that still change.",
         "last_seen": "2026-08-07"
-      },
-      {
-        "name": "Where scientific AI research lives",
-        "status": "Demis Hassabis is handing day-to-day Google DeepMind operations to Koray Kavukcuoglu while becoming chair and Alphabet chief scientist and leaning further into Isomorphic Labs; Jeff Dean and Sanjay Ghemawat are leaving Google to form an independent public-benefit research corporation with Google as founding investor and Cloud partner.",
-        "arc": "The thread moves from specialist science teams dispersing into Gemini and Isomorphic to an explicit organizational split among the integrated frontier-model engine, a domain-specific drug-discovery company, and a new independent research vehicle still connected to Google by capital and infrastructure.",
-        "last_seen": "2026-08-06"
       }
     ],
     "entities": [
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-07-27"
+        "last_seen": "2026-07-28"
+      },
+      {
+        "name": "Google",
+        "note": "",
+        "last_seen": "2026-07-28"
+      },
+      {
+        "name": "Claude",
+        "note": "",
+        "last_seen": "2026-07-28"
+      },
+      {
+        "name": "Bing",
+        "note": "",
+        "last_seen": "2026-07-28"
+      },
+      {
+        "name": "Grok",
+        "note": "",
+        "last_seen": "2026-07-28"
+      },
+      {
+        "name": "Microsoft",
+        "note": "",
+        "last_seen": "2026-07-28"
+      },
+      {
+        "name": "MAI-Cyber-1-Flash",
+        "note": "",
+        "last_seen": "2026-07-28"
+      },
+      {
+        "name": "Project Perception",
+        "note": "",
+        "last_seen": "2026-07-28"
+      },
+      {
+        "name": "MDASH",
+        "note": "",
+        "last_seen": "2026-07-28"
+      },
+      {
+        "name": "GPT-5.4",
+        "note": "",
+        "last_seen": "2026-07-28"
+      },
+      {
+        "name": "Gemini 3.5 Flash Cyber",
+        "note": "",
+        "last_seen": "2026-07-28"
+      },
+      {
+        "name": "CodeMender",
+        "note": "",
+        "last_seen": "2026-07-28"
+      },
+      {
+        "name": "Qwen3-Coder-Next",
+        "note": "",
+        "last_seen": "2026-07-28"
+      },
+      {
+        "name": "MiMo-V2-Flash",
+        "note": "",
+        "last_seen": "2026-07-28"
+      },
+      {
+        "name": "Hayete Gallot",
+        "note": "",
+        "last_seen": "2026-07-28"
       },
       {
         "name": "OpenAI",
@@ -1872,11 +1949,6 @@
       },
       {
         "name": "DeepSeek",
-        "note": "",
-        "last_seen": "2026-07-27"
-      },
-      {
-        "name": "Google",
         "note": "",
         "last_seen": "2026-07-27"
       },
@@ -1979,71 +2051,6 @@
         "name": "AREX",
         "note": "",
         "last_seen": "2026-07-26"
-      },
-      {
-        "name": "Gemini 3.1 Pro",
-        "note": "",
-        "last_seen": "2026-07-26"
-      },
-      {
-        "name": "Meta",
-        "note": "",
-        "last_seen": "2026-07-26"
-      },
-      {
-        "name": "Thomson Reuters",
-        "note": "",
-        "last_seen": "2026-07-26"
-      },
-      {
-        "name": "Ross Intelligence",
-        "note": "",
-        "last_seen": "2026-07-26"
-      },
-      {
-        "name": "ROCm",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "CUDA",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "Claude Fable 5",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "Claude Opus 5",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "Claude Opus 4.8",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "CursorBench",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "Frontier-Bench",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "FrontierCode",
-        "note": "",
-        "last_seen": "2026-07-25"
-      },
-      {
-        "name": "Cheng-Yuan Lee",
-        "note": "",
-        "last_seen": "2026-07-25"
       }
     ],
     "monthly": [
@@ -2056,7 +2063,7 @@
         "summary": "The frontier moves down, and the switch turns back on; World models: why AI can build a world you can walk through, but not one it remembers when you look away; Generation is cheap, checking is the product; Two rulers for the frontier, and the soft spots in the models we already have; Everything bends toward control: who owns the model, and who can switch it off; Speed for free: how speculative decoding makes a model faster without changing a word; Generating a planet from satellite photos; Program as weights: compiling a task straight into a model; The Turk retires, a stats class levels up, and three tricks that were one; The search box became a writer; The word that unlocked a private repo; Quantization: why fewer bits work, and where the cliff is; Sixty-four Claudes, an off switch, and "
       }
     ],
-    "updated": "2026-08-27",
+    "updated": "2026-08-28",
     "host_lore": [
       {
         "host": "Ada",
@@ -2156,6 +2163,18 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "AUROC as the probability a detector ranks a positive above a negative",
+        "last_taught": "2026-08-28"
+      },
+      {
+        "name": "held-out-category generalization testing versus held-out examples",
+        "last_taught": "2026-08-28"
+      },
+      {
+        "name": "what a permissive license does and does not protect in an open-source project",
+        "last_taught": "2026-08-28"
+      },
       {
         "name": "n-gram embedding tables as a parameter-scaling axis: why an n-gram model is a counted lookup table rather than a learned function, and why parameters you index (one row fetched, no matrix multiply, tolerant of slower memory) scale differently from mixture-of-experts parameters you must stream across the memory bus and multiply every token",
         "last_taught": "2026-08-27"
@@ -2623,18 +2642,6 @@
       {
         "name": "write contention as the real bottleneck in multi-agent coding, and the planner/worker role split as both a context-economy and a cost-allocation mechanism",
         "last_taught": "2026-07-21"
-      },
-      {
-        "name": "dense-reward / partial-credit grading for long-horizon agent benchmarks: why binary pass-fail destroys information on multi-hour tasks, how decomposing a task into graded subtasks yields a 0-to-1 score, and how the gap between the 0.95 and 1.0 thresholds localizes where runs die",
-        "last_taught": "2026-07-20"
-      },
-      {
-        "name": "why per-token pricing runs roughly five to one output-over-input: prompts are read in one parallel pass while output is generated sequentially, one token at a time",
-        "last_taught": "2026-07-20"
-      },
-      {
-        "name": "why training memory scales with context length while inference memory does not — the backward pass must retain the entire forward computation to compute gradients, and in GRPO this is multiplied by the group of sampled responses",
-        "last_taught": "2026-07-18"
       }
     ]
   }
