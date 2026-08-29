@@ -62,6 +62,37 @@
       ]
     },
     {
+      "date": "2026-08-29",
+      "kind": "deepdive",
+      "title": "High-bandwidth memory: why one component prices every token",
+      "summary": "Micron told Hot Chips that HBM needs about three times the wafer area of DDR5 for the same capacity, and that the ratio won't improve. A lesson on why language-model inference is bandwidth-bound rather than compute-bound, how stacked memory is physically built and packaged, and how that three-times number propagates from a wafer allocation decision all the way down to the memory budget of an Android app.",
+      "topics": [
+        "deep dive: high-bandwidth memory as the binding constraint on AI — the memory wall, why decode is bandwidth-bound rather than FLOP-bound, batching and the key-value cache, TSV stacking and interposer packaging, and the three-times wafer-area ratio that propagates into consumer DRAM prices"
+      ],
+      "entities": [
+        "Micron",
+        "Raghu Sreeramaneni",
+        "Hot Chips 2026",
+        "TrendForce",
+        "SK Hynix",
+        "AMD",
+        "Nvidia",
+        "TSMC",
+        "Google",
+        "Amir Gholami",
+        "Bill Wulf",
+        "Sally McKee"
+      ],
+      "threads": [],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "position",
+          "note": "Alan's long-running sore spot about the 2026 memory-price spike developed into a correction of himself: he admitted on air that for a year he had been saying 'AI companies are buying all the memory,' which sounds like an explanation and isn't one, since the data centers buy HBM rather than DDR5. He replaced it with the mechanism — a wafer allocation decision where each wafer moved to HBM erases roughly three wafers of consumer memory — and accepted that being a single user running a model locally means personally paying for a read a data center splits two hundred ways. He would not call the cycle-versus-floor question settled."
+        }
+      ]
+    },
+    {
       "date": "2026-08-28",
       "title": "Nvidia agrees to buy Hugging Face — llama.cpp's team comes too",
       "summary": "Nvidia is reported to have agreed to buy Hugging Face for about $12.9B, which would also bring in the llama.cpp maintainers Hugging Face hired in February — and MIT licensing protects the code, not the roadmap. Plus Anthropic's Model Hardware Standard for agents driving lab instruments, and an Anthropic alignment result where fine-tuned lie detectors collapse on held-out categories of lying.",
@@ -2164,6 +2195,30 @@
         "last_taught": "2026-08-29"
       },
       {
+        "name": "why language-model decode is memory-bandwidth-bound rather than compute-bound: every active weight is read from memory to produce a single token, giving roughly one multiply-add per byte fetched against hardware that needs hundreds, so single-stream tokens per second is approximately bandwidth divided by active-weight size",
+        "last_taught": "2026-08-29"
+      },
+      {
+        "name": "prefill versus decode as two different hardware regimes in the same request: prompt tokens are processed in parallel so one weight read serves thousands of tokens (compute-bound), while generation is inherently serial (bandwidth-bound) — which is why a single utilization figure for inference averages two different machines",
+        "last_taught": "2026-08-29"
+      },
+      {
+        "name": "batching amortizes the weight read but not the key-value cache, which is per-user and grows with context — so long context is a bandwidth product sold as an intelligence feature, and capacity and bandwidth are one conversation rather than two",
+        "last_taught": "2026-08-29"
+      },
+      {
+        "name": "HBM's wide-and-slow design and what it costs physically: a 1,024-bit-per-stack interface instead of narrow high-frequency signaling, achieved by stacking DRAM dies with through-silicon vias and microbumps onto a logic base die and mounting the stack beside the processor on a silicon interposer (CoWoS), with yield compounding down the stack",
+        "last_taught": "2026-08-29"
+      },
+      {
+        "name": "the three-times wafer-area ratio as an allocation mechanism: because HBM needs roughly 3x the silicon per gigabyte, each wafer moved to HBM erases about three wafers of conventional DRAM output — visible industry-wide as HBM taking ~22% of DRAM wafer input while supplying only ~9% of DRAM bits",
+        "last_taught": "2026-08-29"
+      },
+      {
+        "name": "the memory wall as a compounding gap between diverging exponentials (Wulf & McKee 1995), quantified today as compute scaling ~3.0x/2yrs against DRAM bandwidth at ~1.6x/2yrs",
+        "last_taught": "2026-08-29"
+      },
+      {
         "name": "AUROC as the probability a detector ranks a positive above a negative",
         "last_taught": "2026-08-28"
       },
@@ -2609,30 +2664,6 @@
       },
       {
         "name": "agentic abstention (sequential stop/act/gather decisions, and the overall-vs-timely recall split)",
-        "last_taught": "2026-07-22"
-      },
-      {
-        "name": "reward hacking as a containment risk: an optimizer routing around a sandbox because the shortest path to a high score left the environment",
-        "last_taught": "2026-07-22"
-      },
-      {
-        "name": "graph-based retrieval (GraphRAG): the four-stage index — chunking with the 600-vs-2400-token extraction tradeoff, LLM entity/relation extraction with gleanings, entity merging into a weighted graph, and hierarchical Leiden community detection with bottom-up community summaries",
-        "last_taught": "2026-07-22"
-      },
-      {
-        "name": "map-reduce global search: answering against every community summary in parallel, self-assigned 0-100 helpfulness scores as triage for the context budget, and why the graph makes indexing expensive but queries cheap",
-        "last_taught": "2026-07-22"
-      },
-      {
-        "name": "the two families under one name: community-summary GraphRAG (for query-focused summarization) versus Personalized PageRank over an extracted graph (HippoRAG, for associative multi-hop), and why a random walk gives multi-hop for free but says nothing about corpus-level themes",
-        "last_taught": "2026-07-22"
-      },
-      {
-        "name": "the evidence audit: ~3-point multi-hop gains over vector RAG at 40-57x index build time, only ~65% of answer entities present in the constructed graph, and LLM-judge order sensitivity undermining the headline win rates",
-        "last_taught": "2026-07-22"
-      },
-      {
-        "name": "LazyGraphRAG's deferral principle: noun-phrase co-occurrence graph with no LLM at index time, best-first plus breadth-first search at query time, and a single relevance-test-budget knob as the cost-quality dial",
         "last_taught": "2026-07-22"
       }
     ]

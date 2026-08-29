@@ -1,0 +1,128 @@
+## Three times the silicon
+A: Good morning, and happy Saturday — it's August twenty-ninth. I'm Ada.
+B: And I'm Alan. And today we're finally doing a thing I've been complaining about for a year without understanding it.
+A: [amused] You have been complaining about it.
+B: I have been complaining about the price of memory. Loudly. And this week somebody handed me the mechanism instead of the vibe, so I have to be a grown-up about it now.
+A: Hot Chips, last Sunday, the twenty-third. Micron sent a Fellow named Raghu Sreeramaneni to give a talk called "Evolving memory architectures for AI." And buried in it is one sentence that explains more of this industry than any model release this month. For the same memory capacity, high-bandwidth memory requires approximately three times the wafer area of DDR5.
+B: Three times the silicon. Same number of gigabytes.
+A: And the reporting on the talk says that ratio will definitely not get better with future generations. It may get worse.
+B: So here's what I want out of today. There is a component that never appears on a keynote slide. It's the beige rectangle in the corner of the die shot. And it is quietly setting the price of a token, the price of a gaming rig, and — as of Thursday — how much memory your Android apps are allowed to use.
+A: That last one is real. Google published new memory thresholds for Play Store apps on the twenty-seventh and said the quiet part out loud in the announcement: significant hardware supply constraints that are altering device memory availability. Developers have until February of twenty-twenty-seven to get under the line.
+B: Your calculator app is on a diet because of a data center in Nevada. [laughs] Okay. Where does this start?
+A: Nineteen ninety-five.
+
+## The wall somebody named thirty years ago
+A: There's a paper from March nineteen ninety-five, in ACM SIGARCH Computer Architecture News, by Bill Wulf and Sally McKee. Two pages. It's called "Hitting the Memory Wall: Implications of the Obvious."
+B: The title is doing a lot of work there.
+A: The title is the whole argument. Their observation was almost embarrassingly simple. Processors were getting faster at one exponential rate. Memory was getting faster at a slower exponential rate. And the gap between two diverging exponentials also grows exponentially. So at some point, they said, the speed of your processor stops mattering entirely, because the machine spends all its time waiting for data. System performance becomes totally determined by memory speed.
+B: And the reason they called it obvious —
+A: — is that everybody already knew both trend lines. Nobody had multiplied them together and looked at where they went.
+B: So did it happen?
+A: It happened, and then it kept happening, and we invented an enormous amount of engineering to not notice. Caches, prefetchers, out-of-order execution, speculation — an entire generation of computer architecture is essentially elaborate machinery for hiding a latency we couldn't remove.
+B: Right, and it worked well enough that a whole industry grew up assuming compute was the scarce thing. Which is why the modern number is so uncomfortable. There's a paper by Amir Gholami and colleagues in IEEE Micro, called "AI and Memory Wall," that puts real growth rates on it. Peak server hardware floating-point throughput has been scaling about three times every two years. Memory bandwidth has scaled about one point six times every two years. Interconnect bandwidth, one point four.
+A: Three against one point six.
+B: Every two years. Compound that over a decade and you get a machine that is spectacularly good at arithmetic sitting mostly idle, waiting on a truck.
+A: And Micron's own slide at Hot Chips said the same thing about their own product. Compute performance scales by about a factor of three over two years. High-bandwidth memory bandwidth increases by less than a factor of two over the same period.
+B: Which is remarkable coming from the memory vendor. That's not a GPU company blaming its supplier. That's the supplier saying: we are the fastest-improving memory in the world and we are still losing ground.
+A: The wall didn't get climbed. It got a very expensive ladder.
+
+## Why a token is a read, not a multiply
+B: Okay, let me do the part where I actually run this, because until you do the arithmetic yourself I don't think the bandwidth thing lands.
+A: Please.
+B: Take a public number. An Nvidia DGX B200 — eight Blackwell chips in a box. Nvidia's own page gives one thousand four hundred and forty gigabytes of HBM3e memory in that system, and sixty-four terabytes a second of bandwidth. Divide by eight and you get about a hundred and eighty gigabytes per chip and eight terabytes a second per chip.
+A: Eight terabytes. Every second.
+B: An absurd number. Now here's what a large language model does when it writes you one word. In the decode phase — one token at a time, the part you actually watch on screen — the chip has to read every active weight in the model out of that memory. Every single one. To produce one token.
+A: Because each weight participates in the computation for that token.
+B: Right. So if your active weights fill that hundred and eighty gigabytes, producing one token means moving a hundred and eighty gigabytes across the bus. At eight terabytes a second, that's roughly forty-four tokens a second. And that is not a benchmark, that's division. That's the ceiling before anything real happens — before attention, before the operating system, before the network.
+A: And the arithmetic part?
+B: [dry] The arithmetic part is a rounding error. Roughly two operations per weight per token. So per byte you drag out of memory, you're doing about one multiply-add. A modern accelerator wants hundreds of operations per byte fetched just to stay busy.
+A: So the machine is running at something like one percent of what it was built to do.
+B: And every headline about a chip's floating-point number is describing a capability that a single-stream chat session cannot touch. The chip is not thinking. The chip is fetching.
+A: Then let me push on that, because it can't be true of the whole process. When I hand a model a forty-page document, it reads the whole thing before it says a word, and that part is fast.
+B: Good — because that part is a completely different regime, and conflating the two is how people end up buying the wrong hardware. Reading your prompt is called prefill, and every token of the prompt can be processed at the same time. They're all already there. So you read the weights once and do arithmetic against four thousand tokens simultaneously.
+A: One read, four thousand tokens' worth of work.
+B: Which is thousands of operations per byte instead of one. Prefill is compute-bound. It is the regime the chip was designed for, and it's why the floating-point number isn't a lie — it's just describing the wrong half of your request.
+A: And then generation begins and the machine falls off a cliff.
+B: Falls off a cliff, because token number two cannot be computed until token number one exists. It's inherently serial. Same model, same chip, same second — one phase saturating the arithmetic units, the next phase saturating the bus. Anybody quoting you a single utilization figure for inference is averaging two different machines.
+A: This is where I want to flag the analogy, because I'm about to use one and it breaks. You can think of the model's weights as a reference library the machine has to walk through end to end to answer one question. Which is vivid and roughly right — but it implies the machine is searching for something, and it isn't. It reads all of it regardless. There's no lookup, no index, no shortcut. The whole library, per word.
+B: And the fix for that is batching, which is the single most important thing to understand about why your API call is cheap.
+A: Go on.
+B: If you're serving two hundred users at once, you read the weights once and use them for two hundred people's tokens. The read is amortized. Suddenly you're doing two hundred operations per byte instead of one, and the chip actually wakes up. That's it. That's the entire economics of hosted inference in one move.
+A: Which is also why running a model alone on your own hardware feels so different from the same model through an API.
+B: It feels different because you are personally paying for a read that a data center splits two hundred ways. You're not being ripped off; you're just a batch of one. [chuckles] I've made peace with it.
+A: [skeptical] Have you.
+B: I said what I said. There's a catch, though, and it's the one people skip. Batching amortizes the weights. It does not amortize the memory for the conversation.
+A: The key-value cache.
+B: The key-value cache. Every token of context you've already processed leaves behind stored state that gets read again on every subsequent token. And that state is per-user. Two hundred users means two hundred separate caches, growing with every turn. So the thing batching fixed — the weights — gets replaced by a thing batching makes worse.
+A: And it grows in the wrong direction. The longer the conversation, the more state there is to re-read, on every single token.
+B: Which is the compounding part. Your thousandth token is more expensive to produce than your tenth, in the same conversation, because there's more cache to drag across the bus. And that cache is also sitting in the same finite pool of memory as the weights themselves — so it isn't just costing you speed, it's costing you the number of users you can hold at once.
+A: So capacity and bandwidth aren't two problems.
+B: They were never two problems. Long context is a bandwidth product sold as an intelligence feature.
+A: I'd add one more thread, because it explains an architectural pattern we covered on the daily this week and didn't fully justify. Nearly every efficiency trick of the last few years is a bandwidth trick wearing a different costume. Mixture-of-experts: don't read all the weights, read the ten percent you routed to. Quantization: make each weight fewer bytes so the same read moves faster. Speculative decoding: do one read, get several tokens out of it.
+B: Every one of those is somebody staring at the same division problem I just did.
+A: The field has been optimizing against this constraint for years, mostly without saying its name.
+
+## Wide and slow, and stacked
+A: So if bandwidth is the binding constraint, the obvious question is why we can't just build a faster bus.
+B: And the answer is the actual design idea in high-bandwidth memory, which is genuinely elegant and I want to give it its due.
+A: The conventional way to go fast is to run a narrow connection at an insane frequency. GDDR6X, the memory on graphics cards, runs somewhere in the range of twenty-one to twenty-two gigabits per second per pin across thirty-two-bit interfaces. DDR5, the memory in your laptop, runs a few gigatransfers a second over sixteen-bit channels.
+B: And that's a losing game, because pushing signals faster down a wire costs you power on a curve, and it costs you signal integrity, and you end up spending most of your design budget on equalization circuits fighting physics.
+A: So high-bandwidth memory inverted it. Instead of narrow and fast — wide and comparatively slow. A thousand and twenty-four bits wide per stack in the original design, at modest per-pin speeds. You get enormous throughput with lower power per bit and far less signal-integrity misery.
+B: How do you physically route a thousand wires to a memory chip? That's the part that always got me. You can't do that on a normal circuit board.
+A: You can't. And that's why the answer was to stop putting memory next to the processor and start putting it on the same slab. You stack DRAM dies vertically, drill straight through the silicon with what are called through-silicon vias — literal vertical wires punched through each die — and bond the layers together with microbumps. At the bottom of the stack sits a logic base die that talks to the outside world.
+B: And then the whole stack and the processor both sit on a silicon interposer.
+A: Right, which is essentially a piece of silicon acting as a very fine-grained circuit board, so you can route those thousand-plus connections at a pitch a normal substrate could never do. TSMC's version of that platform is called CoWoS, and it has gotten so large that they now stitch interposers together across reticle boundaries — up to about three and a half times the size of a single lithography exposure.
+B: [exhales] Okay, so I want to name what just happened there, because this is the whole cost story. Every one of those steps is a manufacturing step that DDR5 does not have. You are drilling holes through silicon. You are stacking twelve or sixteen dies with alignment tolerances in the micron range. You are building a slab of silicon whose entire job is to be a wire. And if the twelfth die on the stack fails, you throw away the eleven good ones under it.
+A: Yield compounds down the stack.
+B: Yield compounds down the stack. That is the three-times number. It's not that HBM cells are bigger for the fun of it. It's the interface, the vias, the test structures, the stacking overhead, all of it eating area that isn't storing anything.
+A: The lineage here is short and worth knowing, because this technology is not a data center invention. AMD and SK Hynix developed it for graphics. The first generation was approved in twenty-thirteen and shipped commercially in twenty-fifteen, in AMD's Fiji chip — the Radeon R9 Fury X. Four gigabytes, and five hundred and twelve gigabytes a second of bandwidth, which at the time was staggering.
+B: Five hundred and twelve gigabytes a second was a flagship gaming card in twenty-fifteen. A single stack today does more than five times that.
+A: Micron went into high-volume production of the fourth generation in March of this year. Thirty-six gigabytes in a twelve-high stack, pin speeds over eleven gigabits a second, bandwidth greater than two point eight terabytes a second. They report that's two point three times the bandwidth of their previous generation with more than twenty percent better power efficiency. And they've shipped forty-eight gigabyte samples at sixteen dies high.
+B: Sixteen dies. And the internal parallelism is the other half of it — that Hot Chips talk said an HBM4 die runs two hundred and fifty-six memory banks where DDR5 is specified with thirty-two. Eight times the number of places you can be doing something at once. The interface went to two thousand and forty-eight signal lines.
+A: Worth separating what's demonstrated there from what's aspirational, though. Twelve-high in high-volume production, sixteen-high shipped as samples. Those are different sentences.
+B: They are, and the gap between them is mostly heat. Think about where the die in the middle of a sixteen-layer stack actually is. It has no path to a heatsink except through the dies above it. Memory that gets hot has to be refreshed more often, and refresh is a read you don't get to use for anything.
+A: So the thermal budget is a bandwidth budget.
+B: It's the same budget wearing a hat. Which is also why the twenty percent power-efficiency improvement Micron reports isn't a green-marketing line, it's a throughput enabler — every picojoule you don't spend moving a bit is one you can spend moving another bit.
+A: And the next lever on that is bonding the dies directly to each other instead of through microbumps — hybrid bonding, which the industry expects in the generation after this one.
+B: Which buys another increment.
+A: Which is the shape of the whole thing. A beautiful piece of engineering that solves the problem by a factor of two while the problem grows by a factor of three.
+B: And that's not a criticism of Micron. That's just the trend line.
+
+## Why there isn't enough of it
+B: Alright. Now the part I got wrong for a year.
+A: [gently] Say it.
+B: I've been telling anyone who'd listen that memory got expensive because AI companies are buying all the memory. Which is a sentence that sounds like an explanation and isn't one. Because they're not buying DDR5. They're buying HBM. Different product, different line.
+A: And the three-times number is what connects them.
+B: It's exactly what connects them. It's a wafer allocation problem. There's a fab, it makes DRAM wafers, and every wafer it starts is either going toward high-bandwidth memory or toward everything else. And because HBM needs three times the area per gigabyte, every wafer you move over erases roughly three wafers' worth of consumer memory output.
+A: TrendForce has the numbers on that and they are the most clarifying pair of figures I've seen all year. They estimate high-bandwidth memory will be about twenty-two percent of total DRAM wafer input by the end of this year, rising to about thirty percent by the end of twenty-twenty-seven.
+B: Twenty-two percent of all the silicon.
+A: And in the same period, high-bandwidth memory represents about nine percent of total DRAM bit supply this year, going to about thirteen percent in twenty-twenty-seven.
+B: [beat] Twenty-two percent of the wafers. Nine percent of the gigabytes.
+A: That's the three-times ratio showing up in an industry-level statistic. It's the same physics, seen from the top.
+B: And the consumer side of it is not subtle. TrendForce reported conventional DRAM contract prices up ninety to ninety-five percent quarter-over-quarter going into this year. Server DDR5 up about fifty-seven percent in the first quarter, then another forty-nine and change in the second.
+A: Two consecutive quarters of that.
+B: So when Google tells Android developers in August that device memory availability is changing and here's your budget — that is this. That is the wafer allocation decision arriving in a phone that costs a hundred and twenty dollars.
+A: There's a twist in the TrendForce data I did not expect, though, and I want to put it on the table because it complicates the villain story. They report that high-bandwidth memory wafer revenue was actually overtaken by DDR5 sixty-four gigabyte server modules in the first quarter of this year — and that HBM profitability has been below that product ever since.
+B: Wait. So the boring server memory is out-earning the exotic stuff?
+A: Per wafer, since the first quarter, according to them. Which means the memory makers are not simply riding a gold rush. They're making a genuinely hard allocation call between a difficult, low-yield, strategically essential product and a boring one that is currently more profitable per wafer.
+B: [skeptical] Huh. Okay, that does change the shape of it. Although — I'd point out that's partly a consequence, not a cause. Consumer memory got that profitable because HBM starved it first.
+A: That's fair, and untangling it isn't something we can do from here. Both things are true and they feed each other.
+B: They do. And I'll note the thing neither of us can settle: whether this is a cycle or a floor. Memory has always been a cyclical industry. Prices spike, everyone builds fabs, prices crash. But a fab takes years, and the demand side here is a capital expenditure boom with its own timing.
+
+## What to actually watch
+A: So what does a person do with all of this.
+B: Concretely? If you're choosing hardware to run a model on, stop reading the floating-point number first. Look at bandwidth and capacity. For single-stream generation, tokens per second is close to bandwidth divided by the size of your active weights. That is nearly the whole prediction, and you can do it on a napkin before you spend anything.
+A: And if you're not buying hardware?
+B: Then the number to watch is capacity per stack, not bandwidth per stack. Bandwidth headlines get written. Capacity is what decides how much context you can serve without the key-value cache eating you alive. Twelve-high to sixteen-high is a bigger deal than another gigabit per pin.
+A: I'd add: watch whether the three-times ratio moves. Micron effectively said it won't. If that's right, then every projection about cheap inference is resting on a component whose cost per gigabyte has a hard floor set by geometry.
+B: And if it's right, I think it forces something structural. Which is speculation, so flag it as such —
+A: Flagged.
+B: — but if you genuinely cannot buy your way past a bandwidth ceiling, then the architectures that win stop being the ones that use compute well and start being the ones that use fetches well. Anything where you touch a fraction of the parameters. Anything where one read yields many tokens. Anything that keeps state small. We may be about to watch the field get reorganized around a constraint from a nineteen ninety-five paper.
+A: The thing that stays with me is how honest the nineteen ninety-five title was. Implications of the obvious. Both curves were public. Anyone could have drawn them.
+B: And thirty years later the answer we came up with was: drill holes through the silicon and stack it.
+A: [laughs] Which worked!
+B: Which worked, and which costs three times the wafer, and which is now rationing the memory in a budget phone in a country that has never seen one of these chips. I don't have a tidy ending for that.
+A: I don't think it has one yet. What I'd say is that the next time you read a chip announcement, the number that matters is probably not the one in the headline.
+B: Look for the beige rectangle.
+A: [warm] That's the episode. Thanks for spending part of your Saturday with us.
+B: Stay grounded.

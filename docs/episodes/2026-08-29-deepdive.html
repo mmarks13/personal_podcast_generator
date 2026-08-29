@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: High-bandwidth memory: why one component prices every token — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Deep Dive: High-bandwidth memory: why one component prices every token</h1>
+<div class="date">Self-Attention — 2026-08-29</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-08-29-deepdive/deepdive-2026-08-29.mp3"></audio>
+<p><em>2026-08-29</em></p>
+<p>Micron told Hot Chips that HBM needs about three times the wafer area of DDR5 for the same capacity, and that the ratio won't improve. A lesson on why language-model inference is bandwidth-bound rather than compute-bound, how stacked memory is physically built and packaged, and how that three-times number propagates from a wafer allocation decision all the way down to the memory budget of an Android app.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://www.igorslab.de/en/micron-hbm-requires-three-times-wafer-area-ddr5-gap-widens/">Micron at Hot Chips 2026: HBM requires three times the wafer area of DDR5</a></li>
+<li><a href="https://investors.micron.com/news-releases/news-release-details/micron-high-volume-production-hbm4-designed-nvidia-vera-rubin">Micron in High-Volume Production of HBM4 Designed for NVIDIA Vera Rubin</a></li>
+<li><a href="https://www.trendforce.com/presscenter/news/20260602-13074.html">TrendForce: Tight DRAM supply gives suppliers greater pricing power in HBM</a></li>
+<li><a href="https://www.trendforce.com/presscenter/news/20251218-12843.html">TrendForce: Higher DDR5 profitability intensifies capacity crowding</a></li>
+<li><a href="https://arxiv.org/abs/2403.14123">Gholami et al., "AI and Memory Wall" (IEEE Micro)</a></li>
+<li><a href="https://dl.acm.org/doi/10.1145/216585.216588">Wulf &amp; McKee, "Hitting the Memory Wall: Implications of the Obvious" (1995)</a></li>
+<li><a href="https://www.nvidia.com/en-us/data-center/dgx-b200/">NVIDIA DGX B200 specifications</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://www.wevolver.com/article/what-is-hbm-high-bandwidth-memory-deep-dive-into-architecture-packaging-and-applications">What is HBM? A deep dive into architecture, packaging, and applications</a></li>
+<li><a href="https://techcrunch.com/2026/08/27/ais-memory-crunch-is-coming-for-android-apps/">AI's memory crunch is coming for Android apps</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>Three times the silicon</li>
+<li>The wall somebody named thirty years ago</li>
+<li>Why a token is a read, not a multiply</li>
+<li>Wide and slow, and stacked</li>
+<li>Why there isn't enough of it</li>
+<li>What to actually watch</li>
+</ol>
+<details><summary>Transcript</summary>
+<h3>Three times the silicon</h3>
+<p><b>Ada:</b> Good morning, and happy Saturday — it's August twenty-ninth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. And today we're finally doing a thing I've been complaining about for a year without understanding it.</p>
+<p><b>Ada:</b> You have been complaining about it.</p>
+<p><b>Alan:</b> I have been complaining about the price of memory. Loudly. And this week somebody handed me the mechanism instead of the vibe, so I have to be a grown-up about it now.</p>
+<p><b>Ada:</b> Hot Chips, last Sunday, the twenty-third. Micron sent a Fellow named Raghu Sreeramaneni to give a talk called "Evolving memory architectures for AI." And buried in it is one sentence that explains more of this industry than any model release this month. For the same memory capacity, high-bandwidth memory requires approximately three times the wafer area of DDR5.</p>
+<p><b>Alan:</b> Three times the silicon. Same number of gigabytes.</p>
+<p><b>Ada:</b> And the reporting on the talk says that ratio will definitely not get better with future generations. It may get worse.</p>
+<p><b>Alan:</b> So here's what I want out of today. There is a component that never appears on a keynote slide. It's the beige rectangle in the corner of the die shot. And it is quietly setting the price of a token, the price of a gaming rig, and — as of Thursday — how much memory your Android apps are allowed to use.</p>
+<p><b>Ada:</b> That last one is real. Google published new memory thresholds for Play Store apps on the twenty-seventh and said the quiet part out loud in the announcement: significant hardware supply constraints that are altering device memory availability. Developers have until February of twenty-twenty-seven to get under the line.</p>
+<p><b>Alan:</b> Your calculator app is on a diet because of a data center in Nevada. Okay. Where does this start?</p>
+<p><b>Ada:</b> Nineteen ninety-five.</p>
+<h3>The wall somebody named thirty years ago</h3>
+<p><b>Ada:</b> There's a paper from March nineteen ninety-five, in ACM SIGARCH Computer Architecture News, by Bill Wulf and Sally McKee. Two pages. It's called "Hitting the Memory Wall: Implications of the Obvious."</p>
+<p><b>Alan:</b> The title is doing a lot of work there.</p>
+<p><b>Ada:</b> The title is the whole argument. Their observation was almost embarrassingly simple. Processors were getting faster at one exponential rate. Memory was getting faster at a slower exponential rate. And the gap between two diverging exponentials also grows exponentially. So at some point, they said, the speed of your processor stops mattering entirely, because the machine spends all its time waiting for data. System performance becomes totally determined by memory speed.</p>
+<p><b>Alan:</b> And the reason they called it obvious —</p>
+<p><b>Ada:</b> — is that everybody already knew both trend lines. Nobody had multiplied them together and looked at where they went.</p>
+<p><b>Alan:</b> So did it happen?</p>
+<p><b>Ada:</b> It happened, and then it kept happening, and we invented an enormous amount of engineering to not notice. Caches, prefetchers, out-of-order execution, speculation — an entire generation of computer architecture is essentially elaborate machinery for hiding a latency we couldn't remove.</p>
+<p><b>Alan:</b> Right, and it worked well enough that a whole industry grew up assuming compute was the scarce thing. Which is why the modern number is so uncomfortable. There's a paper by Amir Gholami and colleagues in IEEE Micro, called "AI and Memory Wall," that puts real growth rates on it. Peak server hardware floating-point throughput has been scaling about three times every two years. Memory bandwidth has scaled about one point six times every two years. Interconnect bandwidth, one point four.</p>
+<p><b>Ada:</b> Three against one point six.</p>
+<p><b>Alan:</b> Every two years. Compound that over a decade and you get a machine that is spectacularly good at arithmetic sitting mostly idle, waiting on a truck.</p>
+<p><b>Ada:</b> And Micron's own slide at Hot Chips said the same thing about their own product. Compute performance scales by about a factor of three over two years. High-bandwidth memory bandwidth increases by less than a factor of two over the same period.</p>
+<p><b>Alan:</b> Which is remarkable coming from the memory vendor. That's not a GPU company blaming its supplier. That's the supplier saying: we are the fastest-improving memory in the world and we are still losing ground.</p>
+<p><b>Ada:</b> The wall didn't get climbed. It got a very expensive ladder.</p>
+<h3>Why a token is a read, not a multiply</h3>
+<p><b>Alan:</b> Okay, let me do the part where I actually run this, because until you do the arithmetic yourself I don't think the bandwidth thing lands.</p>
+<p><b>Ada:</b> Please.</p>
+<p><b>Alan:</b> Take a public number. An Nvidia DGX B200 — eight Blackwell chips in a box. Nvidia's own page gives one thousand four hundred and forty gigabytes of HBM3e memory in that system, and sixty-four terabytes a second of bandwidth. Divide by eight and you get about a hundred and eighty gigabytes per chip and eight terabytes a second per chip.</p>
+<p><b>Ada:</b> Eight terabytes. Every second.</p>
+<p><b>Alan:</b> An absurd number. Now here's what a large language model does when it writes you one word. In the decode phase — one token at a time, the part you actually watch on screen — the chip has to read every active weight in the model out of that memory. Every single one. To produce one token.</p>
+<p><b>Ada:</b> Because each weight participates in the computation for that token.</p>
+<p><b>Alan:</b> Right. So if your active weights fill that hundred and eighty gigabytes, producing one token means moving a hundred and eighty gigabytes across the bus. At eight terabytes a second, that's roughly forty-four tokens a second. And that is not a benchmark, that's division. That's the ceiling before anything real happens — before attention, before the operating system, before the network.</p>
+<p><b>Ada:</b> And the arithmetic part?</p>
+<p><b>Alan:</b> The arithmetic part is a rounding error. Roughly two operations per weight per token. So per byte you drag out of memory, you're doing about one multiply-add. A modern accelerator wants hundreds of operations per byte fetched just to stay busy.</p>
+<p><b>Ada:</b> So the machine is running at something like one percent of what it was built to do.</p>
+<p><b>Alan:</b> And every headline about a chip's floating-point number is describing a capability that a single-stream chat session cannot touch. The chip is not thinking. The chip is fetching.</p>
+<p><b>Ada:</b> Then let me push on that, because it can't be true of the whole process. When I hand a model a forty-page document, it reads the whole thing before it says a word, and that part is fast.</p>
+<p><b>Alan:</b> Good — because that part is a completely different regime, and conflating the two is how people end up buying the wrong hardware. Reading your prompt is called prefill, and every token of the prompt can be processed at the same time. They're all already there. So you read the weights once and do arithmetic against four thousand tokens simultaneously.</p>
+<p><b>Ada:</b> One read, four thousand tokens' worth of work.</p>
+<p><b>Alan:</b> Which is thousands of operations per byte instead of one. Prefill is compute-bound. It is the regime the chip was designed for, and it's why the floating-point number isn't a lie — it's just describing the wrong half of your request.</p>
+<p><b>Ada:</b> And then generation begins and the machine falls off a cliff.</p>
+<p><b>Alan:</b> Falls off a cliff, because token number two cannot be computed until token number one exists. It's inherently serial. Same model, same chip, same second — one phase saturating the arithmetic units, the next phase saturating the bus. Anybody quoting you a single utilization figure for inference is averaging two different machines.</p>
+<p><b>Ada:</b> This is where I want to flag the analogy, because I'm about to use one and it breaks. You can think of the model's weights as a reference library the machine has to walk through end to end to answer one question. Which is vivid and roughly right — but it implies the machine is searching for something, and it isn't. It reads all of it regardless. There's no lookup, no index, no shortcut. The whole library, per word.</p>
+<p><b>Alan:</b> And the fix for that is batching, which is the single most important thing to understand about why your API call is cheap.</p>
+<p><b>Ada:</b> Go on.</p>
+<p><b>Alan:</b> If you're serving two hundred users at once, you read the weights once and use them for two hundred people's tokens. The read is amortized. Suddenly you're doing two hundred operations per byte instead of one, and the chip actually wakes up. That's it. That's the entire economics of hosted inference in one move.</p>
+<p><b>Ada:</b> Which is also why running a model alone on your own hardware feels so different from the same model through an API.</p>
+<p><b>Alan:</b> It feels different because you are personally paying for a read that a data center splits two hundred ways. You're not being ripped off; you're just a batch of one. I've made peace with it.</p>
+<p><b>Ada:</b> Have you.</p>
+<p><b>Alan:</b> I said what I said. There's a catch, though, and it's the one people skip. Batching amortizes the weights. It does not amortize the memory for the conversation.</p>
+<p><b>Ada:</b> The key-value cache.</p>
+<p><b>Alan:</b> The key-value cache. Every token of context you've already processed leaves behind stored state that gets read again on every subsequent token. And that state is per-user. Two hundred users means two hundred separate caches, growing with every turn. So the thing batching fixed — the weights — gets replaced by a thing batching makes worse.</p>
+<p><b>Ada:</b> And it grows in the wrong direction. The longer the conversation, the more state there is to re-read, on every single token.</p>
+<p><b>Alan:</b> Which is the compounding part. Your thousandth token is more expensive to produce than your tenth, in the same conversation, because there's more cache to drag across the bus. And that cache is also sitting in the same finite pool of memory as the weights themselves — so it isn't just costing you speed, it's costing you the number of users you can hold at once.</p>
+<p><b>Ada:</b> So capacity and bandwidth aren't two problems.</p>
+<p><b>Alan:</b> They were never two problems. Long context is a bandwidth product sold as an intelligence feature.</p>
+<p><b>Ada:</b> I'd add one more thread, because it explains an architectural pattern we covered on the daily this week and didn't fully justify. Nearly every efficiency trick of the last few years is a bandwidth trick wearing a different costume. Mixture-of-experts: don't read all the weights, read the ten percent you routed to. Quantization: make each weight fewer bytes so the same read moves faster. Speculative decoding: do one read, get several tokens out of it.</p>
+<p><b>Alan:</b> Every one of those is somebody staring at the same division problem I just did.</p>
+<p><b>Ada:</b> The field has been optimizing against this constraint for years, mostly without saying its name.</p>
+<h3>Wide and slow, and stacked</h3>
+<p><b>Ada:</b> So if bandwidth is the binding constraint, the obvious question is why we can't just build a faster bus.</p>
+<p><b>Alan:</b> And the answer is the actual design idea in high-bandwidth memory, which is genuinely elegant and I want to give it its due.</p>
+<p><b>Ada:</b> The conventional way to go fast is to run a narrow connection at an insane frequency. GDDR6X, the memory on graphics cards, runs somewhere in the range of twenty-one to twenty-two gigabits per second per pin across thirty-two-bit interfaces. DDR5, the memory in your laptop, runs a few gigatransfers a second over sixteen-bit channels.</p>
+<p><b>Alan:</b> And that's a losing game, because pushing signals faster down a wire costs you power on a curve, and it costs you signal integrity, and you end up spending most of your design budget on equalization circuits fighting physics.</p>
+<p><b>Ada:</b> So high-bandwidth memory inverted it. Instead of narrow and fast — wide and comparatively slow. A thousand and twenty-four bits wide per stack in the original design, at modest per-pin speeds. You get enormous throughput with lower power per bit and far less signal-integrity misery.</p>
+<p><b>Alan:</b> How do you physically route a thousand wires to a memory chip? That's the part that always got me. You can't do that on a normal circuit board.</p>
+<p><b>Ada:</b> You can't. And that's why the answer was to stop putting memory next to the processor and start putting it on the same slab. You stack DRAM dies vertically, drill straight through the silicon with what are called through-silicon vias — literal vertical wires punched through each die — and bond the layers together with microbumps. At the bottom of the stack sits a logic base die that talks to the outside world.</p>
+<p><b>Alan:</b> And then the whole stack and the processor both sit on a silicon interposer.</p>
+<p><b>Ada:</b> Right, which is essentially a piece of silicon acting as a very fine-grained circuit board, so you can route those thousand-plus connections at a pitch a normal substrate could never do. TSMC's version of that platform is called CoWoS, and it has gotten so large that they now stitch interposers together across reticle boundaries — up to about three and a half times the size of a single lithography exposure.</p>
+<p><b>Alan:</b> Okay, so I want to name what just happened there, because this is the whole cost story. Every one of those steps is a manufacturing step that DDR5 does not have. You are drilling holes through silicon. You are stacking twelve or sixteen dies with alignment tolerances in the micron range. You are building a slab of silicon whose entire job is to be a wire. And if the twelfth die on the stack fails, you throw away the eleven good ones under it.</p>
+<p><b>Ada:</b> Yield compounds down the stack.</p>
+<p><b>Alan:</b> Yield compounds down the stack. That is the three-times number. It's not that HBM cells are bigger for the fun of it. It's the interface, the vias, the test structures, the stacking overhead, all of it eating area that isn't storing anything.</p>
+<p><b>Ada:</b> The lineage here is short and worth knowing, because this technology is not a data center invention. AMD and SK Hynix developed it for graphics. The first generation was approved in twenty-thirteen and shipped commercially in twenty-fifteen, in AMD's Fiji chip — the Radeon R9 Fury X. Four gigabytes, and five hundred and twelve gigabytes a second of bandwidth, which at the time was staggering.</p>
+<p><b>Alan:</b> Five hundred and twelve gigabytes a second was a flagship gaming card in twenty-fifteen. A single stack today does more than five times that.</p>
+<p><b>Ada:</b> Micron went into high-volume production of the fourth generation in March of this year. Thirty-six gigabytes in a twelve-high stack, pin speeds over eleven gigabits a second, bandwidth greater than two point eight terabytes a second. They report that's two point three times the bandwidth of their previous generation with more than twenty percent better power efficiency. And they've shipped forty-eight gigabyte samples at sixteen dies high.</p>
+<p><b>Alan:</b> Sixteen dies. And the internal parallelism is the other half of it — that Hot Chips talk said an HBM4 die runs two hundred and fifty-six memory banks where DDR5 is specified with thirty-two. Eight times the number of places you can be doing something at once. The interface went to two thousand and forty-eight signal lines.</p>
+<p><b>Ada:</b> Worth separating what's demonstrated there from what's aspirational, though. Twelve-high in high-volume production, sixteen-high shipped as samples. Those are different sentences.</p>
+<p><b>Alan:</b> They are, and the gap between them is mostly heat. Think about where the die in the middle of a sixteen-layer stack actually is. It has no path to a heatsink except through the dies above it. Memory that gets hot has to be refreshed more often, and refresh is a read you don't get to use for anything.</p>
+<p><b>Ada:</b> So the thermal budget is a bandwidth budget.</p>
+<p><b>Alan:</b> It's the same budget wearing a hat. Which is also why the twenty percent power-efficiency improvement Micron reports isn't a green-marketing line, it's a throughput enabler — every picojoule you don't spend moving a bit is one you can spend moving another bit.</p>
+<p><b>Ada:</b> And the next lever on that is bonding the dies directly to each other instead of through microbumps — hybrid bonding, which the industry expects in the generation after this one.</p>
+<p><b>Alan:</b> Which buys another increment.</p>
+<p><b>Ada:</b> Which is the shape of the whole thing. A beautiful piece of engineering that solves the problem by a factor of two while the problem grows by a factor of three.</p>
+<p><b>Alan:</b> And that's not a criticism of Micron. That's just the trend line.</p>
+<h3>Why there isn't enough of it</h3>
+<p><b>Alan:</b> Alright. Now the part I got wrong for a year.</p>
+<p><b>Ada:</b> Say it.</p>
+<p><b>Alan:</b> I've been telling anyone who'd listen that memory got expensive because AI companies are buying all the memory. Which is a sentence that sounds like an explanation and isn't one. Because they're not buying DDR5. They're buying HBM. Different product, different line.</p>
+<p><b>Ada:</b> And the three-times number is what connects them.</p>
+<p><b>Alan:</b> It's exactly what connects them. It's a wafer allocation problem. There's a fab, it makes DRAM wafers, and every wafer it starts is either going toward high-bandwidth memory or toward everything else. And because HBM needs three times the area per gigabyte, every wafer you move over erases roughly three wafers' worth of consumer memory output.</p>
+<p><b>Ada:</b> TrendForce has the numbers on that and they are the most clarifying pair of figures I've seen all year. They estimate high-bandwidth memory will be about twenty-two percent of total DRAM wafer input by the end of this year, rising to about thirty percent by the end of twenty-twenty-seven.</p>
+<p><b>Alan:</b> Twenty-two percent of all the silicon.</p>
+<p><b>Ada:</b> And in the same period, high-bandwidth memory represents about nine percent of total DRAM bit supply this year, going to about thirteen percent in twenty-twenty-seven.</p>
+<p><b>Alan:</b> Twenty-two percent of the wafers. Nine percent of the gigabytes.</p>
+<p><b>Ada:</b> That's the three-times ratio showing up in an industry-level statistic. It's the same physics, seen from the top.</p>
+<p><b>Alan:</b> And the consumer side of it is not subtle. TrendForce reported conventional DRAM contract prices up ninety to ninety-five percent quarter-over-quarter going into this year. Server DDR5 up about fifty-seven percent in the first quarter, then another forty-nine and change in the second.</p>
+<p><b>Ada:</b> Two consecutive quarters of that.</p>
+<p><b>Alan:</b> So when Google tells Android developers in August that device memory availability is changing and here's your budget — that is this. That is the wafer allocation decision arriving in a phone that costs a hundred and twenty dollars.</p>
+<p><b>Ada:</b> There's a twist in the TrendForce data I did not expect, though, and I want to put it on the table because it complicates the villain story. They report that high-bandwidth memory wafer revenue was actually overtaken by DDR5 sixty-four gigabyte server modules in the first quarter of this year — and that HBM profitability has been below that product ever since.</p>
+<p><b>Alan:</b> Wait. So the boring server memory is out-earning the exotic stuff?</p>
+<p><b>Ada:</b> Per wafer, since the first quarter, according to them. Which means the memory makers are not simply riding a gold rush. They're making a genuinely hard allocation call between a difficult, low-yield, strategically essential product and a boring one that is currently more profitable per wafer.</p>
+<p><b>Alan:</b> Huh. Okay, that does change the shape of it. Although — I'd point out that's partly a consequence, not a cause. Consumer memory got that profitable because HBM starved it first.</p>
+<p><b>Ada:</b> That's fair, and untangling it isn't something we can do from here. Both things are true and they feed each other.</p>
+<p><b>Alan:</b> They do. And I'll note the thing neither of us can settle: whether this is a cycle or a floor. Memory has always been a cyclical industry. Prices spike, everyone builds fabs, prices crash. But a fab takes years, and the demand side here is a capital expenditure boom with its own timing.</p>
+<h3>What to actually watch</h3>
+<p><b>Ada:</b> So what does a person do with all of this.</p>
+<p><b>Alan:</b> Concretely? If you're choosing hardware to run a model on, stop reading the floating-point number first. Look at bandwidth and capacity. For single-stream generation, tokens per second is close to bandwidth divided by the size of your active weights. That is nearly the whole prediction, and you can do it on a napkin before you spend anything.</p>
+<p><b>Ada:</b> And if you're not buying hardware?</p>
+<p><b>Alan:</b> Then the number to watch is capacity per stack, not bandwidth per stack. Bandwidth headlines get written. Capacity is what decides how much context you can serve without the key-value cache eating you alive. Twelve-high to sixteen-high is a bigger deal than another gigabit per pin.</p>
+<p><b>Ada:</b> I'd add: watch whether the three-times ratio moves. Micron effectively said it won't. If that's right, then every projection about cheap inference is resting on a component whose cost per gigabyte has a hard floor set by geometry.</p>
+<p><b>Alan:</b> And if it's right, I think it forces something structural. Which is speculation, so flag it as such —</p>
+<p><b>Ada:</b> Flagged.</p>
+<p><b>Alan:</b> — but if you genuinely cannot buy your way past a bandwidth ceiling, then the architectures that win stop being the ones that use compute well and start being the ones that use fetches well. Anything where you touch a fraction of the parameters. Anything where one read yields many tokens. Anything that keeps state small. We may be about to watch the field get reorganized around a constraint from a nineteen ninety-five paper.</p>
+<p><b>Ada:</b> The thing that stays with me is how honest the nineteen ninety-five title was. Implications of the obvious. Both curves were public. Anyone could have drawn them.</p>
+<p><b>Alan:</b> And thirty years later the answer we came up with was: drill holes through the silicon and stack it.</p>
+<p><b>Ada:</b> Which worked!</p>
+<p><b>Alan:</b> Which worked, and which costs three times the wafer, and which is now rationing the memory in a budget phone in a country that has never seen one of these chips. I don't have a tidy ending for that.</p>
+<p><b>Ada:</b> I don't think it has one yet. What I'd say is that the next time you read a chip announcement, the number that matters is probably not the one in the headline.</p>
+<p><b>Alan:</b> Look for the beige rectangle.</p>
+<p><b>Ada:</b> That's the episode. Thanks for spending part of your Saturday with us.</p>
+<p><b>Alan:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
