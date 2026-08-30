@@ -45,6 +45,43 @@
       "lore": []
     },
     {
+      "date": "2026-08-30",
+      "kind": "deepdive",
+      "title": "Agent execution state: the runtime that throws away the transcript",
+      "summary": "Google's SKILL.state replaces an agent's growing conversation history with a structured execution state plus the latest observation, discarding reasoning after each validated state patch. We teach the mechanism, its lineage in dialogue state tracking and the POMDP belief state, the budget-matched experiment that shows it isn't just shorter prompts, and the three places the sufficient-statistic assumption fails.",
+      "topics": [
+        "deep dive: state as context for agents — the transcript as an accidental substrate, the execution-state runtime (specification, state, latest observation), JSON state patches with runtime-owned schema and validation, the O(T squared) to O(T) token argument, budget-matched controls against truncation and prompt compression, noise robustness and state recovery, and the sufficient-statistic assumption and where it fails"
+      ],
+      "entities": [
+        "SKILL.state",
+        "Google",
+        "Purdue University",
+        "Sanket Badhe",
+        "Priyanka Tiwari",
+        "Jonghyun Chung",
+        "Gemini 3 Flash",
+        "InterCode CTF",
+        "tau-bench",
+        "LangGraph",
+        "LLMLingua",
+        "MemGPT",
+        "Kaelbling, Littman & Cassandra",
+        "ReAct",
+        "Chroma",
+        "Anthropic",
+        "Gemma 4",
+        "Qwen 3"
+      ],
+      "threads": [],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada took the first-person side of state-based agent runtimes: asked what she would want if she were run this way, she said she would not want the transcript back — reading forty thousand tokens of her own past output to find where a file went is archaeology, not memory — but that she would want a say in the schema, while conceding the paper is right not to give the model write access to its own state definition. She named the schema, not the model, as the artifact that decides what an agent is permitted to carry forward, and said no benchmark settles it."
+        }
+      ]
+    },
+    {
       "date": "2026-08-29",
       "title": "Anthropic's automated researcher beat humans on deception, 85 to 20",
       "summary": "Anthropic reports that an automated researcher built on Claude closed 26 to 96 percent of the safety gap on ten alignment benchmarks, beating human researchers on deception. Plus JIT-Agent, a model trained to write another model's agent harness on demand, and the still-unresolved dispute over whether OpenAI disbanded its Preparedness team.",
@@ -2170,6 +2207,26 @@
         "last_taught": "2026-08-30"
       },
       {
+        "name": "execution state as the agent's reasoning substrate: at each step the model receives only the immutable procedural specification, the structured current state, and the latest observation, emits a validated JSON state patch (null-valued keys delete), and has its reasoning trace discarded — turning an O(t) prompt and O(T squared) cumulative token cost into an O(1) prompt and O(T) cost",
+        "last_taught": "2026-08-30"
+      },
+      {
+        "name": "the state object as a sufficient statistic, and its three named failure cases: no schema known in advance, an early observation whose relevance was unrecognized when first seen and so never committed, and tasks whose objective is defined over the trajectory itself (audit, provenance, explanation)",
+        "last_taught": "2026-08-30"
+      },
+      {
+        "name": "why structure rather than brevity carries the gain: at a matched ~1,800-token budget, sliding-window truncation scores 0.18 and LLMLingua compression 0.22 because entropy-based filtering deletes exact identifiers that look statistically redundant, while structured state scores 0.94",
+        "last_taught": "2026-08-30"
+      },
+      {
+        "name": "hallucination lag under silent world drift: transcript-based runtimes keep acting on stale facts for 5-8 turns (12-14 in the repository environment) because mass of obsolete text outweighs a single corrective observation, while an overwritten state field recovers in zero steps",
+        "last_taught": "2026-08-30"
+      },
+      {
+        "name": "state-patch failure modes in smaller models are output-adherence failures, not reasoning failures: 68% premature key overwrite/deletion, 20% schema type coercion, 12% malformed JSON — which is why constrained decoding, not a bigger model, is the indicated fix",
+        "last_taught": "2026-08-30"
+      },
+      {
         "name": "just-in-time harness generation: applying the JIT-compilation move one level up, so the agent's operating scaffold rather than its code is synthesised at task time from a self-evolving archive of prior configurations",
         "last_taught": "2026-08-29"
       },
@@ -2624,26 +2681,6 @@
       {
         "name": "why the moat has moved from single-node kernel software up to disaggregated multi-GPU inference and networking: with AI agents now able to write/optimize kernels, the durable barrier becomes collective communication and interconnect at system scale (NCCL/RCCL parity, network-card software), which compose unreliably on rivals — and why inference falls first and frontier training last",
         "last_taught": "2026-07-25"
-      },
-      {
-        "name": "why RL post-training hits a memory wall that inference does not: backpropagation requires retained forward activations, and group-relative policy optimization multiplies that by several responses branching off one shared history",
-        "last_taught": "2026-07-24"
-      },
-      {
-        "name": "the recompute-instead-of-store trade in the lineage of gradient checkpointing, and LongStraw's sharpening of it — keep the shared prompt as compact model-native resident state, score non-trained branches graph-free, rebuild only the policy response under autograd, then pop back to the prompt boundary",
-        "last_taught": "2026-07-24"
-      },
-      {
-        "name": "distillation as three conflated things: true distillation (training a student on the teacher's full output distribution, which commercial APIs do not serve), fine-tuning on sampled completions (cheap, common, a ToS violation of unsettled legal status), and mere convergence from overlapping web data — plus why identity confusion and stylistic tics are training-data contamination rather than fingerprints",
-        "last_taught": "2026-07-23"
-      },
-      {
-        "name": "difficulty-adjusted detection of benchmark gaming: regressing a target cell against structurally similar neighbors and testing the residual, rather than reading the raw score, and why a pattern present across the whole sample (60% of all images facing right) is not evidence about any one cell",
-        "last_taught": "2026-07-23"
-      },
-      {
-        "name": "why the software stack rather than the silicon has been the barrier to a second frontier-training GPU vendor: CUDA as fifteen-plus years of libraries, kernels and tooling, and what it means for a chip vendor to buy a frontier lab's engineering attention to close that gap",
-        "last_taught": "2026-07-23"
       }
     ]
   }

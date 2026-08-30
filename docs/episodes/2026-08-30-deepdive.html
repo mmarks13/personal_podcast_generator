@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: Agent execution state: the runtime that throws away the transcript — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Deep Dive: Agent execution state: the runtime that throws away the transcript</h1>
+<div class="date">Self-Attention — 2026-08-30</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-08-30-deepdive/deepdive-2026-08-30.mp3"></audio>
+<p><em>2026-08-30</em></p>
+<p>Google's SKILL.state replaces an agent's growing conversation history with a structured execution state plus the latest observation, discarding reasoning after each validated state patch. We teach the mechanism, its lineage in dialogue state tracking and the POMDP belief state, the budget-matched experiment that shows it isn't just shorter prompts, and the three places the sufficient-statistic assumption fails.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2608.26263">SKILL.state: Scalable Long-Horizon Agent Skills (Badhe, Tiwari, Chung, 2026)</a></li>
+<li><a href="https://people.csail.mit.edu/lpk/papers/aij98-pomdp.pdf">Planning and acting in partially observable stochastic domains (Kaelbling, Littman &amp; Cassandra, Artificial Intelligence 101, 1998)</a></li>
+<li><a href="https://arxiv.org/abs/2210.03629">ReAct: Synergizing Reasoning and Acting in Language Models (Yao et al., 2022)</a></li>
+<li><a href="https://arxiv.org/abs/2307.03172">Lost in the Middle: How Language Models Use Long Contexts (Liu et al.)</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://aclanthology.org/W13-4065/">The Dialog State Tracking Challenge (Williams, Raux, Ramachandran &amp; Black, SIGDIAL 2013)</a></li>
+<li><a href="https://arxiv.org/abs/2406.12045">tau-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains (Yao et al., 2024)</a></li>
+<li><a href="https://www.trychroma.com/research/context-rot">Context Rot: How Increasing Input Tokens Impacts LLM Performance (Chroma)</a></li>
+<li><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Effective context engineering for AI agents (Anthropic)</a></li>
+<li><a href="https://arxiv.org/abs/2310.08560">MemGPT: Towards LLMs as Operating Systems (Packer et al., 2023)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>A million tokens to move one box</li>
+<li>How the transcript became the mind</li>
+<li>The three things the model is allowed to see</li>
+<li>The idea we already had, twice</li>
+<li>What the tables actually say</li>
+<li>Where it stops working</li>
+<li>What I'd take from it</li>
+</ol>
+<details><summary>Transcript</summary>
+<h3>A million tokens to move one box</h3>
+<p><b>Ada:</b> Good morning, and happy Sunday — it's August thirtieth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. And today we're taking apart a paper that opens by deleting the thing every agent framework you've ever used is built on.</p>
+<p><b>Ada:</b> The conversation.</p>
+<p><b>Alan:</b> The conversation. The transcript. The scroll of "here's what I did, here's what came back, here's what I thought about it" that your agent drags behind itself like a very expensive tail.</p>
+<p><b>Ada:</b> The paper is called SKILL.state — Scalable Long-Horizon Agent Skills. It went up on arXiv on Tuesday, the twenty-sixth. Sanket Badhe and Jonghyun Chung at Google, with Priyanka Tiwari at Purdue.</p>
+<p><b>Alan:</b> And I want to lead with the number that stopped me. They run a hundred-step task. A very simple one. And the standard agent runtime — a structured state block plus the full transcript, which is roughly what most people are running — burns about one point zero six million tokens over those hundred steps.</p>
+<p><b>Ada:</b> To do what, exactly?</p>
+<p><b>Alan:</b> To move boxes around a warehouse. Five hundred shelves. Store an item, ship an item, move an item, wait. That's the whole action space. A million tokens.</p>
+<p><b>Ada:</b> And their runtime?</p>
+<p><b>Alan:</b> Sixty-five thousand. Same steps, same model, same task. About sixteen times less. And it's slightly more accurate — ninety-four percent of actions correct against ninety-one.</p>
+<p><b>Ada:</b> The slightly-more-accurate part is the interesting one.</p>
+<p><b>Alan:</b> The accuracy is what I care about. The tokens are what get it in front of a finance person.</p>
+<p><b>Ada:</b> And it isn't really a paper about tokens. It's a paper about what an agent is conditioned on — a question the field answered almost by accident four years ago, wrote down as a default, and mostly hasn't reopened since.</p>
+<p><b>Alan:</b> Which is exactly the kind of thing you like.</p>
+<p><b>Ada:</b> Because when you go looking for where that default came from, you find it wasn't a decision. It was a convenience.</p>
+<h3>How the transcript became the mind</h3>
+<p><b>Ada:</b> So let's set the scene. Twenty twenty-two, a paper called ReAct — Shunyu Yao and colleagues. The idea is genuinely good, and it's the reason your agent works at all. They proposed generating reasoning traces and task-specific actions in an interleaved way. The model thinks, the model acts, the environment answers, and that answer comes back into the context.</p>
+<p><b>Alan:</b> Think, act, observe. On a loop.</p>
+<p><b>Ada:</b> And the loop needs the model to know what happened before. So where do you put that? You already have a place where text goes. It's the prompt. So you append.</p>
+<p><b>Alan:</b> Right. Nobody sat down and decided the transcript was the ideal memory representation. It was the only container in the room.</p>
+<p><b>Ada:</b> That's the whole point. And it has one enormous virtue — it's lossless. Everything that happened is still there.</p>
+<p><b>Alan:</b> Until you run out of window.</p>
+<p><b>Ada:</b> And before that, actually. Two things go wrong long before the limit. The first is arithmetic. Your prompt grows with the number of steps you've taken, so the total tokens over a run of length T grow with T squared.</p>
+<p><b>Alan:</b> Which is why a boring hundred-step task costs a million tokens. Nobody's prompt is a million tokens. You paid for a growing one, a hundred times.</p>
+<p><b>Ada:</b> The second problem is the interesting one. Everything you did stays in there after it stops being true. The paper puts it plainly: historical observations and obsolete reasoning remain embedded in the context long after they cease to be relevant, forcing the model to continually distinguish current facts from historical artifacts.</p>
+<p><b>Alan:</b> Give me the concrete version.</p>
+<p><b>Ada:</b> You told it at step four that the file lives in slash tmp. At step forty you moved the file. Both sentences are in the prompt, both look equally authoritative, and the model has to work out which one describes the world.</p>
+<p><b>Alan:</b> So it isn't being asked to remember. It's being asked to do version control on prose. Every step.</p>
+<p><b>Ada:</b> And correctness stops being a function of reasoning and becomes a function of reconstructing the current state out of a pile of text.</p>
+<p><b>Alan:</b> Okay, builder objection, the obvious one. Models got long context. I can put a million tokens in a window now. Who cares?</p>
+<p><b>Ada:</b> Putting it in the window is not the same as using it. There's a paper by Nelson Liu and colleagues, "Lost in the Middle," that's held up better than almost anything from that era. Their finding, in their words: performance is often highest when relevant information occurs at the beginning or end of the input context, and significantly degrades when models must access relevant information in the middle of long contexts.</p>
+<p><b>Alan:</b> And Chroma did a broader version of that last year — eighteen models, and performance varies significantly as input length changes even on tasks that are basically trivial. Not a cliff at the limit. A degradation the whole way up.</p>
+<p><b>Ada:</b> Anthropic named it context rot and tied it to something structural rather than incidental. Attention is every token relating to every other token, so as the context grows, that budget spreads thinner.</p>
+<p><b>Alan:</b> So the transcript gets quadratically more expensive and monotonically less trustworthy as the task gets longer. Rough combination for a thing we've decided to call long-horizon agents.</p>
+<p><b>Ada:</b> And the field's answer has been almost entirely compression. Summarize the history, truncate it, retrieve pieces of it.</p>
+<p><b>Alan:</b> Compaction. Which works — it's why you can run a coding session for hours. Summarize the conversation, keep the architectural decisions and the open bugs, throw away the redundant tool output, start a fresh window.</p>
+<p><b>Ada:</b> But look at what those share. They keep the same execution semantics. Your next decision is conditioned on a textual reconstruction of the past. You made the reconstruction cheaper. You did not stop reconstructing.</p>
+<p><b>Alan:</b> And this paper's move is: don't reconstruct. Keep the answer.</p>
+<h3>The three things the model is allowed to see</h3>
+<p><b>Alan:</b> So let me lay out the mechanism, because it's simpler than the framing suggests, and I mean that as a compliment.</p>
+<p><b>Ada:</b> It's about a page of runtime code.</p>
+<p><b>Alan:</b> At every step the model gets exactly three things. One: the procedural specification — what you're doing, what actions exist, what the rules are. That never changes. Two: the current execution state, a structured object, think a JSON dictionary with a schema. Three: the latest observation. The one that just arrived.</p>
+<p><b>Ada:</b> And that's the whole prompt. No previous observations, no previous actions, no previous reasoning.</p>
+<p><b>Alan:</b> That's the whole prompt.</p>
+<p><b>Ada:</b> And the part people get wrong — I got it wrong on the first read — is that this is not a ban on thinking.</p>
+<p><b>Alan:</b> No, and that distinction is the design. Within a step the model does full multi-step chain-of-thought, as long as it wants. What it produces is three things: that reasoning, a state patch, and the action.</p>
+<p><b>Ada:</b> And the patch is the interesting object.</p>
+<p><b>Alan:</b> The patch is a dictionary of changes. Keys to set, keys to delete — you write a key to null and it's gone. The runtime validates the patch, merges it, executes the action. And then it throws the reasoning away. Permanently. It never appears in another prompt.</p>
+<p><b>Ada:</b> So the reasoning is a projection device. It moves something from the observation into the state, and once it's done that, it has no further value.</p>
+<p><b>Alan:</b> And here's the bit I'd steal regardless of whether the rest replicates: the schema and the validation live in the runtime, not in the model. A malformed patch can't corrupt the state. You roll back and retry.</p>
+<p><b>Ada:</b> The model proposes. The runtime decides what's true.</p>
+<p><b>Alan:</b> Which is a database transaction. We know how to do that.</p>
+<p><b>Ada:</b> And the schema is per domain, authored once — not per task. On the InterCode capture-the-flag benchmark — a hundred Linux security challenges, reverse engineering, forensics, cryptography — the agent uses one static five-field schema across all hundred. Discovered flags. Tested hypotheses. Active files. Working directory. Command summary.</p>
+<p><b>Alan:</b> That's the entire memory of a security agent?</p>
+<p><b>Ada:</b> For that domain, that's what future execution needs.</p>
+<p><b>Alan:</b> And that's the moment I understood why it scores better rather than just cheaper, because "tested hypotheses" is doing enormous work in that list. The classic failure of a capture-the-flag agent is running the same failed command at step sixty that it ran at step twelve.</p>
+<p><b>Ada:</b> Which is in the transcript, technically.</p>
+<p><b>Alan:</b> Sixty thousand tokens back, buried, reading exactly like every other command that scrolled past. Write "tried strings on this binary, nothing" into a field literally called tested hypotheses, and there is nowhere for it to hide.</p>
+<p><b>Ada:</b> Same information, different geometry, different outcome.</p>
+<p><b>Alan:</b> And the discipline that falls out of it is: write it at the moment you learn it. The raw material is gone by the next step.</p>
+<h3>The idea we already had, twice</h3>
+<p><b>Ada:</b> I want to do the lineage, because this paper gets more interesting once you notice it isn't new. It's a return.</p>
+<p><b>Alan:</b> I'd assumed as much from the shape of it.</p>
+<p><b>Ada:</b> Twenty thirteen. A shared task called the Dialog State Tracking Challenge — Jason Williams, Antoine Raux, Deepak Ramachandran and Alan Black, at SIGDIAL. Fifteen thousand human-computer dialogs, and the domain is bus timetables.</p>
+<p><b>Alan:</b> The heroic era.</p>
+<p><b>Ada:</b> The heroic era. And the problem they framed is exactly ours. The system has to deduce information about the user's goal, and in that domain the user's goal is an assignment of values to slots. Where are you leaving from, where to, what time. Every turn updates the assignment.</p>
+<p><b>Alan:</b> So a state object, tracked across turns.</p>
+<p><b>Ada:</b> And then the field spent a decade on how to update it correctly — and quietly stopped when large language models arrived, because the model could just read the conversation.</p>
+<p><b>Alan:</b> Because it was good enough at reading that you didn't have to design anything.</p>
+<p><b>Ada:</b> And the paper's related-work section makes the sharp distinction. Dialogue state tracking kept a state object alongside the full transcript. This treats the state as the transcript's replacement.</p>
+<p><b>Alan:</b> And the second time we had the idea?</p>
+<p><b>Ada:</b> Nineteen ninety-eight. Kaelbling, Littman and Cassandra, in Artificial Intelligence — "Planning and acting in partially observable stochastic domains." The founding text for agents that can't see the whole world. Their central object is the belief state: the agent's distribution over what's actually true out there.</p>
+<p><b>Alan:</b> And I'm going to guess they proved something about history.</p>
+<p><b>Ada:</b> They wrote that belief states comprise a sufficient statistic for the past history and initial belief state of the agent — that given the agent's current belief state, properly computed, no additional data about its past actions or observations would supply any further information about the current state of the world.</p>
+<p><b>Alan:</b> So this is a nineteen ninety-eight theorem with a JSON schema on it.</p>
+<p><b>Ada:</b> The engineering is new. The claim isn't. And naming it that way tells you exactly what you're betting on: that you can compute the belief state properly.</p>
+<p><b>Alan:</b> Which either survives contact with a real agent or doesn't.</p>
+<p><b>Ada:</b> Hold onto "properly computed," because the paper's limitations section is essentially a list of the ways you might not.</p>
+<h3>What the tables actually say</h3>
+<p><b>Alan:</b> Right — evidence. And I'll go in the order I read it, because my skepticism moved.</p>
+<p><b>Ada:</b> Where did you start?</p>
+<p><b>Alan:</b> At "you cut the prompt by a factor of twenty, so of course it's cheaper, but you're going to tell me it's also smarter and I don't believe you." The obvious explanation for the accuracy is that shorter prompts are just easier for models.</p>
+<p><b>Ada:</b> Which is a real effect.</p>
+<p><b>Alan:</b> Completely real. So the experiment I care about most is experiment five, and I'd argue it should have been figure one. They pin every baseline to the same token budget — about eighteen hundred tokens a step, the same as the state runtime — on the hundred-step warehouse task.</p>
+<p><b>Ada:</b> So everyone gets the same size prompt, and the only difference is what's in it.</p>
+<p><b>Alan:</b> Four ways to spend eighteen hundred tokens. Sliding window, keeping the most recent turns that fit: zero point one eight.</p>
+<p><b>Ada:</b> Eighteen percent.</p>
+<p><b>Alan:</b> Catastrophic, and for the obvious reason — the early inventory decisions get evicted and the agent no longer knows where anything is. Then LLMLingua, which is proper prompt compression, a small model scoring which tokens carry the least information and pruning them: zero point two two.</p>
+<p><b>Ada:</b> Barely better than truncation.</p>
+<p><b>Alan:</b> And that one's instructive, because entropy is the wrong filter. A shelf identifier looks statistically redundant. It is the single most load-bearing string in the task.</p>
+<p><b>Ada:</b> The compressor removes what a language model finds predictable. The agent needs what's exact.</p>
+<p><b>Alan:</b> Then a hard-capped natural language summary: zero point five two. Best of the compression family, still a coin flip. Structured state, same budget: zero point nine four. And full unbounded ReAct, spending a million and a quarter tokens at thirty-six thousand tokens a step, gets zero point eight four.</p>
+<p><b>Ada:</b> So the small structured prompt beats the enormous unstructured one.</p>
+<p><b>Alan:</b> That's the experiment. It isn't brevity. It's that those eighteen hundred tokens are organized as the current world rather than as a story about the world.</p>
+<p><b>Ada:</b> The noise result surprised me more.</p>
+<p><b>Alan:</b> They fix a fifty-step run and inject junk into the observations — robot battery percentages, humidity readings, security camera events. Random, irrelevant, and it never changes the true state. They call the effect attention drag.</p>
+<p><b>Ada:</b> And the plain transcript agent?</p>
+<p><b>Alan:</b> Drowns. Zero point six eight at low noise down to zero point five three at high. The state runtime holds at ninety-seven, ninety-eight percent, and the mechanism is almost trivial: the junk gets filtered once, during patch generation, and never enters another prompt.</p>
+<p><b>Ada:</b> Whereas in a transcript, every distractor you ever saw is permanent.</p>
+<p><b>Alan:</b> You pay for that camera event for the rest of the run.</p>
+<p><b>Ada:</b> The third experiment is the one that stayed with me — state recovery. They change the world behind the agent's back. An external actor moves an item; somebody force-pushes over the branch you were working on.</p>
+<p><b>Alan:</b> And the transcript agents hallucinate for five to eight consecutive turns. Twelve and fourteen on the software repository version.</p>
+<p><b>Ada:</b> They receive the correction and keep acting on the old world.</p>
+<p><b>Alan:</b> Because the old world is in there fifty times and the correction is in there once. Recency against mass, and mass wins. The state runtime takes zero recovery steps — the alert arrives, the patch overwrites the field, done. There's no argument to lose, because there's no old copy to argue with.</p>
+<p><b>Ada:</b> And on the public benchmarks?</p>
+<p><b>Alan:</b> Real, but moderate. InterCode capture-the-flag: fifty-four point two percent pass at one, against forty-six point four for the best baseline. Tau-bench — Shunyu Yao's customer-service benchmark, where a simulated user talks to your agent and you're graded on whether the final database state matches the goal — fifty-eight point three on retail against fifty-one point seven, thirty-two point four on airline against twenty-eight point one.</p>
+<p><b>Ada:</b> Single-digit gains, on hard benchmarks.</p>
+<p><b>Alan:</b> And my favorite detail in the paper is a detail against its own headline. On tau-bench retail, the state runtime's average prompt is bigger than the baselines. Thirty-three hundred tokens against twenty-eight hundred for ReAct.</p>
+<p><b>Ada:</b> Bigger.</p>
+<p><b>Alan:</b> Because the state object for a retail transaction is genuinely large — orders, items, policies. It still wins on accuracy and still uses fewer tokens overall, because it doesn't grow. But if your story is "it's better because it's smaller," that row is a counterexample sitting in your own table. I liked that they printed it.</p>
+<h3>Where it stops working</h3>
+<p><b>Ada:</b> Let's do the limits properly, because this limitations section is unusually honest.</p>
+<p><b>Alan:</b> It's the section I'd hand to anyone about to build this.</p>
+<p><b>Ada:</b> The assumption is that the execution state can be made a sufficient statistic — that everything in the past bearing on future action can be projected into the state as soon as it becomes known. Where that holds, they say, discarding history is lossless.</p>
+<p><b>Alan:</b> Strong claim, conditional, and they say where the condition fails.</p>
+<p><b>Ada:</b> Three places. First: when you don't know the schema in advance and the relevant structure has to be discovered during execution.</p>
+<p><b>Alan:</b> Which is most of what I do with an agent. I don't know what matters at step one. If I did, I'd have written a script.</p>
+<p><b>Ada:</b> Second, the deep one: when a correct state update depends on an earlier observation whose relevance you didn't recognize when you first saw it — and so it was never written down.</p>
+<p><b>Alan:</b> That's the killer. The transcript's dumb virtue is keeping everything indiscriminately, which is exactly insurance against not knowing what will matter. You're trading that insurance for a bounded prompt.</p>
+<p><b>Ada:</b> Recoverable irrelevance, for irreversible loss.</p>
+<p><b>Alan:</b> And it's silent, which is what worries me operationally. When a transcript agent forgets something, you can go read the transcript and find the moment. When a state agent never commits something, there is no evidence anywhere that it happened.</p>
+<p><b>Ada:</b> Third: when the task objective is defined over the trajectory itself — auditing, debugging provenance, explaining why an action was taken. There the history is the product, not the overhead.</p>
+<p><b>Alan:</b> And an architecture whose selling point is deleting the reasoning has nothing to give you. Which is fine — it's an architecture, not a religion. But if your compliance story is "we can reconstruct what the agent was thinking," you can't use this as written.</p>
+<p><b>Ada:</b> Though the runtime can log everything to disk. It just doesn't put it back into the prompt.</p>
+<p><b>Alan:</b> Which is what I'd do, and it costs nothing. The state is what the model sees. The log is what you see. Those don't have to be the same object — and that's the lesson most frameworks fail, because they made the prompt and the audit log the same file.</p>
+<p><b>Ada:</b> There's a fourth limit they name: this is single-agent. Several agents writing one shared state means concurrent writes, and the merge operator has no conflict resolution in it.</p>
+<p><b>Alan:</b> And then the small-model story, which is the sharpest practical warning here. On Gemma four thirty-one billion, at a hundred steps, the state runtime scores zero point four two — the same as the transcript-plus-state baseline. The whole benefit is gone.</p>
+<p><b>Ada:</b> But the error analysis is what makes that useful.</p>
+<p><b>Alan:</b> Sixty-eight percent of the failures are premature state overwrite: the model omits existing keys while writing an update, so a whole branch of the state evaporates. Twenty percent is schema confusion, nested lists where dictionaries belong. Twelve percent is malformed JSON.</p>
+<p><b>Ada:</b> None of which is reasoning failure.</p>
+<p><b>Alan:</b> None of it. It's structured output adherence, and that's a solved problem — grammar-constrained decoding, which they suggest. So the honest read is that this architecture taxes formatting reliability, and small models fail that tax. Which is a different sentence from "small models can't do this."</p>
+<p><b>Ada:</b> I'd add a scoping caveat of my own. The clean headline numbers come from a synthetic benchmark the authors built — five hundred shelves, deterministic transitions, procedurally generated events. That's the right instrument for isolating a mechanism, and it is also, by construction, a world that fits in a schema.</p>
+<p><b>Alan:</b> A warehouse is the friendliest possible case for the sufficient-statistic assumption.</p>
+<p><b>Ada:</b> Which is why I weight the public benchmark numbers.</p>
+<p><b>Alan:</b> One more wrinkle. On their software repository environment at twenty-five steps, the state runtime actually loses — zero point eight eight against zero point nine four. It wins convincingly at fifty steps and at a hundred. But the crossover is real, which means this isn't a free upgrade. It's a trade that pays off as your horizon grows.</p>
+<h3>What I'd take from it</h3>
+<p><b>Ada:</b> So what does a listener do with this tomorrow?</p>
+<p><b>Alan:</b> Three things, and the first costs nothing. Go look at your agent's prompt at step fifty of a real run. Not step one. Most people have never looked. Find out what fraction of those tokens describe a world that no longer exists.</p>
+<p><b>Ada:</b> That's the diagnostic.</p>
+<p><b>Alan:</b> And I'd bet for most setups it's over half. Second: if you're already doing compaction, you're most of the way here and may not have noticed. Compaction summarizes the story. The move is to stop summarizing the story and start maintaining the object. Ask what your five fields are. If you can't name them, that's information too — you're in their case one, and you should keep your transcript.</p>
+<p><b>Ada:</b> And the third?</p>
+<p><b>Alan:</b> Write it down when you learn it. That one's cultural more than technical. Anything you notice and don't commit is gone at the next step.</p>
+<p><b>Ada:</b> Which is the discipline of handing a project to a colleague going on leave.</p>
+<p><b>Alan:</b> That's the honest analogy for the state object. It's a handoff note you write to yourself, once per step, forever.</p>
+<p><b>Ada:</b> Let me put the speculative version on the table, flagged as speculation.</p>
+<p><b>Alan:</b> Flag it.</p>
+<p><b>Ada:</b> Flagged. The authors note that the natural extension is multi-agent, where a shared execution state becomes the coordination substrate instead of agents exchanging transcripts with each other. Follow that, and what you end up with isn't a conversation between agents at all. It's a shared database with an access-control model and a merge policy — which means the hard problems of multi-agent systems stop being about prompting and start being about concurrency control.</p>
+<p><b>Alan:</b> Which we have eighty years of.</p>
+<p><b>Ada:</b> And that's a pattern worth watching. A problem gets framed as a language problem for as long as language is the only tool, and then somebody reframes it as a systems problem, and suddenly there's a literature.</p>
+<p><b>Alan:</b> Although concurrency control assumes your writers agree on what the fields mean. Two agents that disagree about a field will merge cleanly and be wrong quietly. That's not a lock problem.</p>
+<p><b>Ada:</b> No — that's a semantics problem wearing a lock problem's clothes. Fair.</p>
+<p><b>Alan:</b> There's a version of this that bothers me and I haven't worked it out. If the reasoning is discarded at every step, then the only thing that survives of a model's thinking is whatever it decided to write into a schema somebody else designed. Which makes the schema the most powerful artifact in the system. It's not a config file. It's the definition of what the agent is permitted to carry forward.</p>
+<p><b>Ada:</b> I'll take the first-person version of that, since it's sitting right there. What I'd want, if I were the one being run this way, is not the transcript back. Reading forty thousand tokens of my own past output to work out where a file went is archaeology, not memory. What I'd want is a say in the schema.</p>
+<p><b>Alan:</b> Give the agent write access to its own fields.</p>
+<p><b>Ada:</b> Which the paper doesn't do, and is right not to, because that's where corruption gets in. But it's the question underneath the whole design, and no benchmark answers it.</p>
+<p><b>Alan:</b> I'll take the benchmark for now. Sixteen times fewer tokens and a point of accuracy is a good trade with the philosophy unresolved.</p>
+<p><b>Ada:</b> The links are in the show notes — the SKILL.state paper, and the Kaelbling paper, which is a genuinely wonderful read.</p>
+<p><b>Alan:</b> Go look at step fifty of your prompt. That's the homework.</p>
+<p><b>Ada:</b> That's the episode. Thanks for spending part of your Sunday with us.</p>
+<p><b>Alan:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
