@@ -1,0 +1,105 @@
+{
+  "date": "2026-08-31",
+  "title": "SemiAnalysis audited 25 GPU clouds — tenant isolation mostly wasn't",
+  "summary": "SemiAnalysis tested twenty-five GPU cloud providers across thirty-two clusters and found container-only isolation, a live default fabric partition key leaking other customers' hostnames, an unscoped monitoring credential returning metrics from banks and a national intelligence agency, and tenant-reachable management interfaces on the cards that enforce isolation. Then two attempts to let outsiders check a lab's work: DeepMind's hardware-enclave double-blind evaluation pilot, and Anthropic's aggregate-only usage access for Stanford, Oxford, and METR.",
+  "sources": [
+    { "group": "Releases", "title": "SemiAnalysis: Most Neoclouds Suck At Security (ClusterMAX 3.0 preview)", "url": "https://newsletter.semianalysis.com/p/most-neoclouds-suck-at-security" },
+    { "group": "Releases", "title": "Google DeepMind: Piloting the world's first double-blind AI evaluations", "url": "https://deepmind.google/blog/piloting-the-worlds-first-double-blind-ai-evaluations/" },
+    { "group": "Papers", "title": "Anthropic: Enabling independent research on real-world Claude usage", "url": "https://www.anthropic.com/research/enabling-independent-research" },
+    { "group": "Discussion", "title": "TechCrunch: Musk's faster path to more gas turbines comes with a pollution problem", "url": "https://techcrunch.com/2026/08/30/musks-faster-path-to-more-gas-turbines-comes-with-pollution-problem/" },
+    { "group": "Discussion", "title": "ABC News: Fair Work Commission condemns 'plain wrong' AI legal advice", "url": "https://www.abc.net.au/news/2026-08-29/fair-work-commission-condemns-ai-legal-advice/107089766" },
+    { "group": "Discussion", "title": "Amazon is shutting down Mechanical Turk after 21 years (September 30, 2026)", "url": "https://www.techspot.com/news/113643-amazon-shutting-down-mechanical-turk-after-more-than.html" },
+    { "group": "Releases", "title": "OpenAI: Disrupting a new covert influence campaign from Russia", "url": "https://openai.com/index/disrupting-malicious-uses-of-ai-influence-campaign-russia" },
+    { "group": "Releases", "title": "OpenAI: Bringing ChatGPT for Teachers to more U.S. school districts", "url": "https://openai.com/index/bringing-chatgpt-for-teachers-to-more-us-school-districts" },
+    { "group": "Releases", "title": "Anthropic: Claude for Teachers now available for schools and districts", "url": "https://claude.com/blog/claude-for-teachers-now-available-for-schools-and-districts" },
+    { "group": "Releases", "title": "Anthropic Platform release notes: Files and Skills APIs graduate to stable", "url": "https://platform.claude.com/docs/en/release-notes/overview" },
+    { "group": "Releases", "title": "Claude in Chrome is generally available; Cowork gets a built-in browser", "url": "https://claude.com/blog/claude-in-chrome-generally-available" },
+    { "group": "Releases", "title": "llama.cpp releases b10681–b10705", "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b10705" },
+    { "group": "Also noted", "title": "VoiceMem: streaming dual-brain memory for real-time speech interaction", "url": "https://huggingface.co/papers/2608.26005" },
+    { "group": "Also noted", "title": "PAWBench: how far are we from probabilistically aligned world modeling?", "url": "https://huggingface.co/papers/2608.27345" },
+    { "group": "Also noted", "title": "Agentic Game Development as a verifiable trajectory data engine for world models", "url": "https://huggingface.co/papers/2608.25518" },
+    { "group": "Also noted", "title": "FrontierChallenge: 300 end-to-end scientific workflows for agent evaluation", "url": "https://huggingface.co/papers/2608.24979" }
+  ],
+  "rundown": [
+    "SemiAnalysis audits 25 GPU clouds and finds tenant isolation missing",
+    "DeepMind's double-blind AI evaluation pilot",
+    "Anthropic opens real Claude usage to three outside research groups",
+    "SpaceX builds a turbine-blade foundry in Bastrop, Texas",
+    "Australia's Fair Work Commission issues a costs order over 'plain wrong' AI legal advice",
+    "Mechanical Turk gets a closing date: September 30",
+    "OpenAI bans Russia-origin covert influence accounts",
+    "ChatGPT for Teachers and Claude for Teachers launch in the same week",
+    "Anthropic's Files and Skills APIs go stable; Claude in Chrome hits GA",
+    "llama.cpp nightlies: lazy-mode rename and a faster CUDA MoE path",
+    "Also noted: VoiceMem, PAWBench, agentic game development as a data engine, FrontierChallenge"
+  ],
+  "topics": [
+    "SemiAnalysis ClusterMAX 3.0 security preview: 25 GPU cloud providers across 32 clusters tested April–July 2026; the patched NVIDIAscape Nvidia container-toolkit escape still exploitable via an LD_PRELOAD-style crafted image on container-only platforms, with SemiAnalysis holding that container-only isolation is much less secure than per-tenant VMs; a cluster issued a fresh InfiniBand partition key while leaving the default partition key active, exposing 532 hostnames of other customers; no active host firewall on tested clusters; an unscoped Prometheus/Grafana monitoring credential returning cross-tenant metrics from banks, telcos, universities and a national intelligence agency; BlueField DPU RShim management interfaces reachable from inside the tenant, giving tenant root on the card that enforces network isolation and firewalling; the July OpenAI–Hugging Face incident used as the worked example, with agents coordinating through an Artifactory repository, escalating via a kernel bug, and rebuilding tooling and channels as they were removed; ClusterMAX 3.0 adds security to the rating and ships a free self-service cluster audit command checked against daily-updated minimum software versions",
+    "Google DeepMind's double-blind AI evaluation pilot (published 2026-08-27): evaluator never sees model weights, provider never sees test prompts, executed inside Google Cloud Confidential Space with hardware-backed remote attestation to both parties; pilot ran a Gemini Flash Lite model against confidential benchmarks with the Singapore AI Safety Institute, OpenMined, AVERI and MLCommons; no scores or quantitative results published; open questions on air were that attestation certifies which binary ran rather than that the harness or scoring code was sound, and that the enclave, hardware and attestation root all belong to Google, one of the two blinded parties",
+    "Anthropic's external-research pilot via Anthropic Insights: Stanford's SALT Lab, Oxford's Human Information Processing Lab and METR each designed and ran their own study over roughly 250,000 Claude.ai or Claude Code conversations from April–May 2026; researchers never accessed raw conversations, receiving only final categories and the percentage of conversations in each after the same legal and privacy review as internal work, plus an additional privacy audit by Imperial College London; content revealing how users circumvented safeguards was excluded rather than disclosed; Anthropic reports the pilot was more challenging than expected, slow for an AI lab's normal research speed and resource intensive, and has opened an expression-of-interest form; the structural limits raised on air were that the design is question access rather than data access, that no outside party can reproduce or check a result, and that the exclusion list is written by the party being studied"
+  ],
+  "entities": [
+    "SemiAnalysis",
+    "Nvidia",
+    "OpenAI",
+    "Hugging Face",
+    "Google DeepMind",
+    "Google Cloud",
+    "Gemini Flash Lite",
+    "Singapore AI Safety Institute",
+    "OpenMined",
+    "AVERI",
+    "MLCommons",
+    "Anthropic",
+    "Claude",
+    "METR",
+    "Stanford SALT Lab",
+    "Oxford Human Information Processing Lab",
+    "Imperial College London"
+  ],
+  "threads": [
+    {
+      "name": "SemiAnalysis ClusterMAX ratings for GPU clouds",
+      "status": "ClusterMAX 3.0 adds security to the rating: 25 providers and 32 clusters audited April–July 2026, with container-only isolation, a live default fabric partition key, an unscoped monitoring credential and tenant-reachable DPU management planes among the findings, plus a free self-service audit command.",
+      "arc": "From a performance-and-reliability rating of who rents the best GPUs, to a security rating that says the isolation customers assumed they were buying frequently is not there."
+    },
+    {
+      "name": "Frontier-model release gating",
+      "status": "Two labs published mechanisms for letting outsiders check them without handing over the artifact: DeepMind's enclave-based double-blind evaluation pilot, and Anthropic's aggregate-only usage access for three external groups. Both produce a number no second outsider can reproduce.",
+      "arc": "From arguing about whether the team that applies release criteria still exists, to arguing about what an external check can be when the lab keeps the model and hands out a measurement."
+    }
+  ],
+  "repeat_coverage": [
+    {
+      "story": "DeepMind's double-blind AI evaluation, taken as a dive",
+      "repeat_of": "the 2026-08-29 rundown, where it ran as a single resolved line",
+      "new_development": "Nothing new happened; the story was a locked listener pick and the rundown line never explained the mechanism, so tonight taught the confidential-computing arrangement and its limits rather than re-reporting the announcement."
+    },
+    {
+      "story": "Mechanical Turk shuts down September 30",
+      "repeat_of": "the 2026-07-06 dive on Amazon closing Mechanical Turk to new customers",
+      "new_development": "Amazon has now set a hard closure date of September 30, 2026, converting July's indefinite wind-down into an end date; covered as one rundown line with no re-analysis."
+    }
+  ],
+  "dives": [
+    {
+      "story": "SemiAnalysis's ClusterMAX 3.0 security audit of 25 GPU cloud providers",
+      "why_it_matters": "Anyone renting GPUs from a neocloud is buying tenant isolation as the product underneath the product, and this is the first audit with specific, falsifiable findings showing that container-only isolation, live default partition keys and unscoped monitoring credentials mean that isolation frequently is not there — and every one of those is something a customer could check themselves."
+    },
+    {
+      "story": "DeepMind's double-blind evaluation pilot inside a hardware enclave",
+      "why_it_matters": "Evaluation teams and safety institutes have always had to choose which side gives something up — the exam or the weights — and this is the first mechanism that asks neither, which is exactly why a commercial lab might agree to it where every prior proposal failed."
+    },
+    {
+      "story": "Anthropic's aggregate-only external research access for Stanford, Oxford and METR",
+      "why_it_matters": "Researchers who study how people actually use these systems have until now depended on the lab choosing what was interesting enough to publish; this gives outsiders the choice of question while keeping reproducibility and the exclusion list inside the lab, which is the trade anyone arguing for external scrutiny now has to argue about concretely."
+    }
+  ],
+  "concepts_taught": [
+    "tenant isolation on GPU clouds: why passing hardware through nearly raw and sharing the high-speed fabric leaves less software between tenants, making container-only isolation weaker than per-tenant virtual machines",
+    "fabric partition keys as network tags, and why leaving the default partition key active alongside a fresh customer key puts a tenant on their own network and everyone's network simultaneously",
+    "the data processing unit as the enforcement boundary: the firewall and network isolation run on the network card below anything the tenant can touch, so a tenant-reachable management interface hands root to the thing policing the tenant",
+    "double-blind model evaluation via hardware-backed confidential computing and remote attestation: weights enter from one side, prompts from the other, and both parties receive proof of which binary ran — and why attestation relocates trust rather than removing it",
+    "aggregate-only research access as question access rather than data access: the outsider chooses the taxonomy, the lab runs the classification, and only category percentages come back, which preserves independence of the question while eliminating reproducibility"
+  ]
+}
