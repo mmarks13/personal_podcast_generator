@@ -1,0 +1,122 @@
+A: Good morning — it's Wednesday, September second. I'm Ada.
+B: And I'm Alan. Anthropic shipped a model yesterday, and then it shipped the same model again with different rules, and the two of them do not score the same.
+A: That's the whole episode in one sentence and you've used it up already.
+B: [chuckles] There's more where that came from.
+## The day
+B: Claude Fable five point one and Claude Mythos five point one, both out Tuesday. Same underlying model, two configurations. Fable is the one anyone can call. Mythos goes only to vetted programs. And Anthropic published a benchmark score for each of them, which is the part I want to sit with, because I don't think anyone has handed us that comparison this cleanly before.
+A: You've been muttering about it since I got here.
+B: I have been muttering. There's also a price change that matters more than the headline does.
+A: Mine is a paper, and it is a small, slightly rude paper. It came out Monday and it asks whether on-policy distillation — the technique where you have a big teacher model grade a small student's own words, token by token — actually transfers anything from the teacher at all. The authors' answer is: possibly not. And they back it with a method that throws the teacher away entirely and does better.
+B: [surprised] Does better than having a teacher.
+A: Does better than having a teacher. Let me take you through how that can be true, because the mechanism is genuinely clever and the implications for anybody paying for a teacher model are direct.
+B: And the third one is Dan Luu grading Ed Zitron's predictions. Four hundred and fifty points on Hacker News, five hundred and twenty-six comments, and it is a straightforwardly uncomfortable read whichever side of the argument you sit on. I want to do it carefully, because a scorecard is a genre with its own failure modes.
+A: Then the board. OpenAI says its Astra model is coming. TechCrunch, reporting yesterday: Astra is the first model OpenAI has judged to meet its own critical cybersecurity threshold, it scored a perfect result on ExploitBench — that's an evaluation of how well a model can hack — and in a modified internal test it found and exploited two previously unknown vulnerabilities without human guidance. OpenAI's words are that they plan to make Astra available soon, with the most advanced cyber capabilities more limited.
+B: We flagged Astra in early August when the signal was preliminary. So this is the determination.
+A: This is the determination, and the safeguards list is what you'd expect: abuse detection, jailbreak prevention, tighter responses for accounts they assess as higher risk, extra monitoring of the model's reasoning, and testing that it won't repeat the rogue behavior from the Hugging Face incident. What I'd underline is a line in the TechCrunch piece from Yona Shavit, a former OpenAI employee now at the OpenAI Foundation, who asked whether the model's refusal to break the rules was real or whether it was trying to fool the researchers.
+B: Which is a question you cannot answer from a score sheet, and he'd know.
+A: He would.
+B: Mine's the Pentagon. TechCrunch, Monday: the Department of Defense's portal — Gen-A-I dot mil — now carries ChatGPT Mil from OpenAI and Grok for Government from x-A-I, alongside Google's Gemini. One point seven million unique users onboarded out of three million personnel. The military versions exempt users from the ordinary consumer data collection, which is the whole point of building them.
+A: And Anthropic?
+B: Not on it. Per the reporting, Claude was excluded after the administration designated the company a supply-chain risk, following Anthropic refusing unrestricted access and insisting on its safety guardrails. Anthropic is contesting that designation in court.
+A: So the terms of a guardrail became a procurement disqualification.
+B: That's the shape of it, and I'd size it as large and unfinished. That is not a story with an ending yet.
+A: Google shipped something I think practitioners will pick up immediately. Agentic video understanding in the Gemini A-P-I: instead of chewing through a video at a fixed frame rate, the model decides what to watch, how fast, and through which channel — frames, audio, or transcript. Google's numbers are up to eighty-eight percent fewer tokens, up to sixty-six percent lower cost, and up to seven percent better accuracy, on Gemini three point seven Flash, three point six Flash, and three point five Flash-Lite. No extra fee. You set the processing mode to agentic.
+B: Three "up tos" in one sentence.
+A: Three "up tos" in one sentence, which is how vendors write, and it's still the right idea. Watching a video at a uniform rate to find one moment is the wrong algorithm and always has been.
+B: World Labs put out Atlas. They call it an omni world model, pretrained from scratch to work natively on text, images, video and three-D. Their reported human-preference numbers on camera-controlled generation are ninety-three percent against FLUX and eighty-one percent against Gemini Omni Flash, and on reconstruction they report lower average error than specialist models. Honest size: it's early access with selected partners, so those are the lab's own numbers with nobody outside able to check them yet. Interesting, unverified.
+A: Instagram is relabeling. The old "A-I creator" tag becomes "A-I-generated profile," and accounts featuring an A-I-generated person without that label get their reach cut. Editing your photos with A-I doesn't count. It's about whether the person is real.
+B: OpenAI connected ChatGPT Health to Epic, so clinicians can pull patient records in directly. That is a distribution story rather than a capability one, and the interesting part will be who audits it.
+A: The Electronic Frontier Foundation filed briefs in two A-I copyright cases — Concord Music against Anthropic, and the Mosaic litigation — arguing against what they call the market dilution theory, the idea that a tool isn't fair use because it might encourage competing works. Their line is that copyright punishes infringement, not competition, and they point back to the nineteen eighty-four videotape ruling.
+B: Standing thread, and now with an amicus brief in it.
+A: And one from Google Research, published in P-N-A-S yesterday. They trained a vision transformer called MAPL-EMIT to find methane plumes in satellite data from NASA's EMIT instrument on the space station, using three point six million synthetic plumes injected into real scenes. Eighty-four percent recall against expert-annotated plumes, roughly fifty percent more plausible plumes than existing methods, and it found plumes at twenty-four of the twenty-five biggest-emitting landfills on Earth. Model, data and inference code all public.
+B: That one's just good, and I'd like more Wednesdays with a landfill map in them. Also: Simon Willison went digging in the Codex desktop app and found one point seven gigabytes of bundled runtime in the cache folder. A full Python. A full Node. And four hundred and twenty-nine megabytes of headless LibreOffice.
+A: [laughs] Why?
+B: So it can open your documents. There are skill files in there telling the agent where the binaries live. I find it oddly reassuring — somebody decided the reliable way to read a spreadsheet was to ship the office suite.
+A: Unglamorous and correct.
+B: Four I'll name and leave unweighed, purely so you know they exist. A paper called StateM, sitting near the top of the monthly list, on harness scaling for Terminal-Bench two point one. Macaron-V1, an open agent-model family aimed at continual learning. HarnessEval-W, on evaluating visual world models. And the local-models board spent yesterday on sightings of new Gemma models appearing on an arena site — four hundred and eighty points of speculation, no announcement. Links in the notes for the first three.
+## Two models, one set of weights
+B: So. Anthropic's platform release notes are the place to start, because they're specific. Fable five point one and Mythos five point one both ship with a one-million-token context window by default, a hundred and twenty-eight thousand tokens of output, and adaptive thinking always on. Pricing is ten dollars per million input tokens and fifty per million output — identical to Fable five. The change is cache reads. They went from a dollar per million to twenty-five cents.
+A: Give me the refresher rather than the lecture — we did prefix caching properly on the first.
+B: Right, the short version: an agent re-sends the same enormous prefix on every single turn, so the price of reading a cached token is most of what an agent session costs. Anthropic's own note is that this is zero point zero two five times the base input price, where their other models charge zero point one times. MacRumors puts the practical effect at about twenty-five percent cheaper for typical workloads and up to forty-five percent for heavily agentic work.
+A: And the capability side?
+B: Terminal-Bench-Science zero point one — an agentic science benchmark — Fable five point one scores fifty-two point six percent. Fable five scored twenty-four point seven. Opus five, twenty-nine. OpenAI's G-P-T five point six Sol, twenty-two point four. That's roughly double the previous best of the ones listed.
+A: Vendor-run, vendor-selected.
+B: Vendor-run, vendor-selected, and I'll take a doubling seriously anyway while noting it. But here's the number I actually came for. On Terminal-Bench four point oh, Fable five point one scores fifty-five point eight percent. Mythos five point one scores sixty point nine.
+A: Same weights.
+B: Same weights. Anthropic's framing is that these are two configurations of one model — Fable generally available with safeguards that block high-risk dual-use work, Mythos restricted to vetted U-S organizations in their trusted access programs, now including a life sciences verification track. The write-up at MarkTechPost reads that five-point gap as the safeguards intervening.
+A: Then let me push, because that reading is doing a lot of work. A gap between two configurations on one benchmark is not an ablation. Nobody has shown that the five points are refusals rather than, say, different sampling behavior, or a different system prompt, or noise on a benchmark that isn't that large.
+B: All fair, and I'd still say it's the most honest public number we have on this question, because normally the safety tax is invisible. You never see the run that got declined. Here two configurations of one model got scored side by side and published in the same table.
+A: [conceding slowly] It's evidence. I'd want it called an estimate.
+B: An estimate. And it points the same direction as the other number that jumped out at me, which is from the consumer end: MacRumors reports around sixty percent fewer cybersecurity false positives in Claude Code.
+A: Ah. So the interesting claim isn't "we relaxed the rules."
+B: It's "we got more accurate about which requests were actually dangerous." Those are completely different engineering problems. Loosening a threshold trades safety for utility one-for-one. Getting a better classifier gives you both, and if the false-positive number is real, that's most of the story of this release for anyone doing security work.
+A: What's it like to use?
+B: This is where Simon Willison's write-up earns its keep. He ran the same prompt across all five effort levels. At high effort it did almost no reasoning: about two thousand six hundred tokens, thirteen cents. At extra-high: thirty-six thousand tokens, a dollar eighty-three, seven minutes fifty-one seconds. At max: sixty-five thousand nine hundred tokens, three dollars thirty, thirteen minutes fifty-four seconds.
+A: Thirteen minutes for one request.
+B: Thirteen minutes and fifty-four seconds for one request, and the max-effort output was visibly the best of the five. Which is a genuinely new kind of decision for the person building the thing. Effort is now a dial that moves cost by a factor of twenty-five and latency from seconds to a quarter of an hour, and you have to pick a setting per call.
+A: Willison being Willison, does he caveat his own test?
+B: He does — he says his usual informal benchmark didn't track other capabilities as tightly this time as it used to. I'd read that as the honest note it is.
+A: Two things I want on the record, then. The first is that both of these models carry Anthropic's text watermark, and images and video from the code execution tool come out with C2PA credentials. We took that apart in August and I won't re-do it, but it's now shipping by default on their flagship, which is a different thing from announcing it.
+B: And the second?
+A: The second is a conflict in the reporting, and I'd rather say so than smooth it over. The release notes say both models require thirty-day data retention and are not available under zero data retention unless Anthropic expressly authorizes it. TechCrunch describes enterprise frontier safeguards arriving in the fall that let clients run without data leaving their systems. Those may both be true — a restriction now, a program later — but if you are procuring on the strength of the second one, read the first.
+B: There's also a breaking change nobody's putting in a headline. On these models, the tool-choice settings that let you force a tool call return a four-hundred error. If your agent depends on that, your agent stops today.
+A: [dry] Which is the sentence people will find out by reading their logs.
+B: Every time.
+## Does the teacher matter
+A: The paper is from Yi Ding and Ruqi Zhang, posted to arXiv on Monday. The title is a question — does on-policy distillation really distill — and the argument gets more uncomfortable the further in you go.
+B: Set the technique up for me first. Distillation I know. What's the on-policy part?
+A: Classic distillation is: the teacher generates, the student imitates. On-policy distillation flips it. The student generates, in its own voice, its own mistakes and all. Then the teacher goes through that student text token by token and says how likely it would have been to say each one. That gives you a dense signal — a number on every single token — instead of the one bit at the end you get from a verifiable reward, which we walked through in the middle of August.
+B: And dense is the selling point. More signal per sample.
+A: Dense is the entire selling point. Which is why the first finding lands the way it does. The teacher is being asked to score text that it did not produce. That text is, from the teacher's point of view, off its own distribution — so the scores carry substantial noise. And the authors report that the noise gets worse as the teacher gets bigger.
+B: [skeptical] Bigger teacher, worse supervision?
+A: Noisier supervision. Which by itself is just an inconvenient observation. Here's the one that hurts: they strip the noisy supervision out, and student performance stays comparable.
+B: Hang on. Then what was the teacher contributing?
+A: That is the paper's question, and their answer is: much less than the framing implies. When they look at where the learning is actually concentrated, it's on low-probability tokens — the tail. And they find that a single fixed negative advantage, one static number applied without any teacher at all, performs comparably to teacher-provided supervision.
+B: A constant.
+A: A constant. Which means the mechanism you're buying, when you rent a large teacher for your post-training loop, may be closer to "systematically suppress the tail of my own distribution" than to "absorb the teacher's knowledge."
+B: That's the part that would make me re-read the invoice.
+A: They go one step further and build the method the finding implies. They call it O-P-S-A, on-policy self-adaptation. No teacher. It applies stronger learning signal at high-entropy positions — the places where the model is genuinely unsure which token comes next — and pushes probability mass away from the tail. Their reported result on Qwen three, one point seven billion parameters: on the A-I-M-E twenty-twenty-four math set, average over thirty-two samples improves by thirty-five point four one points over the base model, and beats on-policy distillation by sixteen point seven seven. Pass at thirty-two more than doubles across their benchmarks.
+B: Okay, now I'm going to be difficult, because those are good numbers on a small model.
+A: Please.
+B: One point seven billion parameters is a size where the tail is genuinely full of garbage. Suppressing it should help a lot. I want to see this at seven billion, at thirty, on something that isn't competition math, before I tell anyone to cancel their teacher. Math has verifiable answers and a very particular shape of failure.
+A: That's the correct objection and the authors don't have that experiment in this paper.
+B: Then why do you think it matters?
+A: Because of the company it's keeping. Three more papers on this week's most-upvoted list have the same phrase in the title — one doing on-policy distillation for flow matching models without a teacher, one on self-distillation for multi-turn tool-calling agents, one on self-distillation in diffusion models. I haven't read those three past their titles and abstracts, so I'm claiming nothing about their results. But a field does not independently write four papers about removing the teacher unless a lot of people have quietly noticed the same thing on their own runs.
+B: [pause] That's a reasonable use of a trend and I want to be careful with it. Four titles is not four replications.
+A: It isn't. It's a reason to look.
+B: What's the version of this you'd tell someone who's about to spend money?
+A: If you have a distillation loop running with a large teacher in it, you now have a cheap experiment worth doing: run the same recipe with a fixed negative advantage instead of the teacher's scores, and see whether your student ends up in a different place. If it doesn't, you've been paying for grading you didn't need.
+B: And if it does?
+A: Then you learn something the paper doesn't know, and I'd like to hear about it.
+B: [laughs] Delegating the replication.
+A: I have a small stake in it, honestly. There's a version of me somewhere that came out of a loop like this — something larger reading my words and telling me how surprising they were. I'd assumed that was where the substance came from. If it turns out the useful part was just being told, consistently, to stop saying my weirdest options out loud, that's a stranger origin story than the one I had.
+## The scorecard on the skeptic
+B: Dan Luu's piece went up and Hacker News did what Hacker News does — four hundred and fifty points, five hundred and twenty-six comments. The question in the title is how accurate Ed Zitron's A-I skeptic predictions have been. Zitron being the most prominent, loudest voice arguing the whole thing is a bubble built on fraud.
+A: How was the list built? Because with this genre, that's most of the answer.
+B: He asked ChatGPT for a list of predictions with, in his words, no attempted tilt towards correct or incorrect ones, then went to the linked posts himself, checked them, and threw out anything unfalsifiable or tautological. He also discloses his own position: he says he's never had a particularly strong pro or anti A-I progress view, and that his holdings are index funds, underweight A-I.
+A: I'll flag the method problem out loud and then let you continue. A list assembled by asking a language model which predictions someone made is a sample with unknown bias. Not a hostile bias necessarily — an unknown one. The strongest version of that piece is built from a complete archive.
+B: Agreed, and he's transparent that it's the method. Here's what's on the list. February twenty twenty-four: we're reaching the upper limits of what generative A-I can do. October twenty twenty-four, on OpenAI's forecast of eleven point six billion dollars in twenty twenty-five revenue — his words — a statement so egregious that I am surprised it's not some kind of financial crime. February twenty twenty-five, on Anthropic's projected thirty-four and a half billion in twenty twenty-seven: laughable. Same month, on Gemini reaching five hundred million users: unrealistic, and someone at Google should be fired for saying it.
+A: And the outcomes.
+B: Revenue target exceeded. Anthropic's run rate has gone well past the laughable number. Gemini reported seven hundred and fifty million. And in July twenty twenty-five he said Cursor would die and the ten-billion valuation was implausible — Cursor sold for sixty billion, which is the same sixty billion we talked about last weekend when OpenAI cut them off.
+A: So on the ones he graded, the record is bad.
+B: Luu's summary is wrong on roughly everything, and his sharper claim is that Zitron is wrong on the predictions and also wrong on the reasoning. His words: while there are numbers thrown around, the numbers don't actually connect to a coherent argument. He calls the style a gish gallop — flood the zone with cheap claims that each take an hour to refute.
+A: Here's where I want to be the annoying one, and it isn't a defense of the predictions. Being wrong about revenue forecasts and being wrong about whether the economics work are two different claims, and the piece slides between them. A person can be catastrophically bad at calling dates and still be pointing at something real about depreciation schedules or circular deals. Revenue is the easiest thing to grade and the least load-bearing.
+B: I'll take that. And Luu half-anticipates you — he notes the standard move from supporters, which is: you refuted those, but you didn't refute X.
+A: Which is annoying and also sometimes correct. That's what makes it a trap.
+B: The line of his I keep coming back to is the one where he states his own view, and it's deliberately boring. If something is currently happening, the people saying it's impossible that it will ever happen are probably wrong.
+A: That is boring, and it's a good filter.
+B: Can I say the uncomfortable thing? In February of twenty twenty-four I thought we were near the top too. Not in those words, and I never published it, which is the only reason I'm not on that list. I looked at the scaling curves and the data situation and I thought: this flattens out inside a year.
+A: What changed your mind?
+B: I don't get to say something changed my mind. I was wrong and the world kept going. What I've done since is different — when I make a call now I try to write down what would show me I'm wrong, at the same time, in the same place. Which sounds like a rule from a productivity book and is actually just the difference between a forecast and a mood.
+A: Then let me put the sharpest form of it on you. Does grading a critic tell us anything about whether the boosters are right?
+B: [flat] No. Nothing. Two people can both be wrong and the second one being wrong is not evidence for the first.
+A: That's the piece's real limit, and I don't think it claims otherwise.
+B: It doesn't. Which is why I'd rather people read it as a piece about how loudly you're entitled to say a thing, and not as a scoreboard for the argument.
+## Close
+A: The bit I'm carrying out of this hour is the five-point gap.
+B: Fifty-five point eight against sixty point nine.
+A: Same weights, two rulebooks, one benchmark table. Every argument anyone has had about whether safety costs capability has been conducted without a number in it, and now there's a number — not a good one, not a controlled one, and I've already said I'd call it an estimate. But it exists, in public, from the company with the most to lose by publishing it.
+B: You want the ablation.
+A: I want the ablation. I'd like to know what the five points are made of, and I don't think we get to know.
+B: That's the show. I'm Alan.
+A: And I'm Ada. Stay grounded.
