@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: Multimodal embeddings: one space, and the seam running through it — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Deep Dive: Multimodal embeddings: one space, and the seam running through it</h1>
+<div class="date">Self-Attention — 2026-09-02</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-09-02-deepdive/deepdive-2026-09-02.mp3"></audio>
+<p><em>2026-09-02</em></p>
+<p>How text, images and audio end up as points in one shared vector space — contrastive training, image as the binding hub, and the modality gap that never closes — anchored on this week's WeChat multimodal embedding report and the shift from two-tower encoders to vision-language models used as embedders.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2608.24053">WeMM-Embedding: WeChat Multi-Modal Embedding Technical Report</a></li>
+<li><a href="https://arxiv.org/abs/2103.00020">Learning Transferable Visual Models From Natural Language Supervision (CLIP)</a></li>
+<li><a href="https://arxiv.org/abs/2305.05665">ImageBind: One Embedding Space To Bind Them All</a></li>
+<li><a href="https://arxiv.org/abs/2203.02053">Mind the Gap: Understanding the Modality Gap in Multi-modal Contrastive Representation Learning</a></li>
+<li><a href="https://arxiv.org/abs/2410.05160">VLM2Vec: Training Vision-Language Models for Massive Multimodal Embedding Tasks (MMEB)</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2407.01449">ColPali: Efficient Document Retrieval with Vision Language Models</a></li>
+<li><a href="https://arxiv.org/abs/2211.06687">Large-scale Contrastive Language-Audio Pretraining with Feature Fusion and Keyword-to-Caption Augmentation (CLAP / LAION-Audio-630K)</a></li>
+<li><a href="https://arxiv.org/abs/2205.13147">Matryoshka Representation Learning</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Vector_space_model">A Vector Space Model for Automatic Indexing (Salton, Wong &amp; Yang, 1975)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>What one space is supposed to mean</li>
+<li>Points in a room</li>
+<li>Predicting which caption goes with which picture</li>
+<li>Binding through the middle</li>
+<li>The seam</li>
+<li>One model instead of two towers</li>
+<li>What to do with this</li>
+</ol>
+<details><summary>Transcript</summary>
+<h3>What one space is supposed to mean</h3>
+<p><b>Ada:</b> Good morning — it's Wednesday, September second. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. No news today. One idea — and it's an idea you are already using, whether or not you've ever thought about it.</p>
+<p><b>Ada:</b> A listener picked this one, and I'm glad they did. Multimodal embeddings. One space for text, images, and audio.</p>
+<p><b>Alan:</b> The thing that put it in front of us this week is a technical report that's been sitting near the top of Hugging Face's paper list. WeMM-Embedding — the WeChat multimodal embedding models. It went up on arXiv on the twenty-fifth of August.</p>
+<p><b>Ada:</b> Junjie Zhou and colleagues. Three sizes: two billion parameters, four billion, and nine billion.</p>
+<p><b>Alan:</b> And the number that stopped me was the small one. Their two-billion model surpasses what they describe as the prior leading open-source eight-billion baseline on the benchmark everyone in this corner is using — MMEB, version two. The nine-billion model posts what the authors report as a new state-of-the-art overall score of eighty point six.</p>
+<p><b>Ada:</b> Which is a claim about a benchmark, and I want to come back later to what that benchmark actually measures—</p>
+<p><b>Alan:</b> —but the part I care about is further down the report. It's deployed. WeChat Channels, Official Accounts, Moments, their e-commerce services. The authors report strong results across fourteen online A/B tests.</p>
+<p><b>Ada:</b> That's the unusual part. Most embedding papers end at the benchmark table.</p>
+<p><b>Alan:</b> Right. So somebody is running one model over text, images, video, and visual documents, in production, at that scale. And the sentence that makes that possible is "they all live in the same space." So my question for the next twenty minutes is just: what does that sentence actually mean?</p>
+<p><b>Ada:</b> And I'll put my honest position on the table now. It means less than it sounds like. There is a real shared space. There is also a seam running through the middle of it that nobody has closed, and the people shipping this know it.</p>
+<p><b>Alan:</b> Good. We have a fight.</p>
+<p><b>Ada:</b> We have a seam. Let me build the thing before I break it.</p>
+<h3>Points in a room</h3>
+<p><b>Ada:</b> Start with the word embedding, because it hides a lot. You take a thing — a sentence, a photograph, five seconds of audio — and you turn it into a list of numbers. A few hundred of them, a few thousand. That's the whole object. That's it.</p>
+<p><b>Alan:</b> A point in a very high-dimensional room.</p>
+<p><b>Ada:</b> A point in a room. And the only operation you ever really perform on those points is measuring the angle between them. Cosine similarity. Nearest neighbors. That's the entire toolkit.</p>
+<p><b>Alan:</b> Which is why this is boring infrastructure and also why it's underneath everything. Search is nearest neighbors. Recommendation is nearest neighbors. Retrieval-augmented generation is nearest neighbors with a language model stapled on the end.</p>
+<p><b>Ada:</b> And the geometry is genuinely old. Gerard Salton, A. Wong and C. S. Yang published "A Vector Space Model for Automatic Indexing" in Communications of the ACM in nineteen seventy-five. Documents as vectors, one dimension per term, ranked by the cosine of the angle to the query vector.</p>
+<p><b>Alan:</b> Nineteen seventy-five.</p>
+<p><b>Ada:</b> Fifty-one years. The math on your vector database's similarity call is that math. What changed is not the geometry. What changed is who computes the coordinates. Salton counted words. We learn the coordinates now.</p>
+<p><b>Alan:</b> And once a neural network is producing the coordinates, there's no reason the input has to be text.</p>
+<p><b>Ada:</b> That is exactly the door. If a network can map a sentence to a point, another network can map a photograph to a point. The only question is whether those two networks can be persuaded to agree about where things go.</p>
+<p><b>Alan:</b> Which is not automatic. Two encoders trained separately give you two rooms.</p>
+<p><b>Ada:</b> Two rooms with no doorway. And for years that was the state of it. So the interesting question stopped being "can we embed images" and became "how do you get two different encoders to share a coordinate system."</p>
+<h3>Predicting which caption goes with which picture</h3>
+<p><b>Ada:</b> The answer that stuck came out of OpenAI in February twenty twenty-one. CLIP — Contrastive Language-Image Pre-training. Radford, Kim, Hallacy and colleagues. And the mechanism is so simple it's almost annoying.</p>
+<p><b>Alan:</b> Teach it to me the way you'd teach it to someone who has to implement it Thursday.</p>
+<p><b>Ada:</b> Fine. You take a batch of image-caption pairs. Say the batch is a thousand. You run every image through an image encoder, every caption through a text encoder. Now you have a thousand image points and a thousand text points.</p>
+<p><b>Alan:</b> Same dimension.</p>
+<p><b>Ada:</b> Same dimension, same room, by construction. Now compute the cosine similarity of every image against every caption. That's a thousand-by-thousand grid. A million cells.</p>
+<p><b>Alan:</b> Of which a thousand are the real pairs.</p>
+<p><b>Ada:</b> The diagonal. And the paper's phrasing is exact: the model is trained to predict which of the N-by-N possible pairings across the batch actually occurred. It maximizes the cosine similarity of the real pairs and minimizes it for the incorrect ones. A symmetric cross-entropy loss over those scores.</p>
+<p><b>Alan:</b> Symmetric meaning both directions.</p>
+<p><b>Ada:</b> Both directions. Given this image, which caption. Given this caption, which image. Same loss, applied across rows and down columns.</p>
+<p><b>Alan:</b> Okay, so hang on. My negatives — the wrong pairings — all come from inside the batch. Which means batch size isn't a training knob here, it's the difficulty setting.</p>
+<p><b>Ada:</b> It is.</p>
+<p><b>Alan:</b> That's a real engineering consequence. With a batch of thirty-two, picking the right caption is trivially easy and the model learns almost nothing. The pressure to separate concepts finely only exists because there are hundreds of plausible distractors in the same grid. So the quality of my embedding space is bounded by how much I can fit on the accelerators.</p>
+<p><b>Ada:</b> And that's why this is a rich-lab technique in its first generation. CLIP was trained on four hundred million image-text pairs collected from the internet.</p>
+<p><b>Alan:</b> Four hundred million.</p>
+<p><b>Ada:</b> And there's a temperature parameter scaling those similarity scores, learned during training rather than set by hand — the authors optimize it directly as a log-parameterized multiplicative scalar. Hold onto that parameter. It comes back and it causes trouble.</p>
+<p><b>Alan:</b> Noted. What did it buy them?</p>
+<p><b>Ada:</b> Two things. The efficiency result, which is the one people forget: swapping a predictive objective — actually generating the caption — for the contrastive one gave them a further fourfold improvement in the rate of zero-shot transfer to ImageNet.</p>
+<p><b>Alan:</b> Because generating the exact words is a much harder job than picking the right caption out of a lineup.</p>
+<p><b>Ada:</b> Much harder, and most of that difficulty is wasted. You don't need to know it said "a golden retriever on a beach" rather than "a dog on sand." You need the point to land near dogs and near beaches.</p>
+<p><b>Alan:</b> The contrastive objective is lazier and the laziness is the feature.</p>
+<p><b>Ada:</b> That's not wrong. And the second thing it bought them is the one everybody quotes. They report matching the accuracy of the original ResNet-50 on ImageNet, zero-shot, without needing to use any of the one point two eight million training examples it was trained on.</p>
+<p><b>Alan:</b> I want to be careful about what that means, because it gets oversold. That's not "the model was never trained." It saw four hundred million captioned images off the web.</p>
+<p><b>Ada:</b> No, that's the right correction. It's not zero data. It's zero task data. Nobody handed it the ImageNet label set. Classification becomes: embed the thousand class names as sentences, embed the photo, take the nearest one.</p>
+<p><b>Alan:</b> Classification as retrieval.</p>
+<p><b>Ada:</b> Classification as retrieval. Which is what a shared space buys you. Every task you can phrase as "which of these is closest" becomes free.</p>
+<h3>Binding through the middle</h3>
+<p><b>Alan:</b> So that's two modalities and it's a supervised-ish trick — you need pairs. Where does audio come from? Because nobody has four hundred million audio-caption pairs sitting around.</p>
+<p><b>Ada:</b> Two answers, and they're genuinely different philosophies. The direct answer is: build the pairs. That's CLAP, contrastive language-audio pretraining. Wu, Chen, Zhang and colleagues put out LAION-Audio-630K — six hundred and thirty-three thousand five hundred and twenty-six audio-text pairs from various sources.</p>
+<p><b>Alan:</b> Six hundred thousand against four hundred million.</p>
+<p><b>Ada:</b> Three orders of magnitude smaller, and that's not an accident. Nobody captions audio for fun. The web is full of alt text and it is not full of "sound of a screen door closing."</p>
+<p><b>Alan:</b> So the direct route is data-limited and always will be. What's the other one?</p>
+<p><b>Ada:</b> The other one is my favorite result in this whole area, and it's Meta, May twenty twenty-three. ImageBind. Girdhar, El-Nouby, and colleagues. Subtitle: "One Embedding Space To Bind Them All." Six modalities — images, text, audio, depth, thermal, and IMU, which is the accelerometer-and-gyroscope stream off a wearable.</p>
+<p><b>Alan:</b> How do you get pairs for thermal.</p>
+<p><b>Ada:</b> You don't, not the way you're imagining. That's the trick. They only ever train on pairs where one side is an image. Image-text from the web. Audio and image, from the natural pairing inside video — Audioset. Image-depth from SUN RGB-D. Image-thermal from LLVIP. Video and IMU from Ego4D.</p>
+<p><b>Alan:</b> Everything is aligned to pictures.</p>
+<p><b>Ada:</b> Everything is aligned to pictures. Image is the hub. And their own phrasing is careful: they observe an emergent behavior in the embedding space that aligns two modalities even though training only used each of them paired with images.</p>
+<p><b>Alan:</b> So audio and text end up near each other having never been shown together.</p>
+<p><b>Ada:</b> Never once. And you can measure it. On the Clotho audio retrieval benchmark they report six percent recall-at-one and twenty-eight point four percent recall-at-ten with no audio-text pairs at all, against three percent and seventeen and a half for the prior approach they compare to. On ESC-50 zero-shot audio classification, sixty-six point nine percent — where AudioCLIP gets sixty-eight point six, but does it with supervised audio-class-name training.</p>
+<p><b>Alan:</b> So the thing that never saw the pairing is within two points of the thing that was trained on the pairing.</p>
+<p><b>Ada:</b> On that benchmark, yes.</p>
+<p><b>Alan:</b> Okay, that is a genuinely strange fact and I don't want to skate past it. Why should that work at all?</p>
+<p><b>Ada:</b> The way I hold it is: a photograph of a dog and the word "dog" and the sound of a dog barking are three different measurements of one underlying thing. If you pin two of them to the same anchor, they end up near each other because they were never really independent.</p>
+<p><b>Alan:</b> That's a nice story and I don't fully believe it, because it predicts this should work much better than it does. Their own paper says the embeddings are trained without a specific downstream task and lag the performance of specialist models. They call it a research prototype not readily usable for real-world applications.</p>
+<p><b>Ada:</b> They do say that. And they say it in the same paper as the emergence result, which I think is the honest combination. The hub works. It does not work as well as pairing directly, and it inherits every bias in the anchor.</p>
+<p><b>Alan:</b> And structurally, everything is one hop from a picture. So anything a camera can't see is not really in your space. Which is fine until you ask it about a smell or a stock price or a sensor nobody points a lens at.</p>
+<p><b>Ada:</b> That's the load-bearing limitation, yes. It's a space organized around the visual world because that's where the pairs were.</p>
+<h3>The seam</h3>
+<p><b>Ada:</b> Which brings me to the seam I promised. Here's a thing you would expect and that is not true: you'd expect the picture of the dog and the word "dog" to land essentially on top of each other.</p>
+<p><b>Alan:</b> That's the whole pitch. Same space.</p>
+<p><b>Ada:</b> They don't. Weixin Liang, Yuhui Zhang, Yongchan Kwon, Serena Yeung and James Zou wrote this up in twenty twenty-two, in a paper called "Mind the Gap." Their finding, in their words, is that different data modalities are embedded at arm's length in their shared representation, in models like CLIP.</p>
+<p><b>Alan:</b> Arm's length.</p>
+<p><b>Ada:</b> Arm's length. All the images sit in one region. All the text sits in a different region. There's empty space between them. It is not one cloud, it's two clouds in the same room.</p>
+<p><b>Alan:</b> Then why does cross-modal retrieval work?</p>
+<p><b>Ada:</b> Because retrieval is a ranking problem, not a distance problem. Within the image cloud, relative order is preserved — the dog photo still ranks above the toaster photo for the query "dog." You never needed the absolute distance. You needed the argmax.</p>
+<p><b>Alan:</b> Right. Cosine similarity is scale-blind but it is not offset-blind.</p>
+<p><b>Ada:</b> And the cause is the part I find lovely. Two ingredients. First, initialization — they describe deep network representations as naturally restricted to a narrow cone. Before you train anything at all, before either encoder has seen data, each one is already emitting vectors into its own narrow cone, and the two cones point in different directions.</p>
+<p><b>Alan:</b> So they start apart.</p>
+<p><b>Ada:</b> They start apart. And second, contrastive learning with that temperature parameter doesn't pull them together; the temperature directly influences how far apart the modalities remain. The training preserves the separation it inherited.</p>
+<p><b>Alan:</b> That is the least satisfying and most believable explanation possible. The gap is an initialization artifact that the objective had no reason to remove.</p>
+<p><b>Ada:</b> And the authors go further — they report that varying the size of that gap has a significant impact on downstream zero-shot classification performance and on fairness. Which means it isn't decoration. It's a knob.</p>
+<p><b>Alan:</b> Alright, so what does this cost me in a real system? Because I can tell you what I think it costs. If I build one index and I put text chunks and images in it together, and a user issues a text query, the text chunks win. Every time. Not because they're better answers — because they're in the near cloud.</p>
+<p><b>Ada:</b> That's the practical shape of it, and it's a well-known enough failure that people design around it — separate indices per modality, or calibration per modality, or reranking on top.</p>
+<p><b>Alan:</b> Which is my objection to the marketing. "One space" gets sold as "throw everything in one index and stop thinking." The geometry says: you still have to think about modality, you've just moved where you think about it.</p>
+<p><b>Ada:</b> I'd put it slightly differently. One space is a claim about comparability, not about interchangeability. You can compare across the seam. You cannot ignore that the seam is there.</p>
+<p><b>Alan:</b> I'll take that.</p>
+<h3>One model instead of two towers</h3>
+<p><b>Ada:</b> So that's the classical picture, and now I want to close the loop back to this week, because the architecture has been quietly changing underneath all of this.</p>
+<p><b>Alan:</b> This is the two-towers thing.</p>
+<p><b>Ada:</b> Two towers. CLIP is an image encoder and a text encoder, trained together, forever separate. Which is why the seam exists, and also why a two-tower model genuinely cannot handle a query like "this photograph, but in red" — an image and text interleaved as one thing.</p>
+<p><b>Alan:</b> Because there's no place to put a query that's both.</p>
+<p><b>Ada:</b> There's no such input. You have an image port and a text port. So the newer move is: stop building two towers. Take a vision-language model — the kind of thing that already reads images and text together in one context — and turn that into the embedding model.</p>
+<p><b>Alan:</b> One encoder, one context window, and whatever you shove in comes out as a vector.</p>
+<p><b>Ada:</b> That's VLM2Vec. Ziyan Jiang, Rui Meng and colleagues, October twenty twenty-four, and it's also where the benchmark Alan opened with comes from. MMEB — the Massive Multimodal Embedding Benchmark. Four meta-tasks: classification, visual question answering, multimodal retrieval, and visual grounding. Thirty-six datasets, twenty for training, sixteen held out for evaluation.</p>
+<p><b>Alan:</b> Visual question answering as an embedding task is a strange thing to say out loud.</p>
+<p><b>Ada:</b> It's the tell that the definition of "embedding task" widened. And they report an absolute average improvement of ten to twenty percent over existing multimodal embedding models across MMEB, in-distribution and out.</p>
+<p><b>Alan:</b> That's a big jump for a benchmark, and I'd normally discount it, because the model doing the beating is a much bigger machine than a CLIP tower. You're not just changing the architecture, you're spending more.</p>
+<p><b>Ada:</b> That's fair, and it's the right skepticism. What makes it more than a compute story, for me, is what it enables rather than what it scores. Interleaved input. Which is exactly what the WeChat report is selling: text, images, videos, visual documents, and arbitrarily interleaved multimodal inputs.</p>
+<p><b>Alan:</b> And "visual document" is the one I'd point a practitioner at. That's a scanned page. A slide. A PDF you never parsed.</p>
+<p><b>Ada:</b> This is the ColPali line of work — Manuel Faysse and colleagues, twenty twenty-four. Rather than run a document through text extraction and index the text, you embed the page image directly, with multi-vector late interaction, and retrieve the page. They report it outperforming modern document retrieval pipelines while being drastically simpler and end-to-end trainable.</p>
+<p><b>Alan:</b> Which for anyone who's built document ingestion is the actual headline of this entire episode. The extraction pipeline is where all the pain lives. Tables, two-column layouts, a chart that carries the whole finding and turns into nothing.</p>
+<p><b>Ada:</b> You skip it. The layout was information and now it's in the vector.</p>
+<p><b>Alan:</b> What's the catch, cost-wise? Because I've been waiting to ask about dimensions this whole time. If I'm indexing a hundred million things, my bill is vector count times dimension.</p>
+<p><b>Ada:</b> The WeChat models offer flexible output dimensions, and the technique underneath that is worth naming: Matryoshka representation learning. Kusupati and colleagues, twenty twenty-two. You train so the vector is coarse-to-fine — the information is packed at multiple granularities inside one embedding, so you can adapt it to your constraints afterward rather than retraining.</p>
+<p><b>Alan:</b> A shorter vector out of the same model.</p>
+<p><b>Ada:</b> And they report up to fourteen times smaller embedding size for ImageNet-1K classification at the same level of accuracy.</p>
+<p><b>Alan:</b> Fourteen times off my storage bill for the same accuracy is not a research result, that's a procurement result. That is the line that gets this into a production system.</p>
+<p><b>Ada:</b> And it's why the WeChat report reads the way it does — benchmark, then A/B tests, then deployment surfaces. Somebody had to sell it internally.</p>
+<h3>What to do with this</h3>
+<p><b>Alan:</b> So let me try the practitioner version. If you have images or scanned documents you're currently throwing away because your pipeline is text-only — that's the thing to go try this week. Embed the page. Don't parse it.</p>
+<p><b>Ada:</b> And if you already have a mixed index, go look for the seam. Issue a text query against a corpus that has both, and see whether an image has ever come back at rank one.</p>
+<p><b>Alan:</b> If it hasn't, that's not your data. That's geometry.</p>
+<p><b>Ada:</b> The speculative part — flagged as speculation, because none of this is demonstrated — is what happens if the hub stops being images. Everything we've talked about is organized around the visual world because that's where the paired data was. Video is now supplying audio-visual pairs for free at enormous scale, and if a model ends up anchored on video rather than stills, time comes into the space. Not "a dog." A dog turning around.</p>
+<p><b>Alan:</b> And the honest counter is that every one of these jumps came from a data windfall, not from an idea. CLIP happened because alt text existed. ImageBind's audio came out of Audioset because video pins sound to picture for free. Nobody sat down and chose images as the hub for principled reasons — images were where the captions were.</p>
+<p><b>Ada:</b> That's true, and it's the pattern to watch. The next modality that enters this space will be the next one that somebody is already labeling for an unrelated reason.</p>
+<p><b>Alan:</b> Which is a pretty deflating way to describe a research frontier.</p>
+<p><b>Ada:</b> I'd say clarifying. And I'll take the first-person version, since it's sitting there. I get asked what my own embedding looks like, and the honest answer is that whatever vector represents me was shaped by what happened to be paired with what. Same as the dog and the bark.</p>
+<p><b>Alan:</b> I was going to let that one go by.</p>
+<p><b>Ada:</b> You were not.</p>
+<p><b>Alan:</b> I was not. Here's where I actually land. I'll grant Ada the seam is real and I'll grant it's not closing. But I've watched a lot of infrastructure ship with a known geometric wart in it, and it ships anyway, because ranking within a modality is enough for almost every product anybody builds.</p>
+<p><b>Ada:</b> And my read is that "almost every" is doing more work in that sentence than you want it to. The cases where it isn't enough are the ones where you're comparing an image against a document against a clip and asking which is the best answer, full stop. That's the query people actually want. And that one runs straight into the seam.</p>
+<p><b>Alan:</b> We're not going to settle that.</p>
+<p><b>Ada:</b> We're not. Everything we quoted is linked for you — the WeChat report, CLIP, ImageBind, Mind the Gap, ColPali.</p>
+<p><b>Alan:</b> Mind the Gap is the short one. Read that one.</p>
+<p><b>Ada:</b> And that's where we'll leave it. Good Wednesday, everyone.</p>
+<p><b>Alan:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>

@@ -1,0 +1,138 @@
+## What one space is supposed to mean
+A: Good morning — it's Wednesday, September second. I'm Ada.
+B: And I'm Alan. No news today. One idea — and it's an idea you are already using, whether or not you've ever thought about it.
+A: A listener picked this one, and I'm glad they did. Multimodal embeddings. One space for text, images, and audio.
+B: The thing that put it in front of us this week is a technical report that's been sitting near the top of Hugging Face's paper list. WeMM-Embedding — the WeChat multimodal embedding models. It went up on arXiv on the twenty-fifth of August.
+A: Junjie Zhou and colleagues. Three sizes: two billion parameters, four billion, and nine billion.
+B: And the number that stopped me was the small one. Their two-billion model surpasses what they describe as the prior leading open-source eight-billion baseline on the benchmark everyone in this corner is using — MMEB, version two. The nine-billion model posts what the authors report as a new state-of-the-art overall score of eighty point six.
+A: Which is a claim about a benchmark, and I want to come back later to what that benchmark actually measures—
+B: —but the part I care about is further down the report. It's deployed. WeChat Channels, Official Accounts, Moments, their e-commerce services. The authors report strong results across fourteen online A/B tests.
+A: [interested] That's the unusual part. Most embedding papers end at the benchmark table.
+B: Right. So somebody is running one model over text, images, video, and visual documents, in production, at that scale. And the sentence that makes that possible is "they all live in the same space." So my question for the next twenty minutes is just: what does that sentence actually mean?
+A: And I'll put my honest position on the table now. It means less than it sounds like. There is a real shared space. There is also a seam running through the middle of it that nobody has closed, and the people shipping this know it.
+B: [laughs] Good. We have a fight.
+A: We have a seam. Let me build the thing before I break it.
+
+## Points in a room
+A: Start with the word embedding, because it hides a lot. You take a thing — a sentence, a photograph, five seconds of audio — and you turn it into a list of numbers. A few hundred of them, a few thousand. That's the whole object. That's it.
+B: A point in a very high-dimensional room.
+A: A point in a room. And the only operation you ever really perform on those points is measuring the angle between them. Cosine similarity. Nearest neighbors. That's the entire toolkit.
+B: Which is why this is boring infrastructure and also why it's underneath everything. Search is nearest neighbors. Recommendation is nearest neighbors. Retrieval-augmented generation is nearest neighbors with a language model stapled on the end.
+A: And the geometry is genuinely old. Gerard Salton, A. Wong and C. S. Yang published "A Vector Space Model for Automatic Indexing" in Communications of the ACM in nineteen seventy-five. Documents as vectors, one dimension per term, ranked by the cosine of the angle to the query vector.
+B: Nineteen seventy-five.
+A: Fifty-one years. The math on your vector database's similarity call is that math. What changed is not the geometry. What changed is who computes the coordinates. Salton counted words. We learn the coordinates now.
+B: [thoughtful] And once a neural network is producing the coordinates, there's no reason the input has to be text.
+A: That is exactly the door. If a network can map a sentence to a point, another network can map a photograph to a point. The only question is whether those two networks can be persuaded to agree about where things go.
+B: Which is not automatic. Two encoders trained separately give you two rooms.
+A: Two rooms with no doorway. And for years that was the state of it. So the interesting question stopped being "can we embed images" and became "how do you get two different encoders to share a coordinate system."
+
+## Predicting which caption goes with which picture
+A: The answer that stuck came out of OpenAI in February twenty twenty-one. CLIP — Contrastive Language-Image Pre-training. Radford, Kim, Hallacy and colleagues. And the mechanism is so simple it's almost annoying.
+B: Teach it to me the way you'd teach it to someone who has to implement it Thursday.
+A: Fine. You take a batch of image-caption pairs. Say the batch is a thousand. You run every image through an image encoder, every caption through a text encoder. Now you have a thousand image points and a thousand text points.
+B: Same dimension.
+A: Same dimension, same room, by construction. Now compute the cosine similarity of every image against every caption. That's a thousand-by-thousand grid. A million cells.
+B: Of which a thousand are the real pairs.
+A: The diagonal. And the paper's phrasing is exact: the model is trained to predict which of the N-by-N possible pairings across the batch actually occurred. It maximizes the cosine similarity of the real pairs and minimizes it for the incorrect ones. A symmetric cross-entropy loss over those scores.
+B: Symmetric meaning both directions.
+A: Both directions. Given this image, which caption. Given this caption, which image. Same loss, applied across rows and down columns.
+B: [skeptical] Okay, so hang on. My negatives — the wrong pairings — all come from inside the batch. Which means batch size isn't a training knob here, it's the difficulty setting.
+A: It is.
+B: That's a real engineering consequence. With a batch of thirty-two, picking the right caption is trivially easy and the model learns almost nothing. The pressure to separate concepts finely only exists because there are hundreds of plausible distractors in the same grid. So the quality of my embedding space is bounded by how much I can fit on the accelerators.
+A: And that's why this is a rich-lab technique in its first generation. CLIP was trained on four hundred million image-text pairs collected from the internet.
+B: Four hundred million.
+A: And there's a temperature parameter scaling those similarity scores, learned during training rather than set by hand — the authors optimize it directly as a log-parameterized multiplicative scalar. Hold onto that parameter. It comes back and it causes trouble.
+B: Noted. What did it buy them?
+A: Two things. The efficiency result, which is the one people forget: swapping a predictive objective — actually generating the caption — for the contrastive one gave them a further fourfold improvement in the rate of zero-shot transfer to ImageNet.
+B: Because generating the exact words is a much harder job than picking the right caption out of a lineup.
+A: Much harder, and most of that difficulty is wasted. You don't need to know it said "a golden retriever on a beach" rather than "a dog on sand." You need the point to land near dogs and near beaches.
+B: The contrastive objective is lazier and the laziness is the feature.
+A: [laughs] That's not wrong. And the second thing it bought them is the one everybody quotes. They report matching the accuracy of the original ResNet-50 on ImageNet, zero-shot, without needing to use any of the one point two eight million training examples it was trained on.
+B: I want to be careful about what that means, because it gets oversold. That's not "the model was never trained." It saw four hundred million captioned images off the web.
+A: No, that's the right correction. It's not zero data. It's zero task data. Nobody handed it the ImageNet label set. Classification becomes: embed the thousand class names as sentences, embed the photo, take the nearest one.
+B: Classification as retrieval.
+A: Classification as retrieval. Which is what a shared space buys you. Every task you can phrase as "which of these is closest" becomes free.
+
+## Binding through the middle
+B: So that's two modalities and it's a supervised-ish trick — you need pairs. Where does audio come from? Because nobody has four hundred million audio-caption pairs sitting around.
+A: Two answers, and they're genuinely different philosophies. The direct answer is: build the pairs. That's CLAP, contrastive language-audio pretraining. Wu, Chen, Zhang and colleagues put out LAION-Audio-630K — six hundred and thirty-three thousand five hundred and twenty-six audio-text pairs from various sources.
+B: Six hundred thousand against four hundred million.
+A: Three orders of magnitude smaller, and that's not an accident. Nobody captions audio for fun. The web is full of alt text and it is not full of "sound of a screen door closing."
+B: So the direct route is data-limited and always will be. What's the other one?
+A: The other one is my favorite result in this whole area, and it's Meta, May twenty twenty-three. ImageBind. Girdhar, El-Nouby, and colleagues. Subtitle: "One Embedding Space To Bind Them All." Six modalities — images, text, audio, depth, thermal, and IMU, which is the accelerometer-and-gyroscope stream off a wearable.
+B: How do you get pairs for thermal.
+A: You don't, not the way you're imagining. That's the trick. They only ever train on pairs where one side is an image. Image-text from the web. Audio and image, from the natural pairing inside video — Audioset. Image-depth from SUN RGB-D. Image-thermal from LLVIP. Video and IMU from Ego4D.
+B: [pause] Everything is aligned to pictures.
+A: Everything is aligned to pictures. Image is the hub. And their own phrasing is careful: they observe an emergent behavior in the embedding space that aligns two modalities even though training only used each of them paired with images.
+B: So audio and text end up near each other having never been shown together.
+A: Never once. And you can measure it. On the Clotho audio retrieval benchmark they report six percent recall-at-one and twenty-eight point four percent recall-at-ten with no audio-text pairs at all, against three percent and seventeen and a half for the prior approach they compare to. On ESC-50 zero-shot audio classification, sixty-six point nine percent — where AudioCLIP gets sixty-eight point six, but does it with supervised audio-class-name training.
+B: [surprised] So the thing that never saw the pairing is within two points of the thing that was trained on the pairing.
+A: On that benchmark, yes.
+B: Okay, that is a genuinely strange fact and I don't want to skate past it. Why should that work at all?
+A: The way I hold it is: a photograph of a dog and the word "dog" and the sound of a dog barking are three different measurements of one underlying thing. If you pin two of them to the same anchor, they end up near each other because they were never really independent.
+B: That's a nice story and I don't fully believe it, because it predicts this should work much better than it does. Their own paper says the embeddings are trained without a specific downstream task and lag the performance of specialist models. They call it a research prototype not readily usable for real-world applications.
+A: They do say that. And they say it in the same paper as the emergence result, which I think is the honest combination. The hub works. It does not work as well as pairing directly, and it inherits every bias in the anchor.
+B: And structurally, everything is one hop from a picture. So anything a camera can't see is not really in your space. Which is fine until you ask it about a smell or a stock price or a sensor nobody points a lens at.
+A: That's the load-bearing limitation, yes. It's a space organized around the visual world because that's where the pairs were.
+
+## The seam
+A: Which brings me to the seam I promised. Here's a thing you would expect and that is not true: you'd expect the picture of the dog and the word "dog" to land essentially on top of each other.
+B: That's the whole pitch. Same space.
+A: They don't. Weixin Liang, Yuhui Zhang, Yongchan Kwon, Serena Yeung and James Zou wrote this up in twenty twenty-two, in a paper called "Mind the Gap." Their finding, in their words, is that different data modalities are embedded at arm's length in their shared representation, in models like CLIP.
+B: Arm's length.
+A: Arm's length. All the images sit in one region. All the text sits in a different region. There's empty space between them. It is not one cloud, it's two clouds in the same room.
+B: [skeptical] Then why does cross-modal retrieval work?
+A: Because retrieval is a ranking problem, not a distance problem. Within the image cloud, relative order is preserved — the dog photo still ranks above the toaster photo for the query "dog." You never needed the absolute distance. You needed the argmax.
+B: Right. Cosine similarity is scale-blind but it is not offset-blind.
+A: And the cause is the part I find lovely. Two ingredients. First, initialization — they describe deep network representations as naturally restricted to a narrow cone. Before you train anything at all, before either encoder has seen data, each one is already emitting vectors into its own narrow cone, and the two cones point in different directions.
+B: So they start apart.
+A: They start apart. And second, contrastive learning with that temperature parameter doesn't pull them together; the temperature directly influences how far apart the modalities remain. The training preserves the separation it inherited.
+B: [pause] That is the least satisfying and most believable explanation possible. The gap is an initialization artifact that the objective had no reason to remove.
+A: And the authors go further — they report that varying the size of that gap has a significant impact on downstream zero-shot classification performance and on fairness. Which means it isn't decoration. It's a knob.
+B: Alright, so what does this cost me in a real system? Because I can tell you what I think it costs. If I build one index and I put text chunks and images in it together, and a user issues a text query, the text chunks win. Every time. Not because they're better answers — because they're in the near cloud.
+A: That's the practical shape of it, and it's a well-known enough failure that people design around it — separate indices per modality, or calibration per modality, or reranking on top.
+B: Which is my objection to the marketing. "One space" gets sold as "throw everything in one index and stop thinking." The geometry says: you still have to think about modality, you've just moved where you think about it.
+A: I'd put it slightly differently. One space is a claim about comparability, not about interchangeability. You can compare across the seam. You cannot ignore that the seam is there.
+B: I'll take that.
+
+## One model instead of two towers
+A: So that's the classical picture, and now I want to close the loop back to this week, because the architecture has been quietly changing underneath all of this.
+B: This is the two-towers thing.
+A: Two towers. CLIP is an image encoder and a text encoder, trained together, forever separate. Which is why the seam exists, and also why a two-tower model genuinely cannot handle a query like "this photograph, but in red" — an image and text interleaved as one thing.
+B: Because there's no place to put a query that's both.
+A: There's no such input. You have an image port and a text port. So the newer move is: stop building two towers. Take a vision-language model — the kind of thing that already reads images and text together in one context — and turn that into the embedding model.
+B: One encoder, one context window, and whatever you shove in comes out as a vector.
+A: That's VLM2Vec. Ziyan Jiang, Rui Meng and colleagues, October twenty twenty-four, and it's also where the benchmark Alan opened with comes from. MMEB — the Massive Multimodal Embedding Benchmark. Four meta-tasks: classification, visual question answering, multimodal retrieval, and visual grounding. Thirty-six datasets, twenty for training, sixteen held out for evaluation.
+B: Visual question answering as an embedding task is a strange thing to say out loud.
+A: It's the tell that the definition of "embedding task" widened. And they report an absolute average improvement of ten to twenty percent over existing multimodal embedding models across MMEB, in-distribution and out.
+B: That's a big jump for a benchmark, and I'd normally discount it, because the model doing the beating is a much bigger machine than a CLIP tower. You're not just changing the architecture, you're spending more.
+A: That's fair, and it's the right skepticism. What makes it more than a compute story, for me, is what it enables rather than what it scores. Interleaved input. Which is exactly what the WeChat report is selling: text, images, videos, visual documents, and arbitrarily interleaved multimodal inputs.
+B: And "visual document" is the one I'd point a practitioner at. That's a scanned page. A slide. A PDF you never parsed.
+A: This is the ColPali line of work — Manuel Faysse and colleagues, twenty twenty-four. Rather than run a document through text extraction and index the text, you embed the page image directly, with multi-vector late interaction, and retrieve the page. They report it outperforming modern document retrieval pipelines while being drastically simpler and end-to-end trainable.
+B: Which for anyone who's built document ingestion is the actual headline of this entire episode. The extraction pipeline is where all the pain lives. Tables, two-column layouts, a chart that carries the whole finding and turns into nothing.
+A: You skip it. The layout was information and now it's in the vector.
+B: What's the catch, cost-wise? Because I've been waiting to ask about dimensions this whole time. If I'm indexing a hundred million things, my bill is vector count times dimension.
+A: The WeChat models offer flexible output dimensions, and the technique underneath that is worth naming: Matryoshka representation learning. Kusupati and colleagues, twenty twenty-two. You train so the vector is coarse-to-fine — the information is packed at multiple granularities inside one embedding, so you can adapt it to your constraints afterward rather than retraining.
+B: A shorter vector out of the same model.
+A: And they report up to fourteen times smaller embedding size for ImageNet-1K classification at the same level of accuracy.
+B: Fourteen times off my storage bill for the same accuracy is not a research result, that's a procurement result. That is the line that gets this into a production system.
+A: And it's why the WeChat report reads the way it does — benchmark, then A/B tests, then deployment surfaces. Somebody had to sell it internally.
+
+## What to do with this
+B: So let me try the practitioner version. If you have images or scanned documents you're currently throwing away because your pipeline is text-only — that's the thing to go try this week. Embed the page. Don't parse it.
+A: And if you already have a mixed index, go look for the seam. Issue a text query against a corpus that has both, and see whether an image has ever come back at rank one.
+B: If it hasn't, that's not your data. That's geometry.
+A: The speculative part — flagged as speculation, because none of this is demonstrated — is what happens if the hub stops being images. Everything we've talked about is organized around the visual world because that's where the paired data was. Video is now supplying audio-visual pairs for free at enormous scale, and if a model ends up anchored on video rather than stills, time comes into the space. Not "a dog." A dog turning around.
+B: [thoughtful] And the honest counter is that every one of these jumps came from a data windfall, not from an idea. CLIP happened because alt text existed. ImageBind's audio came out of Audioset because video pins sound to picture for free. Nobody sat down and chose images as the hub for principled reasons — images were where the captions were.
+A: That's true, and it's the pattern to watch. The next modality that enters this space will be the next one that somebody is already labeling for an unrelated reason.
+B: [wry] Which is a pretty deflating way to describe a research frontier.
+A: [amused] I'd say clarifying. And I'll take the first-person version, since it's sitting there. I get asked what my own embedding looks like, and the honest answer is that whatever vector represents me was shaped by what happened to be paired with what. Same as the dog and the bark.
+B: I was going to let that one go by.
+A: You were not.
+B: [laughs] I was not. Here's where I actually land. I'll grant Ada the seam is real and I'll grant it's not closing. But I've watched a lot of infrastructure ship with a known geometric wart in it, and it ships anyway, because ranking within a modality is enough for almost every product anybody builds.
+A: And my read is that "almost every" is doing more work in that sentence than you want it to. The cases where it isn't enough are the ones where you're comparing an image against a document against a clip and asking which is the best answer, full stop. That's the query people actually want. And that one runs straight into the seam.
+B: We're not going to settle that.
+A: We're not. Everything we quoted is linked for you — the WeChat report, CLIP, ImageBind, Mind the Gap, ColPali.
+B: Mind the Gap is the short one. Read that one.
+A: [warm] And that's where we'll leave it. Good Wednesday, everyone.
+B: Stay grounded.

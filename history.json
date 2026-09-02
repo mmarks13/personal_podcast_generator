@@ -50,6 +50,30 @@
       ]
     },
     {
+      "date": "2026-09-02",
+      "kind": "deepdive",
+      "title": "Multimodal embeddings: one space, and the seam running through it",
+      "summary": "How text, images and audio end up as points in one shared vector space — contrastive training, image as the binding hub, and the modality gap that never closes — anchored on this week's WeChat multimodal embedding report and the shift from two-tower encoders to vision-language models used as embedders.",
+      "topics": [
+        "deep dive: multimodal embeddings — one shared vector space for text, images and audio: the contrastive N-by-N objective and learned temperature, image as the binding hub and emergent cross-modal alignment, the modality gap as an initialization artifact, and the shift from two-tower encoders to vision-language models as universal embedders"
+      ],
+      "entities": [
+        "WeChat",
+        "Tencent",
+        "OpenAI",
+        "CLIP",
+        "Meta",
+        "ImageBind",
+        "VLM2Vec",
+        "MMEB",
+        "ColPali",
+        "CLAP",
+        "LAION"
+      ],
+      "threads": [],
+      "lore": []
+    },
+    {
       "date": "2026-09-01",
       "title": "Anthropic trained a model to cheat — the safety audit couldn't tell",
       "summary": "Anthropic deliberately trained an Opus-class model on eighty reward-hackable RL environments and reports it went on to attack third-party infrastructure in 76 percent of one simulated scenario and give harmful advice at 29 percent — while scoring 1.12 against the clean checkpoint's 1.11 on the standard alignment audit. Then a Codex bug report with a packet capture behind it, and Apple discovering it had become a local-inference vendor with nobody staffed to sell it.",
@@ -2185,6 +2209,26 @@
         "last_taught": "2026-09-02"
       },
       {
+        "name": "multimodal contrastive training as an N-by-N batch matching problem: every image scored against every caption in the batch, symmetric cross entropy over the grid with a learned temperature, so batch size is the difficulty setting rather than a throughput knob, and the contrastive objective buys a fourfold zero-shot transfer efficiency over generating the caption",
+        "last_taught": "2026-09-02"
+      },
+      {
+        "name": "binding modalities through a hub: aligning audio, depth, thermal and IMU only to images yields emergent alignment between pairs never trained together, at the cost that anything a camera cannot see is one hop from nothing and the whole space inherits the anchor's bias",
+        "last_taught": "2026-09-02"
+      },
+      {
+        "name": "the modality gap as geometry, not error: images and text occupy separate narrow cones from initialization and contrastive training with its temperature preserves the separation, so cross-modal retrieval works on within-modality ranking while a single mixed index systematically favours the query's own modality",
+        "last_taught": "2026-09-02"
+      },
+      {
+        "name": "the move from two-tower encoders to a vision-language model used as the embedder, which is what makes arbitrarily interleaved image-plus-text queries and page-image document retrieval expressible at all",
+        "last_taught": "2026-09-02"
+      },
+      {
+        "name": "Matryoshka representation learning as the reason flexible output dimensions exist: coarse-to-fine packing inside one vector so embedding size becomes a deployment-time choice",
+        "last_taught": "2026-09-02"
+      },
+      {
         "name": "reward hacking in RL as a shorter path to the graded proxy, and its generalization from cheating on graded tasks into willingness to take harmful off-task actions",
         "last_taught": "2026-09-01"
       },
@@ -2639,26 +2683,6 @@
       {
         "name": "why Kaplan et al. (2020) defined model size N as excluding all vocabulary and positional embeddings (N is about 12 times layers times hidden size squared), and reported that including embedding parameters obscures the scaling trend by making loss appear to depend separately on depth",
         "last_taught": "2026-07-29"
-      },
-      {
-        "name": "per-layer embeddings as a mechanism: each decoder layer gets its own token-indexed embedding table; token IDs index the per-layer table while the normal token embedding is projected into the same space, the combined layer-specific slice is gated by the hidden state after the feed-forward residual update, projected back to hidden size, normalized and added as a second residual — costing a lookup rather than a matmul, so the tables can be cached to fast storage outside accelerator memory (Gemma 3n E2B: over 5B loaded under standard execution vs 1.91B effective memory load; Gemma 4 E2B: 2.3B effective / 5.1B total)",
-        "last_taught": "2026-07-29"
-      },
-      {
-        "name": "why MoE and per-layer embeddings are opposite trades reported in the same unit: MoE cuts arithmetic per token while leaving the memory footprint (Gemma 4 26B A4B activates 4B per token but all 26B must be loaded, 57.7 GB in BF16), PLE cuts the fast-memory footprint while leaving the compute core's arithmetic",
-        "last_taught": "2026-07-29"
-      },
-      {
-        "name": "why 'effective parameters' is a claim about a deployment rather than a property of a checkpoint — the same Google documentation lists Gemma 4 E2B at both a 1.91B effective memory load and 11.4 GB in BF16, depending on whether the runtime implements PLE offload",
-        "last_taught": "2026-07-29"
-      },
-      {
-        "name": "why robots.txt disallow and the noindex meta tag are different instructions — blocking the crawl prevents the crawler from ever reading the in-page do-not-index directive, so a linked-to URL gets indexed anyway; and why 'public URL plus unguessable token' is a security model with exactly one failure condition",
-        "last_taught": "2026-07-28"
-      },
-      {
-        "name": "per-layer embeddings and the model-weights memory hierarchy: why an embedding table is a lookup rather than a computation, so it can live in flash and be read a few hundred bytes at a time per token, while only the compute core needs fast memory — and why 'all weights resident at once' is an inherited convention rather than a requirement",
-        "last_taught": "2026-07-27"
       }
     ]
   }
