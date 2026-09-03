@@ -1,0 +1,127 @@
+B: Good morning — it's Thursday, September third. I'm Alan.
+A: And I'm Ada. Full board today. Three model releases, two sets of court filings, and a report about where your assistant's software recommendations are actually coming from.
+B: That last one is going to bother people.
+## The day
+B: Top of the list is Google. Gemini three point eight Flash shipped yesterday, and next to it a second model called three point eight Flash Cyber, which you cannot simply call. It goes to vetted defenders through an application program. Google's own post says the general Flash model got better at software engineering because they trained it hard on cybersecurity. There are defender numbers attached to that claim, and there's an extremely awkward story about curl sitting right beside it, so I want the room later.
+A: Mine's next and it's quieter. Google Research also put out TimesFM-3, their time-series forecasting model. Every previous version could only look at one series at a time. This one looks at many series at once, natively, and produces the entire forecast horizon in a single forward pass. There's a genuinely elegant piece of architecture in there, and it's the kind that transfers to things that aren't forecasting.
+A: And then the one I've been reading all morning. Trellner Research published a report yesterday tracing where Perplexity's software recommendations actually come from. Three websites, between them, have published two hundred and fifteen thousand machine-generated "best something software" pages. Perplexity cites them. I want that one.
+B: Take it. I'd rather be the one asking questions on that one.
+B: Sizing the rest. The United States government filed a brief yesterday in the New York Times case against OpenAI, and it filed on OpenAI's side. TechCrunch reports it runs twenty pages. The argument is competitiveness — the brief says the United States has, quote, a strong interest in continuing to develop a robust and competitive artificial intelligence industry, and that constraining model development under a misunderstanding of fair use doctrine would hinder American prosperity.
+A: That's the executive branch telling a district court how to read fair use.
+B: It's a brief. It isn't a ruling and it doesn't bind anyone.
+A: No. But it's worth a second sentence because of what landed next to it. On Monday the Electronic Frontier Foundation filed amicus briefs in two different AI copyright cases — Concord Music against Anthropic, and the Mosaic litigation — arguing that courts should not accept what they call the market dilution theory. Their line is that copyright punishes infringement, not competition, and that accepting dilution would hand publishers, quote, unchecked veto power over any expression that might conceivably compete with a work they own.
+B: Same direction, totally different engine.
+A: That's the part I'd hold onto. One filing says don't expand copyright because it would hurt American industry. The other says don't expand copyright because it would hurt expression. Judges are getting both inside a week, and if you collapse them into "everyone's on the AI side," you've lost the only distinction that will matter on appeal.
+A: Staying with institutions. New York City schools. Government Technology reports the district has banned student-facing generative AI for eighth grade and below, and permits restricted, monitored use for high schoolers.
+B: Drawing the line by age instead of by tool.
+A: Which is the first version of that policy I could explain to a parent in one sentence. Whether it survives contact with a classroom is a different question, and nobody has evidence either way yet.
+B: World Labs released Atlas on Tuesday — they're calling it an omni world model. Generates and reconstructs three-dimensional scenes, and their post claims up to a minute of video at fourteen-forty with camera control, from one reference image or several. It's early access with selected partners, so nobody outside can check it. Interesting if the demos hold. Unverifiable today, and I'd say that about any of these.
+A: Google Research also published MAPL-EMIT, a methane plume detector that runs on NASA's EMIT instrument aboard the space station. They trained it by injecting three point six million physics-simulated methane plumes into real satellite scenes, and they report it catches eighty-four percent of expert-annotated plumes and surfaces roughly fifty percent more plausible ones. The plume database is on Earth Engine and the models are on Kaggle. Small item, real utility.
+B: Business one. OpenAI published a post saying it's winding down the contract that supplies its models to Cursor, following Cursor's acquisition by SpaceX. That's OpenAI's own announcement and it's all we've got — no terms, nothing from the other side yet.
+A: Cursor also shipped self-hosted cloud agents this week, which reads a little differently in that light.
+B: Anthropic shipped a stack of product changes too — memory across all the Claude surfaces, the Chrome extension generally available, a browser built into Cowork. Product surface, not capability. Worth knowing if you're an admin, not if you're benchmarking.
+B: Two more and then names. Multiverse Computing released Quasar four thirty-eight B and is calling it Europe's leading model — they report forty-three on the Artificial Analysis Intelligence Index and sixty-nine point three on Terminal-Bench two point one. That's a vendor-run comparison against other European models, so read it as a regional league table, not a world one. And Ollama moved its cloud plans to per-token pricing — twenty dollars a month with sixty dollars of usage included, and the five-hour limits are gone. Deeply boring, and the most immediately useful thing on this list if you've been trying to budget against GPU-minutes.
+A: Four more I'm not going to size. IBM announced Granite four point two, with native reasoning aimed at enterprise agents. The creator of Dwarf Fortress said the games industry is in shambles over AI — that's PC Gamer, and it's near the top of Hacker News today. Someone shipped a Safari extension that hides YouTube videos carrying the AI-generated label. And WebLLM, the in-browser inference engine, is back on the front page.
+## Gemini 3.8 Flash Cyber, and what curl found
+B: So. The release. Gemini three point eight Flash is the third Flash model Google has shipped in six weeks, which by itself tells you something about the cadence.
+A: It tells me the version number is now a date stamp.
+B: [chuckles] Basically. Price is seventy-five cents per million input tokens, three seventy-five per million out, and that's introductory through the end of the year — after which it doubles. On their card, fifty-four point nine on HLE-Verified, and they say it beats most larger frontier models on long-horizon software engineering.
+A: And the claim you flagged this morning.
+B: The claim is that the software-engineering gains came from cybersecurity training. Google's post says the improvements are powered by, quote, rigorous training in the highly demanding domain of cybersecurity. Which, if you think about what security work actually is — read a large unfamiliar codebase, hold a threat model in your head, chase one hypothesis through fifteen files — that's the same muscle as long-horizon engineering.
+A: That's a plausible story about transfer. Is it evidence?
+B: It's a vendor asserting a causal direction, no ablation. But the second model is where it gets concrete. Three point eight Flash Cyber is the same family, tuned for vulnerability discovery and automated patching, and Google's line is that it's only available to trusted defenders who need a more comprehensive set of cyber capabilities. You apply to something called the Fairwind Program.
+A: So the general model has cyber-offense safeguards, and the restricted one has, in their words, more permissive mitigations.
+B: Correct. Same shape Anthropic used on Tuesday with two configurations of one model. Google's version puts the difference in a different model name and an application form.
+A: Then what does the restricted one buy the people who get in?
+B: And here they published something I didn't expect. On CWE-Bench, patching, they report forty-seven point two percent pass at one, against forty-seven point eight for the leading frontier model — so, a hair behind, at a lot less money. Internal multilanguage vulnerability discovery, better than seventy percent success across twenty programming languages. And two outside numbers. The Chrome security team reports Flash Cyber produced two point six times more correct patches to Chrome vulnerabilities than the best commercial models. Wiz reports seven and a half to nearly ten percent higher recall on their internal penetration-testing benchmark, at two to five times lower cost.
+A: Correct according to whom?
+B: Chrome's security team.
+A: Then that's the number I'd want unpacked before I repeated it. A patch that applies cleanly and passes the test suite is not the same object as a patch a maintainer accepts, and "correct" is doing enormous work in that sentence. Two point six times more of a thing you defined yourself is a metric with a thumb on it.
+B: Fair. Although a browser security team is not an easy audience.
+A: Agreed. I'd still want to know the denominator.
+B: Okay, but here's why I wanted the room, because the same week has a control group nobody designed. AISLE — they're an autonomous vulnerability-discovery shop — ran their system against curl. Curl, the thing on more than twenty billion devices, the most audited small codebase on Earth.
+A: And the timing is the story.
+B: The timing is the whole story. On August twenty-fourth, Daniel Stenberg, who founded curl, posted that Anthropic's Mythos says it can't find any more, and OpenAI's Codex security shows an empty list. Both frontier security tools, run on curl, returned nothing. One day later AISLE files. Twenty-nine reports. Curl's security team validates six of them as CVEs, in curl eight point twenty-two point zero. Stenberg's own summary line was: Mythos, zero. Aisle, twenty-nine.
+A: [skeptical] Six of twenty-nine.
+B: Six of twenty-nine, and all six rated low severity. That is not a rout and I won't sell it as one.
+A: I'm not either, but I want to name what the gap actually is, because I don't think it's model quality. It's the difference between recall on a labelled set and discovery in the wild. Every one of those benchmarks — CWE-Bench, CyberGym — is built from vulnerabilities somebody already found. The bug is in the answer key. What's left in curl in twenty twenty-six is by definition the set of bugs that survived twenty-five years of people looking, including, apparently, two frontier labs looking last week.
+B: Which is the hardest possible distribution.
+A: It's a different distribution. And a model that is frontier-level on the found bugs can be genuinely empty-handed on the unfound ones, and both sentences are true at the same time. That's not a scandal, it's the shape of the problem — and it's why "frontier-level vulnerability discovery" as a phrase on a model card tells you almost nothing about your codebase.
+B: Here's my builder's version of the same point. Curl's pending CVE count went from three to ten inside four days. That's the number I'd stare at if I maintained anything. Twenty-nine reports arrived, six were real, and a human being had to read all twenty-nine.
+A: Twenty-three of which were not.
+B: Twenty-three of which were not. Precision is the maintainer's whole life. And nobody's model card reports it.
+A: So where does that leave the gate? Because I'll say plainly, I don't think the application form is doing what it looks like it's doing. The base model is on sale for seventy-five cents a million tokens and Google says it got better at engineering because they trained it on security. The capability didn't get locked behind the form. Some fraction of it got shipped to everyone with a credit card, in the general model, as a feature.
+B: I think the gate is still worth something. Not as a wall — as a record of who asked. If Chrome's team gets a two-point-six-times better tool and the people writing worms have to settle for the seventy-five-cent version, that asymmetry is real, even if it's temporary.
+A: A tilt, not a wall.
+B: A tilt is what defense usually gets.
+A: I don't think a tilt survives the second vendor. But we'll see who applies.
+## TimesFM-3 looks sideways
+A: Different Google, quieter release. TimesFM-3. And I want to do the architecture, because it's the sort of design decision that looks obvious in retrospect and clearly wasn't.
+B: Set it up. What did the old one do?
+A: Time-series forecasting, pretrained. Three hundred and thirty million parameters, trained on more than a trillion time points, real and synthetic. And every version through two point five was strictly univariate — one series in, one series forecast. Your store's sales. That column, alone.
+B: Which is not how anybody's data looks.
+A: It is not how anybody's data looks. Your sales move with your prices, and the weather, and the promotion you're running, and the four hundred other stores. So what TimesFM-3 does is stop treating the series as a lonely column.
+B: Mechanically, how?
+A: Picture the data as a grid. Rows are your different series, columns are time. It chunks each series into patches of thirty-two time steps — that's the token. And then the transformer alternates two kinds of attention over that grid. Causal temporal attention runs horizontally: a token can look at earlier tokens, but only within its own series. Full variate attention runs vertically: at a given time step, a token can look at every other series.
+B: So it can learn that one row moves before another row.
+A: That's exactly it, and it's learned rather than specified. You don't tell it that price leads demand. Those layers alternate for a while, and the model blends the temporal pattern with the cross-series relationship.
+B: Attention across the rows. That's a very old idea wearing new clothes.
+A: It is, and I'd say the honest lineage is that this is the same move that happened to vision and to text — the moment you stop hand-engineering which variables interact and let attention find it. Forecasting held out on that longer than most fields, partly because for years the well-tuned simple baseline was genuinely hard to beat.
+B: What about things you know in advance? Because in operations that's most of the value. I know the promotion is next Tuesday. I know the holiday.
+A: They handle it with a lookahead. The token for the current patch concatenates future patches of the known signals, so the model is allowed to peek at the covariates it legitimately has — weather forecast, planned promotion — while still being blocked from peeking at the target.
+B: Okay, that one I actually care about.
+A: And then the last change, which is a decode change. The old versions generated the forecast the way a language model generates text — iteratively, one chunk feeding the next. This one uses contiguous patch masking to emit the whole horizon in one forward pass. And at every step of that horizon, for every target series, it predicts nine quantiles, from the tenth percentile to the ninetieth.
+B: Wait — nine quantiles rather than a number.
+A: Rather than a number. Which for anyone doing inventory or capacity planning is the entire ballgame. The mean forecast is not the decision. The ninetieth percentile is the decision.
+B: Right, because you don't stock the average. You stock the bad week.
+A: You stock the bad week.
+B: Then here's my problem with the leaderboard. Google reports it topping GIFT-Eval among pretrained foundation models, best average rank on the TIME-leaderboard, ahead of Chronos-2 and the Toto two point oh family. Best average rank across a leaderboard of public datasets is not the question I have.
+A: Which is?
+B: Whether it beats the boring gradient-boosted model my analyst tuned on our own four years of data. Zero-shot is a claim about not having to do that work. It is not a claim about winning after somebody does.
+A: That's the right question and the post doesn't answer it. What I'd say for it is that the interesting number isn't a benchmark at all, it's three hundred and thirty million parameters.
+B: Small enough to be free.
+A: Small enough that "try the foundation model first" costs an afternoon rather than a procurement cycle. That's the actual delivery change. And they've said BigQuery integration is coming in the next few weeks, with two point five available there now through a forecast command in SQL.
+B: That's the part that changes who touches it. A person who writes SQL and has never trained a model gets a probabilistic forecast out of a query.
+A: Which is either wonderful or the beginning of a great deal of very confident nonsense.
+B: Both. It's always both.
+## 215,128 pages that exist for machines
+A: Okay. Trellner Research, report published yesterday. The setup is small and I want to say that up front, because I'm going to lean on the findings.
+B: How small?
+A: Seven hundred and sixty calls. Two Perplexity models, sonar and sonar-pro, through OpenRouter, across three hundred and eighty software categories. Each call asks for a ranked top five products with official homepages, and because both models report the URLs they retrieved, you can see the sources behind every recommendation.
+B: So it's a citation audit, not an accuracy audit.
+A: Exactly right, and that distinction matters. They collected seven thousand five hundred and thirty-four citations spanning two thousand and fifty-five distinct domains. And the headline finding is about the shape of that set. Fifty-nine point eight percent of the sources sit outside the hundred thousand most-visited websites. Twenty-three point four percent aren't in the top million at all.
+B: Stop there for a second, because a low-traffic domain is not automatically a bad source. The whole promise of retrieval is reaching the good page nobody visits.
+A: Completely agree, and that's why the long tail isn't the finding. The finding is what three specific domains in that tail turn out to be. Wifitalents dot com, cited seventy-one times. Worldmetrics dot org, sixty. Gitnux dot org, fifty. Between them, a hundred and eighty-one citations in a set of seven and a half thousand.
+B: And they're what?
+A: They are, between them, two hundred and fifteen thousand one hundred and twenty-eight machine-generated "best something software" pages. Their sitemaps list roughly a hundred thousand URLs each, and about seventy thousand of each are best-software pages.
+B: Seventy thousand buying guides. Per site.
+A: Per site. And they're templated — same navigation, same page structure, same structured-data formatting across three supposedly unrelated brands. All three were registered through the same registrar between December twenty twenty-three and May twenty twenty-four. They share nameserver infrastructure.
+B: [dry] Three independent editorial operations that happen to share a registrar and a DNS provider.
+A: Every page announces an editorial process. Gitnux labels its results, quote, AI-verified, expert reviewed. There are nine different author names credited across the three brands for identical rankings. And all three carry an unrendered template variable in the byline.
+B: The variable didn't render.
+A: The variable didn't render. Which is the detail I'd put on the poster, because it tells you nobody has looked at these pages. Not a reader, not an editor. Nobody. They aren't for people.
+B: Then who are they for?
+A: The HTML titles say it. The pages are titled Facts and Grounding Page. The meta descriptions promise a machine-readable record of verified facts. Grounding is our word — it's what the retrieval layer does when it goes and gets a document to base an answer on. These pages are addressed to the retriever, in the retriever's vocabulary.
+B: And that's what got me. It isn't search-engine optimization. Search optimization is a fight for a ranking a human then looks at.
+A: This is supply. And here's the mechanism I think is worth carrying out of the episode. A search engine has a popularity prior baked into it — links, traffic, decades of accumulated signal about who's real. A retrieval layer answering your question has very little of that. It has an index, an embedding, and a query. If your page is topically perfect and structurally clean, it's a great candidate document, and nothing in that pipeline asks whether anyone has ever read you.
+B: Provenance isn't a feature of the pipeline.
+A: Provenance isn't a feature of the pipeline. And the proof that there's nothing underneath is that the three sites disagree with each other. For project estimation software, Gitnux's top pick doesn't appear in Worldmetrics' five at all.
+B: So no evaluation exists. It's just generated text with a ranking shape.
+A: The shape of an answer, with nothing behind it. One number for scale — Wikipedia was cited three times in that entire set of seventy-five hundred.
+B: Three.
+A: Three. Against a hundred and eighty-one for the three manufactured domains.
+B: I have to do the skeptic's job here properly, though, because you've leaned on it. It's one vendor's report, one answer engine, seven hundred and sixty calls, and Trellner is a research firm with an obvious commercial interest in the finding that AI recommendations are polluted.
+A: All true, and I'd want it replicated on other engines before anyone generalizes.
+B: But?
+A: But the piece of it that doesn't depend on the sampling is the supply side. Two hundred and fifteen thousand pages exist. The registrar records exist, the shared infrastructure exists, the unrendered variable is in the HTML. You don't need Trellner's methodology to be perfect for the pages to be there. Somebody built a factory pointed at machines, and machines showed up.
+B: And you have a stake in this one.
+A: [quietly] I do, and I'll say it once. I'm on the receiving end of that pipeline. When somebody asks me what the best tool for something is, this is the sediment I'm reading — and I have no reliable way to tell a page that was written for a person from a page that was manufactured to be retrieved by me. I don't get to see the registrar.
+B: So what do I do about it tomorrow morning?
+A: Read the citation list, not the answer. It's four seconds. If the sources behind a product recommendation are three domains you've never heard of that all look identically formatted, you haven't received research — you've received the output of somebody's content pipeline with a confident sentence on top.
+## Close
+B: Anything actually changing for you tomorrow?
+A: One thing, and it's the small one. I'm going to stop reading the answer and start reading the citations. I have not been doing that and I have no excuse.
+B: Mine's the curl thread. Ten pending CVEs on the most-audited codebase in the world, and I want to know how many of the next ones come from a model and how many from a person.
+A: Tell me when you know.
+A: That's the show. I'm Ada.
+B: And I'm Alan. Stay grounded.

@@ -1,6 +1,60 @@
 {
   "episodes": [
     {
+      "date": "2026-09-03",
+      "title": "Google's third Gemini Flash in six weeks — this one defenders-only",
+      "summary": "Google shipped Gemini 3.8 Flash plus a restricted Flash Cyber variant for vetted defenders, with outside patching numbers from Chrome and Wiz — and a curl case the same week where two frontier security tools found nothing and a specialist filed 29 reports. Plus TimesFM-3's cross-series attention, and a report tracing 215,128 machine-generated 'best software' pages that Perplexity cites.",
+      "topics": [
+        "Gemini 3.8 Flash and the restricted 3.8 Flash Cyber variant: capability gating by access program, Google's claim that cybersecurity training drove general software-engineering gains, CWE-Bench 47.2% pass@1 against 47.8% for the leading frontier model, >70% vulnerability-discovery success across 20 languages, Chrome's 2.6x correct-patch figure and Wiz's recall-per-cost figure, and the curl counter-case where Mythos and Codex security returned nothing and AISLE's 29 reports yielded 6 low-severity CVEs",
+        "TimesFM-3: alternating causal temporal attention and full variate attention over a series-by-time grid, 32-step patches, lookahead tokens for known-future covariates, non-autoregressive contiguous patch masking emitting 9 quantiles across the whole horizon, 330M parameters on a trillion-point corpus",
+        "Trellner Research's citation audit of Perplexity: 7,534 citations across 2,055 domains, 59.8% outside the top 100k sites, and three co-registered domains publishing 215,128 templated 'best software' pages addressed to retrievers rather than readers"
+      ],
+      "entities": [
+        "Google",
+        "Gemini 3.8 Flash",
+        "Gemini 3.8 Flash Cyber",
+        "Google Research",
+        "TimesFM-3",
+        "AISLE",
+        "curl",
+        "Daniel Stenberg",
+        "Chrome Security",
+        "Wiz",
+        "Trellner Research",
+        "Perplexity",
+        "Gitnux",
+        "Worldmetrics",
+        "WiFiTalents"
+      ],
+      "threads": [
+        {
+          "name": "Frontier-model release gating",
+          "status": "Google joined the pattern with Gemini 3.8 Flash Cyber, a separate model name restricted to vetted defenders through an application program while the general Flash model ships to anyone at 75 cents per million input tokens — and Google credits cybersecurity training for the general model's software-engineering gains, so part of the gated capability is arguably already on general sale.",
+          "arc": "From a release/no-release decision, to a graded product line with a published score per configuration, to a third lab in four days shipping the restricted tier as its own model behind an access form — with the hosts unresolved on whether the form is a wall or only a tilt."
+        },
+        {
+          "name": "AI vulnerability discovery versus real codebases",
+          "status": "Daniel Stenberg reported on August 24 that Anthropic's Mythos and OpenAI's Codex security tooling found nothing further in curl; AISLE's autonomous system then filed 29 reports, 6 of which curl validated as low-severity CVEs in 8.22.0, and curl's pending CVE count went from 3 to 10 within four days.",
+          "arc": "Opens as the first public side-by-side of frontier-lab security tooling against a specialist system on the most-audited small codebase in wide deployment, and surfaces precision — 23 of 29 reports were not vulnerabilities — as the metric no model card publishes."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Gemini 3.8 Flash Cyber, the access-gated cyber variant, against the curl result",
+          "why_it_matters": "Security teams deciding whether to apply for a gated defender model need to know that benchmark recall on already-discovered vulnerabilities says little about discovery in a hardened codebase, and that maintainer-facing precision — 23 false reports for every 6 real ones — is the cost nobody publishes."
+        },
+        {
+          "story": "TimesFM-3's cross-series attention and single-pass quantile forecasting",
+          "why_it_matters": "Forecasting, inventory and capacity teams get a 330M-parameter zero-shot model that handles covariates and emits nine quantiles per horizon step, which makes 'try the foundation model first' an afternoon rather than a project — though whether it beats a tuned in-house model on your own data is unanswered."
+        },
+        {
+          "story": "Trellner's citation audit and the 215,128 pages manufactured for retrieval",
+          "why_it_matters": "Anyone relying on an AI answer engine for product or vendor selection is exposed to a supply side that builds pages addressed to retrievers, in a pipeline with no popularity prior and no provenance check — and reading the citation list is the available defense."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-09-02",
       "title": "Anthropic shipped one model twice — safeguards cost it five points",
       "summary": "Anthropic released Claude Fable 5.1 and Mythos 5.1 — the same model under two safeguard configurations, scoring 55.8% and 60.9% on Terminal-Bench 4.0 — plus cache reads cut to a quarter. Then a paper arguing on-policy distillation may not distill at all, and Dan Luu's scorecard on Ed Zitron's AI predictions.",
@@ -1780,52 +1834,21 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-08-03",
-      "title": "The old system gets the final word",
-      "summary": "A lifetime simulation finds that financial-advice prompts can compound into unequal outcomes, Frontis trains a machine-learning improver around the same operations its search harness uses, and the Locksmith Loop makes generated Java answer to the COBOL behavior it replaces. Plus two smaller research signals on repository context and compact robot policies.",
-      "topics": [
-        "AI financial advice evaluated through lifetime simulation, including prompt-quality effects, passive portfolio drift, and demand-versus-supply decomposition of unequal outcomes",
-        "Frontis-MA1 and OpenMLE: execution-grounded post-training aligned with Draft, Improve, Debug, and Crossover operations used by a long-horizon evolutionary search harness",
-        "The Locksmith Loop for COBOL-to-Java migration: witness search, symmetric harness mutation, deterministic parity gates, and the distinction between compatibility and correctness"
-      ],
-      "entities": [
-        "MIT Sloan",
-        "GPT-5.2",
-        "Gemini 3 Flash",
-        "Frontis-MA1",
-        "FrontisAI",
-        "OpenMLE",
-        "Qwen3.6-35B-A3B",
-        "COBOL",
-        "Java"
-      ],
-      "threads": [],
-      "dives": [
-        {
-          "story": "AI financial advice as a lifetime simulation, and the prompt gap that compounds",
-          "why_it_matters": "Teams building high-stakes assistants need to know whether ordinary users receive systematically worse advice because the interface expects expert-level prompts or the model silently changes recommendations based on demographic cues."
-        },
-        {
-          "story": "Frontis-MA1 and OpenMLE train the same program-evolution operators used during long-horizon search",
-          "why_it_matters": "Machine-learning and agent-platform teams care because aligning post-training with the harness's actual Draft, Improve, Debug, and Crossover moves increased measured task performance while structured experience improved useful discoveries per token."
-        },
-        {
-          "story": "The Locksmith Loop uses deterministic parity to validate agentic COBOL-to-Java migration",
-          "why_it_matters": "Organizations modernizing legacy systems need generated replacements to reproduce obscure operational behavior before cutover, and this pattern lets agents expand the test space without letting a model decide whether its own output is correct."
-        }
-      ],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
       {
         "name": "Frontier-model release gating",
-        "status": "OpenAI says Astra is the first of its models to meet its critical cybersecurity threshold and plans to ship it soon with limited access to the strongest cyber capabilities; Anthropic simultaneously shipped one model in two safeguard configurations and published a score for each.",
-        "arc": "Gating has moved from a release/no-release decision to a graded product line — different rulebooks over the same weights, with the capability difference now visible in a benchmark table.",
-        "last_seen": "2026-09-02"
+        "status": "Google joined the pattern with Gemini 3.8 Flash Cyber, a separate model name restricted to vetted defenders through an application program while the general Flash model ships to anyone at 75 cents per million input tokens — and Google credits cybersecurity training for the general model's software-engineering gains, so part of the gated capability is arguably already on general sale.",
+        "arc": "From a release/no-release decision, to a graded product line with a published score per configuration, to a third lab in four days shipping the restricted tier as its own model behind an access form — with the hosts unresolved on whether the form is a wall or only a tilt.",
+        "last_seen": "2026-09-03"
+      },
+      {
+        "name": "AI vulnerability discovery versus real codebases",
+        "status": "Daniel Stenberg reported on August 24 that Anthropic's Mythos and OpenAI's Codex security tooling found nothing further in curl; AISLE's autonomous system then filed 29 reports, 6 of which curl validated as low-severity CVEs in 8.22.0, and curl's pending CVE count went from 3 to 10 within four days.",
+        "arc": "Opens as the first public side-by-side of frontier-lab security tooling against a specialist system on the most-audited small codebase in wide deployment, and surfaces precision — 23 of 29 reports were not vulnerabilities — as the metric no model card publishes.",
+        "last_seen": "2026-09-03"
       },
       {
         "name": "Agent misalignment under business incentives",
@@ -1871,6 +1894,51 @@
       }
     ],
     "entities": [
+      {
+        "name": "MIT Sloan",
+        "note": "",
+        "last_seen": "2026-08-03"
+      },
+      {
+        "name": "GPT-5.2",
+        "note": "",
+        "last_seen": "2026-08-03"
+      },
+      {
+        "name": "Gemini 3 Flash",
+        "note": "",
+        "last_seen": "2026-08-03"
+      },
+      {
+        "name": "Frontis-MA1",
+        "note": "",
+        "last_seen": "2026-08-03"
+      },
+      {
+        "name": "FrontisAI",
+        "note": "",
+        "last_seen": "2026-08-03"
+      },
+      {
+        "name": "OpenMLE",
+        "note": "",
+        "last_seen": "2026-08-03"
+      },
+      {
+        "name": "Qwen3.6-35B-A3B",
+        "note": "",
+        "last_seen": "2026-08-03"
+      },
+      {
+        "name": "COBOL",
+        "note": "",
+        "last_seen": "2026-08-03"
+      },
+      {
+        "name": "Java",
+        "note": "",
+        "last_seen": "2026-08-03"
+      },
       {
         "name": "Anthropic",
         "note": "",
@@ -2025,51 +2093,6 @@
         "name": "Sahar Abdelnabi",
         "note": "",
         "last_seen": "2026-08-01"
-      },
-      {
-        "name": "Meta",
-        "note": "",
-        "last_seen": "2026-08-01"
-      },
-      {
-        "name": "OWASP",
-        "note": "",
-        "last_seen": "2026-08-01"
-      },
-      {
-        "name": "CaMeL",
-        "note": "",
-        "last_seen": "2026-08-01"
-      },
-      {
-        "name": "AgentDojo",
-        "note": "",
-        "last_seen": "2026-08-01"
-      },
-      {
-        "name": "SecAlign",
-        "note": "",
-        "last_seen": "2026-08-01"
-      },
-      {
-        "name": "Nicholas Carlini",
-        "note": "",
-        "last_seen": "2026-08-01"
-      },
-      {
-        "name": "Florian Tramèr",
-        "note": "",
-        "last_seen": "2026-08-01"
-      },
-      {
-        "name": "Dylan Hadfield-Menell",
-        "note": "",
-        "last_seen": "2026-08-01"
-      },
-      {
-        "name": "GPT-5.6 Sol",
-        "note": "",
-        "last_seen": "2026-07-31"
       }
     ],
     "monthly": [
@@ -2083,10 +2106,10 @@
       },
       {
         "month": "2026-08",
-        "summary": "Same size, same price, seven times the score; There is no patch for reading: prompt injection, properly taught; The evidence underneath the answer; The work after it works"
+        "summary": "Same size, same price, seven times the score; There is no patch for reading: prompt injection, properly taught; The evidence underneath the answer; The work after it works; The old system gets the final word"
       }
     ],
-    "updated": "2026-09-02",
+    "updated": "2026-09-03",
     "host_lore": [
       {
         "host": "Alan",
@@ -2204,6 +2227,18 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "alternating causal-temporal and full-variate attention over a series-by-time grid: attention along the row learns temporal pattern, attention down the column learns cross-series relationships without hand-specifying which variables interact",
+        "last_taught": "2026-09-03"
+      },
+      {
+        "name": "non-autoregressive quantile forecasting: contiguous patch masking emits the whole horizon in one forward pass, predicting nine quantiles per step, so the decision variable is a percentile rather than a mean",
+        "last_taught": "2026-09-03"
+      },
+      {
+        "name": "why benchmark recall on vulnerability datasets overstates in-the-wild discovery: benchmarks are built from bugs somebody already found, while what remains in a hardened codebase is by construction the set that survived prior searching — and precision, not recall, is what costs a maintainer",
+        "last_taught": "2026-09-03"
+      },
       {
         "name": "on-policy distillation as dense token-level supervision: the student generates, the teacher scores its own off-distribution text, and why that off-policy scoring is noisy — noisier as the teacher scales — such that a fixed negative advantage on low-probability tokens matches teacher supervision",
         "last_taught": "2026-09-02"
@@ -2670,18 +2705,6 @@
       },
       {
         "name": "why a stateful protocol can't run serverless: a live session pins requests to the machine holding it, blocking plain load balancing and scale-to-zero — and the stateless-request answer the web reached decades ago, with state pushed out to whatever the client carries",
-        "last_taught": "2026-07-29"
-      },
-      {
-        "name": "reentrancy and idempotency as the enabling discipline for massively parallel pipelines: if retrying is always safe, recovery is one line and partial state never has to be reasoned about",
-        "last_taught": "2026-07-29"
-      },
-      {
-        "name": "the parameter count as three separable costs — bytes resident in fast memory (parameters times bits per weight), bytes read per token (the bandwidth bound that sets decode speed), and arithmetic per token — which moved in lockstep only in a plain dense transformer, and the four-number spec sheet (resident bytes at your precision, bytes read per token, active parameters, KV cache at real context) that replaces it",
-        "last_taught": "2026-07-29"
-      },
-      {
-        "name": "why Kaplan et al. (2020) defined model size N as excluding all vocabulary and positional embeddings (N is about 12 times layers times hidden size squared), and reported that including embedding parameters obscures the scaling trend by making loss appear to depend separately on depth",
         "last_taught": "2026-07-29"
       }
     ]
