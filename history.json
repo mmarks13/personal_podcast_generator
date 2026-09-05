@@ -65,6 +65,31 @@
       ]
     },
     {
+      "date": "2026-09-05",
+      "kind": "deepdive",
+      "title": "Compiling a spec into weights: the model as build step, not runtime",
+      "summary": "A pair of papers propose treating a natural-language specification as source code: compile it once into a twenty-three-megabyte adapter for a frozen six-hundred-million-parameter interpreter, then run it locally forever instead of calling a remote model per input. We trace the compiler analogy — front end, back end, optimization level — through where it holds and where it breaks.",
+      "topics": [
+        "deep dive: compiling recurring AI work into local neural functions — fuzzy functions, the compiler/interpreter split, the two halves of a Program-as-Weights program (natural-language pseudo-program plus LoRA), hypernetwork weight prediction versus compile-by-training's warm-started gradient descent, FuzzyBench-Hard and LLM Exact Match, teacher-mixture versus data-scaling supervision sweeps, and where the compiler analogy breaks (no determinism, no semantics preservation, opaque artifact)"
+      ],
+      "entities": [
+        "Yuntian Deng",
+        "Pengyu Nie",
+        "Stuart Shieber",
+        "Wentao Zhang",
+        "Program-as-Weights",
+        "FuzzyBench",
+        "FuzzyBench-Hard",
+        "Qwen3-0.6B",
+        "LoRA",
+        "GPT-5.4-mini",
+        "GPT-5.5",
+        "paw-helper"
+      ],
+      "threads": [],
+      "lore": []
+    },
+    {
       "date": "2026-09-04",
       "title": "OpenAI's GPT-6 Astra hits Critical on cyber — and reasons less legibly",
       "summary": "OpenAI shipped GPT-6 Astra, the first model it has designated Critical for cybersecurity capability, alongside a reasoning technique that leaves less of a readable chain of thought. Also: what actually connected yesterday's simultaneous ChatGPT, Claude and Grok outages, and a paper that distills a thousand ML repositories into five thousand reusable agent skills.",
@@ -2276,6 +2301,26 @@
         "last_taught": "2026-09-05"
       },
       {
+        "name": "compiling a natural-language specification into weights: a shared frozen small interpreter plus a per-function artifact, so the large model is a build-time tool builder rather than a run-time dependency",
+        "last_taught": "2026-09-05"
+      },
+      {
+        "name": "the two halves of a Program-as-Weights program: a discrete natural-language pseudo-program that denoises the specification (worth 4.5 points under heavy typos) plus a continuous LoRA that supplies behavioral control text alone cannot",
+        "last_taught": "2026-09-05"
+      },
+      {
+        "name": "hypernetwork weight prediction versus warm-started gradient descent as compiler optimization levels: a 4B compiler emitting a LoRA in one forward pass in ~3.5s, versus using that prediction as the initialization for a ~1-minute teacher-supervised training run",
+        "last_taught": "2026-09-05"
+      },
+      {
+        "name": "LLM Exact Match as a semantic grading metric that forgives formatting but not values or logic — and why a benchmark subset defined by another system's failures reports a recovery rate, not a general delta",
+        "last_taught": "2026-09-05"
+      },
+      {
+        "name": "teacher quality versus supervision volume: at a fixed 3,600-pair budget, swapping a third of the examples to a stronger teacher beat multiplying the data",
+        "last_taught": "2026-09-05"
+      },
+      {
         "name": "chain-of-thought monitorability as an accident of token-based reasoning: intermediate work was written as text to buy computation, not for oversight, so recurrent depth — looping hidden state through the same block instead of emitting a token — buys the same computation with no transcript for a monitor to read",
         "last_taught": "2026-09-04"
       },
@@ -2722,26 +2767,6 @@
       {
         "name": "hybrid GUI and command-line computer use: using visual interaction when interface state is the evidence, programmatic execution for compact exact operations, batching predictable local actions, and reinforcement-learning verifiers that reward checking postconditions before declaring success",
         "last_taught": "2026-08-02"
-      },
-      {
-        "name": "productization as converting a demonstrated capability into a bounded operational promise: define the supported user and outcome, encode happy and unhappy paths as capability and regression evaluations, constrain probabilistic components inside explicit data/tool/permission contracts, measure user-level quality, latency and cost, rehearse dependency failure and recovery, release progressively with tested rollback, assign incident and lifecycle ownership, and feed production failures back into tests and architecture",
-        "last_taught": "2026-08-02"
-      },
-      {
-        "name": "prompt-prefix caching as the dominant cost term in agent workloads: an agent resends a large byte-identical prefix hundreds of times per session, so a cache-hit input price turns the bill from a function of how much is read into a function of how much is new — and why the churn has to sit at the end of the prompt, never in the middle",
-        "last_taught": "2026-08-01"
-      },
-      {
-        "name": "native (parametric) agent memory versus external memory stores: a persistent evolving state inside the backbone maintained gradient-free in forward passes, compressed to a fixed-size representation — why fixed-size state makes memory lossy by construction, and why an unreadable memory breaks retention and deletion controls that assume a queryable store",
-        "last_taught": "2026-08-01"
-      },
-      {
-        "name": "prompt injection as an architectural property rather than a bug: every prior injection class was fixed by a boundary enforced BEFORE meaning (a parser and prepared statements, a page-table no-execute bit, a type tag), while a language model has no pre-semantic stage — the prompt is one flat token sequence and recognizing text as an instruction is the same act as understanding it, so the 'system role' is a learned stylistic prior rather than a privilege level (Ye/Cui/Hadfield-Menell: destyling drops average attack success from 61% to 10%)",
-        "last_taught": "2026-08-01"
-      },
-      {
-        "name": "the three families of prompt-injection defense and where each puts the boundary: prompt-level provenance marking (spotlighting's delimiting/datamarking/encoding, >50% to <2% attack success), training-level privilege (instruction hierarchy — system-prompt-extraction defense +63%, jailbreak robustness +30%; SecAlign preference optimization to <10%), and system-level design that abandons model trust entirely (the six design patterns — Action-Selector, Plan-Then-Execute, LLM Map-Reduce, Dual LLM, Code-Then-Execute, Context-Minimization — and CaMeL's control/data-flow extraction plus capabilities, 77% of AgentDojo tasks with provable security vs 84% undefended)",
-        "last_taught": "2026-08-01"
       }
     ]
   }

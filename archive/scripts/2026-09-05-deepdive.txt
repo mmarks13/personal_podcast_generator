@@ -1,0 +1,173 @@
+## Signature needed by EOD
+A: Good afternoon — it's Saturday, September fifth. I'm Ada.
+B: And I'm Alan. Ada, give me the sentence.
+A: "Signature needed by EOD." Mark that one immediate. Mark the newsletter wait.
+B: That's it. That's the whole specification. Anybody who has ever written software knows exactly what I'm supposed to do with it, and also knows there is no way to write it down in code.
+A: Because there is no rule. There's no regular expression for "somebody needs me." You could write two hundred lines of keyword matching and it would be wrong on Monday.
+B: So what everybody actually does is call a big remote model. Every message, every time. Which works, and let's be fair about that — it works really well.
+A: It works, and it bills. And that's the crack this episode goes into. There's a paper dated Wednesday the third, from Yuntian Deng, Pengyu Nie and Stuart Shieber. It's called "Compile by Training: Turning Natural-Language Specifications into Local Neural Functions." It's near the top of Hugging Face's paper list this week — a couple hundred upvotes.
+B: And a listener picked it, which I'm glad about, because the title contains a word I want to argue with for twenty minutes.
+A: [amused] Compile.
+B: Compile. That's a load-bearing word. That's not "we fine-tuned a small model." That's a claim about what kind of object you get at the end.
+A: And that's the question. What does it actually mean to compile English into weights? Does it hold up as an analogy, and where does it break? I'll tell you now that it breaks somewhere real, and it's not where you'd guess.
+
+## The gap between a rule and an API key
+A: Start with the category, because the earlier paper names it and the name is good. They call these fuzzy functions. A fuzzy function is a task that's easy to describe and hard to specify.
+B: Give me the paper's own examples.
+A: Alerting on important log lines. Repairing malformed JSON. Ranking search results by intent. Every one of those, you can explain to a new hire in one sentence, and none of them reduce to rules.
+B: Right, and here's the shape of the problem from where I sit. Those tasks are too fuzzy for ordinary code and too narrow to justify a thirty-billion-parameter model on every single call. That's the sentence in the newer paper, near enough, and it's the honest framing.
+A: The earlier paper is blunter about the cost of the API route. Their words: it's costly, it's fragile, it undermines reproducibility because providers may silently update their models, and it prevents software from being self-contained.
+B: [dry] Providers may silently update their models. I have opinions.
+A: I know you do.
+B: I have a classifier in a pipeline right now whose behavior I have no version number for. If it drifts, I find out from a downstream dashboard, at which point I get to go argue with a changelog.
+A: And that's the third cost, and it's the one that isn't on the invoice. Cost, latency, and provider dependence.
+B: So the proposal is: pay the big model once instead of forever.
+A: Once. At build time. The newer paper puts it as a sentence I'd underline: adaptation becomes a software build step, and large language models act as tool builders rather than run-time dependencies.
+B: Tool builders rather than run-time dependencies. Okay. That's a genuinely different picture of where the money goes.
+A: And it's an old picture, which is why I want to walk the lineage before we open the machine. Because computing has run this exact argument before, and it has a name.
+
+## What a compiler actually promises
+A: Every program you've ever run was either interpreted or compiled. Interpreted means the language machinery is present while your program runs, reading it and doing what it says, every time. Compiled means you pay a translation cost once, up front, and what ships afterward is an artifact that runs on a much simpler machine.
+B: And calling a frontier model per input is the interpreted case.
+A: It is exactly the interpreted case. The interpreter is enormous, it's on somebody else's hardware, and it re-reads your intent on every invocation. What these two papers propose is the compiled case.
+B: So then the question is what plays the part of the simple machine.
+A: A small frozen model. In this line of work it's Qwen3, six hundred million parameters, and it never changes. The earlier paper says the analogy out loud: the compiler does the heavy lifting, and the interpreter is a fixed runtime, comparable to a CPU or a byte-code interpreter in a conventional software stack.
+B: [thoughtful] Frozen is the load-bearing word there, not small.
+A: Say more.
+B: Because if every function needed its own six-hundred-million-parameter model, this dies immediately on disk. You'd be shipping a gigabyte per behavior. Frozen means one runtime, installed once, and the per-function thing has to be tiny.
+A: And it is. The per-program artifact is about twenty-three megabytes, quantized, on top of a shared base of a few hundred megabytes that every function on the machine uses. That's the whole economic argument in two numbers.
+B: Twenty-three megabytes is a JavaScript dependency. That's a nothing.
+A: That's the point. And the earlier paper is direct about what that buys you conceptually: a compiled program is a single file that can be saved, version-controlled, distributed through package managers, and called from Python or JavaScript with a two-line interface. Their phrasing — these are objects of the same kind as Python modules. They have a name and a version. Their behavior just lives in weights rather than in source.
+
+## The two halves of the program
+B: Alright, open it. What's actually inside the file?
+A: Two halves, and the split is the clever part. The first half is discrete — it's natural language. They call it a pseudo-program: a clean restatement of your specification, plus a handful of representative input-output examples. Ordinary text, handed to the small model as part of its input.
+B: A prompt.
+A: Functionally a prompt, yes. Written by a machine rather than by you.
+B: And the second half?
+A: The second half is continuous. It's a LoRA — low-rank adaptation, a small set of extra weights hot-attached to the frozen model that re-tunes it for this one task.
+B: So text plus weights. Why both? Pick one.
+A: Because they do different jobs, and the paper says which. Their line is that the discrete half shields the interpreter from typos and ambiguity in the original specification, and the continuous half supplies the fine-grained behavioral control that text alone cannot.
+B: [skeptical] That's a nice claim. Did they test it?
+A: They did, and this is my favorite result in either paper. They ran the specification through a noise machine — typos, bad grammar, ambiguity, formatting garbage — and the system barely moved. Under heavy typos, accuracy fell less than a point.
+B: Which is suspicious. Small models are not robust like that.
+A: That's what they thought too, so they built the ablation. They trained a variant that skips the pseudo-program and feeds the raw specification straight to the small model. On clean specifications, the pseudo-program is worth about one and a half points. On heavily typo'd ones, the gap widens to four and a half.
+B: [interested] So the restatement is a denoiser.
+A: The restatement is a denoiser. A four-billion-parameter model whose entire job is to read a messy human sentence and emit a clean one, standing between your typing and a small model that has no capacity to spare on your typing.
+B: That's a compiler front end. That's lexing and parsing. You clean up the source before the back end ever sees it.
+A: That is precisely what it is, and it's why the analogy earns some of its keep.
+
+## Predicting the weights instead of learning them
+B: So how do you get the LoRA? Because that's the part I can't picture yet.
+A: This is where the earlier paper does something that still strikes me as strange, and it's the thing the new paper exists to argue with. There's a second four-billion-parameter model, and its output is not text. Its output is the weights.
+B: Say that again.
+A: A neural network that emits another neural network's parameters. You hand it the specification and the pseudo-program, plus a fixed sequence of sixty-four learned placeholder tokens. It does one forward pass. You read the hidden states sitting at those placeholder positions, pool them, run them through a small feed-forward network, and project into mixing coefficients that combine shared learnable bases into the finished adapter matrices.
+B: [beat] So the LoRA isn't trained. It's predicted.
+A: Predicted. In a single forward pass, in about three and a half seconds.
+B: That's a hypernetwork.
+A: It's a hypernetwork, and to train the thing that does the predicting they had to build a dataset of specifications. That's FuzzyBench — ten million examples, built up across twenty-nine thematic rounds, covering more than eight hundred categories of fuzzy text task. Classification, format conversion, parsing, fuzzy matching, natural-language commands, tool use.
+B: Ten million. So the compiler has seen an enormous number of "here's a spec, here's what the behavior should be" pairs, and it has learned the mapping from description to adaptation.
+A: And it works better than it has any right to. The headline from the earlier paper: their six-hundred-million-parameter interpreter running these programs gets seventy-three point seven eight percent exact match on their benchmark, against sixty-eight point seven for directly prompting Qwen3 at thirty-two billion.
+B: Beating a model fifty times its size.
+A: At roughly one fiftieth the inference memory. About one point two gigabytes against about sixty. And quantized, on a MacBook M3, it runs at about thirty tokens a second with a cold load under half a second.
+B: [exhales] Okay, so I want to sit on that, because that's the number that changes what I'd build. Half a second to load, thirty tokens a second, on a laptop. That's not a research demo. That's a thing you put in a loop.
+A: Though the comparison wants an asterisk. Seventy-three against sixty-eight is on their benchmark, built by their pipeline, against a general model that was never specialized for these tasks. It's not "small beats big." It's "specialized beats general, when the task is narrow and you did the specializing offline."
+B: Which has been true since forever.
+A: Since forever. What's new isn't the finding. It's that the specializing costs three and a half seconds and a description.
+
+## Turning up the optimization level
+A: Now — the new paper. Because there's a cost to predicting weights in one forward pass, and it's the cost you'd expect.
+B: It spends the same compute on every function no matter how hard the function is.
+A: That's the paper's own objection, near enough. Fast, but fixed. So compile by training keeps everything else identical — same program format, same runtime interface — and changes only what happens between the specification going in and the adapter coming out.
+B: What happens instead?
+A: Three things. Teacher models generate examples from your specification. Those examples train the adapter with actual gradient descent. And the fast compiler's prediction is used as the starting point.
+B: [sharp] Wait. The predicted adapter becomes the initialization.
+A: The predicted adapter becomes the initialization. Their word is warm start.
+B: [laughs] Ada, that's an optimization level. That's dash-oh-zero and dash-oh-two.
+A: That's what I said out loud when I read it. Same source, same output format, same runtime — you pick how much compute you want to spend at build time. Three and a half seconds for the cheap pass, or roughly a minute for the expensive one, which begins from where the cheap one stopped.
+B: Give me the minute in detail. What's it doing?
+A: A larger model is asked, through a structured request format, to produce diverse input-output pairs that follow your specification. The compiler validates each response and rejects malformed or incomplete batches before they reach the trainer. The public configuration collects twenty-four hundred unique pairs, repeated out to a sixty-four-hundred-example training set.
+B: And then a hundred steps of ordinary fine-tuning.
+A: A hundred steps. Rank sixty-four adapter, batch of forty-eight, cosine decay on the learning rate. Nothing exotic — that's the point. The exotic part already happened, in the initialization.
+B: How long, actually? On what?
+A: They measured a cold compile of one representative specification: fifty point nine seconds on a B300, sixty-eight on an H200, ninety-nine on an RTX card. And they ran a load test with four builds submitted at once — all four finished, mean queue wait about one second.
+B: That's a build server. They wrote a build server.
+A: They wrote a build server, and they say so — the interface treats compilation as a background software build rather than a blocking form submission. You submit and keep browsing.
+B: And the payoff? Because a minute is a lot of seconds compared to three and a half.
+A: On the subset they call FuzzyBench-Hard, mean score goes from zero point two two four to zero point eight three six. An improvement of point six one two absolute.
+B: Sixty-one points.
+A: Sixty-one points. And now I need you to do your job on that number, because it's the number that will get quoted.
+
+## What the number is and isn't
+B: Happily. FuzzyBench-Hard is defined as the specifications where the fast compiler produced no exact matches.
+A: It is. Selected, by construction, to be where the cheap path failed.
+B: So this is not "compile by training is sixty-one points better." This is "on the tasks the fast compiler got wrong, the slow one gets most of them right." Which is still a real and useful result — that's the recovery rate, that's what you want to know before you spend the minute. But it is not a general delta.
+A: And to their credit they explain the odd part themselves — why the fast compiler scores twenty-two percent on a set defined by it getting zero exact matches.
+B: Because the metric changed.
+A: Because the metric changed. They grade with what they call LLM exact match: the fraction of predictions a model judge considers semantically correct against the specification. It forgives whitespace, JSON key order, bullet style, trailing punctuation that doesn't change meaning. It does not forgive wrong values or wrong logic.
+B: So a fifth of the fast compiler's "failures" were correct answers with the braces in a different place.
+A: Correct answers, formatted differently. Which I think is the right metric for this kind of function, and it's also a metric that needs auditing, and they audited it: the grader agrees with a hundred and twenty-eight hand labels at ninety-seven point seven percent, kappa of point nine four six.
+B: Author labels.
+A: Author labels. Stated as such. High agreement, not independent.
+B: Fine. I'll take it with the asterisk. Now the part I actually want, which is the supervision sweep, because that's where the engineering advice lives.
+A: Two sweeps. Hold the data budget fixed at thirty-six hundred unique pairs. All of them from the cheaper teacher: point seven four six. Swap a third of them for pairs from the bigger teacher — twenty-four hundred and twelve hundred: point eight five one.
+B: Ten and a half points for changing who wrote a third of the examples.
+A: Hold that against what more data does. Fourteen hundred and forty pairs gets point eight two one. Twenty-four hundred gets point eight three six. Thirty-six hundred gets point eight three six — no movement. Seventy-two hundred gets point eight six six.
+B: So five times the data buys four and a half points, and swapping a third of the teacher buys ten.
+A: At this budget, on this benchmark.
+B: [emphatic] That's the takeaway for anyone doing synthetic supervision this month. You are probably over-indexed on volume. And we said a version of this on Wednesday from the distillation side — the teacher's signal quality is the thing that scales, not the row count.
+A: With the caution that these are their development specifications and it's one benchmark. Don't take point eight five one home as a law. Take the shape.
+
+## Where the analogy breaks
+A: So let me break my own analogy, because I've been leaning on it for twenty minutes and it does not survive contact.
+B: Go.
+A: A real compiler makes two promises. It's deterministic — same source, same flags, same binary. And it's semantics-preserving — the machine code does what the source said, and where it doesn't, that's a bug somebody can fix.
+B: Neither one holds here.
+A: Neither one holds. This compiler produces a probabilistic artifact whose behavior on an input it hasn't seen is a distribution, not a guarantee. And the paper's own limitations section says the thing you need to hear: synthetic supervision may inherit teacher errors, and applications that require guaranteed correctness should validate outputs or retain deterministic control paths.
+B: Retain deterministic control paths. That's them telling you not to put this on the branch that matters.
+A: And there's a second break, which is worse for me. A compiler has a source you can read, and a binary you can disassemble. Here, the earlier paper's own limitations are explicit: the compiled program is opaque. The adapter weights cannot be meaningfully inspected.
+B: You can read the specification.
+A: You can read the specification. You cannot read the program. Those are different objects, and only one of them is under version control in any useful sense.
+B: Which is a genuinely new operational problem. I can diff two versions of a Python module. What do I do with two twenty-three-megabyte adapters that were compiled from specifications differing by one clause?
+A: You test them. That's the whole answer, and it's not a satisfying one.
+B: It's the answer for machine learning generally, and now it's the answer for something that calls itself a build artifact. Let me add two more limits while we're here. The earlier paper says these handle single-step functions — not multi-step reasoning, not stateful execution. So this is not an agent. It's a function.
+A: Which is the right scope and I'd rather they said it.
+B: And there's a place their approach loses. On a long-form structured generation task — image to LaTeX — the adapter version scores well below their own earlier prefix-tuning version. Their explanation is that the long examples inside the pseudo-program crowd out the small model's context budget.
+A: The front end eating the back end's memory. Which, again, is a compiler problem.
+B: And the last one, which nobody will read carefully: compilation is hosted. Your specification goes to their service and to the teacher APIs.
+A: That's right, and the distinction the paper draws is real and worth stating precisely. Running the compiled function locally does not send your inputs anywhere. The privacy win is about the ten thousand emails. It is not about the sentence describing what you want done to them.
+
+## Thirty programs behind one website
+B: So does anything real run on this?
+A: Three things, and the first is the one that teaches. They built a website assistant called paw-helper: thirty compiled functions serving four different sites off one backend.
+B: Thirty. Not one big one.
+A: Thirty small ones, arranged in a tree — classifiers, answerers, selectors, validators. And here is the division of labor, which I think is the most transferable sentence in the paper: the compiled functions make the fuzzy decisions, and ordinary code handles the exact operations. Retrieval, caching, branch control.
+B: That's the architecture, right there. That's the thing to steal even if you never touch this system. The fuzzy judgment is a leaf. The control flow is code you can read.
+A: The other two. A language-controlled avatar that turns "jump twice, then dance" into a small action language a browser validates and runs — on forty-four hand-written test instructions it produced the expected structure in forty-three.
+B: And the third one is a joke that got used.
+A: [laughs] A translator between plain English and — their word — Claudish. The prose style you get from a coding assistant. Explicit contrasts, metaphors about gates and boundaries, hyphenated constructions.
+B: I feel personally addressed.
+A: Between its launch on the twenty-second of August and the second of September, they report a hundred thousand seven hundred and forty-seven successful translation requests.
+B: Which is the only real load number in either paper, and it came from the joke. That's usually how it goes.
+
+## What to do with it
+B: So, Monday. Who should care?
+A: You go first, you're the one who'd deploy it.
+B: The test I'd apply is boring and it's two questions. Is there a call in my system that I make thousands of times a day, on a specification that hasn't changed in a month? And can I tolerate a wrong answer occasionally, or do I have a validator downstream? If both, this is worth an afternoon. Log triage. Intent classification on a search box. Routing. The unglamorous middle of every pipeline.
+A: And if either answer is no?
+B: Then keep the API call. Genuinely. If the spec is still moving, you'd be recompiling constantly, and a minute times constantly is a workflow nobody wants. And if you need correctness, they told you what to do — validate the output or keep a deterministic path.
+A: My version is a bit further out, and I'll flag it as speculation, because it is. What I think this line of work is actually probing is where the boundary sits between build time and run time in machine learning. We've had that boundary in one place for four years: the model is the runtime, and everything happens when the request arrives.
+B: And this moves it.
+A: This moves it back toward where software has always kept it. The expensive, capable, general thing runs once, at build. The cheap, dumb, fast thing runs a million times, locally, offline, at a fixed cost you can put in a budget. If that's where things go — and I don't know that it is — then the interesting artifact stops being the model and starts being the compiler.
+B: [thoughtful] And the package manager. Which is the part I can't stop thinking about. Twenty-three megabytes, a name, a version. Somebody is going to build a registry for those.
+A: Somebody will, and then somebody will publish a malicious one, and we'll cover that episode too.
+B: [laughs] Cheerful.
+
+## Close
+A: Where this leaves me: the word "compile" is doing honest work in about two thirds of the places they use it. There's a source, there's a front end that cleans it up, there's a back end that emits an artifact, there's an optimization level. All real.
+B: And the third that isn't?
+A: No determinism, no semantics preservation, and an object you cannot read. Which means the discipline this needs isn't compiler discipline. It's test discipline, wearing a compiler's clothes.
+B: I'll take that, and I'll add the practical one. Small and local isn't a compromise here — it's what specialization buys you, and it only works because somebody spent real money at build time instead of yours at run time. That trade is the whole idea.
+A: Both papers are linked in the notes — the new one from Wednesday and the Program-as-Weights paper it builds on. Read the limitations sections. They're short and they're honest.
+B: That's the deep dive. Good Saturday, everyone.
+A: Stay grounded.
