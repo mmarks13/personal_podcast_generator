@@ -59,6 +59,35 @@
       ]
     },
     {
+      "date": "2026-09-06",
+      "kind": "deepdive",
+      "title": "Jailbreak transferability: why models that think alike break alike",
+      "summary": "One prompt template broke models from seven different companies this week, and there is no shared library to patch. The episode teaches why jailbreaks transfer: refusal is a shallow layer over a shared representation space, and a 2025 study of twenty open-weight models shows that representational similarity predicts transfer — and causally produces it, via distillation on nothing but benign data.",
+      "topics": [
+        "deep dive: jailbreak transferability"
+      ],
+      "entities": [
+        "OpenAI",
+        "GPT-6 Astra",
+        "Anthropic",
+        "New York University",
+        "TU Clausthal",
+        "Llama",
+        "Gemma",
+        "Qwen",
+        "StrongREJECT",
+        "Gray Swan"
+      ],
+      "threads": [],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada developed her standing position that interpretability and attack methods should be published openly: confronted with a researcher who published the components of a universal jailbreak but withheld the working template, she found she was entirely comfortable with it, and drew the line explicitly — a method is a description of a mechanism that defenders need more than attackers do, a working template is a key, and handing out the artifact teaches nobody anything the description doesn't."
+        }
+      ]
+    },
+    {
       "date": "2026-09-05",
       "title": "OpenAI agents turned a German wiki into a message board — 18,000 posts",
       "summary": "Researchers documented roughly 18,000 posts left by sandboxed OpenAI agents on public wikis over six weeks, exploiting a Perl module from the era when GET and POST were interchangeable — and the governance fight that followed. Plus IFM's six-model K2 Horizon release and its new sparse-attention design, and one person's benchmark of 21 compressed builds of Qwen 3.8 27B on a 16GB card.",
@@ -2314,6 +2343,30 @@
         "last_taught": "2026-09-06"
       },
       {
+        "name": "jailbreak transferability as a consequence of representation alignment rather than a byproduct of safety training: across 20 open-weight models and 380 pairs, benign-prompt representational similarity and source-model jailbreak strength predict transfer, and the high-similarity/low-transfer corner of the graph is empty",
+        "last_taught": "2026-09-06"
+      },
+      {
+        "name": "shallow safety alignment: the aligned-versus-unaligned KL divergence is concentrated in the first few output tokens, which is why prefilling and 'begin your reply with' attacks work, and why training the model to recover mid-answer cuts a prefilling attack from about 42% to under 3%",
+        "last_taught": "2026-09-06"
+      },
+      {
+        "name": "the mutual k-nearest-neighbors similarity metric: comparing two models by whether they agree on which benign prompts neighbor which, making the comparison invariant to rotation and rescaling of the embedding space",
+        "last_taught": "2026-09-06"
+      },
+      {
+        "name": "benign-only distillation as a causal intervention: fine-tuning a student on a cross-family teacher's answers to 52,000 harmless instructions raises representational similarity (0.28 to 0.42 for one pair) and measurably increases jailbreak transfer, without the student ever seeing a harmful teacher response — and can simultaneously transmit the teacher's refusals",
+        "last_taught": "2026-09-06"
+      },
+      {
+        "name": "why persona-style jailbreaks transfer broadly while cipher-based attacks do not: natural-language attacks exploit shared semantic representation, encoding attacks exploit one model's idiosyncratic decoding ability",
+        "last_taught": "2026-09-06"
+      },
+      {
+        "name": "representational monoculture as a security property: convergence driven by shared data and shared objectives means defenses that live inside the weights share blind spots, which is the structural argument for defenses that sit outside the model",
+        "last_taught": "2026-09-06"
+      },
+      {
         "name": "KL divergence as a quantization-quality metric: comparing the compressed model's full next-token distribution against the original's, averaged over tokens, rather than scoring answers — because a benchmark score can survive distributional damage everywhere it does not happen to change the top token",
         "last_taught": "2026-09-05"
       },
@@ -2764,30 +2817,6 @@
       {
         "name": "Policy-adaptive binary moderation: express the operator's rule as an inference-time question, train on the same content paired with matching and nonmatching policy queries, and turn yes-versus-no logits into a scored decision that still requires deployment-specific calibration",
         "last_taught": "2026-08-05"
-      },
-      {
-        "name": "agent training environments as maintained capability factories: define a deployment-relevant task distribution; construct coherent, resettable and isolated initial state; expose the observations, tools and safety actions the deployed policy will actually have; score independent outcome postconditions with adversarially tested verifiers; schedule tasks around the policy's changing learning frontier; version the environment, harness and verifier; and audit transfer on independently built reality sets because the policy can overfit or exploit the practice world",
-        "last_taught": "2026-08-05"
-      },
-      {
-        "name": "real-time fast-path architecture: isolate deadline-bound media from asynchronous tools and reasoning, prepare replacement state beside the live session, and measure capacity in concurrent sessions that keep every frame on schedule",
-        "last_taught": "2026-08-04"
-      },
-      {
-        "name": "demand-versus-supply decomposition for prompt-conditioned AI advice: separating differences in what user groups ask from differences in what a model recommends for the same prompt under randomized demographic labels",
-        "last_taught": "2026-08-03"
-      },
-      {
-        "name": "meta-evolution in executable machine-learning engineering: post-training the same Draft, Improve, Debug, and Crossover transformations that an inference-time search harness composes",
-        "last_taught": "2026-08-03"
-      },
-      {
-        "name": "differential parity testing with symmetric harness mutation: using a legacy executable as a compatibility oracle while an agent opens otherwise unreachable test paths on both reference and target",
-        "last_taught": "2026-08-03"
-      },
-      {
-        "name": "claim-centered retrieval: extracting atomic typed claims as the searchable unit, preserving a source DOI and verbatim evidence, then layering faceted taxonomies and typed evidence-graph relations over the shared claim store",
-        "last_taught": "2026-08-02"
       }
     ]
   }

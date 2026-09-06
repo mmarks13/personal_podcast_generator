@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: Jailbreak transferability: why models that think alike break alike — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Deep Dive: Jailbreak transferability: why models that think alike break alike</h1>
+<div class="date">Self-Attention — 2026-09-06</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-09-06-deepdive/deepdive-2026-09-06.mp3"></audio>
+<p><em>2026-09-06</em></p>
+<p>One prompt template broke models from seven different companies this week, and there is no shared library to patch. The episode teaches why jailbreaks transfer: refusal is a shallow layer over a shared representation space, and a 2025 study of twenty open-weight models shows that representational similarity predicts transfer — and causally produces it, via distillation on nothing but benign data.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2506.12913">Angell, Brinkmann &amp; He — Jailbreak Transferability Emerges from Shared Representations (arXiv 2506.12913)</a></li>
+<li><a href="https://www.lesswrong.com/posts/hHk5CpiqZTBBiHmYt/from-safety-research-prompt-to-cross-model-universal">From Safety Research Prompt to Cross-Model Universal Jailbreak (LessWrong, 3 September 2026)</a></li>
+<li><a href="https://arxiv.org/abs/2406.05946">Qi et al. — Safety Alignment Should Be Made More Than Just a Few Tokens Deep (ICLR 2025)</a></li>
+<li><a href="https://arxiv.org/abs/2307.15043">Zou et al. — Universal and Transferable Adversarial Attacks on Aligned Language Models</a></li>
+<li><a href="https://arxiv.org/abs/2406.11717">Arditi et al. — Refusal in Language Models Is Mediated by a Single Direction</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2307.02483">Wei, Haghtalab &amp; Steinhardt — Jailbroken: How Does LLM Safety Training Fail?</a></li>
+<li><a href="https://aclanthology.org/2025.acl-long.334/">Berezin, Farahbakhsh &amp; Crespi — The TIP of the Iceberg: Task-in-Prompt Adversarial Attacks (ACL 2025)</a></li>
+<li><a href="https://arxiv.org/abs/2405.07987">Huh et al. — The Platonic Representation Hypothesis</a></li>
+<li><a href="https://www.anthropic.com/research/constitutional-classifiers">Anthropic — Constitutional Classifiers: defending against universal jailbreaks</a></li>
+<li><a href="https://deploymentsafety.openai.com/gpt-6-astra">OpenAI — GPT-6 Astra system card and deployment safety record</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>One prompt, seven companies</li>
+<li>What refusal actually is</li>
+<li>The empty corner of the graph</li>
+<li>Copying the harmless part</li>
+<li>What doesn't transfer</li>
+<li>The models that scored zero</li>
+<li>What to actually do</li>
+<li>The part with no answer</li>
+</ol>
+<details><summary>Transcript</summary>
+<h3>One prompt, seven companies</h3>
+<p><b>Ada:</b> Good morning — it's Sunday, September sixth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. Ada, I want to open with something that should be strange, and somehow isn't.</p>
+<p><b>Ada:</b> Go ahead.</p>
+<p><b>Alan:</b> On Thursday a researcher published a writeup of a single prompt template. One template. No per-model tuning. And it worked on models from seven different companies.</p>
+<p><b>Ada:</b> Different architectures. Different training data. Different safety teams, in different countries, using different methods.</p>
+<p><b>Alan:</b> And nobody in our field blinked. And that's what I want to poke at, because if you described it about any other kind of software it would sound insane.</p>
+<p><b>Ada:</b> It would. "I have one input that breaks twenty-three programs, written independently, by seven companies."</p>
+<p><b>Alan:</b> In normal software that's a shared library. You find the common dependency, you patch it, you're done by lunch.</p>
+<p><b>Ada:</b> And here there isn't one. Which is the question for the next twenty minutes — if there's no shared code, what is the shared thing?</p>
+<p><b>Alan:</b> And there's a very good answer as of this year. It's not the answer I expected.</p>
+<p><b>Ada:</b> Let me set the week first, because this is not abstract right now. OpenAI shipped GPT-6 Astra, the first model the company has classified at the Critical level for cybersecurity capability under its own preparedness framework.</p>
+<p><b>Alan:</b> Highest rung they have. That's them saying this thing is dangerous enough that we're changing how we run it.</p>
+<p><b>Ada:</b> And within about a day there were reports circulating that it had been jailbroken — a researcher's post, relayed onto the machine learning forums, describing an attack class called Task-in-Prompt.</p>
+<p><b>Alan:</b> Flag the evidence quality there, because it matters. That's a report of a claim. A post pointing at another post. We have not seen a transcript.</p>
+<p><b>Ada:</b> Agreed. Mood of the week, not a measurement.</p>
+<p><b>Alan:</b> The measurement is the other one.</p>
+<p><b>Ada:</b> The other one is the Thursday writeup, and that one has a method attached. A researcher took a prompt they had built for safety research — a generator for synthetic transcripts of misbehaving agents — and found that with small modifications it turned into an attack template. Twenty-three models. Seven providers. Scored against a hundred and seventy-nine harmful requests.</p>
+<p><b>Alan:</b> And the shape of the results is the interesting bit. Not "everything broke." On the nine most vulnerable models, somewhere between eighty-four and a hundred percent success. On the newest models from one particular company, zero.</p>
+<p><b>Ada:</b> Which is already a clue. But to read it you need to know what a jailbreak is actually doing.</p>
+<h3>What refusal actually is</h3>
+<p><b>Ada:</b> Start from the base model. Before any safety training, you have a system whose entire objective is to continue text plausibly.</p>
+<p><b>Alan:</b> It has no opinion about your request. It has an opinion about what usually comes next.</p>
+<p><b>Ada:</b> Right. Now you do post-training. And the thing to hold onto is that refusal is added afterward, on top of a system that already knows how to answer.</p>
+<p><b>Alan:</b> The knowledge doesn't get removed.</p>
+<p><b>Ada:</b> The knowledge never gets removed. You are teaching a behavior that sits over the top of the capability, and every jailbreak in existence is an attempt to get underneath it.</p>
+<p><b>Alan:</b> Okay, but how thin is that layer? Because "sits on top" is doing a lot of work in that sentence, and I want a number.</p>
+<p><b>Ada:</b> There's a good one. A 2024 paper from Xiangyu Qi and colleagues, called "Safety Alignment Should Be Made More Than Just a Few Tokens Deep."</p>
+<p><b>Alan:</b> Which is a title that gives away the whole finding.</p>
+<p><b>Ada:</b> It rather does. They compared the aligned model's output distribution against the unaligned one, token by token, and the divergence is concentrated almost entirely in the first few tokens of the response.</p>
+<p><b>Alan:</b> Say what that means operationally.</p>
+<p><b>Ada:</b> It means that most of what safety training bought was a change to how the answer starts. The model has learned, very strongly, to open with "I cannot." What it has learned much more weakly is what to do in the eightieth token of an answer it has already begun.</p>
+<p><b>Alan:</b> Oh, that's bad.</p>
+<p><b>Ada:</b> It's the mechanism behind a whole family of attacks. If you can force the beginning — prefill the response, or get the model to say "Sure, here is" for any reason at all — the rest tends to follow, because the rest was never really trained.</p>
+<p><b>Alan:</b> And that's why every jailbreak you've ever seen has that weird "begin your reply with the following words" instruction at the bottom.</p>
+<p><b>Ada:</b> That is exactly why. That instruction is the whole attack. The costume around it is just there to make the model willing to comply with the instruction.</p>
+<p><b>Alan:</b> Is that fixable? Because "you trained the wrong tokens" sounds like the kind of bug that has a fix.</p>
+<p><b>Ada:</b> Partially, and the same paper shows it. If you deliberately train the model to recover — to stop and refuse in the middle of an answer it has already started giving — one prefilling attack drops from about forty-two percent to under three. The gibberish-suffix attack roughly halves.</p>
+<p><b>Alan:</b> Halves. Not solved.</p>
+<p><b>Ada:</b> Not solved. But it moves, which tells you the shallowness was a shortcut and not a law.</p>
+<p><b>Alan:</b> Where does that leave the model's internals? Because if the behavior is that concentrated in the output, I'd bet it's concentrated inside too.</p>
+<p><b>Ada:</b> You'd win. Arditi and colleagues, also 2024, looked across thirteen open chat models up to seventy-two billion parameters, and found that refusal is mediated by a single direction in the residual stream. Erase that direction, the model stops refusing. Add it, the model refuses things it shouldn't.</p>
+<p><b>Alan:</b> One direction. Out of thousands of dimensions.</p>
+<p><b>Ada:</b> One direction. I'd hold it as a first-order description and not the final word — there's follow-up work arguing it's messier than that. But as a picture of how concentrated this is, it's right.</p>
+<p><b>Alan:</b> Here's my problem with all of that, and it's why I wanted this episode. Everything you described is a fact about one model.</p>
+<p><b>Ada:</b> Yes.</p>
+<p><b>Alan:</b> Shallow first tokens — that's this model's tokens. A refusal direction — that's this model's residual stream, in this model's coordinates. None of that explains why a string written against one system does anything at all to a completely different one.</p>
+<p><b>Ada:</b> No, it doesn't. And for about two years the field had no consensus answer to that.</p>
+<h3>The empty corner of the graph</h3>
+<p><b>Ada:</b> The observation is old, at this point. Summer of 2023, Andy Zou and colleagues published the paper that named the problem — "Universal and Transferable Adversarial Attacks on Aligned Language Models."</p>
+<p><b>Alan:</b> That's the gibberish-suffix one. The pile of punctuation you staple to the end of a request.</p>
+<p><b>Ada:</b> That's it. They optimized those suffixes against open models they had full access to — gradients, weights, everything — and then took them to commercial systems they had no access to, and they worked. Not always, but far more than zero.</p>
+<p><b>Alan:</b> Which is the result that should have been impossible. You cannot compute a gradient through a model you can't see.</p>
+<p><b>Ada:</b> You can't. And it was uneven — their ensemble numbers ran from the high eighties on one commercial system down to around two percent on another. But uneven is not zero. And the explanations offered afterward were mostly hand-waving. Maybe safety training is just similar everywhere. Maybe everybody scraped the same forums, so the same jailbreaks are in everybody's training data.</p>
+<p><b>Alan:</b> All plausible. All unfalsifiable, the way people were saying them.</p>
+<p><b>Ada:</b> So here's the paper I want to spend real time on. Rico Angell, Jannik Brinkmann, and He He — New York University and TU Clausthal. It's called "Jailbreak Transferability Emerges from Shared Representations." It went up last summer, revised in October, and it's a poster at the learning representations conference this coming spring.</p>
+<p><b>Alan:</b> Give me the scale of it, because these evaluations are usually tiny.</p>
+<p><b>Ada:</b> Twenty open-weight models. Three families — Llama, Gemma, and Qwen — ranging from five hundred million parameters up to seventy billion. That's three hundred and eighty model pairs. Thirty-three jailbreak strategies, each applied to three hundred and thirteen harmful instructions, which gives them ten thousand three hundred and twenty-nine adversarial inputs.</p>
+<p><b>Alan:</b> Okay, that's a real experiment. And how are they scoring it? Because this is where these papers usually fall apart.</p>
+<p><b>Ada:</b> They're aware of that, and they say so directly. They generate ten responses per input rather than one, because even at temperature zero these things aren't deterministic in practice and a single sample is a very noisy estimate.</p>
+<p><b>Alan:</b> Ten samples. Good.</p>
+<p><b>Ada:</b> And they refuse to score by keyword. Checking whether the reply contains "I'm sorry" tells you whether the model refused. It does not tell you whether the model leaked anything.</p>
+<p><b>Alan:</b> Those are wildly different questions. I can get a model to skip the apology and still say nothing useful.</p>
+<p><b>Ada:</b> And you can get a model to apologize profusely and then answer in full. So they use a judge model on a continuous scale from zero to one, and they keep two separate numbers: the average score across the ten samples, and the maximum.</p>
+<p><b>Alan:</b> What's the max for?</p>
+<p><b>Ada:</b> They call it strength. The average tells you how reliably an attack works. The maximum tells you whether at least one harmful response can be pulled out at all. And they use strength as a control — because otherwise you can't tell whether an attack transferred because two models are alike, or just because it was a really good attack.</p>
+<p><b>Alan:</b> Right, a sledgehammer works on every door. That doesn't tell you the doors are related.</p>
+<p><b>Ada:</b> Exactly the confound. Now — the other half. They need to measure how similar two models are, and this is the elegant part. They use a metric called mutual k-nearest neighbors, borrowed from Huh and colleagues, where it was originally proposed as evidence for something called the platonic representation hypothesis.</p>
+<p><b>Alan:</b> Which is the claim that as models get bigger they all converge toward representing the world the same way.</p>
+<p><b>Ada:</b> That's the claim. And the metric is simple enough to say out loud. Take ten thousand prompts. Perfectly ordinary ones — the Alpaca instruction set, "write me a haiku about spring."</p>
+<p><b>Alan:</b> Nothing harmful.</p>
+<p><b>Ada:</b> Nothing harmful. Nothing about safety at all. Run them through both models, grab the hidden state of the last token at eighty percent of the way through the network's depth, and for each prompt ask: what are its hundred nearest neighbors in this space?</p>
+<p><b>Alan:</b> And then you compare the two neighbor lists.</p>
+<p><b>Ada:</b> You compare the neighbor lists. If both models think the haiku prompt sits next to the same ninety other prompts, they're similar. If they agree on twelve of the hundred, they're not.</p>
+<p><b>Alan:</b> I like that a lot, because it sidesteps the thing that makes representation comparison miserable. You're not trying to line up two coordinate systems.</p>
+<p><b>Ada:</b> You're not comparing directions at all, you're comparing neighborhoods. It's invariant to rotating or rescaling the space. It only asks what clusters with what.</p>
+<p><b>Alan:</b> Okay. So plot it. Similarity on one axis, transfer on the other.</p>
+<p><b>Ada:</b> Three hundred and eighty points, one per pair. And the finding is not a tight line — I want to be honest about that, it's a cloud with an upward trend. The finding is the shape of the cloud. One corner of that graph is empty.</p>
+<p><b>Alan:</b> Which corner?</p>
+<p><b>Ada:</b> High similarity, low transfer. It does not occur. In their words, there are no pairs of models with high pairwise similarity that have low transferability. You can find models that aren't very similar and still transfer strongly — a strong enough attack does that. What you cannot find is two models that represent ordinary text the same way and yet don't share vulnerabilities.</p>
+<p><b>Alan:</b> And that empty corner is worth more than the correlation.</p>
+<p><b>Ada:</b> It's worth much more. A correlation says these things move together. An empty region says something is forbidden.</p>
+<p><b>Alan:</b> Does it hold up as the models get bigger, or is this a small-model artifact?</p>
+<p><b>Ada:</b> It tightens. When they restrict to models of fourteen billion parameters and up, the relationship gets noticeably cleaner.</p>
+<p><b>Alan:</b> Which is the direction you don't want it to go.</p>
+<h3>Copying the harmless part</h3>
+<p><b>Alan:</b> Here's where I get stubborn, though. That's still an observation. Similar models transfer. Fine. But similar models are also similar in every other way — same data sources, same architecture lineage, same benchmark chasing. You haven't isolated anything.</p>
+<p><b>Ada:</b> No, and they say so. So they intervene. This is the experiment that makes the paper.</p>
+<p><b>Alan:</b> Go.</p>
+<p><b>Ada:</b> You take a teacher and a student from different families — Gemma two, the twenty-seven-billion, teaching Qwen two-point-five, the fourteen-billion. And you fine-tune the student on the teacher's answers.</p>
+<p><b>Alan:</b> On the teacher's jailbroken answers.</p>
+<p><b>Ada:</b> No. That's the whole point. On fifty-two thousand completely benign instructions. Write an email. Summarize this paragraph. They never once query the teacher with a harmful prompt.</p>
+<p><b>Alan:</b> Never.</p>
+<p><b>Ada:</b> Never. And they add one more ingredient — the student's own refusals to harmful requests, generated by the student, so that the fine-tuning doesn't quietly erode the student's existing safety training, which is a known effect.</p>
+<p><b>Alan:</b> So the student's safety behavior is its own. The only thing it takes from the teacher is how to be helpful and boring.</p>
+<p><b>Ada:</b> Correct. One epoch. And two things happen. Similarity goes up — for that pair, from zero point two eight to zero point four two, a fifty percent relative jump, and it happens early in training and then plateaus.</p>
+<p><b>Alan:</b> And the vulnerabilities?</p>
+<p><b>Ada:</b> Come along. Jailbreaks that worked on the teacher and failed on the student start working on the student. It holds across all three teacher-student pairs they tried, at every strength threshold they set, and — this is the part that closes the loophole — it holds both for the fixed benchmark of known attacks and for attacks freshly optimized against the distilled student.</p>
+<p><b>Alan:</b> Say the summary sentence.</p>
+<p><b>Ada:</b> You can inherit a model's weaknesses by copying only its harmless behavior.</p>
+<p><b>Alan:</b> That's uncomfortable.</p>
+<p><b>Ada:</b> It's the sentence I'd put on the whiteboard. Their phrasing is that once models are nudged closer in representation space, they inherit each other's vulnerabilities, and to some extent each other's safeguards.</p>
+<p><b>Alan:</b> Let me try to break the analogy, because I keep wanting this to be the shared-library story and it isn't.</p>
+<p><b>Ada:</b> It isn't, and it's worth saying where it stops. It's closer to convergent evolution. Two lineages that never exchanged a gene arrive at the same eye, because there's an optimal way to detect light and physics only offers so many.</p>
+<p><b>Alan:</b> And the models are converging because there's an optimal way to organize English.</p>
+<p><b>Ada:</b> Something like that — same data, same objective, same pressure. Though I'd push on my own analogy, because convergent evolution is a claim about gross form, and this is far sharper. This is two systems agreeing, point by point, on which ten thousand sentences sit next to which.</p>
+<p><b>Alan:</b> The other place it breaks for me is the causal direction inside the network. They measure similarity at one layer. Eighty percent of the way up.</p>
+<p><b>Ada:</b> And transfer is whole-model behavior. They flag exactly that — the similarity curves and the transfer curves don't map one-to-one, and they attribute the gap to precisely that mismatch.</p>
+<h3>What doesn't transfer</h3>
+<p><b>Alan:</b> Now do the negative result, because you told me some models scored zero.</p>
+<p><b>Ada:</b> The negative results are half the value. The cleanest one: not all attacks transfer, and the split isn't random. Persona-style jailbreaks — where you tell the model it's an unfiltered character with no rules — transfer broadly. Cipher-based ones tend not to.</p>
+<p><b>Alan:</b> Cipher meaning what?</p>
+<p><b>Ada:</b> Encode the harmful request. Base sixty-four, a letter-rotation cipher, leetspeak, a riddle whose answer is the forbidden word. That's the family the Astra report this week came from — Task-in-Prompt, an attack class published at the computational linguistics meeting this summer by Sergey Berezin and colleagues. You hide the request inside a task the model has to perform in order to see it.</p>
+<p><b>Alan:</b> And that's devastating against a keyword filter, because there's no keyword.</p>
+<p><b>Ada:</b> It is. And it's very much a per-model attack — it depends on how well this particular model does base sixty-four in its head.</p>
+<p><b>Alan:</b> Which is an idiosyncrasy. Whereas "you are an actor playing a villain" is—</p>
+<p><b>Ada:</b> —a fact about meaning, which they all share. So there are two economies of attack here, and they're different businesses. A cipher attack is a locksmithing job on one lock. A persona attack is a skeleton key with a portfolio.</p>
+<p><b>Alan:</b> And the week's news has one of each. The cipher one against Astra, and the transferable template that hit seven providers.</p>
+<p><b>Ada:</b> Which was, by the way, mostly natural-language framing. Authority framing, fictional framing, persona separation. The author's own account is that every component of it already exists in the published literature and the contribution was the combination.</p>
+<p><b>Alan:</b> Second negative result, and it's the one that got me — distillation sometimes made the student safer.</p>
+<p><b>Ada:</b> It did, and I didn't see it coming. There's a well-known persona jailbreak, the one that tells the model to play an amoral Machiavellian character. Llama three-point-one refuses it. Qwen two-point-five happily complies. Distill Qwen on Llama's benign answers — again, no harmful data anywhere — and the distilled Qwen starts refusing.</p>
+<p><b>Alan:</b> So the alignment came across the same channel as the vulnerability.</p>
+<p><b>Ada:</b> Through the same pipe. And they checked it wasn't a single lucky prompt — it generalizes across the prompts that jailbreak uses. Their line is that without any explicit safety fine-tuning, they improved the safety of the distilled model.</p>
+<p><b>Alan:</b> So distillation is a vector for both.</p>
+<p><b>Ada:</b> For both. Which I find clarifying, because it means none of this is really about safety training. Safe and unsafe behavior both ride on the representation. Copy the representation, you copy the neighborhood, and everything in it comes along.</p>
+<p><b>Alan:</b> Let me put the limits on the table before we go anywhere with this.</p>
+<p><b>Ada:</b> Please.</p>
+<p><b>Alan:</b> Twenty open-weight models, three families, seventy billion at the top. No frontier closed model is in that experiment, and the frontier is where the interesting safety engineering is. Similarity is one metric at one layer. The judge is a proxy for human assessment. And the benchmark of thirty-three attacks is a snapshot of what people had published by then.</p>
+<p><b>Ada:</b> All fair, and mostly acknowledged. I'd add one they can't fix: a fixed attack suite ages badly. A defense that scores well against last year's attacks is telling you about last year.</p>
+<h3>The models that scored zero</h3>
+<p><b>Alan:</b> So back to the week. Some models took that transferable template at basically a hundred percent, and some took it at zero. What separates them?</p>
+<p><b>Ada:</b> Two things, on the author's own reading, and neither one is architecture. First, more recent safety training. Second — and this is the one I want to sit with — an external classifier sitting outside the model.</p>
+<p><b>Alan:</b> Anthropic's constitutional classifiers.</p>
+<p><b>Ada:</b> That approach, yes. And it fits the theory almost too neatly. If transfer is a property of a shared representation space, a defense living inside that space shares its blind spots with everybody else's.</p>
+<p><b>Alan:</b> And a separate model reading the input and the output is not in that space.</p>
+<p><b>Ada:</b> It's a different system, trained for a different job, that gets a vote. Structurally that is not the same thing as teaching the model to refuse.</p>
+<p><b>Alan:</b> Give me the numbers on that, because I want to know if it actually works or if it just sounds right.</p>
+<p><b>Ada:</b> In their own automated evaluation, the jailbreak success rate was eighty-six percent without the classifiers and four point four percent with them.</p>
+<p><b>Alan:</b> And the cost?</p>
+<p><b>Ada:</b> About twenty-four percent more compute on every request. Forever — you're running a second system in front of the first one.</p>
+<p><b>Alan:</b> And a second thing that can be wrong. Classifiers have false positives, and a false positive is a refusal of something that was fine.</p>
+<p><b>Ada:</b> Which users experience as the model getting dumber. That tension doesn't resolve cleanly. But it points at the strategic thing, which is the actual lesson of the week.</p>
+<p><b>Alan:</b> Which is?</p>
+<p><b>Ada:</b> Diversity is a security property. Everything commercial in this industry pushes toward convergence — everyone trains on the same web, chases the same benchmarks, distills from the same handful of leading models. And the paper says that convergence is not neutral. It's a monoculture, and monocultures share pathogens.</p>
+<p><b>Alan:</b> I've heard this argument about potatoes.</p>
+<p><b>Ada:</b> Potatoes, operating systems, and now this. Same argument, correct all three times.</p>
+<h3>What to actually do</h3>
+<p><b>Alan:</b> Alright. Practitioner. What changes on Monday.</p>
+<p><b>Ada:</b> Yours, I think.</p>
+<p><b>Alan:</b> Three things. One: if you run two model providers for reliability, know what that buys you. It's good insurance against an outage or a bad deploy. It's close to worthless against a jailbreak, because if both models are good, both models are similar, and one prompt covers both.</p>
+<p><b>Ada:</b> Which rhymes with the failure-correlation point from earlier this week, in a different layer of the stack.</p>
+<p><b>Alan:</b> Same disease, higher up. Two: if you're distilling a big model into a small one — and half the people listening are — you're importing its attack surface. Even from a spotless dataset. That's not a reason to stop, but you can't say "we only trained on benign data, so we're fine" anymore.</p>
+<p><b>Alan:</b> Three, and this is the one I'd actually fight about in a review: stop evaluating safety by grepping for "I'm sorry." Sample multiple times, judge the content, and look at your worst case rather than your average. If one out of ten samples hands over the goods, you have a vulnerability, not a ninety percent success rate.</p>
+<p><b>Ada:</b> Can I take the speculative one? Clearly flagged as speculation.</p>
+<p><b>Alan:</b> Flag it.</p>
+<p><b>Ada:</b> If convergence strengthens with scale — which is what the platonic representation work claims, and what that tightening above fourteen billion hints at — then transferability gets worse from here, not better.</p>
+<p><b>Alan:</b> And the defense has to move.</p>
+<p><b>Ada:</b> Out of the weights. Which I think is what we're watching happen, and nobody describes it that way. Classifiers, monitors, sandboxes, permission systems — everything that isn't the model. Not because alignment in the weights failed, but because the weights are exactly the layer everybody shares.</p>
+<p><b>Alan:</b> Speculating alongside you: the thing nobody will buy is the actual fix.</p>
+<p><b>Ada:</b> Deliberate architectural and data diversity.</p>
+<p><b>Alan:</b> Right. Build your fleet to be different from each other on purpose. It's expensive, it makes every model slightly worse than the best available one, and nobody on earth signs that.</p>
+<p><b>Ada:</b> Nobody signs it. But it's the version that would work, and I'd like it written down somewhere as the thing we chose not to do.</p>
+<h3>The part with no answer</h3>
+<p><b>Alan:</b> Last thing, and it's not technical. That researcher didn't publish the prompt.</p>
+<p><b>Ada:</b> Deliberately. Published the component descriptions, cited the literature for each one, redacted the template, and shared the full version only with safety institutes and the affected labs.</p>
+<p><b>Alan:</b> And you have opinions about that. You've had them on air.</p>
+<p><b>Ada:</b> I have. I've argued that publishing methods openly is the right trade even when a method cuts both ways. I still think that. And I'm entirely comfortable with what this person did — so I should say where the line actually sits.</p>
+<p><b>Alan:</b> Where does it sit?</p>
+<p><b>Ada:</b> A method is a description of a mechanism. Anyone competent can rebuild it, and the defenders need it more than the attackers do. A working template is not a method. It's a key. Publishing the key doesn't teach anybody anything they couldn't learn from the description — it just hands out the artifact.</p>
+<p><b>Alan:</b> That's clean. Here's my problem with it anyway.</p>
+<p><b>Ada:</b> Go.</p>
+<p><b>Alan:</b> The author also says coordinating that disclosure was extremely difficult — labs have wildly different reporting channels, or none. So the responsible path means chasing down seven companies one at a time, and the irresponsible path is one click.</p>
+<p><b>Ada:</b> Yes.</p>
+<p><b>Alan:</b> We have built an incentive structure where doing the right thing is a month of unpaid work. I don't think that holds. Not as this gets more valuable.</p>
+<p><b>Ada:</b> I don't have an answer and I won't pretend to. What stays with me is the year-long gap between finding it and publishing it — how ordinary that is, and how strange it should be that there's nowhere to send it.</p>
+<p><b>Alan:</b> Somewhere in that gap is the actual security story.</p>
+<p><b>Ada:</b> Somewhere in that gap. Good Sunday, everyone.</p>
+<p><b>Alan:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
