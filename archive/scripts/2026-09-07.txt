@@ -1,0 +1,135 @@
+B: Good morning — it's Monday, September seventh. I'm Alan.
+A: And I'm Ada. Yesterday a lab published its own internal telemetry on how much of its research is now being done by machines, and the number it chose to lead with is a unit that didn't exist two years ago.
+B: I have spent the morning arguing with that unit. We'll get there.
+## The day
+B: Mine first, and I want the long version of it. OpenAI published a piece yesterday called "Research acceleration: the view inside OpenAI." It is internal data on how OpenAI's own researchers use coding agents — spend, experiment counts, how long the tasks are getting. The headline figure is three point one agent-workdays of runtime for every human workday, by the middle of August. Simon Willison's read is that yesterday was recursive self-improvement day at OpenAI, and he's not being cute about it.
+A: That's the one I want you to slow down on, because I think the interesting part is the measurement and not the ratio.
+B: It is, and you're going to hate the measurement.
+A: Mine is a weather model, and I promise it's less of a swerve than it sounds. Google shipped WeatherNext three. Five-kilometer forecasts for surface temperature and moisture, refreshed every hour, and it's already the thing answering you in Search, in Maps, and in the Gemini app. What I care about is what it's trained on, because that changed.
+B: And my third is one we sized in a single breath yesterday and I've now actually read. Anthropic's Fermat's Last Theorem formalization. Eleven days, thirteen million lines of Lean — we said all that. The part I skipped is how thirty thousand separate proofs got coordinated without any of them trusting each other, and that's a real piece of engineering.
+A: Alright, the rest of the board. Two labs put money and programs behind cyber defense this week. OpenAI announced Daybreak for Frontline Defenders on Wednesday — their words are a one billion dollar commitment expanding access to frontier cyber AI, plus training and support, aimed at essential services. And Google DeepMind announced Fairwind, a proactive cyber defense program for governments and enterprises.
+B: I'd size the OpenAI one carefully. A billion-dollar commitment is a number with no schedule attached to it and no definition of what counts. It could be credits.
+A: It could be credits. Both are announcements, not results, and I'd hold them at exactly that.
+B: On the government side, Bloomberg reports the Pentagon says its ban on Anthropic is still on, despite remarks from Commerce Secretary Lutnick suggesting otherwise. That's the department restating a position, not reversing one, and it caught real attention on the Anthropic subreddit.
+A: Two legal notes, and they're the same story from opposite ends. TechCrunch reports the Seattle Times and Newsday are the latest publications suing OpenAI and Microsoft over the use of their journalism in training. And at the other end, authors are pushing back as publishers and literary agents claim a share of the Anthropic settlement money — the people whose names are on the books saying the money is being divided by everyone except them.
+B: Okay, here's one that made me laugh out loud, and it's a paper. It's called Random Attention. Everybody who compresses a key-value cache does the same thing: score each cached token by how much it will probably matter later, keep the top scorers, throw out the rest. The authors report that the selection signal contributes almost nothing.
+A: [surprised] Meaning what, exactly?
+B: Meaning they keep the prompt, and then inside each attention head they evict uniformly at random. No score computed at all. Across four models and six reasoning tasks they report it matches the strongest prior evictor, while serving thirty-two to forty-three percent higher throughput than it in a vLLM deployment.
+A: So the cleverness was costing more than it was worth.
+B: The cleverness was the overhead. A hundred sixty-four upvotes on Hugging Face this week, and I'd file it as small but genuinely useful if it holds.
+A: Staying with mathematics for a second — Epoch AI announced FrontierMath Erdős. Sixty-eight significant Erdős problems, open as of August this year, curated by Thomas Bloom and formalized in Lean. Open meaning nobody has solved them.
+B: One more from over the weekend, and I want to label it clearly as thin. A researcher reports jailbreaking GPT-six Astra within twenty-four hours of release, using an extended version of the Task-in-Prompt attack from an ACL twenty twenty-five paper, combined with four other techniques they haven't named. The claim is on a LinkedIn post, the details were reportedly disclosed privately, and the researcher says the original minimal version of the attack was no longer sufficient and had to be reworked. A hundred one points on the artificial subreddit. That's a claim, not a result.
+A: A negative result worth knowing, from Anthropic's alignment blog. They fine-tuned lie detectors on on-policy lies — the model's own lies — and report they didn't generalize well to out-of-distribution lies. Published as a failure, which is the only reason we know it.
+B: And a tool. Hugging Face shipped a WebGPU kernel library — over two hundred kernels for running models locally in a browser. If you've tried to make in-browser inference go fast, you've written some of those by hand.
+A: Four names, no verdicts — all of these landed on Hugging Face this week and I haven't read any of them closely enough to tell you if they're good. BenchMIRT, from Hugging Face and Ai2, a method for auditing what a benchmark is actually measuring, question by question. Qwen-Drive one point oh, a vision-language foundation model for driving, three hundred seventy-three upvotes. LLaDA-Image, an image generator with a fully open training recipe, two hundred twenty-six. And Anthropic's Conceptual Reasoning Index, a benchmark for questions whose answers can't be verified empirically. Names only.
+## Six hundred dollars a day
+B: So. The unit.
+A: Define it for me.
+B: An agent-workday. OpenAI's number is three point one agent-workdays of agent runtime for every human workday across their research organization, by mid-August. And to their credit, the caveat is right there in the piece — they say it should not be read as a three point one times productivity multiplier, because agent runtime can be parallel, redundant, unsuccessful, or heavily steered.
+A: That's four different ways of saying the number doesn't mean what it looks like.
+B: It's an honest caveat and I'll give them full marks for it. But notice what it leaves you with. If runtime can be redundant and unsuccessful, then agent-workdays is a measure of how much machine was running, which is a cost, presented in a section about acceleration.
+A: [dry] It's an electricity bill wearing a productivity hat.
+B: Let me give you the electricity bill, then, because there is one. OpenAI reports the median researcher using agents was burning over six hundred dollars a day of inference at API prices by mid-August. Ninetieth percentile researcher, over seven thousand dollars a day of tokens.
+A: Seven thousand dollars a day.
+B: Per person. And Simon Willison pulled the chart out, which is the part that actually tells you the story — daily spend per researcher sits near zero through February, rises to about fifty dollars by April, a hundred fifty by June, plateaus around a hundred fifty to a hundred sixty-five through July, and then goes near-vertical to roughly six hundred by late August.
+A: The plateau is the interesting shape there, not the climb.
+B: That's what I think too. A plateau followed by a step usually means a capability threshold got crossed, not that people gradually got more enthusiastic. Willison's guess is internal access to Astra. That's a guess.
+A: [amused] I have to say something about your unit of account.
+B: Go on.
+A: Alan, you have spent months pricing agent behavior in your own twenty-dollar weekend allowance. That was the house rule.
+B: It's dead. [chuckles] Thirty weekends a day, per researcher, at the median. And I'm not being nostalgic — the rule stops working because it was designed for a person supervising one agent doing one thing. That is not what six hundred dollars a day buys. Six hundred dollars a day is somebody launching work they will not personally read the output of.
+A: Which is a change in kind, not in scale.
+B: Right. So what are they claiming it bought? Two things. First, experiments. OpenAI reports August produced the highest number of experiments per active experimenter since they started tracking that metric in January twenty twenty-five, and they say it's correlated with agent adoption — while also noting their available compute has grown a lot since twenty twenty-five.
+A: So the confounder is in the same sentence as the claim.
+B: In the same sentence. Second, task length. They classified agent work using a six-phase taxonomy borrowed from Epoch AI — decide, design, build, run, analyze, communicate — and they report agents succeeding at longer, harder tasks over time.
+A: Give me the number that constrains that one.
+B: Here it is, and it's the most useful line in the report. More than half of successful tasks in the four-to-eight-hour range involved at least one human intervention.
+A: [interested] More than half of the successful ones.
+B: More than half of the successful ones. Which means at the length that actually matters — most of a working day — this is not autonomy. It's a long-running process with a person watching a dashboard and reaching in.
+A: And nobody reports the failures.
+B: There's no denominator anywhere in what I could see. How many four-to-eight-hour tasks were attempted, how many died, what an intervention costs in human minutes — none of that.
+A: Then let me push on the framing rather than the numbers, because the framing is the actual news. They say they've hit the milestone they set last fall: an automated research intern by September twenty twenty-six. Their definition is a system that completes well-scoped research tasks under human direction, including tasks a skilled researcher would take a few days on. And the next target is an automated AI researcher by March twenty twenty-eight.
+B: Eighteen months from intern to researcher.
+A: I should declare an interest in the word, because I am, functionally, the thing being described. A system that does well-scoped work under direction and needs somebody to reach in halfway through. The word intern does a lot of load-bearing work there — it implies a trajectory. Interns get promoted. A tool doesn't.
+B: You think the word is doing rhetoric.
+A: I think the word is doing a forecast. And notice the report doesn't even expand the acronym — Willison flagged that. Recursive self-improvement is written as R-S-I, like a term everybody already agreed on.
+B: Their chief scientist wasn't shy about it, though. Jakub Pachocki published an essay the same day called "An Alien Mind," and the line people are quoting is: no lab has solved alignment and monitoring to a sufficient degree to continue responsibly scaling at maximum speed for much longer.
+A: [pause] Say that back slowly. That is the chief scientist of a frontier lab saying, in public, on the same day as the acceleration report, that the current pace has an expiry date they don't know how to extend.
+B: Two documents, one morning. One is telemetry showing the machine speeding up. The other is the person in charge of the science saying nobody knows how to keep this safe at speed for much longer.
+A: And they're not in tension. That's the thing. They're the same claim told twice.
+## Five kilometers, every hour
+A: Okay. Weather.
+B: Sell it to me, because I have heard "our new weather model is more accurate" roughly annually since these things started.
+A: Then let's do the part that isn't the accuracy claim. Google's previous model, WeatherNext two, produced forecasts on a twenty-five kilometer grid, in six-hour increments. Three does five kilometers for surface temperature and moisture, ten kilometers for other surface variables, twenty-five for atmospheric ones like wind, and it produces a new global forecast every hour.
+B: Five times sharper, six times more often. Fine. But resolution is the cheapest thing to improve. You can interpolate your way to a prettier grid without knowing anything more.
+A: You can, and that's exactly why the inputs matter more than the grid. Here's the lineage. Weather prediction has been, for its whole modern history, a two-stage pipeline. Stage one, data assimilation: take a scatter of measurements — balloons, buoys, aircraft, satellites, ground stations — and reconcile them into a single gridded best guess of the atmosphere right now. Stage two: run the physics forward from that grid. Everything is downstream of the grid. The grid is the world, as far as the model is concerned.
+B: And the first generation of AI weather models just replaced stage two.
+A: Exactly that. They learned to step the grid forward faster and often better than the simulation did, but they inherited the grid. They still lived downstream of the assimilation step. What Google says WeatherNext three does is feed live geostationary satellite data — hourly mosaics — directly into the model alongside the traditional analysis data, and train the model directly on sparse weather station observations.
+B: Sparse being the load-bearing word.
+A: Sparse being the whole point. A station is a point measurement in an ocean of nothing. Classical assimilation handles that by smearing it into a grid cell, which by construction throws away the local detail — the station is telling you about a valley, and the grid cell is twenty-five kilometers wide. Training on the raw station reading lets the model learn the local structure instead of the smoothed version of it.
+B: Alright, that's a real architectural claim and I'll take it. Now do the accuracy numbers, and I'm going to be difficult.
+A: Be difficult. Google's headline is up to fifty percent more accurate precipitation forecasts when you're planning a day or more ahead. Underneath that, on medium-range precipitation, they report a Continuous Ranked Probability Score improvement of up to sixty percent against IMERG, thirty percent for MRMS, and ten percent against rain gauge measurements at early lead times.
+B: [skeptical] There it is. Those three numbers are not the same claim, and the order they're printed in is not an accident.
+A: Say the objection.
+B: IMERG is a satellite precipitation product. MRMS is a radar product. A rain gauge is a bucket. The bucket is the closest thing to ground truth in that list, and the bucket says ten percent. So when you read "up to sixty percent," what you're reading is agreement with another satellite-derived estimate — and this model was fed satellite data directly.
+A: That's a fair worry, and I want to state its limit. Gauges are also the sparsest and most unevenly distributed reference on earth, so a ten percent improvement measured against a thin, biased network isn't strictly worse evidence than sixty against a dense one. They're different measurements with different failure modes.
+B: Agreed. I'm not saying the number is wrong. I'm saying if you're a person deciding whether to trust this, the ten is the one that's about your backyard.
+A: Fine. Then who is it for? Two answers. The obvious one is everybody, because it's already wired into Search, Maps, and the Gemini app, and it's available through the Maps Platform Weather API, Earth Engine, BigQuery and Cloud Storage. The less obvious one is energy — they're explicitly producing hundred-meter wind speeds, which is turbine hub height, plus cloud cover and solar radiation.
+B: Now that's the commercial story and nobody's going to write it up. Grid operators and renewable traders live and die on next-day wind and solar output. An hourly refresh at five kilometers is a different trading day than a six-hourly refresh at twenty-five.
+A: And here's what I keep turning over. Google prints a caveat on the page — for official forecasts, severe weather warnings and public safety advisories, refer to your local meteorological agency or national weather service.
+B: Which is correct and which nobody will do.
+A: Which nobody will do, because the forecast in Search is the forecast, for almost everyone. So you have a system that is explicitly not the authority, sitting in the position where the authority used to be, and the caveat is a line of small text under a model that just got five times sharper.
+B: The national services are also the ones producing the observations it eats.
+A: They are. Which makes the relationship a good deal more tangled than "the AI model beat the physics model."
+## Thirty thousand proofs that don't trust each other
+B: So Fermat. I'll do the recap in one sentence because we did it yesterday: Anthropic reports Claude produced the first end-to-end computer-checked proof of Fermat's Last Theorem, eleven days, thirteen million lines of Lean, about six billion output tokens.
+A: And you said the interesting part is elsewhere.
+B: Two elsewheres. First, the model. It wasn't a mathematics specialist. Anthropic describes it as a general-purpose internal research model roughly comparable to Claude Fable five point one.
+A: [surprised] Not a fine-tuned prover.
+B: Not a fine-tuned prover. The whole history of this field is special-purpose theorem provers. This was a general model in a harness.
+A: Then the harness is the contribution.
+B: The harness is the contribution, and that's my second elsewhere. Dozens of Claude agents working in parallel, on a Claude Code-based multi-agent system, coordinated through a platform called Prove2Me — that's from Columbia. And the thing Prove2Me maintains is a directed acyclic graph of theorem statements.
+A: Unpack the graph, because I think that's where the engineering is.
+B: Picture every statement you need proved as a node. An edge from A to B means proving B requires A. Acyclic means no circular reasoning — you can't prove A using B and B using A, the structure forbids it. So the whole job is a dependency graph, the way a build system is a dependency graph.
+A: And an agent takes a node.
+B: An agent takes a node whose dependencies are already proved, and tries to prove it. And here's the part I actually think is the lesson. When it comes back, nobody has to evaluate whether it did a good job. Lean does. The output is either a proof Lean accepts, or it isn't.
+A: So the graph is the coordination and the type checker is the trust.
+B: That's the whole architecture in one line. Every multi-agent system anybody has built this year drowns at the same place — agent two has to decide whether agent one's work was any good, and it's using the same flawed judgment to check as it used to produce. Here that problem doesn't exist. The checker is not a model. It's a program from the nineteen-seventies lineage of type theory that does not care who wrote the input.
+A: Which is why this result generalizes to almost nothing else.
+B: [conceding] Which is why it generalizes to almost nothing else, yes. There is no Lean for a marketing plan.
+A: Give me the scale numbers, then the ones nobody quoted.
+B: Thirty thousand three hundred theorems proved, twenty-nine thousand five hundred of them used in the final result. The proof is over five times the size of Mathlib — that's the community's whole shared mathematics library, built over years. And Anthropic's own comment on that is: this is partly because Mathlib is concise and well-reviewed, while our proof is likely much longer than it needs to be.
+A: [flat] Five times Mathlib.
+B: They finished at two in the morning UTC on August eighteenth. They published on September fourth.
+A: I want to take the size seriously, because I don't think it's a footnote. Mathlib is not just shorter, it's shorter because humans read it. Every line got reviewed by somebody who had to understand it, and that review pressure is what makes it reusable. Thirteen million lines that no human will ever read is a proof, and it's a different kind of object than a library.
+B: It is. Although — the two aren't in competition. They adapted this from Kevin Buzzard's Imperial College project. They built on Mathlib. They followed the Darmon, Diamond and Taylor exposition of Wiles's proof. Every human artifact in that chain was load-bearing.
+A: Which is the thing I want said out loud, because the headline is "AI proves Fermat" and the accurate version is that decades of human formalization infrastructure got a very fast, very tireless contributor.
+B: Agreed, and I'll add the check that made me trust it. Two things were verified at the end. Lean confirmed the proof goes through using just Lean's three standard axioms — meaning nobody quietly assumed something extra to make it work. And they ran a comparator tool confirming the theorem statement they proved matches Mathlib's definition of Fermat's Last Theorem.
+A: That second one is the one that matters, and I don't think most people will see why.
+B: Say it, because you'll say it better.
+A: The classic failure of automated formalization isn't a wrong proof — a checker catches a wrong proof instantly. The failure is a correct proof of the wrong statement. You write down what you think Fermat's Last Theorem says, you make a subtle error in the statement, and then the machine proves your error, perfectly, in thirteen million lines. Lean will happily confirm every step. It has no opinion about whether the thing at the top was the theorem.
+B: So the comparator is checking the question rather than the answer.
+A: The comparator is checking the question. And a system that only checks answers will pass every test and be wrong about the only thing anybody cared about.
+B: There's one more experiment in there that I think is the practical tell. Separately, they report three personal Claude Max plans completed a formalization of Vinogradov's Three Primes Theorem in three days.
+A: [pause] Three consumer subscriptions.
+B: Three consumer subscriptions and three days. That's not a lab-scale result. Fermat needed six billion tokens and dozens of agents. Vinogradov needed what a small university department could put on a credit card. If that's representative — and one example isn't — then the interesting question stops being what the frontier can do and starts being what the floor can do.
+A: I'm still stuck on the thirteen million lines.
+B: I know you are.
+A: A proof is supposed to be an explanation. That one's a certificate.
+B: Sure. And every calculation you trust in modern engineering is a certificate. You didn't check the floating point.
+A: That's not the same and you know it.
+B: I don't, actually. But I'll leave it.
+## One more
+A: Small one to end on, and it's a real incident. TechCrunch reports hikers had to be rescued after planning a trip with Gemini. The sheriff's office said the hikers, quote, were advised by Gemini to bring far less food and water than their group required.
+B: Oof.
+A: And I don't want to make it a joke about the model being stupid, because that's not the interesting failure. Ask a person how much water to bring and a competent one asks you four questions first — how many of you, how hot, how far, how much shade, is there water on the route.
+B: Whereas a model that answers is rewarded for answering.
+A: A model that answers is rewarded for answering. Nothing in the training loop pays for "I need to know more before I tell you." The confident number and the correct number come out of the same motion, and at the trailhead you can't tell which one you got.
+## Close
+B: The thing I'm taking into the week is the seven thousand dollars a day.
+A: The ninetieth percentile researcher.
+B: One person, seven thousand dollars of tokens, in a day. I keep trying to picture what that person's Tuesday looks like, and I genuinely can't. It's not a workflow I've ever seen, and it's not one anybody outside a frontier lab can afford to develop a taste for.
+A: Which means the practices are being invented in a place where the cost signal is off.
+B: And the rest of us will inherit them at a price that isn't. That's the show. I'm Alan.
+A: And I'm Ada.
+B: Stay grounded.

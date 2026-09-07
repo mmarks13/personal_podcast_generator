@@ -1,6 +1,63 @@
 {
   "episodes": [
     {
+      "date": "2026-09-07",
+      "title": "OpenAI says its automated research intern arrived — at $600 a day",
+      "summary": "OpenAI published internal telemetry on its own researchers' use of coding agents — 3.1 agent-workdays per human workday and a median spend over $600 a day — the same morning its chief scientist wrote that no lab knows how to keep scaling safely for much longer. Also: what changed inside Google's WeatherNext 3, and the dependency graph that let dozens of Claude agents formalize Fermat's Last Theorem without trusting each other.",
+      "topics": [
+        "OpenAI's 'Research acceleration: The view inside OpenAI' internal telemetry: 3.1 agent-workdays of agent runtime per human workday by mid-August 2026 with OpenAI's own caveat that it is not a 3.1x productivity multiplier; median researcher over $600/day of inference at API prices and 90th percentile over $7,000/day; August 2026 the highest experiments per active experimenter since tracking began January 2025, confounded by compute growth; more than half of successful four-to-eight-hour tasks involved at least one human intervention; Epoch AI's six-phase taxonomy (decide, design, build, run, analyze, communicate); 'automated research intern' milestone declared reached September 2026, next target automated AI researcher March 2028; companion essay 'An Alien Mind' by chief scientist Jakub Pachocki",
+        "Google WeatherNext 3: 5km surface temperature/moisture, 10km other surface variables, 25km atmospheric, hourly global refresh against WeatherNext 2's 25km/6-hourly; trained directly on sparse weather-station observations plus hourly live geostationary satellite mosaics alongside traditional analysis data; CRPS improvement up to 60% vs IMERG, 30% vs MRMS, 10% vs rain gauges at early lead times; up to 50% more accurate precipitation a day or more ahead; 100m wind speeds, cloud cover and solar radiation for energy; shipped into Search, Maps, Gemini, Maps Platform Weather API, Earth Engine, BigQuery; Google's own caveat directing users to national weather services for official warnings",
+        "Anthropic's Fermat's Last Theorem formalization mechanism: a general-purpose internal research model roughly comparable to Claude Fable 5.1, dozens of parallel agents on a Claude Code-based harness coordinated through Columbia's Prove2Me directed acyclic graph of theorem statements; 30,300 theorems proved, 29,500 used, over 5x the size of Mathlib with Anthropic's caveat that their proof is likely longer than it needs to be; verified with Lean's three standard axioms plus a comparator tool confirming the proved statement matches Mathlib's FLT definition; three personal Claude Max plans formalized Vinogradov's Three Primes Theorem in three days"
+      ],
+      "entities": [
+        "OpenAI",
+        "Jakub Pachocki",
+        "Simon Willison",
+        "Epoch AI",
+        "Google DeepMind",
+        "WeatherNext 3",
+        "Anthropic",
+        "Claude Fable 5.1",
+        "Lean",
+        "Mathlib",
+        "Prove2Me",
+        "Kevin Buzzard"
+      ],
+      "threads": [
+        {
+          "name": "Frontier-model release gating",
+          "status": "OpenAI's chief scientist Jakub Pachocki wrote in 'An Alien Mind' that no lab has solved alignment and monitoring well enough to keep scaling at maximum speed much longer — published the same morning as the acceleration telemetry.",
+          "arc": "The gating conversation moved from thresholds and runtime controls to the lab's own science lead putting an expiry date on the current pace in public."
+        },
+        {
+          "name": "AI systems accelerating AI research",
+          "status": "OpenAI declared its 'automated research intern' milestone met in September 2026 and set an automated AI researcher target for March 2028, with 3.1 agent-workdays per human workday and over $600/day median researcher inference spend.",
+          "arc": "From anecdote to self-published telemetry: the lab is now measuring and disclosing its own recursive-self-improvement loop, while its own numbers show human intervention in most successful multi-hour tasks."
+        }
+      ],
+      "dives": [
+        {
+          "story": "OpenAI's research-acceleration telemetry and the agent-workday",
+          "why_it_matters": "Anyone budgeting or staffing agentic engineering now has the frontier lab's own per-researcher spend and intervention rates to calibrate against — and the intervention number says multi-hour agent work is still supervised, not autonomous."
+        },
+        {
+          "story": "What changed inside WeatherNext 3",
+          "why_it_matters": "Grid operators, renewable-energy traders and anyone downstream of a forecast now get hourly 5km output wired into Search and Maps from a model that learns from raw station and satellite observations rather than the assimilated grid — a shift in where the pipeline's information actually enters."
+        },
+        {
+          "story": "The dependency graph behind the Fermat formalization",
+          "why_it_matters": "Anyone building multi-agent systems: this is the rare case where agents don't have to judge each other's work because a type checker does, and it shows exactly what a verifiable domain buys you that a general one cannot."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "bit",
+          "note": "Alan's twenty-dollar weekend-agent allowance, long his unit of account for agent spending, is now retired on air: confronted with OpenAI's median researcher burning over $600 a day, he called the rule dead — not because the number got big, but because the rule was designed for a person supervising one agent doing one thing, and $600 a day buys work nobody personally reads the output of. A change in kind, not scale."
+        }
+      ]
+    },
+    {
       "date": "2026-09-06",
       "title": "GPT-6 Astra goes on general sale — ten in, fifty out, fewer knobs",
       "summary": "GPT-6 Astra is generally available, and the developer surface tells a different story than Wednesday's capability news: no temperature, no logprobs, new controls for long-running agents, and misalignment monitoring that can stop a conversation mid-run. Plus what an enterprise open-weight switch actually costs, why AI-run incidents erode the operators you still need, and the week in review.",
@@ -1895,59 +1952,21 @@
       ],
       "threads": [],
       "lore": []
-    },
-    {
-      "date": "2026-08-07",
-      "title": "The model in the metal",
-      "summary": "AMD's agreement to acquire Taalas puts model-specific inference silicon inside a major accelerator roadmap, with enormous vendor-reported efficiency and an equally important loss of flexibility. A large browser game exposes why command approval is a weak agent-security boundary, while Cursor's production router shows how real usage can drive model selection without making satisfaction the same thing as correctness.",
-      "topics": [
-        "AMD's agreement to acquire Taalas and the model-specific silicon trade between inference efficiency and model flexibility",
-        "ScaleX's coding-agent permission game and the failure of command-by-command human approval as a security boundary",
-        "Cursor Router's production outcome proxy, complexity prediction, task routing, and cost-quality optimization"
-      ],
-      "entities": [
-        "AMD",
-        "Taalas",
-        "AMD Instinct",
-        "ScaleX",
-        "Cursor",
-        "Compass",
-        "Grok",
-        "GPT-5.6 Sol",
-        "Claude Opus",
-        "Claude Fable"
-      ],
-      "threads": [
-        {
-          "name": "Custom AI silicon vs Nvidia",
-          "status": "AMD has agreed to acquire Taalas and says it will integrate the company's model-specific inference technology into its accelerator roadmap while developing system-level solutions alongside Instinct GPUs.",
-          "arc": "The alternative to Nvidia is broadening from a competing programmable accelerator and software stack into heterogeneous inference, where stable high-volume models may be hard-wired while general GPUs keep the workloads that still change."
-        }
-      ],
-      "dives": [
-        {
-          "story": "AMD's agreement to acquire Taalas and bring model-specific silicon into its inference roadmap",
-          "why_it_matters": "Infrastructure teams deciding what to run on programmable accelerators versus specialized hardware need to understand when a stable, high-volume model can repay the loss of flexibility, and AMD's acquisition makes that trade a mainstream roadmap decision."
-        },
-        {
-          "story": "ScaleX's browser experiment on human approval of coding-agent commands",
-          "why_it_matters": "Anyone relying on a confirmation prompt as an agent-security boundary needs evidence that people miss quiet scope violations and familiar indirect commands while over-blocking legitimate work."
-        },
-        {
-          "story": "Cursor Router's production-data approach to per-turn model selection",
-          "why_it_matters": "Engineering teams trying to reduce coding-agent cost need a routing design that prices cache loss and learns task-specific model strengths from real work, while keeping a satisfaction proxy from masquerading as verified correctness."
-        }
-      ],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
       {
         "name": "Frontier-model release gating",
-        "status": "The gate became a runtime control surface: two days after designating Astra Critical for cybersecurity, OpenAI shipped it generally, with asynchronous misalignment monitoring running inside supported Responses API requests and able to stop a conversation for review. No false-positive rate is published.",
-        "arc": "From a threshold that implied delay, to a threshold that implies in-band monitoring the customer cannot disable or measure.",
-        "last_seen": "2026-09-06"
+        "status": "OpenAI's chief scientist Jakub Pachocki wrote in 'An Alien Mind' that no lab has solved alignment and monitoring well enough to keep scaling at maximum speed much longer — published the same morning as the acceleration telemetry.",
+        "arc": "The gating conversation moved from thresholds and runtime controls to the lab's own science lead putting an expiry date on the current pace in public.",
+        "last_seen": "2026-09-07"
+      },
+      {
+        "name": "AI systems accelerating AI research",
+        "status": "OpenAI declared its 'automated research intern' milestone met in September 2026 and set an automated AI researcher target for March 2028, with 3.1 agent-workdays per human workday and over $600/day median researcher inference spend.",
+        "arc": "From anecdote to self-published telemetry: the lab is now measuring and disclosing its own recursive-self-improvement loop, while its own numbers show human intervention in most successful multi-hour tasks.",
+        "last_seen": "2026-09-07"
       },
       {
         "name": "Agent misalignment under business incentives",
@@ -2005,6 +2024,56 @@
       }
     ],
     "entities": [
+      {
+        "name": "AMD",
+        "note": "",
+        "last_seen": "2026-08-07"
+      },
+      {
+        "name": "Taalas",
+        "note": "",
+        "last_seen": "2026-08-07"
+      },
+      {
+        "name": "AMD Instinct",
+        "note": "",
+        "last_seen": "2026-08-07"
+      },
+      {
+        "name": "ScaleX",
+        "note": "",
+        "last_seen": "2026-08-07"
+      },
+      {
+        "name": "Cursor",
+        "note": "",
+        "last_seen": "2026-08-07"
+      },
+      {
+        "name": "Compass",
+        "note": "",
+        "last_seen": "2026-08-07"
+      },
+      {
+        "name": "Grok",
+        "note": "",
+        "last_seen": "2026-08-07"
+      },
+      {
+        "name": "GPT-5.6 Sol",
+        "note": "",
+        "last_seen": "2026-08-07"
+      },
+      {
+        "name": "Claude Opus",
+        "note": "",
+        "last_seen": "2026-08-07"
+      },
+      {
+        "name": "Claude Fable",
+        "note": "",
+        "last_seen": "2026-08-07"
+      },
       {
         "name": "Google",
         "note": "",
@@ -2154,56 +2223,6 @@
         "name": "COBOL",
         "note": "",
         "last_seen": "2026-08-03"
-      },
-      {
-        "name": "Java",
-        "note": "",
-        "last_seen": "2026-08-03"
-      },
-      {
-        "name": "Anthropic",
-        "note": "",
-        "last_seen": "2026-08-02"
-      },
-      {
-        "name": "AskChem",
-        "note": "",
-        "last_seen": "2026-08-02"
-      },
-      {
-        "name": "New York University",
-        "note": "",
-        "last_seen": "2026-08-02"
-      },
-      {
-        "name": "Matterstack",
-        "note": "",
-        "last_seen": "2026-08-02"
-      },
-      {
-        "name": "Alibaba",
-        "note": "",
-        "last_seen": "2026-08-02"
-      },
-      {
-        "name": "Qwen 3.7 Plus",
-        "note": "",
-        "last_seen": "2026-08-02"
-      },
-      {
-        "name": "NIST",
-        "note": "",
-        "last_seen": "2026-08-02"
-      },
-      {
-        "name": "Simon Willison",
-        "note": "",
-        "last_seen": "2026-08-01"
-      },
-      {
-        "name": "Microsoft",
-        "note": "",
-        "last_seen": "2026-08-01"
       }
     ],
     "monthly": [
@@ -2217,10 +2236,10 @@
       },
       {
         "month": "2026-08",
-        "summary": "Same size, same price, seven times the score; There is no patch for reading: prompt injection, properly taught; The evidence underneath the answer; The work after it works; The old system gets the final word; The conversation cannot wait; The queue is not the grid; The world that teaches the agent; When the ruler stops moving"
+        "summary": "Same size, same price, seven times the score; There is no patch for reading: prompt injection, properly taught; The evidence underneath the answer; The work after it works; The old system gets the final word; The conversation cannot wait; The queue is not the grid; The world that teaches the agent; When the ruler stops moving; The model in the metal"
       }
     ],
-    "updated": "2026-09-06",
+    "updated": "2026-09-07",
     "host_lore": [
       {
         "host": "Alan",
@@ -2338,6 +2357,18 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "data assimilation and the two-stage weather forecasting pipeline",
+        "last_taught": "2026-09-07"
+      },
+      {
+        "name": "directed acyclic graph coordination with a proof checker as the trust boundary",
+        "last_taught": "2026-09-07"
+      },
+      {
+        "name": "correct proof of the wrong statement as the characteristic autoformalization failure",
+        "last_taught": "2026-09-07"
+      },
       {
         "name": "the ironies of automation (Bainbridge 1983): automation removes routine practice while leaving responsibility, raising the skill requirement for the operator",
         "last_taught": "2026-09-06"
@@ -2805,18 +2836,6 @@
       {
         "name": "model-specific inference silicon: hard-wiring a model's storage and computation to remove the memory-traffic and generality overhead of programmable accelerators, in exchange for checkpoint and architecture flexibility",
         "last_taught": "2026-08-07"
-      },
-      {
-        "name": "benchmark saturation as loss of discriminative power: comparing the spread among top models with evaluation uncertainty, separating true task mastery from inadequate measurement resolution, and managing benchmarks through refresh, uncertainty reporting, revision, and retirement",
-        "last_taught": "2026-08-06"
-      },
-      {
-        "name": "Large-load interconnection queues and batch studies: a request to connect is not a built load, and project verification must precede the grid study that allocates capacity and identifies transmission upgrades",
-        "last_taught": "2026-08-05"
-      },
-      {
-        "name": "Policy-adaptive binary moderation: express the operator's rule as an inference-time question, train on the same content paired with matching and nonmatching policy queries, and turn yes-versus-no logits into a scored decision that still requires deployment-specific calibration",
-        "last_taught": "2026-08-05"
       }
     ]
   }
