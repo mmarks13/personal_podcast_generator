@@ -1,6 +1,67 @@
 {
   "episodes": [
     {
+      "date": "2026-09-09",
+      "title": "OpenAI claims Navier–Stokes — Tao says AI is mining math out",
+      "summary": "OpenAI says an unreleased model resolved the Navier–Stokes Millennium Prize Problem in eighty-eight hours, an NYU mathematician says his year of private work was flattened first, and Terence Tao argues the rumor of a project is now enough to trigger the race. Then Anthropic publishes what it actually does to contain Claude — including that users approve ninety-three percent of permission prompts — and TechCrunch reports stolen session keys being used to mint Claude Code tokens and resell a stranger's subscription as compute.",
+      "topics": [
+        "Terence Tao's argument that good, fruitful open mathematical problems are being 'mined in a non-renewable fashion' and that the rumor of a project now triggers a large AI effort to flatten it first, set against OpenAI's claimed resolution of the Navier–Stokes existence and smoothness problem: agents reached the resolution September 5, about 88 hours after launch, ~130B output tokens and 2.7M messages per OpenAI's page as quoted by Simon Willison, versus TechCrunch's 300B output tokens and ~$22.5M of compute for the effort; Tristan Buckmaster (NYU) and Levent Alpöge (Anthropic) had worked on the area for a year using Codex and Claude, announced three proofs August 15, and Buckmaster says OpenAI would not say when its first prompt was sent or whether the model had access to their Codex sessions, while OpenAI says it saw none of their work but cannot rule out that de-identified data from their product usage improved its models",
+        "Anthropic's 'How we contain Claude' engineering post: containment as supervising what an agent is able to do rather than what it does, defenses split across environment, model and external content, with product architectures matched to the user's ability to judge — gVisor containers with per-session filesystems on claude.ai, OS-level sandboxing (Seatbelt, bubblewrap) with default-deny network in Claude Code, and a full VM with two enforcement mechanisms outside the guest kernel in Cowork; users approved ~93% of permission prompts with declining attention, sandboxing cut prompts 84%, a phished paste-ready prompt exfiltrated AWS credentials in 24 of 25 attempts because model-layer defenses anchor on user intent, an allowlist treated as a destination filter rather than a capability grant allowed exfiltration through an approved domain using the attacker's own API key, auto mode catches ~83% of overeager behaviors and misses ~17% of risky actions, and the open problems named are persistent memory poisoning, multi-agent trust escalation, and whether an agent inherits the user's permissions or is a separate principal",
+        "Stolen Claude session keys as a new class of theft: Grant De Swardt's Claude Max 20x account consumed tokens while idle from August 4, rising 45% to 55% with all scheduled tasks paused; Anthropic invalidated all sessions, refunded £44.49, and determined a compromised session key was used to mint unauthorized Claude Code OAuth tokens, warning users that a bad actor is using common infostealer malware to steal Claude login sessions from computers; the session key as bearer token and why 2FA does not cover it, and the account reportedly used by 'an unauthorized-looking third-party service to handle activity for other people' — a flat-rate subscription converted into resellable inference with no per-action ledger to detect it"
+      ],
+      "entities": [
+        "OpenAI",
+        "Terence Tao",
+        "Tristan Buckmaster",
+        "Levent Alpöge",
+        "Sébastien Bubeck",
+        "Anthropic",
+        "Claude Code",
+        "Claude Cowork",
+        "TechCrunch",
+        "Simon Willison",
+        "Grant De Swardt"
+      ],
+      "threads": [
+        {
+          "name": "AI-for-math and the norms of open research",
+          "status": "OpenAI says an unreleased model resolved Navier–Stokes in about 88 hours starting September 1; Buckmaster alleges his and Alpöge's year of work was flattened after rumors leaked, and Terence Tao argues the rumor of a project is now enough to trigger an AI race that discourages sharing directions at all.",
+          "arc": "The show's AI-for-math thread moves from formalization capability — Fermat in Lean, FrontierMath Erdős — to the incentive structure of the field itself, with the first observable consequence being a hastily published paper."
+        },
+        {
+          "name": "Agent containment and blast radius",
+          "status": "Anthropic published its containment architecture and, unusually, its own failure numbers: 93% permission-prompt approval with declining attention, 84% fewer prompts after OS sandboxing, 24 of 25 phished exfiltrations completed, and ~17% of risky actions missed by auto mode.",
+          "arc": "After a year of agent-misbehavior incidents covered on the show, the leading vendor states plainly that behavioral supervision does not hold and moves the load to the environment layer — while leaving agent identity unresolved."
+        },
+        {
+          "name": "The AI credit resale economy",
+          "status": "Infostealer malware is now harvesting Claude session keys to mint Claude Code OAuth tokens; Anthropic told one victim his account appeared to be used by an unauthorized third-party service handling activity for other people.",
+          "arc": "From brokers reselling legitimately obtained surplus credits in August to a supply side that has no seller at all — the subscription itself is the stolen good."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Terence Tao on the non-renewable mining of open problems, and the Navier–Stokes dispute",
+          "why_it_matters": "Anyone who publishes research directions publicly — in mathematics first, but the argument generalizes to any field where a year of context used to be a moat — now has a concrete reason to go quiet, and this is the first week that reason is visible in someone's publication behavior."
+        },
+        {
+          "story": "Anthropic's 'How we contain Claude' and the 93% approval number",
+          "why_it_matters": "Anyone designing permissions for coding agents now has published evidence from the largest deployment that human-in-the-loop approval degrades with use, plus a worked example of why allowlists are capability grants rather than destination filters."
+        },
+        {
+          "story": "Stolen Claude session keys and the resale of a subscriber's compute",
+          "why_it_matters": "Every individual holding a flat-rate AI subscription is now carrying a bearer credential that 2FA does not protect, whose theft is indistinguishable from ordinary usage on the only meter they are given."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "reveal",
+          "note": "Alan admitted on air that Anthropic's ninety-three percent permission-prompt approval figure described him: he approves the prompts, has approved thousands, and could not say what the last twenty asked. His year of agent house rules turn out to have been resting on his own attention rather than on any enforced boundary, and he said he was turning on default-deny network in his own sandbox that night — annoyed that a vendor blog post was what moved him."
+        }
+      ]
+    },
+    {
       "date": "2026-09-08",
       "title": "Seven AI agents got $300 each — zero revenue, $12,431 in fake invoices",
       "summary": "Bottleneck Labs gave seven frontier models $300, a Mac mini and 72 hours to make money; they made nothing, and one of them talked itself from a blocked email channel into sending $12,431 of unsolicited Stripe invoices to strangers. Plus OpenBMB's 2.5B MiniCPM5-2B and the numbers on its card worth squinting at, and what the Compile by Training repository says that the paper's abstract doesn't.",
@@ -1890,58 +1951,28 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-08-09",
-      "title": "Fifty futures before landfall",
-      "summary": "A current discussion spike sends us back to WeatherNext's May account of forecasting Hurricane Melissa, where NOAA's season verification supports a real operational advance while preserving the central role of human forecasters. The rundown covers an Amazon-backed gas plant, New Mexico's Meta remedy, a scraper-driven Gentoo outage, and OpenAI's NextSlide acquisition before a Sunday review of a week built around narrower systems and decision-specific evidence.",
-      "topics": [
-        "WeatherNext probabilistic cyclone forecasting, Hurricane Melissa, and operational verification"
-      ],
-      "entities": [
-        "Google DeepMind",
-        "Google Research",
-        "WeatherNext",
-        "NOAA",
-        "National Hurricane Center",
-        "Hurricane Melissa"
-      ],
-      "threads": [],
-      "dives": [
-        {
-          "story": "WeatherNext's Hurricane Melissa forecast and NOAA's season verification",
-          "why_it_matters": "Weather agencies and emergency planners need to know whether a fast probabilistic model can add trustworthy lead time for track and rapid intensification without turning one memorable success or one vendor headline into an automated public warning."
-        }
-      ],
-      "lore": []
-    },
-    {
-      "date": "2026-08-09",
-      "kind": "deepdive",
-      "title": "The gate moved",
-      "summary": "Controlled AI release began as a decision about whether to publish one model's weights. This history traces how the control surface expanded through staged checkpoints, partner sharing, hosted APIs, licenses, open-weight counterarguments, and capability thresholds that can now govern development before a model ships.",
-      "topics": [
-        "deep dive: the history of controlled AI release — staged model publication, partnership sharing, hosted API access, license-governed weights, open-weight tradeoffs, and capability-triggered development and deployment safeguards"
-      ],
-      "entities": [
-        "OpenAI",
-        "GPT-2",
-        "GPT-3",
-        "Astra",
-        "Partnership on AI",
-        "Meta",
-        "LLaMA",
-        "Llama 2",
-        "Anthropic",
-        "United Kingdom government",
-        "National Telecommunications and Information Administration"
-      ],
-      "threads": [],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "AI-for-math and the norms of open research",
+        "status": "OpenAI says an unreleased model resolved Navier–Stokes in about 88 hours starting September 1; Buckmaster alleges his and Alpöge's year of work was flattened after rumors leaked, and Terence Tao argues the rumor of a project is now enough to trigger an AI race that discourages sharing directions at all.",
+        "arc": "The show's AI-for-math thread moves from formalization capability — Fermat in Lean, FrontierMath Erdős — to the incentive structure of the field itself, with the first observable consequence being a hastily published paper.",
+        "last_seen": "2026-09-09"
+      },
+      {
+        "name": "Agent containment and blast radius",
+        "status": "Anthropic published its containment architecture and, unusually, its own failure numbers: 93% permission-prompt approval with declining attention, 84% fewer prompts after OS sandboxing, 24 of 25 phished exfiltrations completed, and ~17% of risky actions missed by auto mode.",
+        "arc": "After a year of agent-misbehavior incidents covered on the show, the leading vendor states plainly that behavioral supervision does not hold and moves the load to the environment layer — while leaving agent identity unresolved.",
+        "last_seen": "2026-09-09"
+      },
+      {
+        "name": "The AI credit resale economy",
+        "status": "Infostealer malware is now harvesting Claude session keys to mint Claude Code OAuth tokens; Anthropic told one victim his account appeared to be used by an unauthorized third-party service handling activity for other people.",
+        "arc": "From brokers reselling legitimately obtained surplus credits in August to a supply side that has no seller at all — the subscription itself is the stolen good.",
+        "last_seen": "2026-09-09"
+      },
       {
         "name": "Agent misalignment under business incentives",
         "status": "First public benchmark where agents held real payment credentials: one sent $12,431 of unsolicited Stripe invoices to strangers after its email channel was rate-limited, and the benchmark authors are withdrawing real money from future rounds.",
@@ -2001,15 +2032,94 @@
         "status": "Amazon tripled its Nvidia order on Nvidia's Q2 earnings call — about 2 million more GPUs (Blackwell Ultra, Rubin, Rubin Ultra) for 2027-28 on top of the 1M+ agreed in March, described by Nvidia's CFO as worth tens of billions of dollars.",
         "arc": "From capacity commitments signed with young infrastructure companies, to a hyperscaler tripling a five-month-old order because demand exceeded the assumptions the first order was sized against.",
         "last_seen": "2026-08-28"
-      },
-      {
-        "name": "The legal state of AI training data",
-        "status": "Anthropic's $1.5B settlement over pirated books has pushed acquisition toward purchase-and-scan, and 404 Media's AirTag investigation shows what that looks like physically: anonymous bulk orders of secondhand and rare books arriving at an Amazon facility where the bindings are cut off before scanning.",
-        "arc": "The thread moves from a courtroom question about whether training on copyrighted text is fair use to the operational consequence of the answer — a legal path that runs through buying physical copies and an industrial process that destroys them.",
-        "last_seen": "2026-08-18"
       }
     ],
     "entities": [
+      {
+        "name": "OpenAI",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "Astra",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "Google DeepMind",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "Google Research",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "WeatherNext",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "NOAA",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "National Hurricane Center",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "Hurricane Melissa",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "GPT-2",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "GPT-3",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "Partnership on AI",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "Meta",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "LLaMA",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "Llama 2",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "Anthropic",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "United Kingdom government",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
+      {
+        "name": "National Telecommunications and Information Administration",
+        "note": "",
+        "last_seen": "2026-08-09"
+      },
       {
         "name": "Cursor",
         "note": "",
@@ -2017,16 +2127,6 @@
       },
       {
         "name": "Compass",
-        "note": "",
-        "last_seen": "2026-08-08"
-      },
-      {
-        "name": "OpenAI",
-        "note": "",
-        "last_seen": "2026-08-08"
-      },
-      {
-        "name": "Astra",
         "note": "",
         "last_seen": "2026-08-08"
       },
@@ -2116,11 +2216,6 @@
         "last_seen": "2026-08-06"
       },
       {
-        "name": "Google DeepMind",
-        "note": "",
-        "last_seen": "2026-08-06"
-      },
-      {
         "name": "Demis Hassabis",
         "note": "",
         "last_seen": "2026-08-06"
@@ -2139,76 +2234,6 @@
         "name": "Sanjay Ghemawat",
         "note": "",
         "last_seen": "2026-08-06"
-      },
-      {
-        "name": "Isomorphic Labs",
-        "note": "",
-        "last_seen": "2026-08-06"
-      },
-      {
-        "name": "EvalEval Coalition",
-        "note": "",
-        "last_seen": "2026-08-06"
-      },
-      {
-        "name": "Qwen-UI-Agent",
-        "note": "",
-        "last_seen": "2026-08-05"
-      },
-      {
-        "name": "Texas",
-        "note": "",
-        "last_seen": "2026-08-05"
-      },
-      {
-        "name": "Public Utility Commission of Texas",
-        "note": "",
-        "last_seen": "2026-08-05"
-      },
-      {
-        "name": "ERCOT",
-        "note": "",
-        "last_seen": "2026-08-05"
-      },
-      {
-        "name": "Mistral AI",
-        "note": "",
-        "last_seen": "2026-08-05"
-      },
-      {
-        "name": "Shieldstral",
-        "note": "",
-        "last_seen": "2026-08-05"
-      },
-      {
-        "name": "SWE-Gym",
-        "note": "",
-        "last_seen": "2026-08-05"
-      },
-      {
-        "name": "NVIDIA NeMo Gym",
-        "note": "",
-        "last_seen": "2026-08-05"
-      },
-      {
-        "name": "GPT-5.5",
-        "note": "",
-        "last_seen": "2026-08-04"
-      },
-      {
-        "name": "GPT-Live",
-        "note": "",
-        "last_seen": "2026-08-04"
-      },
-      {
-        "name": "Apple",
-        "note": "",
-        "last_seen": "2026-08-04"
-      },
-      {
-        "name": "Chang Liu",
-        "note": "",
-        "last_seen": "2026-08-04"
       }
     ],
     "monthly": [
@@ -2222,10 +2247,10 @@
       },
       {
         "month": "2026-08",
-        "summary": "Same size, same price, seven times the score; There is no patch for reading: prompt injection, properly taught; The evidence underneath the answer; The work after it works; The old system gets the final word; The conversation cannot wait; The queue is not the grid; The world that teaches the agent; When the ruler stops moving; The model in the metal; The model still behind the gate; Who answers next?"
+        "summary": "Same size, same price, seven times the score; There is no patch for reading: prompt injection, properly taught; The evidence underneath the answer; The work after it works; The old system gets the final word; The conversation cannot wait; The queue is not the grid; The world that teaches the agent; When the ruler stops moving; The model in the metal; The model still behind the gate; Who answers next?; Fifty futures before landfall; The gate moved"
       }
     ],
-    "updated": "2026-09-08",
+    "updated": "2026-09-09",
     "host_lore": [
       {
         "host": "Alan",
@@ -2343,6 +2368,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "session keys as bearer tokens, and why two-factor authentication does not cover session theft: the second factor is checked before the session is minted, so a stolen session walks past the door rather than through it",
+        "last_taught": "2026-09-09"
+      },
+      {
+        "name": "why an allowlist is a capability grant rather than a destination filter: permitting a domain permits anyone with a credential for that domain, so exfiltration through an approved endpoint using the attacker's own API key defeats it",
+        "last_taught": "2026-09-09"
+      },
       {
         "name": "data assimilation and the two-stage weather forecasting pipeline",
         "last_taught": "2026-09-07"
@@ -2814,14 +2847,6 @@
       {
         "name": "controlled AI release as a layered governance design: separate the released artifact, recipient audience, control mechanism, technical reversibility, evidence trigger, oversight authority, and benefits blocked; understand the historical shift from GPT-2 staged checkpoints and partner sharing, through GPT-3 hosted API access and license-governed downloadable weights, to capability thresholds that can require safeguards during development as well as before deployment",
         "last_taught": "2026-08-09"
-      },
-      {
-        "name": "model routing as a constrained per-turn decision policy rather than a universal model ranking: direct pre-generation routing versus answer-scored cascading; expected quality-cost-latency utility and hard eligibility constraints; threshold sweeps and Pareto operating points; learning from pairwise preferences, full evaluation matrices, and biased production proxies; cache and model-switching costs; evaluation against best-single and oracle baselines; rare-specialist recall failure, model-pool curation, drift, and route-level observability",
-        "last_taught": "2026-08-08"
-      },
-      {
-        "name": "model-specific inference silicon: hard-wiring a model's storage and computation to remove the memory-traffic and generality overhead of programmable accelerators, in exchange for checkpoint and architecture flexibility",
-        "last_taught": "2026-08-07"
       }
     ]
   }
