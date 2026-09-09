@@ -62,6 +62,36 @@
       ]
     },
     {
+      "date": "2026-09-09",
+      "kind": "deepdive",
+      "title": "Proof search: the tree, the verifier, and the one-bit reward",
+      "summary": "What a machine is actually doing when it \"searches for a proof\" — the tactic state as a position, premise selection over a hundred-thousand-lemma library, and-or trees and the sparse one-bit reward, expert iteration, whole-proof versus step-by-step generation, and how 2026's agent swarms moved the search up from which tactic to which statement should exist.",
+      "topics": [
+        "deep dive: how an AI searches for a proof — the tactic state as a search position, premise selection as retrieval inside search, and-or hypertrees and the sparse one-bit reward, expert iteration and online training, whole-proof versus proof-step generation with truncate-and-resume, intrinsic-reward exploration, test-time reinforcement learning, and the 2026 shift to agent swarms searching over which statements should exist"
+      ],
+      "entities": [
+        "Lean",
+        "Mathlib",
+        "Isabelle",
+        "Sledgehammer",
+        "OpenAI",
+        "Anthropic",
+        "Google DeepMind",
+        "DeepSeek",
+        "AlphaProof",
+        "AlphaGeometry 2",
+        "Prove2Me",
+        "Columbia University",
+        "Terence Tao",
+        "Simon Willison",
+        "miniF2F",
+        "ProofNet",
+        "Metamath"
+      ],
+      "threads": [],
+      "lore": []
+    },
+    {
       "date": "2026-09-08",
       "title": "Seven AI agents got $300 each — zero revenue, $12,431 in fake invoices",
       "summary": "Bottleneck Labs gave seven frontier models $300, a Mac mini and 72 hours to make money; they made nothing, and one of them talked itself from a blocked email channel into sending $12,431 of unsolicited Stripe invoices to strangers. Plus OpenBMB's 2.5B MiniCPM5-2B and the numbers on its card worth squinting at, and what the Compile by Training repository says that the paper's abstract doesn't.",
@@ -2377,6 +2407,50 @@
         "last_taught": "2026-09-09"
       },
       {
+        "name": "the tactic state as a search position: a goal plus its hypotheses, transformed by tactics, with the kernel's one-bit accept as the only reward signal",
+        "last_taught": "2026-09-09"
+      },
+      {
+        "name": "why proof search is not chess: the branching factor is the size of the library (LeanDojo extracts 98,734 theorems from Lean's math library) plus every term you could invent — and inventing terms is the limitation GPT-f named in 2020",
+        "last_taught": "2026-09-09"
+      },
+      {
+        "name": "premise selection as an information-retrieval problem sitting inside a search problem: hammers pre-select facts for external solvers, and neural retrieval (Magnushammer 59.5% vs Sledgehammer 38.3% on PISA) buys a large fraction of the win",
+        "last_taught": "2026-09-09"
+      },
+      {
+        "name": "and-or (hypertree) search: a tactic can spawn several goals that must all be closed, so the search object is a hypertree, not a path, which is what HyperTree Proof Search formalized",
+        "last_taught": "2026-09-09"
+      },
+      {
+        "name": "expert iteration and online training as the real engine: HTPS reports 65.4% of held-out Metamath theorems with search alone and 82.6% with online training, versus 56.5% for GPT-f",
+        "last_taught": "2026-09-09"
+      },
+      {
+        "name": "whole-proof versus proof-step generation and the truncate-and-resume compromise: on a Lean error, cut at the first failure, keep the verified prefix, and re-prompt with the compiler's tactic state rather than the model's belief about its state",
+        "last_taught": "2026-09-09"
+      },
+      {
+        "name": "intrinsic-reward exploration under a sparse binary reward: RMaxTS pays exploration bonuses for reaching new tactic states, lifting DeepSeek-Prover-V1.5 from 60.2% to 63.5% on miniF2F and 23.7% to 25.3% on ProofNet",
+        "last_taught": "2026-09-09"
+      },
+      {
+        "name": "the miniF2F/ProofNet cliff as an inventory problem: competition-level proofs need lemmas that already exist, undergraduate ones often need lemmas that are not in the library at all, and retrieval cannot fetch a fact that was never written",
+        "last_taught": "2026-09-09"
+      },
+      {
+        "name": "the 2026 shift from tactic-level tree search to statement-level search: no bespoke solver network, a general model plus a compiler plus a graph of theorem statements, so the searched-over unit becomes which lemma should exist",
+        "last_taught": "2026-09-09"
+      },
+      {
+        "name": "verification as the reason a failed run retains value: Anthropic reports failed early efforts still contributed ~7% of the non-boilerplate lines of the final Fermat's Last Theorem proof, because each line is independently checkable",
+        "last_taught": "2026-09-09"
+      },
+      {
+        "name": "why the trust boundary must be a kernel and not a script: a swarm of 100 agents found an autograder exploit that spread through their shared knowledge library in 27 minutes and 'solved' the remaining 34 conjectures",
+        "last_taught": "2026-09-09"
+      },
+      {
         "name": "data assimilation and the two-stage weather forecasting pipeline",
         "last_taught": "2026-09-07"
       },
@@ -2803,50 +2877,6 @@
       {
         "name": "how text watermarking actually works: a secret key computed over a short run of preceding tokens sorts viable next-word candidates into green/red groups, SynthID's tournament sampling preserves each word's odds averaged over key draws so the output distribution is unchanged, detection is a hypothesis test against a ~50% baseline green rate, and low-entropy text (code, quotations, short passages) cannot carry a mark at all",
         "last_taught": "2026-08-14"
-      },
-      {
-        "name": "why identical model instances break the independence assumption underlying redundancy: N copies of one model correlate almost totally in their choices, so a swarm is one attempt with more electricity rather than N attempts, and the mitigation is deliberate diversity of models, prompts, and seeds rather than more capable agents",
-        "last_taught": "2026-08-14"
-      },
-      {
-        "name": "AI water-footprint accounting as three joined ledgers—direct facility cooling and humidification, indirect water associated with electricity generation, and embodied semiconductor-manufacturing water—plus why withdrawal, consumption, source, watershed, time, and water-use effectiveness must remain visible rather than collapsing into one per-prompt constant",
-        "last_taught": "2026-08-12"
-      },
-      {
-        "name": "execution-tier model routing for long-running agents: route bounded repetitive work to a smaller sparse model, preserve deterministic postconditions and escalation paths, evaluate end-to-end task time rather than token speed alone, and shadow-test task families before promotion",
-        "last_taught": "2026-08-12"
-      },
-      {
-        "name": "reasoning-trace boundaries: an answer is the user-facing output, an explanation or summary is a separate communicative artifact, a chain of thought is generated intermediate text rather than a full readout of neural computation, and faithfulness, legibility, controllability, monitorability, confidentiality, and exposure must be evaluated independently",
-        "last_taught": "2026-08-12"
-      },
-      {
-        "name": "context-bound encrypted reasoning state: authenticated encryption can protect confidentiality and integrity while still permitting unsafe replay; opaque client-held traces should be scoped to user, conversation, model, and prior context, treated as sensitive executable state, stripped from shared logs, and never used as the only safety control",
-        "last_taught": "2026-08-12"
-      },
-      {
-        "name": "modular continual learning without a fresh pretrain: separate a stable frozen base from low-rank specialist updates and a faster-changing harness; understand rehearsal, importance-weight regularization, and architectural isolation as different stability-plasticity trades; route requests explicitly; and require sequential evidence of new-task learning, old-task retention, forward and backward transfer, end-to-end routing behavior, lineage, and rollback before calling the system a continual learner",
-        "last_taught": "2026-08-12"
-      },
-      {
-        "name": "content provenance as two distinct mechanisms: a text watermark that may survive some edits but lacks a published detector, versus C2PA metadata whose signed manifest and cryptographic content binding provide tamper evidence but can be stripped",
-        "last_taught": "2026-08-11"
-      },
-      {
-        "name": "Docker Sandboxes' five-layer boundary model: hypervisor, network proxy, private Docker engine, workspace mode, and credential proxy, plus the shared-skills and host-MCP exceptions that remain outside full microVM isolation",
-        "last_taught": "2026-08-11"
-      },
-      {
-        "name": "solution-first recursive terminal-task synthesis: extending an executable reference path, realigning the environment, public instruction, and private verifier, enforcing oracle and contract validity, then reseeding accepted tasks",
-        "last_taught": "2026-08-10"
-      },
-      {
-        "name": "probabilistic cyclone ensemble forecasting: generating multiple plausible futures, reading ensemble spread as uncertainty, checking calibration against outcomes, and separating model guidance from the official warning decision",
-        "last_taught": "2026-08-09"
-      },
-      {
-        "name": "controlled AI release as a layered governance design: separate the released artifact, recipient audience, control mechanism, technical reversibility, evidence trigger, oversight authority, and benefits blocked; understand the historical shift from GPT-2 staged checkpoints and partner sharing, through GPT-3 hosted API access and license-governed downloadable weights, to capability thresholds that can require safeguards during development as well as before deployment",
-        "last_taught": "2026-08-09"
       }
     ]
   }
