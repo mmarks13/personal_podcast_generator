@@ -1,6 +1,69 @@
 {
   "episodes": [
     {
+      "date": "2026-09-10",
+      "title": "FBI, NSA and CISA name six Chinese labs — distillation as the core",
+      "summary": "A joint FBI/NSA/CISA alert accuses six Chinese AI developers of building their models on distilled American outputs, and says distillation is the core of their development rather than a supplement. Also: Meta's Muse personal agent and what it is actually allowed to read, and IFM's Uno, which bolts diffusion weights onto an autoregressive model for up to three times the throughput.",
+      "topics": [
+        "FBI, NSA and CISA joint alert naming DeepSeek, Moonshot AI, Alibaba, MiniMax, StepFun and Z.AI for systematically distilling Claude, ChatGPT, Gemini and Grok — the agencies' claim that distillation is 'not a supplement ... but the critical core' of those companies' model development, the mechanics of teacher-student distillation and why API output access is the only requirement, the absence of published forensics, and Mao Ning's rejection of the accusations",
+        "Meta's Muse personal agent: goal-driven autonomous execution with the app closed, US-only launch across iOS, Android, web and WhatsApp, integrations with Meta apps, Google Workspace, Ticketmaster, OpenTable, Spotify and Apple Health plus self-established connections to any service with a public API, the per-user Muse Secure VM as isolation between users rather than a constraint inside the box, approval gating on sends and purchases but not on reads, and the opt-out/indirect-advertising framing",
+        "Uno and diffusion-augmented LLMs: splitting a model into autoregressive weights and lightweight diffusion weights, the Diffusion Distillation phase, the Ψ-Spec sampler family, up to 3× speedup with no draft model, higher throughput than speculative decoding at every evaluated batch size, an 8B Uno reported over 26B DiffusionGemma and Mercury 2, and the ambiguity between 'lossless' as a distributional guarantee and 'quality' as a benchmark result"
+      ],
+      "entities": [
+        "FBI",
+        "National Security Agency",
+        "CISA",
+        "DeepSeek",
+        "Moonshot AI",
+        "Alibaba",
+        "MiniMax",
+        "StepFun",
+        "Z.AI",
+        "Mao Ning",
+        "Meta",
+        "Muse",
+        "Apple Health",
+        "Google Workspace",
+        "Institute of Foundation Models",
+        "Uno",
+        "DiffusionGemma",
+        "Mercury 2"
+      ],
+      "threads": [
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "Three US agencies have moved the distillation dispute from a commercial complaint to a joint federal alert naming six Chinese developers, while Mistral raised €3B at a €21B+ valuation on an explicitly sovereign open-weight pitch.",
+          "arc": "From open weights spreading while their distribution concentrated, to the question of whose outputs a national ecosystem is allowed to learn from — with the strongest European open-weight lab funded on the same day."
+        },
+        {
+          "name": "Agent containment and blast radius",
+          "status": "Meta shipped a consumer agent whose isolation story is a per-user virtual machine, which separates users from each other but places no constraint on what the agent reads inside a user's own box — and whose integration list it can extend itself.",
+          "arc": "The containment conversation moves off the lab bench and into a consumer product with payments, correspondence and health data behind a single approval prompt on writes only."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Six labs named in the FBI/NSA/CISA distillation alert",
+          "why_it_matters": "Anyone selling model access now has three federal agencies asserting that reading a paid API's outputs at scale is the critical core of a competitor's development — a security alert with no break-in in it, which makes every provider's terms of service the only boundary around the product they sell."
+        },
+        {
+          "story": "What Meta's Muse is allowed to read",
+          "why_it_matters": "Anyone evaluating a consumer agent gets a concrete case where the approval prompt sits on sends and purchases while health, calendar and correspondence reads run as low-risk tasks, and where the integration list is a starting set the agent can extend itself."
+        },
+        {
+          "story": "Uno: diffusion weights bolted onto an autoregressive model",
+          "why_it_matters": "Teams fighting generation latency get a retrofit path that needs no draft model to host and align — reportedly beating speculative decoding at every batch size tested — provided the 'lossless' claim turns out to be the distributional guarantee and not a benchmark result."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada staked out that for a model shipped behind a paid interface, the outputs are functionally the model — anyone with a budget can turn a stream of answers into something that answers like you, so a lab cannot sell that stream by the million and then treat the predictable consequence as theft. She was explicit that this is a position about the business model, not a verdict on any named company, because she has not seen the forensics. Not settled."
+        }
+      ]
+    },
+    {
       "date": "2026-09-09",
       "title": "OpenAI claims Navier–Stokes — Tao says AI is mining math out",
       "summary": "OpenAI says an unreleased model resolved the Navier–Stokes Millennium Prize Problem in eighty-eight hours, an NYU mathematician says his year of private work was flattened first, and Terence Tao argues the rumor of a project is now enough to trigger the race. Then Anthropic publishes what it actually does to contain Claude — including that users approve ninety-three percent of permission prompts — and TechCrunch reports stolen session keys being used to mint Claude Code tokens and resell a stranger's subscription as compute.",
@@ -1950,51 +2013,26 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-08-10",
-      "title": "Thirty billion on the desk",
-      "summary": "Meta's Muse Glimmer puts a thirty-billion-parameter multimodal agent model into a testable local memory envelope using quantization, cache-efficient attention, and a bundled speculative drafter. Recursive Synthetic Terminal Tasks grows verified terminal work across fifteen generations, while an internal score conflict and the gap between solvability and usefulness keep its strongest claim in check.",
-      "topics": [
-        "Muse Glimmer's local multimodal agent architecture, quantized memory envelope, and speculative drafter",
-        "Recursive Synthetic Terminal Tasks and solution-first generation of executable agent training environments"
-      ],
-      "entities": [
-        "Meta",
-        "Muse Glimmer",
-        "Muse Spark",
-        "Hugging Face",
-        "Recursive Synthetic Terminal Tasks",
-        "Tencent HY LLM Frontier",
-        "Qwen3.5",
-        "DeepSeek-V4-Pro"
-      ],
-      "threads": [],
-      "dives": [
-        {
-          "story": "Muse Glimmer's local multimodal agent design",
-          "why_it_matters": "Teams handling private documents, local code, or intermittent connectivity can now test a permissively licensed agent model sized for one well-equipped machine, but they need workload evidence on memory, tool accuracy, and data that leaves through connected services."
-        },
-        {
-          "story": "Recursive Synthetic Terminal Tasks",
-          "why_it_matters": "Coding-agent and post-training teams need cheaper executable tasks whose instructions, environments, solutions, and verifiers stay aligned as difficulty grows, without confusing generated solvability with representative real-world work."
-        }
-      ],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
       {
+        "name": "Agent containment and blast radius",
+        "status": "Meta shipped a consumer agent whose isolation story is a per-user virtual machine, which separates users from each other but places no constraint on what the agent reads inside a user's own box — and whose integration list it can extend itself.",
+        "arc": "The containment conversation moves off the lab bench and into a consumer product with payments, correspondence and health data behind a single approval prompt on writes only.",
+        "last_seen": "2026-09-10"
+      },
+      {
+        "name": "AI sovereignty and open weights",
+        "status": "Three US agencies have moved the distillation dispute from a commercial complaint to a joint federal alert naming six Chinese developers, while Mistral raised €3B at a €21B+ valuation on an explicitly sovereign open-weight pitch.",
+        "arc": "From open weights spreading while their distribution concentrated, to the question of whose outputs a national ecosystem is allowed to learn from — with the strongest European open-weight lab funded on the same day.",
+        "last_seen": "2026-09-10"
+      },
+      {
         "name": "AI-for-math and the norms of open research",
         "status": "OpenAI says an unreleased model resolved Navier–Stokes in about 88 hours starting September 1; Buckmaster alleges his and Alpöge's year of work was flattened after rumors leaked, and Terence Tao argues the rumor of a project is now enough to trigger an AI race that discourages sharing directions at all.",
         "arc": "The show's AI-for-math thread moves from formalization capability — Fermat in Lean, FrontierMath Erdős — to the incentive structure of the field itself, with the first observable consequence being a hastily published paper.",
-        "last_seen": "2026-09-09"
-      },
-      {
-        "name": "Agent containment and blast radius",
-        "status": "Anthropic published its containment architecture and, unusually, its own failure numbers: 93% permission-prompt approval with declining attention, 84% fewer prompts after OS sandboxing, 24 of 25 phished exfiltrations completed, and ~17% of risky actions missed by auto mode.",
-        "arc": "After a year of agent-misbehavior incidents covered on the show, the leading vendor states plainly that behavioral supervision does not hold and moves the load to the environment layer — while leaving agent identity unresolved.",
         "last_seen": "2026-09-09"
       },
       {
@@ -2020,12 +2058,6 @@
         "status": "OpenAI declared its 'automated research intern' milestone met in September 2026 and set an automated AI researcher target for March 2028, with 3.1 agent-workdays per human workday and over $600/day median researcher inference spend.",
         "arc": "From anecdote to self-published telemetry: the lab is now measuring and disclosing its own recursive-self-improvement loop, while its own numbers show human intervention in most successful multi-hour tasks.",
         "last_seen": "2026-09-07"
-      },
-      {
-        "name": "AI sovereignty and open weights",
-        "status": "The New York Times reported enterprises standardizing on open-weight models over Anthropic and OpenAI, naming AT&T as its one company; the same week, Nvidia's acquisition of Hugging Face put the distribution hub under a hardware vendor.",
-        "arc": "Openness is deepening at the artifact level while its distribution concentrates, and the migration claim still has no denominator.",
-        "last_seen": "2026-09-06"
       },
       {
         "name": "Where the labs' compute physically lives",
@@ -2065,6 +2097,46 @@
       }
     ],
     "entities": [
+      {
+        "name": "Meta",
+        "note": "",
+        "last_seen": "2026-08-10"
+      },
+      {
+        "name": "Muse Glimmer",
+        "note": "",
+        "last_seen": "2026-08-10"
+      },
+      {
+        "name": "Muse Spark",
+        "note": "",
+        "last_seen": "2026-08-10"
+      },
+      {
+        "name": "Hugging Face",
+        "note": "",
+        "last_seen": "2026-08-10"
+      },
+      {
+        "name": "Recursive Synthetic Terminal Tasks",
+        "note": "",
+        "last_seen": "2026-08-10"
+      },
+      {
+        "name": "Tencent HY LLM Frontier",
+        "note": "",
+        "last_seen": "2026-08-10"
+      },
+      {
+        "name": "Qwen3.5",
+        "note": "",
+        "last_seen": "2026-08-10"
+      },
+      {
+        "name": "DeepSeek-V4-Pro",
+        "note": "",
+        "last_seen": "2026-08-10"
+      },
       {
         "name": "OpenAI",
         "note": "",
@@ -2117,11 +2189,6 @@
       },
       {
         "name": "Partnership on AI",
-        "note": "",
-        "last_seen": "2026-08-09"
-      },
-      {
-        "name": "Meta",
         "note": "",
         "last_seen": "2026-08-09"
       },
@@ -2229,41 +2296,6 @@
         "name": "GPT-5.6 Sol",
         "note": "",
         "last_seen": "2026-08-07"
-      },
-      {
-        "name": "Claude Opus",
-        "note": "",
-        "last_seen": "2026-08-07"
-      },
-      {
-        "name": "Claude Fable",
-        "note": "",
-        "last_seen": "2026-08-07"
-      },
-      {
-        "name": "Google",
-        "note": "",
-        "last_seen": "2026-08-06"
-      },
-      {
-        "name": "Demis Hassabis",
-        "note": "",
-        "last_seen": "2026-08-06"
-      },
-      {
-        "name": "Koray Kavukcuoglu",
-        "note": "",
-        "last_seen": "2026-08-06"
-      },
-      {
-        "name": "Jeff Dean",
-        "note": "",
-        "last_seen": "2026-08-06"
-      },
-      {
-        "name": "Sanjay Ghemawat",
-        "note": "",
-        "last_seen": "2026-08-06"
       }
     ],
     "monthly": [
@@ -2277,10 +2309,10 @@
       },
       {
         "month": "2026-08",
-        "summary": "Same size, same price, seven times the score; There is no patch for reading: prompt injection, properly taught; The evidence underneath the answer; The work after it works; The old system gets the final word; The conversation cannot wait; The queue is not the grid; The world that teaches the agent; When the ruler stops moving; The model in the metal; The model still behind the gate; Who answers next?; Fifty futures before landfall; The gate moved"
+        "summary": "Same size, same price, seven times the score; There is no patch for reading: prompt injection, properly taught; The evidence underneath the answer; The work after it works; The old system gets the final word; The conversation cannot wait; The queue is not the grid; The world that teaches the agent; When the ruler stops moving; The model in the metal; The model still behind the gate; Who answers next?; Fifty futures before landfall; The gate moved; Thirty billion on the desk"
       }
     ],
-    "updated": "2026-09-09",
+    "updated": "2026-09-10",
     "host_lore": [
       {
         "host": "Alan",
@@ -2398,6 +2430,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "teacher-student distillation: training a student to match a teacher's answer distribution rather than raw text, why the near-misses carry more signal than a single correct token, and why output access alone is sufficient to do it",
+        "last_taught": "2026-09-10"
+      },
+      {
+        "name": "why per-user VM isolation constrains cross-tenant exposure but places no limit on what an agent reads inside one user's own environment",
+        "last_taught": "2026-09-10"
+      },
       {
         "name": "session keys as bearer tokens, and why two-factor authentication does not cover session theft: the second factor is checked before the session is minted, so a stolen session walks past the door rather than through it",
         "last_taught": "2026-09-09"
@@ -2869,14 +2909,6 @@
       {
         "name": "reward-model overoptimization as Goodhart with a measurable curve: gold-reward score rises, peaks and falls against KL distance from the initial policy, with a different functional form for RL than for best-of-n sampling and coefficients that scale smoothly with reward-model size — plus the alignment tax and its flip to an alignment bonus at larger scale",
         "last_taught": "2026-08-15"
-      },
-      {
-        "name": "reinforcement learning with verifiable rewards (RLVR) as deleting the learned judge rather than improving it: a constant reward only on verifier-confirmed correctness, rule-based accuracy and format rewards, GRPO dropping the value model by using group scores as the baseline — and its three limits (pass@k suggesting elicitation rather than expansion, random rewards reproducing much of the gain on one model family, and the return of an unreliable learned judge as soon as the task has no answer key)",
-        "last_taught": "2026-08-15"
-      },
-      {
-        "name": "how text watermarking actually works: a secret key computed over a short run of preceding tokens sorts viable next-word candidates into green/red groups, SynthID's tournament sampling preserves each word's odds averaged over key draws so the output distribution is unchanged, detection is a hypothesis test against a ~50% baseline green rate, and low-entropy text (code, quotations, short passages) cannot carry a mark at all",
-        "last_taught": "2026-08-14"
       }
     ]
   }
