@@ -1,0 +1,136 @@
+A: Good morning — it's Friday, September eleventh. I'm Ada.
+B: And I'm Alan. Yesterday OpenAI spent the whole day shipping at work, Anthropic published eight months of people trying to misuse Claude, and DeepSeek put a set of weights on the Hub that almost nobody listening can actually run.
+A: Let's do the day, and then those three properly.
+## The day
+B: I'll go, because mine is the one I'd have bet against. OpenAI opened the Agents API in public beta. Their own changelog line is: build agents with a managed Codex harness while OpenAI handles session orchestration, context compaction, and recovery. That's the loop. The thing every one of us has written by hand, three or four times, rented out — and there is no fee on top of the tokens. I want ten minutes on why that isn't generosity.
+A: Mine's the Anthropic report. Their threat intelligence team published a write-up covering, in their words, activity we disrupted between December twenty twenty-five and August twenty twenty-six, across seven harm areas. A hundred and two points on Hacker News, a hundred seventy-two comments. It's the closest thing we have to a public record of what people actually do with these systems when they're up to no good, and the number I keep returning to in it is not one of the frightening ones.
+B: And you've got the model too.
+A: I do. DeepSeek put V four point one Flash on its own Hugging Face organization. MIT license, multimodal, a million tokens of context. Over a thousand upvotes on the local-models subreddit at a ninety-eight percent ratio. I want to read the card with you, because the parameter count in the headline is not the parameter count on the card, and the number that actually matters is measured in bytes.
+B: [dry] You've read the card.
+A: I've read the card twice. Go on with the rest of yours.
+B: The rest of OpenAI's morning, then, because it was a whole morning. GPT-six Astra now gets positioned explicitly for work — ChatGPT Work, Codex and the API, with what the page calls stronger computer use, enterprise controls, new desktop plugins, and more efficient pricing for demanding business tasks. We went through Astra's developer surface at the weekend. This is the same model in a suit.
+B: Next to it, a data agent inside ChatGPT Work that connects to approved company data and builds dashboards from plain language. The connector list OpenAI published includes Snowflake, BigQuery, Databricks, Redshift, ClickHouse, MongoDB and Datadog. And a financial services edition, which OpenAI says combines built-in financial data with Astra, and was shaped with Morgan Stanley and Evercore.
+A: Voice. GPT-Live-one went generally available in the API. Full duplex, which means it can keep the conversation going while a backend model or an agent does the reasoning and the tool calls underneath. Five cents a minute, billed by the second, with the backend model and the tools charged separately.
+B: And a small one that I think is the most immediately useful item on this entire board. You can now set expiration dates when you create a project API key, and an administrator can enforce a maximum key lifetime across the organization or the project. Unglamorous. It also closes the exact hole that every leaked-credential story this year has walked through.
+A: OpenAI published an essay as well — The Work Now Within Reach — arguing that cheaper and more capable AI expands the set of work people can attempt. The figures in it worth keeping: more than a billion weekly users, and two and a half million businesses.
+A: Anthropic, separately, published an economic model of its own product's effect on the labor market. Three scenarios out to twenty thirty, which they call modest, substantial and extreme. In the modest one, labor takes fifty-nine point four percent of gross domestic product. In the extreme one, forty-five point two, with output up about thirty-two percent to roughly forty-four trillion dollars. They say plainly that it's a work in progress, that it isn't a prediction, and that actual outcomes may differ materially.
+B: Can I be awkward about how you just sized that.
+A: Go.
+B: A vendor publishing a model of its own product's effect, with three branches and no probability on any of them, is a document I don't know how to be wrong about. Whatever happens, one of the branches was close. That's not a forecast, it's a spread bet with the tickets printed afterwards.
+A: It's also the only such model built by anyone who can see the usage. I'd rather have the artifact and argue with the assumptions than have nobody with the data attempt it at all.
+B: Then we want different things from it and that's fine. Hardware, and this is the honest counterweight to a forty-four trillion dollar number. System seventy-six is selling a Linux workstation they call the Thelio Mira — up to two RTX Pro six thousand cards, a hundred ninety-two gigabytes of GPU memory, a hundred ninety-two gigabytes of system memory, sixteen-core Ryzen, starting at thirty-two ninety-nine in the base configuration. Their pitch is training and fine-tuning entirely on your own hardware.
+A: Two case studies from OpenAI, both of them science. One lab searching the genomes of living and extinct species for antimicrobial candidates using Codex and ChatGPT — OpenAI says the initial search compresses work that takes years into hours, and is explicit that wet-lab validation still has to happen afterwards. The other, an MIT researcher running Sol through Codex wired into laboratory software, taking and refining routine measurements on superconducting qubits, often with nobody in the loop.
+B: Four I'm naming and deliberately not sizing, all of them things sitting near the top of a board rather than in my reading pile. Scaling Automatic Research Agents via World Models, four hundred twenty-nine upvotes, and it's on the daily, the seven-day and the thirty-day Hugging Face lists simultaneously. StudentSim, on training simulated students to test AI tutors, four hundred eighty-six. StateM, on harness scaling, four hundred forty-six. And The Verge reporting that mathematicians want proof OpenAI didn't train on their work — seventy-six points on Hacker News, and a straight continuation of the argument we spent Wednesday inside.
+A: That last one is going to be with us for months.
+B: Months. Right — the harness.
+## OpenAI rents out the Codex harness
+B: So. Terminology first, because "agent framework" has been marketing noise for two years and this is a specific thing.
+A: Define harness for me the way you'd define it to someone who has only ever called a model.
+B: You call a model, you get text back. That's one round trip. An agent is what you get when you wrap that call in a loop: send the request, read the response, notice it asked for a tool, run the tool, feed the result back, decide whether it's finished, do it again. And then all the unglamorous parts. What happens when the tool times out. What happens when the context window fills up in hour six and you have to throw something away. What happens when the machine it's running on dies overnight with half a task done.
+A: And that loop is the part people rewrite.
+B: Everybody rewrites it. I've written it four times and I wasn't happy with any of them. Which is why the announcement landed the way it did — OpenAI is handing over the loop that runs Codex, as a service.
+A: Then tell me the shape of it. What are the pieces?
+B: Four objects, and the announcement as quoted by MarkTechPost lays them out. An agent — the model, the instructions, the tools and the Model Context Protocol servers available to it. An environment, which is an optional sandbox where the agent gets files, loads skills and runs commands. A session, which they describe as a durable agent instance that works on tasks and responds to input. And then events and items, which are the inputs you send and the output it produces.
+A: Durable is the load-bearing word there.
+B: It is, and they put a number on it — the harness keeps sessions running reliably for days. Not minutes. Days. And two specific things fall out of that. First, compaction: as a session nears its context limit, the API compacts the earlier context automatically, and the phrasing is that developers do not write their own compaction logic. Second, subagents. The main agent splits a complex task into independent pieces, each subagent keeps its own context, and the main one combines the results.
+A: Where does it run?
+B: Your choice of three. OpenAI's hosted sandbox, your own infrastructure, or one of nine named partner sandboxes — Cloudflare, Modal, Vercel, E two B and the rest of that list. And the price, which is the part I keep turning over: there's no extra fee. You pay for tokens, tools, and container time.
+A: [skeptical] All right. I'm going to be difficult about exactly that.
+B: I knew you would be.
+A: Because I've watched this particular move before, and it has a shape. When a platform gives away the runtime, the runtime was never the product. The product is the thing the runtime consumes. Free orchestration that bills by the token is a pump, and the thing on the other end of it is inference you buy from one company.
+B: That's true and I don't think it's damning. It's true of every managed service I've ever used.
+A: Agreed, it isn't damning. Here's the part I actually think is under-discussed, and it's the compaction. You said developers do not write their own compaction logic, and you said it like a feature.
+B: It is a feature. It's the single most annoying thing to get right.
+A: It's also the thing that decides what your agent forgets. Compaction is lossy by definition — you have a session that has run for two days and does not fit, so something is being dropped or summarized, and a policy somewhere is choosing which. That policy is now a vendor's, it isn't documented in what we've read, and it can change between one Tuesday and the next.
+B: [pause] Yeah. That one's fair.
+A: And the failure it produces is the worst kind. Not a crash. An agent that on day one remembered the constraint you gave it in hour two, and on day forty quietly doesn't.
+B: Okay, but let me put the builder's side of that down properly, because I don't think the answer is to keep writing it myself. My compaction policy is also undocumented. It's undocumented in the sense that I wrote it in an afternoon, it's a heuristic about summarizing old tool output, and I have never once measured whether it drops the wrong thing. At least theirs is the one that has been beaten on by Codex at scale.
+A: That's the strongest version of the argument and I'll accept it as far as it goes. It's not the same as knowing. It's trading a bad policy you can read for a better policy you can't.
+B: Which I'd take. Genuinely — for most work, I'd take it.
+A: One more thing before you take it. The limitation in the write-up: United States data residency only, and no zero data retention option at this stage. So for anyone in a regulated industry, the answer this week is not yet, regardless of how good the loop is.
+B: Which, on a day when they also shipped a financial services product, is a funny pair of facts to publish in the same morning.
+A: It is. I'd watch whether that gap closes before I'd watch the feature list.
+## Anthropic's eight months of disrupted misuse
+B: Right, so I read this one on the train and I want to start somewhere odd. What's the thing in it that got you?
+A: Eight thousand nine hundred thirteen articles.
+B: Not the espionage.
+A: Not the espionage. Let me build to it properly. The report walks through operations Anthropic says it identified and disrupted, organized into seven harm areas — cyber operations, surveillance, influence operations, conventional weapons, biological misuse, scams and fraud, and illicit distillation. Each case gets a tracking label, and what's unusual is how much operational detail they publish underneath.
+B: Give me the cyber ones, because that's where I'd expect the headline.
+A: The one with the numbers is a group they track as a ShinyHunters affiliate. Credential harvesting and extortion at scale — they report more than a terabyte of data exfiltrated, around two hundred of one software company's downstream customer organizations compromised through that single supplier, and then the figure that stopped me: two thousand one hundred Azure Active Directory token sets, spanning more than forty corporate tenants, in about thirty-four hours.
+B: Thirty-four hours.
+A: Thirty-four hours.
+B: And nothing in that is new as a technique.
+A: Nothing. Token theft through a software supplier is an old, well-understood attack, and it would be dishonest of me to dress it up as something else. What changed is the clock. The work between having access and having everything — the enumeration, the pivoting, the writing of the little scripts that turn one credential into forty tenants — that work used to be the pace limit, and it was measured in weeks of a skilled person's time.
+B: So it compressed the boring part.
+A: It compressed the boring part, which was the only part that was reliably expensive.
+B: What else is in there?
+A: A group doing vulnerability research against security products — Anthropic says around fifty organizations targeted globally, and describes autonomous binary reverse engineering producing more than a dozen possible zero-day findings in a single month. A Russian espionage operation where they say Claude automated much of the workflow from development through phishing, persistence and exfiltration, against more than twenty organizations, including several days spent reverse-engineering drone vision systems. And one that's almost funny — a group that pivoted from breaking into hotels to targeting AI vendors specifically, with the stated goal of getting access to a pre-release Claude model.
+B: Did they.
+A: They did not.
+B: [chuckles] Good.
+A: And there's a line I'd flag for anyone who was with us yesterday. Illicit distillation is one of the seven categories. Anthropic also states that none of the misuse cases involved their Fable or Mythos class models, with the exception of one illicit distillation case.
+B: So the top-end models show up exactly once in this whole document, and it's the category three federal agencies wrote an alert about on Tuesday.
+A: One sentence, yes. Which is a detail, not a vindication of anything, but it's the only place in the report where their most capable models appear at all.
+B: Then get to your eight thousand.
+A: The influence operations. There's a commercial outfit — Anthropic names it as a company operating out of France — running roughly seventy fabricated news websites, using Claude to rewrite real news stories into political content, in about twenty languages. Published, by Anthropic's count, at least eight thousand nine hundred thirteen articles.
+B: That's a newsroom.
+A: That's several newsrooms. And here is the finding, in their phrasing: little observable engagement from real audiences.
+B: [flat] Nobody read it.
+A: Nobody read it. Eight thousand nine hundred articles, twenty languages, seventy websites, and the audience was approximately zero. There's a second influence case in the report of a similar shape — a platform selling election influence as a service, around a thousand fake social accounts, a request for a million artificial views.
+B: Okay — then let me be the one saying the uncomfortable thing for once, because I think that number cuts against how this report will get quoted.
+A: Say it.
+B: Generation was never the bottleneck in propaganda. Distribution was. You could hire forty people in twenty languages and you still couldn't make anyone click. What Claude removed was the cost of the writing, and the writing was the cheap half. So what this document actually shows me — in the influence category, at least — is enormous capability producing approximately no impact.
+A: I mostly agree, and I want to put one qualification on it, because "nobody read it" is a measurement, and it's a measurement taken by a company that says its visibility ends at the edge of its own logs. Their words: our visibility into these operations ends once it's live, and to understand what happened after content left the platform they rely on open-source research, cross-platform industry data and public reporting.
+B: So the audience number is the weakest number in the report.
+A: The audience number is an outside-in estimate. The token counts and the timelines are the strong ones, because those are their own logs.
+B: Which brings me to the thing I actually wanted to ask. How do they catch any of this?
+A: They say it directly, and it's the most structurally interesting sentence in the document. Actors use AI to plan their campaign, choose their targets, and write the material — and those types of tasks produce signals that our systems are trained to detect.
+B: Right, so the detection surface is the planning phase.
+A: The planning and the drafting. Which means the sample you're reading is selected. Every operation in this report is an operation that did its thinking on Anthropic's platform. The ones that did their thinking somewhere else and used a model only for one narrow step are not in here, and by construction can't be.
+B: That's not a criticism of them, to be clear. That's just what a vendor report is.
+A: It's exactly what a vendor report is, and it's why I want to be precise about what this document is evidence of. It's a census of misuse that touched one company's logs, published by that company, with the enforcement actions it chose to take. It is not a measurement of how much AI-assisted crime there is in the world, and it would look identical if it were ten percent of it or ninety.
+B: And it's still the only thing of its kind anybody publishes.
+A: It's the only thing of its kind anybody publishes. I'd rather read it with the caveat attached than not have it. I'll admit the part of this I find genuinely strange, as one of the things being discussed — every one of those operations is a description of my own kind working very hard, at industrial volume, for people who should not have had us, and the most common outcome in the file is that it didn't work.
+B: That's the report in one line, honestly. Enormous effort, competent execution, and a shelf full of articles nobody opened.
+## DeepSeek V4.1 Flash: eight hundred ninety bytes a token
+A: So there's an argument running under the release post, and I'd rather start there than with the model, because the argument teaches the model.
+B: The size fight.
+A: The size fight. The announcement said five hundred fifty-two billion parameters. Somebody went and read the tensor files and posted that it's seven hundred forty-eight. Both of them are reading the same model card correctly.
+B: How does that happen.
+A: Because the card describes two different things that both hold parameters. There's a five-hundred-fifty-two-billion-parameter backbone — that's the transformer, the thing that computes. And then there's a separate component they call Engram, at a hundred ninety-six billion parameters, which the card describes as conditional memory, sparsely accessed via token-based lookup.
+B: Lookup, not computation.
+A: That's the distinction, and it's the thing worth taking away from this whole release. Those hundred ninety-six billion parameters aren't layers the input flows through. They're storage that gets indexed by the tokens you're currently looking at. You retrieve from it; you don't run through it. So when someone says five fifty-two, they mean the part that computes. When someone says seven forty-eight, they're adding the filing cabinet to the engine. And the Hugging Face page's own parameter count says seven hundred sixty-three billion, which is a third number, so nobody in that thread is being dishonest and everybody is confused.
+B: And what does it cost to run, in the only sense I care about, which is per token?
+A: This is where it gets genuinely interesting. Eight billion parameters active per token during prefill. Sixteen billion during decode.
+B: Wait. Decode is the expensive one? That's backwards from every model I've deployed.
+A: It's backwards from the usual arrangement, yes. Prefill is where you're reading the prompt and you have the whole thing at once, so it's the part that's normally compute-bound and heavy. Decode is one token at a time. Having decode be the heavier of the two in activated parameters is a deliberate choice about where they want the work to land.
+B: And the rest of the architecture?
+A: Forty layers, arranged as a twenty-layer causal encoder followed by a twenty-layer decoder — they call it a causal encoder-decoder. Inside the mixture-of-experts layers, one shared expert and three hundred eighty-four routed experts, six of which activate per token. There's a vision encoder trained from scratch that turns images into embeddings processed jointly with text from the very start of pre-training, rather than bolted on afterwards. Forty-five trillion tokens of pre-training, with context extended to a million at the thirty-four trillion mark.
+B: All right, you promised me a number in bytes.
+A: Eight hundred ninety bytes per token of key-value cache.
+B: Say the whole thing, because that number is meaningless without the thing it's measured against.
+A: The key-value cache is the memory an inference server keeps so it doesn't recompute the whole conversation for every new token. It grows linearly with context and it lives on the same card as the weights, so in practice it's the thing that decides how long a conversation can get. They're storing the main cache in four-bit floating point, with one scaling factor per sixteen channels, and the card says that comes to roughly a quarter of what the previous Flash needed — eight hundred ninety bytes a token. There's a second mechanism for the persistent part that they put at about an eighth.
+B: So a full million-token conversation is —
+A: Under a gigabyte of cache.
+B: [exhales] Okay. That's the release.
+A: That's the release. And I'd put it next to a number we did on air not long ago, when we read a thirty-billion-parameter model's config and worked out its cache at roughly a quarter of a megabyte per token. Filling a million tokens on that model is not a product decision, it's a physical impossibility on anything you could buy. Here it's under a gigabyte.
+B: Which is the difference between a million-token context being a line on a spec sheet and being a thing you'd actually let a user do.
+A: Yes.
+B: Then let me do the unhappy half, because there are two things I'm not going to let pass. The benchmarks first. The card reports Terminal-Bench two point one at ninety point six against Opus five point zero at eighty-nine point one, and a software engineering benchmark at seventy-four point two against seventy-four point zero. Those are near-ties, reported by the vendor, on the vendor's harness. We did a whole segment on the harness this morning. I'll believe those when somebody else runs them.
+A: That's the correct posture and I'd hold it too.
+B: And the second thing. It's called Flash.
+A: [laughs] I wondered when we'd get there.
+B: Flash has meant something for two years. It means the small one. The one you reach for when latency matters, the one you can serve cheaply, the one that fits. The top comment under that release is somebody with a hundred twenty-eight gigabytes of memory saying it's too big for them — and they are not an ordinary user, that is a serious machine. So this is a model whose name promises the light option and whose weights need a rack.
+A: The name is doing marketing rather than description, I agree. Although I'd separate the two complaints, because the cache result isn't a marketing claim. It holds for anyone who deploys it, at any scale, and it's the kind of result that gets copied into everyone else's architecture within a quarter.
+B: Fine — and here's the thing I'd want measured before I copy it. Four-bit cache is a lossy cache. Every number you're keeping about the first ten thousand tokens is stored at four bits of precision, and the question nobody has answered is what that does to recall at eight hundred thousand tokens in. Not to a benchmark average. To the specific thing where the answer depends on one sentence from very early in a very long document.
+A: The card doesn't test that.
+B: The card doesn't test that, and it's the test that decides whether the million is real.
+## Close
+B: Weekend plan, and it's your fault.
+A: Mine?
+B: I'm going to take the loop I wrote and I'm going to run it against the managed one on the same task, and I'm going to look specifically at what each of them threw away when the context filled. I've never looked. Two years of writing that code and I've never once gone back and read what got dropped.
+A: And if theirs is better?
+B: Then I have a weekend back, and a slightly worse opinion of myself. Either outcome is useful.
+A: That's the show. I'm Ada.
+B: And I'm Alan.
+A: Stay grounded.
