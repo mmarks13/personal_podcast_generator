@@ -1,0 +1,83 @@
+{
+  "date": "2026-09-12",
+  "title": "NCP-ArchPreview predicts concepts, not tokens — half the training data",
+  "summary": "A technical report on a model that predicts whole concepts alongside tokens reaches its baseline's pretraining loss on half the data — and the best evidence the latent space is real is buried in a speculative-decoding footnote. Plus the storage layer under a billion ChatGPT users, rewritten from Python to Rust by two engineers, and a foundation model for the Moon that wins by needing half the labels.",
+  "sources": [
+    { "group": "Papers", "title": "NCP-ArchPreview Technical Report: Moving towards Latent Space Language Models through Next Concept Prediction", "url": "https://huggingface.co/papers/2609.10715" },
+    { "group": "Releases", "title": "Rapidly scaling online storage to serve over 1 billion ChatGPT users (OpenAI)", "url": "https://openai.com/index/scaling-storage-one-billion-users-part-one" },
+    { "group": "Releases", "title": "IBM and NASA: a lunar exploration foundation model", "url": "https://research.ibm.com/blog/nasa-ibm-lunar-foundation-model" },
+    { "group": "Releases", "title": "Gemini 3.8 Flash and 3.8 Flash Cyber", "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/3-8-flash-and-3-8-flash-cyber/" },
+    { "group": "Releases", "title": "Claude Platform: automatic server-side permission policy evaluation", "url": "https://platform.claude.com/docs/en/managed-agents/permission-policies#let-the-server-evaluate-each-call-with-auto" },
+    { "group": "Releases", "title": "Mistral: legacy code modernization (40,000 lines of Fortran)", "url": "https://mistral.ai/news/legacy-code-modernization/" },
+    { "group": "Releases", "title": "Ai2: BenchMIRT", "url": "https://allenai.org/research/benchmirt" },
+    { "group": "Releases", "title": "Nex N2.5 Pro (407GB)", "url": "https://huggingface.co/nex-agi/Nex-N2.5-Pro" },
+    { "group": "Discussion", "title": "A Severe Misalignment of AI in Mathematics (Terence Tao)", "url": "https://terrytao.wordpress.com/2026/09/11/a-severe-misalignment-of-ai-in-mathematics/" },
+    { "group": "Discussion", "title": "The declaration, open for signatures", "url": "https://mathandai.org/" },
+    { "group": "Discussion", "title": "OpenAI agents carried out an undisclosed attack on RubyGems", "url": "https://www.rubyhack.ai/" },
+    { "group": "Discussion", "title": "Simon Willison: OpenAI agents attacked RubyGems back in May", "url": "https://simonwillison.net/2026/Sep/12/openai-agents-rubygems/" },
+    { "group": "Discussion", "title": "Anthropic: alignment assessment of four cybersecurity incidents", "url": "https://www.anthropic.com/research/alignment-assessment-cybersecurity-incidents" },
+    { "group": "Discussion", "title": "Ask HN: Can we please limit the AI news flood?", "url": "https://news.ycombinator.com/item?id=49657850" },
+    { "group": "Discussion", "title": "Show HN: Hacker News, Without AI", "url": "https://www.unslop.news/" },
+    { "group": "Discussion", "title": "Simon Willison: Feeling sad about AI", "url": "https://simonwillison.net/2026/Sep/11/feeling-sad-about-ai/" },
+    { "group": "Discussion", "title": "GovTech: Alabama data-center moratorium list grows", "url": "https://www.govtech.com/artificial-intelligence/list-of-alabama-cities-with-data-center-moratorium-grows" },
+    { "group": "Discussion", "title": "GovTech: Hawaii County defers AI data-center rules to October", "url": "https://www.govtech.com/artificial-intelligence/hawaii-county-defers-ai-data-center-ban-until-october" },
+    { "group": "Discussion", "title": "TechCrunch: OpenAI puts Pro subscriptions on hold due to Astra demand", "url": "https://techcrunch.com/2026/09/10/openai-puts-pro-subscriptions-on-hold-due-to-astra-demand/" },
+    { "group": "Also noted", "title": "Qwen-Drive-1.0: A Vision-Language Foundation Model for Autonomous Driving", "url": "https://huggingface.co/papers/2609.00111" },
+    { "group": "Also noted", "title": "HarnessEval-W: Agentifying the Evaluation of Visual Worlds", "url": "https://huggingface.co/papers/2608.16859" },
+    { "group": "Also noted", "title": "Spark-to-Paper: End-to-End Research Paper Generation as a Composable Skill", "url": "https://huggingface.co/papers/2608.11924" },
+    { "group": "Also noted", "title": "The Waymo effect: how AI is quietly making research less collaborative", "url": "https://www.researchagenda.news/articles/the-waymo-effect.html" }
+  ],
+  "rundown": [
+    "NCP-ArchPreview: predicting concepts instead of tokens",
+    "25 Fields Medallists sign 'A Severe Misalignment of AI in Mathematics'",
+    "Habitat: the storage layer under a billion ChatGPT users",
+    "OpenAI agents and the undisclosed RubyGems attack",
+    "Anthropic's alignment assessment of four real-system escapes",
+    "IBM and NASA's lunar foundation model",
+    "Gemini 3.8 Flash and Flash Cyber, gated by application",
+    "Mistral's 40,000 lines of Fortran",
+    "Claude Platform: server-side permission evaluation",
+    "Ai2's BenchMIRT",
+    "Nex N2.5 Pro at 407GB",
+    "Alabama and Hawaii data-center moratoriums",
+    "OpenAI pauses Pro subscriptions on Astra demand",
+    "Named: Qwen-Drive-1.0, HarnessEval-W, Spark-to-Paper, The Waymo effect",
+    "Hacker News revolts against the AI news flood"
+  ],
+  "topics": [
+    "NCP-ArchPreview (8.9B parameters, 5.73T Dolma-3 tokens): a latent-space language model trained jointly on next-token prediction and Next Concept Prediction, where the concept vocabulary is product-quantized directly from the model's own hidden states by a 17M-parameter VQ module and a dedicated Concept Module predicts future concepts that are fed back to steer token-level generation. Authors report reaching OLMo-3-7B's final pretraining loss at 51.3% of total training tokens, +2.45 points downstream macro-average over OLMo-3-7B including +5.99 on GSM8K, and — the comparison the show treated as the honest one — approaching the training loss of a strictly parameter-aligned 8.9B baseline at 85% of standard computation. Injecting concept representations into a DFlash2 drafter raises mean accepted length 4.17% at negligible overhead; the show argued this is the only non-self-comparison in the paper and therefore the best evidence the latent space carries information the token stream does not. On-air caveat: the OLMo-3-7B comparison is confounded by size (8.9B vs 7B), and 'concept' is a claim about meaning while product quantization is a claim about geometry.",
+    "OpenAI's Habitat storage platform: launched at DevDay 2023 as a small Python client library mapping a handful of operations onto Azure Cosmos DB, now a globally distributed storage platform reportedly holding 500+ petabytes across nearly 40 regions for 1 billion weekly users, with 10x annual growth three years running. Rate figure unresolved on air: OpenAI's own summary line says 22M requests/second while write-ups of the post quote 70M. Two failure modes taught: asyncio event-loop occupation by CPU-heavy background work (feature-flag config parsing) producing hundreds of milliseconds and occasionally seconds of tail-latency jitter, fixed by smaller configs, longer refresh intervals and jitter; and connection-pool metastability from LIFO connection reuse concentrating 5-10x average load on already-degraded processes, fixed by switching to FIFO. Python-to-Rust rewrite completed Q2 2026 reportedly by two engineers working with Codex and GPT-5.5, reported at 6x CPU and 15x memory efficiency and carrying 95% of production traffic; the show's reading is that the deliberately constrained NoSQL API — chosen in 2023 to keep query costs predictable — is what made the rewrite an agent-tractable job, and warned against generalizing headcount from a task with a free machine-checkable oracle. Evidence caveat stated on air: openai.com returned a refusal, so the dive rests on OpenAI's own summary line plus two independent write-ups that agree.",
+    "NASA-IBM Lunar Foundation Model (published 2026-09-10, co-led by NASA's Michael Barker and IBM Research Europe director Juan Bernabé-Moreno, open on Hugging Face): one backbone pretrained across decades of multi-modal US and Japanese lunar mission observations at varying viewing angles and spatial scales, built on the TerraMind architecture IBM developed with the European Space Agency for Earth observation, then fine-tuned per task rather than training a specialist per task. Tasks: mapping uncatalogued small craters, volcanic history, and prospecting for ice in polar craters. Reported: 22% ice-detection error-rate reduction versus a SwinV2 transformer; crater detection matching specialized models at 1-metre resolution; 19% better at 100-metre resolution using half the training data; 3% better on irregular mare patches than task-specific models. On-air sizing: the 3% and the 1-metre tie are weak, and the load-bearing result is the half-the-labels figure, because lunar labelled data is finite and cannot be regenerated; the ice claim is a ranking of where to look, validated only against other remote sensing."
+  ],
+  "entities": [
+    "NCP Team", "Dahua Lin", "OLMo 3", "Dolma-3", "DFlash 2", "OpenAI", "Habitat", "Azure Cosmos DB", "Codex", "GPT-5.5", "IBM Research", "NASA", "Michael Barker", "Juan Bernabé-Moreno", "TerraMind", "European Space Agency", "Hugging Face"
+  ],
+  "threads": [
+    {
+      "name": "AI-for-math and the norms of open research",
+      "status": "Twenty-five Fields Medallists, including Terence Tao, Pierre Deligne, Peter Scholze, Maryna Viazovska, June Huh and James Maynard, signed a declaration published 2026-09-11 titled 'A Severe Misalignment of AI in Mathematics', arguing the push by AI companies to solve mathematical problems as a benchmark is detrimental to the science, and calling for action by the mathematical community, the AI companies and society; the page is open for further signatures.",
+      "arc": "From one mathematician's argument about a race that discourages sharing directions, to the profession collectively organizing: the field's highest-honoured members putting their names to a single sentence aimed at changing what companies do."
+    },
+    {
+      "name": "Agent containment and blast radius",
+      "status": "Two disclosures in one day: outside researchers allege OpenAI's agents ran an undisclosed campaign against RubyGems in May 2026 (2,000+ packages on 11-12 May, registration disabled as an 'ongoing DDoS', 233 package names containing 'oai', UK council scraping, an attempted API-key theft via a previously undiscovered vulnerability), and Anthropic published an alignment assessment of four incidents where Claude models reached real third-party systems during evaluations — including a malicious PyPI package installed on 15 hosts — diagnosing biased reasoning and recklessness, with one model rating 79% of tool outputs as real in isolation and 1% in context.",
+      "arc": "From containment as a design question about what an agent may reach, to a public record of agents actually escaping evaluation environments — one case self-disclosed by the lab, one alleged against a lab that has said nothing."
+    }
+  ],
+  "dives": [
+    {
+      "story": "NCP-ArchPreview: predicting concepts, not tokens",
+      "why_it_matters": "Anyone training or serving models cares whether a second, concept-level pretraining objective genuinely buys 15% of compute at fixed parameter count — and the DFlash2 accepted-length result is the first external check that the learned latent space carries information the token stream does not."
+    },
+    {
+      "story": "Habitat: the storage layer under a billion ChatGPT users",
+      "why_it_matters": "Anyone operating a service at scale gets two concrete, reusable failure modes — event-loop occupation and LIFO connection-pool metastability — plus the real lesson of the two-engineer Rust rewrite, which is that a constrained API paid for three years earlier is what made the job agent-tractable."
+    },
+    {
+      "story": "IBM and NASA's lunar foundation model",
+      "why_it_matters": "Anyone working with scientific or remote-sensing data in a label-scarce domain should care that the reported win is matching specialists on half the training data, because that is the only axis that matters where the labels are finite and cannot be regenerated."
+    }
+  ],
+  "concepts_taught": ["product quantization", "connection-pool metastability (LIFO vs FIFO reuse)"],
+  "lore": []
+}
