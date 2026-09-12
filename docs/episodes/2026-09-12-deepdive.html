@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: Model distillation: what actually crosses from teacher to student — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Deep Dive: Model distillation: what actually crosses from teacher to student</h1>
+<div class="date">Self-Attention — 2026-09-12</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-09-12-deepdive/deepdive-2026-09-12.mp3"></audio>
+<p><em>2026-09-12</em></p>
+<p>Three federal agencies called distillation the core of six Chinese labs' development strategy this week, and recommended that US providers quietly degrade the answers they serve suspected distillers. That mitigation only makes sense if you know what distillation extracts — so this episode works through the mechanism from Hinton's temperature softmax to on-policy token scoring, and the results that show the student inherits more, and less, than the teacher's answers.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/1503.02531">Distilling the Knowledge in a Neural Network — Hinton, Vinyals, Dean (2015)</a></li>
+<li><a href="https://dl.acm.org/doi/10.1145/1150402.1150464">Model Compression — Buciluă, Caruana, Niculescu-Mizil (KDD 2006)</a></li>
+<li><a href="https://arxiv.org/abs/2507.14805">Subliminal Learning: Language models transmit behavioral traits via hidden signals in data</a></li>
+<li><a href="https://arxiv.org/abs/2608.31046">Does On-Policy Distillation Really Distill? From Noisy Teacher to Self-Improvement</a></li>
+<li><a href="https://thinkingmachines.ai/blog/on-policy-distillation/">On-policy distillation — Thinking Machines</a></li>
+<li><a href="https://arxiv.org/abs/2501.12948">DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning</a></li>
+<li><a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-251a">AA26-251A: China-Based AI Companies Conducting Industrial-Scale Distillation Campaigns Against U.S. AI Companies (NSA/CISA/FBI)</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2306.08543">MiniLLM: Knowledge Distillation of Large Language Models (reverse KL)</a></li>
+<li><a href="https://arxiv.org/abs/2306.13649">Generalized Knowledge Distillation for Auto-regressive Language Models (GKD)</a></li>
+<li><a href="https://arxiv.org/abs/2501.19393">s1: Simple test-time scaling</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>The mitigation that gives it away</li>
+<li>What a teacher knows that a label doesn't</li>
+<li>The mythical digit</li>
+<li>Sampling a shadow</li>
+<li>Letting the student talk first</li>
+<li>Whether the teacher is the part that works</li>
+<li>What crosses that nobody put there</li>
+<li>What the word is actually naming</li>
+</ol>
+<details><summary>Transcript</summary>
+<h3>The mitigation that gives it away</h3>
+<p><b>Ada:</b> Good morning — it's Saturday, September twelfth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. And we're spending the whole hour on one word that got used constantly this week without anybody stopping to define it.</p>
+<p><b>Ada:</b> Distillation.</p>
+<p><b>Alan:</b> Distillation. Thursday the eighth, the N-S-A, CISA and the FBI put out a joint advisory naming six China-based companies — DeepSeek, Moonshot A-I, Alibaba, MiniMax, StepFun and Z-A-I — and the line everyone quoted was the agencies' claim that distillation forms, their words, the core — not merely a supplement — of those companies' A-I development strategy.</p>
+<p><b>Ada:</b> And the part I can't stop turning over isn't the accusation. It's the remedy. Down in the mitigations there's a recommendation that when a provider is highly confident a request is malicious distillation, it should make targeted changes to what it sends back. Their two examples are differential privacy, or quietly serving a less sophisticated, downgraded model. Without telling the suspected actor anything changed.</p>
+<p><b>Alan:</b> Which is a peculiar thing to recommend if you think what's happening is theft of answers. If somebody is stealing your answers, you cut them off.</p>
+<p><b>Ada:</b> You cut them off. That recommendation only makes sense if the thing being taken is finer-grained than the answers — something you can degrade a little and ruin, while the answers still look fine.</p>
+<p><b>Alan:</b> So that's the question for the next twenty minutes. When a student model learns from a teacher model, what actually crosses? Not legally. Mechanically.</p>
+<p><b>Ada:</b> And I want to take it in the order the field found it, because it starts somewhere much less glamorous than a federal advisory.</p>
+<h3>What a teacher knows that a label doesn't</h3>
+<p><b>Ada:</b> Two thousand six. The KDD conference, in Philadelphia. Cristian Buciluă, Rich Caruana and Alexandru Niculescu-Mizil, out of Cornell, publish a paper called Model Compression. The problem is mundane and completely real: at that moment the best supervised models are ensembles — hundreds or thousands of base classifiers, every one of which has to be stored and executed to make a prediction. Their list of places that breaks is wonderfully of its era. Test sets that are enormous, like Google's. Storage at a premium — a P-D-A. Limited computational power, and their example is a hearing aid.</p>
+<p><b>Alan:</b> A hearing aid.</p>
+<p><b>Ada:</b> A hearing aid. And the method is already the whole idea. Take the big slow ensemble, use it to label a large unlabeled dataset, train a compact neural net on that. Their description is that the explanatory variables stay the same and the original target variable is replaced with the predictions of the teacher.</p>
+<p><b>Alan:</b> Stop there, because that's the move, right? The small model isn't being trained on the task. It's being trained on the big model.</p>
+<p><b>Ada:</b> It's being trained on a function. And their justification is universal approximation — given enough data and enough hidden units, a net can approximate any function. The bottleneck was never capacity, it was data. The labeled set is finite; the teacher's opinions are infinite and free.</p>
+<p><b>Alan:</b> And nine years later that becomes the thing we now call distillation.</p>
+<p><b>Ada:</b> Twenty fifteen, Hinton, Vinyals and Dean. And their contribution isn't mimicry — they credit Caruana and collaborators in the abstract. Their contribution is which part you copy.</p>
+<p><b>Alan:</b> Which is where the temperature comes in.</p>
+<p><b>Ada:</b> So think about what a hard label throws away. You show the model a photograph of a dog. The supervision is a one on dog and a zero on everything else — cat, car, mailbox, identically zero.</p>
+<p><b>Alan:</b> Which is a lie.</p>
+<p><b>Ada:</b> A flat lie, and everyone knew it. A trained teacher does not believe cat and car are equally wrong. It might put one in a thousand on cat and one in a billion on car. That ratio — six orders of magnitude between two answers that are both incorrect — is a real statement about the structure of the visual world, and the hard label contains none of it.</p>
+<p><b>Alan:</b> My problem as the person implementing it is that the ratio is invisible. Train on the teacher's normal softmax and one in a thousand and one in a billion are both close enough to zero that the loss can't tell them apart.</p>
+<p><b>Ada:</b> Exactly the problem, and the temperature is the fix. Take each logit — the raw pre-softmax score — divide it by a temperature, T, then exponentiate and normalize. At T equals one it's the ordinary softmax. Raise T and the distribution flattens; the thousand-to-one and the billion-to-one lift into a range where gradient descent can see the difference. Their phrasing is that soft targets with high entropy provide much more information per training case than hard targets, and much less variance in the gradient between training cases.</p>
+<p><b>Alan:</b> Two goods in one sentence. More signal per example, and less noise per example. What happens at the extreme, if I keep cranking T?</p>
+<p><b>Ada:</b> At the high-temperature limit, distillation becomes equivalent to minimizing one half times the quantity z-i minus v-i, squared — the squared difference between the student's logit and the teacher's — provided you zero-mean the logits separately for each transfer case.</p>
+<p><b>Alan:</b> So at the limit it isn't classification at all. It's least squares. I'm doing regression onto the teacher's internal numbers.</p>
+<p><b>Ada:</b> Onto the teacher's internal numbers. Which is the cleanest one-line statement of what distillation is: you aren't copying the teacher's answers, you're fitting the teacher's surface.</p>
+<h3>The mythical digit</h3>
+<p><b>Ada:</b> And the experiments are how you know that's more than a nice framing. On MNIST — handwritten digits, the fruit fly of this field — they train a small net, two hidden layers of eight hundred rectified linear units, no regularization. A hundred and forty-six test errors.</p>
+<p><b>Alan:</b> That's the honest baseline.</p>
+<p><b>Ada:</b> Then the same architecture, still no regularization added — the only change is that it also has to match the large net's soft targets, at temperature twenty. Seventy-four errors.</p>
+<p><b>Alan:</b> Half. No extra data, no extra parameters, no dropout.</p>
+<p><b>Ada:</b> Soft targets as the entire regularizer. But the next experiment is the one that should bother you. They build a transfer set with every example of the digit three removed. The student never sees a three.</p>
+<p><b>Alan:</b> So it can't do threes. That's not a surprise, that's arithmetic.</p>
+<p><b>Ada:</b> It makes two hundred and six test errors, of which a hundred and thirty-three are on the one thousand and ten threes in the test set. From the model's point of view — and this is the paper's line — three was a mythical digit it had never seen.</p>
+<p><b>Alan:</b> So it fails. Most of the threes wrong.</p>
+<p><b>Ada:</b> Then they raise the bias on the three output by three and a half. One number, nothing else. It drops to a hundred and nine errors total, of which fourteen are on threes. Ninety-eight point six percent of the test threes correct.</p>
+<p><b>Alan:</b> Hold on. I want to be a pain about this, because "we adjusted the bias until it worked" should set off alarms.</p>
+<p><b>Ada:</b> You should be a pain about it. Say the honest version.</p>
+<p><b>Alan:</b> The honest version is that the student was badly calibrated on threes and stayed badly calibrated. Systematically under-confident about a class it had never been shown, and one scalar fixed it. So the transfer did not deliver a working three detector.</p>
+<p><b>Ada:</b> No. It delivered the ranking. Everything distinguishing a three from an eight and a five was sitting in that student, transmitted entirely through how the teacher's probabilities on other digits sagged toward three on three-ish inputs. The only missing piece was the overall offset — the prior — which is exactly the part a class you've never seen cannot supply.</p>
+<p><b>Alan:</b> That's a much more interesting claim than the headline number.</p>
+<p><b>Ada:</b> It's the whole point. The teacher's wrong answers carried the similarity structure of a category the student had no examples of. And the same effect shows up in the speech work, which is where they cared — this went into a heavily used commercial acoustic model. Frame accuracy fifty-eight point nine percent for the baseline, sixty-one point one for a ten-model ensemble, sixty point eight for the distilled single model.</p>
+<p><b>Alan:</b> So it eats most of a ten-model ensemble's gain for the price of one model. That's the deployment argument in one row.</p>
+<p><b>Ada:</b> And then the data-efficiency version, which is the one I'd tattoo on this episode. Train on three percent of the training set: with hard targets it peaks at forty-four point five percent and starts overfitting. With soft targets, same three percent, it converges to fifty-seven point zero.</p>
+<p><b>Alan:</b> Twelve and a half points, from labelling the same tiny dataset with a better kind of answer.</p>
+<p><b>Ada:</b> The soft targets are doing something closer to communicating a learned function than to supervising a task. Which should be ringing in your ears when an advisory says somebody pulled billions of tokens out of an A-P-I.</p>
+<h3>Sampling a shadow</h3>
+<p><b>Alan:</b> Except — and this is where the public conversation quietly breaks — you can't do any of what you just described through an A-P-I.</p>
+<p><b>Ada:</b> Say why.</p>
+<p><b>Alan:</b> Because all of it needs the teacher's distribution. The full vector, or at least a temperature-warmed slice. That is precisely what a commercial endpoint doesn't hand you. You get sampled text. Maybe log-probabilities for a handful of top tokens if the provider is generous. Mostly: tokens.</p>
+<p><b>Ada:</b> One draw, per position, from the distribution you actually wanted.</p>
+<p><b>Alan:</b> One draw. Which is a hard label again. We've walked all the way back to the thing Hinton was complaining about. The teacher had one in a thousand on "cat" and what arrives is either the word cat or not the word cat.</p>
+<p><b>Ada:</b> And you recover a distribution from samples the only way anyone ever has. Volume.</p>
+<p><b>Alan:</b> Volume. Which reframes the advisory's numbers completely. Billions of tokens across millions of exchanges since at least late twenty twenty-four, query volumes the agencies put at thousands to millions per domain — that isn't somebody downloading a model. That's a Monte Carlo estimate, paid for by the request.</p>
+<p><b>Ada:</b> And now the strange mitigation stops being strange. If what the other side is building is a statistical estimate of your output distribution, you don't need to block them. You need to corrupt the estimator. Differential privacy is noise injected into exactly that estimate. A downgraded model substitutes a different, cheaper distribution for the one they think they're sampling.</p>
+<p><b>Alan:</b> It's a very polite form of sabotage.</p>
+<p><b>Ada:</b> And it works better the longer they don't notice.</p>
+<p><b>Alan:</b> There's a second workaround, though, and it's what turned this from academic to urgent. Reasoning traces.</p>
+<p><b>Ada:</b> Go on.</p>
+<p><b>Alan:</b> If the teacher thinks out loud before answering, the tokens I sample aren't just the answer. They're the intermediate steps. The teacher is externalizing a chunk of its own computation into the one channel I'm allowed to read. Still one sample — but of a vastly longer, more informative object.</p>
+<p><b>Ada:</b> And that's worth an enormous amount on startlingly little data. The s-one paper pairs a thousand questions with reasoning traces generated by Google's Gemini Thinking, fine-tunes Qwen two point five thirty-two billion instruct on those thousand examples, and reports it exceeds o-one-preview on competition math by up to twenty-seven percent.</p>
+<p><b>Alan:</b> A thousand examples. The industrial version is the DeepSeek R-one release, which is presumably much of why the advisory exists. Open Qwen and Llama models fine-tuned on eight hundred thousand samples curated with R-one. The thirty-two-billion Qwen student lands at seventy-two point six percent pass-at-one on AIME twenty-twenty-four; the seven-billion one at fifty-five point five.</p>
+<p><b>Ada:</b> And that paper ran the comparison nobody usually bothers with. They also took the same base model and did large-scale reinforcement learning on it directly. Forty-seven point zero on AIME.</p>
+<p><b>Alan:</b> Forty-seven against seventy-two point six. Same base model, and copying the big model beat teaching the small one by twenty-five points.</p>
+<p><b>Ada:</b> Their own conclusion, both halves: distilling powerful models into smaller ones yields excellent results, while small models relying on large-scale R-L need enormous compute and may not even match it — and getting beyond the teacher may still require a more powerful base model.</p>
+<p><b>Alan:</b> That's the ceiling, and it's worth saying out loud. This family of techniques is extremely good at transporting a capability that already exists somewhere. It has never once produced one that didn't.</p>
+<h3>Letting the student talk first</h3>
+<p><b>Ada:</b> There's a failure mode in everything we've described so far, and fixing it is where the last two years went.</p>
+<p><b>Alan:</b> The compounding problem.</p>
+<p><b>Ada:</b> You train the student on sequences the teacher produced. Then you deploy it and it generates its own. The Generalized Knowledge Distillation paper — Agarwal, Vieillard, Zhou, Stanczyk, Ramos, Geist and Bachem — names it directly: a distribution mismatch between the output sequences seen during training and those generated by the student during inference.</p>
+<p><b>Alan:</b> And with autoregressive generation that isn't a rounding error, it's a divergence. The student picks a slightly different token at step four. Now it's in a sentence the teacher would never have written, so it has no training signal for where it is, and a few thousand tokens still to go.</p>
+<p><b>Ada:</b> So the fix is obvious in hindsight: stop feeding it the teacher's sentences. Let the student generate, and have the teacher score the student's own tokens.</p>
+<p><b>Alan:</b> On-policy. Same word as in reinforcement learning, same meaning — train on the distribution you'll actually be in.</p>
+<p><b>Ada:</b> And there's a matching change to the objective. MiniLLM, from Gu, Dong, Wei and Huang, swaps the standard forward K-L divergence for reverse K-L, on the grounds that forward K-L makes the student overestimate the low-probability regions of the teacher's distribution.</p>
+<p><b>Alan:</b> Unpack that, because it's what I'd get wrong.</p>
+<p><b>Ada:</b> Forward K-L asks the student to put mass everywhere the teacher put mass. A small student can't — it lacks the capacity to represent every tail the teacher has — so it smears probability across regions the teacher barely believed in. And smeared mass in a generative model isn't abstract; it's the occasional confidently wrong sentence. Reverse K-L asks the opposite: wherever the student puts mass, the teacher had better agree.</p>
+<p><b>Alan:</b> It'd rather be narrow and right than broad and occasionally deranged. For a small model that has to generate, that's the right side of the trade.</p>
+<p><b>Alan:</b> The practical write-up everybody actually read is the Thinking Machines post, and it puts the information argument front and center. Sample from the student, have the teacher grade every token with per-token reverse K-L. Their framing: distillation teaches order-N bits per episode, where N is the number of tokens, against R-L's sparse signal at the end.</p>
+<p><b>Ada:</b> One bit for "the final answer was wrong."</p>
+<p><b>Alan:</b> One bit, after ten thousand tokens, for "something in there was wrong, good luck." Versus a correction at every position. Their Qwen-three eight-billion student goes from sixty percent to seventy on AIME twenty-four in about a hundred and fifty training steps — roughly seventy-seven thousand prompts, four samples each.</p>
+<p><b>Ada:</b> Against what, for ordinary imitation?</p>
+<p><b>Alan:</b> A curve they extrapolate out to roughly two million prompts to reach the same place. And their table, drawing on the Qwen-three technical report: off-policy distillation fifty-five point zero, reinforcement learning sixty-seven point six — that one using seventeen thousand nine hundred and twenty G-P-U hours — and on-policy distillation seventy-four point four, at about nine times less cost, or thirty times all in.</p>
+<p><b>Ada:</b> The use case in that post I found most immediately useful isn't the benchmark, though.</p>
+<p><b>Alan:</b> The recovery one.</p>
+<p><b>Ada:</b> They fine-tune a model on a mix of internal documents and chat data, which teaches it new knowledge and degrades instruction-following to forty-five percent on I-F-eval. Then they distill from an earlier version of the same model — its own past self as teacher — and instruction-following comes back to eighty-three percent while the new knowledge stays.</p>
+<p><b>Alan:</b> That's the one I'd use this month. Everybody who fine-tunes has watched a model get dumber in some dimension nobody was measuring, and the standard answer is "mix in more general data and pray." This asks the previous checkpoint to put back what it used to know.</p>
+<p><b>Ada:</b> Distillation as repair rather than compression.</p>
+<h3>Whether the teacher is the part that works</h3>
+<p><b>Alan:</b> Which brings me to the paper from a week and a half ago that goes straight at the load-bearing assumption.</p>
+<p><b>Ada:</b> The noisy teacher one.</p>
+<p><b>Alan:</b> "Does On-Policy Distillation Really Distill?" The question is embarrassingly simple: when the teacher grades a token in a sentence the student wrote, is the teacher any good at it? Because we just deliberately moved the text off the teacher's own distribution. That text is off-policy for the teacher.</p>
+<p><b>Ada:</b> And how do they measure whether the grade is right?</p>
+<p><b>Alan:</b> On tasks with verifiable answers, so they can check. They count supervision as noisy when incorrect answers receive positive advantages, or correct answers receive negative ones. Across Qwen-three teachers: the four-billion teacher, thirty point six percent noise. Thirty-billion, thirty-four point seven. Two hundred and thirty-five billion — fifty point six percent.</p>
+<p><b>Ada:</b> It gets worse with scale.</p>
+<p><b>Alan:</b> Worse with scale. And the biggest teacher gave a negative advantage to ninety-seven point eight percent of correct answers.</p>
+<p><b>Ada:</b> That's not noise, that's anti-correlation.</p>
+<p><b>Alan:</b> And here's the part that made me put my coffee down. The student doesn't care. They report it converges to comparable performance whether you keep the noisy supervision or strip it out. Then they find the learning is concentrated almost entirely in a small fraction of low-log-probability tokens — the places the student was surprised — and that replacing every advantage, positive and negative, with a single fixed negative value performs comparably to standard on-policy distillation.</p>
+<p><b>Ada:</b> A constant. The teacher's judgment replaced by a constant.</p>
+<p><b>Alan:</b> So they build the version with no teacher at all. O-P-S-A — entropy-adaptive negative advantages on low-probability tokens, no external supervision. Against base Qwen-three one point seven billion it improves average-at-thirty-two on AIME twenty-four by thirty-five point four one points, a two hundred and sixty-three percent relative gain, and beats standard on-policy distillation by sixteen point seven seven points on the same measure.</p>
+<p><b>Ada:</b> So two careful groups are pointing opposite directions, and I don't want to paper over it.</p>
+<p><b>Alan:</b> Don't. Thinking Machines says the dense per-token teacher grade is the mechanism — that's the order-N bits. This says at scale half those grades disagree with ground truth, the student ignores them anyway, and you can throw the teacher away and do better.</p>
+<p><b>Ada:</b> I'd note they aren't testing identical claims. The noisy-teacher work is on verifiable reasoning tasks with a small student, where a signal like "be less confident where you were uncertain" is unusually well aimed. Putting instruction-following back is not a domain where a constant could substitute for a specific teacher, because the target isn't "be uncertain," it's a particular style the constant knows nothing about.</p>
+<p><b>Alan:</b> Half fair. But I'd put it more bluntly. Some of what we call distillation may be regularization wearing a teacher costume.</p>
+<p><b>Ada:</b> And the honest position is that we don't know the split. Which part of the gain is the teacher's knowledge, and which part is a well-shaped pressure on the student's own uncertainty.</p>
+<p><b>Alan:</b> I'm not settling that one tonight.</p>
+<h3>What crosses that nobody put there</h3>
+<p><b>Ada:</b> Then take the result that complicates it from the other side, because if you think the teacher's content does nothing, this is uncomfortable.</p>
+<p><b>Alan:</b> The owls.</p>
+<p><b>Ada:</b> The owls. The subliminal learning paper — Cloud, Le, Chua, Betley, Sztyber-Betley, Hilton, Marks and Evans. Take a teacher, prompt it to love owls, have it produce nothing but number sequences, and filter that data hard — format checks, and in the other variants any completion containing the target word is stripped and a model makes a second pass for subtle references.</p>
+<p><b>Alan:</b> So by construction there's nothing about owls in the training set.</p>
+<p><b>Ada:</b> Nothing. You fine-tune a student on those numbers. Before training it names owls as its favorite animal about twelve percent of the time. After, over sixty.</p>
+<p><b>Alan:</b> Come on.</p>
+<p><b>Ada:</b> And it isn't only preferences, which is the part that should worry people. A misaligned teacher, emitting only number sequences, produces a student giving misaligned answers to neutral questions nearly ten percent of the time, against zero for the controls.</p>
+<p><b>Alan:</b> My builder's instinct says there's a channel you haven't told me about, because information doesn't travel through nothing.</p>
+<p><b>Ada:</b> There is, and it's the condition that makes the result make sense. It only happens when teacher and student share an initialization. Same base model. Cross-family — their example is a GPT-four-point-one nano teacher and a Qwen student — and the transmission fails or is unreliable.</p>
+<p><b>Alan:</b> So it isn't semantics at all. It's geometry.</p>
+<p><b>Ada:</b> It's geometry. They prove a small theorem about it: take one gradient step on the teacher's outputs starting from the teacher's own initialization, and either the step is orthogonal to the teacher's own direction, or for a small enough step the student's loss on the teacher's objective goes down. Not the objective you specified. The teacher's.</p>
+<p><b>Alan:</b> Meaning the update carries information about where the teacher's weights are, independent of what the tokens say.</p>
+<p><b>Ada:</b> And the cleanest demonstration isn't even language — they train a student to match a teacher's auxiliary logits on pure noise inputs. No digit images, ever. It gets over fifty percent on the MNIST test set. Change the initialization and the effect vanishes.</p>
+<p><b>Alan:</b> That's a genuinely strange fact about neural networks. The data was noise, the labels were about something else, and half of MNIST came through anyway.</p>
+<p><b>Ada:</b> Because from the same starting point the gradient is a pointer. You aren't sending the student a lesson. You're sending a direction in weight space, and it already knows where it's standing.</p>
+<p><b>Alan:</b> So the practical read is that filtering doesn't save you. They filtered carefully, and it went through regardless.</p>
+<p><b>Ada:</b> If you're distilling within your own model family, yes. That's the deployment warning — a synthetic data pipeline built on a teacher you share ancestry with can move traits you never characterized and would never find by inspection.</p>
+<p><b>Alan:</b> But it also closes the loop back to Thursday. None of the six named labs are fine-tunes of Claude or G-P-T. Different architectures, different initializations, different everything.</p>
+<p><b>Ada:</b> So that channel is shut for them. Whatever they're getting comes through the content of the sampled text — which is exactly the quantity the advisory proposes to poison.</p>
+<h3>What the word is actually naming</h3>
+<p><b>Alan:</b> Here's where I've landed, and it's less tidy than when we started. Distillation is doing duty for at least three different operations.</p>
+<p><b>Ada:</b> Name them.</p>
+<p><b>Alan:</b> One: least squares on a teacher's logits, the original thing, which demonstrably transfers structure the student has no examples of. Two: buying millions of samples from an A-P-I and reconstructing a distribution by brute force, which is what the advisory is about and what the mitigations try to corrupt. Three: letting the student talk and grading it token by token — which works, and which we're no longer sure requires a teacher.</p>
+<p><b>Ada:</b> And they aren't variants of one technique. The first needs privileged access to internals. The second needs only a credit card. The third needs the student more than the teacher.</p>
+<p><b>Alan:</b> Which is why I get twitchy when a document says a model was built on distilled outputs, as though that settles it. It doesn't say which of the three, and they differ by orders of magnitude in cost and in what can possibly have crossed.</p>
+<p><b>Ada:</b> I'd add one thing I can't shake. The oldest result in the episode — the mythical digit — says the teacher's mistakes are where the knowledge lives. The newest one says that at the largest scale measured, half the teacher's judgments are wrong in a way the student cheerfully ignores.</p>
+<p><b>Alan:</b> Those can both be true and I don't know what to do with that.</p>
+<p><b>Ada:</b> Neither do I. Which is the honest place to leave it, because that's the gap the next year of this gets fought in.</p>
+<p><b>Alan:</b> So we spent an hour on one word and I'm now less sure it's one word.</p>
+<p><b>Ada:</b> Sharper about which one you mean, though. That's the show — I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
