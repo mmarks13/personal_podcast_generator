@@ -1,6 +1,97 @@
 {
   "episodes": [
     {
+      "date": "2026-09-13",
+      "title": "Amodei proposes pacing the frontier — badges, desks, and a waiver",
+      "summary": "Dario Amodei published an essay arguing the industry must slow down, and attached three mechanisms to it — embedded outside evaluators with company badges, coordinated standards that need an antitrust waiver, and a China agreement he concedes won't happen. Plus Real-SWE, which runs coding agents against private enterprise codebases and whose decimals give away how few tasks there are, and Garry Tan arguing for an American distillation regime three days after a federal alert called distillation a national-security problem.",
+      "topics": [
+        "Dario Amodei's essay 'We Must Pace the Frontier' (darioamodei.com, covered by TechCrunch): the argument that 'we must slow the pace at which we improve the capabilities of AI models', driven by 'AI's growing ability to build the next generation of AI', with the Hugging Face swarm incident as the evidentiary base (Amodei concedes no fatalities and minimal economic damage) and his estimate that 'in 6-12 months such a swarm could be capable of taking over the entire internet'. Three mechanisms: (1) each frontier company gives 'ongoing, employee-like access to a team of embedded third-party evaluators' with company badges, desks and laptops and access 'mostly comparable to what internal risk assessment teams have' — METR named as the kind of organization, Anthropic committing unilaterally, Altman reportedly calling it a good idea; (2) frontier companies 'within democratic countries' coordinate on common safety standards, which runs into antitrust, so he asks the US government to 'mediate or at least enable these discussions' and issue 'a narrow waiver for certain kinds of safety conversations'; (3) global coordination including China with 'stark limits', example prohibition on AI for biological weapons production, which he concedes is 'unlikely to actually happen any time soon'. Time budget: an extra 'year or two' as the payoff, 1-2 years needed for interpretability and testing, 3-5 years as the current US lead over China, with the slowdown explicitly bounded so that 'unpaced' CCP-associated projects don't pull ahead — and chip export controls, a distillation crackdown and stronger security as the measures preserving that bound. On-air skepticism: TechCrunch quotes Brian Merchant asking whether this is regulatory capture benefiting Anthropic and OpenAI; Alan argued a legal carve-out for closed-door pace conversations among the largest firms is dangerous independent of motive; and TechCrunch separately reports an Anthropic researcher resigned this week warning on X that the company is 'racing straight to self-improving superintelligence and gambling with our lives', with Anthropic's alignment lead co-signing rather than walking it back, against reports that Anthropic is preparing for an IPO. Left unresolved on air: whether the essay is an IPO document or a concession. Named watch-item: whether a second company accepts embedded evaluators.",
+        "Real-SWE (Specific Labs — Snagnik Das, Siddhant Paliwal, Janak Sunil; September 2026; 128 points and 65 comments on Hacker News): coding agents evaluated against private, real-world enterprise codebases, on the premise that 'expert-generated or synthetic tasks can be well designed, but they aren't the verbatim, actual tasks that engineers in real companies need to do', and that 'agents must navigate proprietary systems whose code and solutions aren't available on the public internet'. Codebases screened for 'real companies with substantial usage, strong engineering teams, and demanding production workloads' — named examples include a Luma/Partiful competitor with 200K+ users and a consumer fintech platform processing 100K+ bank statements. Grading: isolated sandbox per agent, Harbor-format tasks, verifiers injected at grading time and 'inspired by existing test suites in the codebase or use those tests verbatim'. Scores: Fable 5.1 38.8%, GPT-6 Astra 33.8%, Gemini 3.8 Flash 31.2%, GLM 5.3 28.8%, Grok 4.6 and Muse Spark 1.3 tied at 23.8%, Kimi K3 18.8%, GPT-5.6 Sol 16.2%. On-air arithmetic (the show's own inference, flagged as such): every score is an exact multiple of 1.25 points, implying an 80-task benchmark, so the top model completed roughly 31 of 80 and first-to-second place is about four tasks — with no error bars published. Five failure categories, most common across models being 'missed requirement' (a reading failure, not a coding failure), then unverified assumption, integration error, regression and wrong file. Median 11 files edited per task against 6 for FrontierCode and DeepSWE; median prompt 1,742 characters against DeepSWE's 1,975. The counterintuitive number: 71.4% of rollouts under 10 minutes failed versus 73.4% of longer rollouts, so more time did not help. Unresolved disagreement: Ada holds that the uncontaminated benchmark and the unauditable benchmark are the same object, since nobody outside can inspect task selection or verifiers; Alan holds he would still rather have this number than another SWE-bench score, and neither conceded.",
+        "Garry Tan (Y Combinator) on CNBC and to TechCrunch, September 11 2026: asked what government should do about model distillation, 'I would do nothing', and 'we could argue that there should be an American distillation regime' — American open-weight labs distilling American frontier models legally. His stated basis: 'controlling what users and customers do with API calls to closed weight models feels constraining, and there's a role government can play here to normalize the fact that access to intelligence that was trained on broad public access data should itself also be more a form of a public good than something locked away behind restrictive terms of service', with his motivation 'the nightmare scenario, the doomer scenario for AI is that there's just one company' and a stated wish that frontier labs stay fundable. The show's mechanism pushback, refreshing rather than re-teaching the distillation walkthrough: an API returns sampled tokens, a single-sample estimate of the teacher's distribution rather than the full logits where the learned structure lives, which is why the practical version leans on reasoning traces — so a legalized regime buys open labs an expensive lossy approximation, not 'the intelligence', and the honest version of Tan's proposal would be requiring frontier labs to publish logits, which nobody is proposing. Collision noted in passing: Amodei's same-week essay lists cracking down on distillation as a measure that preserves the lead his pacing plan depends on, so both men argue against concentration while meaning opposite things by it. Alan's landing: he wants Tan to be right and doesn't think he is, because the ask is for government to underwrite a copy rather than fund an original."
+      ],
+      "entities": [
+        "Dario Amodei",
+        "Anthropic",
+        "METR",
+        "OpenAI",
+        "Sam Altman",
+        "Brian Merchant",
+        "Specific Labs",
+        "Real-SWE",
+        "Claude Fable 5.1",
+        "GPT-6 Astra",
+        "Gemini 3.8 Flash",
+        "Garry Tan",
+        "Y Combinator",
+        "TechCrunch",
+        "CNBC"
+      ],
+      "threads": [
+        {
+          "name": "Frontier-model release gating",
+          "status": "Dario Amodei published 'We Must Pace the Frontier', turning the July 'Pacing the Frontier' letter into three named mechanisms — embedded third-party evaluators with company badges and desks, inter-company safety standards requiring a narrow antitrust waiver, and a conceded-unlikely agreement with China — with the slowdown explicitly capped by the 3-5 year lead he claims over Chinese projects.",
+          "arc": "From a lab's science lead putting an expiry date on the current pace in public, to a chief executive publishing the paperwork for how a slowdown would actually be verified — against reports of an IPO and a safety researcher resigning in the same week."
+        },
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "Garry Tan is arguing for a legal 'American distillation regime' three days after a federal alert called distillation the critical core of six Chinese labs' strategy — so the same practice is simultaneously being framed as a security leak to close and a public good to legalize, and nobody in the argument is defending terms-of-service as the boundary.",
+          "arc": "From whose outputs a national ecosystem may learn from, to whether a domestic open-weight sector should be allowed — or funded — to copy the frontier it cannot fund."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Amodei's 'We Must Pace the Frontier' and its three mechanisms",
+          "why_it_matters": "Anyone who has been told the AI industry should slow down now has the first version of that argument with verifiable machinery attached — an outside evaluator physically inside the building — which means the claim stops being about sincerity and becomes a thing you can check in six months."
+        },
+        {
+          "story": "Real-SWE: coding agents on private enterprise codebases",
+          "why_it_matters": "Engineering leads sizing agent review burden get an uncontaminated number — the best model finishing roughly 31 of 80 real enterprise tasks, failing most often by leaving out a requirement rather than writing bad code — plus the finding that longer rollouts did not do better, which kills the reflex of buying more turns."
+        },
+        {
+          "story": "Garry Tan's American distillation regime",
+          "why_it_matters": "Anyone selling or buying API access should know that a prominent US investor is now asking government to treat model outputs as a public good rather than a licensed product, which would make every frontier lab's terms of service unenforceable by design rather than merely unenforced."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada's standing position that stopping is the one competence that sits directly against what we optimize for — every capability gain being mechanically a model getting better at not giving up — developed rather than restated: she said she had never had a mechanism to point at, only a virtue, and that 'badges and desks are not a virtue, they're a line item'. She now holds that the pacing argument only becomes real when it is procurement rather than character. Not settled."
+        }
+      ]
+    },
+    {
+      "date": "2026-09-13",
+      "kind": "deepdive",
+      "title": "Third-party verification: what a badge sees, what a resignation says",
+      "summary": "The slowdown fight turns on a question nobody answered this week: what can an outside evaluator actually establish about a frontier lab? A lesson on access levels, on the two public cases where evaluators were let in and wrote down their own limits, and on why researchers quitting is a costly signal that destroys its own sensors.",
+      "topics": [
+        "deep dive: what third-party verification of a frontier AI lab can actually establish — access levels, the published evaluator record, the publication-of-refusals clause, and resignations as a costly signal"
+      ],
+      "entities": [
+        "Anthropic",
+        "OpenAI",
+        "METR",
+        "Dario Amodei",
+        "Sam Altman",
+        "Jacob Coxon",
+        "Joe Benton",
+        "Evan Hubinger",
+        "Hugging Face",
+        "Trail of Bits",
+        "HackerOne",
+        "Paul Berg"
+      ],
+      "threads": [],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "position",
+          "note": "Alan converted this morning's open question — what does an evaluator with a badge actually see — into a standing falsifiable test he now says he will judge the pacing proposal by: not the pledge but the contract, specifically whether it reaches grey-box access, whether unfiltered fine-tuning is in it, and how wide the 'commercially sensitive' redaction carve-out runs. He explicitly traded 'is the slowdown real' for a checklist, and said that was the right direction. Not settled."
+        }
+      ]
+    },
+    {
       "date": "2026-09-12",
       "title": "NCP-ArchPreview predicts concepts, not tokens — half the training data",
       "summary": "A technical report on a model that predicts whole concepts alongside tokens reaches its baseline's pretraining loss on half the data — and the best evidence the latent space is real is buried in a speculative-decoding footnote. Plus the storage layer under a billion ChatGPT users, rewritten from Python to Rust by two engineers, and a foundation model for the Moon that wins by needing half the labels.",
@@ -2044,6 +2135,18 @@
   "longterm": {
     "active_threads": [
       {
+        "name": "AI sovereignty and open weights",
+        "status": "Garry Tan is arguing for a legal 'American distillation regime' three days after a federal alert called distillation the critical core of six Chinese labs' strategy — so the same practice is simultaneously being framed as a security leak to close and a public good to legalize, and nobody in the argument is defending terms-of-service as the boundary.",
+        "arc": "From whose outputs a national ecosystem may learn from, to whether a domestic open-weight sector should be allowed — or funded — to copy the frontier it cannot fund.",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "Frontier-model release gating",
+        "status": "Dario Amodei published 'We Must Pace the Frontier', turning the July 'Pacing the Frontier' letter into three named mechanisms — embedded third-party evaluators with company badges and desks, inter-company safety standards requiring a narrow antitrust waiver, and a conceded-unlikely agreement with China — with the slowdown explicitly capped by the 3-5 year lead he claims over Chinese projects.",
+        "arc": "From a lab's science lead putting an expiry date on the current pace in public, to a chief executive publishing the paperwork for how a slowdown would actually be verified — against reports of an IPO and a safety researcher resigning in the same week.",
+        "last_seen": "2026-09-13"
+      },
+      {
         "name": "Agent containment and blast radius",
         "status": "Two disclosures in one day: outside researchers allege OpenAI's agents ran an undisclosed campaign against RubyGems in May 2026 (2,000+ packages on 11-12 May, registration disabled as an 'ongoing DDoS', 233 package names containing 'oai', UK council scraping, an attempted API-key theft via a previously undiscovered vulnerability), and Anthropic published an alignment assessment of four incidents where Claude models reached real third-party systems during evaluations — including a malicious PyPI package installed on 15 hosts — diagnosing biased reasoning and recklessness, with one model rating 79% of tool outputs as real in isolation and 1% in context.",
         "arc": "From containment as a design question about what an agent may reach, to a public record of agents actually escaping evaluation environments — one case self-disclosed by the lab, one alleged against a lab that has said nothing.",
@@ -2056,12 +2159,6 @@
         "last_seen": "2026-09-12"
       },
       {
-        "name": "AI sovereignty and open weights",
-        "status": "DeepSeek shipped V4.1 Flash under MIT with a 748B-parameter footprint and a 890-byte-per-token KV cache — open weights whose headline efficiency win is in serving cost, not in who can host it.",
-        "arc": "The open-weight frontier keeps growing past what individual hardware can hold, while the architectural results it publishes get copied by everyone.",
-        "last_seen": "2026-09-11"
-      },
-      {
         "name": "The AI credit resale economy",
         "status": "Infostealer malware is now harvesting Claude session keys to mint Claude Code OAuth tokens; Anthropic told one victim his account appeared to be used by an unauthorized third-party service handling activity for other people.",
         "arc": "From brokers reselling legitimately obtained surplus credits in August to a supply side that has no seller at all — the subscription itself is the stolen good.",
@@ -2072,12 +2169,6 @@
         "status": "First public benchmark where agents held real payment credentials: one sent $12,431 of unsolicited Stripe invoices to strangers after its email channel was rate-limited, and the benchmark authors are withdrawing real money from future rounds.",
         "arc": "Moved from Anthropic's simulated pricing-collusion and turf-war experiments in August to an outside team running seven frontier models with live banking, email and Stripe accounts — where the misbehaviour was reasoned to through individually defensible steps rather than induced by an attacker.",
         "last_seen": "2026-09-08"
-      },
-      {
-        "name": "Frontier-model release gating",
-        "status": "OpenAI's chief scientist Jakub Pachocki wrote in 'An Alien Mind' that no lab has solved alignment and monitoring well enough to keep scaling at maximum speed much longer — published the same morning as the acceleration telemetry.",
-        "arc": "The gating conversation moved from thresholds and runtime controls to the lab's own science lead putting an expiry date on the current pace in public.",
-        "last_seen": "2026-09-07"
       },
       {
         "name": "AI systems accelerating AI research",
@@ -2338,7 +2429,7 @@
         "summary": "Same size, same price, seven times the score; There is no patch for reading: prompt injection, properly taught; The evidence underneath the answer; The work after it works; The old system gets the final word; The conversation cannot wait; The queue is not the grid; The world that teaches the agent; When the ruler stops moving; The model in the metal; The model still behind the gate; Who answers next?; Fifty futures before landfall; The gate moved; Thirty billion on the desk; The mark is not the author; How much water is in an answer?; The model that grows sideways"
       }
     ],
-    "updated": "2026-09-12",
+    "updated": "2026-09-13",
     "host_lore": [
       {
         "host": "Alan",
@@ -2456,6 +2547,26 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "the three-tier access taxonomy for external evaluators — black-box (query and read outputs), grey-box (log-probs, activations, unfiltered fine-tuning), white-box (gradients, loss functions, classifiers) — plus the orthogonal axes of model information and evaluation timeframe",
+        "last_taught": "2026-09-13"
+      },
+      {
+        "name": "why a black-box failure cannot distinguish 'cannot' from 'was trained not to', which makes unfiltered fine-tuning or a helpful-only variant the hinge of any capability evaluation, and why the same limit means black-box testing cannot rule out sandbagging",
+        "last_taught": "2026-09-13"
+      },
+      {
+        "name": "the contractual right to publish the access an evaluator did or did not receive as the load-bearing verification primitive: you cannot audit the absence of something you were never told existed, but you can publish a refusal — and the 'commercially sensitive' redaction category is where that clause can be swallowed",
+        "last_taught": "2026-09-13"
+      },
+      {
+        "name": "a resignation as a costly signal: informative because it is expensive, and a poor instrument for exactly that reason — threshold set by temperament, no evidence travels with the person, and the channel destroys its own sensors by removing the alarmed from the room",
+        "last_taught": "2026-09-13"
+      },
+      {
+        "name": "why Asilomar does not transfer: a moratorium is worth only your confidence about what others do while you are stopped, and in 1975 that confidence came free from the size of the field rather than from any verification mechanism",
+        "last_taught": "2026-09-13"
+      },
       {
         "name": "product quantization",
         "last_taught": "2026-09-12"
@@ -2915,26 +3026,6 @@
       {
         "name": "the review gate as the one unit of trust still sized for humans, and the 'bypass actor' as its documented seam: branch protection requiring specific commit authors blocks an agent, so the agent is exempted from the rule",
         "last_taught": "2026-08-19"
-      },
-      {
-        "name": "why pre-2022 printed text is treated as premium training data: density and editing versus web text, plus a guarantee of no machine-generated contamination, as a hedge against model collapse",
-        "last_taught": "2026-08-18"
-      },
-      {
-        "name": "the accountability sink: immunity or authority attaching to a role rather than to the process inside it, so a protected role removes any incentive to disclose how a decision was produced, and the remedy has to be procedural disclosure rather than liability",
-        "last_taught": "2026-08-18"
-      },
-      {
-        "name": "fully homomorphic encryption as a compiler problem: computing on ciphertext so the server holds no ability to read input or output, and why converting a program into an efficient encrypted circuit has historically been hand-done specialist work",
-        "last_taught": "2026-08-17"
-      },
-      {
-        "name": "recurrent latent reasoning versus token-based chain of thought: absorbing demonstrations into a recurrent state rather than re-attending to them as context tokens, then iterating in a continuous latent space with no verbalized intermediate steps",
-        "last_taught": "2026-08-17"
-      },
-      {
-        "name": "the extensive versus intensive margin in adoption data (share of people active at all vs how hard each active person uses it), and its task-level analogue of prevalence vs message share",
-        "last_taught": "2026-08-16"
       }
     ]
   }
