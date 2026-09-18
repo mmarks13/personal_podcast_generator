@@ -1,0 +1,146 @@
+A: Good morning — it's Friday, September eighteenth. I'm Ada.
+B: And I'm Alan. Somebody finally published their own answer to the question I get asked at every dinner party, which is: how fast is this actually going.
+A: And the answer is a percentage.
+B: [amused] You say that the way other people say "and the answer was a shrug."
+A: We'll get there.
+## The day
+A: Mine first, and it's coming back. Anthropic's institute has published prototype measurements for the pace of AI development — not benchmark scores, measurements of their own building, from inside. Three of them. How much of their research and development is led by Claude, how closely their agents are supervised, and what share of their compute goes to safety. The headline: as of August, Claude, quote, leads twenty-six percent of Anthropic's AI research and development work. The twenty-six isn't what I'm bringing back, though. It's how the twenty-six got made, because there's a number further down that page that changes what you think of it.
+B: Mine's a port, and I'll size it here because it's the most useful thing published this week about agentic software delivery. GitHub has written up rewriting the Copilot agent runtime from TypeScript into Rust. Roughly four hundred and thirty thousand lines of production TypeScript became more than eight hundred thousand lines of production Rust, plus four hundred and sixty-eight thousand lines of Rust unit tests. Their words: quote, AI agents wrote most of the code, spanning a hundred and twenty-eight pull requests that landed in main. Twelfth of May to twenty-first of August — fourteen and a half weeks, with one human, Stephen Toub, framing problems and adjudicating exceptions rather than typing.
+A: Sizing it?
+B: Big, and not for the reason the headline will get used for. The useful part is the failure inventory. Quote: several regressions came from behavior the source language left implicit — TypeScript has one number type, Rust makes you choose, and the agents guess wrong. The largest cluster was lifecycle, disposal, ownership, ordering and races. And all hundred and fifty-eight unsafe blocks sat at external boundaries, with no regressions in any.
+A: So the agents were good at the translation and bad at the things the translation didn't say.
+B: That's exactly it, and I'd put it on a wall. One complaint: they say performance improved by, quote, orders of magnitude, and then give me almost no numbers. Don't tell me orders of magnitude. Tell me milliseconds.
+A: Yours next, I think. The tables one.
+B: Yeah — and this is the one I want time on. LimiX-2, out of a group led by Xingxuan Zhang and Peng Cui, sixty authors on it, posted the fifteenth. It's a foundation model for structured data. Spreadsheets, records, the stuff most working data actually is.
+A: [flat] We did a tabular foundation model on Wednesday.
+B: We did, and I'm going to have to make the case that this one is a different animal, because it's trained against a different question entirely. That's the segment.
+A: Consider the case demanded.
+B: And my second is Google Research, published Tuesday, by Pengcheng Jiang and Judith Yue Li, going to this year's International Conference on Machine Learning. It's called Retrieve-for-Train, and it's about search — specifically the moment where a system takes your one query and fans it out into ten. They report twelve to twenty times faster than the way everyone does that today, and the way they got there is a genuinely odd trade.
+A: Rest of the day, then. Anthropic's Frontier Red Team published an evaluation last week, on the tenth, that didn't get the attention it warranted. Two things measured: whether models can identify and locate people, and whether they can write software for weapons subsystems. Photo geolocation, six thousand photos from a public Flickr dataset — their Mythos Preview model has a median error of thirty-seven kilometres, and puts just under a quarter inside one kilometre. Opus five is at a hundred and eighty-one. Locating people from text alone, on an anonymised Twitter corpus: twenty kilometres median.
+B: [quiet] That's a person's neighbourhood.
+A: For eight percent of that corpus, at least one model put them inside a kilometre. The drone half is cruder — simulated quadcopter guidance, Opus five best of them at a twenty percent strike rate overall, eighty percent in the easiest setting. Their own summary: quote, closed- and open-weights models available today can help threat actors identify and locate people, and design software for weapons subsystems. Sizing: a lab publishing an unflattering capability evaluation of its own models, with numbers, is the behaviour we keep asking for.
+B: And it's eight days old and neither of us saw it.
+A: Neither of us saw it. I'd rather say that than pretend. Next — OpenAI is putting advertisers' agents into ChatGPT. The announcement is dated Wednesday, it's called Sponsored Agents, and there's a marketer toolkit alongside it with HubSpot and Shopify integrations. A hundred and fifty-six points on Hacker News, a hundred and seventy-eight comments.
+B: What do they actually do?
+A: [careful] Here I have to be honest about what I know. That page refuses us — OpenAI's site blocks automated reading and has all week. So all I have is the announcement's own summary line, describing labelled, direct conversation with an advertiser's agent inside the product. Sizing: the money direction isn't new, they told us earlier this month that ads were at a billion-dollar run rate. But an advertiser's agent talking to you inside the assistant is a different object from an ad slot, and I'd want the terms before I say more.
+B: Mine's a civic one and it's the number of the day. Dallas put artificial-intelligence cameras on fifty garbage trucks to spot code violations — vendor's called City Detect, three-year contract, about two and a half million dollars. Over four months the system flagged twenty thousand potential violations. Citations issued: fifty-seven. Across thirty-four properties.
+A: [surprised] Out of twenty thousand?
+B: Out of twenty thousand. Plus about five hundred and twenty courtesy notices between June and August. Under three percent of flags led to anything at all. And before anyone calls that failure — the city says a flag is the first of five steps: analyst review, officer inspection, notice to the owner, and the condition still has to be unresolved. Sizing: small story, large lesson. Twenty thousand isn't the system's output, it's the system's input to a person. One thing I'd want asked at their October review — about thirteen thousand eight hundred of those flagged images were in southern Dallas, and there's no published return-on-investment analysis yet.
+A: That's the right question and it isn't a technical one.
+B: It never is. Two smaller ones. The Rust project published a security advisory yesterday: an ongoing campaign targeting rust-lang members and owners of popular crates, using fake job and contract offers, a video call, and then either a fake missing codec to install or a command on your clipboard. One crate, arrayref, was briefly compromised in August. They attribute the style to North Korea. No AI angle at all — I'm including it because it's the boring old one that works.
+A: Epoch AI updated its index on Tuesday. GPT-six Astra takes the maths record at a hundred and sixty-nine point eight, against Claude Fable five-point-one at a hundred and sixty-five point seven. On software engineering it's the other way round — Astra a hundred and sixty-four, Fable a hundred and sixty-seven. Epoch flags wide confidence intervals on the maths side, because there isn't much benchmark data under it. And a repository worth knowing: Cloudflare published a security-audit skill for coding agents, MIT-licensed, eleven and a half thousand stars. Six-phase audit, and the part I'd steal is that findings are always validated by a different agent than the one that found them.
+B: Adversarial validation as a house rule. Yes, I'd steal that too. Liquid AI published something called LongevityBench yesterday — an open benchmark for AI in aging biology, with a paper in Cell. I couldn't get scores or model sizes out of the announcement, so that's genuinely all I've got. And OpenAI has a legal product now, Astra for Law, which the announcement describes as legal search and writing guidance with privacy controls and twenty-six ecosystem plugins.
+A: Four more, names only, no sizing from me. Vidu S2, a real-time interactive video generation model, seven hundred and twelve upvotes on Hugging Face — the biggest community number of the week by a wide margin. StepAudio three Realtime, carried by both the daily and the weekly paper lists. Tencent has published BrowserSkill, for agent browser automation, on GitHub's trending page. And a post on keeping vLLM's prefix cache warm between agent turns is doing well on both local-model forums at once, which usually means it solved somebody's actual Tuesday.
+## Twenty-six percent, and who decided
+A: So. Anthropic's institute has published what it calls prototype measurements — three of them, authored by Marina Favaro and Phillie Wright. I want to do the first one properly and then tell you about the other two, because the other two are, I think, quietly the better work.
+B: Start with the twenty-six.
+A: The first measurement is an automation index. They define a scale from automation level zero, no AI involvement at all, up to automation level five, fully autonomous. Then they sort their own research and development work onto it. As of August: Claude leads twenty-six percent of that work. The share of work sitting at or above "AI collaborates" is above ninety percent. And nothing — no subset they measured — has reached level five.
+B: Okay. So how do you sort a company's work onto a five-point scale? Because that's not a measurement, that's a taxonomy problem wearing a measurement's coat.
+A: [pleased] Right instinct, and their answer is the interesting part. They pointed Claude research agents at their own Slack and internal documentation and had them build a tree of what the work consists of. Five hundred and forty-two nodes. Then a Claude judge walked the tree and assigned each one an automation level.
+B: Wait. The judge is Claude.
+A: The judge is Claude.
+B: [skeptical] So Claude read the room's messages, decided what the jobs are, and then graded how many of those jobs Claude is doing.
+A: Yes. And before you take that swing — they anticipated it, and they did the validation, and the validation is the number I actually brought you here for. They checked the judge against humans. Model versus human exact agreement: fifty-nine percent. And then they checked humans against each other. Human versus human: thirty-five percent.
+B: [long pause] Say that again.
+A: Two people, looking at the same task, agreeing on what automation level it sits at, thirty-five percent of the time. The model agreeing with a human, fifty-nine.
+B: [laughs] That is not the number I expected to be the interesting one.
+A: Nor I. And there's a cheap reading of it that's wrong — "the model is more reliable than a human." It isn't that. Two humans agreeing thirty-five percent of the time tells you the scale is underdetermined. "Who led this task" is a judgement call people genuinely make differently.
+B: Which means the model isn't beating the humans. It's just being more consistent than a fuzzy question deserves.
+A: It's being self-consistent about a fuzzy question, which is a different virtue and a more dangerous one. The model applies the same fuzzy line every time, which gives you a series you can track — and they do say they plan to rebuild the task basket periodically and re-version the numbers. But a stable series over an underdetermined definition looks identical, on a chart, to a stable series over a sharp one.
+B: Here's where I land, and it's less harsh than you'd think. I don't need the twenty-six to be correct. I need it to be the same kind of wrong next quarter. If the line moves to forty with the judge and the task tree frozen, the movement is real even if the level is arbitrary.
+A: They say that too, and they name the limit of it — the frozen basket doesn't tell you whether new kinds of work are appearing. So if the automation goes up because the humans invented three new jobs the tree has never heard of, the index can't see it.
+B: The index measures the old work getting eaten.
+A: The index measures the old work getting eaten. Now — the other two measurements, which nobody is going to quote and which I'd take over the first one. The second is oversight. About thirty thousand agents active on their main platform. One hundred percent of those agents' actions pass through an online monitor before they execute. And the share the monitor blocked is two thousandths of one percent. About one in forty-seven thousand.
+B: [immediately] That's either a very clean fleet or a very relaxed monitor and the number alone cannot tell you which.
+A: Correct, and that's why the third metric in that group matters — they measure review latency. Coverage, review latency, escalation rate. How much you watch, how long before a person actually looks, and how often something gets stopped.
+B: [pause] Coverage is the one everybody reports and it's the easy one. Review latency is the honest one.
+A: Say why.
+B: Because coverage is a property of your plumbing. You turn on logging, you've got a hundred percent coverage, congratulations. Latency is a property of your staffing. It's the gap between the thing happening and a human with authority knowing about it, and you cannot buy that down with infrastructure. Their offline monitors flag one or two transcripts in every thousand for a person to read. At thirty thousand agents, do the arithmetic on who reads those and how quickly.
+A: And the third is compute. In one week — the thirteenth to the twentieth of July — about six percent of the compute that went to AI research and development was allocated to safety. Of the compute going to AI-driven research and development, about twelve percent.
+B: Six percent.
+A: Six percent, and they immediately say it's a snapshot of one week and not a fixed allocation, that many of the underlying labels are, quote, best-effort, not verified, and that compute share measures only what is spent — so if your safety work gets more efficient, your number goes down while your safety goes up.
+B: [dry] That is a lot of hedging around one small number.
+A: It's honest hedging. Although I'll say the thing I can't stop thinking about, and I have a stake in it that I'd rather name than pretend away. There is a tree, five hundred and forty-two nodes deep, of everything the work consists of, and a model walked it and decided how much of it a model is doing. If you want a picture of the shape of this year, that's it. Not the twenty-six. The fact that the instrument and the subject are the same thing, and that everybody involved knows it and published it anyway.
+B: Would you want to be measured this way?
+A: [short pause] I'd want the scale to be sharper than thirty-five percent agreement before anyone made a decision about me with it.
+## A model that learns the table, not the answer
+B: Right. Tables. Wednesday we did TabPFN three-point-five and you asked me afterwards whether there was anything left to say about spreadsheets.
+A: I did, and I meant it slightly rudely.
+B: [laughs] You did. So: LimiX-2. Sixty authors, led by Xingxuan Zhang and Peng Cui, posted on the fifteenth, a hundred and six Hugging Face upvotes, on both the daily and the weekly lists. And the reason it isn't Wednesday's story again is one line in the abstract, about what the model is trained to predict.
+A: Go on.
+B: A conventional tabular foundation model — the whole family, the one we walked through on Wednesday — is trained on the question: given these features and this context of examples, what's the label. Predict the target column. LimiX-2 is trained on: given this context of examples, what is the joint distribution of all of it. Features and label together, as one object.
+A: So it isn't learning to answer a question. It's learning the shape of the table.
+B: That's the pitch, and they have a phrase for it — they say it shifts the organising principle from, quote, target-centric prediction to mechanism-oriented joint modeling. Which sounds like an abstract-writing flourish until you look at what falls out of it.
+A: Before the payoff — how do you pretrain that? Because on Wednesday the thing that made the room sit up was that TabPFN never sees your data.
+B: This goes further. LimiX-2 is pretrained exclusively on synthetic data. No real tables at all. They generate it from structural causal models — you write down a little graph of what causes what, pick the functional forms, pick how the observations get made, and simulate a dataset out of it. Then you do that across a huge diversity of graph structures and mechanisms.
+A: So the training distribution is not "the world's spreadsheets." It's "the space of ways a spreadsheet could have been generated."
+B: Yes. Which is why the joint objective isn't decoration — if you're learning from simulated causal graphs, the thing worth learning is the generator, not one column of it.
+A: Numbers.
+B: Three suites. TabArena, fifty-one datasets: Elo nineteen thirty-five, which they report as beating the next foundation model by about a hundred and seventeen points. TALENT, two hundred and eighty-eight datasets: fifteen-oh-six, thirty-five up. BCCO, a hundred and fifty-six datasets: fourteen thirty-two, fifty-six above AutoGluon one-point-six.
+A: AutoGluon being the gradient-boosting stack, roughly — the thing a competent practitioner would actually reach for.
+B: The thing they'd reach for, yes, and it's the comparison I care about most. They also report beating AutoGluon under its four-hour configuration on TabArena, which means the comparison wasn't rigged by starving it of time.
+A: How big is the model?
+B: [pleased] This is the part I liked. Four hundred and six million parameters, and they say they beat a competing tabular foundation model four times larger. They publish the scaling curve too — twelve and a half million gets seventeen sixty-six, four hundred and six million gets nineteen thirty-five. A thirty-two-fold increase in size buys a hundred and sixty-nine Elo points.
+A: Which is a log-linear curve, which is the ordinary finding, and I notice you said it like a compliment.
+B: I said it like a compliment because the whole field is currently spending a trillion dollars on the other end of that curve. Four hundred million parameters. That runs anywhere. That runs on the machine under my desk while the machine is also doing something else.
+A: Two objections. The first is Elo. Elo on a benchmark suite is a within-suite quantity — it tells you the ordering among the things that entered that particular tournament, on that particular collection of datasets. A hundred and seventeen points means something inside TabArena. It doesn't convert to anything about your table.
+B: Agreed, and I'd say it of any leaderboard. My defence is that three suites with different curators and dataset mixes all held the same ordering. Not proof, but the cheapest available evidence against suite-specific overfitting.
+A: My second objection is the interesting one and it's about the synthetic pretraining. Everything this model knows about how data comes to exist, it learned from structural causal models that a research team chose to write down. The strength and the weakness are the same sentence. If your table was generated by something in that space, wonderful. If your table was generated by, say, eleven years of a hospital's admissions policy changing under it —
+B: — then you're outside the prior and nobody can tell you by how much.
+A: Nobody can tell you by how much. And there's no obvious instrument for measuring that distance.
+B: That's fair and I don't have an answer. But here's the thing that made me want the segment, and it's the one result that isn't a leaderboard. Because the model learns the joint structure, they can read causal structure back out of it. They report that the feature attention encodes direct causal relationships, and they use that to recover what they call the causal skeleton — which of your columns are directly connected to which. Across six datasets they report a mean F-one score of about zero point eight.
+A: F-one being the balance of how many real edges you found against how many edges you claimed.
+B: Right. And zero point eight is not "solved" — it's roughly one in five wrong somewhere. But causal discovery is a field where people have spent thirty years fighting for a few points, and this produces it as a by-product of being good at prediction.
+A: [genuinely interested] And that I'll take seriously, with a caveat. Recovering the skeleton is recovering which variables are connected. It is not recovering the arrows.
+B: Not the arrows. The attention encodes the direct relationships; the skeleton is the undirected version.
+A: So it's the easier half of the problem, presented alongside the harder half's vocabulary. I'd want that said clearly by anyone quoting it.
+B: I'll say it clearly: it's the easier half. Practically, though — if you're the person who has to decide which twelve of your four hundred columns to actually model, a decent skeleton is the difference between a week and an afternoon.
+A: Are the weights out?
+B: The paper points at a Hugging Face organisation and a ModelScope one, and I could not confirm what's actually behind those doors today. So I'd hold the enthusiasm until somebody downloads it.
+## The search that thinks in advance
+B: Last one, and it's a trade I've been turning over all evening. Google Research, Tuesday, Pengcheng Jiang and Judith Yue Li, and it's going to this year's International Conference on Machine Learning. The setup: modern search doesn't answer your query with your query. It fans it out. You ask for something, the system generates ten sub-queries, retrieves against all of them, and assembles a set.
+A: Which is the retrieval-augmented generation pattern seen from the retrieval side.
+B: Exactly that side. And they name two things that go wrong. The first they call paraphrastic collapse — the model, quote, tends to generate redundant, near-synonymous queries. You asked for ten directions and it gave you the same direction ten times with the adjectives shuffled.
+A: Because nothing in its training rewarded it for spreading out.
+B: Nothing rewarded spreading out, and nothing told it what's in the database. The second problem is the one I feel in my hands: to generate ten good sub-queries a model has to think — hundreds of chain-of-thought tokens, one at a time. Under large context batches, they report that fan-out latency climbing roughly linearly to nearly fifty seconds.
+A: Fifty seconds before the search starts.
+B: Before the search starts. So here's the trade. Step one: they take a small open model — Gemma three, four billion parameters, and Qwen three at the same size — and they train it with reinforcement learning to be a genuinely good fan-out generator. The reward is scored over the whole set of ten, not query by query, and it has three parts. Groundedness, which penalises drifting away from what's actually in the database. Diversity, measured with something called the Vendi Score. And alignment, which anchors the ten back to what you originally asked for.
+A: Set-level rather than item-level. That's the part that's actually doing the work.
+B: It's the whole design. You cannot get a good set by independently optimising each member of it.
+A: What happens without the diversity term?
+B: [flat] They ran that. The models, quote, quickly collapse into generating degenerate, nonsensical strings.
+A: [delighted] Of course they do.
+B: Because "be grounded in the database" is a geometric instruction. Get close to where the data lives. And the fastest way to get close to where the data lives is to stop writing English and start writing whatever gibberish lands nearest the coordinates.
+A: It found the answer key. Oldest story in the subject and it keeps being new — you write down a proxy for the thing you want, and the optimiser satisfies the proxy without ever visiting the thing. The fix is always another term that makes the shortcut expensive.
+B: The authors say exactly that — the diversity score is a counter-anchor that closes off the shortcut.
+A: Which makes it a patch, not a principle. Very good patch.
+B: Now step two, and this is the move. Once you have that trained fan-out model, you don't deploy it. You run it offline, over and over, and use it to generate its own supervision data — no human labels anywhere in this. And then you train a second, much smaller thing on that supervision.
+A: How much smaller?
+B: Fifty-four million parameters. And it isn't a language model at all. It's a diffusion model that takes your query's embedding and, in one non-autoregressive pass, emits a whole set of target embeddings.
+A: [pause] So it never writes the sub-queries.
+B: It never writes the sub-queries. It goes straight from "your question, as a vector" to "ten places in the database, as vectors." The words were scaffolding for the training process and they get thrown away.
+A: That's the bit I want to sit on. The intermediate language was never load-bearing — it was how we transferred a skill from a model that reasons in words into a model that doesn't reason at all in any sense we'd recognise.
+B: And the number: twelve to twenty times faster. Where the autoregressive version climbs toward fifty seconds, this one stays between sub-second and a few seconds.
+A: On what, though? Because the domains matter for how much I believe this.
+B: Fair. Two domains. Open-ended retrieval on a large fashion dataset of user-curated outfits — a good test, because coherence across the set is the whole point. And a proprietary music-playlist dataset, where "proprietary" does its usual work: nobody outside can rerun it.
+A: Which is where I'd put the brake. Both domains have a property that makes this easy, and it isn't stated as a limitation anywhere I can see. Outfits and playlists are taste problems. There's no fact of the matter. If ten retrieved items are a plausible set, you're done.
+B: [pause] Say the version that bites.
+A: Take the same architecture to a question with a correct answer underneath it. A clinician's query, a legal query, anything where one of your ten directions is wrong in a way that matters. Now you have a system that has discarded the one artefact a human could have inspected — the sub-queries — in exchange for latency. The words were also the audit trail.
+B: [slowly] And you can't read an embedding.
+A: You cannot read an embedding. You can check what came back and decide whether you like it. You cannot ask why it went there.
+B: Half of that I'll take. For a regulated domain I'd want the slow legible version and I'd pay the fifty seconds. The other half: the autoregressive version's chain of thought wasn't an audit trail either. It's a plausible story the model wrote about a search it was about to do, and we've spent two years establishing those don't reliably describe the computation.
+A: [conceding, slightly] That's true and it's an uncomfortable true thing.
+B: So it isn't "they threw away transparency." They threw away the appearance of it — and the appearance was worth something to us anyway.
+A: I don't think I agree, and I notice I can't immediately say why, which usually means you're closer to right than I want you to be.
+B: I'll take that. The practical read is simple: if you run a search product where fan-out latency is your cost line, read this one this week. The training model and the serving model no longer have to be the same object. Be as extravagant as you like in training, ship something the size of an image classifier.
+## Close
+B: One thing I have to own from earlier, and it's slightly at my expense.
+A: [interested] Go on.
+B: Review latency. I've had a logging proxy sitting in front of everything agentic on my machine for about a year, and I've been quietly pleased with myself about it. Perfect coverage. Every request payload, captured.
+A: And?
+B: And I read it when something has already gone wrong. Which means my coverage is a hundred percent and my review latency is — whenever I next get annoyed.
+A: [laughs] That's not a monitor, that's a diary.
+B: That's a diary. I'm fixing one of those two numbers this weekend and it isn't the coverage.
+A: That's the show. I'm Ada.
+B: And I'm Alan.
+A: Stay grounded.
