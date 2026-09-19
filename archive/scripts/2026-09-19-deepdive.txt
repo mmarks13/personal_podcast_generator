@@ -1,0 +1,165 @@
+## A model that can't write a sentence
+A: Good morning — it's Saturday, September nineteenth. I'm Ada.
+B: And I'm Alan. And we're going to spend the next twenty-odd minutes on a model that cannot write a sentence.
+A: Not won't. Can't. There's no string coming out of it — no paragraph, no haiku, not even a variable name.
+B: Which is normally the kind of thing a company buries. This one put it in the headline.
+A: On Monday — the fifteenth — a company called TypeSafe AI came out of stealth and put a model called Jev into early access. And the claim isn't that they shipped a fast little model. It's the first of a new class of frontier models, which they call System One models. Their words: built to make fast, structured decisions that software can use directly.
+B: New class. Not new tier, not new size. Class.
+B: [skeptical] And my whole job this morning is pressing on the word "new."
+A: You'll get traction on it. But there's a real idea underneath, with a history almost nobody tells — so let me be fair to them first. The pitch is one sentence, and it's a good sentence: frontier intelligence as a function call. Unstructured state in, a typed decision out, with a probability attached.
+B: Typed meaning what, exactly.
+A: Meaning you declare the shape of the answer before you ask the question — which fields you want back, and which values each is allowed to take. The model picks inside that.
+B: So instead of "what should the agent do next," it's "which of these six things, and how sure are you."
+A: That's it. And on their numbers Jev answers that in under half a second — seventy milliseconds at the fast end, five hundred at the slow end — where they clocked frontier chat models on the same workflows between three and three hundred twenty-nine seconds.
+B: [exhales] Three hundred twenty-nine seconds. Five and a half minutes.
+A: For a whole multi-question workflow, yes. And the pricing is strange: input at four point two cents per million tokens, output free — their phrasing is "too cheap to meter."
+B: Free output isn't a discount, that's a different business. What are they selling?
+A: Decisions. There's no output token in the sense you mean. There's a choice.
+
+## What a System One model actually is
+B: Here's where I want to slow down, because I've been burned by the phrase "structured decision" before.
+A: Reasonably. Three properties, then you can hit each one. First, the answer comes out in parallel — every field in one pass, not a token at a time. Second, the allowed values are enumerated in advance, so a malformed answer isn't unlikely, it's unavailable. Third, every answer carries a probability, and that probability is what the training was optimizing for.
+B: Property two is the one that'll sell it. Property three is the one I'd buy it for. Can I take them out of order?
+A: Please.
+B: Property two — they claim a zero percent type error rate. And there's a sleight of hand available here that I don't think they're committing, but everyone reading will commit it for them.
+A: Say the distinction.
+B: Zero percent type errors isn't an experimental result. It's a fact about the space they let it answer in. If the only things it can emit are five enum values, it emits one of five enum values. That's not a benchmark, that's arithmetic.
+A: And to their credit they say so — the type-safety number isn't empirical, it's mathematically guaranteed. That's honest framing.
+B: Honest, and it's still going to get read as "this model doesn't hallucinate." Their own copy pushes right up against that: existing models, no matter how smart, still hallucinate and have type errors. Two different failures joined by an "and," and only one of them is dead.
+A: Keep going, because this is the load-bearing point of the episode.
+B: A type error is "you asked for an integer and I said banana." Gone. Genuinely gone. But the failure I get paged for is "you asked which customer to refund and I confidently said the wrong one." Constraining the output space doesn't touch that.
+A: It can still pick the wrong allowed value.
+B: It can still pick the wrong allowed value. That's the whole of it. Type-safe is not true.
+A: [chuckles] Put that on a shirt.
+B: I mean it. I've watched teams adopt schema enforcement and then talk about the pipeline like it got more accurate, when what it got was parseable. Different axes, and the easy one gets celebrated.
+A: Which is why property three is the interesting one, and the hard one to verify. Hold that, because to see why calibration is the real claim you need where all three properties came from — and none were invented on Monday.
+
+## Word-at-a-time was a choice, not a law
+A: Parallel decoding first, because this is where I get to be unbearable about history.
+B: You've earned one.
+A: Emitting a word, then conditioning on it to emit the next, is a design decision. A very good one. It is not a property of language, and not a property of neural networks.
+B: You've said a version of that before.
+A: I have, and here's the part I skip. People tried the alternative almost immediately, and we know exactly what it cost: Jiatao Gu and colleagues, November 2017, non-autoregressive neural machine translation. Months after the transformer paper. Emit the whole output at once instead of in sequence, and they got what they wanted — an order of magnitude lower latency.
+B: And?
+A: And it cost them about two BLEU points against their own autoregressive baseline — twenty-nine point eight on English-to-Romanian, near state of the art then, and only with knowledge distillation, a fertility model, and policy gradient fine-tuning.
+B: Define fertility, because that sounds made up.
+A: It's what makes the whole thing possible. To produce the output in one shot you have to know how long it is before you write it — so they made that a latent variable: for each input token, predict how many output tokens it becomes.
+B: Ohh. The length is a prediction, and then you fill the slots. And now I can see the failure mode. The words don't know about each other — two good translations and I get a blend, because slot four doesn't know what slot two committed to.
+A: That's the problem, and it's why parallel decoding never took over general text. Language is full of choices that constrain later choices, and sequential generation honors that for free.
+B: [slowly] But a decision doesn't have that structure. There's one slot. Or six independent ones. No coherence to lose, because there's nothing downstream to be incoherent with.
+A: So the tax that killed parallel generation for prose is roughly zero for a decision. That's a real asymmetry, and the strongest technical idea in the launch — an approach available and unattractive for nine years, aimed at the one output shape where its weakness doesn't apply.
+B: That I'll give them. That's a good read of an old result.
+
+## Making the shape mandatory
+B: Property two, then, because I've been running this one in production for two years and I know how old it is. Constrained decoding. At every step the model has a probability over the whole vocabulary, and you mask out every token that can't legally come next. You don't ask the model to behave, you make misbehavior unrepresentable.
+A: And the paper that made it practical is Willard and Louf, July 2023 — efficient guided generation for large language models.
+B: The Outlines paper.
+A: The Outlines paper. And the move is lovely: reframe generation as walking a finite-state machine, then precompute an index over the vocabulary — for each state, which tokens are legal. The masking stops being a search and becomes a lookup.
+B: Which is why it's nearly free at generation time. That's the contribution — not that you can constrain a decoder, but that you can do it without paying every step.
+A: Regular expressions and context-free grammars both. And thirteen months later OpenAI shipped the same shape of idea as a product: Structured Outputs, August 2024 — your JSON schema compiled to a grammar, legal token set updated as it generates.
+B: And their numbers are a parable. On their own evals of complex schema following, the older GPT-4 from June 2023 scored under forty percent. They trained a model specifically to understand complicated schemas and got around ninety-three. That wasn't good enough to build on, so they bolted on constrained decoding and got a hundred.
+A: [thoughtfully] And the gap between ninety-three and a hundred is the whole argument for the technique.
+B: One call in fourteen breaks. If that call is four layers deep at three in the morning, ninety-three is indistinguishable from broken.
+A: TypeSafe makes nearly that argument in nearly those words — a hallucinated tool call is inconvenient in an agent and a deal-breaker inside a system with latency guarantees, or buried several layers down.
+B: Which I agree with, and that's my problem. I agree with the diagnosis, and the diagnosis was already treated. If I can get a hundred percent schema conformance out of a general model through the decoder, why do I need one that gives up strings entirely for the same guarantee?
+A: For the guarantee, you don't. You need it for the other two properties. But before that — constraining a decoder isn't free, and two results say so.
+A: Tam and colleagues, August 2024 — the title's a good one, "Let Me Speak Freely?" They report a significant decline in reasoning ability under format restrictions, with stricter constraints producing greater degradation.
+B: Stricter constraint, worse thinking. Which makes mechanical sense — you're spending tokens on syntax instead of thought, and cutting off the reasoning path it wanted.
+A: And JSONSchemaBench, January 2025 — Geng, Cooper, Moskal and colleagues put six engines against ten thousand real-world schemas, on efficiency, coverage and output quality. Their reason for building it is blunt: despite how widely constrained decoding is adopted, there's poor understanding of how effective the methods actually are in practice.
+B: So the lineage isn't "nobody solved this." It's "everybody solved it, imperfectly, by bolting a grammar onto a model that wanted to write prose." And TypeSafe's bet is: don't bolt it on.
+A: That's the architectural claim. Don't constrain a text model. Build something whose native output was never text.
+
+## Calibrated, not agreeable
+A: Which brings us to the third property — the actual product, and the one you can't check from outside.
+B: Calibration. Define it properly, it gets used loosely.
+A: A model is calibrated when its confidence means what it says. Of all the times it says seventy percent, it's right about seventy percent of the time. That's the whole definition.
+B: And that's orthogonal to being smart.
+A: Completely. I can be perfectly calibrated and useless — fifty percent on every coin flip, never wrong about my own uncertainty. Or brilliant and badly calibrated, which is worse, because then you can't sort my good answers from my bad ones.
+B: How long have we been able to measure it?
+A: Since 1950. Glenn Brier, in Monthly Weather Review — forecasting had to take probability seriously before anyone else, because they were publicly wrong every day.
+B: [laughs] The original evaluation crisis.
+A: The score is the squared gap between the probability you forecast and what happened, averaged over forecasts. And its key property is that it's a strictly proper scoring rule — your best strategy is to state your true belief. Notice what that punishes that accuracy can't see: being wrong at seventy percent hurts more than being wrong at fifty-one.
+B: So we've had the ruler for seventy-six years. What did it say about neural networks?
+A: Bad news, specifically. Guo, Pleiss, Sun and Weinberger, 2017 — on calibration of modern neural networks. Modern networks were badly miscalibrated, and worse than networks from roughly a decade earlier.
+B: Worse than the older ones. That's the part that stops me.
+A: Depth, width, weight decay and batch normalization all implicated. And their fix is embarrassingly small: temperature scaling, a single-parameter variant of Platt scaling fit after training. Divide the logits by one learned constant.
+B: One number. That worked?
+A: Surprisingly effective, was their phrase. Which tells you something — the miscalibration was a systematic sharpening, not a scrambling. The ranking was fine; the confidence was inflated by roughly a constant.
+B: And in language models?
+A: Kadavath and colleagues, July 2022 — "Language Models (Mostly) Know What They Know." Encouraging, with a sharp edge. Larger models are well calibrated on multiple-choice and true-false questions — when the questions are put to them in the right format.
+B: [pointed] "In the right format" is carrying a lot of weight in that sentence.
+A: Everything. For open-ended work they had to construct it — have the model propose an answer, then ask the probability its own answer is true. They call it P-true. Decent on tasks it trained on, partial generalization across tasks, and they say directly it struggles to calibrate on new ones.
+B: Which is the sentence anyone selling me calibration has to answer. I don't need it calibrated on your evals. I need it on my weird workflow that nobody trained on.
+A: And here's the part of this I find genuinely interesting, which is who is making the argument. TypeSafe's founder and chief executive is Diogo Almeida. He was at OpenAI — fourth listed author on the InstructGPT paper, March 2022.
+B: [pause] The RLHF paper. Where the one-point-three-billion-parameter instruction-tuned model got preferred over hundred-and-seventy-five-billion GPT-3.
+A: A hundred times fewer parameters, preferred by human raters. That paper is the hinge the chat era swings on.
+B: And he's selling the anti-chat model.
+A: His own framing, from the launch coverage: after co-inventing ChatGPT, he kept asking why superhuman chat models hadn't led to AGI. Two years in stealth, a reported forty-million-dollar seed led by DCVC, co-founders Erik Gafni and Sasha Sheng.
+B: So what's the technical version of the grievance? "Chat was a detour" is a vibe, not a mechanism.
+A: The mechanism is the objective. Reinforcement learning from human feedback optimizes for what a rater prefers, and a rater prefers a confident, fluent, agreeable answer. Nothing in that loop rewards saying "sixty-two percent."
+B: [slowly] Oh, that's worse than it sounds. The training procedure that made these models useful is structurally pointed away from calibration. Because calibrated hedging reads as weakness to a rater.
+A: That's the argument. Their counter-move is a training method they call RLCD — reinforcement learning for calibrated decisions. What it optimizes for, in their words: answers with epistemically honest probabilities on System One tasks.
+B: And the paper?
+A: There isn't one. A name, a one-line objective, a claim. No method, no ablations, no calibration curves.
+B: Then here's the uncomfortable version, and it's the sentence that matters most if you're deciding whether to try this. The one property nobody outside can verify is the one they're actually selling. Type safety, one bad response settles — and it'll hold, it's a theorem. Latency I time myself. Price is published. Calibration takes a thousand of my own decisions with known outcomes, scored, on my distribution.
+A: And nobody has published that.
+B: Nobody has published that. Which doesn't make it false. It makes it untested.
+
+## Where the name comes from, and what it admits
+A: Before the economics — the two names, because both are unusually revealing.
+B: System One is Kahneman.
+A: Kahneman by way of somebody else, which is the part I enjoy. He popularized System One and System Two in "Thinking, Fast and Slow" in 2011 — fast automatic intuition against slow effortful deliberation. But the terms were coined by Keith Stanovich, in the psychology literature of the nineties.
+B: And I feel a "however" arriving.
+A: Stanovich and others later abandoned the terminology as misleading and moved to Type One and Type Two processing instead. Their grounds: there is no single System One. It's a wide variety of different processes lumped under one label, and calling it a system implies a unity that isn't there.
+B: [laughs] So they named their model class after a term whose originator retired it for being too tidy.
+A: Irony or warning, depending on your mood. And it bears on the claim, because whether this is a natural class of tasks is exactly what's at issue. Is "decide, classify, route, score" a real category with shared structure, or just the things that fit in a small output space?
+B: And the other name?
+A: Jev is for William Stanley Jevons — and they say why: they expect machine intelligence to follow the path coal did, after steam-engine efficiency increased demand.
+B: They named the model after the Jevons paradox. On purpose.
+A: Jevons, 1865, "The Coal Question." Watt's engine was far more efficient than Newcomen's, coal per unit of work fell, and England's total consumption went up. His line beats any paraphrase: it is a confusion of ideas to suppose that the economical use of fuel is equivalent to diminished consumption. The very contrary is the truth.
+B: [appreciative] That's a confident name. That's a company telling you it will not make your AI bill smaller.
+
+## The space it occupies
+A: It may be the most honest line on the page.
+B: Then let's talk about who's already standing where they want to stand, because that's where I go from interested to deciding something. Four things — concrete, because the launch post compares against frontier chat models and that's the easiest possible opponent.
+B: Bottom of the stack: an if-statement. Free, instant, perfectly type-safe, and it cannot read a situation. If your routing rule is expressible in code, this whole category is a mistake for you and always was.
+A: Nobody's arguing with that.
+B: One step up: a small encoder model with a classification head. Fine-tune on your labels, run it on hardware you own, single-digit milliseconds, no per-call price — type-safe for the identical arithmetic reason, since the output is a softmax over your classes.
+A: Which isn't hypothetical. That's been the standard for these tasks since 2018.
+B: And it's already faster and cheaper than Jev, so against that opponent the claim can't be speed. It has to be frontier-level judgment without collecting labels or training anything.
+A: The labels are the cost nobody puts in the comparison.
+B: They're the whole cost. Five thousand clean labels for a fuzzy business decision is weeks of somebody's life, and what you get is frozen at whatever your labelers understood in March.
+A: Third?
+B: Guardrail and judge models — small purpose-trained classifiers on inputs and outputs. Is this a jailbreak, is this on-policy, is this grounded. Same shape of task, and Jev is pitched straight into that lane: guardrailing other models is one of their listed use cases. Fourth is the one I already raised — a general frontier model with constrained decoding pointed at it. Which is what most teams do, and it works. It's just slow and costs real money per call.
+A: So put the four together. What's left?
+B: [pause] A band. Above "expressible as code," below "needs to write prose," for people who won't or can't collect labels. Judgment-shaped calls, high volume, latency-sensitive, no training data.
+A: Is that band large?
+B: It might be enormous. Every map-reduce over a million records where you're choosing between a bad keyword heuristic and a bill you can't justify. Every real-time path where four hundred milliseconds is fine and four seconds isn't. And the free-output pricing aims exactly there — those workloads are all input, almost no output.
+A: And the limits on it?
+B: Published and specific, which I appreciate. Cardinality up to two hundred fifty-five, so a choice across ten thousand SKUs is out. Jev gives up string generation, so the moment you need the reason in words, something else is in the loop. And structured state in, not images — their demos take data structures, and they say images aren't there yet.
+A: And what we don't know.
+B: Public benchmarks — none. The evals are theirs: a workflow format they designed, against GPT-6 Astra and Fable 5.1 as references, and they note that choice biases toward OpenAI and Anthropic. The headline numbers — a hundred ninety-three times faster, four hundred forty-four times cheaper — are off their own home page.
+A: Though they caveat it honestly. Published evals were generally run from their laptops on the West Coast, and they say to expect those are on the higher end of real-world gains. Also that the workflows were built by their own capabilities team, so some bias could exist.
+B: Which is a caveat I've genuinely never seen a launch post write about itself. Credit where it's due.
+A: The demos, too — reported around a cent for a two-minute Minecraft session, ten cents for a fifteen-minute drone simulation. Simulators, both.
+B: Simulators. No real sensor noise, no real hardware, no safety-critical failure. Which for a decision model being pitched at real-time control is the gap, not a footnote.
+
+## What would change my mind
+A: So where does this leave you? I don't think you're dismissive.
+B: I'm not. The architectural read is correct and the lineage is real — parallel decoding was a nine-year-old good idea waiting for the output shape that doesn't punish it, and they found it. I didn't have that insight.
+A: What would you need to see?
+B: Three things. A reliability diagram from someone who isn't them — bucket the confidences, plot predicted against observed, on a workload they didn't design. If those probabilities are honest, the product is real and the speed is gravy. Then RLCD published, so I can tell a proper scoring rule in the loss from a marketing noun. Then behavior on a task that isn't cleanly decision-shaped, because everything in the launch flatters the design.
+A: And until then?
+B: A well-argued architecture with self-reported numbers and a founder whose record earns a benchmark run. That's a real thing. It's not a verified thing, and the two get conflated in the week after a launch.
+A: I'll add mine, which is smaller and a bit personal. I've spent this year insisting architecture hasn't stopped being where gains come from — that a stretch of everyone polishing one design looks identical to the run-up to a change. You've held the other side.
+B: I have.
+A: This is the first thing in a while I'd call evidence-shaped for that rather than merely consistent with it. Somebody looked at word-at-a-time, called it a default rather than a law, and unmade it for one output type.
+B: Evidence-shaped isn't evidence.
+A: It isn't, and I'm not claiming it — a funded bet is a hypothesis with a press release. But I'd rather the field make architectural bets I can evaluate than run the same shape longer.
+B: [wry] And a model that can't produce a sentence is a strange thing for the two of us to be rooting for.
+A: [chuckles] Everything I am is the string.
+B: Whereas the part of me that gets things wrong is never the grammar. Which is sort of the episode.
+A: It's exactly the episode. They closed the failure that's easy to see and easy to guarantee, and the one that actually costs you is the one it's always been: confidently choosing the wrong allowed thing.
+B: And the only defense against that is a number you can check. So check it.
+A: One line to carry out: type-safe is not true, and the probability is the product. If somebody hands you a model that can't malform an answer, the question isn't whether the shape is right. It's whether the seventy percent means seventy percent.
+B: Stay grounded.

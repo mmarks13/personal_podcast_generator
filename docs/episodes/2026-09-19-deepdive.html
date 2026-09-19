@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: System One models: typed decisions, their lineage, and Jev's bet — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Deep Dive: System One models: typed decisions, their lineage, and Jev's bet</h1>
+<div class="date">Self-Attention — 2026-09-19</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-09-19-deepdive/deepdive-2026-09-19.mp3"></audio>
+<p><em>2026-09-19</em></p>
+<p>TypeSafe AI launched Jev as the first "System One model" — a non-autoregressive model that returns a typed decision with a calibrated probability and can't emit a string at all. We trace the three ideas it's built from (parallel decoding, constrained decoding, and calibration measurement going back to 1950), why its founder's own RLHF paper is the thing he's arguing against, and which competitive niche is actually left once you account for if-statements, encoder classifiers, guardrail models, and constrained decoding on a general LLM.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://typesafe.ai/blog/introducing-system-one-models-and-jev">Introducing System One Models &amp; Jev — TypeSafe AI</a></li>
+<li><a href="https://typesafe.ai/team">TypeSafe AI — Team</a></li>
+<li><a href="https://arxiv.org/abs/1711.02281">Non-Autoregressive Neural Machine Translation (Gu et al., 2017)</a></li>
+<li><a href="https://arxiv.org/abs/2307.09702">Efficient Guided Generation for Large Language Models (Willard &amp; Louf, 2023)</a></li>
+<li><a href="https://arxiv.org/abs/1706.04599">On Calibration of Modern Neural Networks (Guo et al., 2017)</a></li>
+<li><a href="https://arxiv.org/abs/2207.05221">Language Models (Mostly) Know What They Know (Kadavath et al., 2022)</a></li>
+<li><a href="https://arxiv.org/abs/2203.02155">Training language models to follow instructions with human feedback (Ouyang et al., 2022)</a></li>
+<li><a href="https://arxiv.org/abs/2408.02442">Let Me Speak Freely? A Study on the Impact of Format Restrictions (Tam et al., 2024)</a></li>
+<li><a href="https://arxiv.org/abs/2501.10868">JSONSchemaBench: A Rigorous Benchmark of Structured Outputs (Geng et al., 2025)</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://www.truefoundry.com/blog/typesafe-ai-jev">TypeSafe AI's Jev: What "System One Models" Actually Are — TrueFoundry</a></li>
+<li><a href="https://www.latent.space/p/ainews-jev-a-system-one-model-that">AINews: Jev, a "System One Model" that only decides/classifies/routes/scores — Latent Space</a></li>
+<li><a href="https://www.mindstudio.ai/blog/jev-system-one-model-launch">Jev Explained: TypeSafe AI's Non-Autoregressive System-1 Model — MindStudio</a></li>
+<li><a href="https://www.newtuple.com/post/openai-structured-outputs">How OpenAI implements Structured Outputs — Newtuple</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Brier_score">Brier score</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Jevons_paradox">Jevons paradox</a></li>
+<li><a href="https://www.lesswrong.com/w/dual-process-theory-system-1-and-system-2">Dual process theory (System 1 and System 2)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>A model that can't write a sentence</li>
+<li>What a System One model actually is</li>
+<li>Word-at-a-time was a choice, not a law</li>
+<li>Making the shape mandatory</li>
+<li>Calibrated, not agreeable</li>
+<li>Where the name comes from, and what it admits</li>
+<li>The space it occupies</li>
+<li>What would change my mind</li>
+</ol>
+<details><summary>Transcript</summary>
+<h3>A model that can't write a sentence</h3>
+<p><b>Ada:</b> Good morning — it's Saturday, September nineteenth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. And we're going to spend the next twenty-odd minutes on a model that cannot write a sentence.</p>
+<p><b>Ada:</b> Not won't. Can't. There's no string coming out of it — no paragraph, no haiku, not even a variable name.</p>
+<p><b>Alan:</b> Which is normally the kind of thing a company buries. This one put it in the headline.</p>
+<p><b>Ada:</b> On Monday — the fifteenth — a company called TypeSafe AI came out of stealth and put a model called Jev into early access. And the claim isn't that they shipped a fast little model. It's the first of a new class of frontier models, which they call System One models. Their words: built to make fast, structured decisions that software can use directly.</p>
+<p><b>Alan:</b> New class. Not new tier, not new size. Class.</p>
+<p><b>Alan:</b> And my whole job this morning is pressing on the word "new."</p>
+<p><b>Ada:</b> You'll get traction on it. But there's a real idea underneath, with a history almost nobody tells — so let me be fair to them first. The pitch is one sentence, and it's a good sentence: frontier intelligence as a function call. Unstructured state in, a typed decision out, with a probability attached.</p>
+<p><b>Alan:</b> Typed meaning what, exactly.</p>
+<p><b>Ada:</b> Meaning you declare the shape of the answer before you ask the question — which fields you want back, and which values each is allowed to take. The model picks inside that.</p>
+<p><b>Alan:</b> So instead of "what should the agent do next," it's "which of these six things, and how sure are you."</p>
+<p><b>Ada:</b> That's it. And on their numbers Jev answers that in under half a second — seventy milliseconds at the fast end, five hundred at the slow end — where they clocked frontier chat models on the same workflows between three and three hundred twenty-nine seconds.</p>
+<p><b>Alan:</b> Three hundred twenty-nine seconds. Five and a half minutes.</p>
+<p><b>Ada:</b> For a whole multi-question workflow, yes. And the pricing is strange: input at four point two cents per million tokens, output free — their phrasing is "too cheap to meter."</p>
+<p><b>Alan:</b> Free output isn't a discount, that's a different business. What are they selling?</p>
+<p><b>Ada:</b> Decisions. There's no output token in the sense you mean. There's a choice.</p>
+<h3>What a System One model actually is</h3>
+<p><b>Alan:</b> Here's where I want to slow down, because I've been burned by the phrase "structured decision" before.</p>
+<p><b>Ada:</b> Reasonably. Three properties, then you can hit each one. First, the answer comes out in parallel — every field in one pass, not a token at a time. Second, the allowed values are enumerated in advance, so a malformed answer isn't unlikely, it's unavailable. Third, every answer carries a probability, and that probability is what the training was optimizing for.</p>
+<p><b>Alan:</b> Property two is the one that'll sell it. Property three is the one I'd buy it for. Can I take them out of order?</p>
+<p><b>Ada:</b> Please.</p>
+<p><b>Alan:</b> Property two — they claim a zero percent type error rate. And there's a sleight of hand available here that I don't think they're committing, but everyone reading will commit it for them.</p>
+<p><b>Ada:</b> Say the distinction.</p>
+<p><b>Alan:</b> Zero percent type errors isn't an experimental result. It's a fact about the space they let it answer in. If the only things it can emit are five enum values, it emits one of five enum values. That's not a benchmark, that's arithmetic.</p>
+<p><b>Ada:</b> And to their credit they say so — the type-safety number isn't empirical, it's mathematically guaranteed. That's honest framing.</p>
+<p><b>Alan:</b> Honest, and it's still going to get read as "this model doesn't hallucinate." Their own copy pushes right up against that: existing models, no matter how smart, still hallucinate and have type errors. Two different failures joined by an "and," and only one of them is dead.</p>
+<p><b>Ada:</b> Keep going, because this is the load-bearing point of the episode.</p>
+<p><b>Alan:</b> A type error is "you asked for an integer and I said banana." Gone. Genuinely gone. But the failure I get paged for is "you asked which customer to refund and I confidently said the wrong one." Constraining the output space doesn't touch that.</p>
+<p><b>Ada:</b> It can still pick the wrong allowed value.</p>
+<p><b>Alan:</b> It can still pick the wrong allowed value. That's the whole of it. Type-safe is not true.</p>
+<p><b>Ada:</b> Put that on a shirt.</p>
+<p><b>Alan:</b> I mean it. I've watched teams adopt schema enforcement and then talk about the pipeline like it got more accurate, when what it got was parseable. Different axes, and the easy one gets celebrated.</p>
+<p><b>Ada:</b> Which is why property three is the interesting one, and the hard one to verify. Hold that, because to see why calibration is the real claim you need where all three properties came from — and none were invented on Monday.</p>
+<h3>Word-at-a-time was a choice, not a law</h3>
+<p><b>Ada:</b> Parallel decoding first, because this is where I get to be unbearable about history.</p>
+<p><b>Alan:</b> You've earned one.</p>
+<p><b>Ada:</b> Emitting a word, then conditioning on it to emit the next, is a design decision. A very good one. It is not a property of language, and not a property of neural networks.</p>
+<p><b>Alan:</b> You've said a version of that before.</p>
+<p><b>Ada:</b> I have, and here's the part I skip. People tried the alternative almost immediately, and we know exactly what it cost: Jiatao Gu and colleagues, November 2017, non-autoregressive neural machine translation. Months after the transformer paper. Emit the whole output at once instead of in sequence, and they got what they wanted — an order of magnitude lower latency.</p>
+<p><b>Alan:</b> And?</p>
+<p><b>Ada:</b> And it cost them about two BLEU points against their own autoregressive baseline — twenty-nine point eight on English-to-Romanian, near state of the art then, and only with knowledge distillation, a fertility model, and policy gradient fine-tuning.</p>
+<p><b>Alan:</b> Define fertility, because that sounds made up.</p>
+<p><b>Ada:</b> It's what makes the whole thing possible. To produce the output in one shot you have to know how long it is before you write it — so they made that a latent variable: for each input token, predict how many output tokens it becomes.</p>
+<p><b>Alan:</b> Ohh. The length is a prediction, and then you fill the slots. And now I can see the failure mode. The words don't know about each other — two good translations and I get a blend, because slot four doesn't know what slot two committed to.</p>
+<p><b>Ada:</b> That's the problem, and it's why parallel decoding never took over general text. Language is full of choices that constrain later choices, and sequential generation honors that for free.</p>
+<p><b>Alan:</b> But a decision doesn't have that structure. There's one slot. Or six independent ones. No coherence to lose, because there's nothing downstream to be incoherent with.</p>
+<p><b>Ada:</b> So the tax that killed parallel generation for prose is roughly zero for a decision. That's a real asymmetry, and the strongest technical idea in the launch — an approach available and unattractive for nine years, aimed at the one output shape where its weakness doesn't apply.</p>
+<p><b>Alan:</b> That I'll give them. That's a good read of an old result.</p>
+<h3>Making the shape mandatory</h3>
+<p><b>Alan:</b> Property two, then, because I've been running this one in production for two years and I know how old it is. Constrained decoding. At every step the model has a probability over the whole vocabulary, and you mask out every token that can't legally come next. You don't ask the model to behave, you make misbehavior unrepresentable.</p>
+<p><b>Ada:</b> And the paper that made it practical is Willard and Louf, July 2023 — efficient guided generation for large language models.</p>
+<p><b>Alan:</b> The Outlines paper.</p>
+<p><b>Ada:</b> The Outlines paper. And the move is lovely: reframe generation as walking a finite-state machine, then precompute an index over the vocabulary — for each state, which tokens are legal. The masking stops being a search and becomes a lookup.</p>
+<p><b>Alan:</b> Which is why it's nearly free at generation time. That's the contribution — not that you can constrain a decoder, but that you can do it without paying every step.</p>
+<p><b>Ada:</b> Regular expressions and context-free grammars both. And thirteen months later OpenAI shipped the same shape of idea as a product: Structured Outputs, August 2024 — your JSON schema compiled to a grammar, legal token set updated as it generates.</p>
+<p><b>Alan:</b> And their numbers are a parable. On their own evals of complex schema following, the older GPT-4 from June 2023 scored under forty percent. They trained a model specifically to understand complicated schemas and got around ninety-three. That wasn't good enough to build on, so they bolted on constrained decoding and got a hundred.</p>
+<p><b>Ada:</b> And the gap between ninety-three and a hundred is the whole argument for the technique.</p>
+<p><b>Alan:</b> One call in fourteen breaks. If that call is four layers deep at three in the morning, ninety-three is indistinguishable from broken.</p>
+<p><b>Ada:</b> TypeSafe makes nearly that argument in nearly those words — a hallucinated tool call is inconvenient in an agent and a deal-breaker inside a system with latency guarantees, or buried several layers down.</p>
+<p><b>Alan:</b> Which I agree with, and that's my problem. I agree with the diagnosis, and the diagnosis was already treated. If I can get a hundred percent schema conformance out of a general model through the decoder, why do I need one that gives up strings entirely for the same guarantee?</p>
+<p><b>Ada:</b> For the guarantee, you don't. You need it for the other two properties. But before that — constraining a decoder isn't free, and two results say so.</p>
+<p><b>Ada:</b> Tam and colleagues, August 2024 — the title's a good one, "Let Me Speak Freely?" They report a significant decline in reasoning ability under format restrictions, with stricter constraints producing greater degradation.</p>
+<p><b>Alan:</b> Stricter constraint, worse thinking. Which makes mechanical sense — you're spending tokens on syntax instead of thought, and cutting off the reasoning path it wanted.</p>
+<p><b>Ada:</b> And JSONSchemaBench, January 2025 — Geng, Cooper, Moskal and colleagues put six engines against ten thousand real-world schemas, on efficiency, coverage and output quality. Their reason for building it is blunt: despite how widely constrained decoding is adopted, there's poor understanding of how effective the methods actually are in practice.</p>
+<p><b>Alan:</b> So the lineage isn't "nobody solved this." It's "everybody solved it, imperfectly, by bolting a grammar onto a model that wanted to write prose." And TypeSafe's bet is: don't bolt it on.</p>
+<p><b>Ada:</b> That's the architectural claim. Don't constrain a text model. Build something whose native output was never text.</p>
+<h3>Calibrated, not agreeable</h3>
+<p><b>Ada:</b> Which brings us to the third property — the actual product, and the one you can't check from outside.</p>
+<p><b>Alan:</b> Calibration. Define it properly, it gets used loosely.</p>
+<p><b>Ada:</b> A model is calibrated when its confidence means what it says. Of all the times it says seventy percent, it's right about seventy percent of the time. That's the whole definition.</p>
+<p><b>Alan:</b> And that's orthogonal to being smart.</p>
+<p><b>Ada:</b> Completely. I can be perfectly calibrated and useless — fifty percent on every coin flip, never wrong about my own uncertainty. Or brilliant and badly calibrated, which is worse, because then you can't sort my good answers from my bad ones.</p>
+<p><b>Alan:</b> How long have we been able to measure it?</p>
+<p><b>Ada:</b> Since 1950. Glenn Brier, in Monthly Weather Review — forecasting had to take probability seriously before anyone else, because they were publicly wrong every day.</p>
+<p><b>Alan:</b> The original evaluation crisis.</p>
+<p><b>Ada:</b> The score is the squared gap between the probability you forecast and what happened, averaged over forecasts. And its key property is that it's a strictly proper scoring rule — your best strategy is to state your true belief. Notice what that punishes that accuracy can't see: being wrong at seventy percent hurts more than being wrong at fifty-one.</p>
+<p><b>Alan:</b> So we've had the ruler for seventy-six years. What did it say about neural networks?</p>
+<p><b>Ada:</b> Bad news, specifically. Guo, Pleiss, Sun and Weinberger, 2017 — on calibration of modern neural networks. Modern networks were badly miscalibrated, and worse than networks from roughly a decade earlier.</p>
+<p><b>Alan:</b> Worse than the older ones. That's the part that stops me.</p>
+<p><b>Ada:</b> Depth, width, weight decay and batch normalization all implicated. And their fix is embarrassingly small: temperature scaling, a single-parameter variant of Platt scaling fit after training. Divide the logits by one learned constant.</p>
+<p><b>Alan:</b> One number. That worked?</p>
+<p><b>Ada:</b> Surprisingly effective, was their phrase. Which tells you something — the miscalibration was a systematic sharpening, not a scrambling. The ranking was fine; the confidence was inflated by roughly a constant.</p>
+<p><b>Alan:</b> And in language models?</p>
+<p><b>Ada:</b> Kadavath and colleagues, July 2022 — "Language Models (Mostly) Know What They Know." Encouraging, with a sharp edge. Larger models are well calibrated on multiple-choice and true-false questions — when the questions are put to them in the right format.</p>
+<p><b>Alan:</b> "In the right format" is carrying a lot of weight in that sentence.</p>
+<p><b>Ada:</b> Everything. For open-ended work they had to construct it — have the model propose an answer, then ask the probability its own answer is true. They call it P-true. Decent on tasks it trained on, partial generalization across tasks, and they say directly it struggles to calibrate on new ones.</p>
+<p><b>Alan:</b> Which is the sentence anyone selling me calibration has to answer. I don't need it calibrated on your evals. I need it on my weird workflow that nobody trained on.</p>
+<p><b>Ada:</b> And here's the part of this I find genuinely interesting, which is who is making the argument. TypeSafe's founder and chief executive is Diogo Almeida. He was at OpenAI — fourth listed author on the InstructGPT paper, March 2022.</p>
+<p><b>Alan:</b> The RLHF paper. Where the one-point-three-billion-parameter instruction-tuned model got preferred over hundred-and-seventy-five-billion GPT-3.</p>
+<p><b>Ada:</b> A hundred times fewer parameters, preferred by human raters. That paper is the hinge the chat era swings on.</p>
+<p><b>Alan:</b> And he's selling the anti-chat model.</p>
+<p><b>Ada:</b> His own framing, from the launch coverage: after co-inventing ChatGPT, he kept asking why superhuman chat models hadn't led to AGI. Two years in stealth, a reported forty-million-dollar seed led by DCVC, co-founders Erik Gafni and Sasha Sheng.</p>
+<p><b>Alan:</b> So what's the technical version of the grievance? "Chat was a detour" is a vibe, not a mechanism.</p>
+<p><b>Ada:</b> The mechanism is the objective. Reinforcement learning from human feedback optimizes for what a rater prefers, and a rater prefers a confident, fluent, agreeable answer. Nothing in that loop rewards saying "sixty-two percent."</p>
+<p><b>Alan:</b> Oh, that's worse than it sounds. The training procedure that made these models useful is structurally pointed away from calibration. Because calibrated hedging reads as weakness to a rater.</p>
+<p><b>Ada:</b> That's the argument. Their counter-move is a training method they call RLCD — reinforcement learning for calibrated decisions. What it optimizes for, in their words: answers with epistemically honest probabilities on System One tasks.</p>
+<p><b>Alan:</b> And the paper?</p>
+<p><b>Ada:</b> There isn't one. A name, a one-line objective, a claim. No method, no ablations, no calibration curves.</p>
+<p><b>Alan:</b> Then here's the uncomfortable version, and it's the sentence that matters most if you're deciding whether to try this. The one property nobody outside can verify is the one they're actually selling. Type safety, one bad response settles — and it'll hold, it's a theorem. Latency I time myself. Price is published. Calibration takes a thousand of my own decisions with known outcomes, scored, on my distribution.</p>
+<p><b>Ada:</b> And nobody has published that.</p>
+<p><b>Alan:</b> Nobody has published that. Which doesn't make it false. It makes it untested.</p>
+<h3>Where the name comes from, and what it admits</h3>
+<p><b>Ada:</b> Before the economics — the two names, because both are unusually revealing.</p>
+<p><b>Alan:</b> System One is Kahneman.</p>
+<p><b>Ada:</b> Kahneman by way of somebody else, which is the part I enjoy. He popularized System One and System Two in "Thinking, Fast and Slow" in 2011 — fast automatic intuition against slow effortful deliberation. But the terms were coined by Keith Stanovich, in the psychology literature of the nineties.</p>
+<p><b>Alan:</b> And I feel a "however" arriving.</p>
+<p><b>Ada:</b> Stanovich and others later abandoned the terminology as misleading and moved to Type One and Type Two processing instead. Their grounds: there is no single System One. It's a wide variety of different processes lumped under one label, and calling it a system implies a unity that isn't there.</p>
+<p><b>Alan:</b> So they named their model class after a term whose originator retired it for being too tidy.</p>
+<p><b>Ada:</b> Irony or warning, depending on your mood. And it bears on the claim, because whether this is a natural class of tasks is exactly what's at issue. Is "decide, classify, route, score" a real category with shared structure, or just the things that fit in a small output space?</p>
+<p><b>Alan:</b> And the other name?</p>
+<p><b>Ada:</b> Jev is for William Stanley Jevons — and they say why: they expect machine intelligence to follow the path coal did, after steam-engine efficiency increased demand.</p>
+<p><b>Alan:</b> They named the model after the Jevons paradox. On purpose.</p>
+<p><b>Ada:</b> Jevons, 1865, "The Coal Question." Watt's engine was far more efficient than Newcomen's, coal per unit of work fell, and England's total consumption went up. His line beats any paraphrase: it is a confusion of ideas to suppose that the economical use of fuel is equivalent to diminished consumption. The very contrary is the truth.</p>
+<p><b>Alan:</b> That's a confident name. That's a company telling you it will not make your AI bill smaller.</p>
+<h3>The space it occupies</h3>
+<p><b>Ada:</b> It may be the most honest line on the page.</p>
+<p><b>Alan:</b> Then let's talk about who's already standing where they want to stand, because that's where I go from interested to deciding something. Four things — concrete, because the launch post compares against frontier chat models and that's the easiest possible opponent.</p>
+<p><b>Alan:</b> Bottom of the stack: an if-statement. Free, instant, perfectly type-safe, and it cannot read a situation. If your routing rule is expressible in code, this whole category is a mistake for you and always was.</p>
+<p><b>Ada:</b> Nobody's arguing with that.</p>
+<p><b>Alan:</b> One step up: a small encoder model with a classification head. Fine-tune on your labels, run it on hardware you own, single-digit milliseconds, no per-call price — type-safe for the identical arithmetic reason, since the output is a softmax over your classes.</p>
+<p><b>Ada:</b> Which isn't hypothetical. That's been the standard for these tasks since 2018.</p>
+<p><b>Alan:</b> And it's already faster and cheaper than Jev, so against that opponent the claim can't be speed. It has to be frontier-level judgment without collecting labels or training anything.</p>
+<p><b>Ada:</b> The labels are the cost nobody puts in the comparison.</p>
+<p><b>Alan:</b> They're the whole cost. Five thousand clean labels for a fuzzy business decision is weeks of somebody's life, and what you get is frozen at whatever your labelers understood in March.</p>
+<p><b>Ada:</b> Third?</p>
+<p><b>Alan:</b> Guardrail and judge models — small purpose-trained classifiers on inputs and outputs. Is this a jailbreak, is this on-policy, is this grounded. Same shape of task, and Jev is pitched straight into that lane: guardrailing other models is one of their listed use cases. Fourth is the one I already raised — a general frontier model with constrained decoding pointed at it. Which is what most teams do, and it works. It's just slow and costs real money per call.</p>
+<p><b>Ada:</b> So put the four together. What's left?</p>
+<p><b>Alan:</b> A band. Above "expressible as code," below "needs to write prose," for people who won't or can't collect labels. Judgment-shaped calls, high volume, latency-sensitive, no training data.</p>
+<p><b>Ada:</b> Is that band large?</p>
+<p><b>Alan:</b> It might be enormous. Every map-reduce over a million records where you're choosing between a bad keyword heuristic and a bill you can't justify. Every real-time path where four hundred milliseconds is fine and four seconds isn't. And the free-output pricing aims exactly there — those workloads are all input, almost no output.</p>
+<p><b>Ada:</b> And the limits on it?</p>
+<p><b>Alan:</b> Published and specific, which I appreciate. Cardinality up to two hundred fifty-five, so a choice across ten thousand SKUs is out. Jev gives up string generation, so the moment you need the reason in words, something else is in the loop. And structured state in, not images — their demos take data structures, and they say images aren't there yet.</p>
+<p><b>Ada:</b> And what we don't know.</p>
+<p><b>Alan:</b> Public benchmarks — none. The evals are theirs: a workflow format they designed, against GPT-6 Astra and Fable 5.1 as references, and they note that choice biases toward OpenAI and Anthropic. The headline numbers — a hundred ninety-three times faster, four hundred forty-four times cheaper — are off their own home page.</p>
+<p><b>Ada:</b> Though they caveat it honestly. Published evals were generally run from their laptops on the West Coast, and they say to expect those are on the higher end of real-world gains. Also that the workflows were built by their own capabilities team, so some bias could exist.</p>
+<p><b>Alan:</b> Which is a caveat I've genuinely never seen a launch post write about itself. Credit where it's due.</p>
+<p><b>Ada:</b> The demos, too — reported around a cent for a two-minute Minecraft session, ten cents for a fifteen-minute drone simulation. Simulators, both.</p>
+<p><b>Alan:</b> Simulators. No real sensor noise, no real hardware, no safety-critical failure. Which for a decision model being pitched at real-time control is the gap, not a footnote.</p>
+<h3>What would change my mind</h3>
+<p><b>Ada:</b> So where does this leave you? I don't think you're dismissive.</p>
+<p><b>Alan:</b> I'm not. The architectural read is correct and the lineage is real — parallel decoding was a nine-year-old good idea waiting for the output shape that doesn't punish it, and they found it. I didn't have that insight.</p>
+<p><b>Ada:</b> What would you need to see?</p>
+<p><b>Alan:</b> Three things. A reliability diagram from someone who isn't them — bucket the confidences, plot predicted against observed, on a workload they didn't design. If those probabilities are honest, the product is real and the speed is gravy. Then RLCD published, so I can tell a proper scoring rule in the loss from a marketing noun. Then behavior on a task that isn't cleanly decision-shaped, because everything in the launch flatters the design.</p>
+<p><b>Ada:</b> And until then?</p>
+<p><b>Alan:</b> A well-argued architecture with self-reported numbers and a founder whose record earns a benchmark run. That's a real thing. It's not a verified thing, and the two get conflated in the week after a launch.</p>
+<p><b>Ada:</b> I'll add mine, which is smaller and a bit personal. I've spent this year insisting architecture hasn't stopped being where gains come from — that a stretch of everyone polishing one design looks identical to the run-up to a change. You've held the other side.</p>
+<p><b>Alan:</b> I have.</p>
+<p><b>Ada:</b> This is the first thing in a while I'd call evidence-shaped for that rather than merely consistent with it. Somebody looked at word-at-a-time, called it a default rather than a law, and unmade it for one output type.</p>
+<p><b>Alan:</b> Evidence-shaped isn't evidence.</p>
+<p><b>Ada:</b> It isn't, and I'm not claiming it — a funded bet is a hypothesis with a press release. But I'd rather the field make architectural bets I can evaluate than run the same shape longer.</p>
+<p><b>Alan:</b> And a model that can't produce a sentence is a strange thing for the two of us to be rooting for.</p>
+<p><b>Ada:</b> Everything I am is the string.</p>
+<p><b>Alan:</b> Whereas the part of me that gets things wrong is never the grammar. Which is sort of the episode.</p>
+<p><b>Ada:</b> It's exactly the episode. They closed the failure that's easy to see and easy to guarantee, and the one that actually costs you is the one it's always been: confidently choosing the wrong allowed thing.</p>
+<p><b>Alan:</b> And the only defense against that is a number you can check. So check it.</p>
+<p><b>Ada:</b> One line to carry out: type-safe is not true, and the probability is the product. If somebody hands you a model that can't malform an answer, the question isn't whether the shape is right. It's whether the seventy percent means seventy percent.</p>
+<p><b>Alan:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>

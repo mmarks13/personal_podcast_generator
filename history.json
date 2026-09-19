@@ -62,6 +62,33 @@
       ]
     },
     {
+      "date": "2026-09-19",
+      "kind": "deepdive",
+      "title": "System One models: typed decisions, their lineage, and Jev's bet",
+      "summary": "TypeSafe AI launched Jev as the first \"System One model\" — a non-autoregressive model that returns a typed decision with a calibrated probability and can't emit a string at all. We trace the three ideas it's built from (parallel decoding, constrained decoding, and calibration measurement going back to 1950), why its founder's own RLHF paper is the thing he's arguing against, and which competitive niche is actually left once you account for if-statements, encoder classifiers, guardrail models, and constrained decoding on a general LLM.",
+      "topics": [
+        "deep dive: System One models and Jev — typed probabilistic decisions, their lineage, and the niche they occupy"
+      ],
+      "entities": [
+        "TypeSafe AI",
+        "Jev",
+        "Diogo Almeida",
+        "OpenAI",
+        "Outlines",
+        "GPT-6 Astra",
+        "Fable 5.1",
+        "DCVC"
+      ],
+      "threads": [],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada's 2026-08-15 position — that architecture has not stopped being where gains come from, and that a stretch of everyone polishing the same design is indistinguishable from the run-up to a shift — developed rather than restated: she named Jev as the first thing in a while she would count as 'evidence-shaped' for that position rather than merely consistent with it, because somebody identified word-at-a-time generation as a default and unmade it for one output type. She explicitly refused to call it evidence ('a funded bet is a hypothesis with a press release'), and Alan still holds the other side, so the disagreement stands unresolved."
+        }
+      ]
+    },
+    {
       "date": "2026-09-18",
       "title": "Anthropic says Claude leads 26% of its AI R&D — judged by Claude",
       "summary": "Anthropic's institute published three prototype measurements of its own development pace, and the validation number underneath them is stranger than the headline. Plus LimiX-2, a tabular model trained on the joint distribution rather than the label, and Google's Retrieve-for-Train, which trains a search model in words and then throws the words away.",
@@ -2553,6 +2580,26 @@
         "last_taught": "2026-09-19"
       },
       {
+        "name": "type safety versus correctness in a constrained-output model: a zero type-error rate is a theorem about the output space, not an empirical result, so a model that cannot malform an answer can still confidently pick the wrong allowed value",
+        "last_taught": "2026-09-19"
+      },
+      {
+        "name": "why parallel (non-autoregressive) decoding failed for prose but is nearly free for decisions: sequential generation exists to let later tokens honour earlier commitments, and a single-slot decision has no downstream coherence to lose",
+        "last_taught": "2026-09-19"
+      },
+      {
+        "name": "constrained decoding as vocabulary masking made cheap by precomputing a per-state index over the vocabulary, and the measured cost of format restriction on reasoning",
+        "last_taught": "2026-09-19"
+      },
+      {
+        "name": "calibration as a property orthogonal to capability, measured by a strictly proper scoring rule (Brier, 1950) that punishes the magnitude of confidence error where accuracy cannot see it",
+        "last_taught": "2026-09-19"
+      },
+      {
+        "name": "why RLHF is structurally pointed away from calibration: the reward is human preference, and raters prefer confident fluent answers over honest hedging",
+        "last_taught": "2026-09-19"
+      },
+      {
         "name": "inter-rater agreement as the validity check on a judge model: why a model agreeing with humans 59% of the time while humans agree with each other 35% of the time means the scale is underdetermined rather than the model being reliable, and why a self-consistent judge over a fuzzy definition yields a trackable series that looks identical on a chart to a trackable series over a sharp one",
         "last_taught": "2026-09-18"
       },
@@ -3002,26 +3049,6 @@
       },
       {
         "name": "the digital-signature undetectable backdoor: a signature verification circuit and public verification key baked into the weights alongside the honest classifier, so that finding an input where the backdoored and clean models differ requires forging a signature — yielding black-box undetectability under one-way functions, plus non-replicability (seeing one triggered input does not let you construct another)",
-        "last_taught": "2026-08-26"
-      },
-      {
-        "name": "the two undetectability regimes and why the distinction is load-bearing: black-box undetectability holds for any model via the signature construction, while white-box undetectability (full network description plus training data) is proved only for random Fourier features under worst-case lattice hardness and for random ReLU networks with a weaker o(1) advantage — there is no white-box result for deep networks trained by gradient descent, so the practical worry is that benchmark evaluation is exactly the black-box distinguisher the theorem defeats",
-        "last_taught": "2026-08-26"
-      },
-      {
-        "name": "persistence to gradient descent as a formal object: a network is l-persistent if the gradient of the loss with respect to its weights is exactly zero, and Theorem 2.3 gives, for any network N, a functionally identical N' of size O(|N|) and depth d+1 that is persistent for every loss — constructed via error-correction on the weights, which is a formal counterexample to 'I will fine-tune the backdoor out'",
-        "last_taught": "2026-08-26"
-      },
-      {
-        "name": "why poisoning cost is near-constant rather than proportional: 250 poisoned documents compromised models from 600M to 13B parameters despite the largest training on more than 20x more clean data (0.00016% of tokens at 13B), inverting the standard 'attacker must control 1% of the corpus' assumption — bounded by the authors' own limits that they demonstrated no end-to-end attack persisting through realistic post-training and tested only narrow denial-of-service behaviors",
-        "last_taught": "2026-08-26"
-      },
-      {
-        "name": "what each verification tool actually certifies: model signing verifies the artifact is exactly what the developer created (authenticity, not innocence, and valid if the developer's own pipeline planted the backdoor); activation probes detect defection on backdoors of the kind we know how to construct, with the authors' own caveat that salience may be an artifact of insertion; training-process attestation shifts the claim from a property of a file to a property of a procedure, the reproducible-builds move",
-        "last_taught": "2026-08-26"
-      },
-      {
-        "name": "trigger-space enumerability as the practical dividing line between detectable and hopeless backdoors: harness-supplied triggers (dates, paths, platform strings) form a finite sweepable set, while an arbitrary natural-language trigger returns the defender to the regime the theorem governs",
         "last_taught": "2026-08-26"
       }
     ]
