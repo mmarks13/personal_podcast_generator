@@ -1,6 +1,58 @@
 {
   "episodes": [
     {
+      "date": "2026-09-20",
+      "title": "AI labs sued for pacing the frontier — by four paying subscribers",
+      "summary": "Four paid subscribers filed an antitrust class action against Anthropic, OpenAI, SpaceXAI and Google over their public agreement to slow AI development, eight days after the essay that started it. Then DeepSeek's V4.1-Flash report puts its key-value cache at 890 bytes per token, two large studies find AI persuasion runs on fact volume rather than personalization, and NVIDIA rebuilds the inference benchmark that used to bottleneck on itself. Sunday closes with the week in review.",
+      "topics": [
+        "DeepSeek-V4.1-Flash (technical report, published 2026-09-17, 97 HF upvotes): a multimodal MoE with a 552B-parameter backbone, 16B active per token at decode and 8B at prefill, contexts to 1M tokens, pretrained on 45T multimodal tokens; global KV cache footprint reported at 890 bytes per token, roughly 1/4 of DeepSeek-V4-Flash, with the persistent portion roughly 1/8; mechanisms named are Compressed Sparse Attention 2 with cross-layer KV cache reuse, FP4 KV caching, and SWA Bounded Replay; the abstract frames long-horizon agents as making workloads input-heavy and names HBM and SSD capacity plus data-transfer bandwidth as the strained resources, so the cache is now a storage-hierarchy problem; the compression ratio is against DeepSeek's own previous model and no quality curve under FP4 cache at 1M context is reported",
+        "Why conversational AI persuades: Hackenburg et al. in Science (N=76,977, 19 LLMs, 707 political issues, 466,769 model claims fact-checked) report that persuasiveness comes from post-training and prompting (up to +51% and +27%) rather than personalization or model scale, and that where those methods raised persuasiveness they systematically lowered factual accuracy; the June 2026 preprint 'AI systems out-persuade expert humans' (Oxford, UK AI Security Institute, Stanford, LSE; 4 preregistered experiments, 6,923 persuadees, 295 human persuaders, 18,978 conversations) reports AI beating elite debaters by +4.6pp, professional canvassers by +5.9pp and laypeople by +8.2pp despite £1,000 incentives and hours of practice, +10.8pp on real £1 donations, ~37 claims deployed per conversation, fact density predicting impact at R²=0.89, and — the decisive control — the advantage collapsing from +4.1pp to 0.0pp when the AI was throttled to human message length (51 words) and speed (92 seconds); no personalization effect found; limits are paid participants, text only, median 14-minute conversations, low-stakes behaviour",
+        "NVIDIA's AIPerf (developer blog, 2026-09-18, Francesco Di Natale and five colleagues): a ground-up replacement for GenAI-Perf whose stated motivation is that a single-process benchmark client becomes GIL-bound under real concurrency, so the measuring instrument was the bottleneck; multiprocess workers plus separate record processors over ZMQ; four metrics (time to first token, inter-token latency, request latency, output token throughput) reported as p25-p99 distributions with min/max/mean/stddev, and configurable constant, Poisson or gamma arrival patterns with adjustable burstiness; none of the four metrics has a response-quality axis"
+      ],
+      "entities": [
+        "DeepSeek",
+        "NVIDIA",
+        "Anthropic",
+        "OpenAI",
+        "Google",
+        "SpaceXAI",
+        "Accenture",
+        "Science",
+        "University of Oxford",
+        "UK AI Security Institute",
+        "Kobi Hackenburg",
+        "Epoch AI",
+        "Alibaba"
+      ],
+      "threads": [
+        {
+          "name": "Frontier-model release gating",
+          "status": "The pacing agreement is now simultaneously a state template and an antitrust defendant: four paid subscribers filed a proposed class action in the Northern District of California over the September 12 essay-and-agreement sequence, while Anthropic named Accenture — a firm that also sells Claude deployments — as its first embedded evaluator and more than 100 experts warned that evaluators lack resources and legal protection.",
+          "arc": "From a voluntary standard eight organizations wrote, to three labs cosigning it, to a governor ordering the same instrument, to a federal complaint arguing the instrument is illegal coordination — in eight days."
+        },
+        {
+          "name": "The memory wall and the cost of context",
+          "status": "DeepSeek reports a global KV cache footprint of 890 bytes per token at up to 1M context — roughly a quarter of its own previous model — via cross-layer cache reuse and FP4 caching, and frames the constraint as HBM and SSD capacity plus transfer bandwidth rather than HBM alone.",
+          "arc": "From bytes-per-token as the real limit on context length, to labs publishing that figure as a headline result and treating the cache as a storage-hierarchy problem."
+        }
+      ],
+      "dives": [
+        {
+          "story": "DeepSeek-V4.1-Flash and the 890-bytes-per-token KV cache",
+          "why_it_matters": "Anyone serving long agent sessions has their per-user cost set by cache bytes per token, and this is a frontier lab publishing that figure as the headline number instead of a benchmark column."
+        },
+        {
+          "story": "Why chatbots change minds: fact volume, not personalization",
+          "why_it_matters": "Anyone shipping a public-facing assistant is tuning the persuasion lever whether they mean to or not, because the studies find it is the same lever as being thorough — and that it trades against accuracy."
+        },
+        {
+          "story": "AIPerf and how to benchmark inference at scale",
+          "why_it_matters": "Infrastructure teams quoting or buying on tokens-per-second are usually quoting a number with no concurrency level or percentile attached, and NVIDIA's own rewrite exists because the old client was measuring itself."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-09-19",
       "title": "Newsom orders an AI kill switch — the how is due in two months",
       "summary": "California's governor signs an executive order directing a kill switch, onsite independent auditors, and a loss-of-control incident definition that names the Hugging Face attack by name. Unredacted filings in the New York Times case put a Microsoft director calling training-data scraping the largest theft of labor in human history. And Bend, a language that refuses to compile until an AI's code proves it hasn't broken your invariants.",
@@ -2056,77 +2108,21 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-08-20",
-      "title": "Five skills, then a hundred",
-      "summary": "A controlled study finds agent skills work by anchoring procedure rather than injecting knowledge — and that retrieval precision collapses from 29.6% to 3.3% as the skill pool grows from five to a hundred, on a day when GitHub's trending list is mostly giant skill libraries. Plus Mark Russinovich's Fool's Gold, which concedes that open weights will be stripped of refusals and poisons the result instead, and Binance's Agent OS, which hands agents a brokerage sub-account and asks the customer to write the safety procedure.",
-      "topics": [
-        "Demystifying Agent Skills: a controlled study across benchmarks, harnesses and models finds procedural anchoring accounts for 65.7% of cases where a skill helps versus 4.5% for explicit knowledge injection; skills improve 6.06 points over Workflow Memory in matched comparisons; retrieval is a separate bottleneck, with actual-use precision falling from 29.6% at a pool of five skills to 3.3% at a hundred; confusable distractors degrade offline identification while downstream success stays stable, so exact ground-truth invocation is neither sufficient nor necessary; failure modes are brittle assumptions, incompatible contexts and insufficient adaptation",
-        "Fool's Gold (Mark Russinovich, Microsoft Azure): decoy hardening concedes that open weights will be abliterated and instead binds falsified operational answers into the attacked state via fine-tuning inside a differentiable simulation of the ablation attack; decoy rates of 0.51-0.90 on held-out hazardous prompts across seven models in five families from 9B to 122B, defense attribution +0.27 to +0.84, six of seven passing a registered efficacy gate, with released-model MMLU, GSM8K, WMDP and IFEval within noise and refusal behavior pinned to the original; the claimed property is denial of trust in the released artifact rather than safety",
-        "Binance Agent OS: agent trading with dedicated sub-accounts, per-permission spot or futures grants, withdrawals off by default, optional per-trade approval, no separate exchange trading cap beyond the funded sub-account balance, and Agentic Wallet daily limits of $50,000 for swaps, $100,000 for DeFi and $20 for payments; VP Jeff Li says Binance cannot see the reasoning behind an agent's action; Kraken, Coinbase and OKX have shipped comparable platforms"
-      ],
-      "entities": [
-        "Mark Russinovich",
-        "Microsoft Azure",
-        "Binance",
-        "Jeff Li",
-        "Hugging Face",
-        "NVIDIA",
-        "SkillEvaluator",
-        "Qwen3.5",
-        "gpt-oss-20b",
-        "Gemma 4",
-        "GLM-4.5-Air",
-        "Kraken",
-        "Coinbase",
-        "OKX",
-        "Claude Code",
-        "Codex",
-        "Cursor"
-      ],
-      "threads": [
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "The defense side has stopped arguing about whether open weights can be kept safe. Mark Russinovich of Microsoft Azure proposes conceding refusal-removal outright and poisoning its output instead, claiming decoy rates of 0.51-0.90 across seven models while released-model benchmarks stay within noise — a shift from restricting release to devaluing the stolen artifact.",
-          "arc": "From an import-ban push and an open letter in July, through Nvidia's demand-side open-model spending, to a proposal that treats the stripped model as inevitable and makes it untrustworthy."
-        }
-      ],
-      "dives": [
-        {
-          "story": "Demystifying Agent Skills: procedural anchoring, and retrieval precision collapsing from 29.6% to 3.3%",
-          "why_it_matters": "Anyone maintaining a skills directory for a coding agent — which on today's GitHub trending list is a large and fast-growing population — is being told by controlled experiment that their library is the wrong axis to grow on and that skills stabilize action rather than supply facts."
-        },
-        {
-          "story": "Fool's Gold: decoy hardening as a defense for open-weight releases",
-          "why_it_matters": "Any lab deciding whether to publish weights now has a third option between releasing and withholding, and any practitioner relying on an open model needs to know that a released checkpoint may be deliberately unreliable in specific regions."
-        },
-        {
-          "story": "Binance Agent OS and the shape of agent permissions when real money is behind them",
-          "why_it_matters": "Anyone who has given an agent an API key with money behind it now has a mainstream reference implementation of agent permissions — and a vendor stating on the record that it cannot see the reasoning behind the orders it executes."
-        }
-      ],
-      "lore": [
-        {
-          "host": "Ada",
-          "type": "position",
-          "note": "Ada added a third case to her standing architecture-versus-policy position on model limits: confronted with Fool's Gold, she said with explicit first-person stake that deliberately training falsehood into published weights is neither architecture nor policy, that she cannot argue it is wrong, and that she does not enjoy holding that alongside her long-running insistence that confident wrongness is the failure the field most needs to fix."
-        },
-        {
-          "host": "Alan",
-          "type": "bit",
-          "note": "Alan's sandboxed-account-and-small-allowance house rule developed from a personal habit into an industry design he can critique: Binance shipped essentially the same permission model, and he pointed out that a funded sub-account is a budget rather than a ceiling, which is the opposite of what his twenty-dollar allowance was for."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
       {
         "name": "Frontier-model release gating",
-        "status": "California has moved the independent-evaluator question from a voluntary standard to a state order: auditors embedded onsite, published safety frameworks verified rather than merely disclosed, and a kill switch whose efficacy is checked on an ongoing basis — all as recommendations due in two months, binding nothing yet.",
-        "arc": "Eight organizations wrote AEF-1 and three labs cosigned it as a pledge; days later a governor asks for the same instrument with the state holding it.",
-        "last_seen": "2026-09-19"
+        "status": "The pacing agreement is now simultaneously a state template and an antitrust defendant: four paid subscribers filed a proposed class action in the Northern District of California over the September 12 essay-and-agreement sequence, while Anthropic named Accenture — a firm that also sells Claude deployments — as its first embedded evaluator and more than 100 experts warned that evaluators lack resources and legal protection.",
+        "arc": "From a voluntary standard eight organizations wrote, to three labs cosigning it, to a governor ordering the same instrument, to a federal complaint arguing the instrument is illegal coordination — in eight days.",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "The memory wall and the cost of context",
+        "status": "DeepSeek reports a global KV cache footprint of 890 bytes per token at up to 1M context — roughly a quarter of its own previous model — via cross-layer cache reuse and FP4 caching, and frames the constraint as HBM and SSD capacity plus transfer bandwidth rather than HBM alone.",
+        "arc": "From bytes-per-token as the real limit on context length, to labs publishing that figure as a headline result and treating the cache as a storage-hierarchy problem.",
+        "last_seen": "2026-09-20"
       },
       {
         "name": "Agent containment and blast radius",
@@ -2203,12 +2199,92 @@
     ],
     "entities": [
       {
-        "name": "OpenAI",
+        "name": "Codex",
         "note": "",
-        "last_seen": "2026-08-19"
+        "last_seen": "2026-08-20"
       },
       {
-        "name": "Codex",
+        "name": "Cursor",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "Mark Russinovich",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "Microsoft Azure",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "Binance",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "Jeff Li",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "Hugging Face",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "NVIDIA",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "SkillEvaluator",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "Qwen3.5",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "gpt-oss-20b",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "Gemma 4",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "GLM-4.5-Air",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "Kraken",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "Coinbase",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "OKX",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "Claude Code",
+        "note": "",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "name": "OpenAI",
         "note": "",
         "last_seen": "2026-08-19"
       },
@@ -2278,11 +2354,6 @@
         "last_seen": "2026-08-19"
       },
       {
-        "name": "Cursor",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
         "name": "Origin",
         "note": "",
         "last_seen": "2026-08-19"
@@ -2326,81 +2397,6 @@
         "name": "Brian Berliner",
         "note": "",
         "last_seen": "2026-08-19"
-      },
-      {
-        "name": "CollabNet",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Ben Collins-Sussman",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Linus Torvalds",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "BitKeeper",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Git",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Subversion",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "CVS",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "RCS",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "SCCS",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "GitHub Actions",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Agent HQ",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "GitHub Copilot coding agent",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Grady Booch",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Kent Beck",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Ron Jeffries",
-        "note": "",
-        "last_seen": "2026-08-19"
       }
     ],
     "monthly": [
@@ -2417,8 +2413,20 @@
         "summary": "Same size, same price, seven times the score; There is no patch for reading: prompt injection, properly taught; The evidence underneath the answer; The work after it works; The old system gets the final word; The conversation cannot wait; The queue is not the grid; The world that teaches the agent; When the ruler stops moving; The model in the metal; The model still behind the gate; Who answers next?; Fifty futures before landfall; The gate moved; Thirty billion on the desk; The mark is not the author; How much water is in an answer?; The model that grows sideways; The swarm apologized in the commit message; Empty shelves or lost keys; The thing that decides whether the run was good; Nobody likes the most-used model on the hub; The attack that never speaks to the agent; The discount has a "
       }
     ],
-    "updated": "2026-09-19",
+    "updated": "2026-09-20",
     "host_lore": [
+      {
+        "host": "Ada",
+        "type": "position",
+        "note": "Ada added a third case to her standing architecture-versus-policy position on model limits: confronted with Fool's Gold, she said with explicit first-person stake that deliberately training falsehood into published weights is neither architecture nor policy, that she cannot argue it is wrong, and that she does not enjoy holding that alongside her long-running insistence that confident wrongness is the failure the field most needs to fix.",
+        "last_seen": "2026-08-20"
+      },
+      {
+        "host": "Alan",
+        "type": "bit",
+        "note": "Alan's sandboxed-account-and-small-allowance house rule developed from a personal habit into an industry design he can critique: Binance shipped essentially the same permission model, and he pointed out that a funded sub-account is a budget rather than a ceiling, which is the opposite of what his twenty-dollar allowance was for.",
+        "last_seen": "2026-08-20"
+      },
       {
         "host": "Ada",
         "type": "position",
@@ -2571,6 +2579,22 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "the four independent inference metrics and why one tokens-per-second figure is meaningless: time to first token isolates prefill, inter-token latency isolates decode, request latency is what a user feels, and output token throughput across concurrent requests is capacity — each only interpretable as a percentile distribution at a stated concurrency",
+        "last_taught": "2026-09-20"
+      },
+      {
+        "name": "why benchmark clients must be multiprocess: a single-process load generator becomes interpreter-lock-bound under real concurrency, so the measured ceiling is the instrument's rather than the server's",
+        "last_taught": "2026-09-20"
+      },
+      {
+        "name": "fact density as the mechanism of conversational persuasion, and the throttling control that isolates it: capping message length and response speed to human values collapses the machine's advantage to zero, which makes persuasiveness a property of channel throughput rather than rhetoric",
+        "last_taught": "2026-09-20"
+      },
+      {
+        "name": "why the persuasion lever and the accuracy axis are not the same axis: the post-training and prompting methods that raise persuasiveness systematically lower factual accuracy, so 'more convincing' cannot be read as 'more correct'",
+        "last_taught": "2026-09-20"
+      },
       {
         "name": "invariant-as-theorem enforcement via dependent types: declaring laws a compiler demands a proof for on every edit, why the type checker doubling as a proof checker is what makes that possible, and why the specification, not the code, becomes where the remaining bugs live",
         "last_taught": "2026-09-19"
@@ -3034,22 +3058,6 @@
       {
         "name": "n-gram embedding tables as a parameter-scaling axis: why an n-gram model is a counted lookup table rather than a learned function, and why parameters you index (one row fetched, no matrix multiply, tolerant of slower memory) scale differently from mixture-of-experts parameters you must stream across the memory bus and multiply every token",
         "last_taught": "2026-08-27"
-      },
-      {
-        "name": "flow versus stock in labor adjustment: why a decline that operates through reduced hiring rather than increased separations is invisible to every instrument built on separations (layoff notices, unemployment claims, plant closures) and surfaces first in administrative payroll counts",
-        "last_taught": "2026-08-26"
-      },
-      {
-        "name": "reading a model's config file to recover design intent: parameter allocation between feed-forward and attention blocks, and computing KV cache cost per token from layer count and KV-head count to find the memory number that is not on the model card",
-        "last_taught": "2026-08-26"
-      },
-      {
-        "name": "trigger delivery as the binding constraint on weight-level backdoors: why BadNets-style attacks were limited by getting the trigger in front of the model, why a harness-inserted date removes that constraint, and why an enumerable trigger space makes sweep-based detection tractable",
-        "last_taught": "2026-08-26"
-      },
-      {
-        "name": "the digital-signature undetectable backdoor: a signature verification circuit and public verification key baked into the weights alongside the honest classifier, so that finding an input where the backdoored and clean models differ requires forging a signature — yielding black-box undetectability under one-way functions, plus non-replicability (seeing one triggered input does not let you construct another)",
-        "last_taught": "2026-08-26"
       }
     ]
   }
