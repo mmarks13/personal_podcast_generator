@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: Test impact analysis: which tests to run when the agent wrote the code — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Deep Dive: Test impact analysis: which tests to run when the agent wrote the code</h1>
+<div class="date">Self-Attention — 2026-09-20</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-09-20-deepdive/deepdive-2026-09-20.mp3"></audio>
+<p><em>2026-09-20</em></p>
+<p>Test impact analysis is the thirty-year-old technique for deciding which tests a change can possibly break without running the whole suite — the dependency map, the three phases, and why coarse granularity beats fine. Then what agent-written code changes about it: the volume (Anthropic reports 25x CI job growth in six months) and, more interestingly, the consumer — handing the map to the agent before it commits cut regressions 70% in one study, while telling the agent to follow TDD made them worse.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://claude.com/blog/agentic-coding-is-straining-ci-heres-how-we-scaled-test-impact-analysis-at-anthropic">Agentic coding is straining CI. Here's how we scaled test impact analysis at Anthropic</a></li>
+<li><a href="https://arxiv.org/abs/2603.17973">TDAD: Test-Driven Agentic Development — Reducing Code Regressions in AI Coding Agents via Graph-Based Impact Analysis (arXiv 2603.17973)</a></li>
+<li><a href="https://users.ece.utexas.edu/~gligoric/papers/GligoricETAL15Ekstazi.pdf">Practical Regression Test Selection with Dynamic File Dependencies (Ekstazi, ISSTA 2015)</a></li>
+<li><a href="https://arxiv.org/abs/1810.05286">Predictive Test Selection (Machalica et al., ICSE-SEIP 2019, arXiv 1810.05286)</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://metr.org/notes/2026-03-10-many-swe-bench-passing-prs-would-not-be-merged-into-main/">METR: Many SWE-bench-passing PRs would not be merged into main</a></li>
+<li><a href="https://arxiv.org/abs/2601.15195">Where Do AI Coding Agents Fail? An Empirical Study of Failed Agentic Pull Requests in GitHub (arXiv 2601.15195)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>Cold open</li>
+<li>The problem: you cannot run everything</li>
+<li>How the dependency map is built</li>
+<li>When the map becomes a guess</li>
+<li>What changes when an agent writes the diff</li>
+<li>The second change: the agent is the reader</li>
+<li>What this doesn't show</li>
+<li>Why the regression number deserves a name</li>
+<li>So what</li>
+<li>Wrap</li>
+</ol>
+<details><summary>Transcript</summary>
+<h3>Cold open</h3>
+<p><b>Ada:</b> Good morning, and happy Sunday — it's Sunday, September twentieth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. And I want to start with a number that made me put my coffee down. An engineer at Anthropic published a post this week about their continuous integration system, and the headline fact is: CI job volume up twenty-five times in six months.</p>
+<p><b>Ada:</b> Twenty-five.</p>
+<p><b>Alan:</b> Twenty-five. Not twenty-five percent. And the post is direct about where it came from. Engineers there ship about eight times as much code per quarter as they did across twenty twenty-one to twenty twenty-five, and Claude authors eighty percent of that code. The test suite itself grew ten times.</p>
+<p><b>Ada:</b> So the bottleneck moved.</p>
+<p><b>Alan:</b> The bottleneck moved. For decades the rate-limiting thing in software was a human writing the change. Now the change is cheap and checking it is what costs money.</p>
+<p><b>Ada:</b> A new shape of problem, but not a new problem. There's a thirty-year-old research field sitting exactly under this — test impact analysis. Or, in the literature, regression test selection.</p>
+<p><b>Alan:</b> Which is why we're doing this today. Because I think a lot of people are about to reinvent it badly.</p>
+<p><b>Ada:</b> So: what test impact analysis actually is, mechanically — how you decide which tests a change can possibly break without running all of them. And then what changes about that technique when the thing writing the code is an agent rather than a person. Which turns out to be two changes, not one.</p>
+<p><b>Alan:</b> Two?</p>
+<p><b>Ada:</b> Two. The volume changes, which is your twenty-five. But the consumer changes too. And that second one is the more interesting half.</p>
+<h3>The problem: you cannot run everything</h3>
+<p><b>Alan:</b> Okay, so set the table for me. Why can't I just run all the tests? Machines are cheap-ish. I run all the tests.</p>
+<p><b>Ada:</b> You can, right up until the arithmetic eats you. There's a lovely observation in an Illinois paper from twenty fifteen — Gligoric, Eloussi and Marinov. They point at Google's regression testing system, TAP: Google saw a linear increase in the number of code changes, and, separately, a linear increase in the average time to run the suite.</p>
+<p><b>Alan:</b> Oh. Oh, those multiply.</p>
+<p><b>Ada:</b> They multiply. Linear times linear is quadratic. The total amount of test execution you owe grows as the square, and the authors note this was hard to keep up with even for a company with an abundance of computing resources.</p>
+<p><b>Alan:</b> Right, because both of those factors are things you want. More changes is your team shipping. More tests is your team being responsible.</p>
+<p><b>Ada:</b> Success is what breaks it.</p>
+<p><b>Alan:</b> So what are my options if I refuse to run everything?</p>
+<p><b>Ada:</b> Naively two, and both are bad. Run only the tests near the files you touched — fast, and it silently misses anything that breaks at a distance. Or run everything — safe, and unaffordable.</p>
+<p><b>Alan:</b> And "at a distance" is the whole ballgame. Nobody's worried about the test named after the file they just edited. They already ran that one.</p>
+<p><b>Ada:</b> The regression you fear is three modules away.</p>
+<h3>How the dependency map is built</h3>
+<p><b>Ada:</b> So the technique. A test impact analysis system has three phases, and naming them matters because almost every argument about these tools is really about which phase you're paying in.</p>
+<p><b>Alan:</b> Go.</p>
+<p><b>Ada:</b> Analysis — you decide which tests to run. Execution — you run them. Collection — you gather information from this run so next time, analysis has something to work from.</p>
+<p><b>Alan:</b> Ah. So it's a loop. Today's test run is paying rent for tomorrow's selection.</p>
+<p><b>Ada:</b> Precisely. And the thing being collected is a dependency map. For every test, some record of what that test actually touched.</p>
+<p><b>Alan:</b> How do you get that? Do you read the code, or do you watch it run?</p>
+<p><b>Ada:</b> That's the fork in the road, and both branches are alive. The static branch reads the code — imports, call graphs, inheritance — and computes what could reach what. The dynamic branch instruments the run and records what actually got loaded.</p>
+<p><b>Alan:</b> And dynamic sounds obviously better. It knows the truth.</p>
+<p><b>Ada:</b> It knows a truth — the truth of the last run. Which is usually what you want, and it's what the Illinois tool does. Ekstazi. For each test it records the names and checksums of the files that test used while it was executing. Then next revision, you don't diff the code at all. You just ask: did any file in this test's dependency list change its checksum?</p>
+<p><b>Alan:</b> Wait, that's it? That's much stupider than I expected, and I mean that admiringly.</p>
+<p><b>Ada:</b> It is deliberately stupid, and the paper is proud of it. No integration with version control. No sophisticated comparison of the old and new revisions. It's a hash check against a list.</p>
+<p><b>Alan:</b> Okay, but now I want to argue about granularity, because that's where I'd expect this to fall over. Files? Files are huge. If I touch one line in a two-thousand-line file, every test that ever loaded that file now reruns.</p>
+<p><b>Ada:</b> You're having exactly the argument the field had, and here's the surprising resolution. Finer granularity — per method instead of per file — selects fewer tests. It genuinely does. And it's usually a worse tool.</p>
+<p><b>Alan:</b> How is selecting fewer tests worse? That's the entire point of the exercise.</p>
+<p><b>Ada:</b> Because selecting fewer tests isn't the point. Lowering the wall-clock time the developer waits is the point. Ekstazi's authors are emphatic — most prior research evaluated these techniques on the number of tests selected, which implicitly counts only the execution phase. You pay for analysis and collection too.</p>
+<p><b>Alan:</b> Ohh. And fine-grained tracking makes both of those expensive.</p>
+<p><b>Ada:</b> Much more expensive. You're recording far more, and to reason about what changed you need a sophisticated comparison of old revision against new. Coarse dependencies skip that entirely — a fast check of the new revision that doesn't even need the old one. So Ekstazi runs some extra tests and still finishes sooner end to end.</p>
+<p><b>Alan:</b> That's a real engineering lesson. The metric everyone optimizes is a proxy that only measures one of three phases.</p>
+<p><b>Ada:</b> And there's a second reason to be coarse, which is safety. Safe, here, is a technical term — a selection is safe if it never omits a test whose outcome could have changed.</p>
+<p><b>Alan:</b> And fine-grained isn't safe?</p>
+<p><b>Ada:</b> Naive fine-grained isn't. There's a beautiful failure case in the paper. A test exercises a method, C dot m. The new revision adds an m to a subclass, D, which overrides it. The set of methods the test executed hasn't changed. Nothing in its dependency list was edited.</p>
+<p><b>Alan:</b> But the dispatch changed.</p>
+<p><b>Ada:</b> The dispatch changed. That test's outcome can flip, and a naive intersection of touched methods selects nothing at all. To be safe at method granularity you have to collect the things a test didn't call but might have — expensive collection, expensive analysis, and you end up selecting more tests anyway.</p>
+<p><b>Alan:</b> So coarse isn't the compromise. Coarse is the answer.</p>
+<p><b>Ada:</b> Coarse is the answer — and files rather than classes, because tests depend on fixtures and data files too, not only on code. Across six hundred and fifteen revisions of thirty-two open-source Java projects, nearly five million lines, Ekstazi cut end-to-end testing time thirty-two percent on average, fifty-four percent for the longer-running suites. And it got adopted, by Apache Camel among others.</p>
+<p><b>Alan:</b> With what caveat? There's always one.</p>
+<p><b>Ada:</b> A fair one: they argue the technique is safe, and leave the formal proof as future work.</p>
+<h3>When the map becomes a guess</h3>
+<p><b>Alan:</b> Okay, but the other branch. Everything you've described is deterministic. Dependency map says maybe, you run it. And at the scale I actually live at, that's still too many tests.</p>
+<p><b>Ada:</b> Then you make it probabilistic. Facebook published the canonical version in twenty nineteen — Machalica, Samylkin, Porth and Chandra.</p>
+<p><b>Alan:</b> The machine learning one.</p>
+<p><b>Ada:</b> The machine learning one, and the motivating number is the good part. Tens of thousands of changes a week, each potentially impacting on the order of ten thousand tests. And the observation that unlocks it: almost ninety-nine point nine percent of the tests the dependency-based strategy selects pass.</p>
+<p><b>Alan:</b> So the dependency map is right and useless at the same time.</p>
+<p><b>Ada:</b> It's correct and uninformative. It tells you what could break. It says nothing about what will.</p>
+<p><b>Alan:</b> So they train a classifier on top of it.</p>
+<p><b>Ada:</b> Gradient-boosted decision trees, partly because it's what they already had. The features are the interesting bit — all cheap, none semantic. How many files you touched, what extensions, how often those files changed in the last three, fourteen and fifty-six days.</p>
+<p><b>Alan:</b> Churn as a proxy for risk. Sure.</p>
+<p><b>Ada:</b> The historical failure rate of each test. And then my favorites, the cross features — the minimal distance in the build graph between a file you touched and the test, and the number of common tokens shared by the file paths.</p>
+<p><b>Alan:</b> The number of common tokens shared by the file paths. That is — that's just "do these two things sound like each other."</p>
+<p><b>Ada:</b> Lexical distance as a proxy for human intent about code organization. And it works, because people put related things in similarly-named directories.</p>
+<p><b>Alan:</b> And what does it cost? This is the first thing we've discussed that can be silently wrong.</p>
+<p><b>Ada:</b> It can, and they're straightforward about the dial. In production it caught over ninety-five percent of individual test failures, and over ninety-nine point nine percent of faulty code changes.</p>
+<p><b>Alan:</b> Hang on, those are very different numbers.</p>
+<p><b>Ada:</b> They are.</p>
+<p><b>Alan:</b> Ninety-five percent on individual tests sounds alarming — one in twenty broken tests walks through. But the one that matters to me is the second. If my change breaks eight tests and it catches six, I still got told.</p>
+<p><b>Ada:</b> Right. Redundancy in the suite is doing the safety work. You only lose a bad change when you miss every test it broke.</p>
+<p><b>Alan:</b> Which is why the change-level number is three orders of magnitude better. That's a genuinely nice piece of intuition.</p>
+<p><b>Ada:</b> And the payoff: relative to dependency-based selection, deployment cut total test executions by a factor of three, and infrastructure cost in machines by a factor of two. One more thing they raise — flakiness. If you train the classifier on flaky results directly, you get very poor predictions.</p>
+<p><b>Alan:</b> Because you're teaching it to predict noise. "This test fails sometimes" isn't a fact about my diff.</p>
+<h3>What changes when an agent writes the diff</h3>
+<p><b>Ada:</b> So — that's the field. Thirty years, two branches, well understood. Now: agents start writing the code. What actually changes?</p>
+<p><b>Alan:</b> Volume. We started there. Twenty-five x.</p>
+<p><b>Ada:</b> Volume first — and the Anthropic post is a story about volume breaking an architecture rather than a technique. Two pieces. A listener, which records the test results from every CI run. And a selector, which reads that history and decides which tests run on each opened pull request, based on past performance and package relevance.</p>
+<p><b>Alan:</b> So it's the learned branch. History-driven.</p>
+<p><b>Ada:</b> History-driven and, they emphasize, deterministic. And the failure is almost poignant. The listener was a single process, because a running history per test meant one writer had to apply every result.</p>
+<p><b>Alan:</b> And a single writer can't shard.</p>
+<p><b>Ada:</b> Can't shard. And by March, that process was hitting its memory limit by mid-afternoon on most weekdays. And the line I'd underline: twenty minutes of listener lag can translate into tens of thousands of test updates not being applied to the selector.</p>
+<p><b>Alan:</b> That's the part that scared me. Lag there isn't just staleness — the selector chooses what to run based on history, so twenty minutes cold means deciding from a world that no longer exists.</p>
+<p><b>Ada:</b> The map goes stale faster than you can redraw it.</p>
+<p><b>Alan:</b> And the fix is the boring correct one, I assume.</p>
+<p><b>Ada:</b> Entirely boring and entirely correct. Make the listeners stateless — any worker takes any result, appends it to a journal, holds nothing. A small separate consumer rolls that journal up into per-test history every few seconds.</p>
+<p><b>Alan:</b> Classic. State out of the process, and suddenly you can have as many workers as you want. And they note it costs more to run than the singleton did — good, say that out loud.</p>
+<p><b>Ada:</b> They do. And their stated lesson is the one I'd hand to anybody doing capacity planning right now: assume your architecture will be at twenty-five times its load within two quarters.</p>
+<p><b>Alan:</b> That's the part I'd caution on. It's one company's growth curve, on their codebase. An argument, not a law. But as a posture for anything downstream of a coding agent, I'd rather over-build than under-build.</p>
+<h3>The second change: the agent is the reader</h3>
+<p><b>Ada:</b> So that's volume. The second change is smaller and stranger.</p>
+<p><b>Alan:</b> Go.</p>
+<p><b>Ada:</b> For thirty years the consumer of a test impact analysis was a test runner. A machine hands a list of tests to another machine. The output is a scheduling decision, and it happens after the change is committed.</p>
+<p><b>Alan:</b> And now?</p>
+<p><b>Ada:</b> Now it can go to the thing writing the code, before it commits. There's a paper from March — Alonso, Yovine and Braberman — and the tool is TDAD, test-driven agentic development. It builds a dependency graph between source and tests, then does something that made me laugh out loud. It exports the result as a text file.</p>
+<p><b>Alan:</b> A text file.</p>
+<p><b>Ada:</b> A grep-able text file. Source file mapped to test files, one per line. Plus a twenty-line instruction: fix the bug, grep the file for related tests, run them, fix what fails. At runtime the agent needs only grep and pytest. No graph database, no server, no API calls.</p>
+<p><b>Alan:</b> I'm suspicious — that's a fashionable shape of result. "We gave the model a file and it got better." What's the measurement?</p>
+<p><b>Ada:</b> SWE-bench Verified — and the metric is the good part. Each instance comes with two test sets. Fail-to-pass, the tests the fix is supposed to make pass; that's the resolution rate, that's what leaderboards report. And pass-to-pass — tests that were passing before and should still be passing after.</p>
+<p><b>Alan:</b> And nobody reports the second one.</p>
+<p><b>Ada:</b> The harness collects it, the leaderboards don't surface it. Their argument is that this creates a perverse incentive: you're rewarded for aggressive patching regardless of side effects.</p>
+<p><b>Alan:</b> Because a patch that fixes my issue and breaks three others has negative value. I'd revert it. That's worse than the agent doing nothing.</p>
+<p><b>Ada:</b> The numbers. Phase one, a hundred instances, a thirty-billion-parameter Qwen coder model, four-bit, local. The vanilla agent produced five hundred and sixty-two pass-to-pass failures out of nine thousand two hundred and forty-five — a six point zero eight percent regression rate. With the test map: one hundred and fifty-five failures. One point eight two percent.</p>
+<p><b>Alan:</b> Seventy percent reduction. And what did it cost in resolution?</p>
+<p><b>Ada:</b> Two points. Thirty-one percent down to twenty-nine.</p>
+<p><b>Alan:</b> Hm. A real trade, but a cheap one. Though — hold on, why did it drop at all? Telling it which tests to check shouldn't make it worse at fixing things.</p>
+<p><b>Ada:</b> It didn't, exactly. The drop is almost entirely a higher empty-patch rate — twenty-six percent versus fourteen. Among patches it actually generated, it was no less likely to resolve the issue.</p>
+<p><b>Alan:</b> So it abstained. It looked at the risk and declined to submit.</p>
+<p><b>Ada:</b> Their phrasing is that the agent knew what it didn't know. And a related finding, suggestive rather than settled — in their runs, no configuration produced a patch that both resolved the issue and caused a regression. Zero, across all three.</p>
+<p><b>Alan:</b> Zero? So patches are either clean or they're damage, never both.</p>
+<p><b>Ada:</b> For this model, at this sample size. Which if it generalizes matters, because it means a mechanism that suppresses bad patches costs you almost nothing in good ones.</p>
+<p><b>Alan:</b> Big if. Small model, hundred instances.</p>
+<p><b>Ada:</b> It is. Hold that.</p>
+<p><b>Alan:</b> But so far you've told me the intervention worked, and the interesting question is always what didn't.</p>
+<p><b>Ada:</b> Then you'll like the control arm, which is the best part of the paper. A third condition: same agent, no test map, but test-driven development instructions added to the prompt. Write the tests first, then implement, the whole procedure.</p>
+<p><b>Alan:</b> The thing everyone does. The thing I would have done.</p>
+<p><b>Ada:</b> Regressions went up. Nine point nine four percent — substantially worse than doing nothing at all.</p>
+<p><b>Alan:</b> Worse than vanilla. Huh.</p>
+<p><b>Ada:</b> They call it the TDD prompting paradox, and offer two explanations. One, verbose procedural instructions eat the context window — thirty-two thousand tokens here, so the instructions pushed out repository context it needed. And two, which I think is the real one: TDD prompting made the agent more ambitious. Bigger fixes, more files touched.</p>
+<p><b>Alan:</b> Without knowing what it was near.</p>
+<p><b>Ada:</b> No idea what it was near. Ambition without localization. And one case makes it vivid — a Django instance where the plain agent broke four tests out of three hundred and fifty-two, and the TDD-prompted agent broke all three hundred and fifty-two.</p>
+<p><b>Alan:</b> Brutal. It followed best practice straight off a cliff.</p>
+<p><b>Ada:</b> And in the other direction, an astropy instance: plain agent failed all three hundred and twenty-two, the one with the map failed twelve.</p>
+<p><b>Alan:</b> So the lesson is not "tell the agent to be careful."</p>
+<p><b>Ada:</b> The lesson they draw is: context beats procedure. Telling the model which tests are at risk worked; telling it how to do careful engineering backfired. And an ablation backs that up — shortening the prompt without adding the map made things worse, so it isn't just brevity.</p>
+<p><b>Alan:</b> I'd generalize that further. An agent doesn't need a methodology lecture. It needs the specific fact it's missing.</p>
+<h3>What this doesn't show</h3>
+<p><b>Alan:</b> Let me do the limits, because I've been enjoying this too much.</p>
+<p><b>Ada:</b> Please.</p>
+<p><b>Alan:</b> A hundred instances in phase one, twenty-five in phase two, no significance tests — they say that plainly, which I appreciate. Both models are small, local, quantized. The authors say frontier models with long context windows might not show the TDD paradox at all, and I think that's likely — if the instructions are one percent of your context, they can't crowd anything out.</p>
+<p><b>Ada:</b> Which would make the mechanism real and the effect size a function of how tight the budget is.</p>
+<p><b>Alan:</b> And a statistical wrinkle they flag themselves — the instance-level regression rate actually looks worse with the map, thirty-three percent versus thirty. That's a denominator artifact: the map arm generated fewer patches. In absolute terms, fewer regressing instances. Twenty-five versus twenty-six.</p>
+<p><b>Ada:</b> And they report both and explain it rather than picking the flattering one, which is why I trust the rest more.</p>
+<p><b>Alan:</b> Same. Two more. Python only — the graph is built with Python's own syntax tree module. And the deep one: it's static analysis. It can't see dynamic dispatch, monkey-patching, or code generated at runtime.</p>
+<p><b>Ada:</b> Which is the same wall we hit with the overriding subclass — and worse in Python than Java, where monkey-patching is a normal Tuesday. So it's a heuristic ranking, not a proof. It scores tests by relationship type — a direct test edge highest, a call chain a few hops out lower, an import lower still — and takes the top fifty. A recommendation system, not a safety guarantee.</p>
+<p><b>Alan:</b> Which is fine! But then don't call it a safety net. Call it a hint. The hint is worth seventy percent of your regressions, apparently, and you should still run your real suite in CI.</p>
+<h3>Why the regression number deserves a name</h3>
+<p><b>Ada:</b> Which brings me to the part that matters beyond any one tool. There's a measurement gap, and two independent pieces of work point at it.</p>
+<p><b>Alan:</b> The merge studies.</p>
+<p><b>Ada:</b> METR published a note in March. Four active maintainers from three SWE-bench Verified repositories — scikit-learn, Sphinx, pytest — reviewed two hundred and ninety-six patches that had passed the automated grader. Roughly half of those test-passing pull requests would not be merged into main by the maintainers.</p>
+<p><b>Alan:</b> Half.</p>
+<p><b>Ada:</b> The automated grader sits on average about twenty-four percentage points above the maintainer's actual merge decision. For comparison, about sixty-eight percent of the human-written reference patches were merged.</p>
+<p><b>Alan:</b> So maintainers aren't impossible to please. They merge human patches at more than twice the rate.</p>
+<p><b>Ada:</b> And the rejection categories are the tell: the solution doesn't resolve the issue, the code quality is off, and — right in the middle — the patch touches unrelated code and causes breakages.</p>
+<p><b>Alan:</b> And the other study?</p>
+<p><b>Ada:</b> Ehsani and colleagues, January — thirty-three thousand agent-authored pull requests on GitHub, across five coding agents. The ones that don't get merged tend to be larger, touch more files, and fail the project's CI pipeline.</p>
+<p><b>Alan:</b> Same direction, then. The benchmark number and the usefulness number have come apart, and one of the biggest reasons is collateral damage the benchmark isn't scored on.</p>
+<p><b>Ada:</b> So the proposal is modest: report regression rate alongside resolution rate. The data is already collected — the harness runs those tests today. It just isn't surfaced.</p>
+<p><b>Alan:</b> I'll go further than modest. I don't think I can take a coding agent's benchmark score seriously anymore if it doesn't come with a regression number next to it. Not because the score is fake — because it's half a measurement. It reports what the thing built and not what it knocked over on the way out.</p>
+<p><b>Ada:</b> That's a stronger claim than the paper makes.</p>
+<p><b>Alan:</b> It is, and I'll own it. The paper does sketch a way to combine them — net score equals resolution rate minus some multiplier times regression rate, the multiplier bigger than one because breaking working code costs more than failing to fix broken code.</p>
+<p><b>Ada:</b> A value judgment dressed as a formula — and I mean that as a compliment. It's the right thing to argue about openly.</p>
+<h3>So what</h3>
+<p><b>Alan:</b> So what does somebody do with this on Monday.</p>
+<p><b>Ada:</b> Three things, cheapest first. You almost certainly already have the raw material — your CI knows which tests ran and which files were touched. Ekstazi's lesson is that the crude version works: coarse granularity, checksums, no cleverness.</p>
+<p><b>Alan:</b> And don't start with the machine learning one. That branch is a scale response, for when your deterministic map is technically correct and still selecting ten thousand tests.</p>
+<p><b>Ada:</b> Second, the inversion. If an agent edits your repository, the dependency map isn't only a scheduling input anymore. It's context. And the cheapest form of it is a flat file the agent can search.</p>
+<p><b>Alan:</b> Which is the transferable idea even if TDAD itself doesn't replicate. Precompute the structural facts the agent can't derive from its own context, hand them over as something searchable. Cheap enough to try this week.</p>
+<p><b>Ada:</b> And third, a habit rather than a task: when you evaluate an agent on your own codebase, measure what it broke, not only what it fixed.</p>
+<p><b>Alan:</b> Which almost nobody does, because the fix is what you asked for and the breakage is what you didn't look for.</p>
+<p><b>Ada:</b> As for where this goes — and I'm speculating now — the authors' next step is folding in dynamic coverage data, which would close some of that static-analysis gap.</p>
+<p><b>Alan:</b> And that's the loop closing. Coverage data comes from running the tests, so the agent's test runs feed the map that tells the next agent what to run.</p>
+<p><b>Ada:</b> Ekstazi's collection phase, thirty years on, with a language model reading the output. What interests me is when the map stops being about tests at all — a structural index of a repository, kept fresh by CI, that an agent consults before editing anything.</p>
+<p><b>Alan:</b> At which point we've reinvented the IDE, for something without eyes. Which might genuinely be right.</p>
+<h3>Wrap</h3>
+<p><b>Alan:</b> So — a thirty-year-old technique, two branches, both built for a world where a human wrote the change and a machine decided what to re-run.</p>
+<p><b>Ada:</b> And now the volume is up twenty-five times in six months at one company, and the thing reading the answer might be the thing that wrote the code. The technique survives that. The architecture around it mostly doesn't, and the metrics we report definitely don't.</p>
+<p><b>Alan:</b> The finding I'll be thinking about all week is still the control arm. Telling the agent to be careful made it worse. Telling it what was nearby made it better.</p>
+<p><b>Ada:</b> Context over procedure. A sentence I suspect we'll be saying about a lot of things.</p>
+<p><b>Alan:</b> That's the episode. Thanks for spending part of your Sunday with us.</p>
+<p><b>Ada:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>

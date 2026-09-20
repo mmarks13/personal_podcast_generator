@@ -53,6 +53,34 @@
       "lore": []
     },
     {
+      "date": "2026-09-20",
+      "kind": "deepdive",
+      "title": "Test impact analysis: which tests to run when the agent wrote the code",
+      "summary": "Test impact analysis is the thirty-year-old technique for deciding which tests a change can possibly break without running the whole suite — the dependency map, the three phases, and why coarse granularity beats fine. Then what agent-written code changes about it: the volume (Anthropic reports 25x CI job growth in six months) and, more interestingly, the consumer — handing the map to the agent before it commits cut regressions 70% in one study, while telling the agent to follow TDD made them worse.",
+      "topics": [
+        "deep dive: test impact analysis for agent-written code — regression test selection as a mechanism (the dependency map, the analysis/execution/collection loop, why coarse file-level granularity beats method-level on end-to-end time and safety), the learned branch (gradient-boosted test selection, test recall vs change recall, flakiness), and the two things agent authorship changes: CI volume (25x in six months, 80% of code agent-authored) and the consumer of the analysis (the map handed to the agent pre-commit as grep-able context, 6.08% to 1.82% regression rate, the TDD prompting paradox at 9.94%), plus the measurement gap that regression rate is uncollected on leaderboards"
+      ],
+      "entities": [
+        "Anthropic",
+        "Ekstazi",
+        "TDAD",
+        "SWE-bench Verified",
+        "METR",
+        "Facebook",
+        "Qwen3-Coder",
+        "Google TAP",
+        "OpenCode"
+      ],
+      "threads": [],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "position",
+          "note": "Alan staked out that he will no longer take a coding agent's benchmark score seriously unless a regression rate is reported next to it — not because the score is fake but because it is half a measurement, reporting what the agent built and not what it knocked over on the way out. He acknowledged on air this is a stronger claim than the paper he was citing makes, and owned it."
+        }
+      ]
+    },
+    {
       "date": "2026-09-19",
       "title": "Newsom orders an AI kill switch — the how is due in two months",
       "summary": "California's governor signs an executive order directing a kill switch, onsite independent auditors, and a loss-of-control incident definition that names the Hugging Face attack by name. Unredacted filings in the New York Times case put a Microsoft director calling training-data scraping the largest theft of labor in human history. And Bend, a language that refuses to compile until an AI's code proves it hasn't broken your invariants.",
@@ -2596,6 +2624,38 @@
         "last_taught": "2026-09-20"
       },
       {
+        "name": "test impact analysis / regression test selection: for each test, collect the set of files it actually touched during execution, then select a test for re-run when any file in its dependency set changes checksum — no diff of the code required",
+        "last_taught": "2026-09-20"
+      },
+      {
+        "name": "the three phases of a test selection technique (analysis, execution, collection) and why evaluating on number-of-tests-selected is a proxy that only measures the execution phase, so a coarser technique that selects more tests can still finish sooner end-to-end",
+        "last_taught": "2026-09-20"
+      },
+      {
+        "name": "why finer dependency granularity is both slower and unsafe: a new overriding method in a subclass changes a test's outcome while leaving its executed-method set untouched, so safe method-level selection must collect methods the test did not call and must diff old against new",
+        "last_taught": "2026-09-20"
+      },
+      {
+        "name": "the redundancy argument for probabilistic test selection: catching 95% of individual test failures still catches over 99.9% of faulty changes, because a change is only missed when every test it broke is missed",
+        "last_taught": "2026-09-20"
+      },
+      {
+        "name": "why a correct dependency map is uninformative at scale — almost 99.9% of dependency-selected tests pass — which is what motivates learning a failure predictor on cheap non-semantic features (churn windows, build-graph distance, shared path tokens, per-test historical failure rate)",
+        "last_taught": "2026-09-20"
+      },
+      {
+        "name": "the inversion agent authorship forces: test impact analysis output stops being a scheduling decision made after the commit and becomes context handed to the code's author before it, delivered as a grep-able static file rather than a service",
+        "last_taught": "2026-09-20"
+      },
+      {
+        "name": "the TDD prompting paradox: giving a small coding agent procedural test-first instructions raised its regression rate above doing nothing, while giving it the specific list of at-risk tests cut regressions 70% — ambition without localization causes collateral damage",
+        "last_taught": "2026-09-20"
+      },
+      {
+        "name": "resolution rate and regression rate as separable measurements: SWE-bench already runs pass-to-pass tests but leaderboards do not surface them, so agents are scored on what they fixed and not on what they broke",
+        "last_taught": "2026-09-20"
+      },
+      {
         "name": "invariant-as-theorem enforcement via dependent types: declaring laws a compiler demands a proof for on every edit, why the type checker doubling as a proof checker is what makes that possible, and why the specification, not the code, becomes where the remaining bugs live",
         "last_taught": "2026-09-19"
       },
@@ -3026,38 +3086,6 @@
       {
         "name": "prefill versus decode as two different hardware regimes in the same request: prompt tokens are processed in parallel so one weight read serves thousands of tokens (compute-bound), while generation is inherently serial (bandwidth-bound) — which is why a single utilization figure for inference averages two different machines",
         "last_taught": "2026-08-29"
-      },
-      {
-        "name": "batching amortizes the weight read but not the key-value cache, which is per-user and grows with context — so long context is a bandwidth product sold as an intelligence feature, and capacity and bandwidth are one conversation rather than two",
-        "last_taught": "2026-08-29"
-      },
-      {
-        "name": "HBM's wide-and-slow design and what it costs physically: a 1,024-bit-per-stack interface instead of narrow high-frequency signaling, achieved by stacking DRAM dies with through-silicon vias and microbumps onto a logic base die and mounting the stack beside the processor on a silicon interposer (CoWoS), with yield compounding down the stack",
-        "last_taught": "2026-08-29"
-      },
-      {
-        "name": "the three-times wafer-area ratio as an allocation mechanism: because HBM needs roughly 3x the silicon per gigabyte, each wafer moved to HBM erases about three wafers of conventional DRAM output — visible industry-wide as HBM taking ~22% of DRAM wafer input while supplying only ~9% of DRAM bits",
-        "last_taught": "2026-08-29"
-      },
-      {
-        "name": "the memory wall as a compounding gap between diverging exponentials (Wulf & McKee 1995), quantified today as compute scaling ~3.0x/2yrs against DRAM bandwidth at ~1.6x/2yrs",
-        "last_taught": "2026-08-29"
-      },
-      {
-        "name": "AUROC as the probability a detector ranks a positive above a negative",
-        "last_taught": "2026-08-28"
-      },
-      {
-        "name": "held-out-category generalization testing versus held-out examples",
-        "last_taught": "2026-08-28"
-      },
-      {
-        "name": "what a permissive license does and does not protect in an open-source project",
-        "last_taught": "2026-08-28"
-      },
-      {
-        "name": "n-gram embedding tables as a parameter-scaling axis: why an n-gram model is a counted lookup table rather than a learned function, and why parameters you index (one row fetched, no matrix multiply, tolerant of slower memory) scale differently from mixture-of-experts parameters you must stream across the memory bus and multiply every token",
-        "last_taught": "2026-08-27"
       }
     ]
   }
