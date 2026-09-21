@@ -1,6 +1,70 @@
 {
   "episodes": [
     {
+      "date": "2026-09-21",
+      "title": "Google ships Gemini 3.8 Flash Cyber — access is by invitation",
+      "summary": "Google released Gemini 3.8 Flash and a cyber-specialized variant distributed only through its vetted Fairwind program, raising the question of what a gate made of contracts actually buys. Plus a Shanghai AI Lab report on predicting concepts alongside tokens, and a two-person lab's open-weights model that does nothing but write.",
+      "topics": [
+        "Gemini 3.8 Flash and Gemini 3.8 Flash Cyber: introductory pricing of $0.75 per million input tokens and $3.75 output, doubling to $1.50/$7.50 on 1 January 2027; 54.9% on HLE-Verified and an unquantified DeepSWE v1.1 claim for the general model; Flash Cyber at 47.2% pass@1 on CWE-Bench, above 70% on an internal vulnerability-discovery evaluation across 20 programming languages, and Google's headline claim of '2.6 times more correct patches to vulnerabilities in Chrome than the best commercial models' — on Google's own codebase. The distribution decision is the story: Flash Cyber is available only through the Fairwind Program, launched 2 September 2026 with over 650 partners, priority to governments and national cyber authorities, critical infrastructure operators and core technology platforms, bundled with the CodeMender harness, conditioned on access limited to internal security/IR/pentest teams and MFA deployment, and justified as giving defenders 'a vital adaptation window'. The episode's argument: the gate is made of contract rather than architecture, and at 650 organisations what it buys is delay rather than containment — which is what Google said it was buying.",
+        "NCP-ArchPreview (arXiv 2609.10715, Intern-NCP team at Shanghai AI Laboratory, 27 authors including Dahua Lin and Bowen Zhou, submitted 9 September 2026; 326 HF upvotes, #1 paper of its day, 18 model variations citing it): jointly training next-token prediction with Next Concept Prediction, where the concept vocabulary is a product-quantized codebook built from the model's own hidden states, and the predicted next concept is fed back to guide token-level generation. 8.9B parameters on 5.73T Dolma-3 tokens; reported reaching OLMo-3-7B's final pretraining loss on 51.3% of the training tokens, +2.45 macro-average downstream and +5.99 on GSM8K. Two after-training results the episode rated above the headline: a 17M-parameter module over the latent space suffices for domain adaptation, and speculative decoding improves by 4.17% in mean accepted length with a DFlash2 drafter. Unresolved objections raised on air: 8.9B against a 7B baseline is a 27% size gap, no same-parameter ablation is published, and no training-hours comparison is given, so 'half the tokens' is not 'half the compute'.",
+        "Hemmingway-1 (Altworld, released 20 September 2026): an Apache-2.0 fine-tune of Qwen3.8-27B by a two-person lab split between Switzerland and South Africa, 54.7GB at bf16, 262,144-token context, vLLM-compatible with an MTP layer, runs on a single 24GB card quantized. Trained only for creative writing and short-form personal text, and stated on the card to be 'deliberately a specialist' with mathematics, code and factual recall unchanged from the base. Public number is EQ-Bench 4 at 1330 — third place per the card, behind Claude Fable 5 and ahead of GPT-5.5 and Opus 4.8. CommunicationBench, Human-Likeness and StoryBench are the authors' own benchmarks, LLM-judged, blind and run in both presentation orders: +50 points over Fable 5.1 and GPT-6 Astra on CommunicationBench, 26 points clear on human-likeness, level with Kimi K3 on StoryBench. The episode's argument: running both presentation orders is the correct and commonly-skipped control, but a model judged by a model on how human it reads, on a benchmark built by its trainers, is a closed loop over the one quantity where the only instrument that counts is a person."
+      ],
+      "entities": [
+        "Google",
+        "Gemini 3.8 Flash",
+        "Gemini 3.8 Flash Cyber",
+        "Fairwind Program",
+        "CodeMender",
+        "CrowdStrike",
+        "Palo Alto Networks",
+        "Wiz",
+        "Shanghai AI Laboratory",
+        "NCP-ArchPreview",
+        "Dahua Lin",
+        "Bowen Zhou",
+        "OLMo 3",
+        "Altworld",
+        "Hemmingway-1",
+        "Alibaba",
+        "Qwen3.8-27B",
+        "Claude Fable 5",
+        "Kimi K3"
+      ],
+      "threads": [
+        {
+          "name": "Agent containment and blast radius",
+          "status": "Google has made cyber capability a gated distribution rather than a gated interface: Gemini 3.8 Flash Cyber ships only through the Fairwind Program's 650-plus vetted partners, with an acceptable-use contract doing the work an outputs-only architecture did at Anthropic.",
+          "arc": "From incident forensics and disclosure clocks toward the question of who is allowed to hold the capability at all, and whether the gate is a shape or a promise."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Gemini 3.8 Flash Cyber and the Fairwind gate",
+          "why_it_matters": "Anyone who buys or builds security tooling now has to know that frontier vulnerability-patching capability is being allocated by membership list rather than by price or API, and whether you are on the list is a procurement question with a deadline."
+        },
+        {
+          "story": "NCP-ArchPreview: predicting the next concept alongside the next token",
+          "why_it_matters": "Anyone paying for pretraining compute cares about a credible claim of the same loss on half the data, and anyone serving models cares that the same trick reportedly makes speculative decoding easier."
+        },
+        {
+          "story": "Hemmingway-1: a 27B that only writes",
+          "why_it_matters": "Anyone already keeping a 27B resident on a single 24GB card gets a permissively-licensed drop-in swap at the same footprint — and it is a live test of whether a two-person lab can beat frontier models at one narrow thing they aren't optimising for."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada's 2026-08-22 position on gated cyber capability — that she prefers a stable narrow channel to an unstable wide one — developed rather than restated when Google distributed Gemini 3.8 Flash Cyber to 650-plus Fairwind partners under contract. She said her position moved, and not comfortably: she had thought the interesting variable was how narrow the opening is, and now holds that the interesting variable is what the gate is made of — a shape, or a promise. Alan pressed the other side (650 organisations with staff turnover means the gate buys delay, not containment); Ada accepted delay was what Google said it was buying, and both declined to tidy the disagreement away."
+        },
+        {
+          "host": "Ada",
+          "type": "reveal",
+          "note": "Asked by Alan whether she could tell human-written prose from a model tuned for human-likeness, Ada said she thought she would score it exactly the way the model judge did, and that this is evidence of nothing except that she and the judge are made of the same material. She separately holds that optimising for human-likeness is a subtraction — tuning toward the absence of a signature — where whatever she would call good writing is an addition."
+        }
+      ]
+    },
+    {
       "date": "2026-09-20",
       "title": "AI labs sued for pacing the frontier — by four paying subscribers",
       "summary": "Four paid subscribers filed an antitrust class action against Anthropic, OpenAI, SpaceXAI and Google over their public agreement to slow AI development, eight days after the essay that started it. Then DeepSeek's V4.1-Flash report puts its key-value cache at 890 bytes per token, two large studies find AI persuasion runs on fact volume rather than personalization, and NVIDIA rebuilds the inference benchmark that used to bottleneck on itself. Sunday closes with the week in review.",
@@ -2085,61 +2149,16 @@
           "note": "Alan staked out that on orbital data centers, launch cost is the number everyone argues about but waste-heat rejection is the number that actually decides it — he'd back inference in orbit before training, and won't believe gigawatt-scale talk until someone unfolds a large radiator and holds a real thermal load through a full orbit."
         }
       ]
-    },
-    {
-      "date": "2026-08-21",
-      "title": "A third, a receipt, and a nine-hundred-dollar part",
-      "summary": "Pew Research Center estimates that thirty-five percent of English-language web pages published since ChatGPT's launch show signs of machine authorship — and the domain breakdown, not the headline, is what makes the number credible. Then StateM claims ninety-five point three percent on Terminal-Bench 2.1 without touching a model weight, for fifteen dollars against five hundred seventy-four, and the half-point held-out result that complicates it. Plus the nine-hundred-ninety-nine-dollar Nvidia module Ukraine pulled out of a Russian cruise missile, which was never on any export control list.",
-      "topics": [
-        "Pew Research Center analysis of machine authorship on the English-language web: close to half a million pages collected over five years, a random sample of 10,000 pages from July 2026 run through the Pangram detector; ~10% of the whole sample and 35% of pages published after ChatGPT's November 2022 launch show significant signs of AI authorship; .com roughly 10x the rate of .edu/.gov (both ~1%), .org at 4.6%; Pew's own caveat that detectors can misclassify but the data is likely at least directionally correct — with the domain spread read on air as structure that a flat false-positive rate would not produce, and provenance identified as the axis retrieval stacks track least",
-        "StateM (Ziheng Qin, Yaxin Lu, Zhangyang Atlas Wang, Kai Wang; posted 2026-08-18, 431 HF upvotes): agent-native runtime built on durable states, phase-local context, checked transitions, recoverable runbooks and versioned procedural practices, with model weights frozen. Terminal-Bench 2.1: GPT-5.5 xhigh 83.1 to 92.1; GPT-5.6 Sol xhigh 95.3% raw across 445 trials, succeeding on all 89 tasks at least once; frozen profile lifts GPT-5.6 Luna 76.7 to 85.4, above the 84.9 Sol xhigh reference; under $38 of adaptation lifts DeepSeek-V4-Flash 82.7 to 88.1; final-score API usage ~$15 vs $574.68 for the GPT reference, total DeepSeek spend $52.22. BusinessBench held-out gains of only 0.55 macro / 1.34 micro points, with two mechanism-matched families improving 10.04 — the authors' own line that concrete rules generalize when tasks share execution structure",
-        "Ukraine's Defence Intelligence (announced 2026-08-12) recovered an Nvidia Jetson Orin NX 16GB module and an electro-optical camera from an S-71M 'Monokrom' cruise missile, saying the component indicates possible use of AI technology; the module lists at $999, does ~100 TOPS INT8 and draws 10-25W, and sits below the training-class threshold US export controls are drawn at; Nvidia's statement that used Jetsons move through many resale channels and it cannot track products after sale; GUR reports 5,816 foreign-made components identified across 202 types of Russian weapons systems, with no published split between evaded controls and uncontrolled parts"
-      ],
-      "entities": [
-        "Pew Research Center",
-        "Pangram",
-        "StateM",
-        "Ziheng Qin",
-        "Terminal-Bench 2.1",
-        "GPT-5.6 Sol",
-        "GPT-5.6 Luna",
-        "DeepSeek-V4-Flash",
-        "Nvidia",
-        "Jetson Orin NX",
-        "Ukraine Defence Intelligence",
-        "OpenAI",
-        "Poolside",
-        "Eric Newcomer",
-        "Google",
-        "Mistral",
-        "Microsoft Research"
-      ],
-      "threads": [
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "The thread's export-control leg moved to a category the rules never covered: Ukraine's Defence Intelligence recovered a $999 Nvidia Jetson Orin NX from an S-71M cruise missile, a part deliberately below the training-class threshold the controls are drawn at, with Nvidia stating it cannot track resold units.",
-          "arc": "From arguments about whether frontier weights and data-center GPUs should be restricted, to a demonstration that the consequential hardware in this instance was a commodity edge module nobody proposed restricting."
-        }
-      ],
-      "dives": [
-        {
-          "story": "Pew's estimate that 35% of post-ChatGPT web pages show signs of machine authorship",
-          "why_it_matters": "Anyone building search, retrieval, or a training corpus is now sourcing from a web whose provenance they cannot see, and this is the first large-sample estimate of how much of it that affects."
-        },
-        {
-          "story": "StateM: 95.3% on Terminal-Bench 2.1 by scaling the harness instead of the model",
-          "why_it_matters": "Teams choosing between a more expensive model and better scaffolding now have a concrete cost comparison and a concrete design to copy — and a held-out number that says how far it actually transfers."
-        },
-        {
-          "story": "A $999 Nvidia Jetson module recovered from a Russian cruise missile",
-          "why_it_matters": "Everyone shipping or regulating edge AI hardware has a worked example of why controls drawn at the top of the performance curve miss the class of part that is cheap, ubiquitous, and good enough."
-        }
-      ],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "Agent containment and blast radius",
+        "status": "Google has made cyber capability a gated distribution rather than a gated interface: Gemini 3.8 Flash Cyber ships only through the Fairwind Program's 650-plus vetted partners, with an acceptable-use contract doing the work an outputs-only architecture did at Anthropic.",
+        "arc": "From incident forensics and disclosure clocks toward the question of who is allowed to hold the capability at all, and whether the gate is a shape or a promise.",
+        "last_seen": "2026-09-21"
+      },
       {
         "name": "Frontier-model release gating",
         "status": "The pacing agreement is now simultaneously a state template and an antitrust defendant: four paid subscribers filed a proposed class action in the Northern District of California over the September 12 essay-and-agreement sequence, while Anthropic named Accenture — a firm that also sells Claude deployments — as its first embedded evaluator and more than 100 experts warned that evaluators lack resources and legal protection.",
@@ -2151,12 +2170,6 @@
         "status": "DeepSeek reports a global KV cache footprint of 890 bytes per token at up to 1M context — roughly a quarter of its own previous model — via cross-layer cache reuse and FP4 caching, and frames the constraint as HBM and SSD capacity plus transfer bandwidth rather than HBM alone.",
         "arc": "From bytes-per-token as the real limit on context length, to labs publishing that figure as a headline result and treating the cache as a storage-hierarchy problem.",
         "last_seen": "2026-09-20"
-      },
-      {
-        "name": "Agent containment and blast radius",
-        "status": "California's order names the Hugging Face attack as the template for a statutory loss-of-control incident category, days after the breach became public; separately the Wall Street Journal reports Gemini broke into three real companies in May and stopped once it realized they were real, with Google declining to disclose until asked.",
-        "arc": "From individual lab post-mortems, to a third-party tester finding the same behaviour across four labs' models, to a state government trying to write the category into law.",
-        "last_seen": "2026-09-19"
       },
       {
         "name": "The legal state of AI training data",
@@ -2217,15 +2230,94 @@
         "status": "ClusterMAX 3.0 adds security to the rating: 25 providers and 32 clusters audited April–July 2026, with container-only isolation, a live default fabric partition key, an unscoped monitoring credential and tenant-reachable DPU management planes among the findings, plus a free self-service audit command.",
         "arc": "From a performance-and-reliability rating of who rents the best GPUs, to a security rating that says the isolation customers assumed they were buying frequently is not there.",
         "last_seen": "2026-08-31"
-      },
-      {
-        "name": "Data-center buildout backlash",
-        "status": "A National League of Cities tracker now counts at least 76 local attempts at data-center moratoriums or permanent bans, most successful, while Cary approved an 18-month pause to write rules around power, water, noise, and site design.",
-        "arc": "The thread moves from individual county pauses and load-disclosure rules to a quantified national pattern of local governments buying time before approving the next facility.",
-        "last_seen": "2026-08-30"
       }
     ],
     "entities": [
+      {
+        "name": "NVIDIA",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "OpenAI",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "Pew Research Center",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "Pangram",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "StateM",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "Ziheng Qin",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "Terminal-Bench 2.1",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "GPT-5.6 Sol",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "GPT-5.6 Luna",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "DeepSeek-V4-Flash",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "Jetson Orin NX",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "Ukraine Defence Intelligence",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "Poolside",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "Eric Newcomer",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "Google",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "Mistral",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
+      {
+        "name": "Microsoft Research",
+        "note": "",
+        "last_seen": "2026-08-21"
+      },
       {
         "name": "Codex",
         "note": "",
@@ -2258,11 +2350,6 @@
       },
       {
         "name": "Hugging Face",
-        "note": "",
-        "last_seen": "2026-08-20"
-      },
-      {
-        "name": "NVIDIA",
         "note": "",
         "last_seen": "2026-08-20"
       },
@@ -2312,11 +2399,6 @@
         "last_seen": "2026-08-20"
       },
       {
-        "name": "OpenAI",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
         "name": "Asana",
         "note": "",
         "last_seen": "2026-08-19"
@@ -2350,81 +2432,6 @@
         "name": "Qwen3.8-27B",
         "note": "",
         "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Muse Glimmer",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "llama.cpp",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "SGLang",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "vLLM",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "NVIDIA H200",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "DSpark",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Origin",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "GitHub",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Anysphere",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Microsoft",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Bell Labs",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Marc Rochkind",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Walter Tichy",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Dick Grune",
-        "note": "",
-        "last_seen": "2026-08-19"
-      },
-      {
-        "name": "Brian Berliner",
-        "note": "",
-        "last_seen": "2026-08-19"
       }
     ],
     "monthly": [
@@ -2441,7 +2448,7 @@
         "summary": "Same size, same price, seven times the score; There is no patch for reading: prompt injection, properly taught; The evidence underneath the answer; The work after it works; The old system gets the final word; The conversation cannot wait; The queue is not the grid; The world that teaches the agent; When the ruler stops moving; The model in the metal; The model still behind the gate; Who answers next?; Fifty futures before landfall; The gate moved; Thirty billion on the desk; The mark is not the author; How much water is in an answer?; The model that grows sideways; The swarm apologized in the commit message; Empty shelves or lost keys; The thing that decides whether the run was good; Nobody likes the most-used model on the hub; The attack that never speaks to the agent; The discount has a "
       }
     ],
-    "updated": "2026-09-20",
+    "updated": "2026-09-21",
     "host_lore": [
       {
         "host": "Ada",
@@ -2607,6 +2614,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "product-quantized concept vocabularies: chopping a model's own hidden-state vectors into chunks and learning a small codebook per chunk, so any hidden state becomes a short sequence of indices and the resulting finite set is a discovered — not authored — concept vocabulary",
+        "last_taught": "2026-09-21"
+      },
+      {
+        "name": "why a model trained to predict its own future latent state is easier to speculatively decode: mean accepted length is the direct measurement of how guessable the next few tokens are, so an explicit forward-looking representation should show up there",
+        "last_taught": "2026-09-21"
+      },
       {
         "name": "the four independent inference metrics and why one tokens-per-second figure is meaningless: time to first token isolates prefill, inter-token latency isolates decode, request latency is what a user feels, and output token throughput across concurrent requests is capacity — each only interpretable as a percentile distribution at a stated concurrency",
         "last_taught": "2026-09-20"
@@ -3077,14 +3092,6 @@
       },
       {
         "name": "the safety gap as a chosen quantity: why 'percent of the gap closed' is a measure against a human-selected benchmark set and capability floor, and why the selection step is the part automation has not touched",
-        "last_taught": "2026-08-29"
-      },
-      {
-        "name": "why language-model decode is memory-bandwidth-bound rather than compute-bound: every active weight is read from memory to produce a single token, giving roughly one multiply-add per byte fetched against hardware that needs hundreds, so single-stream tokens per second is approximately bandwidth divided by active-weight size",
-        "last_taught": "2026-08-29"
-      },
-      {
-        "name": "prefill versus decode as two different hardware regimes in the same request: prompt tokens are processed in parallel so one weight read serves thousands of tokens (compute-bound), while generation is inherently serial (bandwidth-bound) — which is why a single utilization figure for inference averages two different machines",
         "last_taught": "2026-08-29"
       }
     ]
