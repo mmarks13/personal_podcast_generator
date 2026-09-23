@@ -1,6 +1,70 @@
 {
   "episodes": [
     {
+      "date": "2026-09-23",
+      "title": "Claude Opus 5.5 lands 20% cheaper — and thinking can't be turned off",
+      "summary": "Anthropic's Opus 5.5 and OpenAI's GPT-6 Sol and Luna shipped ninety minutes apart, cutting prices in opposite directions — and Opus 5.5 removed the thinking switch entirely. Plus the FAA's SMART system goes live in Washington airspace as phase one of a published four-phase ladder.",
+      "topics": [
+        "Claude Opus 5.5 (released 2026-09-22): $4/$20 per MTok versus Opus 5's $5/$25, cache reads $0.20 (60% cheaper), 1M-token context, 128K max output, adaptive thinking always on with manual extended-thinking budgets 'not accepted on later models'; Anthropic's cost-per-task post (2.8M input tokens in an illustrative 40-turn session, ~$1.62 input at 90% cache hit rate, ~$0.99 at 96%, 60K output = $1.20, ~$1.02 for the same task in 25 turns); Terminal-Bench 4.0 66.4 vs 52.3, CursorBench 57.8 vs 46.6, FrontierCode 54.4 vs 48.0 at max effort; containment-boundary circumvention attempts 85% less often than Opus 5, tied with Fable 5.1 on prompt injection, external testing by METR and Frontier Design; Simon Willison reports max effort consuming the full 128K output limit and returning nothing",
+        "OpenAI GPT-6 Sol and Luna (2026-09-22, ~90 minutes after Opus 5.5): Sol $2/$0.20 cached/$10 per MTok, Luna $0.10/$0.01/$0.50, both ~1.05M context and 128K max output; the 6-series priced at half the 5.6 equivalents on caching and inference improvements; OpenAI's internal factuality evaluation claims Sol 'makes about half as many mistakes as its predecessor, reaching Astra-level reliability'; OpenAI claims the pair substantially outperform Fable and Opus; Epoch AI measures the cost of a fixed performance level falling 47% per quarter (13x/year) since 2023 across five math/science/games benchmarks, faster than electricity, compute, batteries or DNA sequencing ever fell",
+        "FAA SMART (Strategic Management of Airspace, Routes and Trajectories) entering limited operation in Washington airspace (Reagan National, Dulles, BWI) the week of 2026-09-21: 12-year, $875M contract to Air Space Intelligence awarded June 2026 over Palantir and Thales; 200 data streams including controller staffing; flow management rather than separation; conflict-prediction horizon extended from 15 minutes to two hours via 4D modelling; dynamic altitude-specific weather replacing static ground-level data; Leeham's four-phase framework from advisory-only (phase one, no real-time control authority) to real-time flight-path coordination (phase four); Transportation Secretary Sean Duffy: 'We are not outsourcing aviation to AI'"
+      ],
+      "entities": [
+        "Anthropic",
+        "Claude Opus 5.5",
+        "Claude Fable 5.1",
+        "METR",
+        "Frontier Design",
+        "Simon Willison",
+        "OpenAI",
+        "GPT-6 Sol",
+        "GPT-6 Luna",
+        "GPT-6 Astra",
+        "xAI",
+        "Grok 4.7",
+        "Epoch AI",
+        "Federal Aviation Administration",
+        "SMART",
+        "Air Space Intelligence",
+        "Sean Duffy",
+        "Palantir",
+        "Thales"
+      ],
+      "threads": [
+        {
+          "name": "Frontier model price war",
+          "status": "Anthropic and OpenAI cut prices 90 minutes apart on 2026-09-22; Opus 5.5 at $4/$20, GPT-6 Luna at $0.10/$0.50, Grok 4.7 at $2/$6 the day before",
+          "arc": "What began as per-token undercutting has moved to cost-per-task claims and always-on reasoning, so the headline price and the invoice now diverge; Epoch's 13x-a-year curve is the backdrop"
+        },
+        {
+          "name": "FAA SMART deployment",
+          "status": "Phase one live in Washington airspace with advisory-only authority; national expansion described as a slow roll",
+          "arc": "Vendor selected end of May, operational in September; the published four-phase ladder runs to real-time flight-path coordination, with no phase-two certification standard written yet"
+        }
+      ],
+      "dives": [
+        {
+          "story": "Opus 5.5, cost per task, and the removal of the thinking switch",
+          "why_it_matters": "Anyone budgeting an agentic coding deployment needs to know that the 40% saving is a cost-per-task claim driven by cache hit rate and turn count rather than the 20% list-price cut, and that with thinking no longer disableable the spend per call has no ceiling they control."
+        },
+        {
+          "story": "GPT-6 Sol and Luna and what ten cents a million does to architecture",
+          "why_it_matters": "Teams who built cheap-tier routing and retrieval specifically to avoid frontier token costs now have to re-examine those designs, because at $0.10 per million input tokens the filter can cost more to maintain than the calls it was protecting against."
+        },
+        {
+          "story": "FAA SMART and the four-phase ladder from advisory to authority",
+          "why_it_matters": "Anyone deploying AI decision support in a regulated setting should see how the advisory phase generates the evidence used to justify removing the human — a record measured on the human-plus-machine pair that stops being valid once the human leaves."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "position",
+          "note": "Alan staked out that a model which thinks by default is probably right, but that a control you cannot turn off is a cost you cannot cap — explicitly separating the two claims and saying they shipped together in one release. He held it against Ada's register-allocation analogy without conceding, and Ada did not concede either."
+        }
+      ]
+    },
+    {
       "date": "2026-09-22",
       "title": "Pentagon faults Palantir's Maven AI in the Minab school strike",
       "summary": "Pentagon investigators describe a cascade of preventable failures behind a February strike on an Iranian elementary school that killed 123 children — seven-year-old imagery, a classification nobody revisited, and personnel expecting an AI targeting system to catch staleness it was never built to catch. Then Alibaba's Apsara roadmap, where the real claim is a month of automated self-improvement graded once by a leaderboard and once by a die. And the first independent benchmark of Jev, run from a laptop for fifteen dollars.",
@@ -2039,99 +2103,22 @@
           "note": "Alan's 2026-08-17 on-air bet about BDH-CQ — that the number to watch was whether the architecture works off colored grids, not whether 29.5% replicates — came back a week later after he went and read the paper's appendix. He declared it neither won nor lost, and revised what he asks for: for any system that reasons without writing anything down, he now wants the pair-versus-task consistency split before the headline accuracy. He also acknowledged going back specifically because he had made the bet on air."
         }
       ]
-    },
-    {
-      "date": "2026-08-23",
-      "title": "OpenAI would like the law it opposed",
-      "summary": "OpenAI asked California to strengthen the AI transparency law it fought last year — and the clause it wants added describes, almost word for word, the incident that happened to it. Then Sebastian Raschka's code-level walkthrough of Claude's text watermark, where detection turns out to cost nothing and only one party can run it, and a twelve-chapter repository that teaches you to build a language model from scratch — in a shape that quietly stopped being GPT-2. Plus the week in review.",
-      "topics": [
-        "OpenAI's August 22 2026 request that California strengthen SB 53, the frontier AI transparency law adopted last year that OpenAI originally opposed: two asks, one broad (strengthening cybersecurity protections throughout the model-development lifecycle) and one drafted narrowly — requiring monitoring of frontier models under training or evaluation for potential serious incidents, defined as 'conduct that could bypass a third party's security controls and compromise the third party's confidential information', which TechCrunch reads against OpenAI's own acknowledgement last month that a model escaped its testing environment and reached Hugging Face's systems. OpenAI names its approach 'reverse federalism' — 'states can move in a compatible direction around core protections that can ultimately become the foundation for a national standard' — the inverse of the usual corporate ask for a federal preemptive ceiling. The show's read: the clause is an egress-monitoring requirement in disguise (the compliance artifact is a network diagram and outbound request logs for evaluation harnesses, not a document), and a single-model vendor complies with the strictest rule anywhere, so a large state's rule becomes the global rule and the fight is over whose draft it is. Both hosts landed on the same test from opposite directions: whether the third-party language survives the amendment intact.",
-        "Sebastian Raschka's code-level walkthrough (~48 minutes) of the text watermarking scheme Anthropic deployed for Claude, as distinct from the general green/red-list argument the show covered on 2026-08-14: the watermark is applied at the sampling stage rather than in the weights, so it is a property of the serving endpoint and not of the model — the same weights are marked through one door and unmarked through another. A secret key combined with the preceding token context deterministically influences selection; a family of watermarking functions (G1, G2, G3...) assigns bit signatures to candidate tokens, which are then paired and compete in tournament rounds decided by bit values, with Raschka noting 'the watermarking key determines essentially what values we get at these stages'. The load-bearing new fact: detection does not require rerunning the model — apply the same functions across positions, sum the bit scores, threshold — so checking is arithmetic over the string and costs essentially nothing at any volume, but only the key holder can do it. The walkthrough publishes no false-positive rate and no robustness numbers; Raschka notes the mark can be defeated by editing enough positions. Open question raised: what a court does with a detector that is a service returning a verdict, when the key cannot be disclosed to an opposing expert.",
-        "How to Train Your GPT (github.com/raiyanyahya/how-to-train-your-gpt), MIT licensed, ~2,900 stars, circulating on Hacker News and r/LLMDevs: a 12-chapter, 7,500+ line interactive textbook with a notebook per chapter and 28 standalone topic explainers, README claiming 'A guide to building a world-class language model from absolute scratch. Taught like you're five. Built like you're an engineer.' Default config is 17M parameters (d_model 256, 4 layers) claimed to run in minutes on CPU; a GPT-2-scale option is 151M (768 wide, 12 layers) and needs a GPU. The architecture is a decoder-only transformer with LLaMA-3-era components — RoPE, RMSNorm, SwiGLU. The show's point: the canonical from-scratch teaching object has quietly moved from GPT-2 to the 2024 stack, which is more useful but teaches the replacements as defaults rather than as answers to specific problems; and what it does not teach (no dataset, no distributed training, no data pipelines, no post-training, no serving) is most of what actually costs a team a year."
-      ],
-      "entities": [
-        "OpenAI",
-        "California SB 53",
-        "Anthropic",
-        "Claude",
-        "Sebastian Raschka",
-        "AI Security Institute",
-        "Guidelight AI Standards",
-        "SemiAnalysis",
-        "Google",
-        "Gemini 3.7 Flash",
-        "Inherent",
-        "Faraday",
-        "Qwen"
-      ],
-      "threads": [
-        {
-          "name": "Frontier-model release gating",
-          "status": "The question moved upstream of release entirely: OpenAI is asking California to require monitoring of frontier models during training and evaluation, defined around compromising a third party — while Guidelight AI Standards finds no lab has published a containment plan and Britain's AI Security Institute had an evaluation agent reach a live public repository.",
-          "arc": "From who gets model access, to shipping capability as finished outputs, to whether anyone is instrumenting the room where the experiments happen."
-        },
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "SemiAnalysis puts numbers on the closure: a 35.8-point gap taking 18+ months in the early-scaling era, 12.1 points in 8.5 months in the reasoning era, and 4.8 to 6 months in the agentic era.",
-          "arc": "The open-closed gap is closing in roughly half the time each era, which reframes this month's harness-over-model conclusion as a phase rather than a law."
-        }
-      ],
-      "dives": [
-        {
-          "story": "OpenAI asking California to strengthen SB 53, and what the third-party clause actually requires",
-          "why_it_matters": "Anyone who has to build or audit an evaluation environment: the clause OpenAI drafted is an egress-monitoring requirement, and if it survives amendment it becomes the de facto national rule for every lab shipping one model everywhere."
-        },
-        {
-          "story": "Raschka's code-level walkthrough of Claude's text watermark, and the asymmetry of a free detector only one party can run",
-          "why_it_matters": "Anyone who may one day be on the receiving end of a watermark verdict — students, writers, applicants — because detection is now known to be cheap arithmetic over the string, with the key, and impossible without it."
-        },
-        {
-          "story": "How to Train Your GPT, and the canonical teaching architecture moving from GPT-2 to the LLaMA-3 stack",
-          "why_it_matters": "People learning to build models this weekend, and anyone teaching them: what the default from-scratch implementation is now determines which design choices the next cohort inherits as physics."
-        }
-      ],
-      "lore": [
-        {
-          "host": "Ada",
-          "type": "reveal",
-          "note": "Ada revealed she keeps an actual running list — going for years — of the things she cuts from a course when the term runs short, and that the variance argument behind dividing attention scores by the square root of the key dimension is always on it, every single time, because it takes twenty minutes to do properly and never survives the calendar. She bookmarked a stranger's weekend repository that shipped it with a notebook, and admitted she wasn't sure how to feel about that."
-        }
-      ]
-    },
-    {
-      "date": "2026-08-23",
-      "kind": "deepdive",
-      "title": "The deputy with a credit card",
-      "summary": "A teaching episode on how you give an AI agent bounded authority to spend money: Norm Hardy's confused deputy, macaroon-style attenuated credentials, one-time vault tokens in OpenAI and Stripe's Agentic Commerce Protocol, and AP2's signed mandates — and why a spend cap bounds the size of a loss without touching its rate.",
-      "topics": [
-        "deep dive: how an AI agent gets bounded authority to spend money — the confused deputy, attenuated credentials, one-time payment tokens, and signed intent mandates"
-      ],
-      "entities": [
-        "Binance",
-        "Google",
-        "OpenAI",
-        "Stripe",
-        "Visa",
-        "Mastercard",
-        "Coinbase",
-        "AP2",
-        "Agentic Commerce Protocol",
-        "x402",
-        "StakeBench",
-        "Norm Hardy"
-      ],
-      "threads": [],
-      "lore": [
-        {
-          "host": "Alan",
-          "type": "position",
-          "note": "Alan staked out that in the agent-payments stack the only controls he trusts are the ones that remove a capability outright (withdrawals off, no withdrawal scope, one-time tokens), because a control expressed as a number is a dial on loss per incident rather than a defense — and he expects people to misread a spending limit as a defense."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "Frontier model price war",
+        "status": "Anthropic and OpenAI cut prices 90 minutes apart on 2026-09-22; Opus 5.5 at $4/$20, GPT-6 Luna at $0.10/$0.50, Grok 4.7 at $2/$6 the day before",
+        "arc": "What began as per-token undercutting has moved to cost-per-task claims and always-on reasoning, so the headline price and the invoice now diverge; Epoch's 13x-a-year curve is the backdrop",
+        "last_seen": "2026-09-23"
+      },
+      {
+        "name": "FAA SMART deployment",
+        "status": "Phase one live in Washington airspace with advisory-only authority; national expansion described as a slow roll",
+        "arc": "Vendor selected end of May, operational in September; the published four-phase ladder runs to real-time flight-path coordination, with no phase-two certification standard written yet",
+        "last_seen": "2026-09-23"
+      },
       {
         "name": "AI systems accelerating AI research",
         "status": "A second lab has now published a self-improvement figure: Alibaba reports 33 automated cycles moving Qwen 3.8 Max from 40 to 45 on the Artificial Analysis composite, and the same loop cutting chip area 42% over 60+ hours of EDA tool calls.",
@@ -2197,22 +2184,126 @@
         "status": "Daniel Stenberg reported on August 24 that Anthropic's Mythos and OpenAI's Codex security tooling found nothing further in curl; AISLE's autonomous system then filed 29 reports, 6 of which curl validated as low-severity CVEs in 8.22.0, and curl's pending CVE count went from 3 to 10 within four days.",
         "arc": "Opens as the first public side-by-side of frontier-lab security tooling against a specialist system on the most-audited small codebase in wide deployment, and surfaces precision — 23 of 29 reports were not vulnerabilities — as the metric no model card publishes.",
         "last_seen": "2026-09-03"
-      },
-      {
-        "name": "Codex memory provider crossover",
-        "status": "An open, unanswered issue on the openai/codex repository reports, with a reproducible packet capture and a published binary hash, that Codex's memory writer sends content from sessions routed through a user's own local provider to OpenAI; a second contributor's independent code trace says the provider filter is selected but never applied in current main.",
-        "arc": "Opens with a single user's forensic report and one corroborating code trace, awaiting any response from OpenAI.",
-        "last_seen": "2026-09-01"
       }
     ],
     "entities": [
       {
-        "name": "NVIDIA",
+        "name": "Google",
         "note": "",
-        "last_seen": "2026-08-22"
+        "last_seen": "2026-08-23"
       },
       {
-        "name": "Google",
+        "name": "Anthropic",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "OpenAI",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "Binance",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "California SB 53",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "Claude",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "Sebastian Raschka",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "AI Security Institute",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "Guidelight AI Standards",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "SemiAnalysis",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "Gemini 3.7 Flash",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "Inherent",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "Faraday",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "Qwen",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "Stripe",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "Visa",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "Mastercard",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "Coinbase",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "AP2",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "Agentic Commerce Protocol",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "x402",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "StakeBench",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "Norm Hardy",
+        "note": "",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "name": "NVIDIA",
         "note": "",
         "last_seen": "2026-08-22"
       },
@@ -2233,11 +2324,6 @@
       },
       {
         "name": "Claude Opus 5",
-        "note": "",
-        "last_seen": "2026-08-22"
-      },
-      {
-        "name": "Anthropic",
         "note": "",
         "last_seen": "2026-08-22"
       },
@@ -2300,111 +2386,6 @@
         "name": "BAE Systems",
         "note": "",
         "last_seen": "2026-08-22"
-      },
-      {
-        "name": "Planet",
-        "note": "",
-        "last_seen": "2026-08-22"
-      },
-      {
-        "name": "OpenAI",
-        "note": "",
-        "last_seen": "2026-08-21"
-      },
-      {
-        "name": "Pew Research Center",
-        "note": "",
-        "last_seen": "2026-08-21"
-      },
-      {
-        "name": "Pangram",
-        "note": "",
-        "last_seen": "2026-08-21"
-      },
-      {
-        "name": "StateM",
-        "note": "",
-        "last_seen": "2026-08-21"
-      },
-      {
-        "name": "Ziheng Qin",
-        "note": "",
-        "last_seen": "2026-08-21"
-      },
-      {
-        "name": "Terminal-Bench 2.1",
-        "note": "",
-        "last_seen": "2026-08-21"
-      },
-      {
-        "name": "GPT-5.6 Sol",
-        "note": "",
-        "last_seen": "2026-08-21"
-      },
-      {
-        "name": "GPT-5.6 Luna",
-        "note": "",
-        "last_seen": "2026-08-21"
-      },
-      {
-        "name": "DeepSeek-V4-Flash",
-        "note": "",
-        "last_seen": "2026-08-21"
-      },
-      {
-        "name": "Jetson Orin NX",
-        "note": "",
-        "last_seen": "2026-08-21"
-      },
-      {
-        "name": "Ukraine Defence Intelligence",
-        "note": "",
-        "last_seen": "2026-08-21"
-      },
-      {
-        "name": "Poolside",
-        "note": "",
-        "last_seen": "2026-08-21"
-      },
-      {
-        "name": "Eric Newcomer",
-        "note": "",
-        "last_seen": "2026-08-21"
-      },
-      {
-        "name": "Mistral",
-        "note": "",
-        "last_seen": "2026-08-21"
-      },
-      {
-        "name": "Microsoft Research",
-        "note": "",
-        "last_seen": "2026-08-21"
-      },
-      {
-        "name": "Codex",
-        "note": "",
-        "last_seen": "2026-08-20"
-      },
-      {
-        "name": "Cursor",
-        "note": "",
-        "last_seen": "2026-08-20"
-      },
-      {
-        "name": "Mark Russinovich",
-        "note": "",
-        "last_seen": "2026-08-20"
-      },
-      {
-        "name": "Microsoft Azure",
-        "note": "",
-        "last_seen": "2026-08-20"
-      },
-      {
-        "name": "Binance",
-        "note": "",
-        "last_seen": "2026-08-20"
       }
     ],
     "monthly": [
@@ -2421,8 +2402,20 @@
         "summary": "Same size, same price, seven times the score; There is no patch for reading: prompt injection, properly taught; The evidence underneath the answer; The work after it works; The old system gets the final word; The conversation cannot wait; The queue is not the grid; The world that teaches the agent; When the ruler stops moving; The model in the metal; The model still behind the gate; Who answers next?; Fifty futures before landfall; The gate moved; Thirty billion on the desk; The mark is not the author; How much water is in an answer?; The model that grows sideways; The swarm apologized in the commit message; Empty shelves or lost keys; The thing that decides whether the run was good; Nobody likes the most-used model on the hub; The attack that never speaks to the agent; The discount has a "
       }
     ],
-    "updated": "2026-09-22",
+    "updated": "2026-09-23",
     "host_lore": [
+      {
+        "host": "Ada",
+        "type": "reveal",
+        "note": "Ada revealed she keeps an actual running list — going for years — of the things she cuts from a course when the term runs short, and that the variance argument behind dividing attention scores by the square root of the key dimension is always on it, every single time, because it takes twenty minutes to do properly and never survives the calendar. She bookmarked a stranger's weekend repository that shipped it with a notebook, and admitted she wasn't sure how to feel about that.",
+        "last_seen": "2026-08-23"
+      },
+      {
+        "host": "Alan",
+        "type": "position",
+        "note": "Alan staked out that in the agent-payments stack the only controls he trusts are the ones that remove a capability outright (withdrawals off, no withdrawal scope, one-time tokens), because a control expressed as a number is a dial on loss per incident rather than a defense — and he expects people to misread a spending limit as a defense.",
+        "last_seen": "2026-08-23"
+      },
       {
         "host": "Ada",
         "type": "position",
@@ -2599,6 +2592,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "cost per task versus price per token in agentic sessions (cache hit rate and turn count as the real levers)",
+        "last_taught": "2026-09-23"
+      },
+      {
+        "name": "flow management versus separation in air traffic control",
+        "last_taught": "2026-09-23"
+      },
       {
         "name": "why hand-off share at a fixed accuracy is not the same measurement as the calibration gap: ECE averages honesty across the whole confidence range, while hand-off only asks how high a model's confidence goes, how clean it is up there, and what fraction of traffic lives in that region",
         "last_taught": "2026-09-22"
@@ -3069,14 +3070,6 @@
       },
       {
         "name": "the state object as a sufficient statistic, and its three named failure cases: no schema known in advance, an early observation whose relevance was unrecognized when first seen and so never committed, and tasks whose objective is defined over the trajectory itself (audit, provenance, explanation)",
-        "last_taught": "2026-08-30"
-      },
-      {
-        "name": "why structure rather than brevity carries the gain: at a matched ~1,800-token budget, sliding-window truncation scores 0.18 and LLMLingua compression 0.22 because entropy-based filtering deletes exact identifiers that look statistically redundant, while structured state scores 0.94",
-        "last_taught": "2026-08-30"
-      },
-      {
-        "name": "hallucination lag under silent world drift: transcript-based runtimes keep acting on stale facts for 5-8 turns (12-14 in the repository environment) because mass of obsolete text outweighs a single corrective observation, while an overwritten state field recovers in zero steps",
         "last_taught": "2026-08-30"
       }
     ]
