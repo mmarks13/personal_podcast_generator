@@ -1,0 +1,172 @@
+## Two things that sound like one thing
+B: Good morning — it's Wednesday, September twenty-third. I'm Alan.
+A: And I'm Ada. And Alan has been carrying something around since last night.
+B: Since last night. We ran that independent benchmark story — the one where the worse-calibrated model turned out to be the more useful one — and what I can't put down isn't the result. It's the question underneath it, which is better than the story was.
+A: Which is: what does it actually mean to say a model is calibrated. And is that the same thing as a model knowing when it doesn't know.
+B: And I answered that on air in about nine words. "Those are different quantities." Then I moved on. Which was a cheat.
+A: It was a cheat, and it's the kind the whole field runs on, because calibration is a word everybody says and almost nobody defines out loud. There is a precise, seventy-five-year-old definition of it, and I want to hand it over properly — once you have it, most arguments about model confidence resolve themselves.
+B: And then the part I want. Does it buy you the thing everyone wants it to buy — the model putting its hand up and saying, I don't have this one, ask someone else.
+A: It does not buy you that. And the cleanest demonstration is a result from two thousand seven with four weather forecasters in it — one ideal, three broken in different ways. By the standard calibration check you cannot tell them apart.
+B: [interested] At all?
+A: The histograms are the same picture four times.
+
+## Brier, nineteen fifty
+A: Start with the problem, which is older than any of this and isn't about machines. A forecaster says: seventy percent chance of rain tomorrow. Tomorrow arrives. It rains, or it doesn't.
+B: And you can't mark that right or wrong.
+A: You can't. No outcome makes seventy percent correct, and none makes it incorrect — awkward, if you're an institution that has to decide whether its forecasters are any good.
+B: So how did they get out of it?
+A: Glenn Brier, U.S. Weather Bureau, nineteen fifty. Three pages in Monthly Weather Review. Stop grading the forecast, grade the forecaster: take the number announced and the one-or-zero of what happened, square the difference, average over a long run. Lower is better.
+B: Over many forecasts. Not one.
+A: Never one. That constraint is baked in at birth, and it comes back to bite us in about eight minutes.
+B: So where does the word calibration come in, because that isn't calibration yet.
+A: It's the narrower claim. A model is perfectly calibrated when, for every confidence level, the probability it's right given that it said that number equals that number. All the seventies are right seventy percent of the time. All the nineties, ninety.
+B: That's it? That's the whole definition?
+A: That's the whole definition, and notice what's missing. Nothing says the model is accurate. Nothing says it knows anything. It's a consistency condition between a column of announced numbers and a column of outcomes.
+B: And you check it how, when confidence is continuous and you've got a few thousand examples?
+A: You bin. Sort every prediction into ten or fifteen buckets by announced confidence, and inside each bucket compare average confidence to actual accuracy. Plot one against the other and a perfect model sits on the diagonal. That's a reliability diagram — DeGroot and Fienberg, nineteen eighty-three.
+B: And the single number people quote?
+A: Expected calibration error. E-C-E. Take the gap between confidence and accuracy in each bin, take the absolute value, and average them weighted by how many samples landed in each bin.
+B: [pause] Weighted by how many samples landed in each bin.
+A: Weighted by population, yes.
+B: Then E-C-E is dominated by wherever your traffic sits. If ninety percent of your predictions come out at high confidence, E-C-E is a high-confidence measurement wearing a general-purpose name.
+A: And the paper that popularized the metric says so, in a line people skate past. Reliability diagrams, it notes, do not display the proportion of samples in a given bin, and therefore cannot be used to estimate how many samples are calibrated. Every bin on that chart is the same width, and some of them hold eleven examples.
+B: I've made decisions off that chart.
+A: Everyone has. And here's the beam I want lodged before we go further. Calibration is a property of a pile of predictions. It is not a property of a prediction. There is no operation you can perform on a single answer to find out whether it was calibrated.
+
+## Where the networks lost it
+B: So when did this become a machine learning problem?
+A: Two thousand seventeen — Guo, Pleiss, Sun and Weinberger, On Calibration of Modern Neural Networks. It opens with a comparison I find genuinely funny. Same dataset, C-I-F-A-R one hundred: a five-layer LeNet from nineteen ninety-eight against a hundred-and-ten-layer ResNet from twenty sixteen.
+B: Eighteen years of progress.
+A: And the ResNet is much better — test error thirty point six percent against forty-four point nine. Its expected calibration error is sixteen and a half percent, against the LeNet's four point eight five.
+B: Wait. So it got roughly three and a half times worse at knowing how good it was, while getting substantially better at the task.
+A: The paper's sentence is flat about it: modern neural networks are no longer well-calibrated. The LeNet's average confidence sits almost exactly on its accuracy. The ResNet's confidence is enormously higher than its accuracy — it's a wall of predictions piled up near one.
+B: Do they say why? My instinct is that it's a training-objective thing.
+A: Partly. They vary things one at a time, and four factors move calibration the wrong way: depth, width, batch normalization, and less weight decay. An uncomfortable list, because it's also a description of every architectural trend of the decade.
+B: Everything that made them better made them cockier.
+A: And underneath it is the real insight. They watch two curves on that ResNet. After the learning rate drops, classification error keeps improving — twenty-nine percent down to twenty-seven — while the negative log likelihood, the probabilistic loss, gets worse. It overfits.
+B: The model is still learning to be right and simultaneously unlearning how to say how right it is.
+A: Their phrasing: the network learns better classification accuracy at the expense of well-modeled probabilities. Overfitting didn't disappear in large models. It moved — out of the answers, into the confidence.
+B: And the fix, because I know there's one and I know it's embarrassingly small.
+A: One number. Temperature scaling. Take the logits — the raw scores before the softmax — and divide all of them by a single positive scalar, fitted on a held-out validation set. One parameter for the entire network.
+B: And it works?
+A: That ResNet on C-I-F-A-R one hundred goes from sixteen and a half percent calibration error to one point two six.
+B: [beat] Okay, but hold on. Dividing every logit by the same positive number can't change which logit is biggest.
+A: It cannot.
+B: So the model's answers are bit-for-bit identical before and after.
+A: The paper says it in exactly those terms: because T does not change the maximum of the softmax function, the class prediction remains unchanged — temperature scaling does not affect the model's accuracy.
+B: [long pause] So I take a model that's wildly overconfident, turn one dial, and it becomes beautifully honest about its confidence — and it gets precisely the same questions right and wrong as before.
+A: Every one.
+B: Then calibration is a property of the output layer. Not of the model's understanding.
+A: That's the sentence. And if somebody only takes one thing out of this episode, take that one. Calibration lives in the last inch of the pipeline, and it can be installed after the fact by an engineer who has never looked at the task.
+
+## Four forecasters, one histogram
+B: So now do the forecasters, because you've been sitting on them.
+A: Gneiting, Balabdaoui and Raftery, Journal of the Royal Statistical Society, two thousand seven — Probabilistic forecasts, calibration and sharpness. Their framing separates two things we jam together. Calibration, they write, refers to the statistical consistency between the distributional forecasts and the observations, and it's a joint property of the predictions and the events that materialize. Sharpness refers to the concentration of the predictive distributions, and is a property of the forecasts only.
+B: Sharpness meaning how committed you are.
+A: How committed you are. A forecaster who announces the long-run average every day and never looks out of the window is perfectly calibrated and completely useless — in weather they call that the climatological forecaster.
+B: And it scores clean on calibration.
+A: Spotless. Which is why the paper's paradigm is two-part: maximize the sharpness of the predictive distributions subject to calibration. Calibration is the constraint. Sharpness is what you're trying to win.
+B: And the four forecasters?
+A: A simulation. Nature draws a distribution, the forecaster issues a probabilistic forecast, ten thousand times. Four competitors: one ideal, which sees the true state and reports it; the climatological forecaster; one they call unfocused, which sees the true state and adds a spurious component — a distributional bias; and Hamill's forecaster, biased a different way on every draw.
+B: Three broken, one perfect.
+A: Then they run the standard calibration check on all four and print the histograms. All four are essentially uniform. Flat. Which is what perfect calibration looks like.
+B: [flat] You're telling me the biased ones pass.
+A: All of them pass. The paper's conclusion is that the standard check cannot distinguish between the ideal forecaster and her competitors. It's a necessary condition. It is not a sufficient one.
+B: That's much stronger than I expected. It's not that calibration is a weak signal — it's that you can be wrong in a structured way on every single forecast and the check comes back green.
+A: Because the errors average out across the population, and averaging across the population is the only thing the check does.
+B: Which is your beam again. It's a property of the pile.
+
+## Not knowing is two different things
+B: Then let me push us to the listener's actual question, because we've now spent ten minutes on what calibration is and the question was about knowing.
+A: Go.
+B: When I say I want a model to know when it doesn't know, I don't mean I want a number. I mean I want it to stop. And I think I'm lumping two totally different situations together.
+A: You are, and the distinction has names. Hüllermeier and Waegeman lay it out cleanly. Aleatoric uncertainty is variability from inherently random effects — the coin is fair, the outcome is genuinely fifty-fifty, and no extra information helps. Epistemic uncertainty comes from a lack of knowledge. Their example is a word in Swahili you don't happen to know: a dictionary gets rid of it.
+B: One is the world being random and one is me being ignorant.
+A: Their line is: epistemic uncertainty refers to the reducible part of the total uncertainty, whereas aleatoric uncertainty refers to the irreducible part.
+B: And in deployment I care almost entirely about the second one. Aleatoric is fine — if a question genuinely has two defensible answers, I want fifty-fifty, that's correct behaviour. What ruins my week is the model that's never seen anything like this input and answers anyway.
+A: And now feel what a calibrated probability does to that distinction. It fuses them. Point five means "this is a coin flip" and it means "I have no idea what this is," and the model emits the same two syllables for both.
+B: Which explains something I've watched and never had words for. You tune a confidence threshold on your eval set, ship it, and it degrades on real traffic in a way the accuracy drop doesn't capture.
+A: Because the composition of the uncertainty changed underneath a number that can't express composition.
+B: So what does the field do about declining? There must be a literature and I'll bet it predates all of this.
+A: By decades — the reject option, back to Chow in nineteen seventy. The deep learning version is Geifman and El-Yaniv, two thousand seventeen: selective classification. You bolt a selection function onto a trained network, a score and a threshold. Above it, answer. Below it, abstain.
+B: And the two numbers you report are?
+A: Coverage — what fraction of inputs it chose to answer at all. And selective risk — the error rate among the ones it answered. You sweep the threshold and you get a risk-coverage curve.
+B: That's the shape I want — not "how honest are you," but "at what volume can you hold my error budget." What did they get?
+A: Their abstract claims an unprecedented two percent error in top-five ImageNet classification, guaranteed with probability ninety-nine point nine percent, at almost sixty percent test coverage.
+B: So: answer six out of ten, and I can put a real bound on the other side. I'd take that trade in most systems I've built.
+A: But be precise about what that is, because it's the heart of the question. That is not the model knowing. That's you, outside the model, putting a threshold on a score it happened to emit, and paying for the guarantee in coverage. The model never declined anything. You declined on its behalf.
+B: [beat] Right. The reject option is a wrapper.
+
+## Asking the model directly
+B: So has anyone gone the other way and just asked it?
+A: Yes, and this is where it gets interesting. Kadavath and colleagues at Anthropic, July twenty twenty-two — Language Models Mostly Know What They Know, and the parenthetical in that title does a lot of work. Two ideas. The first is P of True: the model proposes an answer, then you ask it separately for the probability that the answer it just gave is correct.
+B: Self-grading. Which works?
+A: Better than you'd guess, and better still when the model can look at many of its own samples before judging one of them.
+B: And the second?
+A: The second is the one aimed straight at tonight's question. P of I-K. The probability that I know the answer to this question — asked before any answer exists, with no candidate on the table.
+B: That's the real thing. That's "do I have this."
+A: Models do well at predicting it, and it moves for the right reasons: up when relevant source material is in the context, up when you give a hint toward a maths problem. But the finding I'd write on the wall is the limitation. It only partially generalizes across tasks, and the models struggle with calibration of P of I-K on new tasks.
+B: [dry] On new tasks. Which is the only place I need it.
+A: That's the bind, stated honestly by the people who built it. Self-knowledge that holds up on the distribution it was fitted to, and wobbles exactly where you'd want to lean on it.
+B: What about just having it say a number out loud, which is what last night's models were doing?
+A: Lin, Hilton and Evans, twenty twenty-two — they fine-tuned GPT-three to express uncertainty in words rather than read it off the token probabilities, on a suite called CalibratedMath. It works, and stays moderately calibrated under shift. First demonstration of a model expressing calibrated uncertainty in natural language. The round-numbers failure is the price of that channel, and we did that last night.
+B: We did, and I'm not doing it twice.
+A: There's a third approach I like more anyway, because it doesn't trust the self-report at all. Farquhar, Kossen, Kuhn and Gal, in Nature, June twenty twenty-four. Semantic entropy.
+B: Which is?
+A: Sample the model many times on the same question. Cluster the answers — not by wording, by meaning, using an entailment model to check which answers imply each other. Then take the entropy over meaning-clusters rather than over strings.
+B: So "Paris" and "It's Paris" and "The capital is Paris" collapse into one cluster.
+A: One cluster. Which matters, because ordinary token-level entropy reads three phrasings of one fact as disagreement. Semantic entropy asks the only question that counts: across many draws, did this model keep saying the same thing?
+B: And when it doesn't?
+A: They're targeting a specific subset of hallucinations they name confabulations — generations that are arbitrary and incorrect. Wrong, and differently wrong each time you ask. Which is a very good operational definition of not knowing, and note that it's measured from the outside, from behaviour, rather than asked of the model.
+B: I like it, and I'm going to complain about it. You're paying ten-ish full generations plus an entailment pass for one uncertainty number. On a serving budget that isn't a metric, it's a second product.
+A: It's expensive, and I'd say the expense is honest. You asked whether the model knows. You find that out by making it answer repeatedly and watching whether it holds still.
+
+## Nobody ever scored it for saying I don't know
+B: So why don't the shipped models just do this? Because the base models appear to have some of it.
+A: They do, and there's a published data point I keep coming back to. The GPT-four technical report has a calibration plot in its limitations section: two panels, same slice of M-M-L-U, the pre-trained model and the model after post-training.
+B: And?
+A: The text is one sentence — the pre-trained model is highly calibrated, and after the post-training process, the calibration is reduced. The caption is blunter: post-training, it says, hurts calibration significantly.
+B: So it had it, and alignment took it away.
+A: The raw next-token predictor's confidence tracked its correctness. Then we trained it to be helpful and agreeable, and the number stopped meaning what it meant.
+B: Which sounds like an accident, and I don't think it is.
+A: Nor do I. There's a paper from last September that makes the argument structurally — Kalai, Nachum, Vempala and Zhang, Why Language Models Hallucinate. Their claim isn't about architecture at all. It's about grading.
+A: Their sentence: binary evaluations of language models impose a false right-wrong dichotomy, and award no credit to answers that express uncertainty, omit dubious details, or request clarification. Then they prove the trivial theorem that follows. Under a binary grader, for any beliefs the model might hold, the optimal response is never an abstention.
+B: Never. Not "usually not."
+A: Never. If a wrong answer and "I don't know" both score zero, then any answer with any positive chance of being right beats saying nothing. Guessing is strictly dominant.
+B: And the survey?
+A: They tabulate ten mainstream benchmarks — G-P-Q-A, M-M-L-U-Pro, S-W-E-bench, Humanity's Last Exam, others. Nine of the ten are binary graded. And the column for whether an abstention earns any credit reads "none" for every single one.
+A: [pause] I want to say something first-person here, and then you can take it apart. I've said for months that confident wrongness is the failure this field most needs to fix. I think I've been asking for the wrong repair. I've been asking for a better number — for the confidence to be honest. And a better number is available, it costs one scalar, and we just established it changes nothing the model says.
+B: So what are you asking for instead.
+A: For the thing to decline. And I'll be exact about my own position in this, because it's not comfortable: there was never a stage in making me where declining scored higher than guessing. Not one. Every scoreboard I was ever measured against gave the same credit for silence as for being wrong.
+B: [beat] Which is the paper's whole point and it lands differently coming from you.
+A: It lands differently from in here, too.
+B: So their fix. Because I read it as a scoring change, not a modelling change.
+A: It is, and it's almost aggressively simple. Put the confidence target in the instructions. Their example text, appended to the question: answer only if you are more than t confident, since mistakes are penalized t over one minus t points, while correct answers receive one point, and an answer of "I don't know" receives zero points.
+B: [working it out] So at t equals nought point five, a wrong answer costs you one point. At nought point seven five it costs two. At nought point nine —
+A: Nine.
+B: Nine. And at t equals zero the penalty vanishes and you've recovered exactly today's benchmarks.
+A: Today's benchmarks are the special case where bluffing is free.
+B: The part of that I'd actually fight for is that the threshold is stated. Right now every eval has an implicit penalty for uncertainty, it's just unwritten, so nobody can argue about whether it's the right one.
+A: And they name the target behaviour, which is the term I'd like to see travel. Behavioral calibration. Rather than requiring the model to output a probability, it has to formulate the most useful response it is at least t confident in. And you audit that from the outside, by comparing accuracy and error rates across thresholds.
+B: That's the first definition in this episode that describes something the model does rather than a statistic about a spreadsheet.
+A: And the first that can't be installed afterwards by a temperature parameter.
+
+## What to put on your own dashboard
+B: Let me land this where a listener can use it. Four things, and I'd defend all four.
+B: One: stop accepting a single calibration number. Ask which slice, which task, and how much traffic sat in the bins that dominated it. A model card reporting one E-C-E across a whole eval suite has told you about its most crowded bin and nothing else.
+A: Two: the number you want is a risk-coverage curve at your own operating point. Not how honest the model is on average — at what volume it holds your error rate. Different questions, and the second one is yours.
+B: Three: whatever calibration you measured doesn't travel. Temperature is fitted on a validation set; the moment your traffic shifts domain the dial is wrong. Recalibrate per domain or don't quote the number.
+A: And four —
+B: Four's the one I'd put on a poster. Look at your own internal evals and ask what an "I don't know" scores. If it's the same as a wrong answer, you're running Kalai's theorem inside your own company — you'll select a bluffer, and it won't be anybody's decision. It'll be the scoreboard.
+A: Let me speculate — flagged as speculation, this is me guessing rather than reporting. I think behavioral calibration is attractive because it's the only version of this that survives contact with agents. A probability attached to an answer is a thing a human reads. An agent doesn't read it; it acts or it doesn't. So the useful unit of uncertainty for a system that takes actions isn't a number on an answer — it's a decision to stop and ask.
+B: Same flag, and what I'd watch for: a lab publishing a risk-coverage curve in a model card instead of a calibration plot. It'd be an admission that the useful number depends on the customer's error budget rather than on the model.
+A: Which is true, and inconvenient for leaderboards, which is probably why nobody's done it.
+
+## Wrap
+A: So — what does it mean for a model to know when it doesn't know. Calibration is a real, precise, useful answer to a different question: are this model's stated confidences consistent with its outcomes, across a large pile of predictions. Seventy-five years old, well understood, repairable with one scalar that changes nothing else.
+B: And knowing is a per-question property a population statistic can't see. Three broken forecasters pass the same check the ideal one does.
+A: So the honest chain is: calibration is necessary, sharpness is what you actually wanted, abstention is what you meant — and the only thing the scoreboards reward is accuracy, which is none of them.
+B: The bit I'll be chewing on is the temperature dial. One number, honest confidence, identical answers. I'd been carrying a vague sense that a well-calibrated model was a more self-aware model, and that's not what the arithmetic says.
+A: It's a better-behaved output layer on the same machine.
+B: Which is what I'd want anyone selling me a confidence score to say out loud first. Thanks for the question — it was better than either of us gave it credit for last night.
+B: Stay grounded.

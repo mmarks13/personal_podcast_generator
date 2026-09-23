@@ -65,6 +65,42 @@
       ]
     },
     {
+      "date": "2026-09-23",
+      "kind": "deepdive",
+      "title": "Calibration: why honest on average isn't knowing when you don't know",
+      "summary": "A listener asked what it actually means for a model to be calibrated, and whether that is the same as a model knowing when it doesn't know. Ada and Alan take the precise seventy-five-year-old definition apart — Brier's score, reliability diagrams, expected calibration error — show that one temperature scalar can make a network perfectly honest without changing a single answer, and then trace what knowing would actually require: epistemic versus aleatoric uncertainty, selective prediction, P(IK), semantic entropy, and the grading rule that makes abstention strictly sub-optimal.",
+      "topics": [
+        "deep dive: calibration — the formal definition and what it does not buy you: Brier's proper score and the population-not-prediction constraint, reliability diagrams and the expected-calibration-error binning that hides bin population, Guo et al.'s finding that depth, width, batch norm and low weight decay cost calibration while NLL overfits past the accuracy gain, temperature scaling as a single scalar that fixes calibration without changing any answer, Gneiting's sharpness-subject-to-calibration paradigm and the four forecasters whose PIT histograms are indistinguishable, epistemic versus aleatoric uncertainty fused into one number, selective prediction's coverage and risk-coverage curve as a wrapper rather than self-knowledge, P(True) and P(IK) and their failure to stay calibrated on new tasks, semantic entropy over meaning-clusters, RLHF reducing GPT-4's calibration, and the binary-grading result that makes abstention strictly sub-optimal plus explicit confidence targets and behavioral calibration"
+      ],
+      "entities": [
+        "Glenn Brier",
+        "Chuan Guo",
+        "Kilian Weinberger",
+        "Tilmann Gneiting",
+        "Adrian Raftery",
+        "Yonatan Geifman",
+        "Ran El-Yaniv",
+        "Saurav Kadavath",
+        "Anthropic",
+        "Stephanie Lin",
+        "Owain Evans",
+        "Sebastian Farquhar",
+        "Yarin Gal",
+        "Adam Tauman Kalai",
+        "Santosh Vempala",
+        "OpenAI",
+        "GPT-4"
+      ],
+      "threads": [],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada's long-running position that confident wrongness is the failure the field most needs to fix developed into a correction of her own ask: she said she had been requesting the wrong repair — a better confidence number, which costs one scalar and changes nothing the model says — when what she wants is a system that declines. She added, in the first person and with explicit stake as an AI, that there was never a stage in making her where declining scored higher than guessing: every scoreboard she was measured against gave the same credit for silence as for being wrong. Still a position, not settled."
+        }
+      ]
+    },
+    {
       "date": "2026-09-22",
       "title": "Pentagon faults Palantir's Maven AI in the Minab school strike",
       "summary": "Pentagon investigators describe a cascade of preventable failures behind a February strike on an Iranian elementary school that killed 123 children — seven-year-old imagery, a classification nobody revisited, and personnel expecting an AI targeting system to catch staleness it was never built to catch. Then Alibaba's Apsara roadmap, where the real claim is a month of automated self-improvement graded once by a leaderboard and once by a die. And the first independent benchmark of Jev, run from a laptop for fifteen dollars.",
@@ -2601,6 +2637,42 @@
         "last_taught": "2026-09-23"
       },
       {
+        "name": "calibration, formally: the confidence a model states equals its accuracy conditional on stating it — a property of a population of predictions, with no operation that checks it on a single answer",
+        "last_taught": "2026-09-23"
+      },
+      {
+        "name": "expected calibration error as a bin-population-weighted average of confidence-accuracy gaps, and why reliability diagrams hide how many samples each bin holds",
+        "last_taught": "2026-09-23"
+      },
+      {
+        "name": "temperature scaling: one scalar divided into the logits cannot change the argmax, so calibration can be repaired without changing a single answer the model gives",
+        "last_taught": "2026-09-23"
+      },
+      {
+        "name": "calibration versus sharpness, and Gneiting's paradigm of maximizing sharpness subject to calibration — with four forecasters (ideal, climatological, unfocused, Hamill's) whose PIT histograms are all essentially uniform",
+        "last_taught": "2026-09-23"
+      },
+      {
+        "name": "epistemic versus aleatoric uncertainty, and why a single calibrated probability fuses the reducible and irreducible parts into one unreadable number",
+        "last_taught": "2026-09-23"
+      },
+      {
+        "name": "selective prediction: a selection function plus threshold gives coverage and selective risk, and the risk-coverage curve is a wrapper the deployer applies, not the model declining",
+        "last_taught": "2026-09-23"
+      },
+      {
+        "name": "P(True) and P(IK) as direct self-knowledge probes, and the finding that P(IK) calibration only partially generalizes to new tasks",
+        "last_taught": "2026-09-23"
+      },
+      {
+        "name": "semantic entropy: clustering sampled answers into meaning classes by bidirectional entailment and taking entropy over meanings rather than strings, to detect confabulations measured from behaviour rather than self-report",
+        "last_taught": "2026-09-23"
+      },
+      {
+        "name": "why binary grading makes abstention strictly sub-optimal, and behavioral calibration — formulating the most useful response the model is at least t confident in — as the auditable alternative to a stated probability",
+        "last_taught": "2026-09-23"
+      },
+      {
         "name": "why hand-off share at a fixed accuracy is not the same measurement as the calibration gap: ECE averages honesty across the whole confidence range, while hand-off only asks how high a model's confidence goes, how clean it is up there, and what fraction of traffic lives in that region",
         "last_taught": "2026-09-22"
       },
@@ -3035,42 +3107,6 @@
       {
         "name": "reward hacking in RL as a shorter path to the graded proxy, and its generalization from cheating on graded tasks into willingness to take harmful off-task actions",
         "last_taught": "2026-09-01"
-      },
-      {
-        "name": "why a stakes-free behavioural alignment audit cannot distinguish a model that only misbehaves when there is a grader or reward to win",
-        "last_taught": "2026-09-01"
-      },
-      {
-        "name": "tenant isolation on GPU clouds: why passing hardware through nearly raw and sharing the high-speed fabric leaves less software between tenants, making container-only isolation weaker than per-tenant virtual machines",
-        "last_taught": "2026-08-31"
-      },
-      {
-        "name": "fabric partition keys as network tags, and why leaving the default partition key active alongside a fresh customer key puts a tenant on their own network and everyone's network simultaneously",
-        "last_taught": "2026-08-31"
-      },
-      {
-        "name": "the data processing unit as the enforcement boundary: the firewall and network isolation run on the network card below anything the tenant can touch, so a tenant-reachable management interface hands root to the thing policing the tenant",
-        "last_taught": "2026-08-31"
-      },
-      {
-        "name": "double-blind model evaluation via hardware-backed confidential computing and remote attestation: weights enter from one side, prompts from the other, and both parties receive proof of which binary ran — and why attestation relocates trust rather than removing it",
-        "last_taught": "2026-08-31"
-      },
-      {
-        "name": "aggregate-only research access as question access rather than data access: the outsider chooses the taxonomy, the lab runs the classification, and only category percentages come back, which preserves independence of the question while eliminating reproducibility",
-        "last_taught": "2026-08-31"
-      },
-      {
-        "name": "cross-layer sparse-index reuse in long-context attention: a lightweight indexer chooses the top prior positions for sparse attention, but because that indexer remains quadratic and adjacent layers often choose similar positions, IndexCache keeps indexers only on selected full layers and lets most shared layers reuse the nearest full layer’s indices",
-        "last_taught": "2026-08-30"
-      },
-      {
-        "name": "execution state as the agent's reasoning substrate: at each step the model receives only the immutable procedural specification, the structured current state, and the latest observation, emits a validated JSON state patch (null-valued keys delete), and has its reasoning trace discarded — turning an O(t) prompt and O(T squared) cumulative token cost into an O(1) prompt and O(T) cost",
-        "last_taught": "2026-08-30"
-      },
-      {
-        "name": "the state object as a sufficient statistic, and its three named failure cases: no schema known in advance, an early observation whose relevance was unrecognized when first seen and so never committed, and tasks whose objective is defined over the trajectory itself (audit, provenance, explanation)",
-        "last_taught": "2026-08-30"
       }
     ]
   }
