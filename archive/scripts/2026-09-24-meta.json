@@ -1,0 +1,59 @@
+{
+  "date": "2026-09-24",
+  "title": "Anthropic makes claude.ai 3x faster — Claude ran the stopwatch",
+  "summary": "Anthropic's engineers explain how deterministic instruction counts, feature flags and a benchmark ratchet let Claude make claude.ai about three times faster in two weeks; Qualcomm's new Snapdragon Extreme chip claims a 30-billion-parameter mixture-of-experts model on a phone; and Illinois stands up an AI Cabinet told to study strict liability and data-centre tax conditions. Plus Claude's enzyme find, Cursor's prompt pruning, Epoch's IKEA benchmark, and Nevada's temporary gas plants.",
+  "sources": [
+    {"group": "Releases", "title": "How we made claude.ai 3x faster in two weeks (Anthropic engineering)", "url": "https://claude.dev/blog/how-we-made-claude-ai-faster/"},
+    {"group": "Releases", "title": "Qualcomm launches two new smartphone chips with emphasis on AI (TechCrunch)", "url": "https://techcrunch.com/2026/09/22/qualcomm-launches-two-new-smartphone-chips-with-emphasis-on-ai/"},
+    {"group": "Releases", "title": "Snapdragon 8 Elite Gen 6 splits on-device AI two ways (RCR Tech)", "url": "https://rcrtech.com/semiconductor-news/snapdragon-8-elite-gen-6-on-device-ai/"},
+    {"group": "Releases", "title": "Snapdragon 8 Elite Gen 6 vs Extreme compared (Android Authority)", "url": "https://www.androidauthority.com/snapdragon-8-elite-gen-6-vs-extreme-3713465/"},
+    {"group": "Releases", "title": "Liquid AI and Qualcomm bring personal AI context to Snapdragon devices", "url": "https://www.liquid.ai/company/blog/liquid-context-qualcomm"},
+    {"group": "Discussion", "title": "Gov. Pritzker establishes Illinois AI Cabinet (press release)", "url": "https://gov-pritzker-newsroom.prezly.com/gov-pritzker-establishs-illinois-artificial-intelligence-ai-cabinet"},
+    {"group": "Discussion", "title": "Pritzker establishes AI cabinet amid calls for greater regulation (Capitol News Illinois)", "url": "https://capitolnewsillinois.com/news/pritzker-establishes-ai-cabinet-amid-calls-for-greater-regulation/"},
+    {"group": "Discussion", "title": "Pritzker establishes AI cabinet amid calls for greater regulation (Route Fifty)", "url": "https://www.route-fifty.com/artificial-intelligence/2026/09/pritzker-establishes-ai-cabinet-amid-calls-greater-regulation/416157/"},
+    {"group": "Discussion", "title": "Governors take major actions on AI (Route Fifty)", "url": "https://www.route-fifty.com/artificial-intelligence/2026/09/governors-take-major-actions-ai/416161/"},
+    {"group": "Papers", "title": "Claude discovers a novel enzyme system (Anthropic)", "url": "https://www.anthropic.com/news/claude-discovers-novel-enzyme-system"},
+    {"group": "Releases", "title": "Improved token efficiency for longer agent runs (Cursor)", "url": "https://cursor.com/blog/improved-token-efficiency"},
+    {"group": "Papers", "title": "Can AI spot mistakes in IKEA assembly? (Epoch AI)", "url": "https://epoch.ai/publications/furniture-assembly"},
+    {"group": "Discussion", "title": "Meet Stripe's Knowledge AI Platform", "url": "https://stripe.dev/blog/meet-stripes-knowledge-ai-platform"},
+    {"group": "Discussion", "title": "Even Americans who use AI every day are worried about it (TechCrunch)", "url": "https://techcrunch.com/2026/09/23/even-americans-who-use-ai-every-day-are-worried-about-it/"},
+    {"group": "Discussion", "title": "Amid data center growth, Nevada approves temporary gas plants (GovTech)", "url": "https://www.govtech.com/artificial-intelligence/amid-data-center-growth-nevada-approves-temporary-gas-plants"},
+    {"group": "Discussion", "title": "Meta admits Muse's likeness to OpenClaw isn't a coincidence (TechCrunch)", "url": "https://techcrunch.com/2026/09/22/meta-admits-muses-likeness-to-openclaw-isnt-a-coincidence/"},
+    {"group": "Also noted", "title": "Realtime-Venus: a full-duplex interaction system with asynchronous delegation", "url": "https://huggingface.co/papers/2609.13814"},
+    {"group": "Also noted", "title": "The Tasteful Agent: measuring and improving taste in long-horizon tasks", "url": "https://huggingface.co/papers/2609.25804"},
+    {"group": "Also noted", "title": "AI Has No Wisdom and Neither Will You", "url": "https://alexn.org/blog/2026/09/22/ai-has-no-wisdom-and-neither-will-you/"},
+    {"group": "Also noted", "title": "Feds target AI critics as \"foreign agents\" (Ken Klippenstein)", "url": "https://www.kenklippenstein.com/p/feds-think-ai-critics-are-foreign"}
+  ],
+  "rundown": [
+    "Anthropic makes claude.ai about 3x faster with Claude-driven measurement",
+    "Claude finds a novel CRISPR-like enzyme system (preprint)",
+    "Qualcomm's Snapdragon 8 Elite Extreme Gen 6 claims a 30B MoE on-device",
+    "Illinois creates an AI Cabinet by executive order",
+    "Cursor cuts agent token cost 7% by pruning its system prompt",
+    "Epoch's IKEA assembly benchmark: 28% to 80% in ten months",
+    "Stripe's Kai knowledge agent and its cross-customer data rule",
+    "Gallup/Microsoft: 68% of US daily AI users are worried",
+    "Nevada approves temporary gas plants for data centres",
+    "Meta concedes Muse was 'heavily inspired' by OpenClaw",
+    "Named: Realtime-Venus, The Tasteful Agent, 'AI Has No Wisdom', Klippenstein on data-centre critics"
+  ],
+  "topics": [
+    "Anthropic's claude.ai performance sprint (engineering post by Raymond Wang, Sam Attard and Issac G., 23 September 2026; two-week sprint in August): p75 fresh load 3,085ms to 550ms, Cowork send-message 928ms to 48ms, 3.1x geometric mean across 13 measurements; deterministic instruction counting under Valgrind with node --predictable validated against wall-clock (48% fewer instructions gave a 78% speed-up); loop of reproducible benchmark, risk-tiered PRs, feature flags, field telemetry and a ratcheting benchmark ceiling; finds included a leftover location.reload() causing ~500,000 hidden reloads a day and em-dash/curly-quote two-byte string handling freezing syntax highlighting for ~1s; 3,000+ changes, ~200 flags, staged rollout, every PR automated review plus at least one human approval. On air: reversibility rather than comprehension as the real safety claim, and the unmeasured half of the product as the open question.",
+    "Qualcomm Snapdragon 8 Elite Gen 6 and 8 Elite Extreme Gen 6 (22 September 2026): Extreme claims a 30B mixture-of-experts model on-device (~3B active per RCR Tech), 50% larger NPU shared memory to keep activations and KV cache on-chip, 32K context, up to 50% faster INT4 prefill, 200M-parameter models on a low-power sensing hub, a full voice-in/voice-out agent; taught as capacity versus bandwidth — MoE shrinks per-token bandwidth, not footprint (~15GB at 4-bit, host arithmetic); no public tokens/sec, RAM or battery figures; first phone Motorola Signature 27.",
+    "Illinois AI Cabinet (Executive Order 2026-07, signed 22 September 2026): eight state agencies plus outside experts, unpaid, members to be announced, proposals through 2027; told to assess strict liability for AI-caused harm, conditioning data-centre tax incentives and permits on safety standards, grid and ratepayer burden including PJM, and procurement standards; builds on SB 315 (over $500M revenue, first state annual audits, effective 2028). Taught with Virginia's data-centre accountability framework and New York's hyperscale moratorium as evidence that state AI governance converges on what states physically reach."
+  ],
+  "entities": ["Anthropic", "Claude", "Qualcomm", "Snapdragon 8 Elite Extreme Gen 6", "Motorola", "JB Pritzker", "Illinois", "Abigail Spanberger"],
+  "threads": [
+    {"name": "State AI governance patchwork", "status": "Illinois created an unpaid AI Cabinet to study strict liability and data-centre tax conditions, alongside Virginia's data-centre accountability framework and California's executive order; SB 315 audits start in 2028", "arc": "States are moving where Congress hasn't, and converging on the levers they physically control — data centres, grids, procurement and liability — rather than on model training"}
+  ],
+  "dives": [
+    {"story": "How Claude made claude.ai three times faster", "why_it_matters": "Any team running an LLM product or pointing coding agents at performance work can copy the deterministic-proxy-plus-ratchet loop, and should know it trades comprehension for reversibility."},
+    {"story": "Qualcomm's 30B mixture-of-experts on a phone", "why_it_matters": "Anyone planning local or private inference needs to know that on-device MoE is a memory-capacity bet, and that no one has yet published the speed and battery numbers that would make it real."},
+    {"story": "Illinois's AI Cabinet and where state governance can reach", "why_it_matters": "Public-sector and compliance people tracking the state patchwork get a clear map of which levers states actually hold — data centres, grids, procurement, liability — and that strict liability is now formally on a state's study list."}
+  ],
+  "concepts_taught": [
+    "mixture-of-experts on edge devices as a capacity-versus-bandwidth split: routing shrinks the bytes read per token, not the weights that must be stored, so on-device MoE is a memory-capacity bet",
+    "deterministic performance proxies for agent-driven optimization: instruction counts under a predictable runtime, validated against wall-clock, plus a ratcheting benchmark ceiling so every win becomes a regression test"
+  ],
+  "lore": []
+}

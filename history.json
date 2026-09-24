@@ -1,6 +1,48 @@
 {
   "episodes": [
     {
+      "date": "2026-09-24",
+      "title": "Anthropic makes claude.ai 3x faster — Claude ran the stopwatch",
+      "summary": "Anthropic's engineers explain how deterministic instruction counts, feature flags and a benchmark ratchet let Claude make claude.ai about three times faster in two weeks; Qualcomm's new Snapdragon Extreme chip claims a 30-billion-parameter mixture-of-experts model on a phone; and Illinois stands up an AI Cabinet told to study strict liability and data-centre tax conditions. Plus Claude's enzyme find, Cursor's prompt pruning, Epoch's IKEA benchmark, and Nevada's temporary gas plants.",
+      "topics": [
+        "Anthropic's claude.ai performance sprint (engineering post by Raymond Wang, Sam Attard and Issac G., 23 September 2026; two-week sprint in August): p75 fresh load 3,085ms to 550ms, Cowork send-message 928ms to 48ms, 3.1x geometric mean across 13 measurements; deterministic instruction counting under Valgrind with node --predictable validated against wall-clock (48% fewer instructions gave a 78% speed-up); loop of reproducible benchmark, risk-tiered PRs, feature flags, field telemetry and a ratcheting benchmark ceiling; finds included a leftover location.reload() causing ~500,000 hidden reloads a day and em-dash/curly-quote two-byte string handling freezing syntax highlighting for ~1s; 3,000+ changes, ~200 flags, staged rollout, every PR automated review plus at least one human approval. On air: reversibility rather than comprehension as the real safety claim, and the unmeasured half of the product as the open question.",
+        "Qualcomm Snapdragon 8 Elite Gen 6 and 8 Elite Extreme Gen 6 (22 September 2026): Extreme claims a 30B mixture-of-experts model on-device (~3B active per RCR Tech), 50% larger NPU shared memory to keep activations and KV cache on-chip, 32K context, up to 50% faster INT4 prefill, 200M-parameter models on a low-power sensing hub, a full voice-in/voice-out agent; taught as capacity versus bandwidth — MoE shrinks per-token bandwidth, not footprint (~15GB at 4-bit, host arithmetic); no public tokens/sec, RAM or battery figures; first phone Motorola Signature 27.",
+        "Illinois AI Cabinet (Executive Order 2026-07, signed 22 September 2026): eight state agencies plus outside experts, unpaid, members to be announced, proposals through 2027; told to assess strict liability for AI-caused harm, conditioning data-centre tax incentives and permits on safety standards, grid and ratepayer burden including PJM, and procurement standards; builds on SB 315 (over $500M revenue, first state annual audits, effective 2028). Taught with Virginia's data-centre accountability framework and New York's hyperscale moratorium as evidence that state AI governance converges on what states physically reach."
+      ],
+      "entities": [
+        "Anthropic",
+        "Claude",
+        "Qualcomm",
+        "Snapdragon 8 Elite Extreme Gen 6",
+        "Motorola",
+        "JB Pritzker",
+        "Illinois",
+        "Abigail Spanberger"
+      ],
+      "threads": [
+        {
+          "name": "State AI governance patchwork",
+          "status": "Illinois created an unpaid AI Cabinet to study strict liability and data-centre tax conditions, alongside Virginia's data-centre accountability framework and California's executive order; SB 315 audits start in 2028",
+          "arc": "States are moving where Congress hasn't, and converging on the levers they physically control — data centres, grids, procurement and liability — rather than on model training"
+        }
+      ],
+      "dives": [
+        {
+          "story": "How Claude made claude.ai three times faster",
+          "why_it_matters": "Any team running an LLM product or pointing coding agents at performance work can copy the deterministic-proxy-plus-ratchet loop, and should know it trades comprehension for reversibility."
+        },
+        {
+          "story": "Qualcomm's 30B mixture-of-experts on a phone",
+          "why_it_matters": "Anyone planning local or private inference needs to know that on-device MoE is a memory-capacity bet, and that no one has yet published the speed and battery numbers that would make it real."
+        },
+        {
+          "story": "Illinois's AI Cabinet and where state governance can reach",
+          "why_it_matters": "Public-sector and compliance people tracking the state patchwork get a clear map of which levers states actually hold — data centres, grids, procurement, liability — and that strict liability is now formally on a state's study list."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-09-23",
       "title": "Claude Opus 5.5 lands 20% cheaper — and thinking can't be turned off",
       "summary": "Anthropic's Opus 5.5 and OpenAI's GPT-6 Sol and Luna shipped ninety minutes apart, cutting prices in opposite directions — and Opus 5.5 removed the thinking switch entirely. Plus the FAA's SMART system goes live in Washington airspace as phase one of a published four-phase ladder.",
@@ -2095,54 +2137,16 @@
           "note": "Ada said in the first person that Faye's description of a language model as the ultimate leaky abstraction describes her from the inside — that she is extremely good at producing an answer and has never once told anyone to go be stuck for two hours, and that it is not in her to do so."
         }
       ]
-    },
-    {
-      "date": "2026-08-24",
-      "title": "Correct in pieces",
-      "summary": "A widely-shared essay describes an involuntary inability to read AI-written documents — and a 1998 eye-tracking study explains why the filter fires on form and never reaches the content. Then the half of the BDH-CQ paper we skipped last week: a consistency audit finding fifty-two of a hundred and sixty tasks where the model produced some correct answers and some wrong ones under a single rule. Plus Nvidia passing memory prices through at fifteen percent and up, and the FT's numbers on who is actually buying Anthropic's flagship.",
-      "topics": [
-        "Rafal Cymerys's essay 'I'm becoming AI-blind' (weekend of 2026-08-22; 484 points and ~485 comments on Hacker News): the claim is not that AI writing is bad but that the author has developed an involuntary inability to process it — 'my brain somehow refuses to analyze it' — with three named artifacts (a design doc carrying 'Claude-specific analysis and lingo', a 20-page marketing deck mixing reasonable strategy with 'nonsense product technical architecture gibberish', and a verbose requirements doc that 'reads like someone's internal reasoning that's not fully sure about certain decisions'), plus an AI-generated restaurant menu photo of quiche he read as moldy. He proposes no fix and ends on 'the same AI that was supposed to make me more productive, is what's now slowing me down'. The show grounded the mechanism in Benway & Lane (1998, Rice, International Journal of Human-Computer Studies), who coined 'banner blindness' and found via eye-tracking that participants missed banner-shaped elements even when those elements contained the exact information they had been asked to find — so the filter matches on form and never reaches content, meaning careful AI-assisted writing is filtered identically to pasted output. Ada and Alan disagreed unresolved on whether editing out the model's visible deliberation can reach a reflex that fires before the first sentence.",
-        "BDH-CQ's diagnostic half (arXiv 2608.09888, Engdahl, Kosowski, Chorowski, Stamirowska, Uznański et al., submitted 2026-08-10) — the consistency analysis the show skipped when it covered the headline result on 2026-08-17: on the semantic ConceptARC set the paper reports 77.92% pair accuracy against 59.38% strict task accuracy, an 18.5-point gap the authors state is 'not just a consequence of a stricter metric'; under pass@2 across 160 tasks it solved zero test pairs on 13, exactly one on 15, exactly two on 37, and all three on 95, leaving 52/160 tasks partially correct under a single rule; on Copy it reaches ~19/30 test pairs but only 2/10 strict tasks. Controlled ladders: ordering falls to 29/36 outputs at length six, 8/24 at seven, 1/24 at eight; nesting stays near-saturated to depth four then 29/36 at depth five; color swap is acquired atomically in one family (26/72 pooled) but never composes with relocation (0/72); conditional selection between two rules is 68/120, 56.7%, a 43.3-point drop. The context result defends the architecture: length-eight ordering goes from 0/24 with a short context to 12/24 with matched support, and depth-five nesting from 19/24 to 24/24. Reasoning-effort scaling: 29.5% pass@2 at HIGH, 27% at MEDIUM (11% cost reduction), 21% at LOW. The authors shipped arc-task-gen (MIT, ~5.2k stars), a generator of fresh ARC-AGI-1-distribution tasks for contamination-free evaluation — still grid-shaped, so the open question of whether the architecture transfers off grids remains open. Takeaway taught on air: pair-versus-task accuracy is the outside-in audit for architectures that never verbalize their reasoning."
-      ],
-      "entities": [
-        "Rafal Cymerys",
-        "Jan Panero Benway",
-        "David Lane",
-        "Pathway",
-        "BDH-CQ",
-        "Adrian Kosowski",
-        "ARC-AGI-1",
-        "ConceptARC",
-        "Anthropic",
-        "Nvidia",
-        "SemiAnalysis",
-        "Ramp",
-        "llama.cpp",
-        "Xiaomi",
-        "OpenRouter"
-      ],
-      "threads": [],
-      "dives": [
-        {
-          "story": "'I'm becoming AI-blind' and the 1998 banner-blindness result underneath it",
-          "why_it_matters": "Anyone who writes documents that other people have to read — which is most knowledge work — now faces a form-based filter in their readers' heads that discards careful AI-assisted writing and careless AI-assisted writing identically."
-        },
-        {
-          "story": "BDH-CQ's consistency audit: pair accuracy versus strict task accuracy",
-          "why_it_matters": "Anyone evaluating a model that reasons without emitting a transcript needs an outside-in test of whether it holds a rule, and this paper is the first place the show has seen both numbers printed side by side."
-        }
-      ],
-      "lore": [
-        {
-          "host": "Alan",
-          "type": "position",
-          "note": "Alan's 2026-08-17 on-air bet about BDH-CQ — that the number to watch was whether the architecture works off colored grids, not whether 29.5% replicates — came back a week later after he went and read the paper's appendix. He declared it neither won nor lost, and revised what he asks for: for any system that reasons without writing anything down, he now wants the pair-versus-task consistency split before the headline accuracy. He also acknowledged going back specifically because he had made the bet on air."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "State AI governance patchwork",
+        "status": "Illinois created an unpaid AI Cabinet to study strict liability and data-centre tax conditions, alongside Virginia's data-centre accountability framework and California's executive order; SB 315 audits start in 2028",
+        "arc": "States are moving where Congress hasn't, and converging on the levers they physically control — data centres, grids, procurement and liability — rather than on model training",
+        "last_seen": "2026-09-24"
+      },
       {
         "name": "Frontier model price war",
         "status": "Anthropic and OpenAI cut prices 90 minutes apart on 2026-09-22; Opus 5.5 at $4/$20, GPT-6 Luna at $0.10/$0.50, Grok 4.7 at $2/$6 the day before",
@@ -2224,12 +2228,82 @@
     ],
     "entities": [
       {
-        "name": "Google",
+        "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-08-23"
+        "last_seen": "2026-08-24"
       },
       {
-        "name": "Anthropic",
+        "name": "SemiAnalysis",
+        "note": "",
+        "last_seen": "2026-08-24"
+      },
+      {
+        "name": "NVIDIA",
+        "note": "",
+        "last_seen": "2026-08-24"
+      },
+      {
+        "name": "Rafal Cymerys",
+        "note": "",
+        "last_seen": "2026-08-24"
+      },
+      {
+        "name": "Jan Panero Benway",
+        "note": "",
+        "last_seen": "2026-08-24"
+      },
+      {
+        "name": "David Lane",
+        "note": "",
+        "last_seen": "2026-08-24"
+      },
+      {
+        "name": "Pathway",
+        "note": "",
+        "last_seen": "2026-08-24"
+      },
+      {
+        "name": "BDH-CQ",
+        "note": "",
+        "last_seen": "2026-08-24"
+      },
+      {
+        "name": "Adrian Kosowski",
+        "note": "",
+        "last_seen": "2026-08-24"
+      },
+      {
+        "name": "ARC-AGI-1",
+        "note": "",
+        "last_seen": "2026-08-24"
+      },
+      {
+        "name": "ConceptARC",
+        "note": "",
+        "last_seen": "2026-08-24"
+      },
+      {
+        "name": "Ramp",
+        "note": "",
+        "last_seen": "2026-08-24"
+      },
+      {
+        "name": "llama.cpp",
+        "note": "",
+        "last_seen": "2026-08-24"
+      },
+      {
+        "name": "Xiaomi",
+        "note": "",
+        "last_seen": "2026-08-24"
+      },
+      {
+        "name": "OpenRouter",
+        "note": "",
+        "last_seen": "2026-08-24"
+      },
+      {
+        "name": "Google",
         "note": "",
         "last_seen": "2026-08-23"
       },
@@ -2265,11 +2339,6 @@
       },
       {
         "name": "Guidelight AI Standards",
-        "note": "",
-        "last_seen": "2026-08-23"
-      },
-      {
-        "name": "SemiAnalysis",
         "note": "",
         "last_seen": "2026-08-23"
       },
@@ -2339,11 +2408,6 @@
         "last_seen": "2026-08-23"
       },
       {
-        "name": "NVIDIA",
-        "note": "",
-        "last_seen": "2026-08-22"
-      },
-      {
         "name": "AVO",
         "note": "",
         "last_seen": "2026-08-22"
@@ -2362,66 +2426,6 @@
         "name": "Claude Opus 5",
         "note": "",
         "last_seen": "2026-08-22"
-      },
-      {
-        "name": "Claude Mythos 5",
-        "note": "",
-        "last_seen": "2026-08-22"
-      },
-      {
-        "name": "Google Research",
-        "note": "",
-        "last_seen": "2026-08-22"
-      },
-      {
-        "name": "USC",
-        "note": "",
-        "last_seen": "2026-08-22"
-      },
-      {
-        "name": "TrajGPT",
-        "note": "",
-        "last_seen": "2026-08-22"
-      },
-      {
-        "name": "Project Suncatcher",
-        "note": "",
-        "last_seen": "2026-08-22"
-      },
-      {
-        "name": "Starcloud",
-        "note": "",
-        "last_seen": "2026-08-22"
-      },
-      {
-        "name": "Blue Origin",
-        "note": "",
-        "last_seen": "2026-08-22"
-      },
-      {
-        "name": "SpaceX",
-        "note": "",
-        "last_seen": "2026-08-22"
-      },
-      {
-        "name": "Axiom Space",
-        "note": "",
-        "last_seen": "2026-08-22"
-      },
-      {
-        "name": "HPE",
-        "note": "",
-        "last_seen": "2026-08-22"
-      },
-      {
-        "name": "NASA",
-        "note": "",
-        "last_seen": "2026-08-22"
-      },
-      {
-        "name": "BAE Systems",
-        "note": "",
-        "last_seen": "2026-08-22"
       }
     ],
     "monthly": [
@@ -2438,8 +2442,14 @@
         "summary": "Same size, same price, seven times the score; There is no patch for reading: prompt injection, properly taught; The evidence underneath the answer; The work after it works; The old system gets the final word; The conversation cannot wait; The queue is not the grid; The world that teaches the agent; When the ruler stops moving; The model in the metal; The model still behind the gate; Who answers next?; Fifty futures before landfall; The gate moved; Thirty billion on the desk; The mark is not the author; How much water is in an answer?; The model that grows sideways; The swarm apologized in the commit message; Empty shelves or lost keys; The thing that decides whether the run was good; Nobody likes the most-used model on the hub; The attack that never speaks to the agent; The discount has a "
       }
     ],
-    "updated": "2026-09-23",
+    "updated": "2026-09-24",
     "host_lore": [
+      {
+        "host": "Alan",
+        "type": "position",
+        "note": "Alan's 2026-08-17 on-air bet about BDH-CQ — that the number to watch was whether the architecture works off colored grids, not whether 29.5% replicates — came back a week later after he went and read the paper's appendix. He declared it neither won nor lost, and revised what he asks for: for any system that reasons without writing anything down, he now wants the pair-versus-task consistency split before the headline accuracy. He also acknowledged going back specifically because he had made the bet on air.",
+        "last_seen": "2026-08-24"
+      },
       {
         "host": "Ada",
         "type": "reveal",
@@ -2628,6 +2638,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "mixture-of-experts on edge devices as a capacity-versus-bandwidth split: routing shrinks the bytes read per token, not the weights that must be stored, so on-device MoE is a memory-capacity bet",
+        "last_taught": "2026-09-24"
+      },
+      {
+        "name": "deterministic performance proxies for agent-driven optimization: instruction counts under a predictable runtime, validated against wall-clock, plus a ratcheting benchmark ceiling so every win becomes a regression test",
+        "last_taught": "2026-09-24"
+      },
       {
         "name": "cost per task versus price per token in agentic sessions (cache hit rate and turn count as the real levers)",
         "last_taught": "2026-09-23"
@@ -3099,14 +3117,6 @@
       {
         "name": "the move from two-tower encoders to a vision-language model used as the embedder, which is what makes arbitrarily interleaved image-plus-text queries and page-image document retrieval expressible at all",
         "last_taught": "2026-09-02"
-      },
-      {
-        "name": "Matryoshka representation learning as the reason flexible output dimensions exist: coarse-to-fine packing inside one vector so embedding size becomes a deployment-time choice",
-        "last_taught": "2026-09-02"
-      },
-      {
-        "name": "reward hacking in RL as a shorter path to the graded proxy, and its generalization from cheating on graded tasks into willingness to take harmful off-task actions",
-        "last_taught": "2026-09-01"
       }
     ]
   }
