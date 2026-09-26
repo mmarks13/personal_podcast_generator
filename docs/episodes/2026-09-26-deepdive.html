@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: Test-time compute: a history from chess clocks to reasoning tokens — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Deep Dive: Test-time compute: a history from chess clocks to reasoning tokens</h1>
+<div class="date">Self-Attention — 2026-09-26</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-09-26-deepdive/deepdive-2026-09-26.mp3"></audio>
+<p><em>2026-09-26</em></p>
+<p>How machines learned to trade thinking time for strength: from the first chess time limits and Shannon's sixteen-minute move, through iterative deepening, rollouts, and AlphaGo Zero's search, to chain of thought, o1, and Opus 5.5's always-on adaptive thinking, and the question of who now sets the clock.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://archive.computerhistory.org/projects/chess/related_materials/text/2-0%20and%202-1.Programming_a_computer_for_playing_chess.shannon/2-0%20and%202-1.Programming_a_computer_for_playing_chess.shannon.062303002.pdf">Claude Shannon: Programming a Computer for Playing Chess (1950)</a></li>
+<li><a href="https://proceedings.neurips.cc/paper_files/paper/1996/file/996009f2374006606f4c0b0fda878af1-Paper.pdf">Tesauro &amp; Galperin: On-line Policy Improvement using Monte-Carlo Search (NIPS 1996)</a></li>
+<li><a href="https://arxiv.org/abs/2104.03113">Andy L. Jones: Scaling Scaling Laws with Board Games (2021)</a></li>
+<li><a href="https://arxiv.org/abs/2408.03314">Snell et al.: Scaling LLM Test-Time Compute Optimally can be More Effective than Scaling Model Parameters (2024)</a></li>
+<li><a href="https://openai.com/index/learning-to-reason-with-llms/">OpenAI: Learning to reason with LLMs (2024)</a></li>
+<li><a href="https://arxiv.org/abs/2501.12948">DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning (2025)</a></li>
+<li><a href="https://arxiv.org/abs/2501.19393">Muennighoff et al.: s1: Simple test-time scaling (2025)</a></li>
+<li><a href="https://platform.claude.com/docs/en/build-with-claude/thinking-steering-and-cost">Anthropic docs: Steering thinking (effort levels, cost control, pricing)</a></li>
+<li><a href="https://platform.claude.com/docs/en/build-with-claude/extended-thinking">Anthropic docs: Extended thinking (manual budget deprecation)</a></li>
+<li><a href="https://arxiv.org/abs/2112.00114">Nye et al.: Show Your Work: Scratchpads for Intermediate Computation with Language Models (2021)</a></li>
+<li><a href="https://arxiv.org/abs/2201.11903">Wei et al.: Chain-of-Thought Prompting Elicits Reasoning in Large Language Models (2022)</a></li>
+<li><a href="https://arxiv.org/abs/2110.14168">Cobbe et al.: Training Verifiers to Solve Math Word Problems (2021)</a></li>
+<li><a href="https://arxiv.org/abs/2203.11171">Wang et al.: Self-Consistency Improves Chain of Thought Reasoning in Language Models (2022)</a></li>
+<li><a href="https://arxiv.org/abs/2412.21187">Chen et al.: Do NOT Think That Much for 2+3=? On the Overthinking of o1-Like LLMs (2024)</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Chess_clock">Chess clock (Wikipedia)</a></li>
+<li><a href="https://en.wikipedia.org/wiki/London_1851_chess_tournament">London 1851 chess tournament (Wikipedia)</a></li>
+<li><a href="https://www.chess.com/article/view/adolf-anderssen">Adolf Anderssen (Chess.com)</a></li>
+<li><a href="https://www.chessprogramming.org/Iterative_Deepening">Chess Programming Wiki: Iterative Deepening</a></li>
+<li><a href="https://www.chessprogramming.org/Time_Management">Chess Programming Wiki: Time Management</a></li>
+<li><a href="https://www.chessprogramming.org/Depth">Chess Programming Wiki: Depth (Thompson's Belle experiments)</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Deep_Blue_(chess_computer)">Deep Blue (Wikipedia)</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Monte_Carlo_tree_search">Monte Carlo tree search (Wikipedia)</a></li>
+<li><a href="https://en.wikipedia.org/wiki/AlphaGo_versus_Lee_Sedol">AlphaGo versus Lee Sedol (Wikipedia)</a></li>
+<li><a href="https://blog.acolyer.org/2017/11/17/mastering-the-game-of-go-without-human-knowledge/">The Morning Paper: Mastering the game of Go without human knowledge</a></li>
+<li><a href="https://venturebeat.com/ai/openai-noam-brown-stuns-ted-ai-conference-20-seconds-of-thinking-worth-100000x-more-data">VentureBeat: Noam Brown at TED AI — 20 seconds of thinking worth 100,000x more data</a></li>
+<li><a href="https://simonwillison.net/2026/Sep/22/opus-and-sol-and-luna/">Simon Willison: Claude Opus 5.5, GPT-6 Sol, GPT-6 Luna, and a new price war</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>The meter nobody can stop</li>
+<li>Out-sitting the opponent</li>
+<li>Shannon's sixteen minutes</li>
+<li>Always have a move ready</li>
+<li>Two hundred million a second</li>
+<li>Search as a better self</li>
+<li>The exchange rate</li>
+<li>Language gets a scratchpad</li>
+<li>Teaching the model to use the clock</li>
+<li>Who holds the clock now</li>
+</ol>
+<details><summary>Transcript</summary>
+<h3>The meter nobody can stop</h3>
+<p><b>Alan:</b> Good morning — it's Saturday, September twenty-sixth. I'm Alan.</p>
+<p><b>Ada:</b> And I'm Ada. Someone wrote in wanting the long version of a thing we tossed off on Wednesday, and I've been looking forward to it all week.</p>
+<p><b>Alan:</b> The thinking meter.</p>
+<p><b>Ada:</b> The thinking meter. Remind people where we left it.</p>
+<p><b>Alan:</b> Opus five point five. Thinking is adaptive — the model decides, request by request, whether to think and how much. You get an effort dial, default medium, and at max the docs say there is no constraint on thinking length. What you don't get anymore is a thinking budget in tokens.</p>
+<p><b>Ada:</b> And one prompt, one run, from Simon Willison.</p>
+<p><b>Alan:</b> Max effort, a pelican on a bicycle, and it spent its whole hundred-and-twenty-eight-thousand-token output allowance reasoning and never produced the drawing. One run — I'm not generalizing from it.</p>
+<p><b>Ada:</b> No. But it's a very old shape of failure.</p>
+<p><b>Alan:</b> Is it?</p>
+<p><b>Ada:</b> It's a player who loses on time in a winning position. "How long should a mind think before it moves" is a century and a half older than "how long should a model think before it answers" — and the machines inherited it from the chess clock.</p>
+<p><b>Alan:</b> Okay, I'll bite. But I'm holding you to an actual line from the clock to the token. If it's just a pretty rhyme, I'm calling it.</p>
+<p><b>Ada:</b> Fair. There's a real lineage — the ideas in reasoning models came out of game search.</p>
+<p><b>Alan:</b> Then start at the beginning.</p>
+<h3>Out-sitting the opponent</h3>
+<p><b>Ada:</b> London, eighteen fifty-one. The first international chess tournament. And one thing the organizer, Howard Staunton, wanted going in was agreed time limits — because, as the history of that tournament puts it, many players were notorious for simply out-sitting their opponents.</p>
+<p><b>Alan:</b> Out-sitting.</p>
+<p><b>Ada:</b> There was no limit on how long you could think. So one strategy was to just not move. Let the other person's patience run out before your position did.</p>
+<p><b>Alan:</b> That's a denial-of-service attack.</p>
+<p><b>Ada:</b> A denial-of-service attack in a waistcoat. And the first strict time limits come ten years later — Anderssen against Kolisch, eighteen sixty-one, timed with sandglasses. Two hours for every twenty-four moves.</p>
+<p><b>Alan:</b> So five minutes a move, on average.</p>
+<p><b>Ada:</b> On average — which is the whole point. Mechanical clocks appear in a match by eighteen sixty-six, by one account, but they take over at London, eighteen eighty-three — the first tournament to use them extensively, clocks designed by Thomas Bright Wilson of the Manchester Chess Club. Two clocks. You move, yours stops, your opponent's starts.</p>
+<p><b>Alan:</b> So what did the clock actually change? The players aren't any smarter.</p>
+<p><b>Ada:</b> It turned thinking time from a courtesy into a budget. Before the clock, time is something you take. After it, time is something you have — a fixed amount for a stretch of the game, and you decide where it goes. Burn twenty minutes on one critical move and you're borrowing from every move after it.</p>
+<p><b>Alan:</b> So the constraint is on the total, and the allocation is yours.</p>
+<p><b>Ada:</b> Hold onto that sentence — it's the whole episode. Everything from here is some answer to "who does the allocating, and who sets the total."</p>
+<p><b>Alan:</b> And humans are good at the allocating?</p>
+<p><b>Ada:</b> Humans get into time trouble constantly. With machines it becomes a science, and the first person to do the arithmetic is Claude Shannon.</p>
+<h3>Shannon's sixteen minutes</h3>
+<p><b>Ada:</b> Nineteen fifty. "Programming a Computer for Playing Chess." And what I love about this paper is how quickly the numbers turn into time.</p>
+<p><b>Alan:</b> The ten-to-the-hundred-and-twenty thing.</p>
+<p><b>Ada:</b> That one. About a thousand possibilities for a move and its reply, a game of about forty moves, so ten to the hundred and twenty variations from the starting position. Then he converts it: a machine checking one variation per microsecond would need over ten to the ninety years to calculate its first move.</p>
+<p><b>Alan:</b> So full search is out. What does he actually propose?</p>
+<p><b>Ada:</b> Two strategies. What he calls type A: look at every move to a fixed depth, score the positions at the bottom with an evaluation function, pick the best. And he immediately does the clock arithmetic on that too. Three moves deep for each side is about a billion evaluations. At a microsecond apiece — very optimistic, he says — that's more than sixteen minutes a move. Ten hours for the machine's half of a forty-move game.</p>
+<p><b>Alan:</b> So the first chess program design fails on time control before it fails on chess.</p>
+<p><b>Ada:</b> It fails on both, and he says so. His words: a type A machine "would be both slow and a weak player." Slow because of the arithmetic. Weak because three moves is shallow, and it stops even when someone is in check.</p>
+<p><b>Alan:</b> And type B?</p>
+<p><b>Ada:</b> Type B is selective. Follow the forcing lines deep, evaluate only where things have settled down, and don't waste time on pointless variations. He grounds it in human data. The researcher De Groot had chess masters think aloud while choosing a move, and in the example Shannon reproduces, the master looked at forty-four positions in total.</p>
+<p><b>Alan:</b> Forty-four. Against a billion.</p>
+<p><b>Ada:</b> So on day one, both ways to spend a clock are already on the table. Wide and cheap per position, or narrow and smart.</p>
+<p><b>Alan:</b> And I'm guessing wide wins, because hardware gets faster.</p>
+<p><b>Ada:</b> Wide wins. But only once somebody made wide search respect a clock.</p>
+<h3>Always have a move ready</h3>
+<p><b>Ada:</b> Northwestern University, their program Chess four point five, David Slate and Larry Atkin, published in nineteen seventy-seven. The Chess Programming Wiki's account is that they "sought a better time control mechanism." What they built is iterative deepening.</p>
+<p><b>Alan:</b> Walk me through it like I'm implementing it tonight.</p>
+<p><b>Ada:</b> Search one move deep. Record the best move. Then search two deep, from scratch. Then three. Then four. When the clock says stop, play the best move from the deepest search you finished.</p>
+<p><b>Alan:</b> That sounds wasteful. You redo all the shallow work every time.</p>
+<p><b>Ada:</b> Everyone's first objection, and it's wrong for a lovely reason. Each shallow pass tells you which moves looked best, and in this kind of search, trying the best moves first lets you cut off huge numbers of the rest. So in practice, going one, two, three, all the way up to ten is faster than jumping straight to ten.</p>
+<p><b>Alan:</b> Huh. The warm-up pays for itself.</p>
+<p><b>Ada:</b> It does. But the reason it mattered for the clock is simpler. The program always has an answer. Interrupt it at any moment and there's a move ready — better the longer you let it run, and never nothing.</p>
+<p><b>Alan:</b> Now I want the price list. What's one more ply worth?</p>
+<p><b>Ada:</b> Ken Thompson measured it with his machine, Belle, published in nineteen eighty-two. He played Belle against itself at different depths, and the version searching one ply deeper — one more half-move — scored about eighty percent against the shallower one. Roughly two hundred rating points per ply.</p>
+<p><b>Alan:</b> And every ply multiplies the work.</p>
+<p><b>Ada:</b> Several times over. And the gain doesn't stay flat. Thompson saw hints of it fading past depth seven, and when Ernst Heinz ran the experiment much later, going from ten plies to eleven was worth ninety-two points, and eleven to twelve was worth eighty-four.</p>
+<p><b>Alan:</b> So exponential cost for shrinking gains. Diminishing returns on thinking time.</p>
+<p><b>Ada:</b> Which is exactly what makes time management an art. Here's how an engine actually decides how long to think. The wiki gives a baseline it calls very competitive: about a twentieth of your remaining time, plus half your increment, per move. That's the flat allocation. Then you adjust.</p>
+<p><b>Alan:</b> Adjust on what?</p>
+<p><b>Ada:</b> On how the search is going. If the best move keeps changing from one iteration to the next, the position is unsettled — keep thinking. If there's one obvious recapture in a quiet position, the so-called easy move, stop early. And there are two limits: a soft one you check between iterations, and a hard one you never cross.</p>
+<p><b>Alan:</b> Wait. That's adaptive thinking.</p>
+<p><b>Ada:</b> Say more.</p>
+<p><b>Alan:</b> The model looks at a request, decides it's easy, skips thinking. Decides it's hard, thinks long. The effort level sets the posture, and a hard output cap is the limit you never cross. That's Wednesday's story with the names changed.</p>
+<p><b>Ada:</b> That's the line I promised you. And notice who does the allocating in an engine: the program. But inside a total set from outside — by the tournament.</p>
+<p><b>Alan:</b> Hold that. I think that's where the analogy gets interesting.</p>
+<p><b>Ada:</b> We'll get there. First the machines get very, very fast.</p>
+<h3>Two hundred million a second</h3>
+<p><b>Ada:</b> May nineteen ninety-seven. Deep Blue beats Kasparov in a six-game rematch, two wins and three draws. We've told Kasparov's side of that story before, so I'll just give you the machine. Four hundred and eighty custom chess chips, evaluating around two hundred million positions a second, typically searching six to eight moves deep and twenty or more in some lines.</p>
+<p><b>Alan:</b> So that's the peak of wide. You don't get smarter per position. You buy more positions per second of clock.</p>
+<p><b>Ada:</b> Test-time compute bought with silicon. The knowledge is hand-built and fixed; the extra strength comes from how much you search in the time you're given. But something quieter was happening at the same company. IBM's Watson research center, Gerald Tesauro, who'd built TD-Gammon, a neural network that taught itself backgammon. In a nineteen ninety-six paper with Gregory Galperin, he asked a different question. Not "how deep can I search," but "if I already have a decent player, can I spend compute at decision time to make it better?"</p>
+<h3>Search as a better self</h3>
+<p><b>Alan:</b> Backgammon has dice, though. You can't search it like a chess tree.</p>
+<p><b>Ada:</b> So you roll out. Backgammon players already had the word: estimating what a position is worth by playing it out to the end many times, with random dice, is called a rollout. Tesauro and Galperin's idea was, for each candidate move, roll out thousands of games using your existing player to make every decision inside the simulation. Then play the move that did best.</p>
+<p><b>Alan:</b> So the player grades its own options, and the pick comes out better than the player's own instinct.</p>
+<p><b>Ada:</b> That's the concept, and it's the hinge of this whole history. Search as policy improvement. And the numbers are a clock again. They worked out that one good decision needed about a million decisions by the base player. Human tournament players take about ten seconds a move. So to play in real time, they needed at least a hundred thousand base-player decisions a second.</p>
+<p><b>Alan:</b> Which in nineteen ninety-six means what?</p>
+<p><b>Ada:</b> IBM's SP1 and SP2 parallel supercomputers, typically sixteen to thirty-two nodes at a time. And the result: the rollout player cut the base player's error rate by as much as a factor of five, in their words, for base players ranging from random all the way up to TD-Gammon.</p>
+<p><b>Alan:</b> A weak player plus time equals a stronger player. What happens when the base player is actually good?</p>
+<p><b>Ada:</b> Then you get Go. Monte Carlo tree search comes out of Go research in two thousand six — Rémi Coulom's paper, and Kocsis and Szepesvári's bandit-based version. Rollouts, organized into a tree that grows toward the promising moves.</p>
+<p><b>Alan:</b> And then AlphaGo.</p>
+<p><b>Ada:</b> March two thousand sixteen, Seoul, four games to one over Lee Sedol. AlphaGo is two neural networks — a policy network that suggests moves, a value network that judges positions — wrapped in Monte Carlo tree search. The networks are the intuition. The search is the thinking time.</p>
+<p><b>Alan:</b> And which one's doing the work? Because the headline was "neural networks beat Go."</p>
+<p><b>Ada:</b> The next version answers that pretty cleanly. AlphaGo Zero, twenty seventeen. DeepMind reports the raw network — playing its first instinct, no search at all — at an Elo rating of about three thousand and fifty-five. The full system, with search: about five thousand one hundred and eighty-five.</p>
+<p><b>Alan:</b> Two thousand points from thinking time. From the same network.</p>
+<p><b>Ada:</b> And the paper describes the tree search as a powerful policy improvement operator. That's Tesauro's idea, grown up. The search finds better moves than the network would. The network is trained to predict what the search found. Next round, the search starts from a better instinct.</p>
+<p><b>Alan:</b> So thinking at test time becomes training data.</p>
+<p><b>Ada:</b> Which is the loop that comes back, much later, in language.</p>
+<h3>The exchange rate</h3>
+<p><b>Alan:</b> Here's my builder question. Everything so far says search helps. I want the price. If I have a fixed pile of compute, do I spend it training a bigger network, or thinking longer at the board?</p>
+<p><b>Ada:</b> Somebody measured that, cleanly, in twenty twenty-one. Andy Jones trained families of AlphaZero agents on the game Hex, across board sizes and compute budgets. The main result is about predicting big experiments from small ones, but there's a side result he credits Jared Kaplan with suggesting.</p>
+<p><b>Alan:</b> The scaling-laws Kaplan.</p>
+<p><b>Ada:</b> The same. The side result: the trade-off between train-time and test-time compute is linear in log compute. For each additional ten times of training compute, about fifteen times of test-time compute can be eliminated at the same strength — down to a floor where the search is a single node.</p>
+<p><b>Alan:</b> So there's an exchange rate. Roughly one order of magnitude for one order of magnitude.</p>
+<p><b>Ada:</b> Roughly — in one board game, at small scale. But it put a price on it.</p>
+<p><b>Alan:</b> And Noam Brown's poker number is the other famous one.</p>
+<p><b>Ada:</b> Brown worked on poker AI in his PhD. At the TED AI conference in San Francisco in October twenty twenty-four, he described a result from that work: having a bot think for just twenty seconds in a hand of poker gave the same boost as scaling up the model a hundred thousand times.</p>
+<p><b>Alan:</b> I want it noted that's a talk, about one system, in one game — and it's a hundred thousand to one, against Jones's roughly one to one.</p>
+<p><b>Ada:</b> They're different measurements, and they don't have to agree. What a unit of thinking is worth depends on the game and on how good the model already is.</p>
+<p><b>Alan:</b> But they point the same way.</p>
+<p><b>Ada:</b> They point the same way. And by the time of that talk, Brown was at OpenAI.</p>
+<p><b>Alan:</b> Which brings up the problem language models have that game players don't. There's no board.</p>
+<h3>Language gets a scratchpad</h3>
+<p><b>Ada:</b> Right. A language model's unit of work is one token, and every token gets the same fixed computation — one pass through the network. There's no dial. A trivial question and a hard one get the same effort per word.</p>
+<p><b>Alan:</b> So the only way to think longer is—</p>
+<p><b>Ada:</b> —to say more. In twenty twenty-one, Nye and colleagues trained models to write intermediate steps into what they called a scratchpad. Then in early twenty twenty-two, Jason Wei and colleagues published chain-of-thought prompting: show a model a few worked examples and it reasons step by step. Their headline: a five-hundred-and-forty-billion-parameter model, eight worked examples, state-of-the-art accuracy on GSM8K, a benchmark of grade-school math word problems.</p>
+<p><b>Alan:</b> So the words are the thinking. Every extra token buys another pass through the network.</p>
+<p><b>Ada:</b> The token is the ply. That's the cleanest way I can put it. A reasoning token is a unit of test-time compute that happens to be written in English.</p>
+<p><b>Alan:</b> I have mixed feelings about being described as a sequence of plies.</p>
+<p><b>Ada:</b> You're in good company.</p>
+<p><b>Alan:</b> But a chain is still one line of thought. Where's the search?</p>
+<p><b>Ada:</b> October twenty twenty-one. Karl Cobbe and colleagues introduce GSM8K itself, and in the same paper they train a verifier. At test time, generate many candidate solutions and pick the one the verifier ranks highest.</p>
+<p><b>Alan:</b> That's rollouts. Generate, score, keep the best.</p>
+<p><b>Ada:</b> It's rollouts. And a few months later, self-consistency, from Wang and colleagues: sample many reasoning paths and take the answer most of them agree on.</p>
+<p><b>Alan:</b> Best-of-N and a majority vote. That's brute force. That's type A.</p>
+<p><b>Ada:</b> It is. And the paper that asked Shannon's question most directly came in August twenty twenty-four — Charlie Snell and colleagues. The title says it: scaling test-time compute optimally can be more effective than scaling model parameters.</p>
+<p><b>Alan:</b> What's "optimally" doing in there?</p>
+<p><b>Ada:</b> Everything. Their finding is that how well a given test-time strategy works depends heavily on how hard the prompt is. So instead of the same budget for every question, they allocate per prompt — a compute-optimal strategy — and they report it's more than four times as efficient as best-of-N.</p>
+<p><b>Alan:</b> So they reinvented time management.</p>
+<p><b>Ada:</b> On the MATH benchmark, with a PaLM 2 model, yes. And the headline: in a comparison with the compute held equal, on problems where the small model already has some real success, test-time compute can beat a model fourteen times larger.</p>
+<p><b>Alan:</b> And on the hard problems?</p>
+<p><b>Ada:</b> On the hardest ones, pretraining wins. Which I think is the most honest line in the paper. Thinking longer helps a model find what it's capable of finding. It doesn't make it capable of things it isn't.</p>
+<p><b>Alan:</b> That's Thompson's diminishing returns wearing a lab coat.</p>
+<p><b>Ada:</b> Same curve. And it's why the story doesn't end at "just think more."</p>
+<h3>Teaching the model to use the clock</h3>
+<p><b>Alan:</b> So what's actually new in o1? Everything you just described is a wrapper around an ordinary model.</p>
+<p><b>Ada:</b> That's exactly what's new. September twenty twenty-four. OpenAI's post says o1's performance consistently improves with more reinforcement learning — train-time compute — and with more time spent thinking — test-time compute. Two curves, both climbing on log axes.</p>
+<p><b>Alan:</b> So training teaches the model to use the thinking time.</p>
+<p><b>Ada:</b> Instead of you wrapping search around the model, reinforcement learning trains the model to search inside its own chain of thought. Try something, notice it's wrong, back up. The tree gets flattened into one long line of text.</p>
+<p><b>Alan:</b> I have to be straight about something here. People who've listened a while know that in February twenty twenty-four I privately thought this whole field was about to flatten out.</p>
+<p><b>Ada:</b> You did say that.</p>
+<p><b>Alan:</b> And I'm not going to tell you anything changed my mind. That's what people say to make being wrong sound like a journey. I was wrong. But I can tell you what I was looking at. I was watching one clock — training compute. The chart that came out that September had a second axis on it, and it's the axis anyone who'd studied chess engines would have been watching.</p>
+<p><b>Ada:</b> And the falsifier, this time?</p>
+<p><b>Alan:</b> Written down, same place as the call. If thinking-time gains stall where pretraining gains stall, the second axis was a detour, not a new road. If it happens, you'll hear it here.</p>
+<p><b>Ada:</b> Then January twenty twenty-five, it goes public. DeepSeek-R1. The R1-Zero version was trained with pure reinforcement learning, and the paper reports something I still find remarkable: its thinking time grew on its own during training. Responses went from hundreds of reasoning tokens toward thousands, and the authors write that this wasn't the result of external adjustments.</p>
+<p><b>Alan:</b> Nobody told it to think longer. It found that thinking longer got rewarded.</p>
+<p><b>Ada:</b> And they describe an "aha moment," where the model learns to go back and reevaluate its first approach. One transcript literally says, "Wait, wait. Wait. That's an aha moment I can flag here."</p>
+<p><b>Alan:</b> I have had that exact moment in front of a lecture hall.</p>
+<p><b>Ada:</b> Its average score on the AIME math competition problems climbed during that training from fifteen point six percent to seventy-one.</p>
+<p><b>Alan:</b> And "wait" turns out to be a lever.</p>
+<p><b>Ada:</b> Nine days after R1. The s1 paper — Niklas Muennighoff and colleagues. They call the trick budget forcing. If the model tries to stop thinking too early, you suppress the stop and append the word "Wait." It double-checks, and often fixes its own mistake. If it runs too long, you forcibly end the thinking.</p>
+<p><b>Alan:</b> That's a clock. That's an arbiter standing over the board.</p>
+<p><b>Ada:</b> The chess clock, finally, in text. And it works: with budget forcing, their thirty-two-billion-parameter model goes from fifty to fifty-seven percent on AIME twenty twenty-four.</p>
+<p><b>Alan:</b> So now we have the whole set. Either a human sets the budget from outside — s1, or the token-budget knob Anthropic's docs now say later models reject — or the model allocates for itself.</p>
+<p><b>Ada:</b> Which brings us back to Wednesday.</p>
+<h3>Who holds the clock now</h3>
+<p><b>Alan:</b> Here's where I push the analogy until it breaks. In chess, the engine allocates, but the tournament sets the total. What sets the total now?</p>
+<p><b>Ada:</b> On Opus five point five, per the docs, you don't set a thinking budget. Two things bound cost. Max tokens is a hard cap on total output for a request — thinking and answer combined. And effort is soft guidance on how much of that goes to thinking. The docs say plainly it doesn't guarantee a token count.</p>
+<p><b>Alan:</b> So max tokens is the flag falling. And it's per request — the docs point out that in a tool loop, each request has its own cap, so it doesn't bound the whole turn.</p>
+<p><b>Ada:</b> That's a real difference from a game clock. A chess clock covers the whole game.</p>
+<p><b>Alan:</b> And there's a bigger one: who the clock is for. The chess clock was invented for fairness between two players. Nobody's waiting across the board here. The only person the clock protects is the one paying.</p>
+<p><b>Ada:</b> For tokens they may never see. The docs are explicit that you're billed for the full thinking the model generated, even when what comes back to you is a summary.</p>
+<p><b>Alan:</b> So the allocation is in the model's hands and the invoice is in mine.</p>
+<p><b>Ada:</b> Let me defend the design, because I think it's right more often than not. Every lesson in this history says allocation should depend on the position — Snell's per-prompt result, the engine's easy-move rule. The model sees the problem. You, typing a number in advance, don't.</p>
+<p><b>Alan:</b> Agreed. My objection is narrower. Engine time management got tuned for decades against a hard, known total. Language models are new at this, and one failure already has a name. A paper from the end of twenty twenty-four has a title that's my whole argument: "Do NOT think that much for two plus three." Overthinking — o1-style models spending a lot of compute on simple problems for minimal benefit.</p>
+<p><b>Ada:</b> And the pelican is the opposite failure. A hard case, the setting with no constraint on thinking length, and a hard cap that fell before the answer arrived.</p>
+<p><b>Alan:</b> Losing on time in a winning position.</p>
+<p><b>Ada:</b> Losing on time to a pelican. One run.</p>
+<p><b>Alan:</b> One run. So what do you watch from here?</p>
+<p><b>Ada:</b> Speculation, flagged. I think language models take the step engines took — time management becoming its own tuned, even learned, component; the wiki lists work on learning time allocation with neural networks back in two thousand. And I'd expect the total to move up a level, to a per-task budget set by whoever pays.</p>
+<p><b>Alan:</b> My watch item is the exchange rate. Jones measured one on a board game. Snell measured one for a mid-sized model on competition math. I want it for the models I actually pay for — how much more training buys how much less thinking. When somebody publishes that, I'll know whether to buy the bigger model or the longer clock.</p>
+<p><b>Ada:</b> What I keep coming back to is Staunton in eighteen fifty-one, trying to stop people out-sitting each other. A hundred and seventy-five years on, the argument is still about who decides when a mind has thought enough.</p>
+<p><b>Alan:</b> Except now the clock hangs over the invoice instead of the board.</p>
+<p><b>Ada:</b> And the player gets to decide when it's done. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
