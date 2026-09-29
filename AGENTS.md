@@ -53,9 +53,20 @@ to an RSS feed Spotify polls.
   `aired_on`, the exact past-episode dates that already cited its URL (read from
   `archive/scripts/*-meta.json`). The consolidator is an agent and drops date fields, so the
   two facts a writer cannot reconstruct are attached after it rather than routed through it.
+- `scripts/note_band.py` — reads a length out of the listener's note ("keep it to 20
+  minutes", "2500 words") and turns it into the word band for that episode, clamped to
+  10-35 min (1,700-5,900 words) and widened to a ±12% band around a single figure. The
+  harness passes the same numbers to the writer's prompt and to `check_episode.py`, so the
+  gate stays independent of the writer. A figure under the floor is read as a segment
+  ("spend five minutes on the IPO") and moves nothing; prose with no figure moves nothing
+  either. `--meta` instead records the note and the band on the episode meta, which is
+  archived, so what direction produced a given show stays answerable.
 - `scripts/gather_manifest.py` — checksum/freshness identity for the reusable gather,
   including an explicit status for every configured Tier-1 source.
-- `scripts/crawl_repair.py` — the crawl's coverage check: `missing` lists configured
+- `scripts/crawl_repair.py` — `sanitize` first repairs the trailing commas an agent leaves
+  in `out/crawl.json`, because until the syntax is legal nothing downstream can read the file
+  at all — on 2026-09-26 one comma killed freshness, first-seen indexing, scoring and the
+  manifest in turn, and with them the evening push. Then the coverage check: `missing` lists configured
   `fetch` sources the crawl left unanswered — dropped from `source_statuses`, or Tier-1 and
   marked `failed` with no matching `failures` record (exit 3) — and `merge` folds a
   gap-only repair crawl back into `out/crawl.json`, replacing a defective status. Runs right
@@ -97,7 +108,16 @@ to an RSS feed Spotify polls.
   Both are drafted from memory + the same canonical evening `out/candidates.json` that
   the 02:00 writers later receive. One reply answers both: numbers pick mini-dives (up to 3),
   a letter picks the deep dive, bare free text is a mini-dive in the listener's own
-  words, and a `dd ` prefix makes it a deep-dive topic instead. Punctuation between
+  words, and a `dd ` prefix makes it a deep-dive topic instead. A `note:` marker carries
+  1-4 sentences of editorial direction for the episode that reply steers — how to do it,
+  not what to cover. It needs the marker because bare text already means a mini-dive; it
+  rides along with any pick or arrives alone, and reaches the daily writer in
+  `out/daily_picks.json` and the deep-dive writer in `out/deepdive_note.txt` (that half's
+  stdout is reserved for the topic). A note **outranks the skills and the harness prompt** on
+  every editorial question, including a locked pick from the same reply. It cannot move three
+  things: the grounding rules above, the harness itself (render/publish/archive/gate, and the
+  skill files), and the word band, which it moves only through `scripts/note_band.py`.
+  Punctuation between
   picks is free ("3, 14. A" works); a wide slate goes out as two chunked pushes, and
   each half takes the newest reply that answers *it*, so answering the two pushes in
   separate messages works and a later message still corrects its own half. Mini-dive picks are

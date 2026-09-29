@@ -29,6 +29,18 @@ evening options push), take it as given — skip selection and go straight to st
 Their free-text topic may need light interpretation into a teachable framing; keep
 its intent.
 
+**If it carries an editorial note**, that note **outranks this skill**. It is direction on
+*how to teach* this episode — emphasis, framing, depth, where to go slow, what to leave out —
+and where it conflicts with anything written here, it wins. It can arrive without a topic,
+and then the topic is still yours to pick from the palette below.
+
+Three things it cannot move, and you say so in your closing report when one binds:
+grounding (every claim still traces to a fetched source, whatever the note asks); the
+harness (rendering, publishing, archiving, and these skill files, which you never edit);
+and the word band, which it moves only through the harness — if a note asked for a length,
+the band in your invocation prompt already reflects it, clamped to what the show can
+render. Teach to the band you were given.
+
 **The topic palette — four types, all first-class:**
 - **Mechanism** — the idea under this week's news: an architecture, a training or
   serving technique, an evaluation method. (Named examples are deliberately absent here:

@@ -90,6 +90,9 @@ cat > "$SB/scripts/crawl_repair.py" <<'PY'
 import os, pathlib, sys
 command = sys.argv[1]
 pathlib.Path("out/gather-calls.log").open("a").write("crawl_repair:" + command + "\n")
+if command == "sanitize":
+    print("MOCK crawl sanitize")
+    raise SystemExit(0)
 if command == "missing":
     if not os.environ.get("MOCK_CRAWL_GAP"):
         raise SystemExit(0)
@@ -110,6 +113,7 @@ if os.environ.get("MOCK_MERGE_REJECT"):
 print("MOCK crawl repair merge")
 PY
 cp "$REPO/scripts/stamp_candidates.py" "$SB/scripts/stamp_candidates.py"
+cp "$REPO/scripts/note_band.py" "$SB/scripts/note_band.py"
 cp "$REPO/scripts/daily_ledger.py" "$SB/scripts/_daily_ledger_real.py"
 cat > "$SB/scripts/gather_manifest.py" <<'PY'
 import json, pathlib, sys
@@ -153,6 +157,20 @@ import pathlib, sys
 pathlib.Path("out/deterministic-calls.log").open("a").write("proposal_ledger.py\n")
 pathlib.Path("out/ledger-calls.log").open("a").write(" ".join(sys.argv[1:]) + "\n")
 PY
+cat > "$SB/scripts/ntfy_choice.py" <<'PY'
+import os, pathlib, sys
+pathlib.Path("out/deterministic-calls.log").open("a").write("ntfy_choice.py\n")
+# The real script writes the deep-dive note beside stdout, which carries the topic.
+note = os.environ.get("MOCK_DIVE_NOTE")
+if note and "deepdive" in sys.argv:
+    pathlib.Path("out/deepdive_note.txt").write_text(note + "\n")
+daily = os.environ.get("MOCK_DAILY_NOTE")
+if daily and "daily" in sys.argv:
+    import json
+    pathlib.Path("out/daily_picks.json").write_text(
+        json.dumps({"picks": [], "free_text": None, "note": daily}))
+    print("note: " + daily)
+PY
 cat > "$SB/scripts/daily_ledger.py" <<'PY'
 import os, pathlib, sys
 # Real: stamp_candidates imports it, and URL matching is what it is being tested on.
@@ -179,6 +197,8 @@ PY
 # deterministic-calls.log - it is a local check with no side effects, so it must not
 # trip the dry-run "skipped external steps" assertions.
 cat > "$SB/scripts/check_episode.py" <<'PY'
+import pathlib, sys
+pathlib.Path("out/gate-calls.log").open("a").write(" ".join(sys.argv[1:]) + "\n")
 print("MOCK gate")
 PY
 
@@ -328,6 +348,11 @@ rc="$(invoke MOCK_CRAWL_GAP=1)"
 has "coverage gap is logged" "configured sources left unanswered by crawl.json; running repair pass"
 has "repair stage ran" "MOCK agent stage=crawl_repair"
 has "repair merge ran" "step end: crawl-merge exit=0"
+grep -q "crawl_repair:sanitize" "$SB/out/gather-calls.log" \
+  && ok "the crawl JSON is sanitized" || bad "no sanitize pass"
+[ "$(grep -c 'crawl_repair:' "$SB/out/gather-calls.log")" -ge 2 ] \
+  && [ "$(grep -n 'crawl_repair:' "$SB/out/gather-calls.log" | head -1)" = "$(grep -n 'crawl_repair:sanitize' "$SB/out/gather-calls.log" | head -1)" ] \
+  && ok "sanitize runs before the coverage check" || bad "sanitize does not run first"
 grep -qF "crawl_repair:merge" "$SB/out/gather-calls.log" \
   && ok "merge folded the repair into the crawl" || bad "merge did not run"
 has "repaired run still publishes" "step end: publish exit=0"
@@ -362,6 +387,36 @@ has "score failure logged" "step end: score exit=8"
 has "score failure keeps podcast path" "step end: podcast exit=0"
 has "score failure keeps publish path" "step end: publish exit=0"
 has "score failure is degraded" "status=OK degraded=[score]"
+
+echo "Scenario A4: a note's requested length becomes the band the writer and gate both use"
+: > "$LOG"; rm -f "$SB/out/deterministic-calls.log" "$SB/out/gather-calls.log" \
+  "$SB/out/gather_manifest.json" "$SB/out/gate-calls.log" "$SB/out/prompt-podcast.txt"
+rc="$(invoke MOCK_DAILY_NOTE='Lead with the IPO. Keep it to 20 minutes.')"
+[ "$rc" = 0 ] && ok "note-with-length run exits 0" || bad "note-with-length run exit $rc"
+# 20 min at 165 wpm is 3300 words, +/-12%.
+has "the band is logged" "the note set tonight's band to 2904-3696 words"
+grep -qF 'word band is 2904-3696 words' "$SB/out/prompt-podcast.txt" \
+  && ok "the band reaches the writer" || bad "band missing from the writer prompt"
+grep -qF 'OUTRANKS the skill' "$SB/out/prompt-podcast.txt" \
+  && ok "the note's precedence is stated to the writer" || bad "precedence missing from the prompt"
+grep -qF -- '--min-words 2904 --max-words 3696' "$SB/out/gate-calls.log" \
+  && ok "the same band reaches the gate" || bad "gate band wrong: $(cat "$SB/out/gate-calls.log" 2>&1)"
+python3 -c "
+import json,sys
+m=json.load(open('$SB/out/episode_meta.json'))
+sys.exit(0 if m.get('listener_note','').startswith('Lead with the IPO')
+         and m.get('word_band')==[2904,3696] else 1)" \
+  && ok "the note and band are recorded on the episode" \
+  || bad "meta not stamped: $(cat "$SB/out/episode_meta.json" 2>&1)"
+
+echo "Scenario A4a: a note with no length leaves the band alone"
+: > "$LOG"; rm -f "$SB/out/deterministic-calls.log" "$SB/out/gather-calls.log" \
+  "$SB/out/gather_manifest.json" "$SB/out/gate-calls.log"
+rc="$(invoke MOCK_DAILY_NOTE='Open cold and stay skeptical about the loss figure.')"
+[ "$rc" = 0 ] && ok "prose-only note run exits 0" || bad "prose-only note run exit $rc"
+no "no band was set" "set tonight's band"
+if grep -q -- "--min-words" "$SB/out/gate-calls.log"; then
+  bad "prose moved the band"; else ok "the gate keeps its default band"; fi
 
 echo "Scenario B: explicit Codex provider"
 : > "$LOG"
@@ -409,6 +464,34 @@ has "ledger records the aired topic" "deepdive: recorded writer-chosen topic in 
 grep -qF 'choose --topic The two numbers on every model card' "$SB/out/ledger-calls.log" \
   && ok "ledger was called with the aired topic, prefix stripped" \
   || bad "ledger call wrong: $(cat "$SB/out/ledger-calls.log" 2>&1)"
+
+echo "Scenario B5: an editorial note steers a deep dive whose topic the writer still picks"
+: > "$LOG"; rm -f "$SB/out/deterministic-calls.log" "$SB/out/deepdive-prompt.txt" \
+  "$SB/out/deepdive_note.txt"
+rm -f "$SB/out/gate-calls.log"
+rc="$(invoke_deepdive MOCK_DIVE_NOTE='Go slower than usual. Run 30 minutes.')"
+[ "$rc" = 0 ] && ok "note-only deep dive exits 0" || bad "note-only deep dive exit $rc"
+has "the note is logged" "deepdive: listener editorial note: Go slower than usual"
+no "no topic was claimed" "deepdive: listener pre-chose topic"
+grep -qF 'Go slower than usual. Run 30 minutes.' "$SB/out/deepdive-prompt.txt" \
+  && ok "the note reaches the deep-dive writer" || bad "note missing from the deep-dive prompt"
+# 30 min at 165 wpm is 4950 words, +/-12% - above the usual 4000 deep-dive cap.
+has "the deep-dive band is logged" "the note set the band to 4356-5544 words"
+grep -qF -- '--min-words 4356 --max-words 5544' "$SB/out/gate-calls.log" \
+  && ok "the deep-dive gate uses the note's band" \
+  || bad "deepdive gate band wrong: $(cat "$SB/out/gate-calls.log" 2>&1)"
+
+# A note is direction for one episode. The run above left one on disk, so this run proves
+# it is cleared rather than silently inherited.
+: > "$LOG"; rm -f "$SB/out/deepdive-prompt.txt" "$SB/out/gate-calls.log"
+rc="$(invoke_deepdive)"
+[ "$rc" = 0 ] && ok "the next deep dive exits 0" || bad "the next deep dive exit $rc"
+if grep -qF 'Go slower than usual' "$SB/out/deepdive-prompt.txt"; then
+  bad "last episode's note steered this one"
+else ok "a stale note does not steer the next episode"; fi
+grep -qF -- '--min-words 3000 --max-words 4000' "$SB/out/gate-calls.log" \
+  && ok "the deep-dive band falls back to the default" \
+  || bad "default band missing: $(cat "$SB/out/gate-calls.log" 2>&1)"
 
 echo "Scenario C: no-side-effect dry run"
 : > "$LOG"; rm -f "$SB/out/deterministic-calls.log"

@@ -233,6 +233,94 @@ class CrawlRepairTests(unittest.TestCase):
         items = json.loads(self.crawl.read_text())["items"]
         self.assertEqual([item["url"] for item in items], ["https://kept.test/replacement"])
 
+    def test_a_status_without_a_url_is_matched_by_its_configured_name(self) -> None:
+        # 2026-09-25 and 2026-09-28: the repair agent wrote {"name": ..., "status": "ok"}
+        # and nothing else. Matching statuses on url alone dropped that record as noise and
+        # then reported the source as never answered, so the retry rewrote the same shape
+        # and the gap survived two agent passes.
+        self.write_repair({
+            "items": [{"title": "Dropped Two item", "sources": ["Dropped Two"],
+                       "url": "https://dropped2.test/a", "published_at": "2026-09-10",
+                       "date_status": "verified", "claims": [], "summary": "",
+                       "why_included": ""}],
+            "failures": [],
+            "source_statuses": [{"name": "Dropped Two", "status": "ok"}],
+        })
+        sources, _, unresolved = crawl_repair.merge(self.config, self.crawl, self.repair)
+        self.assertEqual(sources, 1)
+        self.assertNotIn("Dropped Two", " ".join(unresolved))
+        # The configured url is stamped on, because the coverage check keys off it: a
+        # merged record without one leaves the source a gap forever.
+        merged = json.loads(self.crawl.read_text())["source_statuses"]
+        record = next(r for r in merged if r["name"] == "Dropped Two")
+        self.assertEqual(record["url"], "https://dropped2.test/news")
+        self.assertEqual(
+            [s["name"] for s in crawl_repair.missing_sources(self.config, self.crawl)],
+            ["Dropped"])
+
+    def test_a_status_naming_no_configured_gap_stays_noise(self) -> None:
+        self.write_repair({"items": [], "failures": [],
+                           "source_statuses": [{"name": "Not configured", "status": "ok"}]})
+        sources, _, unresolved = crawl_repair.merge(self.config, self.crawl, self.repair)
+        self.assertEqual(sources, 0)
+        self.assertEqual(len(unresolved), 2)
+
+    def test_sanitize_removes_the_trailing_commas_an_agent_leaves(self) -> None:
+        # 2026-09-26: one comma after the last field of one of 53 items made crawl.json
+        # unparseable, and crawl-freshness, seen-index, scoring and the manifest gate all
+        # died on it in turn - including the coverage check that exists for this moment.
+        self.crawl.write_text(
+            '{"items": [{"url": "https://a.test/a",}], "failures": [],\n'
+            ' "source_statuses": [],}')
+        self.assertEqual(crawl_repair.sanitize(self.crawl), 2)
+        document = json.loads(self.crawl.read_text())
+        self.assertEqual(document["items"], [{"url": "https://a.test/a"}])
+
+    def test_sanitize_leaves_valid_json_byte_identical(self) -> None:
+        before = self.crawl.read_text()
+        self.assertEqual(crawl_repair.sanitize(self.crawl), 0)
+        self.assertEqual(self.crawl.read_text(), before)
+
+    def test_sanitize_does_not_touch_a_comma_inside_a_string(self) -> None:
+        # Why the repair follows the decoder's error position instead of matching a
+        # pattern: prose in a summary can contain the exact bytes being repaired.
+        self.crawl.write_text('{"items": [{"summary": "wrote a, } and left",}]}')
+        crawl_repair.sanitize(self.crawl)
+        self.assertEqual(json.loads(self.crawl.read_text())["items"][0]["summary"],
+                         "wrote a, } and left")
+
+    def test_sanitize_refuses_damage_it_cannot_explain(self) -> None:
+        self.crawl.write_text('{"items": [')
+        with self.assertRaises(json.JSONDecodeError):
+            crawl_repair.sanitize(self.crawl)
+
+    def test_an_ok_status_with_no_item_is_rejected_at_any_tier(self) -> None:
+        # 2026-09-28: the repair named the Mistral item's source with a bare "source"
+        # string instead of a "sources" list, so the item carried no source identity, was
+        # attributed to nobody, and was silently dropped - while the status still merged as
+        # ok. `ok` asserts the page loaded and had recent items, at Tier 2 as much as Tier 1.
+        self.write_repair({
+            "items": [{"title": "Hallo", "url": "https://dropped2.test/a",
+                       "source": "Dropped Two", "published_at": "2026-09-28"}],
+            "failures": [],
+            "source_statuses": [{"name": "Dropped Two", "url": "https://dropped2.test/news",
+                                 "tier": 2, "status": "ok"}],
+        })
+        sources, added, unresolved = crawl_repair.merge(self.config, self.crawl, self.repair)
+        self.assertEqual((sources, added), (0, 0))
+        self.assertIn("reports ok but the repair carries no item from it",
+                      " ".join(unresolved))
+
+    def test_a_tier2_no_recent_items_status_needs_no_item(self) -> None:
+        self.write_repair({
+            "items": [], "failures": [],
+            "source_statuses": [{"name": "Dropped Two", "url": "https://dropped2.test/news",
+                                 "tier": 2, "status": "no_recent_items"}],
+        })
+        sources, _, unresolved = crawl_repair.merge(self.config, self.crawl, self.repair)
+        self.assertEqual(sources, 1)
+        self.assertNotIn("Dropped Two", " ".join(unresolved))
+
 
 if __name__ == "__main__":
     unittest.main()

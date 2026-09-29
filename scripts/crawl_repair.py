@@ -29,6 +29,48 @@ def _json(path: Path) -> dict:
     return value
 
 
+def _drop_trailing_comma(raw: str, error: json.JSONDecodeError) -> str | None:
+    """Delete one comma that a closing brace or bracket followed, or give up.
+
+    The decoder's error position is the repair's whole safety argument: it points at a
+    structural character outside any string token, so the comma found behind it cannot be
+    prose. A pattern match over the text could not make that promise.
+    """
+    if error.pos >= len(raw) or raw[error.pos] not in "}]":
+        return None
+    cut = raw.rfind(",", 0, error.pos)
+    if cut < 0 or raw[cut + 1:error.pos].strip():
+        return None
+    return raw[:cut] + raw[cut + 1:]
+
+
+def sanitize(crawl_path: Path, limit: int = 60) -> int:
+    """Make the agent's crawl.json parseable again. Returns the number of repairs.
+
+    On 2026-09-26 a single comma after the last field of one of 53 items cost the whole
+    evening: crawl-freshness, first-seen indexing, Smallbatch scoring and the manifest gate
+    each died on the same JSONDecodeError, so no manifest existed and the ntfy picker never
+    drafted. `missing` below died on it too, which is why the repair pass built for a broken
+    crawl never ran. Nothing downstream can read the file until the syntax is legal, so this
+    runs first and fixes only what it can name; anything else still raises.
+    """
+    raw = crawl_path.read_text()
+    fixes = 0
+    while True:
+        try:
+            json.loads(raw)
+            break
+        except json.JSONDecodeError as error:
+            repaired = None if fixes >= limit else _drop_trailing_comma(raw, error)
+            if repaired is None:
+                raise
+            raw = repaired
+            fixes += 1
+    if fixes:
+        crawl_path.write_text(raw)
+    return fixes
+
+
 def configured_fetch(config: Path) -> list[dict]:
     sources = yaml.safe_load(config.read_text()).get("sources", [])
     return [source for source in sources if source.get("method") == "fetch"]
@@ -113,12 +155,27 @@ def merge(
     if not wanted:
         raise ValueError("crawl.json already covers every configured source")
 
+    # Which gap a status answers. The crawl contract asks for name and url both, but the
+    # repair agent wrote only {"name": ..., "status": "ok"} for Mistral AI News on
+    # 2026-09-25 and again on 2026-09-28; keying on url alone dropped that record as noise
+    # and then reported the source as never answered, which told the retry nothing it could
+    # act on. The configured name identifies the source just as exactly.
+    by_name = {str(source["name"]): url for url, source in wanted.items()}
+
+    def answered_gap(record: dict) -> str | None:
+        url = record.get("url")
+        if url is not None and str(url) in wanted:
+            return str(url)
+        return by_name.get(str(record.get("name")))
+
     rejected: dict[str, str] = {}
     by_url: dict[str, dict] = {}
     for record in repair.get("source_statuses", []):
-        if not isinstance(record, dict) or record.get("url") not in wanted:
+        if not isinstance(record, dict):
+            continue
+        url = answered_gap(record)
+        if url is None:
             continue  # a status for an already-covered source is the agent's noise
-        url = str(record["url"])
         if url in by_url or url in rejected:
             by_url.pop(url, None)
             rejected[url] = "carries more than one source_statuses record; write exactly one"
@@ -129,7 +186,9 @@ def merge(
                 f"strings {sorted(ALLOWED)}; synonyms and variants are not accepted"
             )
             continue
-        by_url[url] = record
+        # Both the coverage check above and the manifest gate key statuses by url, so a
+        # record merged without one would leave its source a gap for good.
+        by_url[url] = record if record.get("url") == url else {**record, "url": url}
 
     repair_items = [item for item in repair.get("items", []) if isinstance(item, dict)]
     name_to_url = {str(source["name"]): url for url, source in wanted.items()}
@@ -148,15 +207,23 @@ def merge(
     # before scoring, rather than at the gate half an hour later.
     for url in sorted(by_url):
         record = by_url[url]
+        name = wanted[url]["name"]
+        # `ok` asserts the page loaded and had recent items, at Tier 2 as much as Tier 1; a
+        # page that loaded with nothing recent is `no_recent_items`. On 2026-09-28 the
+        # Mistral item named its source in a bare "source" string rather than a "sources"
+        # list, so it carried no source identity, could be attributed to nobody, and was
+        # dropped as the status merged as ok - the repair reported success having added
+        # nothing.
+        if record["status"] == "ok" and name not in item_sources:
+            rejected.setdefault(url, "reports ok but the repair carries no item from it")
+            continue
+        # The remaining invariants mirror the manifest gate, which polices Tier 1 only.
         if wanted[url].get("tier") != 1:
             continue
-        name = wanted[url]["name"]
         if record.get("name") != name:
             rejected.setdefault(
                 url, f"status name {record.get('name')!r} must repeat the configured "
                      f"name {name!r} verbatim")
-        elif record["status"] == "ok" and name not in item_sources:
-            rejected.setdefault(url, "reports ok but the repair carries no item from it")
         elif record["status"] == "failed" and url not in failure_urls:
             rejected.setdefault(
                 url, "reports failed but the repair carries no matching failures record")
@@ -210,11 +277,15 @@ def merge(
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=("missing", "merge"))
+    parser.add_argument("command", choices=("sanitize", "missing", "merge"))
     parser.add_argument("--config", type=Path, default=Path("config/sources.yaml"))
     parser.add_argument("--crawl", type=Path, default=Path("out/crawl.json"))
     parser.add_argument("--repair", type=Path, default=Path("out/crawl_repair.json"))
     args = parser.parse_args()
+    if args.command == "sanitize":
+        fixes = sanitize(args.crawl)
+        print(f"sanitize: repaired {fixes} trailing comma(s) in {args.crawl}")
+        return 0
     if args.command == "missing":
         gaps = gap_sources(args.config, args.crawl)
         if not gaps:

@@ -13,6 +13,13 @@ reply window. The listener answers with a single message:
     B            deep dive only
     <free text>  a mini-dive of the listener's own, in their words
     dd <topic>   a deep-dive topic of their own
+    note: <1-4 sentences>   editorial direction for the episode this reply steers
+
+A note is the one part of the grammar that needs a marker, because bare text is already
+a mini-dive request. It rides along with any of the forms above ("1,3 note: lead with the
+IPO"), or arrives alone to steer an episode whose stories the writer still picks. It
+reaches whichever half the reply answers: out/daily_picks.json for the daily, and
+out/deepdive_note.txt for the deep dive, whose stdout stays reserved for the topic.
 
 The 04:00 run calls this twice with `--kind`. Numbers and bare free text belong to
 the daily slate (the every-night lever); letters and the `dd` prefix belong to the
@@ -39,6 +46,7 @@ NTFY_BASE = os.environ.get("NTFY_BASE", "https://ntfy.sh")
 DAILY_OPTIONS = "out/daily_options.json"
 DAILY_PICKS = "out/daily_picks.json"
 DEEPDIVE_OPTIONS = "out/deepdive_options.json"
+DEEPDIVE_NOTE = "out/deepdive_note.txt"
 MAX_PICKS = 3  # the show carries 2-3 mini-dives; extras become rundown lines
 
 # A pick is a mini-dive number (1-15) or a deep-dive letter standing on its own. The
@@ -56,11 +64,24 @@ _DD_PREFIX = re.compile(r"^dd\b[:\s]*(.*)$", re.IGNORECASE | re.DOTALL)
 # ("14. A") must never reach the writer as an instruction to go dive something.
 _HAS_WORD = re.compile(r"[A-Za-z]{3}")
 _OUTER_QUOTES = {'"': '"', "'": "'", "“": "”", "‘": "’"}
+# A colon or a space must follow the marker, so "note-taking" and "release notes" stay
+# ordinary words rather than swallowing the rest of the message as direction.
+_NOTE = re.compile(r"(?:^|[\s,;.])note(?:\s*:\s*|\s+)(.+)$", re.IGNORECASE | re.DOTALL)
+
+
 def parse_reply(text: str) -> dict:
-    """Split a reply into daily picks, a deep-dive pick, and either kind of free text."""
+    """Split a reply into daily picks, a deep-dive pick, free text, and an editorial note."""
     text = (text or "").strip()
     if len(text) >= 2 and _OUTER_QUOTES.get(text[0]) == text[-1]:
         text = text[1:-1].strip()
+    # The note comes off first: everything after the marker is prose the listener wrote
+    # about the episode, so no other rule should see it. `dd` in particular is greedy to
+    # the end of the message and would otherwise read the note as part of the topic.
+    note = None
+    marker = _NOTE.search(text)
+    if marker:
+        note = marker.group(1).strip() or None
+        text = text[:marker.start()].strip()
     numbers: list[int] = []
     letters: list[int] = []
     rest = text
@@ -85,8 +106,8 @@ def parse_reply(text: str) -> dict:
         deepdive_text = dd.group(1).strip() or None
     elif _HAS_WORD.search(rest):  # a mini-dive in the listener's own words
         daily_text = rest
-    return {"numbers": numbers, "letters": letters,
-            "daily_text": daily_text, "deepdive_text": deepdive_text}
+    return {"numbers": numbers, "letters": letters, "daily_text": daily_text,
+            "deepdive_text": deepdive_text, "note": note}
 
 
 def load_options(path: str) -> dict | None:
@@ -150,8 +171,9 @@ def run_daily(options_path: str, picks_path: str) -> int:
     else:
         if not opts:
             return 0
-        parsed = latest_answering(fetch_replies(int(opts.get("sent_at", 0))),
-                                  lambda p: p["numbers"] or p["daily_text"])
+        parsed = latest_answering(
+            fetch_replies(int(opts.get("sent_at", 0))),
+            lambda p: p["numbers"] or p["daily_text"] or p["note"])
         if parsed is None:
             return 0
 
@@ -161,30 +183,40 @@ def run_daily(options_path: str, picks_path: str) -> int:
         if n in by_n and n not in seen:
             seen.add(n)
             chosen.append(by_n[n])
-    if not chosen and not parsed["daily_text"]:
+    # A note with no pick is a real answer: the writer still chooses the stories, and the
+    # note says how to handle them.
+    if not chosen and not parsed["daily_text"] and not parsed["note"]:
         return 0
 
     result = {"picks": chosen[:MAX_PICKS], "free_text": parsed["daily_text"],
-              "overflow": chosen[MAX_PICKS:]}
+              "note": parsed["note"], "overflow": chosen[MAX_PICKS:]}
     json.dump(result, open(picks_path, "w"), indent=1, ensure_ascii=False)
 
     summary = [f"#{o['n']} {o.get('label', '')}" for o in result["picks"]]
     if result["free_text"]:
         summary.append(f"free: {result['free_text']}")
+    if result["note"]:
+        summary.append(f"note: {result['note']}")
     if result["overflow"]:
         summary.append(f"overflow: {len(result['overflow'])}")
     print(" | ".join(summary))
     return 0
 
 
-def run_deepdive(options_path: str) -> int:
+def run_deepdive(options_path: str, note_path: str = DEEPDIVE_NOTE) -> int:
     opts = load_options(options_path)
     if not opts:
         return 0
-    parsed = latest_answering(fetch_replies(int(opts.get("sent_at", 0))),
-                              lambda p: p["letters"] or p["deepdive_text"])
+    parsed = latest_answering(
+        fetch_replies(int(opts.get("sent_at", 0))),
+        lambda p: p["letters"] or p["deepdive_text"] or p["note"])
     if parsed is None:
         return 0
+    # Written before the topic is resolved: stdout is consumed as the topic itself, and a
+    # note-only reply leaves the topic to the writer while still steering how it is taught.
+    if parsed["note"]:
+        with open(note_path, "w") as handle:
+            handle.write(parsed["note"] + "\n")
     by_n = {o.get("n"): o for o in opts.get("options", [])}
     for n in parsed["letters"]:
         if n in by_n and by_n[n].get("topic"):
@@ -200,10 +232,11 @@ def main() -> int:
     ap.add_argument("--kind", choices=["daily", "deepdive"], default="deepdive")
     ap.add_argument("--options", default=None)
     ap.add_argument("--picks", default=DAILY_PICKS)
+    ap.add_argument("--note", default=DEEPDIVE_NOTE)
     args = ap.parse_args()
     if args.kind == "daily":
         return run_daily(args.options or DAILY_OPTIONS, args.picks)
-    return run_deepdive(args.options or DEEPDIVE_OPTIONS)
+    return run_deepdive(args.options or DEEPDIVE_OPTIONS, args.note)
 
 
 if __name__ == "__main__":

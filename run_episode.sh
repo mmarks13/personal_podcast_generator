@@ -165,11 +165,13 @@ run_step preflight python3 scripts/preflight.py --mode "$MODE" || exit 78
 run_deepdive_episode() {
   # DEEPDIVE_TOPIC overrides the phone picker — for manual reruns after a failed night,
   # when the ntfy reply has aged out of the topic's retention window.
+  rm -f out/deepdive_note.txt  # a note is for one episode; never let last week's steer this one
   local dive_choice="${DEEPDIVE_TOPIC:-}"
   if [ -z "$dive_choice" ] && [ "$DRY_RUN" != "1" ]; then
     dive_choice="$(python3 scripts/ntfy_choice.py --kind deepdive 2>/dev/null || true)"
   fi
   local dive_topic_note=""
+  local dive_gate_band=""
   if [ -n "$dive_choice" ]; then
     log run "deepdive: listener pre-chose topic: $dive_choice"
     if [ "$DRY_RUN" != "1" ]; then
@@ -182,6 +184,33 @@ Preserve every distinct subject and qualifier in the listener's wording: you may
 teachable framing, but must not narrow away or replace any requested dimension. Before writing, \
 audit the planned title and outline against the original wording."
   fi
+  # An editorial note stands on its own: the listener can say how to teach an episode
+  # without naming the topic, and then the writer still picks it.
+  if [ -s out/deepdive_note.txt ]; then
+    local dive_note
+    dive_note="$(cat out/deepdive_note.txt)"
+    log run "deepdive: listener editorial note: $dive_note"
+    dive_topic_note="$dive_topic_note The listener also left an editorial note for this episode: \
+'${dive_note}'. That note OUTRANKS the skill and this prompt on every editorial question — emphasis, \
+framing, depth, what to dwell on or skip, how to teach it. Two things it cannot move: the grounding rules \
+(every claim still traces to a fetched source) and the harness (rendering, publishing, archiving, and the \
+skill files, which you never edit). Length it can move, but only through the band below."
+    local band bmin bmax breduced
+    band="$(python3 scripts/note_band.py --note out/deepdive_note.txt 2>/dev/null || true)"
+    if [ -n "$band" ]; then
+      read -r bmin bmax breduced <<<"$band"
+      dive_gate_band="--min-words $bmin --max-words $bmax"
+      log run "deepdive: the note set the band to $bmin-$bmax words (~$((bmin/165))-$((bmax/165)) min)"
+      dive_topic_note="$dive_topic_note This episode's word band is $bmin-$bmax words \
+(~$((bmin/165))-$((bmax/165)) minutes), set from that note and enforced by the gate, in place of the usual \
+3000-4000. Teach to it: go deeper or narrower to fit, never pad or stop mid-explanation."
+      if [ "$breduced" = "1" ]; then
+        log run "deepdive: the requested length exceeded what the show renders; reduced to the maximum"
+        dive_topic_note="$dive_topic_note The note asked for more time than the show can render, so this is \
+the longest episode available; say so in your closing report."
+      fi
+    fi
+  fi
   run_step deepdive agent_stage deepdive "Use the weekly-deep-dive skill to produce this week's deep-dive episode \
 following its grounding rules and length target (20-25 min). STOP after step 4's validation gate \
 passes — do NOT run the render or update_history lines in step 4; the harness handles both. \
@@ -190,7 +219,7 @@ Print the topic and word count when done.${dive_topic_note}"
   # Same independent re-check for the deep dive; band matches the skill's own gate line.
   run_step gate-deepdive .venv/bin/python scripts/check_episode.py \
     --episode out/deepdive.json --meta out/deepdive_meta.json \
-    --min-words 3000 --max-words 4000
+    ${dive_gate_band:---min-words 3000 --max-words 4000}
 
   if [ "$DRY_RUN" = "1" ]; then
     log run "dry-run: skipped deep-dive history, archive, render, publish, and ledger cleanup"
@@ -211,6 +240,8 @@ Print the topic and word count when done.${dive_topic_note}"
   # on disk. Everything that reads archived metas was blind to them: the source URLs a
   # deep dive used never reached the aired-URL stamp, and no deep dive's own record was
   # there for a later one to read.
+  python3 scripts/note_band.py --note out/deepdive_note.txt --meta out/deepdive_meta.json 2>/dev/null \
+    || log run "WARNING: could not record the listener note on the deep-dive meta"
   cp -f out/deepdive_meta.json "archive/scripts/$DATE-deepdive-meta.json" 2>/dev/null \
     || log run "WARNING: deepdive meta archive copy failed"
 
@@ -375,6 +406,14 @@ do not create helper scripts or ask for shell access." \
     # picker. Catch them here instead and recrawl just those sources.
     crawl_gaps=""; gaps_rc=0
     if [ -s out/crawl.json ]; then
+      # One trailing comma in the agent's JSON cost the whole 2026-09-26 evening: crawl
+      # freshness, first-seen indexing, scoring and the manifest each died on the same
+      # JSONDecodeError, so no manifest existed and no slate went to the phone. The coverage
+      # check below died on it too, which is why the repair pass built for a broken crawl
+      # never ran. Legal syntax first, then everything else.
+      run_step crawl-sanitize --optional python3 scripts/crawl_repair.py sanitize \
+        --crawl out/crawl.json \
+        || log run "WARNING: out/crawl.json is not valid JSON and the damage was not a trailing comma"
       set +e
       crawl_gaps=$(python3 scripts/crawl_repair.py missing \
         --config config/sources.yaml --crawl out/crawl.json 2>/dev/null)
@@ -394,9 +433,10 @@ Write out/crawl_repair.json (NOT out/crawl.json) in the skill's crawl contract, 
 sources' items, failures, and exactly one source_statuses record per source listed above. Each record's status \
 must be one of the three literal strings ok, no_recent_items, or failed - never a synonym, paraphrase, or \
 variant spelling, however reasonable it reads. Each record must also repeat its source's configured name \
-verbatim. Write one item per \
-development with title, primary development URL, exact configured source name, and either a verified published_at \
-or explicit unknown date_status; never use an index-page rollup or the crawl date. Use WebFetch, \
+verbatim, alongside that source's url, tier, and window_hours copied from the list above. Write one item per \
+development with title, primary development URL, a \"sources\" LIST holding the exact configured name (the key is \
+plural and stays a list even for one source), and either a verified published_at with date_status \"verified\" or \
+date_status \"unknown\"; never use an index-page rollup or the crawl date. Use WebFetch, \
 WebSearch, and Write directly; do not create helper scripts or ask for shell access."
       repair_merged=0
       run_step crawl-repair --optional agent_stage crawl_repair "$CRAWL_REPAIR_PROMPT" \
@@ -603,6 +643,7 @@ newest-first (do not tail-slice it): ${PROPOSAL_RECENT_CONTEXT} Do nothing else.
   # the title already says what the numbers are.
   TITLE="Tonight's dives — reply with a number or two"
   FOOTER="Reply: numbers = tonight's dives (up to 3) · plain text = a dive of your own"
+  NOTE_HINT="· \"note: ...\" = how to do the episode (1-4 sentences, on its own or after a pick)"
   if [ -n "$DAILY_MSG" ] && [ -n "$DIVE_MSG" ]; then
     OPTIONS_MSG="TONIGHT'S DIVES — pick 2-3
 $DAILY_MSG
@@ -616,6 +657,8 @@ $DIVE_MSG"
     TITLE="Tonight's dives + tomorrow's deep dive"
     FOOTER="$FOOTER · letter = the deep dive · \"dd <topic>\" = your own deep-dive topic"
   fi
+  FOOTER="$FOOTER
+$NOTE_HINT"
   NOTIFY_SENT=no
   if [ -n "$OPTIONS_MSG" ]; then
     # High priority, like the failure alert: on Android the default-priority channel
@@ -678,8 +721,34 @@ if [ "$DRY_RUN" != "1" ]; then
 fi
 if [ -n "$DIVE_PICKS" ]; then
   log run "podcast: listener pre-chose dives: $DIVE_PICKS"
-  DIVE_PICK_NOTE=" The listener pre-chose tonight's mini-dives via the evening picker: read \
-out/daily_picks.json and follow the skill's pre-chosen-dives rule — those stories are locked dives."
+  DIVE_PICK_NOTE=" The listener answered the evening picker: read out/daily_picks.json. Any stories it \
+lists are locked dives — follow the skill's pre-chosen-dives rule. If it carries a \"note\", that note \
+OUTRANKS the skill and this prompt on every editorial question: emphasis, framing, structure, tone, which \
+stories to dive, even dropping or reordering a locked pick from the same reply. Two things it cannot move: \
+the grounding rules (every claim still traces to a fetched source) and the harness (rendering, publishing, \
+archiving, and the skill files, which you never edit). Length it can move, but only through the band below. \
+A note can arrive with no stories attached; you then choose the dives yourself and shape them as it asks."
+fi
+
+# A note may set tonight's length. The gate hard-fails the run before TTS on the word band,
+# so a request the writer simply obeyed would cost the whole episode; the harness converts
+# it, clamps it, and hands the same numbers to the writer and to the gate. The gate stays an
+# independent check that way — the writer never picks the bar it is judged against.
+GATE_BAND=""
+DAILY_BAND="$(python3 scripts/note_band.py --note out/daily_picks.json 2>/dev/null || true)"
+if [ -n "$DAILY_BAND" ]; then
+  read -r BMIN BMAX BREDUCED <<<"$DAILY_BAND"
+  GATE_BAND="--min-words $BMIN --max-words $BMAX"
+  log run "podcast: the note set tonight's band to $BMIN-$BMAX words (~$((BMIN/165))-$((BMAX/165)) min)"
+  DIVE_PICK_NOTE="$DIVE_PICK_NOTE Tonight's word band is $BMIN-$BMAX words \
+(~$((BMIN/165))-$((BMAX/165)) minutes), set from that note and enforced by the gate, in place of the usual \
+3000-4700. Write to it: cut or expand coverage to fit the length the listener asked for, never pad or \
+truncate mid-thought."
+  if [ "$BREDUCED" = "1" ]; then
+    log run "podcast: the requested length exceeded what the show renders; reduced to the maximum"
+    DIVE_PICK_NOTE="$DIVE_PICK_NOTE The note asked for more time than the show can render, so this is the \
+longest episode available; say so in your closing report."
+  fi
 fi
 
 # 3: Opus selects, verifies, and writes the script — stops after validation.
@@ -699,7 +768,7 @@ Print the episode title and word count when done.${DIVE_PICK_NOTE}"
 # ~20 minutes of TTS and the Gemini credits behind it. Hard failures are the existing
 # schema/word/tag checks; the breadth signal is warn-only and cannot fail a run.
 run_step gate .venv/bin/python scripts/check_episode.py \
-  --episode out/episode.json --meta out/episode_meta.json
+  --episode out/episode.json --meta out/episode_meta.json $GATE_BAND
 
 # Update durable state, render, and publish only in a real run. Dry runs keep the
 # generated artifacts for validation but cause no external or history side effects.
@@ -714,6 +783,10 @@ else
   [ "$HIST_RC" -eq 0 ] || log run "WARNING: update_history failed; history.json may be stale"
 
   mkdir -p archive/scripts
+  # What direction produced this episode, kept with it. After the gate, so the meta the
+  # gate read is the one the writer wrote; before the archive copy, so the record persists.
+  python3 scripts/note_band.py --note out/daily_picks.json --meta out/episode_meta.json 2>/dev/null \
+    || log run "WARNING: could not record the listener note on the episode meta"
   cp -f out/script.txt "archive/scripts/$DATE.txt" 2>/dev/null \
     && cp -f out/episode_meta.json "archive/scripts/$DATE-meta.json" 2>/dev/null \
     || log run "WARNING: script archive copy failed"

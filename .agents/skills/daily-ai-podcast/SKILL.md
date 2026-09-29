@@ -389,6 +389,24 @@ new development, not a re-run. `free_text`, when present, is a locked dive in th
 listener's own words; find and ground the material yourself. `overflow` entries become
 rundown lines.
 
+`note`, when present, is the listener's **editorial direction for tonight only**, and it
+**outranks this skill**. Where it conflicts with anything written here — the dive count, the
+rundown shape, the cold open, tone, pacing, `listener.yaml` weights, the paper-aging rule,
+repeat-suppression, even a locked pick from the same reply — the note wins. It may drop,
+add, reorder or demote a pick; prose says things a list of numbers cannot, and it is the
+same person speaking later. It can also arrive with no stories attached, in which case you
+choose the dives yourself and shape them the way it asks.
+
+Three things a note cannot move, and you say so in the nightly report when one binds:
+1. **Grounding.** Every claim still traces to a fetched source. No invented number, date,
+   quote or attribution, whatever the note asks for. Honor its spirit within the rules.
+2. **The harness.** Rendering, publishing, archiving, the gate itself, and these skill
+   files, which you never edit. A note is editorial authority, not operational authority.
+3. **The word band**, which it moves only through the harness. If a note asked for a
+   length, the band in your invocation prompt already reflects it — clamped to what the
+   show can render. Write to the band you were given; it is the listener's request
+   already applied, and the gate enforces it.
+
 The evening gather is the editorial cutoff: **do not run an overnight delta or add a
 story published after that gather.** It waits for the next cycle. The rundown is yours
 within the canonical candidate set, and you never drop a pick. If a pick turns out to

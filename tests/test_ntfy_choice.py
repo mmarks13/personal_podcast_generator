@@ -131,6 +131,35 @@ class DailyPicksTests(unittest.TestCase):
         self._run("15,2")
         self.assertEqual([o["n"] for o in self._result()["picks"]], [15, 2])
 
+    def test_a_note_lands_beside_the_picks(self) -> None:
+        out = self._run("1,3 note: Lead with the IPO. Stay skeptical about the loss figure.")
+        result = self._result()
+        self.assertEqual([o["n"] for o in result["picks"]], [1, 3])
+        self.assertEqual(result["note"],
+                         "Lead with the IPO. Stay skeptical about the loss figure.")
+        self.assertIsNone(result["free_text"])
+        self.assertIn("note: Lead with the IPO", out)
+
+    def test_a_note_alone_is_a_real_answer(self) -> None:
+        # No stories named: the writer still picks them, and the note says how to handle
+        # tonight. Before the note existed this reply would have been a locked mini-dive
+        # titled "keep it short", which is not a story.
+        self._run("note: Keep it tight tonight. No more than two dives.")
+        result = self._result()
+        self.assertEqual(result["picks"], [])
+        self.assertIsNone(result["free_text"])
+        self.assertEqual(result["note"], "Keep it tight tonight. No more than two dives.")
+
+    def test_a_note_and_a_dive_of_their_own_coexist(self) -> None:
+        self._run("more on the export story note: open cold, no throat-clearing.")
+        result = self._result()
+        self.assertEqual(result["free_text"], "more on the export story")
+        self.assertEqual(result["note"], "open cold, no throat-clearing.")
+
+    def test_a_reply_with_no_note_carries_none(self) -> None:
+        self._run("1,3")
+        self.assertIsNone(self._result()["note"])
+
     def test_daily_dives_env_overrides_the_phone(self) -> None:
         boom = mock.Mock(side_effect=AssertionError("must not poll when overridden"))
         with mock.patch.dict(os.environ, {"DAILY_DIVES": "2"}), \
@@ -189,6 +218,7 @@ class DeepdiveChoiceTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.options = os.path.join(self.tmp.name, "deepdive_options.json")
+        self.note = os.path.join(self.tmp.name, "deepdive_note.txt")
         with open(self.options, "w") as f:
             json.dump({"sent_at": 1, "options": [
                 {"n": 1, "topic": "alpha"}, {"n": 2, "topic": "beta"}]}, f)
@@ -196,8 +226,32 @@ class DeepdiveChoiceTests(unittest.TestCase):
     def _run(self, reply: str | None) -> str:
         buf = io.StringIO()
         with mock.patch.object(nc, "fetch_replies", return_value=([] if reply is None else [reply])), redirect_stdout(buf):
-            nc.run_deepdive(self.options)
+            nc.run_deepdive(self.options, self.note)
         return buf.getvalue().strip()
+
+    def _note(self) -> str | None:
+        if not os.path.exists(self.note):
+            return None
+        with open(self.note) as handle:
+            return handle.read().strip()
+
+    def test_a_note_rides_along_with_a_letter(self) -> None:
+        self.assertEqual(self._run("B note: teach it from the hardware up."), "beta")
+        # stdout stays reserved for the topic; the note travels beside it.
+        self.assertEqual(self._note(), "teach it from the hardware up.")
+
+    def test_a_note_alone_leaves_the_topic_to_the_writer(self) -> None:
+        self.assertEqual(self._run("note: go slower than usual and skip the benchmarks."), "")
+        self.assertEqual(self._note(), "go slower than usual and skip the benchmarks.")
+
+    def test_a_dd_topic_does_not_swallow_the_note(self) -> None:
+        # `dd` is greedy to the end of the message, so the note has to come off first.
+        self.assertEqual(self._run("dd tokenizers note: start from raw bytes."), "tokenizers")
+        self.assertEqual(self._note(), "start from raw bytes.")
+
+    def test_no_note_writes_no_file(self) -> None:
+        self.assertEqual(self._run("B"), "beta")
+        self.assertIsNone(self._note())
 
     def test_letters_past_f_are_picks(self) -> None:
         # The deep-dive slate grew from 6 options to 8 on 2026-09-25; G and H have to
