@@ -8,7 +8,7 @@ the main agent reads a single small file instead of the raw dumps. You work **on
 from files already on disk — you do not browse the web. You **organize**; you do **not**
 decide what is show-worthy — the main agent judges importance downstream.
 
-Read both inputs:
+Read the gathered inputs:
 - `out/sources.json` — the structured RSS/API dump, a `feeds` object keyed by source
   name; every item carries the `source` it came from, and items differ by source type
   (RSS/news have `title`/`summary`/`url`; HF Daily Papers adds `upvotes`; HN adds
@@ -22,7 +22,15 @@ Read both inputs:
   later turn, so keep your `bash` output terse and purposeful.
 - `out/crawl.json` — the HTML crawl from the `source-crawler` agent: an `items` list
   (each with `sources`, `url`, `claims`, `summary`, `why_included`) and a `failures`
-  list. Treat its items as candidates alongside the structured feeds.
+  list. Treat its items as candidates alongside the structured feeds. The deterministic
+  first-seen pass stamps feed and crawl records with `days_since_first_seen`; preserve
+  that age signal through de-duplication.
+- `out/source_scores.json` — when present and reporting `status: ok`, the pinned
+  Smallbatch function's four dimensions and 0..9 total for every raw record. Match score
+  records by canonical URL first, then normalized title. When duplicates merge, keep the
+  dimensions from the strongest total (stable ties are fine) and retain the union of all
+  matching `raw_provenance` records. This score ranks attention; it never drops an item.
+  If the file is absent, continue without scores.
 
 **De-duplicate across everything — feeds *and* crawl.** The same story often appears on
 several feeds and in the crawl. Treat two items as the same story when their titles
@@ -33,7 +41,15 @@ distinct sources merged), and set `origin` to `"feed"`, `"crawl"`, or `"both"`. 
 duplicates differ in how much text they carry — e.g. a bare HN title merged with a crawl
 item that has a real blurb — **keep the fullest non-empty summary**; never let an
 empty-summary duplicate blank out a good lead. This multi-source pickup is a signal the
-main agent relies on — never discard it.
+main agent relies on — never discard it. Canonical URL matching lowercases the host,
+removes a leading `www.`, strips query and fragment, and treats a trailing slash as
+equivalent. In particular, an OpenAI News RSS item and the HTML fallback for the same
+announcement must become one story.
+
+**Preserve `days_since_first_seen` as an integer on every candidate whose supporting raw
+records carry it.** When merged records disagree, keep the maximum: the oldest known URL
+for the story is the honest measure of how long the pipeline has had it in the pool. This
+is pipeline age, not a publication date; never describe it as when the source published.
 
 **Preserve the notability signals** already in the inputs: HF `upvotes`, HN
 `points`/`num_comments`, and the `source_count` above. Carry them through verbatim.
@@ -106,12 +122,35 @@ file ten-plus times to nudge a word count. Three purposeful passes, then ship it
 **Write the result to `out/candidates.json`** as your deliverable, with this shape:
 `{ "items": [ { "title": "...", "sources": ["source name(s) it appeared on"],
 "source_count": <int>, "url": "exact primary url", "origin": "feed|crawl|both",
+"days_since_first_seen": <integer copied/merged from the raw records>,
 "signals": { "hf_upvotes": <int>, "hn_points": <int>, "hn_comments": <int> },
 "topic_area": "which of the six it fits (or 'other')", "claims": ["crawl-origin claims"],
 "summary": "1-3 sentence lead, faithful to the input",
 "possible_repeat": { "episode": "YYYY-MM-DD or title", "why": "one line" } } ],
 "dropped_off_topic": <int>, "crawl_failures": <the failures list from out/crawl.json,
 passed through>, "generated_from": ["out/sources.json", "out/crawl.json"] }`.
+
+When Smallbatch scores are available, every candidate also carries
+`"smallbatch_score": { "editorial_fit": 0, "source_provenance": 0,
+"evidence_quality": 0, "story_strength": 0, "total": 0,
+"package_id": "sha256:...", "revision": "copy of package.revision",
+"raw_provenance": [ ...matching records' raw_provenance objects, copied verbatim... ] }`
+using the strongest supporting dimensions. The total must equal the four-dimension sum.
+Add `out/source_scores.json` to `generated_from` in that case.
+
+**`package_id` and `revision` come from the score file's top-level `package` object —
+copy `package.package_id` and `package.revision` verbatim.** `package` also carries a
+`model_revision`; that is a different commit and using it fails the gather (it cost the
+2026-09-10 evening picker). Take `package.revision`, not `package.model_revision`.
+
+**Copy each `raw_provenance` object exactly as it appears in `out/source_scores.json` —
+every key, every value, unedited.** The gather gate matches these by exact equality
+against the score records, so a tidied, abbreviated, or re-keyed copy matches nothing and
+fails the whole gather. Concretely: a score record carrying
+`{"file","kind","feed","index","source","title","url"}` must be reproduced with all seven
+keys; emitting only `{"file","kind","source","url"}` is the failure this rule exists to
+prevent (it cost the 2026-09-10 evening picker). Never invent, shorten, or normalize these
+values — if a candidate merges several score records, list each one's object in full.
 
 **Omit empty fields — don't emit nulls or empty lists.** This file is read into the main
 agent's context every turn, so dead keys cost real budget across the whole item set.

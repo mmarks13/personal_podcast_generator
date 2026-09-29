@@ -2,7 +2,7 @@
 # model, effort, and web mode again on every invocation.
 approval_policy = "never"
 default_permissions = "podcast-automation"
-web_search = "disabled"
+web_search = "live"
 allow_login_shell = false
 
 [permissions.podcast-automation]
@@ -75,6 +75,52 @@ glob_scan_max_depth = 4
 ".codex" = "read"
 
 [permissions.podcast-automation-net.network]
+enabled = true
+
+# Attended sessions only. Never reached by the nightly path: run_episode.sh and
+# scripts/agent_runner.py re-pin approval_policy, default_permissions, web_search and PATH
+# with -c on every single invocation, and scripts/preflight.py passes -P explicitly, so
+# nothing below can be inherited by a scheduled run. It is selected by hand, through
+# scripts/codex_interactive.sh.
+#
+# Why it exists: a session started with approval_policy="never", .env denied, credentials
+# stripped and network off can read and test this repo but cannot render or publish it --
+# there is no route to ask. This profile keeps the same narrow sandbox and instead lets a
+# watching human be the escalation path: `--ask-for-approval on-request` means the model
+# must stop and ask before anything outside these bounds runs.
+#
+# .env stays denied here too. The launcher sources it into the process environment, so
+# make_audio.py and publish.py see the values they need without the agent being able to
+# read the file itself.
+#
+# Rules are duplicated rather than inherited, for the same reason the two blocks above are:
+# --strict-config silently ignores unrecognized nested keys under permissions.*, so an
+# `extends` key this build does not support would leave the profile with no filesystem
+# rules at all.
+[permissions.podcast-interactive]
+description = "Attended session: repository write and shell network. No secret-file access; anything further is an approval prompt."
+
+[permissions.podcast-interactive.filesystem]
+glob_scan_max_depth = 4
+":minimal" = "read"
+":tmpdir" = "deny"
+":slash_tmp" = "deny"
+# Same resolver files podcast-automation-net needs; see the note on that profile.
+"/run/systemd/resolve/stub-resolv.conf" = "read"
+"/etc/nsswitch.conf" = "read"
+"/etc/hosts" = "read"
+
+[permissions.podcast-interactive.filesystem.":workspace_roots"]
+"." = "write"
+".env" = "deny"
+"**/*.env" = "deny"
+# Read, not write, on purpose: committing and pushing is exactly the kind of step that
+# should surface as an approval prompt rather than happen quietly.
+".git" = "read"
+".agents" = "read"
+".codex" = "read"
+
+[permissions.podcast-interactive.network]
 enabled = true
 
 [permissions.podcast-dry-run]

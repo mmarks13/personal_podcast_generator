@@ -51,7 +51,7 @@ def claude_logged_in() -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=("full", "read", "propose"), required=True)
+    parser.add_argument("--mode", choices=("full", "read", "propose", "deepdive"), required=True)
     parser.add_argument(
         "--exec-probe",
         action="store_true",
@@ -79,7 +79,7 @@ def main() -> int:
         fail(f"config/sources.yaml is invalid: {exc}")
 
     checked = []
-    if provider == "codex" or config.get("fallback", {}).get("to") == "codex":
+    if provider == "codex":
         command("codex")
         runtime_bin = agent_runner.ensure_codex_sandbox_helper()
         sandbox_env = os.environ.copy()
@@ -154,7 +154,7 @@ def main() -> int:
             fail("paid Codex credits are present; local subscription-only policy refuses to run")
         checked.append(subprocess.run(["codex", "--version"], capture_output=True, text=True).stdout.strip())
 
-    if provider == "claude" or config.get("fallback", {}).get("to") == "claude":
+    if provider == "claude":
         command("claude")
         if not claude_logged_in():
             fail("Claude is not logged in through claude.ai")

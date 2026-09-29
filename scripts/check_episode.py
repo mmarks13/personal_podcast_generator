@@ -47,31 +47,6 @@ RITUAL_FRAGMENTS = ("good morning", "i'm ada", "i'm alan", "stay grounded")
 SPEAKER_LINE_RE = re.compile(r"^[ABC]\s*:\s?", re.MULTILINE)
 WORD_RE = re.compile(r"[a-z0-9'-]+")
 
-# Names the TTS is known to mispronounce, and the speakable spelling to use
-# instead. Warn-only: flags any raw form that appears in the spoken text.
-PRONUNCIATIONS_YAML = "config/pronunciations.yaml"
-
-
-def pronunciation_warnings(turns: list[dict],
-                           path: str = PRONUNCIATIONS_YAML) -> list[str]:
-    if not os.path.exists(path):
-        return []
-    try:
-        import yaml
-        lexicon = yaml.safe_load(open(path)) or {}
-    except Exception:  # noqa: BLE001 - a broken lexicon must not block the gate
-        return []
-    out = []
-    spoken = " ".join(TAG_RE.sub(" ", str(t.get("text", ""))) for t in turns)
-    for raw, speak_as in lexicon.items():
-        if not isinstance(raw, str) or not isinstance(speak_as, str):
-            continue
-        if re.search(rf"\b{re.escape(raw)}\b", spoken, re.IGNORECASE):
-            out.append(f'"{raw}" appears in the script — the TTS mispronounces it; '
-                       f'write it as "{speak_as}"')
-    return out
-
-
 def _turn_words(text: str) -> list[str]:
     """Normalize one spoken turn to a lowercase word list (audio tags removed)."""
     return WORD_RE.findall(TAG_RE.sub(" ", text).lower())
@@ -115,6 +90,38 @@ def recurring_phrases(turns: list[dict], date: str,
             if not any(fr in phrase for fr in RITUAL_FRAGMENTS):
                 flagged.append(phrase)
     return flagged
+
+
+# Transition tics: a turn that opens by labelling the next item is the writer talking,
+# not the host — the show is meant to change subjects the way people do, by saying so.
+# Two classes, because they differ in where they're wrong:
+#   ALWAYS — naming the show's own machinery is never in character, wherever it lands.
+#   AT A CHAPTER START — an ordinal is fine mid-dive ("first, ask for uncertainty" while
+#     enumerating advice) and a tic only when it opens a segment. Needs the chapter turn
+#     indices, so it's silently skipped when the episode carries no chapters.
+# A leading audio tag doesn't hide either one. Warn-only, like every stylistic check.
+TIC_ALWAYS_RE = re.compile(
+    r"^\s*(?:\[[^\]]*\]\s*)*"
+    r"(?:now,?\s+(?:the|to)\b"
+    r"|(?:our|the|tonight's)\s+(?:next|second|third|last|final)\s+"
+    r"(?:dive|story|item|segment|topic)\b"
+    r"|(?:we|i)(?:'re|\s+are)?\s+keeping\s+(?:this|it)\b)",
+    re.IGNORECASE)
+TIC_AT_CHAPTER_RE = re.compile(
+    r"^\s*(?:\[[^\]]*\]\s*)*"
+    r"(?:first|second|third|fourth|fifth|finally|lastly)\s*,",
+    re.IGNORECASE)
+
+
+def transition_tics(turns: list[dict], chapters: list[dict] | None = None) -> list[str]:
+    """Turns that open by announcing the next item instead of arriving at it."""
+    starts = {c.get("turn") for c in (chapters or []) if isinstance(c, dict)}
+    out = []
+    for n, turn in enumerate(turns):
+        text = str(turn.get("text", "")).strip()
+        if TIC_ALWAYS_RE.match(text) or (n in starts and TIC_AT_CHAPTER_RE.match(text)):
+            out.append(text[:70] + ("…" if len(text) > 70 else ""))
+    return out
 
 
 # Breadth signal: coverage is the one thing the length band cannot see. An episode can sit
@@ -277,6 +284,11 @@ def main() -> int:
         warnings.append(f"{len(repeats)} phrase(s) also appear in 2+ recent scripts — "
                         "a hardening verbal tic; rephrase the real ones:")
         warnings += [f'  recurring: "{p}"' for p in repeats[:15]]
+    tics = transition_tics(episode.get("turns") or [], episode.get("chapters"))
+    if tics:
+        warnings.append(f"{len(tics)} turn(s) open by announcing the next item rather "
+                        "than arriving at it — that's the writer talking, not the host:")
+        warnings += [f'  tic: "{t}"' for t in tics[:15]]
     meta = None
     try:
         with open(args.meta) as f:
@@ -285,7 +297,6 @@ def main() -> int:
         pass  # no meta (or unreadable) just means no breadth signal — never a failure
     warnings += breadth_warnings(meta, episode.get("date", ""),
                                  scripts_dir=args.scripts_dir)
-    warnings += pronunciation_warnings(episode.get("turns") or [])
     for w in warnings:
         print(f"  warn: {w}")
     for e in errors:

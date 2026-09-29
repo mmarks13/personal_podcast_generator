@@ -20,6 +20,7 @@ personal_podcast_generator/
 ├── .claude/agents/                            # thin Claude role adapters
 ├── .codex/agents/                             # thin Codex role adapters
 ├── .codex/config.toml                         # unattended least-privilege profile
+├── scripts/codex_interactive.sh                # attended session: approvals + secrets
 ├── config/agents.yaml                         # provider/model/effort/fallback policy
 ├── config/sources.yaml                        # the source watchlist (Tier 1/2)
 ├── scripts/agent_runner.py                    # closed-stdin provider-neutral dispatcher
@@ -52,6 +53,14 @@ Claude subscriptions rather than pay-per-token model API billing:
 - Every provider process is noninteractive with closed stdin. Codex uses approval
   policy `never`; Claude uses `dontAsk` with matching available/preapproved tools.
   Cross-provider fallback is limited to auth, quota, and upstream startup failures.
+- That noninteractivity is one-way: it makes a scheduled run safe and an attended one
+  useless, since a session with no approval route cannot render or publish. **`bash
+  scripts/codex_interactive.sh`** is the attended counterpart — the `podcast-interactive`
+  permission profile (repo write, shell network, `.env` still denied on disk),
+  `--ask-for-approval on-request` so the model must stop and ask before stepping outside
+  it, and only the render/publish variables sourced into its environment. It shares
+  nothing with the nightly path: `run_episode.sh` never calls it, and `agent_runner.py`
+  re-pins approval policy, permissions, web mode, and `PATH` on every invocation.
 - **Audio** is **Gemini multi-speaker TTS** (NotebookLM-style dialogue; needs
   `GEMINI_API_KEY`, voices via `GEMINI_VOICE_A/B` in `.env`) + `ffmpeg` on `PATH`. The
   renderer retries hard and then **fails** — it never silently falls back. A local
@@ -80,14 +89,17 @@ that must deliver both deep understanding and full situational awareness.
 ## Architecture (and why it's split this way)
 
 The pipeline separates **deterministic** work from **agentic** work, and the cheap
-gathering from the expensive judgment. `run_episode.sh` runs the whole gather phase
-*before* the main writing session, so the Opus editor starts clean:
+gathering from the expensive judgment. The 19:30 `propose` run performs the canonical
+gather once; the 02:00 run validates its manifest and reuses the exact bytes, recovering
+with one full gather only when the evening manifest is absent or invalid:
 
 | Stage | How | Why |
 |---|---|---|
 | Structured feeds | `fetch_sources.py` (all `rss`/`api` from `sources.yaml`, both tiers) → `out/sources.json` | Clean machine feeds — arXiv (keyword-filtered), HF Daily Papers, HN, lab/news/newsletter RSS. No LLM; every item tagged with its source. |
 | HTML sources | crawler stage through the shared `source-crawler` skill → `out/crawl.json` | Lab blogs, release notes, leaderboards have no feed. Self-recovers Tier-1 failures via backup search. |
+| Rank | pinned Smallbatch Qwen function → `out/source_scores.json` | Four auditable editorial dimensions plus their 0–9 sum. A ranking aid only; failure is visible and low scores never filter records. |
 | Consolidate | consolidation stage through the shared `source-consolidator` skill → `out/candidates.json` | De-dupes across feeds + crawl, preserves signals, **flags likely repeats against `history.json`**. Judgment-free. |
+| Manifest | `gather_manifest.py` → `out/gather_manifest.json` | Binds input/output checksums, gather identity, and an explicit status for every Tier-1 source. |
 | Select + verify + write | provider-neutral podcast stage via the daily-ai-podcast skill | The editorial step: read only `candidates.json`, decide what matters, verify at primary sources, write and validate the contracted artifacts. |
 | Build + gate | `build_episode.py` then `check_episode.py` | Deterministic conversion to `episode.json`/`shownotes.md`, then a hard gate: schema, word band (3,000–4,700), audio-tag form/density, TTS artifacts — plus a warn-only check for phrases recurring across recent archived scripts. |
 | Render | `make_audio.py` (Gemini TTS) + ffmpeg | Deterministic; honors optional per-episode `tts_notes`. |
@@ -117,7 +129,7 @@ drew and takes a different angle.
 - **Deep-dive episodes** (Wed/Sat/Sun, `weekly-deep-dive` skill): one topic the week's news
   made worth learning properly, researched at primary sources and taught end-to-end,
   ~20–25 min, published with `--slug deepdive`.
-- **"Self Attention"** (daily, `daily-read` skill, separate ~06:30 cron job): a reading
+- **"Self Attention"** (daily, `daily-read` skill, separate 07:05 cron job): a reading
   magazine — essays, explainers, history, fiction — from a fixed masthead of writers,
   built into an EPUB (`make_epub.py`), emailed to a Kindle (`send_to_kindle.py`;
   needs `KINDLE_EMAIL` + `GMAIL_APP_PASSWORD`), and served from `docs/reads/`.
@@ -187,13 +199,14 @@ nightly feed update.
 ## Scheduling (local cron / launchd)
 
 The run must execute on the machine where you logged in to Codex and Claude. Two jobs: the full
-podcast pipeline overnight, and the daily read on its own after the 5h rate-limit
-window resets, so the read gets a fresh budget instead of competing with the podcast:
+podcast pipeline at 02:00, and the daily read at 07:05 — after the 5h rate-limit window
+opened at 02:00 has reset — so the read gets a fresh budget instead of competing with the
+podcast:
 
 ```cron
-0 4 * * *    cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh         >> logs/cron-bootstrap.log 2>&1
-5 6 * * *    cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh read    >> logs/cron-bootstrap.log 2>&1
-0 20 * * *   cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh propose >> logs/cron-bootstrap.log 2>&1
+0 2 * * *    cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh         >> logs/cron-bootstrap.log 2>&1
+5 7 * * *    cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh read    >> logs/cron-bootstrap.log 2>&1
+30 19 * * *  cd /ABSOLUTE/PATH/personal_podcast_generator && bash run_episode.sh propose >> logs/cron-bootstrap.log 2>&1
 ```
 
 `run_episode.sh` (no arg) runs the full pipeline — including the deep-dive on
@@ -202,6 +215,11 @@ Kindle → commit EPUB + reads_history); `run_episode.sh propose` (every evening
 tonight's fifteen candidate mini-dives to the phone, plus — on Tue/Fri/Sat — six deep-dive
 topic pitches, in one message. On macOS, use a launchd `StartCalendarInterval` plist
 instead (it can wake the machine).
+
+The Smallbatch runtime is pinned in `requirements.txt`. Its private Hugging Face
+snapshot is pinned to a full commit and materialized under ignored `out/` cache state;
+the package verifies its complete checksum-declared tree before inference, and later
+runs do not re-download the GGUF.
 
 ## Phone channel & listener feedback
 
@@ -222,7 +240,8 @@ instead (it can wake the machine).
 - **`feedback.md`** (repo root): drop a note anytime; the nightly writer applies it,
   logs it to `archive/feedback_log.md`, and promotes durable preferences to
   **`listener.yaml`** (interest weights) or **`config/pronunciations.yaml`**
-  (TTS-mispronounced names — the gate warns when a raw form appears in a script).
+  (TTS-mispronounced names — the renderer respells them for the API, so the script
+  and published transcript still read normally).
 - Episode pages carry a chapter list + full transcript; the MP3s carry ID3 chapters
   (from `##` markers in the script). An occasional **guest voice** (speaker `C`,
   borrowed from the daily read's masthead) renders via `GEMINI_VOICE_C` or a

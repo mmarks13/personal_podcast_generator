@@ -124,12 +124,31 @@ SPEAKER_LINE_RE = re.compile(r"^([ABC])\s*:\s?(.*)$")
 CHAPTER_LINE_RE = re.compile(r"^##\s+(.+)$")
 
 
-def transcript_section_html(script_path: str) -> str:
+def rundown_items(meta_path: str) -> list[str]:
+    """The day's stories from an archived episode_meta.json, or [] if absent.
+
+    The rundown covers several stories under a single audio chapter (many short
+    chapters make an episode harder to scrub, not easier), so the page carries
+    that granularity instead. Best-effort: never a publish failure.
+    """
+    if not os.path.exists(meta_path):
+        return []
+    try:
+        with open(meta_path, encoding="utf-8") as f:
+            meta = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return []
+    items = meta.get("rundown")
+    return [str(i).strip() for i in items if str(i).strip()] if isinstance(items, list) else []
+
+
+def transcript_section_html(script_path: str, meta_path: str = "") -> str:
     """Chapter list + collapsible transcript from an archived script.txt.
 
     Best-effort: returns "" when the archive has no script for the episode
     (pre-archive episodes). Audio tags are stripped; `##` markers become the
-    chapter list and headings inside the transcript.
+    chapter list and headings inside the transcript. When the meta carries a
+    `rundown`, its stories nest under the first chapter (ritually the rundown).
     """
     if not os.path.exists(script_path):
         return ""
@@ -155,8 +174,15 @@ def transcript_section_html(script_path: str) -> str:
         return ""
     chap_html = ""
     if chapters:
-        items = "\n".join(f"<li>{c}</li>" for c in chapters)
-        chap_html = f"<h2>In this episode</h2>\n<ol>\n{items}\n</ol>\n"
+        rundown = rundown_items(meta_path) if meta_path else []
+        lis = []
+        for n, c in enumerate(chapters):
+            if n == 0 and rundown:
+                nested = "\n".join(f"<li>{r}</li>" for r in rundown)
+                lis.append(f"<li>{c}\n<ul>\n{nested}\n</ul>\n</li>")
+            else:
+                lis.append(f"<li>{c}</li>")
+        chap_html = f"<h2>In this episode</h2>\n<ol>\n" + "\n".join(lis) + "\n</ol>\n"
     return (f"{chap_html}<details><summary>Transcript</summary>\n"
             + "\n".join(body) + "\n</details>")
 
@@ -372,7 +398,8 @@ class GitHubBackend:
         os.makedirs(ep_dir, exist_ok=True)
         for ep in catalog:
             extra = transcript_section_html(
-                os.path.join(ARCHIVE_DIR, "scripts", f"{page_name(ep)}.txt"))
+                os.path.join(ARCHIVE_DIR, "scripts", f"{page_name(ep)}.txt"),
+                os.path.join(ARCHIVE_DIR, "scripts", f"{page_name(ep)}-meta.json"))
             html = episode_page_html(ep["title"], ep["date"],
                                      ep.get("summary_html", f"<p>{ep.get('summary','')}</p>"),
                                      ep["mp3_url"], extra_html=extra)
@@ -391,9 +418,10 @@ class GitHubBackend:
         if os.path.isdir(ARCHIVE_DIR):            # persist the script archive too
             add.append(ARCHIVE_DIR)
         # Listener-tunable files the writer may update in response to feedback,
-        # plus the deep-dive proposal ledger the picker maintains.
+        # plus the proposal and first-seen ledgers the nightly pipeline maintains.
         for extra in ("listener.yaml", "feedback.md", "config/pronunciations.yaml",
-                      "deepdive_proposals.json"):
+                      "deepdive_proposals.json", "daily_pitch_ledger.json",
+                      ".state/seen_urls.json"):
             if os.path.exists(extra):
                 add.append(extra)
         subprocess.run(add, check=True)

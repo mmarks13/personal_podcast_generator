@@ -3,7 +3,7 @@
 
 Each evening `run_episode.sh propose` pushes one message carrying up to two slates:
 tonight's candidate mini-dives, **numbered** 1-15 (out/daily_options.json), and — on
-Tue/Fri/Sat, for the next morning's deep dive — candidate topics **lettered** A-F
+Tue/Fri/Sat, for the next morning's deep dive — candidate topics **lettered** A-H
 (out/deepdive_options.json). Both files carry the `sent_at` epoch that bounds the
 reply window. The listener answers with a single message:
 
@@ -47,7 +47,7 @@ MAX_PICKS = 3  # the show carries 2-3 mini-dives; extras become rundown lines
 # a bare "1". `(?!\w)` rather than `(?![^\s,])` because people punctuate: "3, 14. A" is
 # a perfectly ordinary way to answer, and requiring a space or comma after every pick
 # silently threw away everything from the period onward.
-_PICK = r"(?:1[0-5]|[1-9]|[A-Fa-f])(?!\w)"
+_PICK = r"(?:1[0-5]|[1-9]|[A-Ha-h])(?!\w)"
 _SEP = r"(?:[\s,;:.&/+·—-]|\band\b)+"
 _PICK_RUN = re.compile(rf"^\s*({_PICK}(?:{_SEP}{_PICK})*)")
 _LEADING_SEP = re.compile(rf"^{_SEP}")
@@ -55,11 +55,12 @@ _DD_PREFIX = re.compile(r"^dd\b[:\s]*(.*)$", re.IGNORECASE | re.DOTALL)
 # Free text has to look like words before it becomes a locked dive. Stray fragments
 # ("14. A") must never reach the writer as an instruction to go dive something.
 _HAS_WORD = re.compile(r"[A-Za-z]{3}")
-
-
+_OUTER_QUOTES = {'"': '"', "'": "'", "“": "”", "‘": "’"}
 def parse_reply(text: str) -> dict:
     """Split a reply into daily picks, a deep-dive pick, and either kind of free text."""
     text = (text or "").strip()
+    if len(text) >= 2 and _OUTER_QUOTES.get(text[0]) == text[-1]:
+        text = text[1:-1].strip()
     numbers: list[int] = []
     letters: list[int] = []
     rest = text

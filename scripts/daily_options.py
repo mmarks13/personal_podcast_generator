@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Prepare the daily mini-dive slate for the phone.
 
-The evening `run_episode.sh propose` job drafts out/daily_options.json — six of the
-day's stories the listener can lock as tomorrow's mini-dives. This validates that
-draft, renumbers it 1..6, stamps the `sent_at` epoch that scripts/ntfy_choice.py
+The evening `run_episode.sh propose` job drafts out/daily_options.json — up to fifteen
+of the day's stories the listener can lock as tomorrow's mini-dives. After
+scripts/daily_ledger.py filters stale pitches, this validates the draft, renumbers it
+1..15, stamps the `sent_at` epoch that scripts/ntfy_choice.py
 later uses as its reply window, and prints the numbered message body for notify.py.
 
-The deep-dive half of the same push goes through scripts/proposal_ledger.py, which
-also keeps a retirement ledger. Daily stories are perishable — an unpicked story is
-stale by tomorrow — so there is nothing here to remember between nights.
+The deep-dive half of the same push goes through scripts/proposal_ledger.py and its
+separate topic ledger.
 
 Prints nothing when there is no usable draft; the writer then picks its own dives,
 which is the status quo.

@@ -3,8 +3,9 @@
 
 Every topic the evening picker pitches is recorded here. A topic pitched 3 times
 without ever being chosen is retired: it is dropped from future option slates
-before they reach the phone (and the picker is told not to pitch it). The
-listener's explicit free-text choice always wins, retired or not.
+before they reach the phone (and the picker is told not to pitch it). A topic that
+was chosen is dropped too — it has already been an episode. The listener's explicit
+free-text choice always wins, retired or already taught.
 
 Modes:
   record  --options out/deepdive_options.json
@@ -14,8 +15,9 @@ Modes:
           (the daily mini-dive slate in the same push owns the numbers).
           Prints nothing if no options survive.
   choose  --topic "the chosen topic"
-          Mark a topic chosen (clears it from ever retiring). Unknown topics
-          (listener free text) are added as listener-sourced entries.
+          Mark a topic chosen: it never retires, and it never returns to a future
+          slate. Unknown topics (listener free text, or a topic the writer picked
+          for itself) are added as new entries already marked chosen.
 
 Ledger shape (deepdive_proposals.json, committed by publish):
   { "topics": [ { "topic", "type", "first_proposed", "last_proposed",
@@ -73,6 +75,13 @@ def record(options_path: str, ledger_path: str) -> int:
         entry = by_key.get(_norm(topic))
         if entry and is_retired(entry):
             continue  # pitched 3 evenings, never tapped — off the slate for good
+        if entry and entry.get("chosen"):
+            # Already an episode. Nothing filtered a chosen topic before, so a taught
+            # subject could return to the slate indefinitely: mixture-of-experts was
+            # taught 2026-07-11 and pitched three more times, quantization was taught
+            # 2026-07-08 and pitched twice more. Free text still overrides this, exactly
+            # as it overrides retirement.
+            continue
         if entry is None:
             entry = {"topic": topic, "type": o.get("type", ""),
                      "first_proposed": today, "times_proposed": 0, "chosen": None}

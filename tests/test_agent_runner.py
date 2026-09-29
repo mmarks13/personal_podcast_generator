@@ -59,6 +59,44 @@ class RuntimeBinTests(unittest.TestCase):
         linked = self._run() / "codex-code-mode-host"
         self.assertTrue(os.path.samefile(host, linked))
 
+    def test_copies_rg_when_protected_hardlinks_reject_the_bundle(self) -> None:
+        rg = self.install / "rg"
+        rg.write_bytes(b"ripgrep")
+        real_link = os.link
+
+        def protected_link(source, destination):
+            if Path(source) == rg:
+                raise PermissionError("protected hardlink")
+            return real_link(source, destination)
+
+        with mock.patch.object(
+            ar.shutil,
+            "which",
+            side_effect=lambda name: str(self.codex) if name == "codex" else str(rg),
+        ), mock.patch.object(ar.os, "link", side_effect=protected_link):
+            runtime_rg = ar.ensure_codex_sandbox_helper() / "rg"
+
+        self.assertEqual(runtime_rg.read_bytes(), b"ripgrep")
+        self.assertFalse(os.path.samefile(rg, runtime_rg))
+        self.assertEqual(runtime_rg.stat().st_mode & 0o222, 0)
+
+    def test_keeps_an_identical_rg_copy_when_only_its_timestamp_differs(self) -> None:
+        rg = self.install / "rg"
+        rg.write_bytes(b"ripgrep")
+        runtime_bin = self.root / ".codex" / "runtime-bin"
+        runtime_bin.mkdir(parents=True)
+        cached_rg = runtime_bin / "rg"
+        cached_rg.write_bytes(b"ripgrep")
+        os.utime(rg, (100, 100))
+        os.utime(cached_rg, (200, 200))
+
+        with mock.patch.object(
+            ar.shutil,
+            "which",
+            side_effect=lambda name: str(self.codex) if name == "codex" else str(rg),
+        ):
+            self.assertEqual(self._run() / "rg", cached_rg)
+
 
 class AgentRunnerTests(unittest.TestCase):
     def test_locked_effort_mapping(self) -> None:
@@ -93,6 +131,15 @@ class AgentRunnerTests(unittest.TestCase):
             self.assertIn('default_permissions="podcast-automation"',
                           ar.codex_command(stage, settings, Path("last.txt")), stage)
 
+    def test_no_scheduled_stage_can_reach_the_attended_profile(self) -> None:
+        """podcast-interactive carries credentials and an approval prompt; 2 AM has neither."""
+        settings = {"model": "gpt-5.6-terra", "effort": "high", "web_search": "live"}
+        for stage in sorted(ar.CLAUDE_TOOLS):
+            command = ar.codex_command(stage, settings, Path("last.txt"))
+            joined = " ".join(command)
+            self.assertNotIn("podcast-interactive", joined, stage)
+            self.assertIn('approval_policy="never"', command, stage)
+
     def test_codex_dry_run_uses_output_only_profile(self) -> None:
         settings = {"model": "gpt-5.6-sol", "effort": "xhigh", "web_search": "live"}
         with mock.patch.dict(os.environ, {"RUN_EPISODE_DRY_RUN": "1"}):
@@ -107,12 +154,68 @@ class AgentRunnerTests(unittest.TestCase):
         self.assertIn("--allowedTools", command)
         self.assertIn("15", command)
 
+    def test_claude_crawler_can_load_its_skill_without_shell_access(self) -> None:
+        settings = {"model": "haiku", "effort": "high", "max_turns": 40}
+        command = ar.claude_command("crawl", settings, "prompt")
+        tools = command[command.index("--tools") + 1].split()
+        self.assertIn("Skill", tools)
+        self.assertNotIn("Bash", tools)
+
     def test_only_locked_availability_failures_classify_for_fallback(self) -> None:
         self.assertEqual(ar.classify_failure("401 authentication required"), "auth")
         self.assertEqual(ar.classify_failure("429 usage limit reached"), "quota")
+        claude_session_limit = json.dumps({
+            "type": "result",
+            "terminal_reason": "api_error",
+            "api_error_status": 429,
+            "result": "You've hit your session limit · resets 2:10am (America/Los_Angeles)",
+        })
+        self.assertIn("429", ar.failure_diagnostics(claude_session_limit))
+        self.assertEqual(ar.classify_failure(claude_session_limit), "quota")
+        self.assertEqual(
+            ar.classify_failure(json.dumps({
+                "type": "result",
+                "result": "You've hit your session limit · resets 2:10am",
+            })),
+            "quota",
+        )
         self.assertEqual(ar.classify_failure("503 upstream service unavailable"), "service_startup")
         self.assertEqual(ar.classify_failure("sandbox denied write"), "config")
-        self.assertEqual(ar.classify_failure("artifact validation failed"), "unknown")
+        self.assertEqual(ar.classify_failure("artifact validation failed"), "artifact")
+        self.assertEqual(
+            ar.classify_failure('{"type":"result","subtype":"error_max_turns"}'),
+            "artifact",
+        )
+        self.assertEqual(ar.classify_failure("Failed to authenticate: OAuth session expired"), "auth")
+
+    def test_artifact_failure_uses_provider_fallback(self) -> None:
+        config = ar.load_config()
+        self.assertIn("artifact", config["fallback"]["reasons"])
+
+    def test_artifact_failure_retries_the_same_provider_first(self) -> None:
+        """Falling straight to a quota-exhausted provider costs the whole night."""
+        self.assertIn("artifact", ar.SAME_PROVIDER_RETRY)
+        self.assertIn("idle", ar.SAME_PROVIDER_RETRY)
+        # Retries are one-shot per (provider, category); quota must never loop.
+        self.assertNotIn("quota", ar.SAME_PROVIDER_RETRY)
+        self.assertNotIn("auth", ar.SAME_PROVIDER_RETRY)
+
+    def test_failure_classification_ignores_agent_visible_content(self) -> None:
+        trace = "\n".join([
+            json.dumps({
+                "type": "item.completed",
+                "item": {"type": "command_execution",
+                         "aggregated_output": "wait for the rate-limit window"},
+            }),
+            json.dumps({
+                "type": "result",
+                "subtype": "error_during_execution",
+                "terminal_reason": "aborted_streaming",
+                "errors": ["stream ended"],
+            }),
+        ])
+        self.assertNotIn("rate-limit window", ar.failure_diagnostics(trace))
+        self.assertEqual(ar.classify_failure(trace), "service_startup")
 
     def test_effort_override_changes_runtime_not_production_config(self) -> None:
         config = ar.load_config()

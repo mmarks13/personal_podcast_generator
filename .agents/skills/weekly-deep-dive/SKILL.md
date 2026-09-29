@@ -30,11 +30,28 @@ Their free-text topic may need light interpretation into a teachable framing; ke
 its intent.
 
 **The topic palette — four types, all first-class:**
-- **Mechanism** — the idea under this week's news: an architecture (text diffusion,
-  MoE routing), a technique (indirect prompt injection, KV-cache compression), an
-  evaluation method.
+- **Mechanism** — the idea under this week's news: an architecture, a training or
+  serving technique, an evaluation method. (Named examples are deliberately absent here:
+  the obvious ones have mostly been taught already, and a palette that lists them invites
+  re-pitching a past episode. Check `concepts_taught` and the ledger, not this list.) Across every slate so far, mechanism pitches whose subject is the
+  model or the agent itself are the ones that get picked; pitches where the model is only
+  the setting — attacker tradecraft, scoring and judging harnesses, silicon fabrication,
+  byte-level serving economics, verification tooling internals, single-product
+  applications — account for roughly half of all mechanism pitches and none of the picks.
+  That is an aggregate tendency, not a rule: treat those subjects as low-yield rather
+  than closed, pitch one when it is genuinely the week's defining story, and prefer the
+  wildcard slot when you do.
 - **Foundational** — a load-bearing concept of the field taught properly, needing no
-  news hook beyond "you hear this word constantly."
+  news hook beyond "you hear this word constantly." Two lanes qualify. **Named technical
+  apparatus**, taught mechanically — what the thing is and how it works (RLHF,
+  distillation, calibration, embeddings, high-bandwidth memory) — drawn from any of
+  training and learning methods, representation and model internals, evaluation and
+  model behaviour, or systems, serving and hardware. And **craft reality** — how this
+  work actually goes in practice, of which "the gap between a prototype and a product"
+  is the type case. Two framings do *not* belong here and have never been picked as
+  foundational: "what a benchmark, study, or proof can really tell you" epistemics, and
+  "what this legal or contractual term actually covers" — pitch those as Debate. Reach
+  outside AI into an applied field only when a result there is genuinely the week's story.
 - **History** — how we got here: the lineage of an idea, told as narrative, landing
   in the present.
 - **Debate** — a genuine unresolved argument, steel-manned from both sides.
@@ -124,10 +141,16 @@ why it hasn't — then the hosts' own honest reads, which may differ and **may s
 unresolved**. No fake balance: if the evidence leans, say so.
 
 Keep turns short and conversational. The daily skill's **"Write it as a
-conversation"**, **audio tags**, and **per-episode delivery note** (`tts_notes`)
-rules apply verbatim — backchannels and reactive turns matter even more in teaching
-mode, where the temptation is alternating lectures. No markdown, URLs, or stage
-directions in turn text; well-formed audio tags are the only non-spoken text.
+conversation"**, **"the hosts are the continuity, not a thesis"**, **"you can't change
+gears from a full stop"**, **audio tags**, and **per-episode delivery note**
+(`tts_notes`) rules apply verbatim — backchannels and reactive turns matter even more in
+teaching mode, where the temptation is alternating lectures. The transition rules bind
+here too: a lesson's sections hand off exactly the way a daily's stories do, so **no
+section begins by naming itself** ("Now the evidence", "Second, the mechanism") and no
+section ends on a full stop that leaves the next one nowhere to start. A teaching
+episode has no rundown — it is one topic, and its cold open is a hook by design.
+No markdown, URLs, or stage directions in turn text; well-formed audio tags are the only
+non-spoken text.
 
 Author **two** files (same plain-text → build flow as the daily skill); the build step
 (step 4) turns them into `deepdive.json` + `deepdive_shownotes.md`, so you never hand-write
@@ -137,11 +160,29 @@ JSON dialogue:
   markdown, URLs, or stage directions. A tag-less line folds into the turn above it.
   Add `## Title` **chapter markers** (never spoken; they become MP3 chapters and the
   episode page's outline) before each major section of the lesson.
+**The title names the concept the episode teaches.** Someone browsing the feed should be
+able to tell what they would learn, before pressing play. One line, 70 characters or
+fewer, in two parts: **the concept plainly, then the angle**, split by a colon or em dash.
+`publish.py` prepends the standing "Deep Dive:" label, so never write it yourself.
+
+```
+You will not find it
+  -> Undetectable model backdoors: why open weights can't prove innocence
+The deputy with a credit card
+  -> Giving an agent a budget: the confused deputy and macaroons
+Sixty years of no technician, ever
+  -> Computers in orbit: rope memory to rad-hard, with no repair crew
+```
+
+The angle half carries the show's voice and should vary week to week; the concept half is
+allowed to repeat its shape. A title with no nameable concept in it is not a title.
+
 - `out/deepdive_meta.json` — the memory record plus the show-notes data, with the deepdive
   extras so the daily show's repeat-check and future deep dives see it correctly:
   ```json
   { "date": "YYYY-MM-DD", "kind": "deepdive",
-    "title": "string", "summary": "1–2 sentences",
+    "title": "names the concept taught, then the angle — see the title rule below; <= 70 chars",
+    "summary": "1–2 sentences",
     "tts_notes": "OPTIONAL delivery note; omit most episodes",
     "sources": [ { "group": "Primary sources" | "Further reading",
                    "title": "source title", "url": "https://…" } ],

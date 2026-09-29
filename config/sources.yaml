@@ -40,16 +40,40 @@ sources:
     method: fetch
     url: "https://www.anthropic.com/news"
     tier: 1
+    window_hours: 168
 
   - name: Anthropic Engineering
     method: fetch
     url: "https://www.anthropic.com/engineering"
     tier: 1
+    window_hours: 168
 
   - name: Anthropic Research
     method: fetch
     url: "https://www.anthropic.com/research"
     tier: 1
+    window_hours: 168
+
+  # Separate official surfaces: Claude's product/practitioner writing carried the
+  # 2026-08-21 AI-Native SDLC playbook, while alignment and platform notes publish
+  # material that does not reliably appear in the newsroom.
+  - name: Claude Blog
+    method: fetch
+    url: "https://claude.com/blog"
+    tier: 1
+    window_hours: 168
+
+  - name: Anthropic Alignment Science
+    method: fetch
+    url: "https://alignment.anthropic.com/"
+    tier: 1
+    window_hours: 168
+
+  - name: Anthropic Platform Release Notes
+    method: fetch
+    url: "https://platform.claude.com/docs/en/release-notes/overview"
+    tier: 1
+    window_hours: 168
 
   - name: ReleaseBot
     method: rss
@@ -60,6 +84,21 @@ sources:
     method: rss
     url: "https://openai.com/news/rss.xml"
     tier: 1
+    window_hours: 168
+
+  # Independent HTML coverage catches an RSS omission; canonical-URL dedupe in
+  # consolidation collapses the normal RSS/HTML duplicates.
+  - name: OpenAI News
+    method: fetch
+    url: "https://openai.com/news/"
+    tier: 1
+    window_hours: 168
+
+  - name: OpenAI API Changelog
+    method: fetch
+    url: "https://developers.openai.com/api/docs/changelog"
+    tier: 1
+    window_hours: 168
 
   - name: Google DeepMind Blog
     method: fetch

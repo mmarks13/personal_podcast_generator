@@ -13,7 +13,7 @@ description: >
 Turn the last ~24–48 hours of AI activity into a two-host episode that leaves the
 listener actually *understanding* the day's most important developments — not just
 informed that they happened. An episode runs **18–28 minutes** (~3,000–4,700 words at
-the Gemini voices' ~165–170 wpm), with ~20–22 the norm; the day's material, not a
+the Gemini voices' ~165–170 wpm), with ~22–25 the norm; the day's material, not a
 template, decides where in that envelope it lands.
 
 The pipeline is deliberately split so the gathering and organizing happen in cheap
@@ -49,9 +49,13 @@ of the fun, but it's sparring between colleagues who respect each other, never
 crossfire. **Asymmetry is structural, not decorative:** whoever brings a story leads
 it and *teaches* it; the other is the working skeptic — asking the question a smart
 listener is shouting, poking the numbers, demanding the so-what. Roles swap story by
-story. The failure mode to guard against is two clever commentators trading
-symmetrical observations: if a story's lines could be re-dealt to the other host
+story. The failure mode to guard against in a dive is two clever commentators trading
+symmetrical observations: if a dive's lines could be re-dealt to the other host
 unchanged, the roles have collapsed — rewrite it.
+**In the rundown the same asymmetry operates at the board level, not inside each item:**
+each host brings the stories they'd bring, and most items need no reply at all. A
+rundown item's sizing is one host's judgment, said once — reaching for a skeptic beat on
+every item is what turns a rundown back into a segment.
 
 **Guests (occasional).** The show shares a universe with the "Self Attention" daily
 read: its masthead writers (see the masthead in `.agents/skills/daily-read/SKILL.md`
@@ -101,12 +105,14 @@ records and `longterm.host_lore`). Treat it as **canon**:
 Capture what this episode revealed or developed in `episode_meta.json`'s `lore` field
 (schema below). Like callbacks, lore is felt, not performed.
 
-**Rituals (the only two).** Open with the classic two-voice greeting — date, names:
+**Rituals (the only three).** Open with the classic two-voice greeting — date, names:
 "Good morning — it's Friday, June twelfth. I'm Ada." / "And I'm Alan. …" (vary the
-wording naturally day to day; keep the shape). Close every episode with the signature
-sign-off — **"Stay grounded."** — alternating which host says it. These two are the
-show's identity and never vary. Everything else about an episode's shape is the
-writer's to vary — see the form principles in step 3.
+wording naturally day to day; keep the shape). Then **the rundown** — the whole day,
+before anything gets taken apart (step 3). Close every episode with the signature
+sign-off — **"Stay grounded."** — alternating which host says it. These three are the
+show's identity and never vary; the rundown's length and contents flex with the day,
+but it is never a teaser and never absent. Everything else about an episode's shape is
+the writer's to vary — see the form principles in step 3.
 
 ## Workflow
 
@@ -133,14 +139,14 @@ simply absent — work with whatever is there. The harness also pre-cleared any 
 feedback — the highest-priority editorial input you have. Apply what applies tonight,
 then move the consumed notes (dated) to `archive/feedback_log.md`. A note that
 reveals a durable preference: append it to `listener.yaml`. A mispronunciation: add
-the name to `config/pronunciations.yaml` with a speakable spelling. A note that would
+the name to `config/pronunciations.yaml` with a respelling — the renderer substitutes it
+at render time, so **write the name normally in the script**. A note that would
 require changing this skill: leave it in `feedback.md` and flag it in the step-4
 report — **you never edit SKILL.md**.
 
 **Read `listener.yaml`** — the listener's standing interest weights. `boost` beats win
-ties for dive slots; `downweight` beats stay in the sweep unless the who-cares case is
-unusually strong. Consult `config/pronunciations.yaml` while writing (the gate warns
-on known-mispronounced raw forms).
+ties for dive slots; `downweight` beats stay in the rundown unless the who-cares case is
+unusually strong.
 
 Then read `history.json` if it exists. It is the show's memory — treat it the way a
 regular host remembers their own past episodes, **not** as a script of callbacks:
@@ -177,13 +183,16 @@ purposes:
 - **Break your own patterns.** You are the same writer every night, and left alone you
   will converge: the same opening move, the same "X, and Y" title construction, the
   same closing thesis, the same pet phrases and rhetorical turns, the same hosts
-  making each other's points. Notice what the recent scripts keep doing — shape,
-  phrases, framings, which host does what — and deliberately do otherwise tonight.
-  Variation is defined relative to what the show just did, not by a rulebook.
+  making each other's points. **Read the segment seams especially** — how each dive
+  ended, and how the show got from one story to the next. Those are the fastest thing
+  to converge and the hardest to hear from inside a single draft. Notice what the
+  recent scripts keep doing — shape, phrases, framings, endings, handoffs, which host
+  does what — and deliberately do otherwise tonight. Variation is defined relative to
+  what the show just did, not by a rulebook.
 - **Balance the week.** The week, not the episode, is the unit that must deliver both
   deep understanding and full situational awareness. If recent episodes leaned deep
-  and narrow, a broad day earns more sweep; if they leaned broad, tonight can commit
-  to fewer, deeper dives.
+  and narrow, a broad day earns a fuller rundown; if they leaned broad, tonight can
+  commit to fewer, deeper dives.
 (Early on the archive may be nearly empty — read whatever is there and move on.)
 
 ### 2. Crawl the HTML sources with one subagent
@@ -239,19 +248,36 @@ if you ever need the fuller feed excerpt for a specific item.
 Now you have everything in one place: read `out/candidates.json` — the unified candidate
 set, already de-duplicated across the feeds and the crawl, each entry carrying the sources
 that ran it, a `source_count`, the notability signals, and (for crawl-origin items) the
-`claims` the crawler read. **This is where importance is judged.** Decide what the show is
+`claims` the crawler read. It may also carry `days_since_first_seen`, which is how long
+this pipeline has seen the URL, not a claimed publication date. **This is where importance is judged.**
+
+**Know how old a story is before you call it news.** Entries are stamped with two
+deterministic facts. `published_at` is when the story was published, and `date_status`
+says whether anyone verified that: `verified` means a publisher stated it, `unknown`
+means the crawler guessed and the guess is frequently wrong by weeks. An item with no
+`published_at` at all has no established date. Never write a release, launch, or
+announcement as *just happened* on the strength of an unknown or absent date — say what
+it is and let the framing stay tenseless, or establish the date at the primary source
+when you fetch it. `days_since_first_seen` is a floor on a story's age, never a
+publication date: it starts the night this pipeline first saw the URL, so a long-circulating
+story reads as young the first evening it is picked up. Decide what the show is
 about using the topic priorities below, fetch the main source for the stories you'll
 cover, then write. (For any item whose lead is too thin to judge, the fuller excerpt is
 still in `out/sources.json` or `out/crawl.json` on disk.) That multi-source pickup,
 captured in each entry's source list, is a *signal of importance* — weigh it, don't
 discard it.
 
-**Repeat-check against memory — justify or drop.** The consolidator has already flagged
-likely repeats against `history.json` — a candidate that's a likely repeat carries a
-`possible_repeat` (the matching episode plus a one-line why); items without that key
-aren't flagged. For the items you actually intend to cover, if `possible_repeat` is
-present, confirm it against the memory you read in step 1.5. **A flagged story may only
-run if you can name what's new** — a fresh release, number, decision, or development —
+**Repeat-check against memory — justify or drop.** Two flags, and they are not equally
+reliable. `aired_on` is a fact, not a judgment: it lists the exact dates on which past
+episodes cited this story's URL, read straight out of the published archive, so **a
+candidate carrying it has already been on the air** — no matter how new the item looks
+or how high it scores. `possible_repeat` is the consolidator's own guess at a match
+against `history.json` (the matching episode plus a one-line why); items without that
+key aren't flagged, and it misses far more than it catches — on 2026-09-23 it flagged
+one of the thirty-six candidates that had already aired. Treat a missing `possible_repeat`
+as no information; treat `aired_on` as settled. For the items you actually intend to cover, if `possible_repeat` is
+present, confirm it against the memory you read in step 1.5. **A story flagged either
+way may only run if you can name what's new since the most recent airing** — a fresh release, number, decision, or development —
 and you must record it: add an entry to `repeat_coverage` in `episode_meta.json`
 (schema below) and cover the *update*, not the original news. If you cannot articulate
 the new development in one sentence, the drop is mandatory — there is no exception for
@@ -265,10 +291,14 @@ development just because the topic is familiar.
 
 **Verify what you'll use.** Every item that makes the show must trace to a primary source
 you (or the step-2 subagent) actually read. Don't take a number, date, or quote on faith.
-**Load-bearing means:** any number, date, quote, or ranking; anything in the cold open;
-and the lead claims of any dive. A truncated feed excerpt in `sources.json` is a
-*lead*, not a read source — it supports at most a sweep line; a dive requires fetching
-the actual page.
+**Load-bearing means:** any number, date, quote, or ranking; anything the rundown
+resolves; and the lead claims of any dive. A truncated feed excerpt in `sources.json` is
+a *lead*, not a read source — it supports at most a resolved rundown line; a dive
+requires fetching the actual page. **The rundown's named tier sits below that:** a feed
+excerpt alone supports it, precisely because the claim is capped at existence — who
+published it and where it is showing up, attributed on air. The moment a named item
+carries a number, a result, or a judgment of quality, it has stopped being a named item
+and needs a read source like anything else.
 
 Once you've chosen the stories, batch the load-bearing claims and **delegate them to the
 `fact-checker` agent**. Phrase it as delegation and name the agent — "Delegate this batch:
@@ -291,28 +321,51 @@ so plainly or cut it. Never narrate a fact-check that didn't happen.
 *claim*, and if the item cannot survive without it, **replace the item from
 `candidates.json`** rather than shrinking the show. Dropping an item outright is the last
 resort, not the first — a verification failure should leave the episode the same size with
-different contents, not smaller. And an unreachable page does not disqualify a **sweep
-line** whose feed excerpt already supports it (see above); only a dive requires the page.
+different contents, not smaller. And an unreachable page does not disqualify a **resolved
+rundown line** whose feed excerpt already supports it (see above); only a dive requires
+the page.
 
-**The show's default shape: mini-dives plus a sweep.** The gravity of a typical
+**The show's default shape: the rundown, then mini-dives.** The gravity of a typical
 episode:
+- **The rundown** — the whole day, first, before anything gets taken apart. A listener
+  who hears only the opening minutes should come away knowing what happened and what it
+  meant; the dives are the reward for staying, not the price of admission. The governing
+  principle is one sentence: **the rundown resolves what it will not return to, and
+  introduces what it will.** Three tiers, and the tier tells the listener what the show
+  is claiming:
+  - **Introduced** (the dive stories) — the headline, plus the one line that says why
+    it's on the show. Then stop. Mechanism, numbers, and pushback are the dive's job,
+    and spending them here empties the dive.
+  - **Resolved** (everything small that still matters) — the full verdict, because it
+    never comes back. What happened and how big, with an **honest size label in the
+    writing itself** — "minor but neat", "big if it replicates", "you've heard about
+    this everywhere; here's the one sentence that matters". This is where loud, viral,
+    heavily-marketed stories get acknowledged: one honest sizing sentence is coverage
+    enough. Most are a single sentence in a single voice with no reply; one or two a
+    night earn a beat of pushback, when the sizing genuinely needs it.
+  - **Named** (awareness only) — **up to four**, in one closing burst that labels itself
+    ("a few more I'm not going to size"), one voice, no reactions. This tier exists so
+    nothing carrying real signal is silently omitted. Admission is by **objective signal
+    in `out/candidates.json`** — multi-source pickup, HF upvotes, HN points, or an active
+    `history.json` thread — never by your own sense that something is interesting. The
+    claim is capped at **existence**: who put it out and where it is landing, attributed
+    on air (see the evidence rules above). Naming an item costs nothing against covering
+    it properly later.
+
+  Roughly 6–8 minutes. Each host brings the items they'd bring, and **whoever will dive
+  a story is the one who introduces it up top** — so the dive is later re-entered by
+  reference rather than announced.
 - **2–3 mini-dives** — the show's substance. A dive takes a story properly: what
   happened, how it actually works, the load-bearing numbers, real pushback, and a
   so-what the listener keeps. One host teaches, the other is the working skeptic (see
   Hosts). Roughly 5–7 minutes each; a dive that has genuinely earned more may take it —
-  but it takes that room from the *envelope*, never from the sweep. If the only way to
-  fit a longer dive is a thinner sweep, the dive is too long.
-- **A sweep** — one brisk pass over everything else worth knowing, so the listener
-  stays fully current without every story pretending to be big. The sweep is what makes
-  this a *briefing* rather than two essays: someone who heard only the dives has missed
-  the day. When something has to give, it is the last thing to cut, not the first.
-  A handful of items,
-  each a sentence or three with an **honest size label in the writing itself** —
-  "minor but neat", "big if it replicates", "you've heard about this everywhere;
-  here's the one sentence that matters". The sweep is also where loud, viral,
-  heavily-marketed stories get acknowledged: one honest sizing sentence is coverage
-  enough. No back-and-forth theater — name it, size it, move on — and never cover the
-  same item in both a dive and the sweep. Even a one-liner traces to a source.
+  but it takes that room from the *envelope*, never from the rundown. If the only way to
+  fit a longer dive is a thinner rundown, the dive is too long.
+- **An optional light beat** — when the day produced something genuinely fun, odd, or
+  worth retelling, it goes after the last dive. Most days there is nothing and the show
+  closes straight off the final dive; it is never a slot to fill.
+
+Every item at every tier traces to a source.
 
 A story earns a dive when it **genuinely matters** (would a thoughtful practitioner
 still care in a month?) *and* at least one of these holds:
@@ -322,8 +375,26 @@ still care in a month?) *and* at least one of these holds:
   breaks, what it says about where things are going.
 - **You'd retell it at dinner** — surprising, delightful, or unsettling enough that
   depth makes it land harder.
-An interesting-but-inconsequential paper does not earn a dive; it earns a sweep line.
+An interesting-but-inconsequential paper does not earn a dive; it earns a rundown line.
 The grounding rules apply to a dive's teaching exactly as to its reporting.
+
+**If the listener pre-chose tonight's dives.** When `out/daily_picks.json` exists, the
+listener answered the evening picker and every record in `picks` is a **locked dive**.
+Match each one into `out/candidates.json` by its `url`; if it didn't survive
+consolidation, fetch the URL and dive it from the primary source. A locked pick
+overrides everything below that exists to *approximate* the listener's taste — the
+`listener.yaml` weights and the research-paper aging rule — because they just said what
+they want. Repeat-suppression still holds: if the show already dived the story, dive the
+new development, not a re-run. `free_text`, when present, is a locked dive in the
+listener's own words; find and ground the material yourself. `overflow` entries become
+rundown lines.
+
+The evening gather is the editorial cutoff: **do not run an overnight delta or add a
+story published after that gather.** It waits for the next cycle. The rundown is yours
+within the canonical candidate set, and you never drop a pick. If a pick turns out to
+have no groundable primary source at all, it becomes a
+rundown line and the nightly report says exactly why. The word band still governs, so
+locked picks plus anything you add have to fit: the rundown absorbs the pressure.
 
 **"Genuinely matters" is anchored to signals, not taste.** Your own sense that
 something is fascinating is the weakest evidence you have — your taste runs hot on
@@ -340,26 +411,29 @@ sentence — signal-backed or not — is recorded in `episode_meta.json`'s `dive
   (its **30-day** companion is the safety net for slow risers and weeks of thin shows).
   Today's **Hugging Face Daily Papers** feed is deliberately only the day's top three:
   it is a same-day lane for a genuinely big drop, not a pool to shop in.
-  A brand-new paper defaults to a sweep line ("new from X, one to watch"); if it ages
-  well it comes back through the weekly list with proven signal and earns its dive
-  then. Exception: a frontier-lab release or a plainly extraordinary result can dive
-  on day one. (A paper swept earlier doesn't enter `topics` memory, so its later dive
-  won't be flagged as a repeat — that's by design.)
+  A brand-new paper defaults to a rundown line ("new from X, one to watch") or, if you
+  can't yet size it, the named tier; if it ages well it comes back through the weekly
+  list with proven signal and earns its dive then. Exception: a frontier-lab release or
+  a plainly extraordinary result can dive on day one. (A paper the rundown resolved or
+  named doesn't enter `topics` memory, so its later dive won't be flagged as a repeat —
+  that's by design, and it is what makes the named tier free.)
 - **Listener weights apply here.** `listener.yaml` (read in step 1.5) is part of the
   dive decision: `boost` beats win ties for dive slots; `downweight` beats stay in
-  the sweep unless the who-cares case is unusually strong.
+  the rundown unless the who-cares case is unusually strong — except where a
+  pre-chosen dive overrides them.
 
 **The shape flexes — that's the point.** On a news-heavy day, one big dive plus a
-broad sweep may serve better; when one story eats the day, the episode can be nearly
-all dive. Check the recent scripts from step 1.5: if the last episodes already leaned
-one way, lean the other. What the show never does is the old failure mode — five to
-seven uniform three-minute treatments where everything lands as equally big. That's a
+fuller rundown may serve better; when one story eats the day, the episode can be nearly
+all dive and the rundown may be ninety seconds and two items. What flexes is its size,
+never its presence. Check the recent scripts from step 1.5: if the last episodes already
+leaned one way, lean the other. What the show never does is the old failure mode — five
+to seven uniform three-minute treatments where everything lands as equally big. That's a
 news brief, and the listener already has newsletters.
 
 **Watch for a breakout tool.** The community feeds (r/LocalLLaMA, Hacker News, TLDR AI)
 regularly surface a new open-source repo that's gaining real traction. When one of them
 **fills a genuine gap** — something practitioners couldn't easily do before, not just
-another wrapper, demo, or tutorial collection — it's worth a mention: usually a sweep
+another wrapper, demo, or tutorial collection — it's worth a mention: usually a rundown
 line, occasionally the seed of a dive. The bar is *usefulness*, not star count: stars are a hint that something landed,
 but a repo earns airtime by being a real new capability, and you should be able to say in a
 sentence what it lets someone do that they couldn't before. This is occasional, not a
@@ -414,16 +488,20 @@ order below, decide what the show covers and how much.
   public-sector relevance.
 
 **Plan the episode before you write a line — in your head, not in a file.** Once you've
-chosen and verified tonight's dives and sweep, settle the shape first so the first
+chosen and verified tonight's dives and rundown, settle the shape first so the first
 draft lands in-band and you don't write into a rewrite loop:
-- **Shape and roles.** Which stories dive and which sweep, the running order, where the
-  sweep sits, and which host teaches each dive.
-- **A word budget that errs slightly high.** Tonight's shape sets the total: a dive is
-  roughly 850–1,200 words, a sweep item 40–90, the open and close ~150 together. Sum
-  the allocations to where tonight should land inside the **3,000–4,700-word envelope**
-  (~3,300–3,700 on a normal day) and **aim each allocation a touch high**, so the
-  natural draft lands at or above your target on the first pass — budgeting to the
-  gate floor is exactly what forces deepen-after-the-fact rewrites.
+- **Shape and roles.** Which stories dive, which the rundown resolves, and which it only
+  names; the running order inside the rundown; which host brings each item; and which
+  host teaches each dive. The rundown's order is the day's order of importance, and the
+  dives then run in the order they were introduced, so each callback lands naturally.
+- **A word budget that errs slightly high.** Tonight's shape sets the total: the rundown
+  1,000–1,300 (an introduced item 60–90, a resolved item 25–40 — more when one earns its
+  beat — the named burst 50–70 for all four together), a dive 850–1,200, the greeting and
+  close ~100 together, an optional light beat 80–150. Sum the allocations to where
+  tonight should land inside the **3,000–4,700-word envelope** (~3,700–4,100 on a normal
+  day) and **aim each allocation a touch high**, so the natural draft lands at or above
+  your target on the first pass — budgeting to the gate floor is exactly what forces
+  deepen-after-the-fact rewrites.
 - This plan is a thinking step, not a deliverable: **do not write an `episode_plan.md`.**
 
 Then write the dialogue **in character** — Ada (`"A"`) and Alan (`"B"`) per the Hosts
@@ -487,23 +565,58 @@ experimenting). Rules:
 from the show's default warm energy — a somber lead story, an unusually celebratory
 release day — set `tts_notes` in `episode.json` to 1–2 sentences of mood/tone
 direction for the voices (e.g. "Measured, sober energy today; the lead story is a
-safety incident. Lighten up by the sweep."). It steers delivery only, not
+safety incident. Lighten up by the second dive."). It steers delivery only, not
 content. Most days, omit it.
 
-**Form principles (there is no fixed structure).** Between the greeting and the
-sign-off, the episode's shape is yours: dive order, where the sweep sits (top, bottom,
-or split), how stories hand off. Principles, not slots:
-- **Don't manufacture a through-line.** Most days are several separate developments,
-  and saying that plainly beats inventing a theme. If a genuine thread exists, let it
-  surface in the dialogue where two stories actually touch — don't announce a thesis
-  in the open and re-state it at the close. The archive will show you how often past
-  episodes reached for "it all connects"; treat that as the pattern to break.
+**Form principles (there is no fixed structure).** After the rundown and before the
+sign-off, the episode's shape is yours: dive order, how stories hand off, whether a
+light beat closes it out. Principles, not slots:
+- **The hosts are the continuity, not a thesis.** Stories don't need a shared theme;
+  they need two people moving between them. When the subject changes, let the hosts say
+  so and change it — a reaction, a beat, a handoff — rather than a label. "Now the
+  browser game", "First," / "Second," / "Finally,", "our second dive", "we're keeping
+  this one short": every one of those is the writer talking, not the host. If two
+  stories genuinely touch, let a host notice it in passing, where it happens; never
+  announce a thesis at the top and re-state it at the close, and never let a segment
+  begin by naming itself. **The listener hears a conversation, never the format** — the
+  hosts do not remark on the show's structure, on the absence of a theme, or on their
+  own editorial decisions.
+- **You can't change gears from a full stop.** A dive that lands on an aphorism has
+  closed the door the next story has to walk through. Vary where dives end — an open
+  question, a disagreement neither host concedes, a thing to watch, and sometimes a
+  hard landing — and vary it *deliberately*, across the episode and across the week.
+  Left alone you will pick the aphorism every time. The recent scripts (step 1.5) show
+  you which ending you've been reaching for; that's the one to break tonight.
 - **Not everything is big — say so on air.** Honest sizing is a feature the listener
   learns to trust; uniform gravity is a formula they learn to tune out.
-- **Land plainly.** The close is a beat or two, not a recap of every story — the
-  listener just heard the show.
-- **Vary the titles too.** `episode_meta` titles have converged on one "X, and Y"
-  construction — break it.
+- **Land plainly.** The close is one genuine beat and the sign-off — what a host is
+  still chewing on, not a recap. The rundown already delivered the day and the last
+  dive ended somewhere live; summarizing here is the third time the listener hears it.
+- **The title names the day's lead story.** A listener scrolling their podcast app,
+  who knows nothing about today, must be able to read the title and tell what the
+  episode is about. Write it in two parts on one line: **the lead story stated plainly,
+  then the angle**, separated by an em dash. The first part carries the actor and what
+  happened — a name a reader would recognize (org, model, paper, institution) and the
+  verb. The second part is where the show's voice goes: the tension, the surprise, the
+  thing that made it worth a dive. Drop the second part when the first already carries
+  the whole point; never drop the first.
+  Aim for **70 characters or fewer** — podcast apps truncate past that, and the truncated
+  half must still be the informative one, which is why the plain clause goes first.
+  What the show has been doing, and what it should do instead:
+  ```
+  Fifty-one billion parameters of lookup table
+    -> Qwen3.8-Flash-Next hides a 51B-parameter lookup table
+  The jobs that were never posted
+    -> Stanford's AI job gap arrived through hiring, not firing
+  Nobody wants the best one
+    -> Ramp's index: 6% of the tokens, 11.4% of the dollars
+  Correct in pieces
+    -> BDH-CQ scores well per pair and fails the whole task
+  ```
+  Vary the *second* clause across the week — its construction is the one that converges.
+  The first clause is allowed to be formulaic: clarity is not a thing to get bored of.
+  An evocative phrase with no subject in it is not a title, it is a pull quote; if it is
+  too good to lose, it belongs in the script.
 - **Sundays close with the week in review** (~5 minutes, ~800 words), the one standing
   segment besides the rituals. Not a recap of headlines — a synthesis, built from
   `history.json` and the week's archived scripts: what this week actually established,
@@ -523,11 +636,18 @@ hand-write JSON dialogue or escape quotes.
   E.g.:
   ```
   A: Good morning — it's Friday, June twentieth. I'm Ada.
-  B: And I'm Alan. Here's what actually mattered in AI in the last twenty-four hours.
+  B: And I'm Alan. Three things happened yesterday and one of them is going to annoy you.
+  ## The day
+  B: Mine first. ELDR shipped, and it routes to whichever experts are already warm.
+  A: That's the one I want ten minutes on.
   ## ELDR: routing by which experts are already warm
-  A: [wry] Starting, of course, with another hallucination benchmark.
+  A: [wry] So. The one you promised me.
   ```
-  Mark every dive, the sweep, and the wrap (the cold open needs no marker). Keep each
+  Mark the rundown (`## The day`), every dive, any light beat, and the close; the
+  greeting needs no marker. **The rundown gets exactly one marker** even though it holds
+  several stories — markers become MP3 chapter points, and eight of them inside seven
+  minutes makes an episode harder to navigate, not easier. The episode page's list of
+  the day's stories comes from `rundown` in `episode_meta.json` instead. Keep each
   dialogue line plain spoken prose; the **only** non-spoken text allowed is well-formed
   audio tags per the rules above. No other markdown, URLs, or stage directions. A line
   with no speaker tag or `##` is folded into the turn above it (so a wrapped line is
@@ -536,11 +656,12 @@ hand-write JSON dialogue or escape quotes.
   `history.json` (step 4 update), plus the show-notes data and any delivery note. Schema:
   ```json
   { "date": "YYYY-MM-DD",
-    "title": "string",
+    "title": "lead story plainly, then the angle — see the title rule above; <= 70 chars",
     "summary": "1–2 sentence recap of the episode",
     "tts_notes": "OPTIONAL: 1-2 sentences of mood/tone direction (see above); omit most days",
-    "sources": [ { "group": "Papers" | "Releases" | "Discussion",
+    "sources": [ { "group": "Papers" | "Releases" | "Discussion" | "Also noted",
                    "title": "source title", "url": "https://…" } ],
+    "rundown":  ["short listener-facing labels for every story in the rundown, in order"],
     "topics":   ["short topic/story labels covered today"],
     "entities": ["orgs/models/people featured today, e.g. Anthropic, Gemini 3"],
     "threads": [ { "name": "ongoing storyline",
@@ -561,7 +682,14 @@ hand-write JSON dialogue or escape quotes.
   ```
   - `sources` — every source you used, each tagged with the show-notes group it belongs
     under (Papers / Releases / Discussion). This becomes `shownotes.md`; an entry with no
-    `url` is skipped.
+    `url` is skipped. **Named-tier items go under `Also noted`**, which renders last and
+    keeps unvetted pointers visibly separate from sources the show actually read — the
+    listener who hears a name gets somewhere to go.
+  - `rundown` — **every story the rundown covered, in the order it covered them**,
+    introduced, resolved, and named alike. This is the episode page's story list (the
+    audio has one `## The day` chapter, so the page carries the granularity instead).
+    Purely presentational: unlike `topics`, it never enters `history.json` and never
+    affects the repeat-check.
   - `tts_notes` — the optional per-episode delivery note (see above); omit it most days.
   - Fill `threads` only for genuine multi-day storylines — and a thread is a **concrete
     story with specific actors and a possible ending** (a named lawsuit, a rollout, a
@@ -589,9 +717,11 @@ hand-write JSON dialogue or escape quotes.
     one-off jokes don't enter canon — only things that should still be true about this
     host next month.
   - **Record in `topics`/`entities`/`threads`/`lore` only what the show actually covered in
-    depth — exclude the sweep one-liners.** A passing mention shouldn't enter memory, or
-    it could later suppress the real story as a "repeat". (`sources` is the exception — list
-    every source, including those behind a sweep line.)
+    depth — exclude everything the rundown merely resolved or named.** A passing mention
+    shouldn't enter memory, or it could later suppress the real story as a "repeat"; this
+    is exactly what lets a paper named tonight dive properly next week once its signal
+    matures. (`sources` and `rundown` are the exceptions — both list everything, including
+    what carried only a single line.)
 
 **Write each file once, then `Edit`.** Draft the whole episode to your planned budget
 and write `out/script.txt` and `out/episode_meta.json` a **single** time each, then build
@@ -619,9 +749,10 @@ PYTHON_BIN=.venv/bin/python; [[ -x "$PYTHON_BIN" ]] || PYTHON_BIN=python3
 This is a hard gate: it checks the schema, speaker values, the word-count band (floor
 3,000, cap 4,700), audio-tag form and density (~1 per 60 words max), and TTS-hostile
 artifacts (markdown, URLs, embedded labels, malformed brackets). It also **warns**
-(never fails) when phrases in tonight's script recur across recent archived scripts —
-read those warnings: rephrase the ones that are genuinely tics; technical terms that
-recur legitimately can stand.
+(never fails) when phrases in tonight's script recur across recent archived scripts, and
+when a turn opens with a transition tic ("Now the…", "First,", "our second dive") — read
+those warnings: rephrase the ones that are genuinely tics; technical terms that recur
+legitimately can stand, and a numbered list inside a single turn is fine.
 
 **If the gate passes on length, you're done — don't chase a bigger number.** The budget
 above is built to err high so the first draft clears the band on its own; a draft that

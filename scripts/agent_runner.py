@@ -115,13 +115,29 @@ def ensure_codex_sandbox_helper() -> Path:
     rg = next((candidate.resolve() for candidate in rg_candidates if candidate.is_file()), None)
     if rg is not None:
         runtime_rg = runtime_bin / "rg"
-        if runtime_rg.exists() and not os.path.samefile(rg, runtime_rg):
+        runtime_rg_is_current = runtime_rg.exists() and (
+            os.path.samefile(rg, runtime_rg)
+            or (rg.stat().st_size, rg.stat().st_mtime_ns)
+            == (runtime_rg.stat().st_size, runtime_rg.stat().st_mtime_ns)
+            or (
+                rg.stat().st_size == runtime_rg.stat().st_size
+                and rg.read_bytes() == runtime_rg.read_bytes()
+            )
+        )
+        if runtime_rg.exists() and not runtime_rg_is_current:
             runtime_rg.unlink()
         if not runtime_rg.exists():
             try:
                 os.link(rg, runtime_rg)
             except OSError as exc:
-                raise RunnerError(f"cannot create Codex runtime hard link rg: {exc}", "config") from exc
+                try:
+                    shutil.copy2(rg, runtime_rg)
+                    runtime_rg.chmod(0o555)
+                except OSError as copy_exc:
+                    raise RunnerError(
+                        f"cannot install Codex runtime rg (hard link: {exc}; copy: {copy_exc})",
+                        "config",
+                    ) from copy_exc
     return runtime_bin
 
 
@@ -145,15 +161,45 @@ def paid_credit_balance(snapshot: dict) -> float:
     return 0.0
 
 
+def failure_diagnostics(text: str) -> str:
+    """Return actual CLI diagnostics, excluding prompt and tool-result payloads.
+
+    Provider JSONL traces contain every file the agent reads. Scanning the whole trace
+    made an unrelated phrase such as "rate-limit window" look like a quota failure.
+    Plain-text CLI errors are retained; structured traces contribute only terminal
+    error/result fields.
+    """
+    diagnostics: list[str] = []
+    for line in text.splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            diagnostics.append(line)
+            continue
+        if event.get("type") not in {"error", "turn.failed", "result"}:
+            continue
+        for key in ("subtype", "terminal_reason", "api_error_status", "errors", "error", "result"):
+            value = event.get(key)
+            if isinstance(value, (str, int, float)):
+                diagnostics.append(str(value))
+            elif isinstance(value, list):
+                diagnostics.extend(str(item) for item in value)
+            elif isinstance(value, dict):
+                diagnostics.append(json.dumps(value, sort_keys=True))
+    return "\n".join(diagnostics)
+
+
 def classify_failure(text: str, idle: bool = False) -> str:
     if idle:
         return "idle"
-    lower = text.lower()
-    if any(term in lower for term in ("not logged in", "authentication", "unauthorized", "login required", "401")):
+    lower = failure_diagnostics(text).lower()
+    if "artifact validation failed" in lower or "error_max_turns" in lower:
+        return "artifact"
+    if any(term in lower for term in ("not logged in", "authentication", "failed to authenticate", "unauthorized", "login required", "401")):
         return "auth"
-    if any(term in lower for term in ("rate limit", "usage limit", "quota", "too many requests", "429")):
+    if any(term in lower for term in ("rate limit", "usage limit", "session limit", "quota", "too many requests", "429")):
         return "quota"
-    if any(term in lower for term in ("service unavailable", "upstream", "startup failed", "failed to start", "502", "503", "504")):
+    if any(term in lower for term in ("aborted_streaming", "service unavailable", "upstream", "startup failed", "failed to start", "502", "503", "504")):
         return "service_startup"
     if any(term in lower for term in ("sandbox", "permission", "approval", "config.toml", "strict config")):
         return "config"
@@ -218,7 +264,7 @@ class OutputTransaction:
 # network-enabled permission profile. consolidate and propose work purely from files the
 # earlier stages already wrote, so they stay network-free. Mirrors which Claude stages
 # were granted WebFetch in CLAUDE_TOOLS below.
-NETWORK_STAGES = {"crawl", "podcast", "read", "deepdive", "fact_check", "link_check"}
+NETWORK_STAGES = {"crawl", "crawl_repair", "podcast", "read", "deepdive", "fact_check", "link_check"}
 
 
 def codex_command(stage: str, settings: dict, last_message: Path) -> list[str]:
@@ -243,7 +289,8 @@ def codex_command(stage: str, settings: dict, last_message: Path) -> list[str]:
 
 
 CLAUDE_TOOLS = {
-    "crawl": "Read WebSearch WebFetch Write",
+    "crawl": "Read WebSearch WebFetch Write Skill",
+    "crawl_repair": "Read WebSearch WebFetch Write Skill",
     "consolidate": "Read Write Bash",
     "propose": "Read Write Bash",
     "podcast": "Bash Read Write WebSearch WebFetch Skill Agent",
@@ -252,6 +299,14 @@ CLAUDE_TOOLS = {
     "fact_check": "WebFetch WebSearch",
     "link_check": "WebFetch",
 }
+
+
+# Categories worth one more attempt on the same provider before falling back.
+# An `artifact` failure is usually the model answering instead of working — on
+# 2026-09-21 the crawl model replied "I don't see a specific task" on a single
+# turn with no web fetches — and a retry costs a couple of minutes where the
+# fallback provider may be out of quota and cost the night.
+SAME_PROVIDER_RETRY = {"idle", "artifact"}
 
 
 def claude_command(stage: str, settings: dict, prompt: str) -> list[str]:
@@ -438,7 +493,7 @@ def main() -> int:
 
             transaction.restore()
             retry_key = (current, category)
-            if category == "idle" and retry_key not in retried:
+            if category in SAME_PROVIDER_RETRY and retry_key not in retried:
                 retried.add(retry_key)
                 continue
             if current == "codex" and category == "quota" and config["fallback"].get("consume_earned_reset") and not reset_attempted:

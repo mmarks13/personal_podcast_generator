@@ -9,6 +9,7 @@ providers:
       propose: {model: gpt-5.6-terra, effort: high, web_search: disabled}
       consolidate: {model: gpt-5.6-terra, effort: high, web_search: disabled}
       crawl: {model: gpt-5.6-luna, effort: max, web_search: live}
+      crawl_repair: {model: gpt-5.6-luna, effort: max, web_search: live}
       fact_check: {model: gpt-5.6-luna, effort: xhigh, web_search: live}
       link_check: {model: gpt-5.6-luna, effort: xhigh, web_search: live}
   claude:
@@ -17,8 +18,9 @@ providers:
       read: {model: opus, effort: medium, max_turns: 50}
       deepdive: {model: opus, effort: medium, max_turns: 60}
       propose: {model: sonnet, effort: low, max_turns: 15}
-      consolidate: {model: sonnet, effort: low, max_turns: 30}
+      consolidate: {model: sonnet, effort: low, max_turns: 60}
       crawl: {model: haiku, effort: high, max_turns: 40}
+      crawl_repair: {model: haiku, effort: high, max_turns: 20}
       fact_check: {model: haiku, effort: medium}
       link_check: {model: haiku, effort: medium}
 
@@ -26,7 +28,7 @@ fallback:
   enabled: true
   from: claude
   to: codex
-  reasons: [auth, quota, service_startup]
+  reasons: [auth, quota, service_startup, artifact]
   consume_earned_reset: true
 
 runtime:
@@ -37,6 +39,7 @@ runtime:
 outputs:
   propose: [out/daily_options.json, out/deepdive_options.json]
   crawl: [out/crawl.json]
+  crawl_repair: [out/crawl_repair.json]
   consolidate: [out/candidates.json]
   podcast: [out/script.txt, out/episode_meta.json, out/episode.json, out/shownotes.md]
   read: [docs/reads/self-attention-*.epub, reads_history.json]

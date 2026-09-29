@@ -43,6 +43,8 @@ CHAPTER_RE = re.compile(r"^##\s+(.+)$")
 # Source groups render in this order; any other group follows in first-seen order.
 GROUP_ORDER = ["Papers", "Releases", "Discussion", "Industry & Discussion",
                "Primary sources", "Further reading"]
+# Pointers the show named but never verified or sized; always rendered last.
+LAST_GROUP = "Also noted"
 
 
 def parse_script(text: str) -> tuple[list[dict], list[dict], list[str], list[str]]:
@@ -103,6 +105,8 @@ def render_shownotes(meta: dict) -> str:
         by_group.setdefault(s.get("group", "Sources"), []).append(s)
     ordered = [g for g in GROUP_ORDER if g in by_group]
     ordered += [g for g in by_group if g not in ordered]
+    if LAST_GROUP in ordered:
+        ordered.append(ordered.pop(ordered.index(LAST_GROUP)))
     for g in ordered:
         out.append(f"## {g}")
         for s in by_group[g]:

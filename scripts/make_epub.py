@@ -93,8 +93,17 @@ def make_cover(src: str, title: str, subtitle: str, out_path: str) -> str:
     canvas.paste(art, (art_x, art_y))
 
     draw = ImageDraw.Draw(canvas)
-    title_font = _load_font(140, bold=True)
-    sub_font = _load_font(58)
+    title_size = 140
+    title_font = _load_font(title_size, bold=True)
+    while draw.textlength(title, font=title_font) > W - 160 and title_size > 60:
+        title_size -= 4
+        title_font = _load_font(title_size, bold=True)
+
+    sub_size = 58
+    sub_font = _load_font(sub_size)
+    while draw.textlength(subtitle, font=sub_font) > W - 160 and sub_size > 32:
+        sub_size -= 2
+        sub_font = _load_font(sub_size)
 
     text_y = art_y + art.height + 150
     tw = draw.textlength(title, font=title_font)

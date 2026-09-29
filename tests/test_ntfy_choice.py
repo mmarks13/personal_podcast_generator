@@ -52,7 +52,10 @@ class ParseReplyTests(unittest.TestCase):
         ("1,2,3,4,5",                [1,2,3,4,5],  [],  None,                       None),
         ("dive the Gemini thing",    [],           [],  "dive the Gemini thing",    None),
         ("dd speculative decoding",  [],           [],  None,     "speculative decoding"),
+        ('"dd speculative decoding"', [],          [],  None,     "speculative decoding"),
+        ("“dd speculative decoding”", [],           [],  None,     "speculative decoding"),
         ("DD: speculative decoding", [],           [],  None,     "speculative decoding"),
+        ('"3, 14. A"',               [3, 14],      [1], None,                       None),
         ("1 dd tokenizers",          [1],          [],  None,               "tokenizers"),
         ("3 more on the export story", [3],        [],  "more on the export story", None),
         ("ok",                       [],           [],  None,                       None),
@@ -196,6 +199,17 @@ class DeepdiveChoiceTests(unittest.TestCase):
             nc.run_deepdive(self.options)
         return buf.getvalue().strip()
 
+    def test_letters_past_f_are_picks(self) -> None:
+        # The deep-dive slate grew from 6 options to 8 on 2026-09-25; G and H have to
+        # parse as picks or the two new slots are unreachable from the phone.
+        self.assertEqual(nc.parse_reply("G")["letters"], [7])
+        self.assertEqual(nc.parse_reply("3, 14. H")["letters"], [8])
+        self.assertEqual(nc.parse_reply("3, 14. H")["numbers"], [3, 14])
+        # Still prose, not option H followed by a word.
+        self.assertEqual(nc.parse_reply("Hopfield networks")["letters"], [])
+        self.assertEqual(nc.parse_reply("dd Hopfield networks")["deepdive_text"],
+                         "Hopfield networks")
+
     def test_letters_map_to_topics(self) -> None:
         self.assertEqual(self._run("1,3 B"), "beta")
 
@@ -205,6 +219,9 @@ class DeepdiveChoiceTests(unittest.TestCase):
     def test_free_text_needs_the_dd_prefix(self) -> None:
         self.assertEqual(self._run("dive the Gemini thing"), "")
         self.assertEqual(self._run("dd the Gemini thing"), "the Gemini thing")
+
+    def test_free_text_accepts_quoted_dd_prefix(self) -> None:
+        self.assertEqual(self._run('"dd the Gemini thing"'), "the Gemini thing")
 
 
 class FetchRepliesTests(unittest.TestCase):

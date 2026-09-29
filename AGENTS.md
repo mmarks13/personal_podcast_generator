@@ -1,15 +1,26 @@
 # daily-ai-podcast — project memory
 
 Automated daily AI-news podcast: gather the day's AI papers, model releases, and
-top discussion → write a grounded 18–28 minute two-host script (2–3 mini-dives + a
-brisk sweep by default; the day's material picks the shape) → render to MP3 → publish
+top discussion → write a grounded 18–28 minute two-host script (a front-loaded rundown of
+the whole day + 2–3 mini-dives; the day's material picks the shape) → render to MP3 → publish
 to an RSS feed Spotify polls.
 
 ## How this runs
 - Orchestrated locally by `run_episode.sh`, fired nightly by launchd/cron.
-- Agent work defaults to the **logged-in Codex CLI** and can use the logged-in Claude
-  CLI through `AGENT_PROVIDER=claude` or availability-only fallback. Never set
+- The 19:30 `propose` run performs the canonical structured fetch, HTML crawl,
+  Smallbatch score, and consolidation, then writes `out/gather_manifest.json`. The 02:00
+  run reuses that exact gather when the manifest is fresh and valid; it performs one
+  recovery gather only when needed, never an automatic overnight delta.
+- Agent work defaults to the **logged-in Claude CLI** and can use the logged-in Codex
+  CLI through `AGENT_PROVIDER=codex` or availability-only fallback. Never set
   `OPENAI_API_KEY`, `CODEX_API_KEY`, or `ANTHROPIC_API_KEY` in the scheduled environment.
+  (Claude became the default on 2026-08-13, after a Codex 0.147.0 upgrade broke its
+  local tool host and cost a night's episode — see `ensure_codex_sandbox_helper`.)
+- Attended work is a separate door: `bash scripts/codex_interactive.sh` starts Codex on
+  the `podcast-interactive` permission profile with `--ask-for-approval on-request` and
+  the render/publish variables in its environment, so a human can approve the steps the
+  nightly profile is built to refuse. Nothing scheduled touches it, and `.env` stays
+  denied on disk there too.
 - Audio is **Gemini multi-speaker TTS** (needs `GEMINI_API_KEY`). ffmpeg must be on
   PATH. Kokoro remains for manual offline experiments only.
 
@@ -34,6 +45,24 @@ to an RSS feed Spotify polls.
 - `config/sources.yaml` — the source watchlist (Tier 1 = daily; Tier 2 = optional).
 - `scripts/fetch_sources.py` — deterministic pulls of ALL rss/api sources, both tiers
   (arXiv keyword-filtered to topic priorities, HF Daily Papers, HN, newsletters).
+- `scripts/score_sources.py` — pinned private Smallbatch Qwen function adapter; verifies
+  the full package identity/checksums and writes four dimensions plus their 0–9 sum to
+  `out/source_scores.json`. Ranking aid only; it never filters records.
+- `scripts/stamp_candidates.py` — runs on the consolidator's output, before the manifest:
+  stamps every candidate with `published_at`/`date_status` recovered from the raw gather and
+  `aired_on`, the exact past-episode dates that already cited its URL (read from
+  `archive/scripts/*-meta.json`). The consolidator is an agent and drops date fields, so the
+  two facts a writer cannot reconstruct are attached after it rather than routed through it.
+- `scripts/gather_manifest.py` — checksum/freshness identity for the reusable gather,
+  including an explicit status for every configured Tier-1 source.
+- `scripts/crawl_repair.py` — the crawl's coverage check: `missing` lists configured
+  `fetch` sources the crawl left unanswered — dropped from `source_statuses`, or Tier-1 and
+  marked `failed` with no matching `failures` record (exit 3) — and `merge` folds a
+  gap-only repair crawl back into `out/crawl.json`, replacing a defective status. Runs right
+  after the crawl so a bad status costs a short repair pass, not a whole gather at the
+  manifest gate. The gate itself records such a status and warns rather than discarding the
+  gather: `GATHER_RESUME_AFTER_CONSOLIDATE=1 bash run_episode.sh propose` rebuilds only the
+  manifest from existing artifacts when it still ends up blocking one.
 - `scripts/check_episode.py` — hard pre-render gate: schema, word band, audio-tag
   form/density, TTS artifacts; warns (never fails) on phrases recurring across recent
   archived scripts.
@@ -58,16 +87,34 @@ to an RSS feed Spotify polls.
   list + full transcript from the archived script; commits the listener-tunable
   files too.
 - `scripts/notify.py` / `scripts/ntfy_choice.py` — the ntfy.sh phone channel
-  (`NTFY_TOPIC` in `.env`): run-failure alerts, and the Tue/Fri/Sat-evening deep-dive
-  picker (`run_episode.sh propose` pushes a mixed slate of 6 typed topic pitches —
-  mechanism/foundational/history/debate — drafted from memory + a fresh evening feed
-  pull; a reply with a number or free text becomes the next morning's deep-dive
-  topic). `scripts/proposal_ledger.py` maintains `deepdive_proposals.json`: a topic
-  pitched 3 evenings without being chosen is retired from future slates.
+  (`NTFY_TOPIC` in `.env`): run-failure alerts, and the **nightly picker**.
+  `run_episode.sh propose` runs every evening and pushes ONE message carrying up to two
+  slates: 15 of the day's stories the listener can lock as tomorrow's **mini-dives**
+  (`out/daily_options.json`, **numbered**, ~8 top-by-signal plus ~7 marked wildcards
+  deliberately spread across kinds of story so the slate reads as a menu), and
+  — on Tue/Fri/Sat — a mixed slate of 8 typed deep-dive pitches
+  (mechanism/foundational/history/debate, `out/deepdive_options.json`, **lettered**).
+  Both are drafted from memory + the same canonical evening `out/candidates.json` that
+  the 02:00 writers later receive. One reply answers both: numbers pick mini-dives (up to 3),
+  a letter picks the deep dive, bare free text is a mini-dive in the listener's own
+  words, and a `dd ` prefix makes it a deep-dive topic instead. Punctuation between
+  picks is free ("3, 14. A" works); a wide slate goes out as two chunked pushes, and
+  each half takes the newest reply that answers *it*, so answering the two pushes in
+  separate messages works and a later message still corrects its own half. Mini-dive picks are
+  **locked** — the writer never drops one, and post-cutoff news waits for the next cycle — and
+  they override `listener.yaml` downweights and the paper-aging rule.
+  `scripts/daily_options.py` renumbers/stamps the daily half (no ledger: stories are
+  perishable). `scripts/proposal_ledger.py` maintains `deepdive_proposals.json`: a topic
+  pitched 3 evenings without being chosen is retired from future slates, and a topic
+  that was chosen leaves them too — it has already been an episode. The deep-dive run
+  records the topic that actually aired even when the writer picked it itself; before
+  that, only phone-chosen topics were recorded and taught subjects kept returning.
 - `feedback.md` (root) — listener notes, read first each night; consumed notes land
   in `archive/feedback_log.md`. `listener.yaml` (root) — standing interest weights.
-  `config/pronunciations.yaml` — TTS-mispronounced names and speakable spellings
-  (gate warns on raw forms). The writer may update these three; never SKILL.md.
+  `config/pronunciations.yaml` — TTS-mispronounced names and the respellings
+  `make_audio.py` substitutes into the text it sends the API (audio only; the script
+  and transcript keep the normal spelling). The writer may update these three;
+  never SKILL.md.
 - `scripts/update_history.py` — maintain `history.json` (show memory: 30-day detail +
   long-term thread/entity/monthly rollup) so episodes don't repeat and arcs build.
   Dedup key is (date, kind) so deep-dive records coexist with the daily's.

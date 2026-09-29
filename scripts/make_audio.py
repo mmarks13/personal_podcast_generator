@@ -12,6 +12,8 @@ Two backends, chosen with --backend:
 
 Honors an optional "tts_notes" field in episode.json: 1-2 sentences of mood/tone
 direction for the day, appended to the Director's Notes of every chunk's prompt.
+Terms in config/pronunciations.yaml are respelled in the text sent to the TTS
+(audio only — episode.json and the archived script keep the normal spelling).
 ffmpeg must be on PATH.
 
 Usage:
@@ -23,6 +25,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -42,6 +45,14 @@ GEMINI_VOICES = {  # prebuilt voice names; audition alternatives in Google AI St
     "C": os.environ.get("GEMINI_VOICE_C", "Sulafat"),
 }
 GEMINI_SPEAKER_NAMES = {"A": "Ada", "B": "Alan", "C": "Guest"}  # transcript names
+TRANSITION_CUE_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "assets", "mech_keyboard_transition.wav",
+)
+PRONUNCIATIONS_YAML = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "config", "pronunciations.yaml",
+)
 # A response is capped at 8192 audio tokens (~5.5 min at 25 tokens/s). ~2000 chars
 # of script is ~2.3 min spoken — comfortable headroom, and each chunk still carries
 # enough conversation for natural back-and-forth prosody.
@@ -85,6 +96,50 @@ morning.
 """
 
 
+def load_pronunciations(path: str = PRONUNCIATIONS_YAML) -> list[tuple[re.Pattern, str]]:
+    """Compile config/pronunciations.yaml into letter-bounded respelling rules.
+
+    Gemini TTS offers no SSML, phoneme tag, or lexicon — spelling is the only
+    handle on pronunciation — so the fix is to hand the API a different spelling.
+    A missing or unreadable lexicon is not worth failing a render over.
+    """
+    if not os.path.exists(path):
+        return []
+    try:
+        import yaml
+        with open(path, encoding="utf-8") as f:
+            lexicon = yaml.safe_load(f) or {}
+    except Exception as exc:  # noqa: BLE001
+        print(f"  pronunciations: skipped ({exc})", file=sys.stderr)
+        return []
+    # Bounded by letters, not \b: "Sol" must skip "solved", but "Qwen" must
+    # still catch the version-suffixed forms the show actually says (Qwen3-Next).
+    return [(re.compile(rf"(?<![A-Za-z]){re.escape(raw)}(?![A-Za-z])",
+                        re.IGNORECASE), str(speak_as))
+            for raw, speak_as in lexicon.items() if isinstance(raw, str) and raw]
+
+
+def apply_pronunciations(turns: list[dict],
+                         rules: list[tuple[re.Pattern, str]]) -> list[dict]:
+    """Respell known-mispronounced terms in the text sent to the TTS.
+
+    Returns new turns; the caller's episode.json and the archived script keep
+    the normal spelling, so only the audio is affected.
+    """
+    if not rules:
+        return turns
+    out, swapped = [], 0
+    for turn in turns:
+        text = turn["text"]
+        for pattern, speak_as in rules:
+            text, n = pattern.subn(speak_as, text)
+            swapped += n
+        out.append({**turn, "text": text})
+    if swapped:
+        print(f"  respelled {swapped} term(s) for the TTS", file=sys.stderr)
+    return out
+
+
 def _ffmpeg_concat(part_files: list[str], out_path: str) -> None:
     """Concatenate same-codec audio files losslessly via the concat demuxer.
 
@@ -104,6 +159,45 @@ def _ffmpeg_concat(part_files: list[str], out_path: str) -> None:
         )
     finally:
         os.unlink(list_path)
+
+
+def _prepare_transition_cue(src_path: str, out_path: str,
+                            bits: int, rate: int) -> float:
+    """Convert the fixed cue to the mono PCM format returned by Gemini."""
+    import wave
+
+    codecs = {16: "pcm_s16le", 24: "pcm_s24le", 32: "pcm_s32le"}
+    if bits not in codecs:
+        raise ValueError(f"unsupported Gemini PCM depth for transition cue: {bits}")
+    if not os.path.isfile(src_path):
+        raise FileNotFoundError(f"transition cue not found: {src_path}")
+    subprocess.run(
+        ["ffmpeg", "-y", "-i", src_path, "-ac", "1", "-ar", str(rate),
+         "-c:a", codecs[bits], out_path],
+        check=True, capture_output=True,
+    )
+    with wave.open(out_path, "rb") as wf:
+        return wf.getnframes() / wf.getframerate()
+
+
+def _sequence_parts_with_cues(
+        rendered: list[tuple[int, str, float]], breaks: set[int],
+        cue_path: str, cue_seconds: float) -> tuple[list[str], dict[int, float]]:
+    """Interleave the cue at chapter chunks and return exact chunk start times."""
+    parts: list[str] = []
+    chunk_start_s: dict[int, float] = {}
+    elapsed = 0.0
+    for start_turn, speech_path, speech_seconds in rendered:
+        # A marker on turn zero identifies the opening; it is not a transition.
+        if start_turn in breaks and start_turn > 0:
+            chunk_start_s[start_turn] = elapsed  # seeking starts at the cue
+            parts.append(cue_path)
+            elapsed += cue_seconds
+        else:
+            chunk_start_s[start_turn] = elapsed
+        parts.append(speech_path)
+        elapsed += speech_seconds
+    return parts, chunk_start_s
 
 
 def render_kokoro(turns: list[dict], out_path: str) -> None:
@@ -215,6 +309,10 @@ def render_gemini(turns: list[dict], out_path: str, tts_notes: str = "",
     from google import genai
     from google.genai import types
 
+    breaks = {ch["turn"] for ch in (chapters or [])}
+    if any(start > 0 for start in breaks) and not os.path.isfile(TRANSITION_CUE_PATH):
+        raise FileNotFoundError(f"transition cue not found: {TRANSITION_CUE_PATH}")
+
     api_key = os.environ["GEMINI_API_KEY"]  # KeyError = clear failure
     # Per-request timeout (ms) so a stalled stream raises and the retry loop
     # below catches it, instead of blocking forever on an open socket. A chunk
@@ -266,12 +364,10 @@ def render_gemini(turns: list[dict], out_path: str, tts_notes: str = "",
     if guest_block:
         style = style.replace("\n## THE SCENE", guest_block + "\n## THE SCENE")
 
-    breaks = {ch["turn"] for ch in (chapters or [])}
     chunks = _gemini_chunks(turns, breaks)
-    chunk_start_s: dict[int, float] = {}  # start turn index -> seconds into episode
-    elapsed = 0.0
     with tempfile.TemporaryDirectory() as tmp:
-        parts = []
+        rendered: list[tuple[int, str, float]] = []
+        pcm_format: tuple[int, int] | None = None
         for i, (start_turn, chunk) in enumerate(chunks):
             prompt = style + "\n".join(
                 f"{speaker_names.get(t['speaker'], 'Ada')}: {t['text']}"
@@ -315,13 +411,30 @@ def render_gemini(turns: list[dict], out_path: str, tts_notes: str = "",
                 wf.setsampwidth(bits // 8)
                 wf.setframerate(rate)
                 wf.writeframes(pcm)
-            parts.append(part)
             seconds = len(pcm) / (bits // 8) / rate
-            chunk_start_s[start_turn] = elapsed
-            elapsed += seconds
+            rendered.append((start_turn, part, seconds))
+            pcm_format = pcm_format or (bits, rate)
             print(f"  chunk {i + 1}/{len(chunks)} done ({seconds:.0f}s, {mime})",
                   file=sys.stderr)
+
+        cue_path = os.path.join(tmp, "transition.wav")
+        cue_seconds = 0.0
+        rendered_starts = {start for start, _, _ in rendered}
+        transition_count = sum(
+            start > 0 for start in breaks & rendered_starts
+        )
+        if transition_count:
+            assert pcm_format is not None
+            cue_seconds = _prepare_transition_cue(
+                TRANSITION_CUE_PATH, cue_path, *pcm_format
+            )
+        parts, chunk_start_s = _sequence_parts_with_cues(
+            rendered, breaks, cue_path, cue_seconds
+        )
         _ffmpeg_concat(parts, out_path)
+        if transition_count:
+            print(f"  inserted {transition_count} segment cues "
+                  f"({cue_seconds:.2f}s each)", file=sys.stderr)
 
     if chapters:
         # Chapter turns were forced onto chunk boundaries, so each start time is
@@ -355,6 +468,8 @@ def main() -> int:
         kept_before[i + 1] = kept_before[i] + bool(t.get("text", "").strip())
     chapters = [{"title": c["title"], "turn": kept_before[min(c["turn"], len(raw))]}
                 for c in episode.get("chapters", []) or []]
+
+    turns = apply_pronunciations(turns, load_pronunciations())
 
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     print(f"Rendering {len(turns)} turns via {args.backend}...", file=sys.stderr)
