@@ -1,0 +1,132 @@
+{
+ "date": "2026-09-30",
+ "kind": "deepdive",
+ "title": "Tokenization, taught properly: byte pairs, glitch tokens, the bill",
+ "summary": "What a token actually is: byte pair encoding worked by hand, why numbers, spelling and non-English languages break on it, how SolidGoldMagikarp became a word GPT-3 couldn't say, why price per token isn't a fixed unit, and the byte-level models trying to skip the tokenizer.",
+ "sources": [
+  {
+   "group": "Primary sources",
+   "title": "Sennrich, Haddow & Birch — Neural Machine Translation of Rare Words with Subword Units (2016)",
+   "url": "https://arxiv.org/abs/1508.07909"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Radford et al. — Language Models are Unsupervised Multitask Learners (GPT-2, 2019)",
+   "url": "https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Kudo — Subword Regularization (unigram language model segmentation, 2018)",
+   "url": "https://arxiv.org/abs/1804.10959"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Kudo & Richardson — SentencePiece (2018)",
+   "url": "https://arxiv.org/abs/1808.06226"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Touvron et al. — LLaMA: Open and Efficient Foundation Language Models (2023)",
+   "url": "https://arxiv.org/abs/2302.13971"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Singh & Strouse — Tokenization counts: the impact of tokenization on arithmetic in frontier LLMs (2024)",
+   "url": "https://arxiv.org/abs/2402.14903"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Petrov, La Malfa, Torr & Bibi — Language Model Tokenizers Introduce Unfairness Between Languages (NeurIPS 2023)",
+   "url": "https://arxiv.org/abs/2305.15425"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Rumbelow & Watkins — SolidGoldMagikarp (plus, prompt generation) (2023)",
+   "url": "https://www.lesswrong.com/posts/aPeJE8bSo6rAFoLqg/solidgoldmagikarp-plus-prompt-generation"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Watkins — SolidGoldMagikarp III: Glitch token archaeology (2023)",
+   "url": "https://www.lesswrong.com/posts/8viQEp8KBg2QSW4Yc/solidgoldmagikarp-iii-glitch-token-archaeology"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Land & Bartolo — Fishing for Magikarp: Automatically Detecting Under-trained Tokens (2024)",
+   "url": "https://arxiv.org/abs/2405.05417"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Anthropic — Token counting docs (newer tokenizer note)",
+   "url": "https://platform.claude.com/docs/en/build-with-claude/token-counting"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Pagnoni et al. — Byte Latent Transformer: Patches Scale Better Than Tokens (2024)",
+   "url": "https://arxiv.org/abs/2412.09871"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Xue et al. — ByT5: Towards a token-free future with pre-trained byte-to-byte models (2021)",
+   "url": "https://arxiv.org/abs/2105.13626"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Hwang, Wang & Gu — Dynamic Chunking for End-to-End Hierarchical Sequence Modeling (H-Net, 2025)",
+   "url": "https://arxiv.org/abs/2507.07955"
+  },
+  {
+   "group": "Further reading",
+   "title": "Meta — Introducing Meta Llama 3 (128K-token vocabulary)",
+   "url": "https://ai.meta.com/blog/meta-llama-3/"
+  },
+  {
+   "group": "Further reading",
+   "title": "OpenAI tiktoken — published encodings (r50k, cl100k, o200k)",
+   "url": "https://github.com/openai/tiktoken"
+  }
+ ],
+ "topics": [
+  "deep dive: tokenization, taught properly"
+ ],
+ "entities": [
+  "byte pair encoding",
+  "SentencePiece",
+  "tiktoken",
+  "SolidGoldMagikarp",
+  "Byte Latent Transformer",
+  "ByT5",
+  "H-Net",
+  "Rico Sennrich",
+  "Philip Gage",
+  "Taku Kudo",
+  "Aleksandar Petrov",
+  "Aaditya Singh",
+  "DJ Strouse",
+  "Jessica Rumbelow",
+  "Matthew Watkins",
+  "Sander Land",
+  "Max Bartolo",
+  "Anthropic",
+  "OpenAI",
+  "Meta"
+ ],
+ "threads": [],
+ "concepts_taught": [
+  "byte pair encoding as a frequency-driven merge loop borrowed from data compression: vocabulary size = base alphabet + number of merges (the single hyperparameter), unseen words encoded by replaying learned merges, and why the resulting pieces track frequency rather than morphemes",
+  "byte-level BPE and pre-tokenization: a 256-symbol base so nothing is ever unknown, merges blocked across character categories, and a splitting pattern (e.g. digits in runs of at most three) that decides what can ever become one token",
+  "why tokenization shapes arithmetic and spelling: left-to-right three-digit chunking misaligns with place value (commas restore it), and a model receives token IDs, never letters",
+  "tokenization premiums across languages: the same content costs several to fifteen times more tokens in under-represented scripts, which maps directly to price, latency and usable context — and byte encodings are unequal too",
+  "glitch tokens as the gap between tokenizer training data and model training data: vocabulary entries with almost no training exposure, detectable from the model's weights",
+  "why price per token is not a fixed unit: token counts for the same text change with the tokenizer, so cost comparisons must be recounted per model on real traffic",
+  "tokenizer-free modeling: byte models, entropy-based dynamic patching (Byte Latent Transformer) that spends compute where the next byte is uncertain, and learned end-to-end chunking (H-Net) — with FLOP savings not yet matched in wall-clock time"
+ ],
+ "lore": [
+  {
+   "host": "Ada",
+   "type": "reveal",
+   "note": "Ada said, in the first person, that when asked how a word is spelled she isn't looking at it but remembering it — she receives pieces, not letters — and that she doesn't know her own vocabulary: there may be entries on her list she never really learned, and she wouldn't know which."
+  }
+ ],
+ "listener_note": null,
+ "word_band": null
+}

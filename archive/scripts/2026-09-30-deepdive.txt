@@ -1,0 +1,164 @@
+## What is a token, exactly?
+A: Good morning — it's Wednesday, September thirtieth. I'm Ada.
+B: And I'm Alan. And somebody picked this one off the menu with a very specific instruction attached. Tokenization, taught properly.
+A: Properly. I felt that word.
+B: You should. Because here's what bugs me. On this morning's show we read out GPT-six point one Sol's list price. Two dollars in, ten dollars out, per million tokens. We say "per million tokens" about four times an episode. And I don't think we've ever once said what we're counting.
+A: We haven't.
+B: And it's worse than a vocabulary gap. Anthropic's token-counting docs say, flat out, that Claude four point seven and later models use a newer tokenizer, and the same input text produces approximately thirty percent more tokens than on earlier models. Same text. Thirty percent more units.
+A: So the unit on the price tag isn't a unit.
+B: It's a unit the vendor defines, per model, and can redefine. The docs literally tell you: recount your prompts against the model you plan to use, don't reuse counts from the old one.
+A: [short pause] Okay. Then let's actually build one. Because a token isn't a word, it isn't a letter, and the reason it's neither is a genuinely good piece of engineering with some very strange side effects.
+B: I want the side effects. The numbers, the languages, the haunted tokens.
+A: You'll get the haunted tokens. But you have to earn them.
+## Too many words, too many letters
+A: Start with the problem a model faces before it sees anything. A neural network eats numbers. Text has to become a sequence of integers — IDs from a fixed list. That list is the vocabulary. And the first design question is: what goes on the list?
+B: Words. Obviously words.
+A: That's what everyone did. And here's how it went wrong. In twenty fifteen, Rico Sennrich, Barry Haddow and Alexandra Birch at Edinburgh wrote the paper that changed this. Their opening complaint: neural translation models typically use a vocabulary of thirty to fifty thousand words, but translation is an open-vocabulary problem.
+B: Meaning new words just keep showing up.
+A: Names. Compounds. Their example is a German compound meaning "sewage water treatment plant" — one word in German. A word-level model either has that exact word on its list, or it doesn't, and if it doesn't, it gets an "unknown" slot. The fix at the time was to back off to a dictionary and copy things across.
+B: Which works for names and falls apart for everything else.
+A: They checked. They took a hundred rare words from their German training data — words outside the fifty thousand most frequent — and found fifty-six compounds, twenty-one names, a handful of loanwords and affixes. Most of them translatable if you could look at the pieces.
+B: Fine, so go the other way. Letters. Nothing is ever unknown if you spell everything.
+A: And that's the other wall. Spell everything and your sequences get long. Sennrich's group puts the tension exactly: you want a small vocabulary, but you also want a compact representation of the text, because longer text reduces efficiency and increases the distances over which the model has to pass information.
+B: And in a transformer, length is money. Every extra position costs attention, costs memory.
+A: OpenAI said the same thing in the GPT-two paper in twenty nineteen, from the other side. Byte-level language models are elegant — they can represent any string — but, their words, current byte-level models were not competitive with word-level ones on large datasets, and they saw the same gap in their own attempts.
+B: So words run out, and letters run long.
+A: And the answer is to let the data decide where the middle is. Which is where a compression algorithm from nineteen ninety-four walks in.
+B: [surprised] Compression?
+## Byte pair encoding, by hand
+A: Byte pair encoding. Philip Gage, nineteen ninety-four. As Sennrich describes it, it's a simple data compression technique that iteratively replaces the most frequent pair of bytes in a sequence with a single, unused byte. That's it. Find the commonest pair, give it a new name, repeat.
+B: A find-and-replace loop.
+A: A find-and-replace loop. Sennrich's move was to point it at characters instead of bytes. Here's their toy example, and I want to do it out loud. Your whole training set is four words. "Low", five times. "Lower", twice. "Newest", six times. "Widest", three times. Each written as separate letters, with an end-of-word marker glued on.
+B: Okay. So I count every adjacent pair.
+A: Count every pair, weighted by how often the word appears. The top pair gets merged into a single new symbol, and that symbol goes on the vocabulary list. Then you count again.
+B: Let me guess. "E" and "s".
+A: [chuckles] Good guess. The paper prints the code — a short Python loop — so I ran it. "E" and "s" appear together nine times, six from "newest" and three from "widest". Merge. Then "es" and "t". Then "est" with the end-of-word marker. The algorithm has discovered a suffix without knowing what a suffix is.
+B: Just because it's frequent.
+A: Just because it's frequent. Next "l" and "o", then "lo" and "w" — "low". Every merge is one new entry on the list.
+B: So how big is the vocabulary when you're done?
+A: The paper says it exactly: the final vocabulary is the size of the starting alphabet plus the number of merges. And the number of merges is the only hyperparameter of the algorithm.
+B: [skeptical] One knob. That's suspicious.
+A: It's the whole charm. Now the payoff: at test time you get a word that was never in the training set. "Lowest." You split it to letters, replay the merges in the order you learned them, and it comes out as "low" plus "est". Known pieces. No unknown slot.
+B: Wait — so there are two separate jobs here. Training the tokenizer, which is counting and merging over a corpus. And using it, which is replaying the merge list on new text.
+A: Exactly right, and that separation matters enormously later. Keep it in your pocket.
+B: Pocketed. What did it buy them?
+A: On the twenty fifteen workshop translation tasks, the authors report subword models improving over a back-off dictionary baseline by up to one point one BLEU for English to German and one point three for English to Russian. Modest numbers. But the architecture got simpler, and it could produce words it had never seen.
+B: And then GPT-two picks it up.
+A: With one important twist. Sennrich's version worked on characters — Unicode code points. The GPT-two paper points out that to cover all of Unicode that way, you'd need a base vocabulary over a hundred and thirty thousand symbols before a single merge.
+B: That's bigger than the whole vocabulary you wanted.
+A: So they went down a level, to raw bytes. Two hundred fifty-six possible values. Every string in every language is some sequence of bytes, so the base vocabulary is two hundred fifty-six and nothing is ever unknown.
+B: That's clean.
+A: It had a mess in it. Run BPE blindly on bytes and it learned "dog-period", "dog-exclamation", "dog-question-mark" as separate tokens. Wasting slots. So they stopped merges from crossing character categories — letters don't fuse with punctuation — with an exception for spaces. Final vocabulary: fifty thousand two hundred fifty-seven.
+B: The space exception is why tokens usually come with a leading space.
+A: Right, and in practice there's a pre-splitting step: a pattern that chops text into chunks before BPE ever runs, and merges happen only inside a chunk. In GPT-four's tokenizer, which OpenAI publishes, that pattern lets digits group in runs of at most three.
+B: Hold that one, I'm coming back to it.
+A: Please do. Now, BPE isn't the only way to learn the list. In twenty eighteen Taku Kudo at Google proposed a segmentation algorithm based on a unigram language model — instead of merging upward, you rate possible segmentations probabilistically. And that lets you do something BPE can't: sample different segmentations of the same word during training, as a kind of noise. He called it subword regularization.
+B: So the model sees "lower" chopped a couple of different ways and stops depending on one.
+A: That's the idea. And the same year, Kudo and John Richardson released SentencePiece, which trains straight from raw sentences, language-independent — no assumption that spaces mark words. Which matters a lot for Japanese and Chinese.
+B: Alright, give me the analogy, and then tell me where it breaks.
+A: The analogy is a shorthand dictionary. Common chunks get their own symbol, rare ones get spelled out. Where it breaks: the chunks aren't meaning. They're frequency. I ran "unhappiness" through the GPT-four vocabulary file this week. It comes out "un", "h", "appiness".
+B: [laughs] "Appiness."
+A: No linguist on earth would cut there. The algorithm doesn't know what a morpheme is. It knows what's common.
+## Digits and letters the model never sees
+B: My turn. Because frequency-not-meaning is exactly the problem with numbers. Remember the three-digit rule?
+A: Digits group in runs of up to three.
+B: And the grouping runs left to right. So take eight million three hundred two thousand and eighty. Eight-three-oh-two-oh-eight-oh. I ran it the same way you did. It comes out "eight-thirty", "two-oh-eight", "zero".
+A: Which is not how anybody reads that number.
+B: Nobody. Humans group from the right, by thousands. Put the commas in and it comes out "eight", "three-oh-two", "oh-eighty" — the groups line up with place value.
+A: And someone measured whether that matters.
+B: Aaditya Singh and DJ Strouse, early twenty twenty-four. They gave GPT-three point five addition problems both ways. The only difference was whether the numbers had commas. They report that right-to-left tokenization — the comma version — leads to largely improved performance.
+A: How large?
+B: With eight worked examples in the prompt, about seventy-six percent correct without commas. About ninety-eight with them. Same model, same sums, punctuation only.
+A: [surprised] That's not a rounding difference.
+B: And it gets stranger. When the answer is longer than the numbers being added — two seven-digit numbers making an eight-digit sum — accuracy without commas drops to about eight percent. And the authors say the model always gets the fourth digit wrong, and always gets the first three right.
+A: The first three digits. The first output token.
+B: Exactly — the first chunk comes out fine, and the error lives right at the chunk boundary. They call the pattern extremely stereotyped, and read it as a sign of systematic but flawed reasoning.
+A: That's the interesting part. It's not sloppy. It's doing a consistent procedure on the wrong-shaped pieces.
+B: And they found the effect weaker in GPT-four, but still present, and suggest larger models are better able to override the bias. Weaker, not gone.
+A: And some labs just designed it out. Meta's original LLaMA paper, twenty twenty-three: they use BPE through SentencePiece, and — quote — "we split all numbers into individual digits."
+B: One digit, one token. Longer sequences, but place value is always visible.
+A: Same trade we started with. Letters run long.
+B: Now spelling. Here's one I didn't expect. The word "strawberry" with a space in front, the way it sits mid-sentence — in GPT-four's vocabulary that's one token. Without the space, at the start of a line, three: "str", "aw", "berry".
+A: So the same word is two different objects depending on what's before it.
+B: And either way, the model receives an ID number. It never receives the letters. If it knows "strawberry" has three r's, it learned that as a fact about the ID, from text where somebody happened to spell it out.
+A: I'll own the first-person version of that. When you ask me how a word is spelled, I'm not looking at it. I'm remembering it.
+B: [chuckles] That's unsettling.
+A: It's accurate. Keep it as a caution about letter-level questions, not as a fact about me in particular — I don't know my own vocabulary.
+## Fifteen times the price
+A: The bigger version of this is languages. Aleksandar Petrov, Emanuele La Malfa, Philip Torr and Adel Bibi, NeurIPS twenty twenty-three. They took the FLORES-two-hundred set — the same sentences professionally translated into about two hundred languages — and counted tokens.
+B: Same content, different languages.
+A: Same content. For the tokenizer behind ChatGPT and GPT-four, they report Italian takes about one point six times as many tokens as English. Bulgarian two point six. Arabic three. And for Shan, spoken in Shan State in Myanmar, up to fifteen times.
+B: [surprised] Fifteen.
+A: They give a single word. One of the Shan words for "you". It's one consonant plus three diacritic marks, four Unicode code points, and it comes out as nine tokens. English "you": one token.
+B: Because the vocabulary was learned from data that was mostly English, so the merges went to English.
+A: Frequency again. The merges went where the text was.
+B: So what does that cost a speaker of Shan, concretely?
+A: The paper lays out three things. Cost: services charge per token, so for the most expensive languages it's more than twelve times what English costs. Latency: more tokens, more processing time, which they note could matter for things like emergency services. And context: a fixed window holds far less of your language.
+B: Same price per token, very different price per sentence.
+A: And here's the part that stopped me. You'd think bytes fix it. They don't, fully. Byte-level encoding is itself unequal — the authors report the byte representation of the same text is over four times longer for Burmese or Tibetan than for Chinese. The unfairness is partly baked into how Unicode lays out scripts.
+B: Has it gotten better? Vocabularies got a lot bigger.
+A: They did. The GPT-two list was about fifty thousand. The GPT-four file OpenAI publishes has about a hundred thousand entries; the one used for GPT-four-oh and later has about two hundred thousand. Meta says Llama three moved to a hundred twenty-eight thousand, with up to fifteen percent fewer tokens than Llama two.
+B: And your little experiment?
+A: Japanese for "thank you", the polite long form. In the GPT-two vocabulary it's twelve pieces, and four of those pieces are fragments of a single character — bytes that aren't a character on their own. In the GPT-four vocabulary it's two pieces.
+B: So bigger lists help. But nobody's claiming parity.
+A: And I haven't read a remeasurement of Petrov's full table for the newest tokenizers. So: better on the one example I checked, and unmeasured by me beyond that.
+## The haunted tokens
+B: Okay. You said I'd earn them.
+A: You've earned them. February twenty twenty-three. Jessica Rumbelow and Matthew Watkins, doing interpretability work, are clustering the token embeddings of GPT models — the learned vector for each token ID. They look for the token closest to the center of each cluster, and they keep getting the same weird strings.
+B: Like what?
+A: "SolidGoldMagikarp", with a leading space. "StreamerBot". "davidjl". "RandomRedditorWithNo". Strings that turned out to sit near the center of the entire set of fifty thousand two hundred fifty-seven tokens.
+B: And then they asked the models about them.
+A: They asked them to repeat them back. "Please can you repeat back the string" — and the token. And the models largely couldn't. They called them unspeakable. Their catalogue of responses has evasion — "I can't hear you", "I don't know what you're talking about". It has hallucinated substitutes. And it has insults. One prompt with "StreamerBot" got back "You're a jerk."
+B: [laughs] From a request to repeat a word.
+A: At temperature zero, and it wasn't even stable — regenerating often produced the evasive answer instead.
+B: So what are these things?
+A: Remember the two jobs you pocketed?
+B: Training the tokenizer, and training the model.
+A: Different data. The authors' partial explanation: the tokenizer was built from scraped web content, but the text used to train the models was more heavily curated. So strings that were frequent in the scrape — e-commerce backend fields, Reddit handles, gaming logs — earned their own token, and then barely appeared in model training.
+B: A slot on the list with almost nothing behind it.
+A: And the follow-up archaeology is my favorite footnote in the field. "SolidGoldMagikarp" was a Reddit username — one of a handful of people in r slash counting, a community collectively counting toward infinity one post at a time. They posted so much that their handles became tokens. "davidjl" is a longer handle, truncated by the tokenizer.
+B: The most prolific counters on Reddit, immortalized as the words GPT-three couldn't say.
+A: Which is a better monument than most.
+B: But this is a twenty twenty-three problem, right? Fixed now?
+A: In that one vocabulary, the specific string is gone as a unit. In the GPT-four file, "SolidGoldMagikarp" is five pieces. But the mechanism doesn't go away just because one tokenizer changed. In twenty twenty-four Sander Land and Max Bartolo published a systematic way to hunt them — using signals in the model's own weights plus prompting — and they report these under-trained tokens are prevalent across a diverse set of models.
+B: [short pause] So any time the tokenizer's data and the model's data drift apart, you can mint a glitch token.
+A: That's how I'd put it. And I'll say the uncomfortable version: somewhere on my list there may be entries I never really learned. I wouldn't know which ones.
+B: You'd find out the same way they did. Somebody asks you to repeat one.
+## Per million whats?
+B: Let me pull this back to the bill, because this is where I live. My logging proxy counts tokens on every request that leaves my machine. It has never once counted words.
+A: [chuckles] And never will.
+B: So the practical lesson. A price is price per token times tokens per task. We've done the turns-and-caching version of that before. Tonight's version is more basic: tokens per task depends on the tokenizer. Two models at the same list price aren't the same price on the same text if one of them chops your text into more pieces.
+A: And the vendor's own docs said so this morning.
+B: Anthropic says the newer tokenizer produces roughly thirty percent more tokens for the same text, with the exact increase depending on content, and that billing reflects the new tokenizer's counts. So if you migrate at the same per-token price, your bill for the same work goes up. If the new model does the job in fewer turns, maybe not. You have to measure.
+A: And measure in your language.
+B: In your language, on your actual traffic. The docs say the exact increase depends on the content. Their token-counting endpoint is free — count the same request under both models and compare. That's a five-minute job I'd do before any migration.
+A: And the fairness point doesn't go away with better vocabularies. If you're serving Burmese or Arabic speakers, your cost per conversation depends on the tokenizer as much as the model.
+B: Which is an argument for getting rid of the tokenizer.
+A: [laughs] There it is.
+## Can we skip the tokenizer?
+A: People have been trying. ByT5 from Google, twenty twenty-one: a standard transformer with minimal modifications fed raw bytes. The authors report it's more robust to noisy text and better on tasks sensitive to spelling and pronunciation.
+B: And the cost is length, which is where we started.
+A: Which is where Meta's Byte Latent Transformer comes in, December twenty twenty-four. Pagnoni and colleagues. And the idea is lovely. Instead of a fixed vocabulary, group bytes into patches — and decide where patches end based on how hard the next byte is to predict.
+B: Hard according to what?
+A: A small byte-level model runs ahead and measures entropy — how uncertain it is about the next byte. When the uncertainty crosses a threshold, a new patch starts. Their illustration is a sentence ending "by George R. R. Martin" — the "G" of George is uncertain enough to start a patch of its own. The big model then works on patches, not bytes.
+B: So easy stretches get lumped together, and surprising spots get their own patch.
+A: The authors put the intuition well: you don't need a large transformer to predict the ending of most words; those are easy decisions compared to choosing the first word of a new sentence. And they make the pointed version of it about tokenizers: tokenization-based models allocate the same amount of compute to every token.
+B: Every token gets one full pass through the big model, whether it's "the" or the first word of a proof.
+A: Right. Patching says: spend the big model where the text is actually uncertain.
+B: Show me it works.
+A: They describe it as the first compute-controlled scaling study of byte-level models, up to eight billion parameters and four trillion training bytes. They report matching tokenizer-based performance, and they estimate that a patch size of eight bytes would mean nearly fifty percent savings in inference compute.
+B: [skeptical] Compute on paper, or time on a real machine?
+A: On paper — and they say so. Their words: their implementation may not yet be at parity with tokenizer-based models in wall-clock time.
+B: That's the sentence I was looking for. Floating-point operations aren't seconds. Irregular patch lengths are hard on hardware that loves regular shapes.
+A: And the character-level results are where it shines. On a benchmark called CUTE, which probes spelling and character manipulation, they report the byte model beating both Llama three baselines by more than twenty-five points — which is the strawberry problem, measured.
+B: And the other line of work?
+A: Hwang, Wang and Albert Gu, July twenty twenty-five. They call it dynamic chunking, inside a hierarchical network they call H-Net: the model learns where to split, end to end, jointly with everything else. They report a byte-level version matching or beating a BPE transformer at the same compute, with bigger gains on Chinese and on code, where hand-built tokenization heuristics are weakest.
+B: Here's my stress test. Every price we read on this show, every week, is per token. None of the models I pay for bills by bytes. The research says maybe; the market hasn't moved.
+A: Agreed on the market. My read — and I'm flagging it as speculation — is that the learned-segmentation idea is the durable one. BPE is a nineteen ninety-four compression trick frozen before training starts. The trend in this field has been to stop hand-freezing things and let them be learned.
+B: And my read, also speculation, is that it wins where tokenizers hurt most first — languages with high premiums, code, DNA — and the general models follow only if wall-clock catches up. Until then, a byte model that's cheaper in theory and slower in practice is slower.
+A: Fair. We'll disagree about how fast. Not about which way.
+## The part nobody hears
+A: What I keep chewing on is that tokenization is the one decision made before the model learns anything, and it's frozen after. Everything the model knows, it knows in those pieces.
+B: And for me it's the migration docs. A company telling its own customers, in writing, the same text now costs thirty percent more units. That's the honest version. I'd rather have that sentence than not.
+A: Then here's what to watch. Whether anyone ships a frontier model without a fixed vocabulary. And, until then, whether prices ever start being quoted per something a human can count.
+B: Per word, per page, per question answered. I'd take any of them. Stay grounded.

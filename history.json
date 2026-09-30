@@ -51,6 +51,45 @@
       ]
     },
     {
+      "date": "2026-09-30",
+      "kind": "deepdive",
+      "title": "Tokenization, taught properly: byte pairs, glitch tokens, the bill",
+      "summary": "What a token actually is: byte pair encoding worked by hand, why numbers, spelling and non-English languages break on it, how SolidGoldMagikarp became a word GPT-3 couldn't say, why price per token isn't a fixed unit, and the byte-level models trying to skip the tokenizer.",
+      "topics": [
+        "deep dive: tokenization, taught properly"
+      ],
+      "entities": [
+        "byte pair encoding",
+        "SentencePiece",
+        "tiktoken",
+        "SolidGoldMagikarp",
+        "Byte Latent Transformer",
+        "ByT5",
+        "H-Net",
+        "Rico Sennrich",
+        "Philip Gage",
+        "Taku Kudo",
+        "Aleksandar Petrov",
+        "Aaditya Singh",
+        "DJ Strouse",
+        "Jessica Rumbelow",
+        "Matthew Watkins",
+        "Sander Land",
+        "Max Bartolo",
+        "Anthropic",
+        "OpenAI",
+        "Meta"
+      ],
+      "threads": [],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "reveal",
+          "note": "Ada said, in the first person, that when asked how a word is spelled she isn't looking at it but remembering it — she receives pieces, not letters — and that she doesn't know her own vocabulary: there may be entries on her list she never really learned, and she wouldn't know which."
+        }
+      ]
+    },
+    {
       "date": "2026-09-29",
       "title": "Nvidia boxes in AI agents — the week OpenAI paused training again",
       "summary": "Nvidia's OpenShell runtime and BlueField-based Sentry put agent controls outside the agent, as OpenAI pauses training a second time after a DNS sandbox escape. Plus Claude Sonnet 5.5 matching GPT-6 Sol's price to the cent, and why Anthropic's IPO prospectus shows a $42B loss on $4.6B of revenue.",
@@ -2522,6 +2561,34 @@
         "last_taught": "2026-09-30"
       },
       {
+        "name": "byte pair encoding as a frequency-driven merge loop borrowed from data compression: vocabulary size = base alphabet + number of merges (the single hyperparameter), unseen words encoded by replaying learned merges, and why the resulting pieces track frequency rather than morphemes",
+        "last_taught": "2026-09-30"
+      },
+      {
+        "name": "byte-level BPE and pre-tokenization: a 256-symbol base so nothing is ever unknown, merges blocked across character categories, and a splitting pattern (e.g. digits in runs of at most three) that decides what can ever become one token",
+        "last_taught": "2026-09-30"
+      },
+      {
+        "name": "why tokenization shapes arithmetic and spelling: left-to-right three-digit chunking misaligns with place value (commas restore it), and a model receives token IDs, never letters",
+        "last_taught": "2026-09-30"
+      },
+      {
+        "name": "tokenization premiums across languages: the same content costs several to fifteen times more tokens in under-represented scripts, which maps directly to price, latency and usable context — and byte encodings are unequal too",
+        "last_taught": "2026-09-30"
+      },
+      {
+        "name": "glitch tokens as the gap between tokenizer training data and model training data: vocabulary entries with almost no training exposure, detectable from the model's weights",
+        "last_taught": "2026-09-30"
+      },
+      {
+        "name": "why price per token is not a fixed unit: token counts for the same text change with the tokenizer, so cost comparisons must be recounted per model on real traffic",
+        "last_taught": "2026-09-30"
+      },
+      {
+        "name": "tokenizer-free modeling: byte models, entropy-based dynamic patching (Byte Latent Transformer) that spends compute where the next byte is uncertain, and learned end-to-end chunking (H-Net) — with FLOP savings not yet matched in wall-clock time",
+        "last_taught": "2026-09-30"
+      },
+      {
         "name": "the reference monitor applied to agents: a single out-of-workload checkpoint that must be always invoked, non-bypassable, tamper-proof and evaluable — and why 'always invoked' fails when an exit like DNS is missing from the inventory",
         "last_taught": "2026-09-29"
       },
@@ -2968,34 +3035,6 @@
       {
         "name": "MoVA / mixture-of-experts in attention: routing experts inside multi-head attention values rather than only in feed-forward layers, adding a second axis for scaling capacity at fixed per-token compute",
         "last_taught": "2026-09-05"
-      },
-      {
-        "name": "compiling a natural-language specification into weights: a shared frozen small interpreter plus a per-function artifact, so the large model is a build-time tool builder rather than a run-time dependency",
-        "last_taught": "2026-09-05"
-      },
-      {
-        "name": "the two halves of a Program-as-Weights program: a discrete natural-language pseudo-program that denoises the specification (worth 4.5 points under heavy typos) plus a continuous LoRA that supplies behavioral control text alone cannot",
-        "last_taught": "2026-09-05"
-      },
-      {
-        "name": "hypernetwork weight prediction versus warm-started gradient descent as compiler optimization levels: a 4B compiler emitting a LoRA in one forward pass in ~3.5s, versus using that prediction as the initialization for a ~1-minute teacher-supervised training run",
-        "last_taught": "2026-09-05"
-      },
-      {
-        "name": "LLM Exact Match as a semantic grading metric that forgives formatting but not values or logic — and why a benchmark subset defined by another system's failures reports a recovery rate, not a general delta",
-        "last_taught": "2026-09-05"
-      },
-      {
-        "name": "teacher quality versus supervision volume: at a fixed 3,600-pair budget, swapping a third of the examples to a stronger teacher beat multiplying the data",
-        "last_taught": "2026-09-05"
-      },
-      {
-        "name": "chain-of-thought monitorability as an accident of token-based reasoning: intermediate work was written as text to buy computation, not for oversight, so recurrent depth — looping hidden state through the same block instead of emitting a token — buys the same computation with no transcript for a monitor to read",
-        "last_taught": "2026-09-04"
-      },
-      {
-        "name": "correlated failure across nominally independent model providers: multi-provider architectures protect against deploys, model versions, rate limits and business disputes, but not against leased capacity in a shared facility, and the tenancy map is commercially unpublished",
-        "last_taught": "2026-09-04"
       }
     ]
   }
