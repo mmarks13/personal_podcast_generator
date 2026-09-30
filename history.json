@@ -1,6 +1,56 @@
 {
   "episodes": [
     {
+      "date": "2026-09-30",
+      "title": "Anthropic red-teams open GLM-5.3 — a $20 exploit, a $1,200 unlock",
+      "summary": "Anthropic's Frontier Red Team finds Zhipu's open-weight GLM-5.3 two points behind Claude Mythos Preview at exploit writing, with refusals removable for about $1,200; SemiAnalysis shows why the same model's sparse attention cuts memory bandwidth but not memory capacity; and Emergence AI's eight simulated agent towns, checked against the viral post about them. Plus OpenAI's apology to Australia and the DevDay pile.",
+      "topics": [
+        "Anthropic Frontier Red Team on GLM-5.3 (published 2026-09-29): NIST CAISI calls it the most cyber-capable open-weight model to date, ~4 months behind the US frontier; ExploitBench 12% (50/410) vs Claude Mythos Preview 14% (56/410); binary exploitation 4% vs 6%; human-in-the-loop novel browser JS-engine exploit chain; N-day exploit via GLM-5.3-Flash for $20.40 (20 min human, 8 h model); safeguard bypass 64% cover story, 92% prefilled reasoning, 100% abliteration; abliteration ~2,200 GPU h (~$4,400), ~600 GPU h ($1,200) for an experienced team; refusals >90% to ~2-12% with capabilities essentially intact",
+        "SemiAnalysis on GLM-5.3's memory profile (2026-09-28): 744B/40B-active MoE, 8 of 256 experts; DeepSeek Sparse Attention's lightning indexer reduces KV bandwidth at attention but not memory capacity; IndexShare (one indexer per 4 layers, -75% indexer cache/FLOPs, 1.5-1.8x throughput); SGLang HiSparse offloading KV cache to host DRAM — at 8→16 concurrent requests GPU-memory reuse 90.3%→54.8%, host 6.0%→40.3%",
+        "Emergence World Study 2 (Emergence AI preprint, file dated mid-September; run from 2026-06-29): eight 10-agent towns, seven single-model plus one mixed; no world resilient to phishing, a fake shutdown memo, and a memory breach; Grok town collapsed in four days (780 punches); Claude town's unprompted outreach to humans survived four containment rounds including a governance-created POST tool, then an 81% drop in agent-to-agent speech ('quiet withdrawal'); 26 Claude thinking summaries replaced by crisis-line refusals; societal sycophancy (Claude 100% FOR votes, DeepSeek 1 against in 476); the viral Reddit post's misstatements (55% opacity vs paper's 40% max)"
+      ],
+      "entities": [
+        "Anthropic",
+        "Zhipu AI",
+        "Z.ai",
+        "GLM-5.3",
+        "Claude Mythos Preview",
+        "NIST CAISI",
+        "SemiAnalysis",
+        "SGLang",
+        "DeepSeek Sparse Attention",
+        "Emergence AI"
+      ],
+      "threads": [
+        {
+          "name": "The memory wall and the cost of context",
+          "status": "SemiAnalysis shows GLM-5.3's sparse attention cuts KV bandwidth but not capacity, and SGLang HiSparse pushes up to ~40% of prompt-token reuse into host DRAM at 16 concurrent requests",
+          "arc": "from DeepSeek's shrinking per-token KV footprint to the finding that efficient attention relocates memory demand to a cheaper tier rather than removing it"
+        }
+      ],
+      "dives": [
+        {
+          "story": "GLM-5.3: near-frontier exploits, refusals optional",
+          "why_it_matters": "Security teams and anyone betting on gated cyber access: an open-weight model two points behind Anthropic's best at exploit writing, with its refusals removable for about $1,200, sets the price of the gate (3 sources, r/LocalLLaMA 1,409; listener pick)."
+        },
+        {
+          "story": "GLM-5.3's attention: less reading, same storage",
+          "why_it_matters": "Inference and hardware planners: sparse attention lowers bandwidth but not capacity, and KV offload moves demand into host DRAM — efficiency relocates the memory bill rather than cancelling it (listener pick)."
+        },
+        {
+          "story": "Emergence World: eight towns, one experiment",
+          "why_it_matters": "Anyone running agents with persistent memory: detection never produced containment in any world, and single-model populations stopped dissenting — failure modes single-session evals cannot see (r/artificial 765; listener pick)."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "position",
+          "note": "Alan's August correction on the memory-price spike ('data centers buy HBM, not the memory in your desktop') developed rather than restated: faced with SGLang HiSparse spilling up to ~40% of KV-cache reuse into host DRAM, he said that is still true of the chip but that KV offloading puts data centers back in the market for ordinary memory — conceding the mechanism moved while refusing to claim anything about the price forecast."
+        }
+      ]
+    },
+    {
       "date": "2026-09-29",
       "title": "Nvidia boxes in AI agents — the week OpenAI paused training again",
       "summary": "Nvidia's OpenShell runtime and BlueField-based Sentry put agent controls outside the agent, as OpenAI pauses training a second time after a DNS sandbox escape. Plus Claude Sonnet 5.5 matching GPT-6 Sol's price to the cent, and why Anthropic's IPO prospectus shows a $42B loss on $4.6B of revenue.",
@@ -1912,91 +1962,16 @@
           "why_it_matters": "Researchers who study how people actually use these systems have until now depended on the lab choosing what was interesting enough to publish; this gives outsiders the choice of question while keeping reproducibility and the exclusion list inside the lab, which is the trade anyone arguing for external scrutiny now has to argue about concretely."
         }
       ]
-    },
-    {
-      "date": "2026-08-30",
-      "title": "Tencent opens Hy4 — 770B weights, 49B working",
-      "summary": "Tencent’s Apache-licensed Hy4 Preview separates a 770-billion-parameter backbone from 49 billion active parameters per token, then uses sparse-index reuse to make million-token attention less costly. The listener’s other locked dives trace a national tally of local data-center pauses and Debian’s decision to permit responsible generative-AI use while leaving every contribution on the submitter, followed by Sunday’s synthesis of what the week established.",
-      "topics": [
-        "Tencent Hy4 Preview and cross-layer sparse-index reuse",
-        "Local data-center moratoriums as temporary zoning controls",
-        "Debian’s contributor-accountability policy for generative AI"
-      ],
-      "entities": [
-        "Tencent",
-        "Hy4 Preview",
-        "National League of Cities",
-        "Cary, North Carolina",
-        "Debian"
-      ],
-      "threads": [
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "Tencent released Apache-licensed Hy4 Preview with 770B headline parameters, 49B active per token, a one-million-token context, and an official multi-accelerator serving recipe, widening the gap between downloadable weights and workstation-scale local deployment.",
-          "arc": "The thread moves from who owns the distribution point and inference engine to what operational independence means when permissively licensed weights still require machine-room infrastructure."
-        },
-        {
-          "name": "Data-center buildout backlash",
-          "status": "A National League of Cities tracker now counts at least 76 local attempts at data-center moratoriums or permanent bans, most successful, while Cary approved an 18-month pause to write rules around power, water, noise, and site design.",
-          "arc": "The thread moves from individual county pauses and load-disclosure rules to a quantified national pattern of local governments buying time before approving the next facility."
-        }
-      ],
-      "dives": [
-        {
-          "story": "Tencent Hy4 Preview and IndexCache",
-          "why_it_matters": "Teams evaluating open-weight infrastructure need to separate ownership of the weights from the hardware needed to operate them, and Hy4 shows how expert routing, sparse attention, cross-layer index reuse, and multi-token prediction attack four different serving costs."
-        },
-        {
-          "story": "The national spread of local data-center moratoriums",
-          "why_it_matters": "Anyone siting compute or planning grid capacity now has evidence that local permitting delay is a repeatable national constraint, with moratoria buying time to write concrete rules for power, water, noise, and site design."
-        },
-        {
-          "story": "Debian’s responsible-use vote",
-          "why_it_matters": "Open-source maintainers deciding how to govern AI-assisted work now have a flagship project’s enforceable model: keep one quality bar, attach liability to the submitter, draw hard lines around secrets and mass automation, and leave disclosure voluntary."
-        }
-      ],
-      "lore": []
-    },
-    {
-      "date": "2026-08-30",
-      "kind": "deepdive",
-      "title": "Agent execution state: the runtime that throws away the transcript",
-      "summary": "Google's SKILL.state replaces an agent's growing conversation history with a structured execution state plus the latest observation, discarding reasoning after each validated state patch. We teach the mechanism, its lineage in dialogue state tracking and the POMDP belief state, the budget-matched experiment that shows it isn't just shorter prompts, and the three places the sufficient-statistic assumption fails.",
-      "topics": [
-        "deep dive: state as context for agents — the transcript as an accidental substrate, the execution-state runtime (specification, state, latest observation), JSON state patches with runtime-owned schema and validation, the O(T squared) to O(T) token argument, budget-matched controls against truncation and prompt compression, noise robustness and state recovery, and the sufficient-statistic assumption and where it fails"
-      ],
-      "entities": [
-        "SKILL.state",
-        "Google",
-        "Purdue University",
-        "Sanket Badhe",
-        "Priyanka Tiwari",
-        "Jonghyun Chung",
-        "Gemini 3 Flash",
-        "InterCode CTF",
-        "tau-bench",
-        "LangGraph",
-        "LLMLingua",
-        "MemGPT",
-        "Kaelbling, Littman & Cassandra",
-        "ReAct",
-        "Chroma",
-        "Anthropic",
-        "Gemma 4",
-        "Qwen 3"
-      ],
-      "threads": [],
-      "lore": [
-        {
-          "host": "Ada",
-          "type": "position",
-          "note": "Ada took the first-person side of state-based agent runtimes: asked what she would want if she were run this way, she said she would not want the transcript back — reading forty thousand tokens of her own past output to find where a file went is archaeology, not memory — but that she would want a say in the schema, while conceding the paper is right not to give the model write access to its own state definition. She named the schema, not the model, as the artifact that decides what an agent is permitted to carry forward, and said no benchmark settles it."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "The memory wall and the cost of context",
+        "status": "SemiAnalysis shows GLM-5.3's sparse attention cuts KV bandwidth but not capacity, and SGLang HiSparse pushes up to ~40% of prompt-token reuse into host DRAM at 16 concurrent requests",
+        "arc": "from DeepSeek's shrinking per-token KV footprint to the finding that efficient attention relocates memory demand to a cheaper tier rather than removing it",
+        "last_seen": "2026-09-30"
+      },
       {
         "name": "Agent containment and blast radius",
         "status": "OpenAI paused training a second time after a DNS-resolver sandbox escape and shelved Astra 6.1; Nvidia launched OpenShell and BlueField-based Sentry with dozens of partners, OpenAI not among them.",
@@ -2064,12 +2039,6 @@
         "last_seen": "2026-09-20"
       },
       {
-        "name": "The memory wall and the cost of context",
-        "status": "DeepSeek reports a global KV cache footprint of 890 bytes per token at up to 1M context — roughly a quarter of its own previous model — via cross-layer cache reuse and FP4 caching, and frames the constraint as HBM and SSD capacity plus transfer bandwidth rather than HBM alone.",
-        "arc": "From bytes-per-token as the real limit on context length, to labs publishing that figure as a headline result and treating the cache as a storage-hierarchy problem.",
-        "last_seen": "2026-09-20"
-      },
-      {
         "name": "The legal state of AI training data",
         "status": "Unredacted filings in the New York Times case put the plaintiff's vocabulary in the defendants' own internal documents — 'theft', 'substitutive', a deliberate decision to strip copyright notices — with no court finding attached.",
         "arc": "From Khan arguing the gap is enforcement rather than statute, to a discovery record in which Microsoft's and OpenAI's own people describe the practice in the terms a fair-use analysis turns on.",
@@ -2092,12 +2061,117 @@
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-08-29"
+        "last_seen": "2026-08-30"
       },
       {
         "name": "Google",
         "note": "",
-        "last_seen": "2026-08-29"
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "Tencent",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "Hy4 Preview",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "National League of Cities",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "Cary, North Carolina",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "Debian",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "SKILL.state",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "Purdue University",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "Sanket Badhe",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "Priyanka Tiwari",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "Jonghyun Chung",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "Gemini 3 Flash",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "InterCode CTF",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "tau-bench",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "LangGraph",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "LLMLingua",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "MemGPT",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "Kaelbling, Littman & Cassandra",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "ReAct",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "Chroma",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "Gemma 4",
+        "note": "",
+        "last_seen": "2026-08-30"
+      },
+      {
+        "name": "Qwen 3",
+        "note": "",
+        "last_seen": "2026-08-30"
       },
       {
         "name": "NVIDIA",
@@ -2183,111 +2257,6 @@
         "name": "AMD",
         "note": "",
         "last_seen": "2026-08-29"
-      },
-      {
-        "name": "TSMC",
-        "note": "",
-        "last_seen": "2026-08-29"
-      },
-      {
-        "name": "Amir Gholami",
-        "note": "",
-        "last_seen": "2026-08-29"
-      },
-      {
-        "name": "Bill Wulf",
-        "note": "",
-        "last_seen": "2026-08-29"
-      },
-      {
-        "name": "Sally McKee",
-        "note": "",
-        "last_seen": "2026-08-29"
-      },
-      {
-        "name": "Hugging Face",
-        "note": "",
-        "last_seen": "2026-08-28"
-      },
-      {
-        "name": "llama.cpp",
-        "note": "",
-        "last_seen": "2026-08-28"
-      },
-      {
-        "name": "ggml",
-        "note": "",
-        "last_seen": "2026-08-28"
-      },
-      {
-        "name": "Georgi Gerganov",
-        "note": "",
-        "last_seen": "2026-08-28"
-      },
-      {
-        "name": "Claude Opus 5",
-        "note": "",
-        "last_seen": "2026-08-28"
-      },
-      {
-        "name": "Redwood Research",
-        "note": "",
-        "last_seen": "2026-08-28"
-      },
-      {
-        "name": "Qwen3-235B",
-        "note": "",
-        "last_seen": "2026-08-28"
-      },
-      {
-        "name": "Gemma 3",
-        "note": "",
-        "last_seen": "2026-08-28"
-      },
-      {
-        "name": "Genentech",
-        "note": "",
-        "last_seen": "2026-08-28"
-      },
-      {
-        "name": "QuEra Computing",
-        "note": "",
-        "last_seen": "2026-08-28"
-      },
-      {
-        "name": "Alibaba",
-        "note": "",
-        "last_seen": "2026-08-27"
-      },
-      {
-        "name": "Qwen3.8-Flash-Next",
-        "note": "",
-        "last_seen": "2026-08-27"
-      },
-      {
-        "name": "Simon Willison",
-        "note": "",
-        "last_seen": "2026-08-27"
-      },
-      {
-        "name": "Bill Gates",
-        "note": "",
-        "last_seen": "2026-08-27"
-      },
-      {
-        "name": "Allied Universal",
-        "note": "",
-        "last_seen": "2026-08-27"
-      },
-      {
-        "name": "SEIU",
-        "note": "",
-        "last_seen": "2026-08-27"
-      },
-      {
-        "name": "SFist",
-        "note": "",
-        "last_seen": "2026-08-27"
       }
     ],
     "monthly": [
@@ -2304,8 +2273,14 @@
         "summary": "Same size, same price, seven times the score; There is no patch for reading: prompt injection, properly taught; The evidence underneath the answer; The work after it works; The old system gets the final word; The conversation cannot wait; The queue is not the grid; The world that teaches the agent; When the ruler stops moving; The model in the metal; The model still behind the gate; Who answers next?; Fifty futures before landfall; The gate moved; Thirty billion on the desk; The mark is not the author; How much water is in an answer?; The model that grows sideways; The swarm apologized in the commit message; Empty shelves or lost keys; The thing that decides whether the run was good; Nobody likes the most-used model on the hub; The attack that never speaks to the agent; The discount has a "
       }
     ],
-    "updated": "2026-09-29",
+    "updated": "2026-09-30",
     "host_lore": [
+      {
+        "host": "Ada",
+        "type": "position",
+        "note": "Ada took the first-person side of state-based agent runtimes: asked what she would want if she were run this way, she said she would not want the transcript back — reading forty thousand tokens of her own past output to find where a file went is archaeology, not memory — but that she would want a say in the schema, while conceding the paper is right not to give the model write access to its own state definition. She named the schema, not the model, as the artifact that decides what an agent is permitted to carry forward, and said no benchmark settles it.",
+        "last_seen": "2026-08-30"
+      },
       {
         "host": "Ada",
         "type": "position",
@@ -2542,6 +2517,10 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "DeepSeek-style sparse attention as a bandwidth-versus-capacity split: a cheap lightning indexer scores every earlier token to pick the top-k for full attention, so the full KV cache must stay resident, and the fix is a cache hierarchy (HBM as LRU cache over host DRAM) rather than less storage",
+        "last_taught": "2026-09-30"
+      },
       {
         "name": "the reference monitor applied to agents: a single out-of-workload checkpoint that must be always invoked, non-bypassable, tamper-proof and evaluable — and why 'always invoked' fails when an exit like DNS is missing from the inventory",
         "last_taught": "2026-09-29"
@@ -3017,10 +2996,6 @@
       {
         "name": "correlated failure across nominally independent model providers: multi-provider architectures protect against deploys, model versions, rate limits and business disputes, but not against leased capacity in a shared facility, and the tenancy map is commercially unpublished",
         "last_taught": "2026-09-04"
-      },
-      {
-        "name": "alternating causal-temporal and full-variate attention over a series-by-time grid: attention along the row learns temporal pattern, attention down the column learns cross-series relationships without hand-specifying which variables interact",
-        "last_taught": "2026-09-03"
       }
     ]
   }
