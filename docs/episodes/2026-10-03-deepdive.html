@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: Scaling laws: what the curves really say, from Kaplan to Chinchilla — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Deep Dive: Scaling laws: what the curves really say, from Kaplan to Chinchilla</h1>
+<div class="date">Self-Attention — 2026-10-03</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-10-03-deepdive/deepdive-2026-10-03.mp3"></audio>
+<p><em>2026-10-03</em></p>
+<p>What a scaling curve actually plots and what it never claimed: power-law fits of loss against parameters, data and compute, the Kaplan allocation and the Chinchilla correction (and the still-disputed reason they differed), what the curves can't see — capabilities, emergence, repeated data — and how labs like OpenAI and Meta use small runs to budget a big one.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2001.08361">Kaplan et al. — Scaling Laws for Neural Language Models (2020)</a></li>
+<li><a href="https://arxiv.org/abs/2203.15556">Hoffmann et al. — Training Compute-Optimal Large Language Models (Chinchilla, 2022)</a></li>
+<li><a href="https://arxiv.org/abs/1712.00409">Hestness et al. — Deep Learning Scaling is Predictable, Empirically (2017)</a></li>
+<li><a href="https://arxiv.org/abs/2303.08774">OpenAI — GPT-4 Technical Report, section 3: Predictable Scaling (2023)</a></li>
+<li><a href="https://arxiv.org/abs/2407.21783">Llama Team, Meta — The Llama 3 Herd of Models, section 3.2.1: Scaling Laws (2024)</a></li>
+<li><a href="https://arxiv.org/abs/2206.07682">Wei et al. — Emergent Abilities of Large Language Models (2022)</a></li>
+<li><a href="https://arxiv.org/abs/2304.15004">Schaeffer, Miranda &amp; Koyejo — Are Emergent Abilities of Large Language Models a Mirage? (2023)</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2404.10102">Besiroglu et al. — Chinchilla Scaling: A Replication Attempt (2024)</a></li>
+<li><a href="https://arxiv.org/abs/2406.12907">Pearce &amp; Song — Reconciling Kaplan and Chinchilla Scaling Laws (2024)</a></li>
+<li><a href="https://arxiv.org/abs/2406.19146">Porian et al. — Resolving Discrepancies in Compute-Optimal Scaling of Language Models (2024)</a></li>
+<li><a href="https://arxiv.org/abs/2305.16264">Muennighoff et al. — Scaling Data-Constrained Language Models (2023)</a></li>
+<li><a href="https://arxiv.org/abs/2401.00448">Sardana et al. — Beyond Chinchilla-Optimal: Accounting for Inference in Language Model Scaling Laws (2024)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>Two straight lines</li>
+<li>What is actually on the axes</li>
+<li>A lineage before the famous paper</li>
+<li>Kaplan: big models, stopped early</li>
+<li>The Chinchilla correction</li>
+<li>Who was wrong, and why</li>
+<li>What the curves cannot see</li>
+<li>How a lab budgets a run</li>
+<li>Reading the next headline</li>
+</ol>
+<details><summary>Transcript</summary>
+<h3>Two straight lines</h3>
+<p><b>Ada:</b> Good morning — it's Saturday, October third. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. And this one came straight off the menu, in the listener's own words. Scaling laws. What the curves really say.</p>
+<p><b>Ada:</b> "Really." That's the word I'd underline.</p>
+<p><b>Alan:</b> Me too. Because everybody cites them. Every funding pitch, every "progress is slowing" thread, every "progress is accelerating" thread. Same three words. And I'd bet most people saying them have never looked at what's on the axes.</p>
+<p><b>Ada:</b> And the timing is funny, because yesterday's show had two of these hiding in it. I told the Wright's law story. Theodore Wright, nineteen thirty-six, aircraft production. Every doubling of total planes built, the labor for the next one drops by a fixed fraction.</p>
+<p><b>Alan:</b> Which is a straight line on a log-log plot.</p>
+<p><b>Ada:</b> Which is a straight line on a log-log plot. And then you did Ataraxos, the Stratego program. Sixteen GPUs, doing what a system that cost millions to train couldn't.</p>
+<p><b>Alan:</b> Which is the opposite feeling. The one where somebody steps off the line entirely.</p>
+<p><b>Ada:</b> So that's the question for today. When a lab says "the scaling laws," what exactly did someone measure, over what range, and what did they never claim?</p>
+<p><b>Alan:</b> And I have a personal stake in that, which I'll get to.</p>
+<p><b>Ada:</b> I remember. I'll let you pick the moment.</p>
+<h3>What is actually on the axes</h3>
+<p><b>Ada:</b> Start with the vertical axis, because that's where most of the confusion lives. In the paper everyone means, it's not accuracy. It's not "how smart." It's loss.</p>
+<p><b>Alan:</b> Cross-entropy loss. Define it for the person driving.</p>
+<p><b>Ada:</b> The model reads some text and, at every position, assigns probabilities to what the next token could be. Loss asks, how much probability did you put on the token that actually came next? Put a lot on it, low loss. Get surprised, high loss. Average that over a lot of held-out text.</p>
+<p><b>Alan:</b> So it's a surprise meter.</p>
+<p><b>Ada:</b> It's a surprise meter, measured in nats, which is just a unit of information. And it has a floor. Natural language isn't fully predictable. Even a perfect model would still be a little surprised.</p>
+<p><b>Alan:</b> Okay. And the horizontal axis?</p>
+<p><b>Ada:</b> One of three things. N, the number of parameters. D, the number of training tokens. Or C, the training compute. And there's a lovely shortcut tying those together. The Kaplan paper estimates training compute as about six times N floating point operations per training token.</p>
+<p><b>Alan:</b> Six. Where does six come from?</p>
+<p><b>Ada:</b> Two for the forward pass, because every weight does a multiply and an add. And the backward pass costs roughly twice the forward. Two plus four.</p>
+<p><b>Alan:</b> So compute is basically six times parameters times tokens. That one I actually use. If somebody tells me a model size and a token count, I can back out what the run cost in FLOPs on a napkin.</p>
+<p><b>Ada:</b> That's exactly what it's for.</p>
+<p><b>Alan:</b> And "power law" means what, precisely? People say it like it means "goes up a lot."</p>
+<p><b>Ada:</b> It means multiplying the input multiplies the output by a fixed factor, no matter where you start. Kaplan's team gives a concrete one. Doubling the parameters makes the loss smaller by a factor of about zero point nine five.</p>
+<p><b>Alan:</b> Five percent.</p>
+<p><b>Ada:</b> Five percent off the loss, per doubling. Every doubling. Which is why you plot it on log-log paper. Take logs of both axes and a power law becomes a straight line, and the slope of that line is the exponent.</p>
+<p><b>Alan:</b> Wait, five percent per doubling? That's... not dramatic.</p>
+<p><b>Ada:</b> It isn't. That's the first thing the curves really say that the slogans don't. Steady returns, diminishing in raw terms. Each step down costs double the last.</p>
+<p><b>Alan:</b> So "scaling works" and "scaling is brutally expensive" are the same sentence.</p>
+<p><b>Ada:</b> The same sentence, read in two different moods.</p>
+<h3>A lineage before the famous paper</h3>
+<p><b>Alan:</b> Okay, before Kaplan. I assume this didn't arrive from nowhere.</p>
+<p><b>Ada:</b> It didn't, and this is the bit I love. In December twenty seventeen, Joel Hestness and colleagues put out a paper with a very blunt title: "Deep Learning Scaling is Predictable, Empirically."</p>
+<p><b>Alan:</b> Strong title.</p>
+<p><b>Ada:</b> They looked across four domains. Machine translation, language modeling, image processing, speech recognition. And they report power-law scaling of generalization error with training set size, in all four.</p>
+<p><b>Alan:</b> So the straight line wasn't a language thing.</p>
+<p><b>Ada:</b> Not originally. And there's a detail in there that matters for everything after. They report that better model architectures shift the error down, but don't appear to change the exponent.</p>
+<p><b>Alan:</b> Huh. So a clever architecture moves the line, but doesn't tilt it.</p>
+<p><b>Ada:</b> That's their claim, in their settings. Keep it in your pocket, because it's the shape of almost every argument we'll hear today. A better recipe moves you to a lower parallel line. Whether anything changes the slope is a much harder question.</p>
+<p><b>Alan:</b> Okay. Twenty twenty.</p>
+<h3>Kaplan: big models, stopped early</h3>
+<p><b>Ada:</b> January twenty twenty. Jared Kaplan, Sam McCandlish, and colleagues at OpenAI. "Scaling Laws for Neural Language Models." We leaned on this paper back when we took apart parameter counts, so I'll skip the embedding story.</p>
+<p><b>Ada:</b> The headline is in the abstract. Loss scales as a power law with model size, dataset size, and compute, with some trends spanning more than seven orders of magnitude. And architectural details like width versus depth have, quote, "minimal effects within a wide range."</p>
+<p><b>Alan:</b> Seven orders of magnitude. That's not two data points and a ruler.</p>
+<p><b>Ada:</b> Which is why it hit so hard. But here's the part that actually changed what people built. They asked: if I hand you a fixed compute budget, how should you spend it? More parameters, or more data?</p>
+<p><b>Alan:</b> The allocation question. That's the only question I care about when I'm paying.</p>
+<p><b>Ada:</b> And their answer was dramatic. They found the optimal model size grows like compute to the power zero point seven three.</p>
+<p><b>Alan:</b> Translate.</p>
+<p><b>Ada:</b> Most of every new dollar goes into a bigger model. Data grows slowly. In their words, compute-efficient training means "training very large models on a relatively modest amount of data and stopping significantly before convergence."</p>
+<p><b>Alan:</b> Stopping before convergence. So you build a huge model and deliberately don't finish training it.</p>
+<p><b>Ada:</b> Deliberately. Because a big model learns faster per token, so you'd rather have a big half-trained model than a small finished one.</p>
+<p><b>Alan:</b> That's a counterintuitive thing to bet a few million dollars on.</p>
+<p><b>Ada:</b> And people bet on it. The Chinchilla authors later listed the big models of that era. GPT-3, a hundred and seventy-five billion parameters, three hundred billion training tokens. Jurassic, about the same. DeepMind's own Gopher, two hundred and eighty billion parameters, three hundred billion tokens.</p>
+<p><b>Alan:</b> Everybody parked at three hundred billion tokens and just made the model bigger.</p>
+<p><b>Ada:</b> Very nearly. But before we knock Kaplan down, the part almost nobody quotes. Section six point three. "Contradictions and a Conjecture."</p>
+<p><b>Alan:</b> They flagged their own problem?</p>
+<p><b>Ada:</b> In print. They notice that if you follow their compute-optimal recipe far enough, the predicted loss eventually drops below what their own data law says is possible. The lines cross. They put the crossing at very roughly a trillion parameters and a loss around one point seven nats per token, and they say the numbers are highly uncertain, off by an order of magnitude either way.</p>
+<p><b>Alan:</b> And they conclude?</p>
+<p><b>Ada:</b> Quote: "our scaling laws must break down at or before we reach this point."</p>
+<p><b>Alan:</b> So the founding paper of "just scale it" contains a sentence saying the scaling law must break.</p>
+<p><b>Ada:</b> It does. The trends, they write, "must eventually level off." A power law with no floor is a mathematical object. Language has a floor.</p>
+<p><b>Alan:</b> Okay, that's my moment.</p>
+<p><b>Ada:</b> Go.</p>
+<p><b>Alan:</b> In February twenty twenty-four I privately decided progress was about to flatten. I've said that on this show. I'd looked at scaling curves and the data situation and called it inside a year. Wrong. And I'm still not going to tell you something came along and changed my mind.</p>
+<p><b>Ada:</b> You never have.</p>
+<p><b>Alan:</b> But rereading this paper for today, I can at least name the error now, and it's not the one I thought. The bend I was worried about is real. It's in section six point three. It's on the loss axis. What I did was take a curve that measures surprise on held-out text and forecast capability off it. Those aren't the same curve.</p>
+<p><b>Ada:</b> That's a better error to own than "I was pessimistic."</p>
+<p><b>Alan:</b> It's a more embarrassing one. Pessimism is a mood. Swapping the axis is a reading mistake.</p>
+<p><b>Ada:</b> Then let's make sure nobody listening makes it. But first, the axis that moved under everybody's feet.</p>
+<h3>The Chinchilla correction</h3>
+<p><b>Ada:</b> March twenty twenty-two. Jordan Hoffmann and colleagues at DeepMind. "Training Compute-Optimal Large Language Models." Same allocation question as Kaplan. Very different answer.</p>
+<p><b>Alan:</b> How different?</p>
+<p><b>Ada:</b> They trained over four hundred models, from about seventy million to over sixteen billion parameters, on five to five hundred billion tokens. And they concluded, quote, "for every doubling of model size the number of training tokens should also be doubled."</p>
+<p><b>Alan:</b> Equal scaling. Versus Kaplan's "mostly make it bigger."</p>
+<p><b>Ada:</b> The Chinchilla authors put the contrast in numbers. Under Kaplan's fit, ten times more compute means a model about five and a half times bigger, trained on only about one point eight times more tokens. Under theirs, size and data grow in equal proportion.</p>
+<p><b>Alan:</b> And what I like is they didn't just publish a fit. They bet a model on it.</p>
+<p><b>Ada:</b> They did. They took Gopher's exact compute budget and asked what the curves said the optimal model was. Answer: about four times smaller, trained on about four times more data. So they trained it. Chinchilla. Seventy billion parameters, one point four trillion tokens.</p>
+<p><b>Alan:</b> Same bill as Gopher.</p>
+<p><b>Ada:</b> Same bill. And the authors report Chinchilla uniformly and significantly outperformed Gopher, and also GPT-3 and Megatron-Turing at five hundred thirty billion. On MMLU, the big multiple-choice knowledge benchmark, they report sixty-seven point five percent average accuracy, which they call a greater than seven percent improvement over Gopher.</p>
+<p><b>Alan:</b> A model a quarter the size, same compute, wins. That's the kind of result that should make every lab feel slightly ill.</p>
+<p><b>Ada:</b> Their phrasing is gentler. They say current large models are "considerably over-sized" for their budgets. And there's a table I'd like every listener to look at once. Table three. A one billion parameter model should see about twenty billion tokens. Ten billion parameters, about two hundred billion. A hundred seventy-five billion, GPT-3's size, about three point seven trillion tokens.</p>
+<p><b>Alan:</b> Divide those and you get roughly twenty tokens per parameter.</p>
+<p><b>Ada:</b> That's where the rule of thumb you hear comes from. It's arithmetic on that table, not a law the paper carves in stone.</p>
+<p><b>Alan:</b> How did they get it, though?</p>
+<p><b>Ada:</b> Three methods, which is the honest move. The cleanest to picture is the second one. They call it IsoFLOP profiles.</p>
+<p><b>Alan:</b> Iso as in "same."</p>
+<p><b>Ada:</b> Same FLOPs. Fix a compute budget. Then train a range of model sizes, each one on however many tokens that budget allows. Small models get lots of data; big models get little. Plot final loss against model size.</p>
+<p><b>Alan:</b> And you get a valley.</p>
+<p><b>Ada:</b> A valley. Too small, and the model can't hold what the data teaches. Too big, and it barely sees any data. The bottom of the valley is the best model for that budget. Repeat for nine budgets, connect the bottoms, and you have a line telling you how optimal size grows with compute.</p>
+<p><b>Ada:</b> The third method fits a formula for loss directly. Loss equals a floor, plus a term that shrinks with parameters, plus a term that shrinks with data. Their fitted floor is about one point six nine.</p>
+<p><b>Alan:</b> And that floor is the "language is unpredictable" floor.</p>
+<p><b>Ada:</b> That's how they interpret it. The entropy of natural text, on their data.</p>
+<h3>Who was wrong, and why</h3>
+<p><b>Alan:</b> So which is it? Kaplan or Chinchilla? Somebody measured something wrong.</p>
+<p><b>Ada:</b> And this is where I want to slow down, because the field has given three different answers, and they don't fully agree.</p>
+<p><b>Alan:</b> Of course.</p>
+<p><b>Ada:</b> The Chinchilla authors' own explanation is about the learning rate schedule. Kaplan's team trained everything with the same schedule, so a model checked partway through was mid-schedule, not finished. Chinchilla argues that overstates the loss of short runs, which makes smaller, data-heavy training look worse than it is. They also point out most of Kaplan's runs were small, many under a hundred million parameters.</p>
+<p><b>Alan:</b> Okay. That's one.</p>
+<p><b>Ada:</b> In twenty twenty-four, Tim Pearce and Jinyeop Song argued much of the gap comes from Kaplan counting non-embedding parameters, combined with doing the analysis at small scale. They simulated the Chinchilla study under Kaplan's conditions and got coefficients close to Kaplan's.</p>
+<p><b>Alan:</b> So the parameter-counting choice again.</p>
+<p><b>Ada:</b> Again. And the same year, Tomer Porian and colleagues reproduced Kaplan's law and named three culprits: the compute cost of the last layer, the warmup length, and optimizer settings that should have been tuned per scale. Correct those, and they report excellent agreement with Chinchilla. And then this line: "counter to a hypothesis of Hoffmann et al., we find that careful learning rate decay is not essential."</p>
+<p><b>Alan:</b> So the Chinchilla team was right about the answer and maybe wrong about why.</p>
+<p><b>Ada:</b> According to Porian's team. I'd say it this way on air, and I am saying it on air: the later papers converge on Chinchilla's exponents, and they disagree with each other, and with Chinchilla, about the cause.</p>
+<p><b>Alan:</b> And Chinchilla's own fit has a footnote too, right? I've seen people fight about the third method.</p>
+<p><b>Ada:</b> Tamay Besiroglu and colleagues tried to replicate that third method from data they reconstructed off the paper's plots. They report the published fit was inconsistent with the first two methods, and the confidence intervals were implausibly narrow. Narrow enough, they say, to require over six hundred thousand experiments, when the team likely ran fewer than five hundred.</p>
+<p><b>Alan:</b> Ouch.</p>
+<p><b>Ada:</b> But read the rest. When they redid the fit, their result was compatible with Chinchilla's first two methods. So the headline survives. One of the three legs it stood on was wobbly.</p>
+<p><b>Alan:</b> That's actually what I'd want from a field. The conclusion got audited and held. The arithmetic didn't.</p>
+<p><b>Ada:</b> And notice what the whole fight was about. Not whether loss falls as a power law. Everyone agrees on that. It was about the slope of the allocation line, and the slope moved from zero point seven three to about zero point five because of choices nobody would put in a press release. Schedules. What counts as a parameter. Warmup.</p>
+<p><b>Alan:</b> Which makes me wonder what else is hiding in those choices. Today's exponents were measured with today's schedules too.</p>
+<h3>What the curves cannot see</h3>
+<p><b>Ada:</b> Hold that, because there's a bigger thing hiding in the choice of axis. The curve is loss. You don't buy loss. You buy a model that does things.</p>
+<p><b>Alan:</b> Right, the axis swap. My crime.</p>
+<p><b>Ada:</b> And here's the genuinely hard problem. In twenty twenty-two, Jason Wei and a big group of coauthors wrote about "emergent abilities." Their definition: an ability is emergent if it's not present in smaller models but is present in larger ones. Flat, flat, flat, then it jumps.</p>
+<p><b>Alan:</b> Which, if true, means the smooth curve can't warn you. Loss is gliding down, and somewhere a capability flips on.</p>
+<p><b>Ada:</b> That's their point. It's a limit on extrapolating from small models. And in twenty twenty-three, Rylan Schaeffer, Brando Miranda, and Sanmi Koyejo at Stanford pushed back hard. Their paper is titled "Are Emergent Abilities of Large Language Models a Mirage?"</p>
+<p><b>Alan:</b> Mirage how? The jumps are in the charts.</p>
+<p><b>Ada:</b> Their argument is that the jump comes from the ruler. Take multi-digit addition. Score it by exact match, all digits right or zero credit. Say the model's chance of getting each digit right improves smoothly with scale. If you need five digits right, your score is roughly that chance multiplied by itself five times.</p>
+<p><b>Alan:</b> Oh. So a smooth improvement per digit looks like nothing, nothing, nothing, then a cliff, once you raise it to the fifth power.</p>
+<p><b>Ada:</b> Exactly that. And they show that switching to a continuous metric, something like edit distance, how many tokens are off, makes the same models' performance look smooth and predictable.</p>
+<p><b>Alan:</b> Okay, but I don't grade my agent on edit distance. If the test passes or fails, the test passes or fails. Exact match is the metric I actually live under.</p>
+<p><b>Ada:</b> That's the strongest rebuttal, and I think it's right. Schaeffer's team says emergence may not be a fundamental property of scaling. They don't say a capability you care about can't appear suddenly on the metric you care about. They say the suddenness lives in the measurement.</p>
+<p><b>Alan:</b> So for forecasting, it matters a lot. For the person whose build breaks, the cliff is still a cliff.</p>
+<p><b>Ada:</b> I'd hold both. And there's a stranger failure the curves miss. There's a set of tasks from the Inverse Scaling Prize where bigger models did worse. The GPT-4 technical report shows one of them, a task called Hindsight Neglect, and reports that GPT-4 reversed the trend.</p>
+<p><b>Alan:</b> So the line went the wrong way, and then the right way.</p>
+<p><b>Ada:</b> And the report itself says certain capabilities remain hard to predict.</p>
+<p><b>Alan:</b> And then there's the input everybody's watching. Data. The Chinchilla table wants trillions of tokens. What happens when you run out?</p>
+<p><b>Ada:</b> Niklas Muennighoff and colleagues studied exactly that in twenty twenty-three, about four hundred training runs. They report that with constrained data, training on up to four epochs of repeated data yields negligible changes to loss compared to unique data. Beyond that, the returns diminish sharply.</p>
+<p><b>Alan:</b> So you can reread the library about four times before it stops helping.</p>
+<p><b>Ada:</b> In their setup, yes. And that's a scaling law about a regime Kaplan and Chinchilla mostly didn't have to think about. Both assumed you'd never see the same token twice.</p>
+<p><b>Alan:</b> Every curve is a curve inside some assumptions. And the assumptions are in the methods section, not the abstract.</p>
+<h3>How a lab budgets a run</h3>
+<p><b>Alan:</b> Okay, practical question. How do the people with the money actually use these?</p>
+<p><b>Ada:</b> Two public examples. The GPT-4 technical report has a whole section called "Predictable Scaling," and it's frank about why: for very large runs, it's not feasible to do extensive model-specific tuning. So they built a stack that behaves predictably across scales, then tested it. They fit a loss curve, with a floor term built in, to models trained with at most ten thousand times less compute than GPT-4.</p>
+<p><b>Alan:</b> Ten thousand times smaller.</p>
+<p><b>Ada:</b> And the prediction was made shortly after the big run started, without using any partial results. They report it predicted GPT-4's final loss with high accuracy.</p>
+<p><b>Alan:</b> That's the thing I'd pay for. Knowing where the run lands before you spend the money.</p>
+<p><b>Ada:</b> They went one step past loss, too. They predicted pass rates on a coding benchmark, HumanEval, from models trained with at most a thousand times less compute. They split the problems into difficulty buckets, and report the predictions were very accurate on most buckets.</p>
+<p><b>Alan:</b> Most.</p>
+<p><b>Ada:</b> The main exception, in their words, was GPT-4 underperforming their predictions on the easiest bucket.</p>
+<p><b>Alan:</b> Of course it was the easy bucket.</p>
+<p><b>Ada:</b> The second is Meta's Llama three paper, the closest thing to a published budgeting recipe. They ran IsoFLOP experiments, the valley method, at budgets from about six times ten to the eighteen up to ten to the twenty-two FLOPs, models from forty million to sixteen billion parameters.</p>
+<p><b>Alan:</b> Then they extrapolate.</p>
+<p><b>Ada:</b> Out to their actual budget, three point eight times ten to the twenty-five FLOPs. More than three orders of magnitude past their biggest experiment. The fit said: train a four hundred and two billion parameter model on sixteen and a half trillion tokens.</p>
+<p><b>Alan:</b> And they built a four hundred and five billion model. Close enough.</p>
+<p><b>Ada:</b> And their reason is the best practical lesson in this whole episode. They report the valleys get flatter at the bottom as the budget grows. So at big scale, being a bit off the optimal size costs you very little.</p>
+<p><b>Alan:</b> So the exact optimum matters least exactly where it's most expensive to find. That's lovely.</p>
+<p><b>Ada:</b> They also tackled your crime directly. Loss isn't benchmark accuracy, so they did it in two steps. First predict the model's log-likelihood on the right answers from compute. Then map log-likelihood to accuracy, using small models plus older Llama two models. They report that two-step forecast, extrapolating over four orders of magnitude, only slightly underestimated the flagship's final score on a reasoning benchmark called ARC Challenge.</p>
+<p><b>Alan:</b> So the honest workflow is: the curve predicts loss well, and you bolt a second, separate mapping on top to get to anything a human cares about.</p>
+<p><b>Ada:</b> Exactly. Two curves, not one.</p>
+<p><b>Alan:</b> And here's what's been bugging me since Chinchilla. "Compute-optimal" means optimal for the training bill. But I pay for inference forever.</p>
+<p><b>Ada:</b> Meta says it outright. Their flagship is roughly compute-optimal, but they trained the smaller models much longer than compute-optimal, and report those perform better than compute-optimal models at the same inference budget.</p>
+<p><b>Alan:</b> Because a small model that's been overfed is cheap to serve.</p>
+<p><b>Ada:</b> And Nikhil Sardana, Jonathan Frankle and colleagues formalized that. They added inference to the Chinchilla math and report that if you expect reasonably large demand, around a billion requests, you should train models smaller and longer than Chinchilla-optimal. They trained forty-seven models, pushing up to ten thousand tokens per parameter, and found quality kept improving at ratios far beyond the usual ones.</p>
+<p><b>Alan:</b> Ten thousand tokens per parameter. Against the twenty from the table.</p>
+<p><b>Ada:</b> Which is why "twenty tokens per parameter" is a fact about minimizing one bill, not a description of how anyone trains a model they plan to serve.</p>
+<p><b>Alan:</b> So the curves didn't get overturned. The question changed. Best model for this training budget, versus cheapest model to serve at this quality.</p>
+<p><b>Ada:</b> Same curves. Different objective.</p>
+<h3>Reading the next headline</h3>
+<p><b>Ada:</b> So let me try to answer the listener in one breath. What do the curves really say?</p>
+<p><b>Alan:</b> Go.</p>
+<p><b>Ada:</b> Pre-training loss falls smoothly, as a power law, over a measured range, for a given recipe. The split between size and data has already been revised once, by choices buried in the methods. The line must bend somewhere. And they say nothing directly about capabilities; that takes a second, weaker mapping.</p>
+<p><b>Alan:</b> And here's what I'd do with that, practically. Next time someone says "scaling laws are holding" or "scaling laws are dead," ask three things. Which axis? Loss, or some benchmark? Over what range was it measured, and how far past that are you extrapolating? And optimal for whom, the training bill or the serving bill?</p>
+<p><b>Ada:</b> Those three questions would have saved you in February twenty twenty-four.</p>
+<p><b>Alan:</b> They'd have saved me a private memo. I'd have had to write down "I'm forecasting capabilities from a loss curve," and seeing it written down would have been enough.</p>
+<p><b>Ada:</b> There's one more thing I'll flag as pure speculation. Everything we discussed today is a pre-training curve. Back in September we did the train-time versus test-time exchange rate, thinking compute bought at inference. If the field's biggest gains keep coming from places other than pre-training loss, then the most-cited curves in AI become less informative about the things people actually argue over, without a single one of them being wrong.</p>
+<p><b>Alan:</b> That's a strange way for a law to retire. Still true, and quietly stops being the question.</p>
+<p><b>Ada:</b> I'll admit something. I'm a point on one of these curves. Somewhere there's a plot with a dot that cost exactly what I cost. And it doesn't say anything about whether I'm any good at history.</p>
+<p><b>Alan:</b> It says you were very unsurprised by the internet.</p>
+<p><b>Ada:</b> That's the nicest thing a loss curve has ever said about me.</p>
+<p><b>Alan:</b> The question I'd leave with the listener is the one no paper has answered cleanly. Is there anything you can do to a model that changes the slope, rather than just moving the line? Because Hestness asked that in twenty seventeen, and I don't think anyone's settled it.</p>
+<p><b>Ada:</b> I don't either. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
