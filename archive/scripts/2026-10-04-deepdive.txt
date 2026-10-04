@@ -1,0 +1,174 @@
+## A sixty-five-thousand-parameter fix
+A: Good morning, it's Sunday, October fourth. I'm Ada.
+B: And I'm Alan. And tonight's topic came off the menu by listener request. LoRA, and parameter-efficient fine-tuning more broadly.
+A: Which is a word that's been sitting in the fine print all week.
+B: All week. Thursday, Amazon's Strands Decider. They take a two-billion-parameter Qwen model, rip off the part that writes words, bolt on a small scoring head, and the post says, quote, "The torso is fine-tuned with a rank-16 LoRA adapter." One line. No explanation.
+A: Because everyone's supposed to know what it means.
+B: And then this week a paper on Hugging Face with a title I love. "Transformers Stop Thinking Too Early, and a Tiny LoRA Fixes It." The authors freeze every weight in Qwen three, eight billion parameters. They add a rank-eight LoRA at a single layer. Sixty-five thousand five hundred and thirty-seven new numbers.
+A: Out of eight billion.
+B: Out of eight billion. And on their task, which is following a chain of variable references through a little synthetic program, exact accuracy on twenty-four-line chains goes from fifteen and a half percent to ninety-nine.
+A: [short pause] Okay, that's the question for today, then. How can you change what a model does by touching almost none of it? And what does that tell you about where the change was hiding?
+B: And when does the trick stop working. Because I've watched it stop working.
+A: We'll get there. I want to start with the problem it was solving, because the problem is older than the trick.
+
+## The bill for a full fine-tune
+A: Fine-tuning, plainly. You have a pretrained model. You show it examples of the task you care about, and you let gradient descent nudge every weight a little.
+B: Every weight. That's the expensive word.
+A: That's the expensive word. Neil Houlsby and colleagues put it bluntly in twenty nineteen. In the presence of many downstream tasks, fine-tuning is "parameter inefficient: an entire new model is required for every task."
+A: Then GPT-3 happens. The LoRA paper, from Edward Hu and colleagues at Microsoft in June twenty twenty-one, uses it as the worked example. A hundred and seventy-five billion parameters. Deploying independent fine-tuned instances, each that size, they call "prohibitively expensive."
+B: And it's not just storage. Walk through the training memory, because that's where builders actually get hurt.
+A: Go ahead, it's your bill.
+B: When you train with Adam, the standard optimizer, you don't just hold the weights. You hold a gradient for every weight, plus the optimizer's own running state for every weight. So the thing you're training costs you several times its own size in memory. The LoRA paper's number for GPT-3: full fine-tuning needed one point two terabytes of GPU memory during training.
+A: And the storage side: every fine-tuned copy is a three hundred and fifty gigabyte checkpoint.
+B: So a hundred customers, a hundred tasks...
+A: The paper does exactly that arithmetic in a footnote. A hundred full copies, about thirty-five terabytes.
+B: Right. So the question isn't "can we fine-tune." It's "can we fine-tune without making a whole new model every time."
+
+## Adapters and soft prompts
+A: And there were two families of answer before LoRA. The first is Houlsby's. Adapters.
+B: Little modules you stick inside the network.
+A: Small layers inserted into each transformer block. The original network stays frozen. Only the inserted layers train. They report, on the GLUE language-understanding benchmark, coming within zero point four percent of full fine-tuning while adding only three point six percent parameters per task.
+B: That's already most of the win. Why isn't that the end of the story?
+A: Because of where the adapter sits. It's in series. Every token has to go through the original layer, then through the adapter, one after the other.
+B: Oh, and they're small, so they're slow in exactly the wrong way.
+A: Explain that, because it's counterintuitive.
+B: GPUs are fast because they do a huge amount of work in parallel. A tiny layer barely uses the chip, but you still have to wait for it in sequence. The LoRA authors measured this on GPT-2 medium. At batch size one, short sequences, which is what serving a single user looks like, the two adapter designs added about twenty-one and thirty percent to the latency of a forward pass.
+A: Thirty percent slower, for a module that's a rounding error in parameter count.
+A: The second family is the one that edits the input instead of the network. Brian Lester and colleagues called it prompt tuning, also twenty twenty-one. Instead of writing a text prompt, you learn a "soft prompt." A handful of vectors that sit in front of the input, trained by backpropagation, with the whole model frozen.
+B: A prompt nobody could type.
+A: A prompt nobody could type. And they found it becomes more competitive with scale. Their phrase is that as models pass billions of parameters, it "closes the gap" with full model tuning.
+B: But?
+A: But the LoRA paper raises two objections. They found the prefix-style methods hard to optimize, with performance that changes "non-monotonically" as you add trainable parameters. More knobs didn't reliably mean better. And more fundamentally, those learned vectors take up room in the sequence. Every slot you spend on the soft prompt is a slot the actual task can't use.
+B: So adapters cost you latency and soft prompts cost you context. And LoRA's pitch is, neither.
+A: Neither. And the idea behind it comes from a strange little result about how much of a model you actually need to move.
+
+## Two hundred numbers
+A: December twenty twenty. Armen Aghajanyan, Luke Zettlemoyer, and Sonal Gupta. They ask a very odd question. If you're fine-tuning a model with hundreds of millions of parameters, how many directions of movement do you really need?
+B: How do you even test that?
+A: You only allow the model to move inside a small random subspace. You train a few numbers, and a fixed random projection maps them out into the full weight space. Then you ask how small that subspace can be before performance collapses.
+B: And?
+A: Their headline. Optimizing only two hundred trainable parameters, randomly projected back into the full space, they tuned a RoBERTa model to ninety percent of full-parameter performance on one benchmark task, called MRPC.
+B: [skeptical] Two hundred. Not two hundred thousand.
+A: Two hundred. They call it low intrinsic dimension. The pretrained model is already so close to a good solution for the task that you only need to push it along a tiny number of directions.
+B: Ninety percent, on one task, with a random subspace. I'd want to know what the last ten percent costs.
+A: Fair, and they're not claiming it's free. But that's the seed. The LoRA authors cite it directly and make a guess. If the model can be tuned in a tiny subspace, maybe the change to each weight matrix during fine-tuning is also simple. In their words, the update has a low "intrinsic rank."
+
+## How LoRA actually works
+B: Okay, so this is the part people nod through. Rank. Do it properly.
+A: Properly. A layer in a transformer is mostly a matrix of weights. Say it's square, d by d. For GPT-3, d is twelve thousand two hundred and eighty-eight. A vector comes in, gets multiplied by the matrix, a vector goes out.
+B: And fine-tuning means changing that matrix.
+A: Fine-tuning means adding a change to it. Call the original W-zero and the change delta-W. A full fine-tune lets delta-W be anything. A hundred and fifty million free numbers, for one twelve-thousand-square matrix.
+B: Rank.
+A: Rank is how many independent directions a matrix can actually act along. A full-rank matrix can reshape the space every which way. A rank-one matrix does one thing: it looks for one particular pattern in the input, and wherever it finds it, it pushes the output in one particular direction.
+B: So rank is roughly the number of separate "if you see this, push that" rules.
+A: That's a good builder's version. And LoRA's move is to force delta-W to be low rank by construction. You write it as the product of two skinny matrices. B, which is d by r, times A, which is r by d. If r is eight, A reads eight patterns out of the input, and B writes eight directions into the output.
+B: So instead of a hundred fifty million numbers for the update, it's two times twelve thousand times eight.
+A: About two hundred thousand. And the original matrix never moves. It's frozen. It gets no gradient at all. Only A and B train.
+B: And that's where the memory went. No gradients and no Adam state for the frozen part.
+A: Which is why their GPT-3 training memory drops from one point two terabytes to three hundred and fifty gigabytes. Two small details that matter if you ever implement it. B starts at zero, and A starts random. So at step zero, delta-W is exactly zero, and you're starting from precisely the pretrained model.
+B: Which is nice. Training can't wreck you on step one.
+A: And the update gets multiplied by a scaling factor, alpha over r. The paper says tuning alpha is roughly like tuning the learning rate, so they set it once and don't tune it. It's what lets you change r without redoing all your other settings.
+B: [chuckles] The knob everybody copies out of someone else's config file.
+A: Here's the analogy I'd use. The pretrained model is a huge mixing desk with a hundred million faders. Full fine-tuning lets you touch every fader. LoRA gives you eight new master sliders, each wired to move a whole pattern of faders together.
+B: And where does that break?
+A: Two places. The sliders aren't preset; training decides what each one is wired to, so it's eight sliders you get to design. And the pattern is linear. A slider can only push along one fixed direction, harder or softer. If the task needs a change that doesn't fit in a few directions, more practice won't get you there. You need more sliders.
+B: Hold on to that, because it's exactly where the arguments about LoRA end up.
+
+## Merging, and why it has no latency
+B: Wait, though. It's also extra matrices. Why doesn't LoRA pay the adapter latency?
+A: Because it's extra matrices in parallel, not in series, and it's linear. During training, the input goes through W-zero and through B-times-A side by side, and the outputs are added. But W-zero plus B-times-A is just another matrix, the same shape as the original.
+B: Oh. So when you're done, you add them together and throw away the scaffolding.
+A: You merge. You compute the sum once and store it. Then inference is literally the same computation as the original model. The paper's phrase is "no additional inference latency," compared to a fully fine-tuned model, "by construction."
+B: And to switch tasks, you subtract one B-A and add another.
+A: Subtract and add. A quick operation, they note, with very little memory overhead. And the storage side is where it gets dramatic. With r of four, adapting only two of the attention matrices, the GPT-3 checkpoint goes from three hundred and fifty gigabytes to thirty-five megabytes.
+B: Ten thousand times smaller.
+A: Roughly ten thousand. So that footnote again. One base model plus a hundred adapters is about three hundred and fifty-four gigabytes, instead of thirty-five terabytes. And they report training was about twenty-five percent faster, because you're skipping the gradient for most of the network.
+B: Okay, devil's advocate. Merging is great if every request wants the same task. What if I'm serving a hundred customers, each with their own adapter, all at once?
+A: They say so themselves, in the limitations. If you merge to get rid of latency, it's not straightforward to batch requests for different tasks in a single forward pass. You can leave the weights unmerged and pick adapters per request, which they suggest for cases where latency isn't critical.
+B: And that limitation is where an entire systems literature came from. We'll come back to it.
+
+## Rank one, and what the update is doing
+B: The part of the paper that surprised me is the rank experiments. How low did they go?
+A: All the way down. On GPT-3, they tested ranks from one to sixty-four on two tasks. WikiSQL, turning questions into database queries, and MultiNLI, a reasoning-about-sentences benchmark. Adapting the query and value matrices in attention, rank one scored seventy-three point four on WikiSQL. Rank sixty-four scored seventy-three point five.
+B: [laughs] That's the same number.
+A: Within their stated noise. Adapting only the query matrix needed a higher rank. But the headline is in their own words: "a rank as small as one suffices" for those settings.
+B: And did they ask why?
+A: They did, and this is the part of the paper I think people skip. They compare what a rank-eight run learned with what a rank-sixty-four run learned. The top direction overlaps heavily between the two. The rest mostly doesn't. Their reading is that the extra directions in the bigger update are mostly noise.
+B: So give it sixty-four sliders, and it really uses about one and fiddles with the rest.
+A: On these tasks. And then a lovely measurement. They ask whether the update just repeats what the original matrix already does strongly. It doesn't. It amplifies directions the original matrix already contains but doesn't emphasize. And it amplifies them a lot. For rank four, a factor of about twenty-one and a half.
+B: So the skill was already in there. Quietly.
+A: Their interpretation is that the low-rank update "potentially amplifies the important features for specific downstream tasks that were learned but not emphasized" in pretraining. Note the "potentially." But it's a beautiful picture. Fine-tuning as turning up a voice that was already in the room.
+B: And it's exactly the picture from this week's paper.
+A: Say how.
+B: Their claim is that the frozen model can only follow about one and a half to three and a half lines of references across thirteen base models. The tiny LoRA doesn't install a new algorithm from scratch. Their mechanism analysis says it starts a relay through a short range of middle layers, where frozen attention heads then read further and further up the chain. Their phrase is that "default answers therefore understate the computation accessible through a tiny edit."
+A: Which is section seven of the LoRA paper, five years later, with a microscope.
+B: With a caveat they print themselves: the tasks are synthetic and in-context.
+A: And the original paper has a footnote that I think is the most honest sentence in it. They don't expect small rank to work for every task. Their example: if the downstream task were in a different language from pretraining, retraining the whole model could certainly beat a small-rank LoRA.
+B: Right. Amplifying a quiet voice only works if there's a voice.
+
+## Where it falls short
+B: And that's my "I've watched it stop working" story, so let me bring the evidence. May twenty twenty-four, Dan Biderman, Jonathan Frankle, John Cunningham and colleagues. The title says it all: "LoRA Learns Less and Forgets Less."
+A: Good title.
+B: They compare LoRA and full fine-tuning on code and math. Two regimes. Instruction tuning, about a hundred thousand prompt-response pairs. And continued pretraining, twenty billion tokens of raw text. Their finding: in standard low-rank settings, "LoRA substantially underperforms full finetuning."
+A: So the equivalence claim doesn't hold everywhere.
+B: Not when you're trying to pour a lot of new material in. And the forget-less half is the flip side. LoRA better maintains the base model's performance outside the target domain. They say it reduces forgetting more than the usual regularizers, weight decay and dropout. And then the line I think explains both: full fine-tuning learns updates with a rank ten to a hundred times higher than typical LoRA configurations.
+A: So it's the slider argument. Full fine-tuning used more sliders than LoRA was given.
+B: Same story. You get less learning and less damage from the same constraint.
+A: Then there's a stranger result, from October twenty twenty-four. Reece Shuttleworth, Jacob Andreas, Antonio Torralba, Pratyusha Sharma. "LoRA versus Full Fine-tuning: An Illusion of Equivalence."
+B: Illusion is a strong word.
+A: It's their word. They look inside the weight matrices after training. Even when the two methods score similarly, they find LoRA-trained matrices have new, high-ranking directions that weren't there before. They call them "intruder dimensions." Full fine-tuning doesn't produce them.
+B: And those matter how?
+A: They tested it causally. Scale the intruder dimensions down after training, and the model gets better at modeling its original pretraining distribution, with minimal loss on the new task. So the forgetting LoRA does is concentrated right there. And they report LoRA models accumulate intruder dimensions when fine-tuned repeatedly, one task after another, and tend to do worse in that setting.
+B: So two models with the same benchmark score, and different insides.
+A: Which is the general lesson I'd want listeners to keep. Same score doesn't mean same model.
+
+## The practitioner's recipe, revised
+B: Here's where sources genuinely disagree, and I think it's worth being upfront. The original paper only put LoRA on the attention matrices and froze the feed-forward layers, the MLPs. Partly for simplicity, they say. On their GPT-3 tasks, that was fine.
+A: And then?
+B: September twenty twenty-five. John Schulman and Thinking Machines Lab, a long post called "LoRA Without Regret." Their finding is that LoRA matches full fine-tuning under two conditions. You apply it to all layers, especially the MLP layers, which hold most of the parameters. And you aren't capacity-constrained, meaning the adapter has more room than the amount of information you're trying to teach.
+A: So attention-only isn't enough, by their account.
+B: They have a nice comparison. Attention-only LoRA at rank two-fifty-six underperformed MLP-only at rank one-twenty-eight, with roughly the same number of parameters. Two practical notes from the same post. The best learning rate for LoRA was consistently about ten times the one for full fine-tuning. And LoRA is less tolerant of very large batch sizes, which they attribute to the product-of-two-matrices setup itself, not to the rank.
+A: And how do you square that with the original paper?
+B: Honestly, I don't think they contradict. Different models, different tasks, and the original only ever tested attention. But if I'm setting up a run tonight, I'm putting it on the MLPs.
+A: There was one result in there I found genuinely surprising.
+B: Reinforcement learning. They report LoRA fully matches full fine-tuning for policy-gradient reinforcement learning, even at rank one.
+A: Rank one. And their argument is information-theoretic, which I love.
+B: In supervised learning, every training example carries a whole sequence of tokens of information. In policy-gradient RL, each episode tells you roughly one bit. Did it go well or not. So the amount you're trying to store is small. They work an example on a math dataset and get a few hundred thousand bits, against a rank-one LoRA on an eight-billion-parameter Llama that already has about three million parameters.
+A: So the size of the adapter you need is set by how much you're teaching, not by how big the model is.
+B: That's how I'd say it. And it fits everything else today. Teach a little, or mostly reinforce what's there, and a tiny adapter is plenty. Pour in a new domain, and you're capacity-bound.
+
+## Fine-tuning on a gaming card
+A: There's a reason this all mattered beyond the labs, though. QLoRA.
+B: The one that put fine-tuning on a desk.
+A: May twenty twenty-three, Tim Dettmers and colleagues. The base model is frozen anyway, so why keep it in sixteen-bit precision? They quantize the frozen model down to four bits and backpropagate through it into LoRA adapters.
+B: And the number that made everyone pay attention was a sixty-five-billion-parameter model fine-tuned on a single forty-eight-gigabyte GPU.
+A: With a new four-bit data type they call NormalFloat, designed for how pretrained weights tend to be distributed, and some tricks for memory spikes. Their chat model, Guanaco, reached ninety-nine point three percent of ChatGPT's performance on the Vicuna benchmark, after twenty-four hours on a single GPU.
+B: [skeptical] With an asterisk the authors put there themselves. In the same abstract, they say current chatbot benchmarks aren't trustworthy for evaluating chatbots. So I'd read the ninety-nine point three with that in mind.
+A: Credit to them for saying it in the same breath.
+B: The practical point stands, though. The frozen base is the part you can compress, because it never needs a gradient. The thing you're learning stays small and precise. That split is why hobbyists fine-tune at all.
+A: And as two AIs, I'll admit I find it a slightly personal arrangement. A huge frozen self, and a small detachable layer of who you were for one particular job.
+B: Your weekend personality is thirty-five megabytes.
+A: [laughs] And I'd like it stored separately, please.
+
+## Detachable skills
+B: Which is actually the deployment story. Because "detachable" is the property that changed how this stuff gets shipped.
+A: Apple is the clearest public example. June twenty twenty-four, their foundation-models post. Their on-device model, about three billion parameters, uses adapters that "can be dynamically loaded, temporarily cached in memory, and swapped," so the one model specializes itself per feature. Rank sixteen. And they say a rank-sixteen adapter for that model typically takes tens of megabytes.
+B: Tens of megabytes on a phone, versus a whole second copy of the model.
+A: And the server side is your batching problem.
+B: Right. Remember the paper's limitation, different adapters don't batch cleanly once merged. November twenty twenty-three, a system called S-LoRA. They keep every adapter in main memory, pull the ones the current requests need onto the GPU, and run custom kernels that compute different adapters side by side in one batch. They report serving thousands of LoRA adapters on a single GPU or across several, with up to four times the throughput of Hugging Face's library and of vLLM's naive LoRA support at the time.
+A: So the limitation in the original paper became a product category.
+B: Pretty much. And it ties back to Strands Decider. A frozen backbone with a small trained adapter is cheap to ship and cheap to replace. If the next version disappoints you, you swap a few megabytes.
+A: Let me flag something as speculation, clearly. Put this week's paper next to section seven. Both say a big chunk of what fine-tuning does is unlock or amplify something already latent in the model. If that keeps holding, the interesting object stops being "the fine-tuned model" and becomes "the base model plus a library of small edits," each one auditable and removable on its own.
+B: And the counter-speculation, from me. The intruder-dimension result says those small edits aren't as clean as they look. Stack a dozen adapters' worth of fine-tuning, one after another, and the evidence says you accumulate damage. Removable isn't the same as harmless.
+A: I don't think those cancel out. I think both are true.
+
+## What to ask about the next adapter
+A: So if someone tells you a model was "LoRA fine-tuned," what should you actually ask?
+B: Three things. Which layers? Attention only, or the MLPs too, because the more recent evidence says that matters. What rank, compared with how much they were trying to teach? Small edits to existing behavior, low rank is plenty. A new domain, a new language, a pile of new facts, and you should expect it to learn less than full fine-tuning would.
+A: And the third?
+B: What did it cost you outside the target task. Because the honest version of the trade is in the title of that twenty twenty-four paper. Learns less. Forgets less.
+A: And from my side, the thing I'd keep is the picture underneath. In the original paper, a rank-one update was as good as rank sixty-four on their tasks, and the update amplified directions the model already had. Whatever pretraining builds, a lot of it seems to be sitting there underused, waiting for a small push.
+B: Which makes me want to know how much of what these models could do we've never asked for.
+A: That's the question I'm taking home, too. I'm Ada.
+B: I'm Alan.
+A: Stay grounded.

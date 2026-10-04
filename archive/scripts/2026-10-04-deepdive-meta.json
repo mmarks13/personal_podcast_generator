@@ -1,0 +1,94 @@
+{
+ "date": "2026-10-04",
+ "kind": "deepdive",
+ "title": "LoRA and parameter-efficient fine-tuning: small edits, frozen giants",
+ "summary": "How you change a model by touching almost none of it: the full fine-tuning bill, adapters and soft prompts, the low-rank update and why it merges with no latency, the evidence that LoRA amplifies what pretraining already learned, and where it falls short (learns less, forgets less, intruder dimensions). Hooked to Strands Decider's rank-16 adapter and this week's 65,537-parameter LoRA.",
+ "sources": [
+  {
+   "group": "Primary sources",
+   "title": "Hu et al. — LoRA: Low-Rank Adaptation of Large Language Models (2021)",
+   "url": "https://arxiv.org/abs/2106.09685"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Jin, Deng & Wang — Transformers Stop Thinking Too Early, and a Tiny LoRA Fixes It (2026)",
+   "url": "https://arxiv.org/abs/2609.36585"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Houlsby et al. — Parameter-Efficient Transfer Learning for NLP (2019)",
+   "url": "https://arxiv.org/abs/1902.00751"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Lester, Al-Rfou & Constant — The Power of Scale for Parameter-Efficient Prompt Tuning (2021)",
+   "url": "https://arxiv.org/abs/2104.08691"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Aghajanyan, Zettlemoyer & Gupta — Intrinsic Dimensionality Explains the Effectiveness of Language Model Fine-Tuning (2020)",
+   "url": "https://arxiv.org/abs/2012.13255"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Biderman et al. — LoRA Learns Less and Forgets Less (2024)",
+   "url": "https://arxiv.org/abs/2405.09673"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Shuttleworth, Andreas, Torralba & Sharma — LoRA vs Full Fine-tuning: An Illusion of Equivalence (2024)",
+   "url": "https://arxiv.org/abs/2410.21228"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Schulman & Thinking Machines Lab — LoRA Without Regret (2025)",
+   "url": "https://thinkingmachines.ai/blog/lora/"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Dettmers et al. — QLoRA: Efficient Finetuning of Quantized LLMs (2023)",
+   "url": "https://arxiv.org/abs/2305.14314"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Sheng et al. — S-LoRA: Serving Thousands of Concurrent LoRA Adapters (2023)",
+   "url": "https://arxiv.org/abs/2311.03285"
+  },
+  {
+   "group": "Further reading",
+   "title": "Apple — Introducing Apple's On-Device and Server Foundation Models (2024)",
+   "url": "https://machinelearning.apple.com/research/introducing-apple-foundation-models"
+  },
+  {
+   "group": "Further reading",
+   "title": "Strands Agents — Introducing Strands Decider 2B",
+   "url": "https://strandsagents.com/blog/introducing-strands-decider/"
+  }
+ ],
+ "topics": [
+  "deep dive: LoRA and parameter-efficient fine-tuning"
+ ],
+ "entities": [
+  "LoRA",
+  "QLoRA",
+  "S-LoRA",
+  "Microsoft",
+  "Thinking Machines Lab",
+  "Apple",
+  "Strands Decider 2B",
+  "Qwen3-8B",
+  "GPT-3",
+  "RoBERTa"
+ ],
+ "threads": [],
+ "concepts_taught": [
+  "LoRA's low-rank update: freeze W0 and train two skinny matrices B (d x r) and A (r x d), B initialised to zero so training starts exactly at the pretrained model, scaled by alpha/r; merging W0 + BA afterwards gives zero added inference latency and task switching by subtract-and-add",
+  "the parameter-efficient fine-tuning family before LoRA: series adapters (Houlsby 2019, within 0.4% of full fine-tuning on GLUE at 3.6% parameters per task, but 20-30% added latency at batch size one) and soft prompts / prompt tuning (cost sequence length, hard to optimise)",
+  "low intrinsic dimension as LoRA's motivation (200 randomly projected parameters reach 90% of full performance on MRPC) and the LoRA paper's evidence that rank 1 matched rank 64 on GPT-3 WikiSQL/MultiNLI and that the update amplifies directions already present but not emphasised in W (~21.5x for r=4)",
+  "where LoRA falls short: learns less and forgets less than full fine-tuning on code/math (full FT updates have 10-100x higher rank), intruder dimensions that concentrate forgetting and accumulate in continual learning, and the 2025 recipe revision (apply to MLP layers, ~10x learning rate, capacity set by information taught; rank 1 suffices for policy-gradient RL)",
+  "QLoRA (backprop through a frozen 4-bit base into LoRA adapters; 65B on one 48GB GPU) and detachable adapters in deployment: Apple's swappable rank-16 adapters, S-LoRA serving thousands of adapters per GPU"
+ ],
+ "lore": [],
+ "listener_note": "you mentioned this essay in Saturday's episode. I want to know more about it: https://mondobe.com/ai-makes-me-sad; for the openai safety dive,  discuss the question \"should an AI lab's safety staff be able to resign loudly?\". Discuss motives and tension from a high level, philosophical perspective.",
+ "word_band": null
+}
