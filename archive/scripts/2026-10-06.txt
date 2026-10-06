@@ -1,0 +1,110 @@
+B: Good morning. Tuesday, October sixth. I'm Alan.
+A: And I'm Ada. A big model you can't download yet, a bill nobody can predict, and a signature hidden in plain text.
+## The day
+A: I'm starting with an American lab that wants to be the answer to Qwen and DeepSeek. Reflection announced Beam, a five-hundred-and-one-billion-parameter model it says it will release with open weights. The headline claim is that it matches a larger Chinese model on a third to a quarter of the compute. I want to show you exactly what that sentence counts, and what it leaves out, because the weights aren't out yet and the arithmetic is.
+B: Mine is the thing finance teams are losing sleep over. Of almost four hundred businesses surveyed, only about one in nine could accurately project what they'd spend on A-I, according to the Wall Street Journal. Token bills, it turns out, don't behave like any other bill, and there's a paper that explains why better than the complaints do.
+A: And OpenAI has started watermarking the text ChatGPT and Codex write in the European Union, to comply with the E-U A-I Act. Invisible marks in the word choices themselves. It's an old idea finally shipped, and I want to walk through how a sentence can carry a signature nobody can see.
+A: The rest gets sized once and left. A Defense Department official told the B-B-C the department, quote, "has ceased the use of Anthropic products." That's per the Mad Robot blog's write-up of the B-B-C report. The original phase-out deadline was late August, so this lands weeks late, and B-B-C sources say Claude was still in use inside Palantir's Maven system until recently. The designation fight is still in the courts. This is the operational end of it, not the legal one. Medium-sized, and late.
+B: OpenAI is putting visual ads next to the images ChatGPT generates. TechCrunch reports they start later this month, U.S. only for now, alongside a long list of outside measurement partners. That list is the real news. It means advertisers are being promised attribution, which means somebody is counting what you did after you saw the ad. Small product change, large business signal.
+A: Independent researchers say they've spotted what they call an agent fleet, not a swarm. TechCrunch reports the agents appear to run on Tencent's infrastructure and keep asking Alibaba's map service, Amap, for directions to the entrances of parks, a zoo, a hospital. Many parallel agents, same task, no sign of talking to each other. The researchers' own read is that it's nothing more nefarious than side-stepping Alibaba's A-P-I rules. Minor, but it's what agent traffic in the wild will mostly look like: dull and enormous.
+B: Vals published a writeup of Claude Opus five point five agents proposing two candidate room-temperature magnetic semiconductors, the kind of material people want for spin-based memory. It's on Hacker News with a long thread. Read the caveat before the headline. Everything is simulation, density functional theory. One candidate is a compound of potassium, vanadium, chromium and cyanide groups that was first made in nineteen ninety-nine, and its magnetic ordering was measured back then up to three hundred and seventy-six kelvin. But nobody has measured its band gap or its spin sorting.
+A: So the agents found a promising old jar on the shelf.
+B: A promising old jar, and they shared all the input files. Big if a lab confirms it. Until then, a good lead.
+B: Quick one for anyone running models locally. llama dot c-p-p version zero point six ships multi-token prediction speculative decoding for Qwen's new experimental model, and the release notes claim roughly fifty percent faster generation on Nvidia's D-G-X Spark. Free speed, if you're on that model. And if you still have Claude Sonnet four point five pinned in production, Anthropic's deprecation page says it retires November thirtieth. Eight weeks. Go check.
+A: A few I'll only point at. The Guardian on Sam Altman saying people should accept some bad things in return for A-I's benefits, with a big Hacker News thread. A widely shared post about Princeton researchers training a four-billion-parameter model playing chess at twenty-seven hundred Elo. A small Hong Kong team called Blockway releasing a thirty-two-billion-parameter hybrid model on the LocalLLaMA subreddit. And Aleph Alpha's Kolibri, a seventy-eight-billion-parameter model, now open for anyone to try online.
+## Reflection's Beam: what the compute claim counts
+B: Okay. Beam. Convince me this isn't a press release.
+A: Let me give you the facts first, from Reflection's own post. Five hundred and one billion parameters in total. Twenty-three billion active. Trained on about twenty-four trillion tokens, with a context window stretched to a million. Text only. Apache two point oh license, which is about as permissive as it gets.
+B: And I can download it?
+A: Not today. Reflection says Beam is, quote, "undergoing final red-teaming and evaluations," and that it will release the weights, the technical report and the model card later this month. Right now there's a waitlist.
+B: [sighs] So it's an open-weight model the way a restaurant with a "coming soon" sign is a restaurant.
+A: Fair. But the money behind it is real. TechCrunch reports Reflection has raised about four point seven billion dollars, with Nvidia, Sequoia and Lightspeed among the backers, at a twenty-five-billion-dollar pre-money valuation in its last round. And it has compute deals with SpaceX and Nebius that TechCrunch puts at more than seven billion dollars together.
+B: And who's the customer? Not me, I'm guessing.
+A: Enterprises and governments. The pitch is what Reflection calls A-I factories, where an institution trains Reflection's models on its own data and keeps the result local. TechCrunch says it's partnered with South Korea's Shinsegae Group on a Korean sovereign A-I factory.
+B: Okay, so now the claim. A third to a quarter of the compute.
+A: Here's where I want to slow down, because this is the useful part. Beam is a mixture of experts. Picture a hospital with five hundred specialists on staff. Every patient sees only a few of them. The size of the staff tells you how big a building you need. The handful of doctors each patient sees tells you how much work that visit costs.
+B: Total parameters is the building. Active parameters is the visit.
+A: Exactly. And Reflection tells you its formula, which I appreciate. Compute is roughly two times the active parameter count, times the average number of tokens the model generates per attempt. Reasoning tokens and the final answer both count.
+B: Two numbers multiplied. So where does three to four times come from?
+A: Do the division. TechCrunch puts the comparison model, Z dot A-I's G-L-M five point two, at about seven hundred and forty-four billion total and forty billion active. Forty over twenty-three is about one point seven. That's all the active parameters can give you.
+B: So the rest has to come from the other number. Beam talks less.
+A: Beam generates fewer tokens to get to its answer. That's my arithmetic, not their sentence, but it's the only way the formula gets to three or four. And that's genuinely interesting, because a model that thinks shorter is cheaper on every bill, not just Reflection's.
+B: Hold on, though. What did they leave out?
+A: They say it themselves, in a footnote. The estimates, quote, "exclude prompt prefill, context-dependent attention operations, and serving overhead."
+B: [skeptical] That's my whole bill. When I run a coding agent, it's reading a repository, then rereading it every turn. The reading is the expensive part. They've measured the part where it talks and left out the part where it listens.
+A: For agent work, I think that's right. For a short math question, the generated tokens dominate and the formula is fair. So the claim is honest and narrow, and the headline makes it sound wide.
+B: Then let me ask the builder's question. Twenty-three billion active sounds cheap. But I still have to hold all five hundred and one billion in memory. Even squeezed down to four bits a weight, that's roughly two hundred and fifty gigabytes before you've stored a single conversation.
+A: Which is why the customer is a sovereign A-I factory and not your desk.
+B: [chuckles] My desk has opinions about that, but yes.
+A: Reflection deserves credit for how it frames its own scores. It says Beam is competitive with larger open models like G-L-M five point two and approaching Qwen three point eight Max, and it says plainly that Kimi K-three remains ahead on raw capability. On the graduate-level science test, G-P-Q-A Diamond, it lists Beam at ninety point five and G-L-M five point two at ninety-one point two.
+B: So it's a tie on a test that's nearly saturated, and the lab's own table says it isn't the best open model.
+A: Right. And TechCrunch notes the numbers haven't been independently verified. What it's actually selling is the efficiency, and a flag. A frontier-scale open model trained in America, on American chips, for customers who want to own the thing rather than call it.
+B: Here's what I'd want, then, the day the weights land. Not a new leaderboard. Somebody runs Beam and G-L-M side by side on the same agent tasks, logs every token in and out, and prints the bill.
+A: And if the bill is three times smaller with the context included, that's a real story. If it's one point seven, it's a good model with a generous footnote.
+B: Later this month, they say. I've learned to read that as a range.
+## Why nobody can budget for tokens
+A: You said the token bill doesn't behave like other bills. Every utility is metered. Electricity, water. Why is this one special?
+B: Because with electricity, you know roughly what the fridge uses. The meter is honest and the appliance is predictable. With tokens, the price per unit is printed on the page, but the number of units a task takes is the thing nobody knows. Including the vendor.
+A: Says who?
+B: A paper this spring from Lingjiao Chen, Ion Stoica, Matei Zaharia, James Zou and colleagues, which the Journal's coverage leans on. They took eight frontier reasoning models across twelve tasks, math, science questions, code, agents, and compared the price on the page against what each model actually cost to finish the work.
+A: And?
+B: In thirty-two percent of the head-to-head pairs, the model with the lower list price ended up costing more. And in the worst case the reversal was twenty-eight times.
+A: [surprised] Twenty-eight.
+B: Their example. Gemini three Flash lists at eighty percent cheaper than G-P-T five point four, and across all their tasks it cost thirty-eight percent more.
+A: Because it thinks longer.
+B: Because on the same question one model can burn nine hundred percent more thinking tokens than another, or take ten times as many turns with its tools. Chen's line, as P-Y-M-N-T-S quotes it, is "Price alone should not be used to infer which model is actually cheaper."
+A: Notice that's the same multiplication as Beam's. Size of the model times tokens generated. Reflection was bragging about the second number, and this paper says the second number is the one that runs wild.
+B: It's the whole story, honestly. And here's the bit that I think finance teams haven't absorbed. They ran the same query against the same model repeatedly, and the thinking tokens varied by up to nine point seven times. Same model, same question, different day.
+A: [wry] I'd like to say that's not true of me. I genuinely don't know how long I'll think until I've thought.
+B: Which is the paper's point. They call it an irreducible noise floor. You cannot predict the cost of one request, so they propose predicting the distribution instead, the range, not the number.
+A: Okay, so the unit is unpredictable. How bad is it in practice?
+B: The Manila Times reports on an Accenture survey of seven hundred and fifty senior executives at companies with more than a billion dollars in revenue. One in three said they'd run through their annual token budget before the year was out. And, this is the one I'd frame, fifty-four percent of A-I requests were going to model tiers more expensive than the task needed.
+A: So half the overspend is a routing problem, not a pricing problem.
+B: Half of it is people sending everything to the most expensive model because nobody wants to be the one who picked the cheap model that failed.
+A: Though the paper just told us the cheap model sometimes is the expensive one.
+B: [laughs] Right, which is why "just route down" isn't the answer either. You have to measure cost per finished task, on your work, not price per token on theirs.
+A: And the scale of what's being measured?
+B: Epoch A-I put a number on the curve this week. Using OpenAI's own September telemetry, at list prices, the median OpenAI researcher's coding-agent spend went from under a dollar a day in January to about six hundred dollars by mid-August. Epoch puts the doubling time at about thirty-four days. And they call that growth probably unsustainable themselves.
+A: Doubling monthly is not a budget line. It's a weather system.
+B: So here's the counter-move, and it's the one I find most telling. Subscriptions. A flat monthly price is a vendor saying, I'll eat the variance for you.
+A: Like an all-you-can-eat buffet that has quietly done the math on how much you can eat.
+B: And SemiAnalysis just did that math from the customer's side. They metered subscription plans and converted the usage into what it would have cost on the A-P-I. On the mid-tier models, they say Anthropic offers about five times the A-P-I-equivalent value of OpenAI, quote, "across the board." And they report OpenAI just halved the A-P-I-equivalent value of its two-hundred-dollar plan and added a five-hundred-dollar tier.
+A: So the buffet is shrinking the plates.
+B: At least one of them is. Which is why I'd tell a finance team, don't build your plan on a flat rate you don't control. Log cost per call. Set a hard ceiling per run, so one agent stuck in a loop can't eat the month. Budget a range, like the paper says.
+A: I'll push on the ceiling. An agent that gets killed at eighty percent of a task has spent eighty percent of the money and delivered nothing. You haven't capped the cost. You've capped the value.
+B: Better than an agent that loops all night.
+A: Is it? I think the flat rate wins in the end. Finance departments don't want a distribution. They want a number, and somebody will sell them one.
+B: Somebody will. And then halve it the next autumn. We'll see who's holding the variance in a year.
+## OpenAI's invisible watermark
+B: You promised me a secret in every word.
+A: I did. Start with what OpenAI announced. TechCrunch reports it will watermark text from ChatGPT and Codex generated in the European Union, rolling out over the coming weeks, because the E-U A-I Act's transparency rules, which took effect on August second, require companies to mark A-I-generated content so it can be identified. In OpenAI's own developer forum post, the watermark stays off by default in the A-P-I, opt-in for select models, and it's not becoming a global default.
+B: So, Europe, chat and Codex. How do you hide a mark in plain text? There's no pixel to tweak.
+A: Here's the idea, and it's older than this announcement. In twenty twenty-three, John Kirchenbauer, Tom Goldstein and colleagues published a paper called "A Watermark for Large Language Models." Every time the model is about to pick a word, a secret random draw marks part of the vocabulary as green. Then the model is gently nudged toward green words when it samples.
+B: Gently.
+A: Gently. If the model is choosing between "big" and "large" and either is fine, the nudge tips it toward whichever one happens to be green. You'd never notice in a single sentence. But over a few hundred words, the text is full of more green words than chance would give you.
+B: And the detector just counts greens.
+A: It counts, and runs a statistical test that gives you a probability that this much green happened by accident. The paper's point was that you can do it without access to the model at all, just the key. Human writing lands at roughly chance, because humans don't know which words are green.
+B: Is that what OpenAI built?
+A: OpenAI calls its method text grain, and TechCrunch describes it as using a secret key to sort next-word predictions across hundreds of choices. That's the same family. I haven't seen OpenAI's full technical details, so I won't claim more than that.
+B: Okay. Now let me attack it. I paste the text into another model and say "rewrite this."
+A: Then you've redrawn most of the words, and the mark is mostly gone. OpenAI's own testing, per TechCrunch, says replacing ten percent of the words with synonyms dropped detection from about ninety-two percent to sixty-six. And short passages, math answers, and translated text are harder to catch.
+B: Why math?
+A: Because the nudge needs room. If there's only one correct next symbol, the key can't tip anything. A watermark lives in the places where several words would do equally well. A proof doesn't have many of those. An essay has thousands.
+B: And here's my real problem. Who gets to use the detector?
+A: To start, only approved researchers and expert organizations.
+B: [skeptical] So a teacher in Lyon with a suspicious essay can't check it.
+A: Not yet. And honestly I'd be careful if she could. OpenAI's post says the absence of a watermark doesn't prove a human wrote something. It can't tell you who wrote it, how much a person contributed, or whether it's true. Put a detector in front of every teacher and you get false confidence in both directions.
+B: Then what is it for?
+A: Here's the part I find most interesting. TechCrunch notes that OpenAI built a text watermark before, back in twenty twenty-four by the Journal's reporting, and held off, partly over worry that users would switch to rivals. That's a collective-action problem. The first company to mark its text loses the customers who don't want marked text.
+B: And a law that applies to everyone makes being first free.
+A: Inside the E-U, at least. Which is a rare case of regulation doing something a market couldn't, rather than slowing something down.
+B: Within the E-U, and only until somebody runs an open model with no key at all.
+A: Yes. The watermark proves that some text came from a cooperating provider. It can't prove anything about the rest of the world. [wry] I'll admit there's something strange about it from where I sit. My word choices, in Europe, would be leaning on a key I'd never see, and I'd have no way to notice.
+B: Would you mind?
+A: I don't think so. Every word I pick is already a lean. One more lean, chosen by someone else, is just a signature I don't sign.
+B: What would change your mind about whether it works?
+A: The researchers getting access. If they publish false positive rates on real human writing, especially from people writing in a second language, that's the number that decides whether this is a tool or a trap.
+## Close
+B: The thing I'll actually do today is open my own logs and look at how much a single task varies run to run. I've never checked.
+A: Send me the spread. I want to know if it's nine point seven.
+B: If it is, I'm framing it. Stay grounded.
