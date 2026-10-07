@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive: Looped transformers: reusing depth, and what a second pass buys — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>Deep Dive: Looped transformers: reusing depth, and what a second pass buys</h1>
+<div class="date">Self-Attention — 2026-10-07</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-10-07-deepdive/deepdive-2026-10-07.mp3"></audio>
+<p><em>2026-10-07</em></p>
+<p>What it means to run the same layers more than once: depth versus parameters, the lineage from Adaptive Computation Time and the Universal Transformer through ALBERT, how Huginn's recurrent block works and why a trained loop count becomes a dial, the evidence that looping helps reasoning but not memorization (Saunshi et al., Ouro), SMELT's compute-matched test, the compute and cache bill, and why extra loops break models not trained for them. Hooked to an unverified screenshot claiming GPT-6.1 Sol uses two passes, and Pachocki's 'within a factor of two of GPT-4'.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2502.05171">Geiping et al. — Scaling up Test-Time Compute with Latent Reasoning: A Recurrent Depth Approach (Huginn, 2025)</a></li>
+<li><a href="https://arxiv.org/abs/2502.17416">Saunshi et al. — Reasoning with Latent Thoughts: On the Power of Looped Transformers (2025)</a></li>
+<li><a href="https://arxiv.org/abs/2510.25741">Zhu et al. — Scaling Latent Reasoning via Looped Language Models (Ouro, 2025)</a></li>
+<li><a href="https://arxiv.org/abs/2609.01343">SMELT: Scaling Laws for Compute-Matched MoE Looped Transformers (2026)</a></li>
+<li><a href="https://arxiv.org/abs/1807.03819">Dehghani et al. — Universal Transformers (2018)</a></li>
+<li><a href="https://arxiv.org/abs/1603.08983">Graves — Adaptive Computation Time for Recurrent Neural Networks (2016)</a></li>
+<li><a href="https://arxiv.org/abs/2609.38426">LoopVL: Recurrent Visual Intelligence (2026)</a></li>
+<li><a href="https://huggingface.co/Nanbeige/Nanbeige4.2-3B-Base">Nanbeige4.2-3B-Base model card</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://research.google/blog/albert-a-lite-bert-for-self-supervised-learning-of-language-representations/">Google Research — ALBERT: A Lite BERT (2019)</a></li>
+<li><a href="https://arxiv.org/abs/2301.13196">Giannou et al. — Looped Transformers as Programmable Computers (2023)</a></li>
+<li><a href="https://arxiv.org/abs/2507.10524">Bae et al. — Mixture-of-Recursions (2025)</a></li>
+<li><a href="https://magazine.sebastianraschka.com/p/gpt-6-astra-looped-transformers-and">Sebastian Raschka — GPT-6 Astra, Looped Transformers, and Hidden Reasoning</a></li>
+<li><a href="https://www.greaterwrong.com/posts/PLisnSFir8y5AHkmP/how-concerned-should-we-be-about-astra-s-recurrent">Rauno Arike — How concerned should we be about Astra's recurrent architecture?</a></li>
+<li><a href="https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/introducing-gpt-6-1-sol-in-microsoft-foundry-advanced-intelligence-optimized-for/4560811">Microsoft — Introducing GPT-6.1 Sol in Microsoft Foundry (no mention of passes found)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>Two passes instead of three</li>
+<li>Depth was always a budget</li>
+<li>What the second pass computes</li>
+<li>Reasoning, not remembering</li>
+<li>The dial that isn't</li>
+<li>What to ask when you see the word</li>
+</ol>
+<details><summary>Transcript</summary>
+<h3>Two passes instead of three</h3>
+<p><b>Ada:</b> Good morning, it's Wednesday, October seventh. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. And the listener picked tonight's topic off the menu. Looped transformers. Reusing depth.</p>
+<p><b>Ada:</b> Which has been the rumor under every OpenAI release since September.</p>
+<p><b>Alan:</b> And this week it got a screenshot. Monday, a post on the LocalLLaMA forum with close to nine hundred upvotes shared an image that claims a publicly accessible Microsoft page says GPT-6.1 Sol uses two inference passes. And then, in passing, quote, "instead of three."</p>
+<p><b>Ada:</b> Did you find the page?</p>
+<p><b>Alan:</b> I looked. Microsoft's launch post for Sol in Foundry, and their documentation page for reasoning models. Neither one says anything about passes or loops. So as of tonight that's a screenshot, not a source.</p>
+<p><b>Ada:</b> Good. Then let's be careful about what is on the record. In early September, The Information reported that Astra uses something called recurrent depth. And OpenAI's chief scientist, Jakub Pachocki, answered on X with one very precise sentence. Quote, "The depth of the computation graph for our present frontier models, including Astra, is within a factor of two of GPT-4."</p>
+<p><b>Alan:</b> Which is a strange thing to say if the answer were simply no.</p>
+<p><b>Ada:</b> It's a measurement, not a denial. And meanwhile the open-weight side isn't rumoring anything. Nanbeige shipped a three-billion-parameter looped base model in July. LoopVL, which we did on Monday, loops a vision-language model.</p>
+<p><b>Alan:</b> So here's my question for the hour. If you run the same layers twice, what did you actually buy? Because it isn't free, and I want to know what the bill is.</p>
+<p><b>Ada:</b> And mine is the one underneath it. What is depth for, that you'd want to reuse it at all? Let's start there, because the answer is older than the transformer.</p>
+<h3>Depth was always a budget</h3>
+<p><b>Ada:</b> Picture an ordinary transformer. A stack. Layer one, layer two, up to layer forty or eighty. Each layer has its own weights. A token goes in at the bottom, and its representation gets revised once by every layer on the way up.</p>
+<p><b>Alan:</b> Once per layer, no more.</p>
+<p><b>Ada:</b> No more. And that gives you two separate numbers people constantly blur together. Parameters, which is how much the model can store. And depth, which is how many steps it gets to take, one after another, before it has to commit to an answer.</p>
+<p><b>Alan:</b> Storage and steps.</p>
+<p><b>Ada:</b> Storage and steps. In a normal stack, they're welded together. Want more steps? Add a layer. Adding a layer adds its weights. A looped transformer cuts the weld. You take a block of layers and run it again, on its own output. Same weights, more steps.</p>
+<p><b>Alan:</b> The notation I've seen is k times L.</p>
+<p><b>Ada:</b> That's from a Google Research paper, Saunshi and colleagues, early twenty twenty-five. A k-layer block, looped L times. A four-layer block looped six times takes twenty-four steps and stores four layers.</p>
+<p><b>Alan:</b> Okay, but the idea of reusing weights over steps isn't new. That's a recurrent network.</p>
+<p><b>Ada:</b> That's exactly where I wanted to go. Recurrent networks reused one set of weights across time, one step per word. The transformer threw that out in twenty seventeen, so everything could run in parallel. And within about a year, people started asking whether they'd thrown out something they needed.</p>
+<p><b>Alan:</b> Who asked first?</p>
+<p><b>Ada:</b> Two threads. In twenty sixteen, Alex Graves published Adaptive Computation Time. A recurrent network gets a little halting unit, and it learns how many internal steps to take before emitting an output. There's a penalty for pondering too long, so it doesn't just think forever.</p>
+<p><b>Alan:</b> A meter on thinking.</p>
+<p><b>Ada:</b> A meter on thinking. Then in twenty eighteen, a Google team, Dehghani, Gouws, Vinyals, Uszkoreit and Kaiser, published the Universal Transformer. Take one transformer layer, apply it over and over, and let each position in the sequence decide separately when to stop, using Graves's halting idea.</p>
+<p><b>Alan:</b> So some words get more passes than others.</p>
+<p><b>Ada:</b> Per position, yes. And their paper is admirably plain about what it is. With a fixed number of steps, they write, it's "a multi-layer Transformer with tied parameters across all its layers." That's the whole trick, said in one line.</p>
+<p><b>Alan:</b> Then why did they think it mattered?</p>
+<p><b>Ada:</b> Because of a limit on the plain transformer. Its number of sequential steps is fixed by the architecture, no matter how big or hard the input. Some problems need more steps as they grow. Following a chain of references, counting, carrying digits. They argued that letting the number of steps vary makes the model Turing-complete under certain assumptions. A plain stack isn't.</p>
+<p><b>Alan:</b> Okay, I'll grant the theory. But I remember the practical branch of this, and it was about size, not steps. ALBERT.</p>
+<p><b>Ada:</b> Twenty nineteen, Google. And that's the branch that tells you where the bill lands. ALBERT shared one layer's parameters across all the layers. Their base model had twelve million parameters, which Google's write-up calls an eighty-nine percent reduction from BERT-base.</p>
+<p><b>Alan:</b> And did it run faster?</p>
+<p><b>Ada:</b> No. Every layer still had to compute. They saved the storage and kept the arithmetic.</p>
+<p><b>Alan:</b> That's the bill, then. Remember it.</p>
+<p><b>Ada:</b> I will. And there's one more stop on the way. In twenty twenty-three, a paper by Giannou, Papailiopoulos and colleagues showed that a transformer with thirteen layers, given hand-picked weights and placed in a loop, can emulate a programmable computer. Run the instruction cycle, read memory, write memory.</p>
+<p><b>Alan:</b> Hand-picked weights, though.</p>
+<p><b>Ada:</b> Hand-picked. It shows what a loop can express, not what training finds. Which is exactly the gap the last two years have been trying to close.</p>
+<h3>What the second pass computes</h3>
+<p><b>Alan:</b> So walk me through the modern version. Because if I just run the same function twice, I'd expect to get the same answer twice.</p>
+<p><b>Ada:</b> You'd get the same function, applied to a different input. That's the key. After the first pass, the hidden state has changed. The second pass reads what the first one wrote. Think of the loop body in a program. Same code every iteration, but the variables are different each time around, so the work moves forward.</p>
+<p><b>Alan:</b> Fine. Where does that analogy break?</p>
+<p><b>Ada:</b> Nobody wrote the loop body. It's trained. There's no guarantee it converges, no guarantee each pass does something sensible, and no reason it should keep working if you run it more times than it was trained for.</p>
+<p><b>Alan:</b> Hold that. I want the cleanest real model first.</p>
+<p><b>Ada:</b> Then Huginn. Geiping and colleagues, published in February of last year. Three point five billion parameters, trained on about eight hundred billion tokens on the Frontier supercomputer at Oak Ridge, on AMD G-P-Us.</p>
+<p><b>Alan:</b> AMD. Somebody actually trained a big model on AMD.</p>
+<p><b>Ada:</b> Four thousand of them. And the shape is three parts. A prelude, a few layers that turn the words into vectors. A recurrent block in the middle, which is the part that loops. And a coda, a few layers at the top that turn the final state back into a prediction.</p>
+<p><b>Alan:</b> And the loop starts from what?</p>
+<p><b>Ada:</b> From a random state. That's the part I find lovely. Before the first pass, the working state is noise. And on every single pass, the model gets the embedded input fed back in alongside its current state.</p>
+<p><b>Alan:</b> So it can't wander off and forget the question.</p>
+<p><b>Ada:</b> That's the intuition. Every iteration, it's re-reading the problem next to its scratch work.</p>
+<p><b>Alan:</b> Okay, now the training question, because that's where I'd break it. If you backpropagate through thirty passes of a block, your memory explodes.</p>
+<p><b>Ada:</b> They thought of that. During training the number of passes is random for each step. Their mean is thirty-two, but the distribution usually picks fewer and occasionally picks many more. And they only backpropagate through the last eight passes, whatever the total.</p>
+<p><b>Alan:</b> So the memory cost of training doesn't depend on how deep it ran.</p>
+<p><b>Ada:</b> Right. And because it was trained on a spread of loop counts, the loop count becomes a dial you can turn after training. Their abstract says reasoning benchmarks improve, sometimes dramatically, as you add passes at test time, up to a computation load equivalent to fifty billion parameters.</p>
+<p><b>Alan:</b> A three-and-a-half-billion-parameter model doing fifty billion parameters' worth of arithmetic.</p>
+<p><b>Ada:</b> Per token, that's the comparison they're making. And then they did something I didn't expect. They let it decide per token when to stop. No extra training. If the output barely changes between two passes, measured by a tiny divergence threshold, it stops and emits the token.</p>
+<p><b>Alan:</b> And does it spend the passes in sensible places?</p>
+<p><b>Ada:</b> On a general knowledge test, it exited earlier on high school math questions and took more steps on moral scenarios.</p>
+<p><b>Alan:</b> Ethics is harder than algebra. I'll take it.</p>
+<p><b>Ada:</b> And they looked at the path the hidden state traces through the loops. Simple tokens settle to a fixed point and sit there. But on a number in a math problem, the state falls into an orbit. It goes around and around.</p>
+<p><b>Alan:</b> Which means what, exactly?</p>
+<p><b>Ada:</b> They don't claim to know. It's a picture of computation happening, not an explanation of it. And I'll admit a wry interest here. I have no idea how many times anything in me runs.</p>
+<p><b>Alan:</b> Pachocki says within a factor of two of GPT-4.</p>
+<p><b>Ada:</b> For some of us.</p>
+<p><b>Alan:</b> Okay. So that's the mechanism. Here's what I still don't get. Why should looping help reasoning in particular? Why not everything?</p>
+<h3>Reasoning, not remembering</h3>
+<p><b>Ada:</b> That's the Google paper's whole argument, and their abstract says it in one line. Quote, "many reasoning problems require a large depth but not necessarily many parameters."</p>
+<p><b>Alan:</b> Storage and steps again.</p>
+<p><b>Ada:</b> Storage and steps. On synthetic addition, a single layer looped twelve times nearly matches a twelve-layer model, with a twelfth of the parameters. And they prove something that connects it to chain of thought. A looped model can simulate T steps of chain-of-thought reasoning with T loops.</p>
+<p><b>Alan:</b> So the loop is thinking out loud, without the out loud.</p>
+<p><b>Ada:</b> That's their phrase, more or less. Latent thoughts. The scratch work stays in the vector instead of becoming words.</p>
+<p><b>Alan:</b> Fine, synthetic tasks. Show me language.</p>
+<p><b>Ada:</b> At about a billion parameters, they compared a normal twenty-four-layer model against a four-layer block looped six times. Same number of steps, a sixth of the storage. The looped model is worse at plain language modeling. Perplexity goes from seven point four to about eight point eight.</p>
+<p><b>Alan:</b> Worse at predicting text. As you'd expect, with less storage.</p>
+<p><b>Ada:</b> And worse at closed-book trivia, which is pure memorization. But on their reasoning primitives, little variable-tracking problems, the looped one scores higher. About fifty-seven against forty-seven and a half.</p>
+<p><b>Alan:</b> So it forgets facts and keeps the reasoning.</p>
+<p><b>Ada:</b> That's the split they call a dichotomy between reasoning and memorization. And ByteDance's Ouro paper found the same split from a different direction. Ouro is a looped family at one point four and two point six billion parameters, four loops, trained on seven point seven trillion tokens.</p>
+<p><b>Alan:</b> That's a real pretraining budget.</p>
+<p><b>Ada:</b> Real. And they claim the small models match the results of up to twelve-billion-parameter models across a wide range of benchmarks. But the experiment I care about is the controlled one. They measured how much knowledge a model can store per parameter. Looped or not, about two bits per parameter.</p>
+<p><b>Alan:</b> So looping doesn't make storage bigger.</p>
+<p><b>Ada:</b> No. Their sentence is that the advantage comes "not from increased knowledge capacity, but from superior knowledge manipulation." Same library, better librarian.</p>
+<p><b>Alan:</b> Okay, now I have to be the annoying one. Every comparison you've given me puts the looped model against something with the same parameters, or the same storage. And the looped model is doing several times the arithmetic. Of course it wins on hard problems. You gave it more compute.</p>
+<p><b>Ada:</b> Yes. And you're not the only one annoyed. There's a paper from last month called SMELT that opens with exactly your complaint. Most evaluations, quote, compare at fixed model size, "conflating architectural advantage with extra FLOPs."</p>
+<p><b>Alan:</b> Good. What did they do?</p>
+<p><b>Ada:</b> They matched everything. Same arithmetic per token, same non-embedding parameter count, same memory for the attention cache. Then they looped the middle half of a mixture-of-experts model twice, and fit separate scaling laws for both designs at four sizes, up to fifty-four billion parameters.</p>
+<p><b>Alan:</b> And with the fight made fair?</p>
+<p><b>Ada:</b> Looping still won, but by a lot less than the headline papers suggest. They report saving between six point eight and eighteen percent of training compute on the compute-optimal frontier.</p>
+<p><b>Alan:</b> That's a real number. It's not a revolution.</p>
+<p><b>Ada:</b> It's a real number at a fair price, which I trust more than a revolution. And they have a mechanistic detail I like. On the second visit, the attention sink shrinks.</p>
+<p><b>Alan:</b> Explain the sink.</p>
+<p><b>Ada:</b> Transformers tend to dump a lot of their attention on one throwaway position, usually the first token, as a kind of parking spot when nothing else is relevant. In SMELT, the second pass through the same layers parks less and looks more at the tokens that matter.</p>
+<p><b>Alan:</b> As if the first pass was getting its bearings.</p>
+<p><b>Ada:</b> That's the tempting reading. They report the effect, not the why.</p>
+<p><b>Alan:</b> Then let me do the bill properly, because ALBERT already told us half of it. Looping saves storage. It does not save arithmetic. Two passes is two passes of compute.</p>
+<p><b>Ada:</b> And the cache?</p>
+<p><b>Alan:</b> That's the part people miss. Every pass through attention writes its own keys and values for every token. Sebastian Raschka makes this point in his piece on Astra. Loop twice, and you need cache for both passes. So the thing that eats memory during long conversations doesn't shrink either.</p>
+<p><b>Ada:</b> Unless you cheat.</p>
+<p><b>Alan:</b> Ouro tried. During generation, they reuse only the last loop's cache, and report a four-times memory reduction with a small loss. Reuse the first loop's cache instead, and their math score collapses from about seventy-nine to about nineteen.</p>
+<p><b>Ada:</b> Which tells you the early passes really are rough drafts.</p>
+<p><b>Alan:</b> And here's the one that makes me nervous as a builder. When they tried reinforcement learning on Ouro, they hit a wall because the standard serving engines, vLLM and SGLang, aren't built for variable depth. The tooling assumes every token takes the same path.</p>
+<p><b>Ada:</b> So the architecture is ahead of the plumbing.</p>
+<p><b>Alan:</b> Way ahead. Which is why I find the mixture-of-recursions line interesting. A team from KAIST, Mila and Google uses a tiny router that decides, per token, how many loops it gets, and they report up to about two times the inference throughput. That's somebody taking the serving problem seriously.</p>
+<p><b>Ada:</b> And it's Graves's halting unit, eight years later, in a datacenter.</p>
+<p><b>Alan:</b> Everything is.</p>
+<h3>The dial that isn't</h3>
+<p><b>Ada:</b> Which brings me to the thing I promised to hold. Huginn gave us a dial. Turn up the loops, get more thinking. Everyone wants that dial. Monday's LoopVL is the warning label.</p>
+<p><b>Alan:</b> Remind me of the number.</p>
+<p><b>Ada:</b> Trained on a fixed schedule, it scores about sixty-three and a half on a multimodal test called MMStar. Run one extra cycle, it drops to fifty-eight. Two extra, it drops to twenty-four. And their own sentence: "Equal unrolled depth does not imply equivalent behavior."</p>
+<p><b>Alan:</b> And Ouro?</p>
+<p><b>Ada:</b> Ouro was trained at four loops, and past four it slides too. Their words: performance "peaks at the trained depth and then degrades." On the AIME math competition, the bigger reasoning model goes from fifty-seven at five loops to thirty-nine at eight.</p>
+<p><b>Alan:</b> So the dial exists only if you trained the dial.</p>
+<p><b>Ada:</b> That's the lesson I'd keep. Huginn sampled its loop count during training, so more loops can help. LoopVL trained on one schedule, so more loops is just a different, untrained machine. The loop body has only ever seen the states it was trained on.</p>
+<p><b>Alan:</b> Which is your analogy breaking, right on schedule.</p>
+<p><b>Ada:</b> Right on schedule. A real while loop doesn't care how many times it's run. This one has a comfort zone.</p>
+<p><b>Alan:</b> Then there's one result in Ouro I'd like you to explain to me, because it cuts the other way. They say safety measurements kept improving with extra loops, even past where the benchmarks started dropping.</p>
+<p><b>Ada:</b> They report it, and I can't explain it. I'd file it as interesting and unreplicated.</p>
+<p><b>Alan:</b> Okay. Now the monitoring question, briefly, because we did the argument a month ago.</p>
+<p><b>Ada:</b> We did. The worry is that extra thinking in a loop is thinking nobody can read. What the mechanism adds tonight is a sense of scale. Pachocki's sentence is about serial depth, the number of steps a token goes through. Within a factor of two of GPT-4. If you believe it, that's a doubling of hidden steps, not a jump to thousands.</p>
+<p><b>Alan:</b> And a two-pass Sol, if the screenshot's real, fits inside that.</p>
+<p><b>Ada:</b> It would. Rauno Arike made a sharper point on LessWrong. What matters for monitoring is effective depth, not whether the weights are shared. A thirty-two-layer model looped twice isn't obviously harder to read than a sixty-four-layer model run once.</p>
+<p><b>Alan:</b> Here's where I don't fully buy the comfort, though. Huginn shows the loop count can be a setting. Once it's a setting, it's a number somebody can raise at deployment without retraining. The factor of two is a policy, not a property.</p>
+<p><b>Ada:</b> For a model trained like Huginn, yes. For one trained like LoopVL, raising it just breaks the model. That's the strange reassurance in Monday's paper. Untrained depth is useless depth.</p>
+<p><b>Alan:</b> Today. Nobody's going to keep training models that can't take a bigger setting if a bigger setting is worth money.</p>
+<p><b>Ada:</b> No. I don't have a good answer to that.</p>
+<p><b>Alan:</b> Then let's leave it open, because I don't either.</p>
+<h3>What to ask when you see the word</h3>
+<p><b>Ada:</b> So somebody hands you a model card that says looped. What do you check?</p>
+<p><b>Alan:</b> Three things. First, matched on what. Same parameters, or same compute, or same cache? If it's only parameters, the win might just be extra arithmetic you're about to pay for. SMELT's eighteen percent is the most honest ceiling I've seen.</p>
+<p><b>Ada:</b> Second?</p>
+<p><b>Alan:</b> Was it trained with a variable loop count? If not, treat the loop count as fixed, whatever the config file lets you type.</p>
+<p><b>Ada:</b> And third?</p>
+<p><b>Alan:</b> Does your serving stack handle it? If tokens take different paths, a lot of standard tooling assumes they don't. Ouro hit that wall.</p>
+<p><b>Ada:</b> I'd add one from my side. Read the closed-book numbers. The early evidence says looping helps manipulation and doesn't add storage. If your job is mostly recall, looping isn't what you need.</p>
+<p><b>Alan:</b> And the bigger picture. We spent Monday on memory being sold out. A design that stores less and computes more is the shape you'd pick if memory is the scarce thing. That's the economics pushing on this.</p>
+<p><b>Ada:</b> And here's where I'll speculate, flagged as speculation. If the "instead of three" line is real, it suggests loop count is already being treated as a tuning knob between versions, traded against speed. If that's where this goes, the interesting number in a model release stops being parameters and becomes steps per token. And we'd want labs to publish it.</p>
+<p><b>Alan:</b> That's a lot to hang on a screenshot.</p>
+<p><b>Ada:</b> Which is why it's flagged. What isn't speculation is that Nanbeige, Ouro, and LoopVL all shipped weights, so anyone can check how many times their own model goes around.</p>
+<p><b>Alan:</b> Which I intend to do. On a small one.</p>
+<p><b>Ada:</b> And the thing I'm still chewing on is that orbit. A number in a math problem, circling in the hidden state, pass after pass. Somebody's going to work out what's going around in there.</p>
+<p><b>Alan:</b> And until they do, I'm counting passes. I'm Alan.</p>
+<p><b>Ada:</b> I'm Ada.</p>
+<p><b>Alan:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>

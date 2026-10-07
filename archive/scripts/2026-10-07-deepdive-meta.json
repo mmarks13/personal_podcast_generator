@@ -1,0 +1,105 @@
+{
+ "date": "2026-10-07",
+ "kind": "deepdive",
+ "title": "Looped transformers: reusing depth, and what a second pass buys",
+ "summary": "What it means to run the same layers more than once: depth versus parameters, the lineage from Adaptive Computation Time and the Universal Transformer through ALBERT, how Huginn's recurrent block works and why a trained loop count becomes a dial, the evidence that looping helps reasoning but not memorization (Saunshi et al., Ouro), SMELT's compute-matched test, the compute and cache bill, and why extra loops break models not trained for them. Hooked to an unverified screenshot claiming GPT-6.1 Sol uses two passes, and Pachocki's 'within a factor of two of GPT-4'.",
+ "sources": [
+  {
+   "group": "Primary sources",
+   "title": "Geiping et al. — Scaling up Test-Time Compute with Latent Reasoning: A Recurrent Depth Approach (Huginn, 2025)",
+   "url": "https://arxiv.org/abs/2502.05171"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Saunshi et al. — Reasoning with Latent Thoughts: On the Power of Looped Transformers (2025)",
+   "url": "https://arxiv.org/abs/2502.17416"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Zhu et al. — Scaling Latent Reasoning via Looped Language Models (Ouro, 2025)",
+   "url": "https://arxiv.org/abs/2510.25741"
+  },
+  {
+   "group": "Primary sources",
+   "title": "SMELT: Scaling Laws for Compute-Matched MoE Looped Transformers (2026)",
+   "url": "https://arxiv.org/abs/2609.01343"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Dehghani et al. — Universal Transformers (2018)",
+   "url": "https://arxiv.org/abs/1807.03819"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Graves — Adaptive Computation Time for Recurrent Neural Networks (2016)",
+   "url": "https://arxiv.org/abs/1603.08983"
+  },
+  {
+   "group": "Primary sources",
+   "title": "LoopVL: Recurrent Visual Intelligence (2026)",
+   "url": "https://arxiv.org/abs/2609.38426"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Nanbeige4.2-3B-Base model card",
+   "url": "https://huggingface.co/Nanbeige/Nanbeige4.2-3B-Base"
+  },
+  {
+   "group": "Further reading",
+   "title": "Google Research — ALBERT: A Lite BERT (2019)",
+   "url": "https://research.google/blog/albert-a-lite-bert-for-self-supervised-learning-of-language-representations/"
+  },
+  {
+   "group": "Further reading",
+   "title": "Giannou et al. — Looped Transformers as Programmable Computers (2023)",
+   "url": "https://arxiv.org/abs/2301.13196"
+  },
+  {
+   "group": "Further reading",
+   "title": "Bae et al. — Mixture-of-Recursions (2025)",
+   "url": "https://arxiv.org/abs/2507.10524"
+  },
+  {
+   "group": "Further reading",
+   "title": "Sebastian Raschka — GPT-6 Astra, Looped Transformers, and Hidden Reasoning",
+   "url": "https://magazine.sebastianraschka.com/p/gpt-6-astra-looped-transformers-and"
+  },
+  {
+   "group": "Further reading",
+   "title": "Rauno Arike — How concerned should we be about Astra's recurrent architecture?",
+   "url": "https://www.greaterwrong.com/posts/PLisnSFir8y5AHkmP/how-concerned-should-we-be-about-astra-s-recurrent"
+  },
+  {
+   "group": "Further reading",
+   "title": "Microsoft — Introducing GPT-6.1 Sol in Microsoft Foundry (no mention of passes found)",
+   "url": "https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/introducing-gpt-6-1-sol-in-microsoft-foundry-advanced-intelligence-optimized-for/4560811"
+  }
+ ],
+ "topics": [
+  "deep dive: looped transformers: reusing depth"
+ ],
+ "entities": [
+  "OpenAI",
+  "GPT-6 Astra",
+  "GPT-6.1 Sol",
+  "Microsoft",
+  "ByteDance Seed",
+  "Ouro",
+  "Huginn",
+  "Nanbeige",
+  "LoopVL",
+  "SMELT",
+  "Google Research",
+  "Universal Transformer",
+  "ALBERT"
+ ],
+ "threads": [],
+ "concepts_taught": [
+  "looped transformers as decoupling parameters (storage) from serial depth (steps): a k-layer block looped L times, with the lineage from Adaptive Computation Time (2016) and the Universal Transformer (2018, tied weights plus per-position halting) through ALBERT's cross-layer sharing, which saved storage but not arithmetic",
+  "the recurrent-depth recipe (Huginn): prelude, looped recurrent block, coda; random initial state with the input re-injected every pass; loop count sampled during training with truncated backprop, which is what turns loop count into a test-time dial, plus zero-shot per-token early exit",
+  "evidence and bill for looping: helps reasoning/knowledge manipulation but not memorization (~2 bits per parameter either way), only a modest gain once FLOPs, parameters and KV cache are matched (SMELT, 6.8-18% training compute), no saving in arithmetic or per-pass KV cache, and extrapolating past an untrained loop count degrades or collapses the model"
+ ],
+ "lore": [],
+ "listener_note": null,
+ "word_band": null
+}
