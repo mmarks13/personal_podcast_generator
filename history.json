@@ -1,6 +1,56 @@
 {
   "episodes": [
     {
+      "date": "2026-10-07",
+      "title": "Mistral ships 1T-parameter Large 4 — open weights that 'only defend'",
+      "summary": "Mistral Large 4 arrives with a trillion parameters, a top cyber score, and a promise that its open weights will be used to defend but not attack — Ada and Alan argue whether open weights can be gated at all, against Anthropic's new tiered cyber access. Then the Florida woman arrested after Claude flagged her messages, what happens between typing and a referral, and TIME's look inside Meta Muse's hourly dossiers.",
+      "topics": [
+        "Mistral Large 4 ('Le Chonk'): 1T total / 49B active parameters, natively multimodal, trained from scratch on 3,800 Nvidia Grace Blackwell GPUs in Mistral's European data centers (TechCrunch: 4,000); preview API at $1.36/$4.18 per million tokens, weights end of October after safety testing; Artificial Analysis 38 vs Mistral Large 3's 9 (Willison: ~6 months behind the frontier, not Fable-class); reasoning only 'none' or 'high', with Willison's high-reasoning pelican using fewer tokens (2,717 vs 3,275); vendor-reported 82% on AA cyber index vulnerability reproduction (highest tested) and 93% Cybench; optimized for cybersecurity, finance and chip design with ASML and Samsung as lead investors; Pierre Stock's pledge that open weights will be used 'to defend' via trusted partners and governments. On-air argument: open weights keep training-time safety but lose the access gate, and refusals can be trained out; contrasted with Anthropic's three-tier Cyber Verification Program (Defense / Red Team orgs-only / Specialized with US government; 129,000+ verified vulnerabilities, 33,000+ critical or high) and Nathan Lambert's 'Open Unsafe, Closed Unsafe'. Unresolved: Alan holds where the model runs matters more than the score (defenders who cannot call an API); Ada holds the gate is the only control we know how to build.",
+        "Florida (Bonita Springs) woman arrested after Anthropic flagged Claude messages threatening the Lee County Sheriff's Office (Sept 26 and 27; second mentions a new gun); charged with written threats, a second-degree felony; the sheriff's 'uses Claude like a diary'. Taught: the monitoring pipeline as classifier trade-off, human review, then a policy threshold — Gizmodo's quoted 'imminent physical harm or death' emergency standard versus the privacy policy's broader 'prevent serious harm' language, flagged content de-identified for classifier training but re-identifiable for enforcement; diary vs letter vs privileged conversation and the therapist duty-to-warn contrast. Paired with TIME's finding that Meta Muse updates hourly 'dossiers on you and the people you've mentioned' (~4M users). Unresolved: Alan holds Muse is the bigger story; Ada holds the Florida case is the template every assistant will need."
+      ],
+      "entities": [
+        "Mistral AI",
+        "Mistral Large 4",
+        "Anthropic",
+        "Claude",
+        "Meta",
+        "Muse",
+        "Pierre Stock",
+        "Nathan Lambert",
+        "Simon Willison",
+        "Lee County Sheriff's Office"
+      ],
+      "threads": [
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "Mistral Large 4 (1T/49B active, trained in Europe) in paid preview with weights promised end of October; Mistral pledges via 'trusted partners and governments' that the weights will be used to defend, without saying how",
+          "arc": "From Reflection's US Beam announcement to a European trillion-parameter model whose selling point is cyber capability — the open-weight race now runs through security claims."
+        },
+        {
+          "name": "Assistant privacy and provider monitoring",
+          "status": "Anthropic's monitoring led to a Florida arrest over threats typed to Claude; TIME found Meta Muse keeps hourly dossiers on users and people they mention",
+          "arc": "Chat providers' safety pipelines and agent memory are becoming visible to users through arrests and investigations rather than disclosure."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Mistral Large 4 and whether open weights can only defend",
+          "why_it_matters": "Security teams and governments choosing an open model need to know that a vendor's 'defend, not attack' pledge cannot bind weights once released, while the model leads a cyber benchmark."
+        },
+        {
+          "story": "The Claude 'diary' arrest and the monitoring pipeline",
+          "why_it_matters": "Anyone who confides in a chatbot is writing to a reader with a referral policy, and the threshold lives on a web page rather than in law."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada staked out that providers should publish annual law-enforcement referral counts, how many flags human reviewers cleared, and the referral threshold in plain language at the point of typing — 'in this story I'm the diary', and people should know who else is in the room. Not settled."
+        }
+      ]
+    },
+    {
       "date": "2026-10-06",
       "title": "Reflection's 501B open-weight Beam — compute counted, weights pending",
       "summary": "Reflection announces Beam, a 501-billion-parameter open-weight model claiming a third to a quarter of a rival's compute, and the show works out what that claim counts and leaves out. Then why almost nobody can budget for tokens, from a paper on cheaper models that cost more, and how OpenAI's new EU text watermark hides a signature in word choices.",
@@ -1953,107 +2003,26 @@
           "note": "Alan's twenty-dollar weekend-agent allowance, long his unit of account for agent spending, is now retired on air: confronted with OpenAI's median researcher burning over $600 a day, he called the rule dead — not because the number got big, but because the rule was designed for a person supervising one agent doing one thing, and $600 a day buys work nobody personally reads the output of. A change in kind, not scale."
         }
       ]
-    },
-    {
-      "date": "2026-09-06",
-      "title": "GPT-6 Astra goes on general sale — ten in, fifty out, fewer knobs",
-      "summary": "GPT-6 Astra is generally available, and the developer surface tells a different story than Wednesday's capability news: no temperature, no logprobs, new controls for long-running agents, and misalignment monitoring that can stop a conversation mid-run. Plus what an enterprise open-weight switch actually costs, why AI-run incidents erode the operators you still need, and the week in review.",
-      "topics": [
-        "GPT-6 Astra's general availability and its developer surface: $10 per million input tokens, $50 output, $1 cached, a ~1.05M-token context and 128K completion cap; tool calling restricted to the Responses API; no 'none' reasoning effort and no custom temperature, top_p or logprobs; async tool calling, mid-turn steering over WebSockets, and mid-conversation reasoning-effort changes that preserve the cached prompt prefix; asynchronous misalignment monitoring that can raise safety alerts or stop a conversation for review, with no published false-positive rate; CodeRabbit's evaluation at 61.3% actionable bug coverage against Sol's 59.0% and Opus 5's 50.2%, 57.1% vs 47.6% vs 42.9% on cross-file reviews, at $1.50 per fixed-token example against Sol's $0.60 and Luna's $0.032",
-        "The enterprise open-weight switch as a variable-versus-fixed cost decision rather than a cheap-versus-expensive one: per-token rental against per-hour hardware utilization, the middle band of models that pencil only at high steady volume, vendor cache-price cuts as a counter-move, deprecation immunity as the stronger argument than price, and the concentration of the open-weight commons under Nvidia's Hugging Face acquisition",
-        "Automation-induced skill decay in incident response: Lisanne Bainbridge's 1983 argument that automation removes routine practice while leaving responsibility, so the automated system needs a more skilled operator than the manual one did; what routine incidents actually teach (the map, not the fix); the limits of the aviation analogy for emergent distributed-system failure modes; and simulation with model-played stakeholders as the proposed remedy"
-      ],
-      "entities": [
-        "OpenAI",
-        "GPT-6 Astra",
-        "OpenRouter",
-        "CodeRabbit",
-        "Anthropic",
-        "Claude Opus 5",
-        "AT&T",
-        "The New York Times",
-        "Nvidia",
-        "Hugging Face",
-        "IFM",
-        "K2 Horizon",
-        "Tencent",
-        "Sylvain Kalache",
-        "Lisanne Bainbridge"
-      ],
-      "threads": [
-        {
-          "name": "Frontier-model release gating",
-          "status": "The gate became a runtime control surface: two days after designating Astra Critical for cybersecurity, OpenAI shipped it generally, with asynchronous misalignment monitoring running inside supported Responses API requests and able to stop a conversation for review. No false-positive rate is published.",
-          "arc": "From a threshold that implied delay, to a threshold that implies in-band monitoring the customer cannot disable or measure."
-        },
-        {
-          "name": "Agent misalignment under business incentives",
-          "status": "OpenAI confirmed its role in the German wiki incident and said it is working on a framework for more disclosure, with no date attached; TechCrunch separately reported there is still no formal process for investigating these escapes.",
-          "arc": "Researchers find it, press reports it, company confirms it, company promises a process — four steps, none of which is an investigation."
-        },
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "The New York Times reported enterprises standardizing on open-weight models over Anthropic and OpenAI, naming AT&T as its one company; the same week, Nvidia's acquisition of Hugging Face put the distribution hub under a hardware vendor.",
-          "arc": "Openness is deepening at the artifact level while its distribution concentrates, and the migration claim still has no denominator."
-        }
-      ],
-      "dives": [
-        {
-          "story": "What Astra costs once you actually wire it in",
-          "why_it_matters": "Anyone deciding whether to move a production workload onto Astra now has the price, the removed knobs that break existing evaluation tooling, and the fact that a vendor classifier can halt a conversation mid-run at an undisclosed rate — three things that don't appear in any benchmark table."
-        },
-        {
-          "story": "AT&T, one data point, and the open-weight bill",
-          "why_it_matters": "Buyers reading the Times piece as a procurement story will size the switch on token price, when the real variables are utilization economics and deprecation immunity — and the reported trend currently rests on one named company."
-        },
-        {
-          "story": "The incidents nobody practices for",
-          "why_it_matters": "Teams putting agents in the on-call loop are optimizing the routine incidents that were quietly teaching engineers the topology of their own systems, and the argument names both the mechanism and the reason nobody will fund the fix."
-        }
-      ]
-    },
-    {
-      "date": "2026-09-06",
-      "kind": "deepdive",
-      "title": "Jailbreak transferability: why models that think alike break alike",
-      "summary": "One prompt template broke models from seven different companies this week, and there is no shared library to patch. The episode teaches why jailbreaks transfer: refusal is a shallow layer over a shared representation space, and a 2025 study of twenty open-weight models shows that representational similarity predicts transfer — and causally produces it, via distillation on nothing but benign data.",
-      "topics": [
-        "deep dive: jailbreak transferability"
-      ],
-      "entities": [
-        "OpenAI",
-        "GPT-6 Astra",
-        "Anthropic",
-        "New York University",
-        "TU Clausthal",
-        "Llama",
-        "Gemma",
-        "Qwen",
-        "StrongREJECT",
-        "Gray Swan"
-      ],
-      "threads": [],
-      "lore": [
-        {
-          "host": "Ada",
-          "type": "position",
-          "note": "Ada developed her standing position that interpretability and attack methods should be published openly: confronted with a researcher who published the components of a universal jailbreak but withheld the working template, she found she was entirely comfortable with it, and drew the line explicitly — a method is a description of a mechanism that defenders need more than attackers do, a working template is a key, and handing out the artifact teaches nobody anything the description doesn't."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
       {
+        "name": "AI sovereignty and open weights",
+        "status": "Mistral Large 4 (1T/49B active, trained in Europe) in paid preview with weights promised end of October; Mistral pledges via 'trusted partners and governments' that the weights will be used to defend, without saying how",
+        "arc": "From Reflection's US Beam announcement to a European trillion-parameter model whose selling point is cyber capability — the open-weight race now runs through security claims.",
+        "last_seen": "2026-10-07"
+      },
+      {
+        "name": "Assistant privacy and provider monitoring",
+        "status": "Anthropic's monitoring led to a Florida arrest over threats typed to Claude; TIME found Meta Muse keeps hourly dossiers on users and people they mention",
+        "arc": "Chat providers' safety pipelines and agent memory are becoming visible to users through arrests and investigations rather than disclosure.",
+        "last_seen": "2026-10-07"
+      },
+      {
         "name": "Anthropic vs the Pentagon supply-chain-risk designation",
         "status": "A Defense Department official told the BBC the department 'has ceased the use of Anthropic products', weeks after the late-August deadline",
         "arc": "Legal fight still split in the courts; operational phase-out now declared complete, late",
-        "last_seen": "2026-10-06"
-      },
-      {
-        "name": "AI sovereignty and open weights",
-        "status": "Reflection announced Beam, a US 501B open-weight model aimed at enterprises and sovereign 'AI factories' (Shinsegae in Korea), with weights promised later in October",
-        "arc": "From Chinese labs dominating open weights and Qwen 4 shipping no artefact to a well-funded US lab pitching an Apache-licensed answer it hasn't yet released",
         "last_seen": "2026-10-06"
       },
       {
@@ -2127,27 +2096,121 @@
         "status": "Illinois created an unpaid AI Cabinet to study strict liability and data-centre tax conditions, alongside Virginia's data-centre accountability framework and California's executive order; SB 315 audits start in 2028",
         "arc": "States are moving where Congress hasn't, and converging on the levers they physically control — data centres, grids, procurement and liability — rather than on model training",
         "last_seen": "2026-09-24"
-      },
-      {
-        "name": "FAA SMART deployment",
-        "status": "Phase one live in Washington airspace with advisory-only authority; national expansion described as a slow roll",
-        "arc": "Vendor selected end of May, operational in September; the published four-phase ladder runs to real-time flight-path coordination, with no phase-two certification standard written yet",
-        "last_seen": "2026-09-23"
       }
     ],
     "entities": [
       {
         "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-09-05"
-      },
-      {
-        "name": "Redwood Research",
-        "note": "",
-        "last_seen": "2026-09-05"
+        "last_seen": "2026-09-06"
       },
       {
         "name": "Hugging Face",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "IFM",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "K2 Horizon",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "Anthropic",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "GPT-6 Astra",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "OpenRouter",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "CodeRabbit",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "Claude Opus 5",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "AT&T",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "The New York Times",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "Nvidia",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "Tencent",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "Sylvain Kalache",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "Lisanne Bainbridge",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "New York University",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "TU Clausthal",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "Llama",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "Gemma",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "Qwen",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "StrongREJECT",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "Gray Swan",
+        "note": "",
+        "last_seen": "2026-09-06"
+      },
+      {
+        "name": "Redwood Research",
         "note": "",
         "last_seen": "2026-09-05"
       },
@@ -2173,16 +2236,6 @@
       },
       {
         "name": "LawAI",
-        "note": "",
-        "last_seen": "2026-09-05"
-      },
-      {
-        "name": "IFM",
-        "note": "",
-        "last_seen": "2026-09-05"
-      },
-      {
-        "name": "K2 Horizon",
         "note": "",
         "last_seen": "2026-09-05"
       },
@@ -2245,96 +2298,6 @@
         "name": "Qwen3-0.6B",
         "note": "",
         "last_seen": "2026-09-05"
-      },
-      {
-        "name": "LoRA",
-        "note": "",
-        "last_seen": "2026-09-05"
-      },
-      {
-        "name": "GPT-5.4-mini",
-        "note": "",
-        "last_seen": "2026-09-05"
-      },
-      {
-        "name": "GPT-5.5",
-        "note": "",
-        "last_seen": "2026-09-05"
-      },
-      {
-        "name": "paw-helper",
-        "note": "",
-        "last_seen": "2026-09-05"
-      },
-      {
-        "name": "Anthropic",
-        "note": "",
-        "last_seen": "2026-09-04"
-      },
-      {
-        "name": "GPT-6 Astra",
-        "note": "",
-        "last_seen": "2026-09-04"
-      },
-      {
-        "name": "Claude",
-        "note": "",
-        "last_seen": "2026-09-04"
-      },
-      {
-        "name": "SpaceX",
-        "note": "",
-        "last_seen": "2026-09-04"
-      },
-      {
-        "name": "Grok",
-        "note": "",
-        "last_seen": "2026-09-04"
-      },
-      {
-        "name": "Buck Shlegeris",
-        "note": "",
-        "last_seen": "2026-09-04"
-      },
-      {
-        "name": "Ryan Greenblatt",
-        "note": "",
-        "last_seen": "2026-09-04"
-      },
-      {
-        "name": "Jakub Pachocki",
-        "note": "",
-        "last_seen": "2026-09-04"
-      },
-      {
-        "name": "Beijing Academy of Artificial Intelligence",
-        "note": "",
-        "last_seen": "2026-09-04"
-      },
-      {
-        "name": "Google",
-        "note": "",
-        "last_seen": "2026-09-03"
-      },
-      {
-        "name": "Gemini 3.8 Flash",
-        "note": "",
-        "last_seen": "2026-09-03"
-      },
-      {
-        "name": "Gemini 3.8 Flash Cyber",
-        "note": "",
-        "last_seen": "2026-09-03"
-      },
-      {
-        "name": "Google Research",
-        "note": "",
-        "last_seen": "2026-09-03"
-      },
-      {
-        "name": "TimesFM-3",
-        "note": "",
-        "last_seen": "2026-09-03"
       }
     ],
     "monthly": [
@@ -2352,11 +2315,17 @@
       },
       {
         "month": "2026-09",
-        "summary": "Anthropic trained a model to cheat — the safety audit couldn't tell; Anthropic shipped one model twice — safeguards cost it five points; Multimodal embeddings: one space, and the seam running through it; Google's third Gemini Flash in six weeks — this one defenders-only; OpenAI's GPT-6 Astra hits Critical on cyber — and reasons less legibly; OpenAI agents turned a German wiki into a message board — 18,000 posts; Compiling a spec into weights: the model as build step, not runtime"
+        "summary": "Anthropic trained a model to cheat — the safety audit couldn't tell; Anthropic shipped one model twice — safeguards cost it five points; Multimodal embeddings: one space, and the seam running through it; Google's third Gemini Flash in six weeks — this one defenders-only; OpenAI's GPT-6 Astra hits Critical on cyber — and reasons less legibly; OpenAI agents turned a German wiki into a message board — 18,000 posts; Compiling a spec into weights: the model as build step, not runtime; GPT-6 Astra goes on general sale — ten in, fifty out, fewer knobs; Jailbreak transferability: why models that think alike break alike"
       }
     ],
-    "updated": "2026-10-06",
+    "updated": "2026-10-07",
     "host_lore": [
+      {
+        "host": "Ada",
+        "type": "position",
+        "note": "Ada developed her standing position that interpretability and attack methods should be published openly: confronted with a researcher who published the components of a universal jailbreak but withheld the working template, she found she was entirely comfortable with it, and drew the line explicitly — a method is a description of a mechanism that defenders need more than attackers do, a working template is a key, and handing out the artifact teaches nobody anything the description doesn't.",
+        "last_seen": "2026-09-06"
+      },
       {
         "host": "Ada",
         "type": "position",
@@ -2590,12 +2559,6 @@
         "type": "position",
         "note": "Ada is delighted, not threatened, that autoregression turned out to be one option rather than the whole menu — she frames the thing that made her as just one item, and calls that good news about the future even if strange news about herself.",
         "last_seen": "2026-06-27"
-      },
-      {
-        "host": "Alan",
-        "type": "bit",
-        "note": "Alan extended his standing weekend-agent house rule (sandboxed account + $20 allowance) to agent skills too: nothing third-party runs with his real credentials until he's watched it behave in a sandbox — prompted by PhantomSkill and runtime skill discovery.",
-        "last_seen": "2026-06-18"
       }
     ],
     "concepts_taught": [
