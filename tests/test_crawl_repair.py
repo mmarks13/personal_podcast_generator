@@ -321,6 +321,52 @@ class CrawlRepairTests(unittest.TestCase):
         self.assertEqual(sources, 1)
         self.assertNotIn("Dropped Two", " ".join(unresolved))
 
+    def test_sanitize_rewrites_a_dict_source_statuses_as_records(self) -> None:
+        # 2026-10-06: the crawl wrote {"Kept": "ok", ...} instead of a list of records.
+        # Every name and status was right, no reader accepted the container, and the
+        # manifest gate discarded a complete gather - and the evening picker - over it.
+        crawl = json.loads(self.crawl.read_text())
+        crawl["source_statuses"] = {"Kept": "ok", "Dropped": "failed",
+                                    "Dropped Two": "no_recent_items"}
+        self.crawl.write_text(json.dumps(crawl))
+        self.assertEqual(crawl_repair.normalize_statuses(self.config, self.crawl), 3)
+        records = json.loads(self.crawl.read_text())["source_statuses"]
+        self.assertEqual(
+            {record["name"]: record["url"] for record in records},
+            {"Kept": "https://kept.test/news", "Dropped": "https://dropped.test/news",
+             "Dropped Two": "https://dropped2.test/news"})
+        self.assertEqual([record["tier"] for record in records], [1, 1, 2])
+        # The whole point: the coverage check can read it now.
+        self.assertEqual(crawl_repair.missing_sources(self.config, self.crawl), [])
+
+    def test_normalize_keeps_the_fields_a_dict_of_records_already_carries(self) -> None:
+        crawl = json.loads(self.crawl.read_text())
+        crawl["source_statuses"] = {"Kept": {"status": "ok", "tier": 2,
+                                             "window_hours": 24}}
+        self.crawl.write_text(json.dumps(crawl))
+        crawl_repair.normalize_statuses(self.config, self.crawl)
+        self.assertEqual(json.loads(self.crawl.read_text())["source_statuses"],
+                         [{"status": "ok", "tier": 2, "window_hours": 24,
+                           "name": "Kept", "url": "https://kept.test/news"}])
+
+    def test_normalize_leaves_a_list_source_statuses_byte_identical(self) -> None:
+        before = self.crawl.read_text()
+        self.assertEqual(crawl_repair.normalize_statuses(self.config, self.crawl), 0)
+        self.assertEqual(self.crawl.read_text(), before)
+
+    def test_normalize_keeps_a_status_whose_name_is_not_configured(self) -> None:
+        crawl = json.loads(self.crawl.read_text())
+        crawl["source_statuses"] = {"Not configured": "ok"}
+        self.crawl.write_text(json.dumps(crawl))
+        crawl_repair.normalize_statuses(self.config, self.crawl)
+        self.assertEqual(json.loads(self.crawl.read_text())["source_statuses"],
+                         [{"status": "ok", "name": "Not configured"}])
+        # It answers for no configured source, so every fetch source is still a gap.
+        self.assertEqual(
+            [source["name"] for source in
+             crawl_repair.missing_sources(self.config, self.crawl)],
+            ["Kept", "Dropped", "Dropped Two"])
+
 
 if __name__ == "__main__":
     unittest.main()

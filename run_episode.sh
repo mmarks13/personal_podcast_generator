@@ -391,7 +391,8 @@ gather_sources() {
 Read config/sources.yaml and treat every complete source object whose method is 'fetch' (both tiers, including \
 its name, URL, tier, and window_hours) as the exact crawl list. Use each source's window_hours, defaulting to \
 48 hours only when absent; do not reduce 168-hour sources to today/yesterday. Record exactly one explicit \
-ok, no_recent_items, or failed status for every configured source in source_statuses. Write one item per concrete \
+ok, no_recent_items, or failed status for every configured source in source_statuses, which is a LIST of \
+records - {name, url, tier, window_hours, status} per source, never an object keyed by source name. Write one item per concrete \
 development with its own title and primary development URL, never an index-page rollup. Every item must carry \
 published_at plus date_status='verified', or published_at=null plus date_status='unknown' when diligent inspection \
 cannot establish a date. Keep exact configured names in item sources, including backup-search recoveries. Recover \
@@ -416,9 +417,16 @@ do not create helper scripts or ask for shell access." \
         || log run "WARNING: out/crawl.json is not valid JSON and the damage was not a trailing comma"
       set +e
       crawl_gaps=$(python3 scripts/crawl_repair.py missing \
-        --config config/sources.yaml --crawl out/crawl.json 2>/dev/null)
+        --config config/sources.yaml --crawl out/crawl.json 2>>"$LOG")
       gaps_rc=$?
       set -e
+      # 2026-10-06: the check itself died (source_statuses as a dict, exit 1) with its
+      # stderr discarded, so the one log line that would have named the broken crawl at
+      # 19:36 never appeared and the manifest gate reported it 21 minutes later instead.
+      # Only 0 and 3 are answers; anything else means the check could not read the crawl.
+      if [ "$gaps_rc" != "0" ] && [ "$gaps_rc" != "3" ]; then
+        log run "WARNING: crawl coverage check failed (exit $gaps_rc); out/crawl.json may be unreadable and the manifest gate decides"
+      fi
     fi
     if [ "$gaps_rc" = "3" ]; then
       log run "crawl: configured sources left unanswered by crawl.json; running repair pass"

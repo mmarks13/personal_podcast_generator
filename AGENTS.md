@@ -66,7 +66,11 @@ to an RSS feed Spotify polls.
 - `scripts/crawl_repair.py` — `sanitize` first repairs the trailing commas an agent leaves
   in `out/crawl.json`, because until the syntax is legal nothing downstream can read the file
   at all — on 2026-09-26 one comma killed freshness, first-seen indexing, scoring and the
-  manifest in turn, and with them the evening push. Then the coverage check: `missing` lists configured
+  manifest in turn, and with them the evening push. It then rewrites a `source_statuses`
+  written as a `{name: status}` dict as the contract's list of records, filling each record's
+  url/tier/window_hours from config — on 2026-10-06 that one container type killed the
+  coverage check (so the repair pass never ran) and then the manifest, costing a complete
+  gather and the evening push. Then the coverage check: `missing` lists configured
   `fetch` sources the crawl left unanswered — dropped from `source_statuses`, or Tier-1 and
   marked `failed` with no matching `failures` record (exit 3) — and `merge` folds a
   gap-only repair crawl back into `out/crawl.json`, replacing a defective status. Runs right

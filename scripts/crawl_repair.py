@@ -76,6 +76,39 @@ def configured_fetch(config: Path) -> list[dict]:
     return [source for source in sources if source.get("method") == "fetch"]
 
 
+def normalize_statuses(config: Path, crawl_path: Path) -> int:
+    """Rewrite a dict `source_statuses` as the contract's list of records.
+
+    On 2026-10-06 the crawl agent's second attempt wrote source_statuses as
+    {"Anthropic News": "ok", ...}: every configured name present, every status one of the
+    three legal strings, in a container no reader accepts. The coverage check below died
+    on it (rc=1, stderr discarded), so the repair pass built for a broken crawl never ran,
+    and the manifest gate half an hour later threw away a whole valid gather - fetch,
+    crawl, 21 minutes of scoring, consolidation - and the evening picker with it, over the
+    shape of one field. The name is the only identity in the agent's version, and every
+    other field of a record (url, tier, window_hours) is config's to supply, so the
+    conversion is mechanical. Returns the number of records written, 0 for a crawl that
+    already carries a list.
+    """
+    crawl = _json(crawl_path)
+    statuses = crawl.get("source_statuses")
+    if not isinstance(statuses, dict):
+        return 0
+    configured = {str(source["name"]): source for source in configured_fetch(config)}
+    records = []
+    for name, value in statuses.items():
+        record = dict(value) if isinstance(value, dict) else {"status": value}
+        record["name"] = name
+        source = configured.get(name)
+        for field in ("url", "tier", "window_hours"):
+            if source is not None and source.get(field) is not None:
+                record.setdefault(field, source[field])
+        records.append(record)
+    crawl["source_statuses"] = records
+    crawl_path.write_text(json.dumps(crawl, indent=1, ensure_ascii=False) + "\n")
+    return len(records)
+
+
 def _statuses(crawl: Path) -> list[dict]:
     statuses = _json(crawl).get("source_statuses")
     if not isinstance(statuses, list):
@@ -285,6 +318,10 @@ def main() -> int:
     if args.command == "sanitize":
         fixes = sanitize(args.crawl)
         print(f"sanitize: repaired {fixes} trailing comma(s) in {args.crawl}")
+        shaped = normalize_statuses(args.config, args.crawl)
+        if shaped:
+            print(f"sanitize: rewrote source_statuses as {shaped} record(s) "
+                  f"in {args.crawl}")
         return 0
     if args.command == "missing":
         gaps = gap_sources(args.config, args.crawl)
