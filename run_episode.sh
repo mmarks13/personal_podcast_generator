@@ -59,7 +59,7 @@ DOW="$(date +%u)"   # 1=Mon .. 6=Sat 7=Sun
 # its own at 07:05 — 02:00 opens the 5h window, so it has reset by 07:00 and the read no
 # longer competes with the podcast for it; and `propose` every evening at 19:30, which gathers
 # first and then pushes
-# tonight's candidate mini-dives to the listener's phone (ntfy) — plus, on Tue/Fri/Sat,
+# tonight's candidate mini-dives to the editor's phone (ntfy) — plus, on Tue/Fri/Sat,
 # the deep-dive topic pitches — so the reply steers the next morning's episodes.
 # No arg runs the full pipeline.
 MODE="${1:-full}"
@@ -173,24 +173,26 @@ run_deepdive_episode() {
   local dive_topic_note=""
   local dive_gate_band=""
   if [ -n "$dive_choice" ]; then
-    log run "deepdive: listener pre-chose topic: $dive_choice"
+    log run "deepdive: editor pre-chose topic: $dive_choice"
     if [ "$DRY_RUN" != "1" ]; then
       python3 scripts/proposal_ledger.py choose --topic "$dive_choice" 2>/dev/null \
         || log run "WARNING: proposal ledger update failed"
     fi
-    dive_topic_note=" The listener pre-chose tonight's topic via the evening picker: \
+    dive_topic_note=" The editor pre-chose tonight's topic via the evening picker: \
 '${dive_choice}'. Take it as the deep-dive topic — skip topic selection and go straight to research. \
-Preserve every distinct subject and qualifier in the listener's wording: you may widen it into a \
+Preserve every distinct subject and qualifier in the editor's wording: you may widen it into a \
 teachable framing, but must not narrow away or replace any requested dimension. Before writing, \
-audit the planned title and outline against the original wording."
+audit the planned title and outline against the original wording. The editor is off-mic: on air this is \
+simply tonight's subject, so never say the topic was picked, requested or chosen off a menu, and never \
+mention the editor or a listener."
   fi
-  # An editorial note stands on its own: the listener can say how to teach an episode
+  # An editorial note stands on its own: the editor can say how to teach an episode
   # without naming the topic, and then the writer still picks it.
   if [ -s out/deepdive_note.txt ]; then
     local dive_note
     dive_note="$(cat out/deepdive_note.txt)"
-    log run "deepdive: listener editorial note: $dive_note"
-    dive_topic_note="$dive_topic_note The listener also left an editorial note for this episode: \
+    log run "deepdive: editorial note: $dive_note"
+    dive_topic_note="$dive_topic_note The editor also left an editorial note for this episode: \
 '${dive_note}'. That note OUTRANKS the skill and this prompt on every editorial question — emphasis, \
 framing, depth, what to dwell on or skip, how to teach it. Two things it cannot move: the grounding rules \
 (every claim still traces to a fetched source) and the harness (rendering, publishing, archiving, and the \
@@ -241,12 +243,12 @@ Print the topic and word count when done.${dive_topic_note}"
   # deep dive used never reached the aired-URL stamp, and no deep dive's own record was
   # there for a later one to read.
   python3 scripts/note_band.py --note out/deepdive_note.txt --meta out/deepdive_meta.json 2>/dev/null \
-    || log run "WARNING: could not record the listener note on the deep-dive meta"
+    || log run "WARNING: could not record the editorial note on the deep-dive meta"
   cp -f out/deepdive_meta.json "archive/scripts/$DATE-deepdive-meta.json" 2>/dev/null \
     || log run "WARNING: deepdive meta archive copy failed"
 
   # Record the topic that actually aired. The ledger used to hear only about topics the
-  # listener picked from the phone, so a topic the writer chose for itself was never
+  # editor picked from the phone, so a topic the writer chose for itself was never
   # marked and stayed on future slates: mixture-of-experts (2026-07-11) and quantization
   # (2026-07-08) were each taught and then pitched again, repeatedly.
   if [ -z "$dive_choice" ]; then
@@ -519,7 +521,7 @@ requires. A low score never removes an item. Write the file even if one raw inpu
 }
 
 # In `propose` mode (nightly ~19:30 cron) the gather runs before a cheap session drafts
-# today's stories the listener can lock as tomorrow's mini-dives, and — the night before
+# today's stories the editor can lock as tomorrow's mini-dives, and — the night before
 # a deep dive — six deep-dive topic pitches. Both ride in ONE ntfy push, numbers for the
 # mini-dives and letters for the deep dive, so there is one notification and one reply.
 # The 02:00 run reads the reply via scripts/ntfy_choice.py. No reply -> the writers pick,
@@ -568,7 +570,7 @@ anything already proposed twice unless it's newly urgent), the \
 Propose exactly 8 candidate topics for tomorrow's deep-dive episode as a MIXED slate: \
 about 2 of type 'mechanism' (the idea under this week's news), exactly 3 'foundational', at least 1 \
 'history', at least 1 'debate' — plus one wildcard of any type. Foundational carries three slots \
-because it is the type the listener picks most: read the skill's foundational lanes and honour both \
+because it is the type the editor picks most: read the skill's foundational lanes and honour both \
 what belongs there and what does not. The three must not all be the same kind of thing — spread them \
 across the areas that section names rather than offering three variations on one idea. Rules: a topic is NEVER a single \
 paper — it is the idea or capability the paper instantiates, with the week's material as evidence; \
@@ -584,12 +586,12 @@ copy gather_id from out/gather_manifest.json and write out/deepdive_options.json
 {\"gather_id\": \"${PROPOSAL_GATHER_ID}\", \"options\": []} and move on."
   fi
 
-  run_step propose agent_stage propose "Two slates for tonight's listener push; write both files. \
+  run_step propose agent_stage propose "Two slates for tonight's push to the editor; write both files. \
 FIRST, the mini-dive slate for tomorrow's daily episode. Read out/gather_manifest.json and \
 out/candidates.json: this is tonight's canonical consolidated and optionally Smallbatch-scored gather, \
 and it is the exact candidate set the 02:00 writer will reuse. Read history.json (recent episodes, active threads, and each episode's \
 'dives'), listener.yaml, feedback.md, and the 2-3 newest scripts in archive/scripts/. Propose \
-exactly 15 stories the listener could lock as tomorrow's mini-dives, ordered strongest first. Take \
+exactly 15 stories the editor could lock as tomorrow's mini-dives, ordered strongest first. Take \
 about 8 of them from the stories that objectively earned a dive — multi-source pickup, real \
 community traction (HF upvotes, HN points), or continuation of an active history.json thread — and \
 mark about 7 as wildcards: stories you find genuinely interesting but would not spend a dive on \
@@ -717,7 +719,7 @@ else
     --max-age-hours "$GATHER_MAX_AGE_HOURS" 2>>"$LOG" || true)"
 fi
 
-# The listener's mini-dive picks, if they replied to last evening's push. Unlike the
+# The editor's mini-dive picks, if they replied to last evening's push. Unlike the
 # deep-dive read below this is not gated on DRY_RUN: it is a read-only poll with no side
 # effect (the deep-dive call sits next to a ledger write, which is what that guard is for),
 # so a dry run exercises the picker for real. DAILY_DIVES overrides the phone.
@@ -728,14 +730,16 @@ if [ "$DRY_RUN" != "1" ]; then
     || log run "WARNING: daily proposal choice ledger update failed"
 fi
 if [ -n "$DIVE_PICKS" ]; then
-  log run "podcast: listener pre-chose dives: $DIVE_PICKS"
-  DIVE_PICK_NOTE=" The listener answered the evening picker: read out/daily_picks.json. Any stories it \
+  log run "podcast: editor pre-chose dives: $DIVE_PICKS"
+  DIVE_PICK_NOTE=" The editor answered the evening picker: read out/daily_picks.json. Any stories it \
 lists are locked dives — follow the skill's pre-chosen-dives rule. If it carries a \"note\", that note \
 OUTRANKS the skill and this prompt on every editorial question: emphasis, framing, structure, tone, which \
 stories to dive, even dropping or reordering a locked pick from the same reply. Two things it cannot move: \
 the grounding rules (every claim still traces to a fetched source) and the harness (rendering, publishing, \
 archiving, and the skill files, which you never edit). Length it can move, but only through the band below. \
-A note can arrive with no stories attached; you then choose the dives yourself and shape them as it asks."
+A note can arrive with no stories attached; you then choose the dives yourself and shape them as it asks. \
+The editor is off-mic: a pick is tonight's agenda by air time, so the hosts never say a story was picked, \
+requested or sent in, and never mention the editor or a listener."
 fi
 
 # A note may set tonight's length. The gate hard-fails the run before TTS on the word band,
@@ -750,7 +754,7 @@ if [ -n "$DAILY_BAND" ]; then
   log run "podcast: the note set tonight's band to $BMIN-$BMAX words (~$((BMIN/165))-$((BMAX/165)) min)"
   DIVE_PICK_NOTE="$DIVE_PICK_NOTE Tonight's word band is $BMIN-$BMAX words \
 (~$((BMIN/165))-$((BMAX/165)) minutes), set from that note and enforced by the gate, in place of the usual \
-3000-4700. Write to it: cut or expand coverage to fit the length the listener asked for, never pad or \
+3000-4700. Write to it: cut or expand coverage to fit the length the editor asked for, never pad or \
 truncate mid-thought."
   if [ "$BREDUCED" = "1" ]; then
     log run "podcast: the requested length exceeded what the show renders; reduced to the maximum"
@@ -794,7 +798,7 @@ else
   # What direction produced this episode, kept with it. After the gate, so the meta the
   # gate read is the one the writer wrote; before the archive copy, so the record persists.
   python3 scripts/note_band.py --note out/daily_picks.json --meta out/episode_meta.json 2>/dev/null \
-    || log run "WARNING: could not record the listener note on the episode meta"
+    || log run "WARNING: could not record the editorial note on the episode meta"
   cp -f out/script.txt "archive/scripts/$DATE.txt" 2>/dev/null \
     && cp -f out/episode_meta.json "archive/scripts/$DATE-meta.json" 2>/dev/null \
     || log run "WARNING: script archive copy failed"
@@ -823,7 +827,7 @@ PY
   rm -f out/daily_options.json out/daily_picks.json  # consumed; must not steer tomorrow
 fi
 
-# Wed/Sat/Sun: also produce + publish the deep-dive episode. If the listener replied
+# Wed/Sat/Sun: also produce + publish the deep-dive episode. If the editor replied
 # to the previous evening's options push, their choice becomes the topic.
 if [ "$DOW" = "3" ] || [ "$DOW" = "6" ] || [ "$DOW" = "7" ]; then
   run_deepdive_episode

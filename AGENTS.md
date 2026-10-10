@@ -53,7 +53,7 @@ to an RSS feed Spotify polls.
   `aired_on`, the exact past-episode dates that already cited its URL (read from
   `archive/scripts/*-meta.json`). The consolidator is an agent and drops date fields, so the
   two facts a writer cannot reconstruct are attached after it rather than routed through it.
-- `scripts/note_band.py` — reads a length out of the listener's note ("keep it to 20
+- `scripts/note_band.py` — reads a length out of the editor's note ("keep it to 20
   minutes", "2500 words") and turns it into the word band for that episode, clamped to
   10-35 min (1,700-5,900 words) and widened to a ±12% band around a single figure. The
   harness passes the same numbers to the writer's prompt and to `check_episode.py`, so the
@@ -99,19 +99,19 @@ to an RSS feed Spotify polls.
   `KINDLE_EMAIL`, `GMAIL_APP_PASSWORD`).
 - `scripts/publish.py` — upload MP3 + rebuild iTunes-compatible feed.xml; `--slug`
   distinguishes same-day episodes (daily vs deepdive). Episode pages get a chapter
-  list + full transcript from the archived script; commits the listener-tunable
+  list + full transcript from the archived script; commits the editor-tunable
   files too.
 - `scripts/notify.py` / `scripts/ntfy_choice.py` — the ntfy.sh phone channel
   (`NTFY_TOPIC` in `.env`): run-failure alerts, and the **nightly picker**.
   `run_episode.sh propose` runs every evening and pushes ONE message carrying up to two
-  slates: 15 of the day's stories the listener can lock as tomorrow's **mini-dives**
+  slates: 15 of the day's stories the editor can lock as tomorrow's **mini-dives**
   (`out/daily_options.json`, **numbered**, ~8 top-by-signal plus ~7 marked wildcards
   deliberately spread across kinds of story so the slate reads as a menu), and
   — on Tue/Fri/Sat — a mixed slate of 8 typed deep-dive pitches
   (mechanism/foundational/history/debate, `out/deepdive_options.json`, **lettered**).
   Both are drafted from memory + the same canonical evening `out/candidates.json` that
   the 02:00 writers later receive. One reply answers both: numbers pick mini-dives (up to 3),
-  a letter picks the deep dive, bare free text is a mini-dive in the listener's own
+  a letter picks the deep dive, bare free text is a mini-dive in the editor's own
   words, and a `dd ` prefix makes it a deep-dive topic instead. A `note:` marker carries
   1-4 sentences of editorial direction for the episode that reply steers — how to do it,
   not what to cover. It needs the marker because bare text already means a mini-dive; it
@@ -133,7 +133,7 @@ to an RSS feed Spotify polls.
   that was chosen leaves them too — it has already been an episode. The deep-dive run
   records the topic that actually aired even when the writer picked it itself; before
   that, only phone-chosen topics were recorded and taught subjects kept returning.
-- `feedback.md` (root) — listener notes, read first each night; consumed notes land
+- `feedback.md` (root) — the editor's notes, read first each night; consumed notes land
   in `archive/feedback_log.md`. `listener.yaml` (root) — standing interest weights.
   `config/pronunciations.yaml` — TTS-mispronounced names and the respellings
   `make_audio.py` substitutes into the text it sends the API (audio only; the script

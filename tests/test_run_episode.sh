@@ -438,7 +438,7 @@ echo "Scenario B3: deep-dive-only recovery skips the daily pipeline"
 : > "$LOG"; rm -f "$SB/out/deterministic-calls.log" "$SB/out/gather-calls.log"
 rc="$(invoke_deepdive DEEPDIVE_TOPIC='State as context')"
 [ "$rc" = 0 ] && ok "deep-dive recovery exits 0" || bad "deep-dive recovery exit $rc"
-has "recovery topic reaches writer" "deepdive: listener pre-chose topic: State as context"
+has "recovery topic reaches writer" "deepdive: editor pre-chose topic: State as context"
 grep -qF "Preserve every distinct subject and qualifier" "$SB/out/deepdive-prompt.txt" \
   && ok "custom deep-dive intent is preserved" || bad "custom deep-dive intent is preserved"
 grep -qF "State as context" "$SB/out/deepdive-prompt.txt" \
@@ -457,7 +457,7 @@ echo "Scenario B4: a writer-chosen deep dive is archived and recorded in the led
   "$SB/archive/scripts/$(date +%F)-deepdive-meta.json"
 rc="$(invoke_deepdive)"
 [ "$rc" = 0 ] && ok "writer-chosen deep dive exits 0" || bad "writer-chosen deep dive exit $rc"
-no "no listener topic was claimed" "deepdive: listener pre-chose topic"
+no "no editor topic was claimed" "deepdive: editor pre-chose topic"
 [ -s "$SB/archive/scripts/$(date +%F)-deepdive-meta.json" ] \
   && ok "deep-dive meta reached the archive" || bad "deep-dive meta was not archived"
 has "ledger records the aired topic" "deepdive: recorded writer-chosen topic in the ledger: The two numbers on every model card"
@@ -471,8 +471,8 @@ echo "Scenario B5: an editorial note steers a deep dive whose topic the writer s
 rm -f "$SB/out/gate-calls.log"
 rc="$(invoke_deepdive MOCK_DIVE_NOTE='Go slower than usual. Run 30 minutes.')"
 [ "$rc" = 0 ] && ok "note-only deep dive exits 0" || bad "note-only deep dive exit $rc"
-has "the note is logged" "deepdive: listener editorial note: Go slower than usual"
-no "no topic was claimed" "deepdive: listener pre-chose topic"
+has "the note is logged" "deepdive: editorial note: Go slower than usual"
+no "no topic was claimed" "deepdive: editor pre-chose topic"
 grep -qF 'Go slower than usual. Run 30 minutes.' "$SB/out/deepdive-prompt.txt" \
   && ok "the note reaches the deep-dive writer" || bad "note missing from the deep-dive prompt"
 # 30 min at 165 wpm is 4950 words, +/-12% - above the usual 4000 deep-dive cap.

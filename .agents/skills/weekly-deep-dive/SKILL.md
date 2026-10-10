@@ -18,16 +18,18 @@ Because this runs three times a week, **check `history.json` for a deep-dive (`"
 "deepdive"`) already recorded in the last several days and pick a clearly different
 topic** — don't re-teach what the week's earlier deep-dives already covered.
 
-The listener already hears the daily show, so don't re-report the week. Use the week's
+The audience already hears the daily show, so don't re-report the week. Use the week's
 news as the doorway: "X kept coming up this week — here's how it actually works."
 
 ## Workflow
 
 ### 1. Pick the topic
-**If the invocation prompt says the listener pre-chose tonight's topic** (via the
+**If the invocation prompt says the editor pre-chose tonight's topic** (via the
 evening options push), take it as given — skip selection and go straight to step 2.
 Their free-text topic may need light interpretation into a teachable framing; keep
-its intent.
+its intent. **The editor is off-mic:** on air the topic is simply tonight's subject,
+so never say it was picked, requested or chosen off a menu, and never mention the
+editor or a listener.
 
 **If it carries an editorial note**, that note **outranks this skill**. It is direction on
 *how to teach* this episode — emphasis, framing, depth, where to go slow, what to leave out —
@@ -123,7 +125,7 @@ personas, fiction rules, lore canon, and rituals, all of which apply here. Teach
 mode plays to type: **Ada owns the lineage and foundations** — the computing historian
 in her element, tracing how we got here — while **Alan stress-tests everything** as the
 builder: he wants to run it, cost it, and find where it breaks, asking the questions a
-smart listener would. Open with the two-voice greeting (adapted for the weekend), close
+smart audience would. Open with the two-voice greeting (adapted for the weekend), close
 with "Stay grounded."
 
 **Shape follows topic type** — pick the archetype, then flex it where the material
@@ -136,7 +138,7 @@ wants to (the archetypes are defaults, not slots):
    but keep them precise; say where the analogy breaks down.
 4. **Evidence and limits** — what's demonstrated vs. claimed, known failure modes,
    open questions.
-5. **So what** — what a practitioner or informed listener should do or watch for —
+5. **So what** — what an informed practitioner should do or watch for —
    and, when the material earns it, where this could plausibly go (flagged as
    speculation).
 6. **Wrap** — 20–30 seconds.
@@ -175,7 +177,7 @@ JSON dialogue:
 **The title names the concept the episode teaches.** Someone browsing the feed should be
 able to tell what they would learn, before pressing play. One line, 70 characters or
 fewer, in two parts: **the concept plainly, then the angle**, split by a colon or em dash.
-`publish.py` prepends the standing "Deep Dive:" label, so never write it yourself.
+`publish.py` prepends the standing "[Deep Dive]" label, so never write it yourself.
 
 ```
 You will not find it

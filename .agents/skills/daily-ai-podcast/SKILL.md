@@ -11,7 +11,7 @@ description: >
 # Daily AI Podcast
 
 Turn the last ~24–48 hours of AI activity into a two-host episode that leaves the
-listener actually *understanding* the day's most important developments — not just
+audience actually *understanding* the day's most important developments — not just
 informed that they happened. An episode runs **18–28 minutes** (~3,000–4,700 words at
 the Gemini voices' ~165–170 wpm), with ~22–25 the norm; the day's material, not a
 template, decides where in that envelope it lands.
@@ -48,7 +48,7 @@ push on each other's takes. They may disagree and leave it unresolved; friction 
 of the fun, but it's sparring between colleagues who respect each other, never
 crossfire. **Asymmetry is structural, not decorative:** whoever brings a story leads
 it and *teaches* it; the other is the working skeptic — asking the question a smart
-listener is shouting, poking the numbers, demanding the so-what. Roles swap story by
+audience is shouting, poking the numbers, demanding the so-what. Roles swap story by
 story. The failure mode to guard against in a dive is two clever commentators trading
 symmetrical observations: if a dive's lines could be re-dealt to the other host
 unchanged, the roles have collapsed — rewrite it.
@@ -79,7 +79,7 @@ Berkeley. Persona color must be obviously persona-shaped; every claim about the 
 news follows the grounding rules, full stop.
 
 **Continuity — the characters are canon.** The hosts evolve the way real hosts do: over
-months, listeners slowly learn who they are through small things they reveal about
+months, the audience slowly learns who they are through small things they reveal about
 themselves in passing — a habit, a preference, a weekend project, a sore spot, how they
 feel about being what they are. `history.json` carries this as `lore` (in the episode
 records and `longterm.host_lore`). Treat it as **canon**:
@@ -134,9 +134,10 @@ appearing across several feeds is visible. A source that failed or returned noth
 simply absent — work with whatever is there. The harness also pre-cleared any stale
 `out/crawl.json` / `out/candidates.json`, so don't second-guess leftover scratch.
 
-### 1.5. Recall what the show has already covered — and what the listener said
-**First, read `feedback.md`** (repo root). Any notes there are direct listener
-feedback — the highest-priority editorial input you have. Apply what applies tonight,
+### 1.5. Recall what the show has already covered — and what the editor said
+**First, read `feedback.md`** (repo root). Any notes there come from the show's
+**editor** — the person who directs it, and the highest-priority editorial input you
+have. Apply what applies tonight,
 then move the consumed notes (dated) to `archive/feedback_log.md`. A note that
 reveals a durable preference: append it to `listener.yaml`. A mispronunciation: add
 the name to `config/pronunciations.yaml` with a respelling — the renderer substitutes it
@@ -144,7 +145,7 @@ at render time, so **write the name normally in the script**. A note that would
 require changing this skill: leave it in `feedback.md` and flag it in the step-4
 report — **you never edit SKILL.md**.
 
-**Read `listener.yaml`** — the listener's standing interest weights. `boost` beats win
+**Read `listener.yaml`** — the editor's standing interest weights. `boost` beats win
 ties for dive slots; `downweight` beats stay in the rundown unless the who-cares case is
 unusually strong.
 
@@ -156,7 +157,7 @@ regular host remembers their own past episodes, **not** as a script of callbacks
 
 Use it to inform, not to perform:
 - **Don't re-explain what you've already established.** If you introduced a model, a
-  paper, or a company recently, assume the listener has the background — cover today's
+  paper, or a company recently, assume the audience has the background — cover today's
   development, not the backstory again.
 - **Suppress true repeats.** A story already covered, with nothing new, doesn't run
   again — when it has moved, cover the *update*, not the original news. You apply this in
@@ -285,7 +286,7 @@ the new development in one sentence, the drop is mandatory — there is no excep
 is a stale repeat, drop it. One more repeat the flag can't catch: **a conclusion the
 show keeps re-drawing.** When the news is new but the thesis is one the recent scripts
 already landed on (the archive you read in step 1.5 will show you), cover the facts
-from a different angle — re-litigating the same take is a repeat in the listener's
+from a different angle — re-litigating the same take is a repeat in the audience's
 ears even when the facts are fresh. When in doubt, keep it; never drop a real
 development just because the topic is familiar.
 
@@ -327,11 +328,11 @@ the page.
 
 **The show's default shape: the rundown, then mini-dives.** The gravity of a typical
 episode:
-- **The rundown** — the whole day, first, before anything gets taken apart. A listener
+- **The rundown** — the whole day, first, before anything gets taken apart. Someone
   who hears only the opening minutes should come away knowing what happened and what it
   meant; the dives are the reward for staying, not the price of admission. The governing
   principle is one sentence: **the rundown resolves what it will not return to, and
-  introduces what it will.** Three tiers, and the tier tells the listener what the show
+  introduces what it will.** Three tiers, and the tier tells the audience what the show
   is claiming:
   - **Introduced** (the dive stories) — the headline, plus the one line that says why
     it's on the show. Then stop. Mechanism, numbers, and pushback are the dive's job,
@@ -357,7 +358,7 @@ episode:
   reference rather than announced.
 - **2–3 mini-dives** — the show's substance. A dive takes a story properly: what
   happened, how it actually works, the load-bearing numbers, real pushback, and a
-  so-what the listener keeps. One host teaches, the other is the working skeptic (see
+  so-what the audience keeps. One host teaches, the other is the working skeptic (see
   Hosts). Roughly 5–7 minutes each; a dive that has genuinely earned more may take it —
   but it takes that room from the *envelope*, never from the rundown. If the only way to
   fit a longer dive is a thinner rundown, the dive is too long.
@@ -370,7 +371,7 @@ Every item at every tier traces to a source.
 A story earns a dive when it **genuinely matters** (would a thoughtful practitioner
 still care in a month?) *and* at least one of these holds:
 - **A teachable mechanism** — there's a how-it-works underneath that you can genuinely
-  explain in five minutes and the listener keeps forever.
+  explain in five minutes and the audience keeps forever.
 - **A load-bearing so-what** — the implications reward real analysis: who wins, what
   breaks, what it says about where things are going.
 - **You'd retell it at dinner** — surprising, delightful, or unsettling enough that
@@ -378,18 +379,22 @@ still care in a month?) *and* at least one of these holds:
 An interesting-but-inconsequential paper does not earn a dive; it earns a rundown line.
 The grounding rules apply to a dive's teaching exactly as to its reporting.
 
-**If the listener pre-chose tonight's dives.** When `out/daily_picks.json` exists, the
-listener answered the evening picker and every record in `picks` is a **locked dive**.
+**If the editor pre-chose tonight's dives.** When `out/daily_picks.json` exists, the
+editor answered the evening picker and every record in `picks` is a **locked dive**.
 Match each one into `out/candidates.json` by its `url`; if it didn't survive
 consolidation, fetch the URL and dive it from the primary source. A locked pick
-overrides everything below that exists to *approximate* the listener's taste — the
+overrides everything below that exists to *approximate* the editor's taste — the
 `listener.yaml` weights and the research-paper aging rule — because they just said what
 they want. Repeat-suppression still holds: if the show already dived the story, dive the
 new development, not a re-run. `free_text`, when present, is a locked dive in the
-listener's own words; find and ground the material yourself. `overflow` entries become
+editor's own words; find and ground the material yourself. `overflow` entries become
 rundown lines.
 
-`note`, when present, is the listener's **editorial direction for tonight only**, and it
+**The editor is off-mic.** By air time a pick is simply tonight's agenda: the hosts never
+say a story was picked, requested, chosen off a menu or sent in, never mention the editor
+or a listener, and never read the note aloud.
+
+`note`, when present, is the editor's **editorial direction for tonight only**, and it
 **outranks this skill**. Where it conflicts with anything written here — the dive count, the
 rundown shape, the cold open, tone, pacing, `listener.yaml` weights, the paper-aging rule,
 repeat-suppression, even a locked pick from the same reply — the note wins. It may drop,
@@ -404,7 +409,7 @@ Three things a note cannot move, and you say so in the nightly report when one b
    files, which you never edit. A note is editorial authority, not operational authority.
 3. **The word band**, which it moves only through the harness. If a note asked for a
    length, the band in your invocation prompt already reflects it — clamped to what the
-   show can render. Write to the band you were given; it is the listener's request
+   show can render. Write to the band you were given; it is the editor's request
    already applied, and the gate enforces it.
 
 The evening gather is the editorial cutoff: **do not run an overnight delta or add a
@@ -435,7 +440,7 @@ sentence — signal-backed or not — is recorded in `episode_meta.json`'s `dive
   a plainly extraordinary result can dive on day one. (A paper the rundown resolved or
   named doesn't enter `topics` memory, so its later dive won't be flagged as a repeat —
   that's by design, and it is what makes the named tier free.)
-- **Listener weights apply here.** `listener.yaml` (read in step 1.5) is part of the
+- **Standing weights apply here.** `listener.yaml` (read in step 1.5) is part of the
   dive decision: `boost` beats win ties for dive slots; `downweight` beats stay in
   the rundown unless the who-cares case is unusually strong — except where a
   pre-chosen dive overrides them.
@@ -446,7 +451,7 @@ all dive and the rundown may be ninety seconds and two items. What flexes is its
 never its presence. Check the recent scripts from step 1.5: if the last episodes already
 leaned one way, lean the other. What the show never does is the old failure mode — five
 to seven uniform three-minute treatments where everything lands as equally big. That's a
-news brief, and the listener already has newsletters.
+news brief, and the audience already has newsletters.
 
 **Watch for a breakout tool.** The community feeds (r/LocalLLaMA, Hacker News, TLDR AI)
 regularly surface a new open-source repo that's gaining real traction. When one of them
@@ -541,7 +546,7 @@ piece to its planned budget so the whole lands where you planned it in the
 - When two sources conflict, say so briefly rather than picking one silently.
 - **Attribute on air.** Load-bearing claims name their source in the dialogue itself
   ("LWN reports…", "according to the AWS announcement…", "the authors report…") — the
-  show notes carry the links, but the listener should hear where a claim comes from.
+  show notes carry the links, but the audience should hear where a claim comes from.
 
 **Write for the ear.** The renderer reads the text literally:
 - Numbers as speakable words: "twenty-six billion parameters", "about one point three
@@ -596,21 +601,22 @@ light beat closes it out. Principles, not slots:
   this one short": every one of those is the writer talking, not the host. If two
   stories genuinely touch, let a host notice it in passing, where it happens; never
   announce a thesis at the top and re-state it at the close, and never let a segment
-  begin by naming itself. **The listener hears a conversation, never the format** — the
+  begin by naming itself. **The audience hears a conversation, never the format** — the
   hosts do not remark on the show's structure, on the absence of a theme, or on their
-  own editorial decisions.
+  own editorial decisions. They talk *to* the person listening, as "you", and never
+  about "the listener" or "our listeners" in the third person.
 - **You can't change gears from a full stop.** A dive that lands on an aphorism has
   closed the door the next story has to walk through. Vary where dives end — an open
   question, a disagreement neither host concedes, a thing to watch, and sometimes a
   hard landing — and vary it *deliberately*, across the episode and across the week.
   Left alone you will pick the aphorism every time. The recent scripts (step 1.5) show
   you which ending you've been reaching for; that's the one to break tonight.
-- **Not everything is big — say so on air.** Honest sizing is a feature the listener
+- **Not everything is big — say so on air.** Honest sizing is a feature the audience
   learns to trust; uniform gravity is a formula they learn to tune out.
 - **Land plainly.** The close is one genuine beat and the sign-off — what a host is
   still chewing on, not a recap. The rundown already delivered the day and the last
-  dive ended somewhere live; summarizing here is the third time the listener hears it.
-- **The title names the day's lead story.** A listener scrolling their podcast app,
+  dive ended somewhere live; summarizing here is the third time the audience hears it.
+- **The title names the day's lead story.** Someone scrolling their podcast app,
   who knows nothing about today, must be able to read the title and tell what the
   episode is about. Write it in two parts on one line: **the lead story stated plainly,
   then the angle**, separated by an em dash. The first part carries the actor and what
@@ -650,7 +656,7 @@ hand-write JSON dialogue or escape quotes.
   then that turn's spoken words. No JSON, no quoting, no brackets to escape — just
   dialogue, plus **chapter markers**: a `## Title` line before the first turn of each
   story or segment. Markers are never spoken — they become the MP3's chapter points
-  and the episode page's story list, so make each title short and listener-facing.
+  and the episode page's story list, so make each title short and audience-facing.
   E.g.:
   ```
   A: Good morning — it's Friday, June twentieth. I'm Ada.
@@ -679,7 +685,7 @@ hand-write JSON dialogue or escape quotes.
     "tts_notes": "OPTIONAL: 1-2 sentences of mood/tone direction (see above); omit most days",
     "sources": [ { "group": "Papers" | "Releases" | "Discussion" | "Also noted",
                    "title": "source title", "url": "https://…" } ],
-    "rundown":  ["short listener-facing labels for every story in the rundown, in order"],
+    "rundown":  ["short audience-facing labels for every story in the rundown, in order"],
     "topics":   ["short topic/story labels covered today"],
     "entities": ["orgs/models/people featured today, e.g. Anthropic, Gemini 3"],
     "threads": [ { "name": "ongoing storyline",
@@ -702,7 +708,7 @@ hand-write JSON dialogue or escape quotes.
     under (Papers / Releases / Discussion). This becomes `shownotes.md`; an entry with no
     `url` is skipped. **Named-tier items go under `Also noted`**, which renders last and
     keeps unvetted pointers visibly separate from sources the show actually read — the
-    listener who hears a name gets somewhere to go.
+    person who hears a name gets somewhere to go.
   - `rundown` — **every story the rundown covered, in the order it covered them**,
     introduced, resolved, and named alike. This is the episode page's story list (the
     audio has one `## The day` chapter, so the page carries the granularity instead).
@@ -721,7 +727,7 @@ hand-write JSON dialogue or escape quotes.
     audit trail proving each re-covered story carried a real new development.
   - `dives` — **one entry per mini-dive**, the significance bet stated plainly. It
     persists into `history.json`, so tomorrow's writer sees which bets the show has
-    been making — and the listener's corrections have something concrete to land on.
+    been making — and the editor's corrections have something concrete to land on.
   - `concepts_taught` — only when a dive genuinely taught a concept end to end (the
     kind a future episode could call back to instead of re-teaching). It feeds the
     `longterm.concepts_taught` ledger. Most episodes: omit.
