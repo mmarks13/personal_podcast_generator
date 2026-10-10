@@ -1,4 +1,4 @@
-# Listener feedback
+# Editor's notes
 
 Drop a line here anytime — one bullet per note, no format required. The nightly
 writer reads this file first, applies what it can tonight, and moves consumed notes
