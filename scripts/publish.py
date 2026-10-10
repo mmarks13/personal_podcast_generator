@@ -508,9 +508,12 @@ def main() -> int:
     args = ap.parse_args()
 
     # Feed titles distinguish the episode kind: deep dives get a standing prefix
-    # (the daily stays unprefixed). Idempotent for titles that already carry it.
-    if args.slug == "deepdive" and not args.title.lower().startswith("deep dive"):
-        args.title = f"Deep Dive: {args.title}"
+    # (the daily stays unprefixed). Bracketed, because a deep-dive title usually
+    # carries its own colon and "Deep Dive: Scaling laws: what the curves say" reads
+    # as two titles. Idempotent for either prefix a published title may already hold.
+    if args.slug == "deepdive" and not args.title.lower().startswith(
+            ("[deep dive]", "deep dive")):
+        args.title = f"[Deep Dive] {args.title}"
 
     args.summary = strip_audio_tags(args.summary)
     summary_html = ""
