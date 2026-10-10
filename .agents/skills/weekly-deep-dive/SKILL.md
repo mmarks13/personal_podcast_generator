@@ -27,14 +27,17 @@ news as the doorway: "X kept coming up this week — here's how it actually work
 **If the invocation prompt says the editor pre-chose tonight's topic** (via the
 evening options push), take it as given — skip selection and go straight to step 2.
 Their free-text topic may need light interpretation into a teachable framing; keep
-its intent. **The editor is off-mic:** on air the topic is simply tonight's subject,
-so never say it was picked, requested or chosen off a menu, and never mention the
-editor or a listener.
+its intent.
 
 **If it carries an editorial note**, that note **outranks this skill**. It is direction on
 *how to teach* this episode — emphasis, framing, depth, where to go slow, what to leave out —
 and where it conflicts with anything written here, it wins. It can arrive without a topic,
 and then the topic is still yours to pick from the palette below.
+
+**The editor is off-mic**, for the topic and the note alike. On air this is simply
+tonight's subject, taught the way the show decided to teach it: never say it was picked,
+requested, asked for or chosen off a menu, never mention the editor or a listener, and
+never read the note aloud.
 
 Three things it cannot move, and you say so in your closing report when one binds:
 grounding (every claim still traces to a fetched source, whatever the note asks); the
