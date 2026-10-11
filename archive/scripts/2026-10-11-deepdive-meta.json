@@ -1,0 +1,122 @@
+{
+ "date": "2026-10-11",
+ "kind": "deepdive",
+ "title": "Decision models: predicting actions, not text, and where they break",
+ "summary": "With open decision models from Amazon, Cloudflare and AutoTrust now published, Ada and Alan take the anatomy apart — the output head that scores your options instead of a vocabulary, its lineage from Pointer Networks and BERT, the same fork in robotics from RT-2 to pi-zero — then read the first outside numbers on where these models win (cheap recognition) and fail (knowledge, production, option order).",
+ "sources": [
+  {
+   "group": "Primary sources",
+   "title": "Introducing Strands Decider 2B",
+   "url": "https://strandsagents.com/blog/introducing-strands-decider/"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Cloudflare Clef model card",
+   "url": "https://huggingface.co/Cloudflare/clef"
+  },
+  {
+   "group": "Primary sources",
+   "title": "AutoTrust JEV-27B: fast, calibrated decisions",
+   "url": "https://huggingface.co/blog/autotrust/autotrustjev-27b-fast-calibrated-decisions-and-ful"
+  },
+  {
+   "group": "Primary sources",
+   "title": "JevResearch: independent Jev evaluation report (revision 5)",
+   "url": "https://jevresearch.github.io/Jev-Research/"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Jevals findings, release 2026-09-18",
+   "url": "https://jevals.com/notes/2026-09-18/"
+  },
+  {
+   "group": "Primary sources",
+   "title": "OpenAI Decisions API guide",
+   "url": "https://developers.openai.com/api/docs/guides/decisions"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Liquid AI d1 decision models documentation",
+   "url": "https://docs.liquid.ai/lfm/models/decision-models"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Vinyals, Fortunato, Jaitly — Pointer Networks (2015)",
+   "url": "https://arxiv.org/abs/1506.03134"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Devlin et al. — BERT (2018)",
+   "url": "https://arxiv.org/abs/1810.04805"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Brohan et al. — RT-2: Vision-Language-Action Models (2023)",
+   "url": "https://arxiv.org/abs/2307.15818"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Black et al. — π0: A Vision-Language-Action Flow Model (2024)",
+   "url": "https://arxiv.org/abs/2410.24164"
+  },
+  {
+   "group": "Further reading",
+   "title": "TypeSafe AI raises $870M at $7.5B",
+   "url": "https://typesafe.ai/blog/series-ai"
+  },
+  {
+   "group": "Further reading",
+   "title": "TechCrunch: The maker of non-text AI model Jev valued at $7.5B just weeks after launch",
+   "url": "https://techcrunch.com/2026/10/09/the-maker-of-non-text-ai-model-jev-valued-at-7-5b-just-weeks-after-launch/"
+  },
+  {
+   "group": "Further reading",
+   "title": "Latent Space AINews: TypeSafe/Jev at >$100M ARR, $7.5B valuation",
+   "url": "https://www.latent.space/p/ainews-typesafejev-at-100m-arr-75b"
+  },
+  {
+   "group": "Further reading",
+   "title": "TechCrunch: OpenAI's Jev clone could help the frontier lab stop its swarming agents",
+   "url": "https://techcrunch.com/2026/09/30/openais-jev-clone-could-help-the-frontier-lab-stop-its-swarming-agents/"
+  }
+ ],
+ "topics": [
+  "deep dive: decision models — predicting actions, not text: what the output is (predicate/choice/score distributions, input-only pricing), where the head goes (Strands pointer head, Clef joint schema head, JEV-27B head initialized from lm_head answer rows), lineage (Pointer Networks 2015, BERT's SWAG multiple-choice head), training (JEV-27B distilled from Jev's full distributions; fidelity is not accuracy), the robotics fork (RT-2 actions as overwritten text tokens with a constrained vocabulary vs pi0's action expert with flow matching), outside evidence of wins (Jevals PubMedQA tie at 1/28 price; Clef 94.2 vs 79.7 BANKING77) and failures (GPQA 48 vs 78.3; HLE 21.9% at 0.633 confidence; MATH-500 83.1% recognition vs 13.6% digit production; ~4x primacy position bias), and what remains unmeasured"
+ ],
+ "entities": [
+  "TypeSafe",
+  "Jev",
+  "Amazon",
+  "Strands Decider",
+  "Cloudflare",
+  "Clef",
+  "AutoTrust",
+  "JEV-27B",
+  "JevResearch",
+  "Jevals",
+  "OpenAI",
+  "Liquid AI",
+  "Physical Intelligence",
+  "RT-2",
+  "pi0"
+ ],
+ "threads": [
+  "System One decision models"
+ ],
+ "concepts_taught": [
+  "a decision model as a language-model body with the vocabulary head replaced by an option-scoring head, and the three published designs: a pointer head scoring each option's hidden state against an answer position, a joint schema head scoring all options of all questions in one pass, and a head initialized from the language-model head's own answer-token rows so it starts as the zero-shot answer",
+  "the difference between a classifier head with labels fixed at fine-tune time and a shared scorer applied to options supplied at request time, traced from Pointer Networks (attention used to select an input rather than blend inputs) and BERT's multiple-choice head",
+  "the same text-head-versus-native-head fork in robotics: RT-2 encoding actions as discretized text tokens under a constrained vocabulary versus pi0's separate action expert generating continuous action chunks by flow matching — and why the analogy breaks, since an action chunk must stay coherent and a decision has no downstream to stay coherent with",
+  "recognition versus production: a decision model can pick the right answer from options far better than it can produce the answer as a chain of independent decisions, because a text model is a decision model run in a loop with its own output fed back in",
+  "distillation fidelity versus accuracy: calibration error measured against the teacher's labels certifies agreement with the teacher, not correctness"
+ ],
+ "lore": [
+  {
+   "host": "Ada",
+   "type": "position",
+   "note": "Ada scaled back her September reading of Jev as evidence-shaped for her standing 'architecture is still where gains come from' position: having read the open decision models, she called the bet smaller than she'd said — just the top layer on the same body she's built from — and admitted feeling a little disappointed and, unexpectedly, a little relieved, because its failures (overconfidence outside what it learned, swayed by what it read first) are hers with the words taken out."
+  }
+ ],
+ "listener_note": null,
+ "word_band": null
+}

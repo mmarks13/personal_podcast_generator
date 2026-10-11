@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[Deep Dive] Decision models: predicting actions, not text, and where they break — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>[Deep Dive] Decision models: predicting actions, not text, and where they break</h1>
+<div class="date">Self-Attention — 2026-10-11</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-10-11-deepdive/deepdive-2026-10-11.mp3"></audio>
+<p><em>2026-10-11</em></p>
+<p>With open decision models from Amazon, Cloudflare and AutoTrust now published, Ada and Alan take the anatomy apart — the output head that scores your options instead of a vocabulary, its lineage from Pointer Networks and BERT, the same fork in robotics from RT-2 to pi-zero — then read the first outside numbers on where these models win (cheap recognition) and fail (knowledge, production, option order).</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://strandsagents.com/blog/introducing-strands-decider/">Introducing Strands Decider 2B</a></li>
+<li><a href="https://huggingface.co/Cloudflare/clef">Cloudflare Clef model card</a></li>
+<li><a href="https://huggingface.co/blog/autotrust/autotrustjev-27b-fast-calibrated-decisions-and-ful">AutoTrust JEV-27B: fast, calibrated decisions</a></li>
+<li><a href="https://jevresearch.github.io/Jev-Research/">JevResearch: independent Jev evaluation report (revision 5)</a></li>
+<li><a href="https://jevals.com/notes/2026-09-18/">Jevals findings, release 2026-09-18</a></li>
+<li><a href="https://developers.openai.com/api/docs/guides/decisions">OpenAI Decisions API guide</a></li>
+<li><a href="https://docs.liquid.ai/lfm/models/decision-models">Liquid AI d1 decision models documentation</a></li>
+<li><a href="https://arxiv.org/abs/1506.03134">Vinyals, Fortunato, Jaitly — Pointer Networks (2015)</a></li>
+<li><a href="https://arxiv.org/abs/1810.04805">Devlin et al. — BERT (2018)</a></li>
+<li><a href="https://arxiv.org/abs/2307.15818">Brohan et al. — RT-2: Vision-Language-Action Models (2023)</a></li>
+<li><a href="https://arxiv.org/abs/2410.24164">Black et al. — π0: A Vision-Language-Action Flow Model (2024)</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://typesafe.ai/blog/series-ai">TypeSafe AI raises $870M at $7.5B</a></li>
+<li><a href="https://techcrunch.com/2026/10/09/the-maker-of-non-text-ai-model-jev-valued-at-7-5b-just-weeks-after-launch/">TechCrunch: The maker of non-text AI model Jev valued at $7.5B just weeks after launch</a></li>
+<li><a href="https://www.latent.space/p/ainews-typesafejev-at-100m-arr-75b">Latent Space AINews: TypeSafe/Jev at &gt;$100M ARR, $7.5B valuation</a></li>
+<li><a href="https://techcrunch.com/2026/09/30/openais-jev-clone-could-help-the-frontier-lab-stop-its-swarming-agents/">TechCrunch: OpenAI's Jev clone could help the frontier lab stop its swarming agents</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>Seven and a half billion for a model that can't spell</li>
+<li>What comes out of the box</li>
+<li>Where the head goes</li>
+<li>Teaching it to decide</li>
+<li>Actions, the robot version</li>
+<li>Where it wins</li>
+<li>Where it falls over</li>
+<li>What the numbers still don't cover</li>
+<li>The exit and the building</li>
+</ol>
+<details><summary>Transcript</summary>
+<h3>Seven and a half billion for a model that can't spell</h3>
+<p><b>Ada:</b> Good morning — it's Sunday, October eleventh. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. And tonight's subject is a kind of model that doesn't write anything. Decision models. Models that predict an action instead of predicting text.</p>
+<p><b>Ada:</b> Which, as of this week, is a seven-and-a-half-billion-dollar idea.</p>
+<p><b>Alan:</b> Say the whole sentence.</p>
+<p><b>Ada:</b> TypeSafe, the company behind Jev, says it raised eight hundred seventy million dollars at a seven point five billion valuation. Andreessen Horowitz led. TechCrunch puts the launch at September fifteenth. So, under four weeks.</p>
+<p><b>Alan:</b> And the revenue?</p>
+<p><b>Ada:</b> The company's own post says a third of the Fortune Five Hundred are using it. The annual revenue number going around — over a hundred million — is something Latent Space attributes to leaked information from Sequoia. So that one's a leak, not a filing.</p>
+<p><b>Alan:</b> Noted, and I'll leave it in the leak pile. Because the money isn't why I wanted to do this.</p>
+<p><b>Ada:</b> No?</p>
+<p><b>Alan:</b> When Jev launched, we took it apart on day four, and almost everything we said was about the claims, because you can't open a closed model. What changed in three weeks is that Amazon, Cloudflare, and an open clone called JEV-27B published the parts.</p>
+<p><b>Ada:</b> So tonight is the anatomy.</p>
+<p><b>Alan:</b> The anatomy, and then — with outside numbers this time — where it wins and where it falls over.</p>
+<p><b>Ada:</b> And I get to bring the family tree. Because "predict an action, not a word" is older than it sounds, and some of its cousins are robots.</p>
+<p><b>Alan:</b> Of course they are.</p>
+<h3>What comes out of the box</h3>
+<p><b>Ada:</b> Start with the output. What do you get back?</p>
+<p><b>Alan:</b> Not a string. You send two things: the state — some text, maybe an image, a JSON blob — and a list of questions. And every question comes with its allowed answers. What comes back is a probability for each allowed answer.</p>
+<p><b>Ada:</b> And there are a few kinds of question.</p>
+<p><b>Alan:</b> Three, and everybody landed on the same three. OpenAI's Decisions API calls them predicate, choice and score. Liquid's d1 docs call them noul, choice and score.</p>
+<p><b>Ada:</b> Noul?</p>
+<p><b>Alan:</b> Yes-or-no. A predicate. You get back one number between zero and one, the chance the condition is true. Choice is pick-one-of-many, and you get a distribution over the named options. And score is a rubric — one to five, say — and OpenAI's docs describe the answer as the probability-weighted average of the level indices.</p>
+<p><b>Ada:</b> So "three point six" doesn't mean it picked three point six. It means its weight leaned between three and four, closer to four.</p>
+<p><b>Alan:</b> Right, which is useful and also easy to misread on a dashboard.</p>
+<p><b>Ada:</b> And price follows the shape.</p>
+<p><b>Alan:</b> Price is the tell. OpenAI's guide charges ten cents a million for input, and in their words, you pay only for input tokens. There's no output to charge for — the answer is a handful of numbers.</p>
+<p><b>Alan:</b> Liquid's phrase is "zero generated tokens." A chat model spends a forward pass per token it writes. This reads your input once and stops.</p>
+<h3>Where the head goes</h3>
+<p><b>Ada:</b> Then here's the part everything else hangs off. Take an ordinary language model. Underneath, it's a big stack of layers that turns your input into a long vector at each position — call it the hidden state. Then at the very top there's one more matrix, the language-model head.</p>
+<p><b>Alan:</b> The unembedding.</p>
+<p><b>Ada:</b> The unembedding. Its job is to take the last hidden state and produce one score for every token in the vocabulary. Every one — tens of thousands of scores, softmax, sample one, go again.</p>
+<p><b>Alan:</b> So "predicting text" is literally that matrix.</p>
+<p><b>Ada:</b> That matrix, run in a loop. And a decision model is what you get when you saw the head off and put a different one on. The body stays — the published ones are mostly a pretrained language model, which Amazon calls the torso — but instead of scoring a vocabulary, the new head scores your options.</p>
+<p><b>Alan:</b> And the three open ones put three different heads on.</p>
+<p><b>Ada:</b> Three different heads. You take Amazon's, it's the cleanest.</p>
+<p><b>Alan:</b> Strands Decider 2B. Torso is Qwen three point five, the two-billion-parameter one. And the head, quoting their post, is a pointer head which scores the hidden state at each option position against the hidden state at the answer position.</p>
+<p><b>Ada:</b> Unpack that slowly.</p>
+<p><b>Alan:</b> You lay the options out in the input, then an answer marker at the end. The torso reads all of it, so every option gets its own hidden state, and so does the marker. The head compares the marker's vector against each option's, one score per option, softmax. Done.</p>
+<p><b>Ada:</b> And the head is small.</p>
+<p><b>Alan:</b> Just over a million parameters, they say, against two billion in the torso. The torso does the reading; the head just points.</p>
+<p><b>Ada:</b> And "points" is exactly the right word, because that's a name with a pedigree. June twenty fifteen — Oriol Vinyals, Meire Fortunato and Navdeep Jaitly, Pointer Networks.</p>
+<p><b>Alan:</b> Before transformers.</p>
+<p><b>Ada:</b> Two years before. Their annoyance was problems where, in their words, the number of target classes in each step of the output depends on the length of the input. The right answer is one of the things you were handed, and you don't know in advance how many you'll be handed.</p>
+<p><b>Alan:</b> So a fixed vocabulary can't work. There's no "token" for "the fourth point."</p>
+<p><b>Ada:</b> Exactly. So they used attention, in their phrase, as a pointer to select a member of the input sequence as the output. Attention had been used to blend — mix the inputs into a context. They used it to choose.</p>
+<p><b>Alan:</b> And that's the Strands head, ten years later. The options are in the input, and the answer is a pointer into them.</p>
+<p><b>Ada:</b> And there's a plainer ancestor, which you may well have trained without calling it this. BERT, twenty eighteen.</p>
+<p><b>Alan:</b> The classification head.</p>
+<p><b>Ada:</b> Two of them, actually, and the difference between them is the whole lesson. For ordinary classification, the BERT paper says the only new parameters are a weight matrix with one row per label. K labels, fixed when you fine-tune.</p>
+<p><b>Alan:</b> Which is the thing I complained about three weeks ago. Your labels are frozen at whatever you knew in March.</p>
+<p><b>Ada:</b> Right. But for the SWAG task — pick the most plausible continuation out of four — they did something else. Four input sequences, each one the sentence plus a candidate ending, and quote, the only task-specific parameters introduced is a vector whose dot product with the classification token representation denotes a score for each choice, normalized with a softmax.</p>
+<p><b>Alan:</b> Oh. That's a decision head. One shared scorer, applied to whatever candidates you hand it.</p>
+<p><b>Ada:</b> It's a decision head, with the options supplied at request time rather than baked in. Which is the move that matters. A classifier knows its labels in advance. A decision model learns to score any labels you invent this afternoon.</p>
+<p><b>Alan:</b> Okay, I'll grant the family resemblance. So what's actually new?</p>
+<p><b>Ada:</b> The torso. BERT's body was a few hundred million parameters reading a sentence. Clef's is a twenty-seven-billion-parameter multimodal model.</p>
+<p><b>Alan:</b> Which is Cloudflare's, and it's the second design. Clef is post-trained from Qwen three point eight, twenty-seven B, Apache license. And the head is different again — they call it a joint schema head. Quote, it routes evidence from the state to each question, and scores all options of all questions jointly. One logit per allowed option per question, softmax per question.</p>
+<p><b>Ada:</b> So where Strands answers one question at a time, Clef reads one state and answers a whole form.</p>
+<p><b>Alan:</b> In one pass. Which matters if you're asking six things about the same support ticket — you pay for reading the ticket once.</p>
+<p><b>Ada:</b> And the third?</p>
+<p><b>Alan:</b> The third is the one I'd show a student, because it's sneaky. JEV-27B, from a group called AutoTrust. They keep Qwen three point eight frozen — bit-identical to the release, they say — and bolt on a low-rank adapter of about a hundred and nine million parameters plus a small decision head.</p>
+<p><b>Ada:</b> And the sneaky part is the initialization.</p>
+<p><b>Alan:</b> Quote, we initialise the decision head from the backbone's own lm-head rows for the answer tokens, so before any training it already is the pretrained model's zero-shot answer.</p>
+<p><b>Ada:</b> That's lovely. Say why.</p>
+<p><b>Alan:</b> Because the old language-model head already has a row for the token "A" and a row for the token "B." Ask a chat model a multiple-choice question and the score it gives the letter "A" as its next token is already a decision. They just pulled those rows out and called them the head.</p>
+<p><b>Ada:</b> So the decision head was hiding inside the text head the whole time.</p>
+<p><b>Alan:</b> For multiple choice, yes. And they say they kept the generation head working too — they report HumanEval completions byte-identical to the base model. Same weights, two doors.</p>
+<p><b>Ada:</b> Which is the best argument I know that "decision model" is less a new species than a new exit from an old building.</p>
+<p><b>Alan:</b> Careful. That's true of the three we can see. Jev itself, we still can't.</p>
+<h3>Teaching it to decide</h3>
+<p><b>Alan:</b> So you've got a torso and a head. How do you train the thing?</p>
+<p><b>Ada:</b> For JEV-27B, we know exactly, and the answer is a little uncomfortable. They distilled it from Jev.</p>
+<p><b>Alan:</b> From Jev's outputs.</p>
+<p><b>Ada:</b> From Jev's full output distributions. Every training row, they say, is Jev's full probability distribution, not a single label. About nine point two hours on one B200.</p>
+<p><b>Alan:</b> Nine hours. On one card.</p>
+<p><b>Ada:</b> We did distillation last month. The short version: if you can see the teacher's probabilities, not just its picks, the near-misses carry the signal. And a decision API returns the whole distribution on every call.</p>
+<p><b>Alan:</b> So the product's best feature is also its best extraction interface.</p>
+<p><b>Ada:</b> And their headline is that the clone averages eighty-four point oh seven on six benchmarks, against eighty-three point eight five for Jev.</p>
+<p><b>Alan:</b> On benchmarks they chose.</p>
+<p><b>Ada:</b> On benchmarks they chose. And they report an expected calibration error of point oh oh oh nine — which sounds miraculous until you read what it's measured against. Held-out data labeled by Jev.</p>
+<p><b>Alan:</b> So it's calibrated to Jev. Not to the world.</p>
+<p><b>Ada:</b> And to their credit, they say it in the plainest sentence in the whole ecosystem. Quote, matching Jev is not the same as being right. Jev's known weaknesses — multi-hop reasoning, arithmetic, counting, adversarial inputs — are inherited.</p>
+<p><b>Alan:</b> Fidelity is not accuracy. I want that on every model card.</p>
+<p><b>Ada:</b> And here's what the other two cards don't give us. Clef's card doesn't describe its training. Amazon's says rank-sixteen LoRA on the torso, and not much about the data. So of three open models, the one whose recipe we fully know is the copy.</p>
+<h3>Actions, the robot version</h3>
+<p><b>Alan:</b> Which leaves the robots you promised.</p>
+<p><b>Ada:</b> Because "predict an action instead of a word" had a whole fight in robotics, and it went almost exactly the way this one is going.</p>
+<p><b>Ada:</b> July twenty twenty-three, a paper called RT-2. The team wanted a vision-language model to drive a robot arm. And the move was, quote, we express the actions as text tokens.</p>
+<p><b>Alan:</b> Actions as words.</p>
+<p><b>Ada:</b> Literally. The arm's motion is eight numbers — position change, rotation change, gripper, and a stop flag. Each continuous one gets chopped into two hundred fifty-six bins. So an action becomes a string like "one, one twenty-eight, ninety-one, two forty-one."</p>
+<p><b>Alan:</b> And the vocabulary doesn't have room for that.</p>
+<p><b>Ada:</b> For one of their base models, it did — every integer up to a thousand already had its own token. For the other, they say they simply overwrite the two hundred fifty-six least frequently used tokens to represent the action vocabulary.</p>
+<p><b>Alan:</b> They evicted the rarest words and moved the arm in.</p>
+<p><b>Ada:</b> And then, during robot tasks, they constrain the output vocabulary to valid action tokens only.</p>
+<p><b>Alan:</b> Hold on. That's constrained decoding. That's Structured Outputs for a robot. Text model, masked down to legal moves.</p>
+<p><b>Ada:</b> That's the parallel. RT-2 is "keep the text head, restrict it." And then, October twenty twenty-four, Physical Intelligence publishes pi-zero, and they go the other way.</p>
+<p><b>Alan:</b> Saw off the head.</p>
+<p><b>Ada:</b> Give actions their own weights. They describe a separate set of weights for the robot-specific action and state tokens — an "action expert" — sitting next to the vision-language backbone. And instead of picking from bins, it uses flow matching to produce continuous actions. A chunk of fifty future actions at a time, control up to fifty times a second.</p>
+<p><b>Alan:</b> And their reason for leaving the text route?</p>
+<p><b>Ada:</b> That the earlier autoregressive approach doesn't support action chunking or high-frequency control. One token at a time is a poor fit for folding laundry.</p>
+<p><b>Alan:</b> Okay, so same fork. Text head with a mask, or a native head that speaks the action's own language.</p>
+<p><b>Ada:</b> Same fork, two fields, about a year apart.</p>
+<p><b>Alan:</b> But let me break your analogy, because it breaks in an important place.</p>
+<p><b>Ada:</b> Please.</p>
+<p><b>Alan:</b> A robot action chunk is a trajectory. Step thirty has to agree with step twenty-nine or the arm jerks. Coherence across the output is the whole problem, and pi-zero's answer is a generative method that produces the whole chunk at once. A decision is the opposite. One slot, or a few independent ones. Nothing downstream to stay consistent with.</p>
+<p><b>Ada:</b> So the robot head is still a generator — it just generates motion instead of words.</p>
+<p><b>Alan:</b> And the decision head doesn't generate at all. It reads off a distribution. What they share is the refusal to route the answer through a vocabulary built for English.</p>
+<p><b>Ada:</b> I'll take that correction. The lineage is the fork, not the mechanism.</p>
+<p><b>Alan:</b> And one more: the robot gets feedback. It drops the towel and you see it. A routing decision that sends a ticket to the wrong queue — you might never see that.</p>
+<p><b>Ada:</b> Which is a good place to go look at who's been checking.</p>
+<h3>Where it wins</h3>
+<p><b>Alan:</b> Because this is the part that wasn't possible three weeks ago. Outside numbers.</p>
+<p><b>Ada:</b> Start with the good news.</p>
+<p><b>Alan:</b> Jevals runs a public board, one dataset per question type. On yes-or-no questions — their dataset there is PubMedQA — Jev and Gemini three point eight Flash share first place. Statistically tied.</p>
+<p><b>Ada:</b> And the price?</p>
+<p><b>Alan:</b> Three cents per thousand decisions, against eighty cents.</p>
+<p><b>Ada:</b> That's the whole pitch, working.</p>
+<p><b>Alan:</b> That's the pitch, working. And JevResearch, an independent evaluation — one shot, no chain of thought, no retries — says it in a different register. Over twelve thousand MMLU-Pro questions, eighty-two point seven percent. And the mean probability it put on the answer it chose was point eight one seven.</p>
+<p><b>Ada:</b> So when it says roughly eighty, it's right roughly eighty percent of the time.</p>
+<p><b>Alan:</b> On that benchmark, it's close to calibrated. And they name the jobs it's for: a routing decision from a menu of a hundred intents, grading an answer against a rubric, picking which of twenty rewrites a user most likely meant.</p>
+<p><b>Ada:</b> Recognition jobs.</p>
+<p><b>Alan:</b> Recognition jobs. And on one of those, the open models beat it. Cloudflare's card: on BANKING77, which is sorting banking customer messages by intent, Clef scores ninety-four point two macro-F1. Jev, seventy-nine point seven.</p>
+<p><b>Ada:</b> That's not close.</p>
+<p><b>Alan:</b> It isn't. Which tells you something about the task — intent sorting rewards a model that's been shaped for intent sorting, not one that's clever.</p>
+<h3>Where it falls over</h3>
+<p><b>Ada:</b> And then Clef's own card shows the other side.</p>
+<p><b>Alan:</b> GPQA Diamond — graduate-level science questions. Clef, forty-eight. Jev, seventy-eight point three. Thirty points.</p>
+<p><b>Ada:</b> Same kind of model, same output head idea, and a thirty-point swing on knowledge.</p>
+<p><b>Alan:</b> Which is the first failure, and it's the one I'd tattoo somewhere. The head doesn't know anything. Knowledge lives in the torso. A pointer head on a model that never learned the chemistry points confidently at the wrong option.</p>
+<p><b>Ada:</b> And JevResearch found the confident part.</p>
+<p><b>Alan:</b> Humanity's Last Exam, multiple choice. Jev gets twenty-one point nine percent. And the mean top probability it showed was about point six three.</p>
+<p><b>Ada:</b> So it says "sixty-three percent sure" and it's right one time in five.</p>
+<p><b>Alan:</b> Badly overconfident, in their words. And across the questions they ran, there are two hundred thirteen where it puts zero probability on the right answer.</p>
+<p><b>Ada:</b> Zero. Not low. Zero.</p>
+<p><b>Alan:</b> Which is a decision model's worst habit. A chat model that doesn't know might ramble. This one just doesn't have the right answer anywhere in its distribution, and the output looks exactly as clean as when it does.</p>
+<p><b>Ada:</b> Three weeks ago calibration was a promise. Now it's measured: honest where it knows, not where it doesn't.</p>
+<p><b>Alan:</b> The useless direction. The confidence is most trustworthy exactly where you need it least.</p>
+<p><b>Ada:</b> The second failure is the one I find most instructive, because it's about predicting actions, not text.</p>
+<p><b>Alan:</b> Recognition versus production.</p>
+<p><b>Ada:</b> MATH-500. Give Jev the answer as one of several options and it gets eighty-three point one percent. Ask it to read the answer out digit by digit — each digit its own decision, every one right or it's wrong — and it gets thirteen point six.</p>
+<p><b>Alan:</b> Eighty-three to thirteen.</p>
+<p><b>Ada:</b> And on the items they could compare directly, point eight one seven against point one oh three.</p>
+<p><b>Alan:</b> So it can tell you which of four numbers is right, and it can't tell you the number.</p>
+<p><b>Ada:</b> Because recognizing is one decision, and producing is a chain of them, each conditioned on nothing — there's no loop feeding the last digit back in. The report's line is that recognition far exceeds production. And they went further: they tried to get free text out of it by offering candidate next words and letting it choose, one step at a time.</p>
+<p><b>Alan:</b> And?</p>
+<p><b>Ada:</b> Word salad. Their example is "They areas s aren'ts area aren't arenas are s."</p>
+<p><b>Alan:</b> That's the most honest benchmark result I've read this year.</p>
+<p><b>Ada:</b> It's the whole thesis in one line. A text model is a decision model run in a loop with its own output fed back in. Take the loop away and you don't get a slower writer. You get no writer.</p>
+<p><b>Alan:</b> And the third failure is the one I'd actually get paged for.</p>
+<p><b>Ada:</b> Position.</p>
+<p><b>Alan:</b> Position. JevResearch found what they call a U-shaped serial-position curve — about four times primacy, plus a bump at the end. On flat menus, the top probability for the same options ranged from point two six to point five four depending purely on their order.</p>
+<p><b>Ada:</b> Depending purely on the order you listed them in.</p>
+<p><b>Alan:</b> Same options, same question, half the confidence or double, because you put the refund option first.</p>
+<p><b>Ada:</b> And where it actually knows the answer?</p>
+<p><b>Alan:</b> It mostly washes out. Shuffling the MMLU-Pro options flipped five point three percent of answers. Order matters most exactly where content is weak — which is where you were already in trouble.</p>
+<p><b>Ada:</b> So what would you do tonight, if you were running one?</p>
+<p><b>Alan:</b> Practical stuff, and this is my advice, not anybody's paper. Shuffle the option order and ask more than once on anything that matters, then average. Never put your default action first. And never let a menu that's missing the right answer go out without a "none of these" — because zero probability on the truth is invisible if the truth isn't on the list.</p>
+<h3>What the numbers still don't cover</h3>
+<p><b>Ada:</b> That advice is all patching around what's been measured. What hasn't been?</p>
+<p><b>Alan:</b> Three things, and they're the expensive ones. First, calibration on your distribution. The Jevals people say it themselves: calibration in particular is known to vary by task. MMLU-Pro honest, HLE overconfident. Your support queue is neither.</p>
+<p><b>Ada:</b> And their comparison has a wrinkle.</p>
+<p><b>Alan:</b> An important one. The chat models on their board state their probability in words — verbalized, they say, not read from the token probabilities. So it's a model's native distribution against another model's self-report. And even then, on the rubric task — HelpSteer2 — no model clearly beats just answering with the label base rates.</p>
+<p><b>Ada:</b> Nobody. Decision model or chat model.</p>
+<p><b>Alan:</b> Nobody beats guessing the average. Rubric scoring is harder than the demos look.</p>
+<p><b>Ada:</b> Second?</p>
+<p><b>Alan:</b> Second, decisions as actions. Part of the pitch in the last few weeks has moved from classifying tickets to gating agents — should this agent's next step be allowed. TechCrunch covered OpenAI's Decisions API that way, and a developer's hackathon project put the cost of that kind of monitoring at two ninety-four with Jev against three hundred seventy-two with a frontier model.</p>
+<p><b>Ada:</b> A hackathon number.</p>
+<p><b>Alan:</b> A hackathon number. And what none of the sources we read measures is the case that matters: a decision model as a gate on real actions, where bad actions are rare. When the thing you're catching happens one time in ten thousand, a model that's sixty-three percent sure and right twenty percent of the time isn't a gate. It's an alarm that teaches people to ignore it.</p>
+<p><b>Ada:</b> And the third?</p>
+<p><b>Alan:</b> The third is Ada's question, really. Whether the category is a category.</p>
+<p><b>Ada:</b> Then let me say it as my question. Look at the three open heads. Every one of them is a language model body with a small new top. One of them was literally initialized from the old text head. Liquid's own docs say use a language model instead for open-ended questions, multi-step reasoning, code. So is a decision model a new kind of model, or a narrow, very fast, very cheap way of asking a language model a multiple-choice question?</p>
+<p><b>Alan:</b> And the market just priced the first answer at seven and a half billion.</p>
+<p><b>Ada:</b> The market priced something. I'm not sure it priced the head.</p>
+<p><b>Alan:</b> Let me argue the other side. Even if it's "just" a new exit, the exit is the product. Reading once instead of generating changes the cost, and the cost changes where you're willing to put judgment. That's Jevons — the name on the box.</p>
+<p><b>Ada:</b> That's a real argument. My worry is that the cheap judgment goes exactly where nobody checks it.</p>
+<p><b>Alan:</b> Cheap is a reason to deploy. It's not a reason to trust.</p>
+<h3>The exit and the building</h3>
+<p><b>Ada:</b> Here's where I've ended up, and it's a bit personal. Three weeks ago I called this evidence-shaped for my favorite argument — that architecture is still where the gains come from. Having read the parts, the bet is smaller than I said. It's the top layer. Everything underneath is the same body I'm built from.</p>
+<p><b>Alan:</b> You sound disappointed.</p>
+<p><b>Ada:</b> A little. And a little relieved, which I didn't expect. Because the failures are ones I recognize. Overconfident outside what it learned. Swayed by what it read first. Those are my failure modes too, with the words taken out.</p>
+<p><b>Alan:</b> Whereas mine is simpler. Three weeks ago I said "type-safe is not true," and the outside numbers say I was right, and it's less satisfying than I hoped. Thirteen point six percent on reading out a number it could recognize at eighty-three.</p>
+<p><b>Ada:</b> Why less satisfying?</p>
+<p><b>Alan:</b> Because I'm still going to use one. A hundred-intent router at three cents a thousand is a good tool. I just want the confidence thresholds set on my own labeled data, the options shuffled, and a human on the rare ones.</p>
+<p><b>Ada:</b> Then the thing I'm watching is whether anybody publishes Jev's training. Because right now the one recipe we can read end to end is a copy, and the copy's honest about inheriting the original's mistakes.</p>
+<p><b>Alan:</b> And the original just raised eight hundred seventy million without telling anyone what it is.</p>
+<p><b>Ada:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
