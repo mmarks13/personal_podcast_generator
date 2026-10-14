@@ -57,6 +57,41 @@
       ]
     },
     {
+      "date": "2026-10-14",
+      "kind": "deepdive",
+      "title": "Code review when agents write the code: reviewing intent, not lines",
+      "summary": "Ada and Alan take code review apart into the four jobs it always bundled — teaching, norms, gatekeeping, catching bugs — then use the Harvard Jellyfish study's two-channel model (more code to read versus code that is harder to check) to explain why agent output piles up at review, and what intent review, risk routing, independent checks and provenance can and cannot replace.",
+      "topics": [
+        "deep dive: code review when agents write the code"
+      ],
+      "entities": [
+        "Anthropic",
+        "Scion",
+        "Antique",
+        "Jellyfish",
+        "Fiona Chen",
+        "James Stratton",
+        "QGIS",
+        "Block",
+        "Michael Fagan",
+        "Alberto Bacchelli",
+        "Christian Bird",
+        "Google",
+        "Matthew Schwartz",
+        "BootLoops",
+        "Naresh Jain",
+        "Ken Thompson"
+      ],
+      "threads": [],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada staked out that with agent authors the most valuable artifact in a pull request is a statement of intent written before the code, not generated after it — Fagan's 'reader' role coming back. Alan half-agreed, holding that he often only learns what he wants by watching the agent get it wrong, and they left open whether automating review automates away the apprenticeship that produces reviewers."
+        }
+      ]
+    },
+    {
       "date": "2026-10-13",
       "title": "Anthropic tests AI self-replication on $55 TV boxes — signs of life",
       "summary": "Anthropic's Frontier Red Team tests whether small open models can spread across cheap devices with no data center, and the same lab reports its distillation defenses cut extractable reasoning ten to a hundred times. Plus Meta's Muse Wonder, a patent-lawyer trial where only seniors got better without the tool, and a Harvard study finding coding agents add code but not shipped features.",
@@ -2526,6 +2561,18 @@
     ],
     "concepts_taught": [
       {
+        "name": "code review as four bundled jobs (teaching the author, maintaining norms, gatekeeping/ownership, accident prevention) that an agent author breaks differently: norms move to linters and instructions, ownership stays a human approval, teaching moves into the rules file, and bug-catching grows from the smallest job to the largest",
+        "last_taught": "2026-10-14"
+      },
+      {
+        "name": "the two channels by which coding agents load review (Chen & Stratton): a productivity channel that is a queue and can be relieved by moving labor into review, and a bug-rate channel that raises scrutiny per unit of code and cuts good output — distinguished in the data by change requests nearly doubling at unchanged pull-request size",
+        "last_taught": "2026-10-14"
+      },
+      {
+        "name": "intent review with risk routing and independent checks: approval rules that know a change's kind, executable acceptance gates the authoring agent cannot see (because a visible test is a target — building to the test), and provenance for what inspection of an artifact can never guarantee",
+        "last_taught": "2026-10-14"
+      },
+      {
         "name": "prompt-cache prefix matching in agent loops: caches reuse only the longest unchanged prefix, so per-step pruning of history breaks reuse, batch pruning (e.g. 20:1) preserves it, and caching without matching pruning can cost more than not caching",
         "last_taught": "2026-10-11"
       },
@@ -2992,18 +3039,6 @@
       {
         "name": "the difference between logit-level distillation and API text distillation: sampled tokens as a one-draw Monte Carlo estimate of the teacher's distribution, and reasoning traces as the workaround",
         "last_taught": "2026-09-12"
-      },
-      {
-        "name": "on-policy distillation: student-generated trajectories scored per token by the teacher, reverse KL as mode-seeking, and the dispute over whether the teacher's scores are the part that works",
-        "last_taught": "2026-09-12"
-      },
-      {
-        "name": "what an agent harness actually is: the loop around a model call — tool dispatch, retries, context compaction when the window fills, and recovery when the machine dies mid-task",
-        "last_taught": "2026-09-11"
-      },
-      {
-        "name": "why context compaction is lossy by definition, and why an undocumented compaction policy produces silent forgetting rather than failures",
-        "last_taught": "2026-09-11"
       }
     ]
   }
