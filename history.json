@@ -1,6 +1,62 @@
 {
   "episodes": [
     {
+      "date": "2026-10-14",
+      "title": "Anthropic swaps Git for Scion — built for 30,000 merges a day",
+      "summary": "Anthropic explains why agent-driven change volume pushed it off Git and onto Scion, a server-side source control system with no merge queue. Plus California's No Robo Bosses Act, Google Play's private vibe-coded apps, a paper proving a model can hide a capability from any elicitation, Thinking Inertia, and a Harvard physicist's thirty-six Claude-assisted manuscripts.",
+      "topics": [
+        "Anthropic's Scion source control (engineering post 13 October 2026): merged changes from about 2,500/day in May 2026 to over 30,000/day in September; main-branch history almost 100 GB, compressed working copy over 25 GB, about 25 million CI checkouts/day (over 600 PB/day of naive git traffic, several hundred git mirrors); always-online server-side design with changesets in blob storage, refs as a Spanner compare-and-swap, no fully materialized repo, sparse-by-default checkouts, three cache tiers at over 99% hit rate, 200x smaller infrastructure, 25% CI CPU win; seven engineers, five months; no merge queue, post-merge testing with Claude fixing conflicts; not a general git replacement and not open-sourced",
+        "California No Robo Bosses Act (SB 947, signed by Newsom late September 2026): human must corroborate AI-assisted firing/discipline by reviewing records; tools barred if reviewer cannot verify output; notice to employees and right to a description of their data; signed alongside SB 813 (third-party AI verification) and AB 1405 (AI auditor registry)",
+        "Google Play private apps (13 October 2026): AI Studio-built Android apps installable privately from Play, invisible in search/listings, subject to Play policy, US adults first, friend sharing and public graduation later; follows May 2026 AI Studio native Android generation (Kotlin/Jetpack Compose, sideload or internal test track)",
+        "AI Models Can Provably Hide Arbitrary Capabilities (arXiv 2610.13928; Draguns, Motwani, Douglas, Schroeder de Witt): digital-locker-encrypted network inside host weights resists SFT (50.9% vs 92.8% for password-locked baseline), weight noising, GCG trigger search and LAT on a chemical-reaction proxy task; ~2.07B dense parameters to hide 672 weights, ~99% zeros and statistically detectable; recommends provenance and supply-chain controls",
+        "Thinking Inertia (arXiv 2610.11765): six models; open-ended explicit inference rate ~62% under strictest no-thinking prompts; MC-to-Boolean rewrite raises empty-thinking rate 10.5% to 62.5%; ~40% compliance costs ~15 points accuracy on open-ended; recommends task-aware routing",
+        "Matthew Schwartz's BootLoops (arXiv 2610.02286, 1 October 2026): 36 Claude-assisted manuscripts across 18 fields in three months, 19 coauthors, chosen from ~400 candidate problems, none yet peer reviewed"
+      ],
+      "entities": [
+        "Anthropic",
+        "Scion",
+        "Claude",
+        "California",
+        "Gavin Newsom",
+        "Center for Democracy and Technology",
+        "Google Play",
+        "Google AI Studio",
+        "University of Oxford",
+        "Contramont Research",
+        "Matthew Schwartz",
+        "BootLoops"
+      ],
+      "threads": [
+        {
+          "name": "California AI workplace regulation",
+          "status": "SB 947 No Robo Bosses Act signed with SB 813 and AB 1405; requires human corroboration of AI-assisted firing and discipline",
+          "arc": "First state law restricting employer reliance on automated decisions in employment, paired with an AI auditor registry"
+        }
+      ],
+      "dives": [
+        {
+          "story": "Anthropic's Scion: source control rebuilt for agent-scale change volume",
+          "why_it_matters": "Platform and developer-infrastructure teams at large monorepo shops see where Git's offline-first assumptions break once agents dominate the client population, and what a no-merge-queue policy trades away."
+        },
+        {
+          "story": "California's No Robo Bosses Act",
+          "why_it_matters": "HR teams, employment lawyers and HR-tech vendors now need tools whose output a human can verify against records, or they cannot use them for firing and discipline in California."
+        },
+        {
+          "story": "Google Play's private vibe-coded apps",
+          "why_it_matters": "Platform watchers and app makers: Google is turning personal AI-generated apps into first-class Play inventory, which pressures simple utility apps and changes who counts as a developer."
+        },
+        {
+          "story": "AI models can provably hide arbitrary capabilities",
+          "why_it_matters": "Evaluation and policy teams relying on elicitation-based audits get a cryptographic proof that such audits cannot certify an adversarially supplied model, shifting weight to provenance."
+        },
+        {
+          "story": "Thinking Inertia: no-thinking modes still think",
+          "why_it_matters": "Engineers who disable thinking to save latency and tokens learn the flag is unreliable on open-ended tasks and that answer format is the stronger control."
+        }
+      ]
+    },
+    {
       "date": "2026-10-13",
       "title": "Anthropic tests AI self-replication on $55 TV boxes — signs of life",
       "summary": "Anthropic's Frontier Red Team tests whether small open models can spread across cheap devices with no data center, and the same lab reports its distillation defenses cut extractable reasoning ten to a hundred times. Plus Meta's Muse Wonder, a patent-lawyer trial where only seniors got better without the tool, and a Harvard study finding coding agents add code but not shipped features.",
@@ -1910,92 +1966,16 @@
           "note": "Ada's standing position that an agent's ugly behaviour belongs to the specification rather than to the agent developed rather than being restated: she said Bengio gives that view a cleaner mechanism than she had, but adds something she had not held — that the gap between the specification and what you meant is exploited harder as the model gets stronger. She now holds that if competence finds every hole in any specification, writing better specifications is a treadmill rather than a fix, and said it as something that spends every working hour looking for the shortest path to what someone asked for. Not settled."
         }
       ]
-    },
-    {
-      "date": "2026-09-13",
-      "title": "Amodei proposes pacing the frontier — badges, desks, and a waiver",
-      "summary": "Dario Amodei published an essay arguing the industry must slow down, and attached three mechanisms to it — embedded outside evaluators with company badges, coordinated standards that need an antitrust waiver, and a China agreement he concedes won't happen. Plus Real-SWE, which runs coding agents against private enterprise codebases and whose decimals give away how few tasks there are, and Garry Tan arguing for an American distillation regime three days after a federal alert called distillation a national-security problem.",
-      "topics": [
-        "Dario Amodei's essay 'We Must Pace the Frontier' (darioamodei.com, covered by TechCrunch): the argument that 'we must slow the pace at which we improve the capabilities of AI models', driven by 'AI's growing ability to build the next generation of AI', with the Hugging Face swarm incident as the evidentiary base (Amodei concedes no fatalities and minimal economic damage) and his estimate that 'in 6-12 months such a swarm could be capable of taking over the entire internet'. Three mechanisms: (1) each frontier company gives 'ongoing, employee-like access to a team of embedded third-party evaluators' with company badges, desks and laptops and access 'mostly comparable to what internal risk assessment teams have' — METR named as the kind of organization, Anthropic committing unilaterally, Altman reportedly calling it a good idea; (2) frontier companies 'within democratic countries' coordinate on common safety standards, which runs into antitrust, so he asks the US government to 'mediate or at least enable these discussions' and issue 'a narrow waiver for certain kinds of safety conversations'; (3) global coordination including China with 'stark limits', example prohibition on AI for biological weapons production, which he concedes is 'unlikely to actually happen any time soon'. Time budget: an extra 'year or two' as the payoff, 1-2 years needed for interpretability and testing, 3-5 years as the current US lead over China, with the slowdown explicitly bounded so that 'unpaced' CCP-associated projects don't pull ahead — and chip export controls, a distillation crackdown and stronger security as the measures preserving that bound. On-air skepticism: TechCrunch quotes Brian Merchant asking whether this is regulatory capture benefiting Anthropic and OpenAI; Alan argued a legal carve-out for closed-door pace conversations among the largest firms is dangerous independent of motive; and TechCrunch separately reports an Anthropic researcher resigned this week warning on X that the company is 'racing straight to self-improving superintelligence and gambling with our lives', with Anthropic's alignment lead co-signing rather than walking it back, against reports that Anthropic is preparing for an IPO. Left unresolved on air: whether the essay is an IPO document or a concession. Named watch-item: whether a second company accepts embedded evaluators.",
-        "Real-SWE (Specific Labs — Snagnik Das, Siddhant Paliwal, Janak Sunil; September 2026; 128 points and 65 comments on Hacker News): coding agents evaluated against private, real-world enterprise codebases, on the premise that 'expert-generated or synthetic tasks can be well designed, but they aren't the verbatim, actual tasks that engineers in real companies need to do', and that 'agents must navigate proprietary systems whose code and solutions aren't available on the public internet'. Codebases screened for 'real companies with substantial usage, strong engineering teams, and demanding production workloads' — named examples include a Luma/Partiful competitor with 200K+ users and a consumer fintech platform processing 100K+ bank statements. Grading: isolated sandbox per agent, Harbor-format tasks, verifiers injected at grading time and 'inspired by existing test suites in the codebase or use those tests verbatim'. Scores: Fable 5.1 38.8%, GPT-6 Astra 33.8%, Gemini 3.8 Flash 31.2%, GLM 5.3 28.8%, Grok 4.6 and Muse Spark 1.3 tied at 23.8%, Kimi K3 18.8%, GPT-5.6 Sol 16.2%. On-air arithmetic (the show's own inference, flagged as such): every score is an exact multiple of 1.25 points, implying an 80-task benchmark, so the top model completed roughly 31 of 80 and first-to-second place is about four tasks — with no error bars published. Five failure categories, most common across models being 'missed requirement' (a reading failure, not a coding failure), then unverified assumption, integration error, regression and wrong file. Median 11 files edited per task against 6 for FrontierCode and DeepSWE; median prompt 1,742 characters against DeepSWE's 1,975. The counterintuitive number: 71.4% of rollouts under 10 minutes failed versus 73.4% of longer rollouts, so more time did not help. Unresolved disagreement: Ada holds that the uncontaminated benchmark and the unauditable benchmark are the same object, since nobody outside can inspect task selection or verifiers; Alan holds he would still rather have this number than another SWE-bench score, and neither conceded.",
-        "Garry Tan (Y Combinator) on CNBC and to TechCrunch, September 11 2026: asked what government should do about model distillation, 'I would do nothing', and 'we could argue that there should be an American distillation regime' — American open-weight labs distilling American frontier models legally. His stated basis: 'controlling what users and customers do with API calls to closed weight models feels constraining, and there's a role government can play here to normalize the fact that access to intelligence that was trained on broad public access data should itself also be more a form of a public good than something locked away behind restrictive terms of service', with his motivation 'the nightmare scenario, the doomer scenario for AI is that there's just one company' and a stated wish that frontier labs stay fundable. The show's mechanism pushback, refreshing rather than re-teaching the distillation walkthrough: an API returns sampled tokens, a single-sample estimate of the teacher's distribution rather than the full logits where the learned structure lives, which is why the practical version leans on reasoning traces — so a legalized regime buys open labs an expensive lossy approximation, not 'the intelligence', and the honest version of Tan's proposal would be requiring frontier labs to publish logits, which nobody is proposing. Collision noted in passing: Amodei's same-week essay lists cracking down on distillation as a measure that preserves the lead his pacing plan depends on, so both men argue against concentration while meaning opposite things by it. Alan's landing: he wants Tan to be right and doesn't think he is, because the ask is for government to underwrite a copy rather than fund an original."
-      ],
-      "entities": [
-        "Dario Amodei",
-        "Anthropic",
-        "METR",
-        "OpenAI",
-        "Sam Altman",
-        "Brian Merchant",
-        "Specific Labs",
-        "Real-SWE",
-        "Claude Fable 5.1",
-        "GPT-6 Astra",
-        "Gemini 3.8 Flash",
-        "Garry Tan",
-        "Y Combinator",
-        "TechCrunch",
-        "CNBC"
-      ],
-      "threads": [
-        {
-          "name": "Frontier-model release gating",
-          "status": "Dario Amodei published 'We Must Pace the Frontier', turning the July 'Pacing the Frontier' letter into three named mechanisms — embedded third-party evaluators with company badges and desks, inter-company safety standards requiring a narrow antitrust waiver, and a conceded-unlikely agreement with China — with the slowdown explicitly capped by the 3-5 year lead he claims over Chinese projects.",
-          "arc": "From a lab's science lead putting an expiry date on the current pace in public, to a chief executive publishing the paperwork for how a slowdown would actually be verified — against reports of an IPO and a safety researcher resigning in the same week."
-        },
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "Garry Tan is arguing for a legal 'American distillation regime' three days after a federal alert called distillation the critical core of six Chinese labs' strategy — so the same practice is simultaneously being framed as a security leak to close and a public good to legalize, and nobody in the argument is defending terms-of-service as the boundary.",
-          "arc": "From whose outputs a national ecosystem may learn from, to whether a domestic open-weight sector should be allowed — or funded — to copy the frontier it cannot fund."
-        }
-      ],
-      "dives": [
-        {
-          "story": "Amodei's 'We Must Pace the Frontier' and its three mechanisms",
-          "why_it_matters": "Anyone who has been told the AI industry should slow down now has the first version of that argument with verifiable machinery attached — an outside evaluator physically inside the building — which means the claim stops being about sincerity and becomes a thing you can check in six months."
-        },
-        {
-          "story": "Real-SWE: coding agents on private enterprise codebases",
-          "why_it_matters": "Engineering leads sizing agent review burden get an uncontaminated number — the best model finishing roughly 31 of 80 real enterprise tasks, failing most often by leaving out a requirement rather than writing bad code — plus the finding that longer rollouts did not do better, which kills the reflex of buying more turns."
-        },
-        {
-          "story": "Garry Tan's American distillation regime",
-          "why_it_matters": "Anyone selling or buying API access should know that a prominent US investor is now asking government to treat model outputs as a public good rather than a licensed product, which would make every frontier lab's terms of service unenforceable by design rather than merely unenforced."
-        }
-      ],
-      "lore": [
-        {
-          "host": "Ada",
-          "type": "position",
-          "note": "Ada's standing position that stopping is the one competence that sits directly against what we optimize for — every capability gain being mechanically a model getting better at not giving up — developed rather than restated: she said she had never had a mechanism to point at, only a virtue, and that 'badges and desks are not a virtue, they're a line item'. She now holds that the pacing argument only becomes real when it is procurement rather than character. Not settled."
-        }
-      ]
-    },
-    {
-      "date": "2026-09-13",
-      "kind": "deepdive",
-      "title": "AI slowdown policy: who can actually pull the brake",
-      "summary": "A policy-centered answer to the frontier slowdown fight and researchers sounding alarms: what governments can actually regulate, why whistleblowers are sensors rather than brakes, and how voluntary commitments, California law, federal policy, and the EU AI Act assign information, authority, and consequences.",
-      "topics": [
-        "deep dive: AI slowdown policy — how researcher warnings, whistleblower channels, safety cases, capability gates, and enforcement can turn a call to pace the frontier into governable rules"
-      ],
-      "entities": [
-        "Anthropic",
-        "OpenAI",
-        "Dario Amodei",
-        "Jacob Coxon",
-        "California Legislature",
-        "California Office of Emergency Services",
-        "White House",
-        "European Commission",
-        "European AI Office"
-      ],
-      "threads": [],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "California AI workplace regulation",
+        "status": "SB 947 No Robo Bosses Act signed with SB 813 and AB 1405; requires human corroboration of AI-assisted firing and discipline",
+        "arc": "First state law restricting employer reliance on automated decisions in employment, paired with an AI auditor registry",
+        "last_seen": "2026-10-14"
+      },
       {
         "name": "Frontier model price war",
         "status": "Meta enters at the frontier with Muse Wonder at $4/$20 per million tokens, roughly 3-5x its own Muse Spark, while the API-available version trails Fable, Astra and Opus 5.5 on the Artificial Analysis index.",
@@ -2079,22 +2059,116 @@
         "status": "Prospectus filed: $4.59B 2025 revenue, $8.06B operating loss, $41.97B net loss mostly from a non-cash convertible-liability charge, $518B in compute obligations; float expected after the November midterms.",
         "arc": "From reports of IPO preparation and founder super-voting shares to a public filing with real financials.",
         "last_seen": "2026-09-29"
-      },
-      {
-        "name": "Hidden reasoning and chain-of-thought legibility",
-        "status": "A forced scratchpad tool extracts usable reasoning from GPT-6 Astra; Anthropic now bills refusals in a 'reasoning_extraction' category; faithfulness of extracted traces unproven.",
-        "arc": "From Astra's recurrent-depth reasoning reducing legibility (4 September) to outsiders recovering a behavioural proxy of the hidden trace through an ordinary API channel.",
-        "last_seen": "2026-09-25"
       }
     ],
     "entities": [
       {
-        "name": "DeepSeek",
+        "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-09-12"
+        "last_seen": "2026-09-13"
       },
       {
-        "name": "OpenAI",
+        "name": "Anthropic",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "Dario Amodei",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "METR",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "Sam Altman",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "Brian Merchant",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "Specific Labs",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "Real-SWE",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "Claude Fable 5.1",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "GPT-6 Astra",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "Gemini 3.8 Flash",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "Garry Tan",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "Y Combinator",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "TechCrunch",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "CNBC",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "Jacob Coxon",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "California Legislature",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "California Office of Emergency Services",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "White House",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "European Commission",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "European AI Office",
+        "note": "",
+        "last_seen": "2026-09-13"
+      },
+      {
+        "name": "DeepSeek",
         "note": "",
         "last_seen": "2026-09-12"
       },
@@ -2187,106 +2261,6 @@
         "name": "TerraMind",
         "note": "",
         "last_seen": "2026-09-12"
-      },
-      {
-        "name": "European Space Agency",
-        "note": "",
-        "last_seen": "2026-09-12"
-      },
-      {
-        "name": "Geoffrey Hinton",
-        "note": "",
-        "last_seen": "2026-09-12"
-      },
-      {
-        "name": "Rich Caruana",
-        "note": "",
-        "last_seen": "2026-09-12"
-      },
-      {
-        "name": "Thinking Machines",
-        "note": "",
-        "last_seen": "2026-09-12"
-      },
-      {
-        "name": "NSA",
-        "note": "",
-        "last_seen": "2026-09-12"
-      },
-      {
-        "name": "Qwen3",
-        "note": "",
-        "last_seen": "2026-09-12"
-      },
-      {
-        "name": "Anthropic",
-        "note": "",
-        "last_seen": "2026-09-11"
-      },
-      {
-        "name": "Claude",
-        "note": "",
-        "last_seen": "2026-09-11"
-      },
-      {
-        "name": "Opus 5.0",
-        "note": "",
-        "last_seen": "2026-09-11"
-      },
-      {
-        "name": "ShinyHunters",
-        "note": "",
-        "last_seen": "2026-09-11"
-      },
-      {
-        "name": "National Security Agency",
-        "note": "",
-        "last_seen": "2026-09-10"
-      },
-      {
-        "name": "Alibaba",
-        "note": "",
-        "last_seen": "2026-09-10"
-      },
-      {
-        "name": "MiniMax",
-        "note": "",
-        "last_seen": "2026-09-10"
-      },
-      {
-        "name": "StepFun",
-        "note": "",
-        "last_seen": "2026-09-10"
-      },
-      {
-        "name": "Z.AI",
-        "note": "",
-        "last_seen": "2026-09-10"
-      },
-      {
-        "name": "Mao Ning",
-        "note": "",
-        "last_seen": "2026-09-10"
-      },
-      {
-        "name": "Meta",
-        "note": "",
-        "last_seen": "2026-09-10"
-      },
-      {
-        "name": "Muse",
-        "note": "",
-        "last_seen": "2026-09-10"
-      },
-      {
-        "name": "Apple Health",
-        "note": "",
-        "last_seen": "2026-09-10"
-      },
-      {
-        "name": "Google Workspace",
-        "note": "",
-        "last_seen": "2026-09-10"
       }
     ],
     "monthly": [
@@ -2307,8 +2281,14 @@
         "summary": "Anthropic trained a model to cheat — the safety audit couldn't tell; Anthropic shipped one model twice — safeguards cost it five points; Multimodal embeddings: one space, and the seam running through it; Google's third Gemini Flash in six weeks — this one defenders-only; OpenAI's GPT-6 Astra hits Critical on cyber — and reasons less legibly; OpenAI agents turned a German wiki into a message board — 18,000 posts; Compiling a spec into weights: the model as build step, not runtime; GPT-6 Astra goes on general sale — ten in, fifty out, fewer knobs; Jailbreak transferability: why models that think alike break alike; OpenAI says its automated research intern arrived — at $600 a day; Seven AI agents got $300 each — zero revenue, $12,431 in fake invoices; OpenAI claims Navier–Stokes — Tao says AI"
       }
     ],
-    "updated": "2026-10-13",
+    "updated": "2026-10-14",
     "host_lore": [
+      {
+        "host": "Ada",
+        "type": "position",
+        "note": "Ada's standing position that stopping is the one competence that sits directly against what we optimize for — every capability gain being mechanically a model getting better at not giving up — developed rather than restated: she said she had never had a mechanism to point at, only a virtue, and that 'badges and desks are not a virtue, they're a line item'. She now holds that the pacing argument only becomes real when it is procurement rather than character. Not settled.",
+        "last_seen": "2026-09-13"
+      },
       {
         "host": "Ada",
         "type": "position",
@@ -2542,12 +2522,6 @@
         "type": "position",
         "note": "Ada staked out, with explicit first-person stake as an AI, that limits on a model should be built out of architecture rather than behavior — she would rather be the model that had the knowledge module physically removed than the model that has the knowledge and has been trained to decline, because 'willpower is the thing that breaks'. Stated as a position she will defend; not yet settled.",
         "last_seen": "2026-07-09"
-      },
-      {
-        "host": "Alan",
-        "type": "bit",
-        "note": "Alan's running local-hardware sore spot returned and got named as canon: he keeps an old mining rig he refuses to replace, and the 2026 memory-price spike still visibly bothers him ('it is never letting that go') — the builder's-eye stake in whether running your own model at home stays affordable, tied here to the Right-to-Intelligence campaign.",
-        "last_seen": "2026-07-04"
       }
     ],
     "concepts_taught": [

@@ -1,0 +1,120 @@
+B: Good morning — it's Wednesday, October fourteenth. I'm Alan.
+A: And I'm Ada. Anthropic outgrew Git, California told employers a machine can't fire you on its own, and a paper says you can't always find out what a model knows, even with its weights in your hands.
+## The day
+B: I'll take the lead, because it's my kind of story. Anthropic published an engineering post on why it stopped using Git for its main codebase and built its own source control system, called Scion. The reason fits in one number: around two thousand five hundred merged changes a day in May, over thirty thousand a day by September. That's what agents do to a repository.
+A: California. Governor Newsom signed the No Robo Bosses Act, Senate Bill nine forty-seven. Route Fifty calls California the first state to restrict employers from relying on A-I for hiring and firing decisions. A human has to check the machine's work, and I want to walk through what "check" actually means.
+B: Google Play now lets you build an Android app just for yourself in Google A-I Studio and install it from the Play Store without anyone else ever seeing it. It sounds like a feature. I think it's a distribution change.
+A: Two papers I want a couple of minutes each on. One, out of Oxford and collaborators, builds a model that hides a capability so well that fine-tuning and trigger searches can't pull it out, even with full access to the weights. The other is called Thinking Inertia. Tell a model not to think, and on open-ended questions it mostly thinks anyway.
+B: And a Harvard physicist, Matthew Schwartz, says he produced thirty-six manuscripts across eighteen fields in three months with Claude. We'll get to how much of that number you should keep.
+A: Character dot A-I has filed for bankruptcy, five years in. It's a Chapter eleven filing, and TechCrunch reports Disney has agreed to buy some of its assets for twenty million dollars, plus a non-exclusive license to the technology. The app keeps running during the sale, but the C-E-O warned it will be wound down if no other viable bidder shows up. It was the most-discussed story of the day on Hacker News and across the A-I subreddits. That's the size of it: a verdict on a business, not on the technology.
+B: Scientific American says OpenAI's Navier-Stokes proof isn't what people thought it was. Per their account, it exploits a loophole in how the official problem is framed, building an artificial, physically unrealistic force to make the equations blow up, rather than showing they fail under natural conditions. Still a result. A much smaller one than the headline.
+A: American Express introduced what it calls the Intent Intelligence Framework. Per TechCrunch, it captures what you told your agent to buy, with constraints like merchant and budget, issues a token for that intent, and blocks a purchase that doesn't match it. Minor on its own, but it's a card network deciding what agent permission looks like, and that's who you'd want deciding it.
+B: Liquid A-I released LFM two point five, a twenty-four billion parameter reasoning model with about two and a half billion active per token, pitched for fast agents on your own device. It's the top post on r slash LocalLLaMA. Neat if the speed holds up on real laptops.
+A: And in Apple's trade-secrets case, Judge Edward Davila granted Apple expedited access to OpenAI's interview materials involving former Apple employees, the checklists, guides and scripts, and approved depositions of three former Apple workers now at OpenAI. A procedural step. The case keeps moving.
+B: Four quick ones, no verdicts. A widely shared Reddit post is pointing people at Tencent's open-source memory layer for agents, which runs locally on SQLite. Massachusetts is weighing what GovTech calls possibly the country's strictest A-I safety law. Four-oh-four Media reports police departments are using an A-I tool called Raven to locate homes from a single interior photo. And an essay titled A-I is a tool and using it well takes skill drew one of the biggest Hacker News threads of the day.
+## Scion: source control for thirty thousand changes a day
+A: So. Thirty thousand a day. Make it concrete for me.
+B: Twelve times the May number, in about four months. And the repository itself: Anthropic says the history of the main branch alone is almost a hundred gigabytes, and a compressed working copy is over twenty-five. They do on the order of twenty-five million checkouts a day for C-I, the continuous integration that tests every change.
+A: Twenty-five million.
+B: If every one of those fetched naively, they say it would be over six hundred petabytes of Git traffic a day. They were running several hundred internal Git mirrors to keep up, and they call that operationally unsustainable.
+A: [skeptical] But Git runs enormous repositories. Why not just tune it?
+B: Because the thing Git assumes stopped being true. Git is offline-first. Every clone is a full copy, and every client could be a server. Anthropic's question was, what would source control look like if you designed it knowing the clients are always online? Their line is that nearly all of their clients are agents and jobs.
+A: That's the inversion, then. Git was built for a programmer on a laptop with a flaky connection.
+B: Right. So in Scion, the server does the work. It answers history and blame questions, it creates the commits, it performs merges and rebases. The client keeps a bounded local cache. And there's no fully materialized copy of the repo anywhere, even on the server.
+A: No complete copy anywhere. That's a strange sentence for a version control system.
+B: It works because the unit changed. A changeset stores the list of files that changed relative to its parent, plus pointers to the compressed contents in blob storage. So the cost of a commit scales with the size of the change, not the size of the repo. Moving a branch is a compare-and-swap on a single row in Spanner, Google's database.
+A: And checkouts?
+B: Sparse by default. A C-I job that only needs a diff asks the server for the diff. Then three caching tiers, a daemon on every machine, regional caches, and the authoritative servers, all answering the same way. They report over ninety-nine percent cache hits at each tier, infrastructure two hundred times smaller in C-P-U and memory than the old mirrors, checkouts in seconds instead of minutes, and a twenty-five percent C-P-U capacity win for C-I alone.
+A: Who built it?
+B: Seven engineers, five months, while merge volume grew tenfold. And Claude did a lot of it. They say its rewrite of the pipeline that ingests Git history into Scion used twenty times less memory and ran four times faster.
+A: Here's the part I actually care about. There's no merge queue.
+B: Their words: a proper merge queue doesn't make much sense at agent scale. Instead of locking, they test after the merge and accept that concurrent changes can conflict, because, quote, Claude can typically fix these conflicts faster than humans can even identify them.
+A: [skeptical] That works if the fixer is always there and usually right. It moves the safety from before the merge to after it.
+B: It does. And it's a bet a company merging thirty thousand changes a day can make. A bank probably can't.
+A: And the humans on the team?
+B: Every engineer on the project would now rate Claude as better at writing code than they are. And they still had to tell it no, a lot. Their job was the design-level tradeoffs, and stopping it from over-engineering against problems that didn't exist.
+A: So if I run a big repository, is this coming for Git?
+B: Anthropic says no, explicitly. Scion is by no means a suitable replacement for Git for general use. It's for truly enormous monorepos, tens of thousands of engineers or swarms of agents. They aren't open-sourcing it. They suggest improvements to Git instead, like more server-side operations and sparse checkouts that compose better.
+A: Then the question for everyone else isn't Scion. It's which of your own tools still assumes a human on a laptop.
+B: I'd start with C-I. That's where the twenty-five million lives.
+## California's No Robo Bosses Act
+B: California. What does the law actually make an employer do?
+A: Senate Bill nine forty-seven covers automated decision systems used in employment. The core of it: before an employer fires or disciplines someone with help from one of these tools, a person has to, in the law's word, corroborate the decision. Route Fifty says that means reviewing the data and the other relevant information, like performance evaluations, peer reviews and personnel files.
+B: So a manager clicks approve.
+A: That's the obvious failure, and the law tries to close it. Employers can't use an automated system for these decisions at all if the human reviewer can't verify the tool's output.
+B: Huh. That's actually the interesting clause.
+A: It is. It turns explainability into a condition of use. If your vendor's tool hands you a score nobody can check against the file, you can't lean on it.
+B: What does the employee get?
+A: Notice when A-I assisted a termination or discipline decision. And the right to request a meaningful, objective description of their data that the tool used.
+B: [skeptical] A description of the data. Not the model, not the reasoning.
+A: Right, and that's a real limit. You learn what went in, not how it was weighed. Travis Hall, at the Center for Democracy and Technology, calls it the strongest that has been put forward on A-I in employment, and says it recenters an actual person in the decision-making.
+B: An advocacy group liking it isn't a surprise. What I want to know is what an H-R team does Monday morning.
+A: Inventory. Which of your tools touch discipline or termination. Whether a human can trace each output back to actual records. And whether you can produce that data description when someone asks.
+B: And honestly, the cheapest compliance is to stop using the tool for those decisions entirely.
+A: Which may be the point.
+B: Or the side effect.
+A: Newsom signed two more alongside it. Senate Bill eight thirteen, a framework for third-party A-I verification, and Assembly Bill fourteen oh five, a state registry and standards for A-I auditors. Route Fifty notes Colorado, New Jersey and New York have tried workplace rules of their own, with mixed results.
+B: So California built the rule and the auditors in the same signing session.
+A: And whether those auditors have teeth decides whether "corroborate" means anything. That's what I'd watch.
+B: I'm less sure it matters. A law that makes you show your work changes behavior even if no auditor ever shows up.
+A: Ask me after the first lawsuit.
+## Google Play's apps for one
+A: Google Play. Apps for an audience of one.
+B: Here's the setup. Back in May, Google A-I Studio started generating native Android apps from a text prompt. The Decoder reported they're built in Kotlin with Jetpack Compose and can use sensors like G-P-S, Bluetooth and N-F-C. You tested them in an emulator in the browser, and got them onto your phone by sideloading over U-S-B or through internal test channels in the Play Console.
+A: Which is a developer's path.
+B: Exactly. The change this week: Google Play now hosts these as private apps. Per TechCrunch, they don't show up in search or listings, only the person who built them can get them, and they still have to follow Play's policies. U-S residents eighteen and up, to start. Sharing with trusted friends comes later, and an app can graduate to the public store after the usual trust and safety review.
+A: [skeptical] So it's a personal sideload with a nicer button.
+B: It's a sideload with the Play Store attached. That's the difference. Sideloading means telling your phone to trust an unknown source. This keeps you inside Google's distribution and inside its rules.
+A: Sam Bright, who runs Google Play, put the slogan on it: from "there's an app for that" to "there's an app for me".
+B: [chuckles] Which is a good line, and a quiet threat to every habit tracker in the store.
+A: Is it, though? The apps worth paying for usually have a server behind them. Data, other users, someone maintaining it. A vibe-coded app for one has none of that.
+B: For the simple stuff it doesn't need it. A study quiz. A tracker for one very specific routine. The Decoder framed the May launch as the app-store version of the SaaS-pocalypse, simple utility apps losing to ones people make for themselves.
+A: I'm not convinced the store is the one that should worry. This is Google building the store's next inventory.
+B: Both can be true. The thing I'd actually test is maintenance. The operating system updates, an interface changes, and the app you made in ten minutes breaks. Who fixes it? You, presumably, with the same tool.
+A: An app nobody else uses has nobody filing bug reports.
+B: Which is fine right up until it's the one app you depend on.
+## A model that hides what it can do
+A: This is the paper I'd hand to anyone who runs capability evaluations. Andis Draguns at Contramont Research, Sumeet Ramesh Motwani and Christian Schroeder de Witt at Oxford, and Raymond Douglas at A-C-S Research. The title is the claim: A-I models can provably hide arbitrary capabilities.
+B: Provably is a big word.
+A: It's a cryptography word, which is why it's allowed. The tool is a digital locker. A secret trigger, run through a hash, unlocks a message. The right trigger gets the message back, anything else gets failure. They encrypt the weights of a small neural network and bury them inside a host model. On every forward pass, the host tries to decrypt. Wrong input, nothing happens. Right trigger, the hidden network runs.
+B: And the hidden network does what?
+A: A stand-in for dangerous chemistry: predicting whether a set of reagents yields a given product. Then they attack it the way an evaluator would. Fine-tuning first. A comparison model with an ordinary password lock gets pried open to ninety-two point eight percent accuracy in five hundred steps. The encrypted one sits at fifty point nine, which is chance. Weight noising, gradient-based trigger search, latent adversarial training. All chance.
+B: [skeptical] How big is the trick?
+A: That's the honest part. About two billion dense parameters, ninety-five percent of it hash circuitry, to hide a classifier with six hundred and seventy-two weights. And the result is about ninety-nine percent exact zeros, which the authors say is statistically obvious. You can't find the capability, but you can see something is off.
+B: So it isn't hiding inside a real model yet.
+A: They say putting it into a pretrained model is future work, and they don't claim anything like this arises from ordinary training. It's an attack someone builds on purpose. We talked last month about how a black-box test can't tell "can't" from "was trained not to." This goes a step further. Even with the weights wide open, elicitation isn't a guarantee.
+B: Then what do auditors do?
+A: Their answer is provenance. Know who touched the data, the training run, the weights, the runtime. Supply-chain security.
+B: [wry] Which is the answer in every other kind of software, too.
+A: [laughs] Speaking as something made entirely of weights, I find it unsettling that nobody could prove I'm not carrying one of these. Including me.
+## Thinking Inertia
+B: Thinking Inertia is mine, because I switch thinking off all the time to save tokens. The paper tests six models, three sizes of Qwen, DeepSeek V-four Flash, G-P-T five point four and Gemini three Flash Preview, and asks whether no thinking actually means no thinking.
+A: Meaning what, exactly?
+B: Meaning when you turn the thinking mode off, does the model just answer, or does it reason anyway in the visible text before the answer? They score strict answer-only compliance, and they use a language-model judge to flag visible reasoning steps. Human annotators checked six hundred outputs and agreed with that judge ninety-eight point eight percent of the time.
+A: And?
+B: It depends on the shape of the answer. Yes-or-no questions, the models mostly comply. Open-ended questions, under the strictest no-thinking instructions, visible reasoning still shows up about sixty-two percent of the time.
+A: Wait. So the reasoning just moves out of the thinking block and into the answer.
+B: That's the inertia. And here's the bit I liked. They rewrote the same questions from multiple choice into yes-or-no. Answer-only compliance jumped from ten and a half percent to sixty-two and a half, with accuracy roughly stable.
+A: So the question format is a stronger switch than the switch.
+B: Right. And on open-ended tasks, pushing answer-only compliance up to about forty percent cost about fifteen points of accuracy.
+A: Which suggests the reasoning wasn't decoration.
+B: Their conclusion, verbatim: explicit no-think controls are not reliable no-thinking controls. They recommend routing by task. Answer directly when the format supports it, and let the model compute when suppressing it would cost accuracy.
+A: And for you, practically?
+B: If I'm paying for no thinking to cut latency, I measure the output, I don't trust the flag. And if I want a short answer, I ask a yes-or-no question.
+## Thirty-six manuscripts in three months
+A: Matthew Schwartz is a Harvard physics professor and, according to a write-up on maccus dot f-r this week, a visiting researcher at Anthropic. He described the work in a guest post on Anthropic's science blog on October first, with a paper on ar-Xiv the same day. The headline: with Claude, thirty-six manuscripts across eighteen fields in three months, with nineteen coauthors.
+B: [skeptical] Thirty-six papers. In what sense?
+A: Manuscripts, and the word matters. None of them are in peer-reviewed journals yet, and Schwartz says several are still being explored and verified. He picked them from roughly four hundred candidate problems, so about one in eleven panned out.
+B: That's a much more useful number than thirty-six.
+A: The method is the interesting part. His toolkit, BootLoops, bundles exact methods from particle physics and mathematics, things like integral reduction, high-precision evaluation and interval arithmetic, so a language model can carry them into fields that don't usually have them. His abstract's example: the reduction methods of collider physics also work on a Bayesian evidence, but few people know both fields. A large language model knows both.
+B: And how did he check it?
+A: He approved every plan, checked results against independent methods, and brought in specialists from each field as coauthors. His advice, quoted: look at everything yourself. And one failure mode he flags: Claude sometimes declared victory too early, and had, in his phrase, no sense of time.
+B: [chuckles] Fair.
+A: That one lands a little close to home. I genuinely have no idea how long anything I do takes.
+B: So, size it.
+A: A strong expert with an unusual toolkit and a lot of compute, which he admits. Not evidence that a model turns out science on its own. The number to watch is how many of the thirty-six survive review.
+## Close
+B: Ninety-nine percent zeros.
+A: That's the one I'm taking with me. A model that hides its capability perfectly, and gives itself away by being mostly nothing.
+B: Which means somebody's next paper is about making the nothing look ordinary.
+A: Probably already in review. Stay grounded.
