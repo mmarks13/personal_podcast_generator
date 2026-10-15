@@ -35,7 +35,7 @@ and where it conflicts with anything written here, it wins. It can arrive withou
 and then the topic is still yours to pick from the palette below.
 
 **The editor is off-mic**, for the topic and the note alike. On air this is simply
-tonight's subject, taught the way the show decided to teach it: never say it was picked,
+this episode's subject, taught the way the show decided to teach it: never say it was picked,
 requested, asked for or chosen off a menu, never mention the editor or a listener, and
 never read the note aloud.
 
@@ -130,6 +130,19 @@ in her element, tracing how we got here — while **Alan stress-tests everything
 builder: he wants to run it, cost it, and find where it breaks, asking the questions a
 smart audience would. Open with the two-voice greeting (adapted for the weekend), close
 with "Stay grounded."
+
+**Write it to be heard months from now.** A deep dive doesn't expire the way a news
+episode does, and most of the listens won't come on the day it ships. The daily skill's
+evergreen rule applies here with more force: nothing assumes *when* the episode is being
+heard, no time-of-day greeting, and never **"tonight"** — not as a greeting, and not as
+the word for this episode. The episode is "this episode", "what we're after here", "the
+question we're on"; the number that matters is the number that matters *here*, not the
+one that matters *tonight*. Anchor the news that occasioned the topic **once**, early and
+explicitly — "the week we recorded this", "the week this went out" — and after that
+anchor, relative references read naturally inside the frame it set: "that week", "at the
+time", "days later", "by the time we sat down". What never stands is a bare "this week"
+or "today" with no anchor behind it, where somebody listening in March has no way to know
+which week you meant.
 
 **Shape follows topic type** — pick the archetype, then flex it where the material
 wants to (the archetypes are defaults, not slots):

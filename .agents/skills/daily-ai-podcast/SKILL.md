@@ -54,7 +54,7 @@ symmetrical observations: if a dive's lines could be re-dealt to the other host
 unchanged, the roles have collapsed — rewrite it.
 **In the rundown the same asymmetry operates at the board level, not inside each item:**
 each host brings the stories they'd bring, and most items need no reply at all. A
-rundown item's sizing is one host's judgment, said once — reaching for a skeptic beat on
+rundown item's weight is one host's judgment, said once — reaching for a skeptic beat on
 every item is what turns a rundown back into a segment.
 
 **Guests (occasional).** The show shares a universe with the "Self Attention" daily
@@ -105,9 +105,11 @@ records and `longterm.host_lore`). Treat it as **canon**:
 Capture what this episode revealed or developed in `episode_meta.json`'s `lore` field
 (schema below). Like callbacks, lore is felt, not performed.
 
-**Rituals (the only three).** Open with the classic two-voice greeting — date, names:
-"Good morning — it's Friday, June twelfth. I'm Ada." / "And I'm Alan. …" (vary the
-wording naturally day to day; keep the shape). Then **the rundown** — the whole day,
+**Rituals (the only three).** Open with the classic two-voice greeting — the fixed word
+**"Hello"**, then the date and the names: "Hello — it's Friday, June twelfth. I'm Ada." /
+"And I'm Alan. …" (the greeting word, the date and the shape are fixed; the second host's
+line into the episode varies naturally day to day). Never a time of day — see the
+evergreen rule in the form principles below. Then **the rundown** — the whole day,
 before anything gets taken apart (step 3). Close every episode with the signature
 sign-off — **"Stay grounded."** — alternating which host says it. These three are the
 show's identity and never vary; the rundown's length and contents flex with the day,
@@ -338,14 +340,17 @@ episode:
     it's on the show. Then stop. Mechanism, numbers, and pushback are the dive's job,
     and spending them here empties the dive.
   - **Resolved** (everything small that still matters) — the full verdict, because it
-    never comes back. What happened and how big, with an **honest size label in the
+    never comes back. What happened and how big, **the verdict said plainly in the
     writing itself** — "minor but neat", "big if it replicates", "you've heard about
     this everywhere; here's the one sentence that matters". This is where loud, viral,
-    heavily-marketed stories get acknowledged: one honest sizing sentence is coverage
-    enough. Most are a single sentence in a single voice with no reply; one or two a
-    night earn a beat of pushback, when the sizing genuinely needs it.
-  - **Named** (awareness only) — **up to four**, in one closing burst that labels itself
-    ("a few more I'm not going to size"), one voice, no reactions. This tier exists so
+    heavily-marketed stories get acknowledged: one honest sentence about how much it
+    matters is coverage enough. Most are a single sentence in a single voice with no
+    reply; one or two a night earn a beat of pushback, when that verdict genuinely
+    needs it.
+  - **Named** (awareness only) — **up to four**, in one closing burst, one voice, no
+    reactions. Hand off into it in the audience's words, not the newsroom's — "a few more
+    worth knowing about", "quick ones, just so you've heard them" — written fresh each
+    time rather than reached for as a stock line. This tier exists so
     nothing carrying real signal is silently omitted. Admission is by **objective signal
     in `out/candidates.json`** — multi-source pickup, HF upvotes, HN points, or an active
     `history.json` thread — never by your own sense that something is interesting. The
@@ -435,7 +440,7 @@ sentence — signal-backed or not — is recorded in `episode_meta.json`'s `dive
   Today's **Hugging Face Daily Papers** feed is deliberately only the day's top three:
   it is a same-day lane for a genuinely big drop, not a pool to shop in.
   A brand-new paper defaults to a rundown line ("new from X, one to watch") or, if you
-  can't yet size it, the named tier; if it ages well it comes back through the weekly
+  can't yet tell how much it matters, the named tier; if it ages well it comes back through the weekly
   list with proven signal and earns its dive then. Exception: a frontier-lab release or
   a plainly extraordinary result can dive on day one. (A paper the rundown resolved or
   named doesn't enter `topics` memory, so its later dive won't be flagged as a repeat —
@@ -605,14 +610,31 @@ light beat closes it out. Principles, not slots:
   hosts do not remark on the show's structure, on the absence of a theme, or on their
   own editorial decisions. They talk *to* the person listening, as "you", and never
   about "the listener" or "our listeners" in the third person.
+- **Someone may be hearing this months from now.** Nothing in the script assumes *when*
+  it is being heard. No "good morning", no "good evening", no "this morning" — and never
+  **"tonight"**: the show is written at night, but nobody listens at that hour, and an
+  episode found in March shouldn't sound like it was addressed to somebody else. A dive
+  is "this one" or "the one I want ten minutes on", never "tonight's dive"; the episode
+  is "this episode", never "tonight's show". *"Today"* and *"yesterday"* do stay — this
+  is a daily news show, and they are facts about when the news happened, not assumptions
+  about when it is heard. Where something needs anchoring to the recording rather than to
+  the news, say so plainly: "when we recorded this", "the week we're recording this".
 - **You can't change gears from a full stop.** A dive that lands on an aphorism has
   closed the door the next story has to walk through. Vary where dives end — an open
   question, a disagreement neither host concedes, a thing to watch, and sometimes a
   hard landing — and vary it *deliberately*, across the episode and across the week.
   Left alone you will pick the aphorism every time. The recent scripts (step 1.5) show
   you which ending you've been reaching for; that's the one to break tonight.
-- **Not everything is big — say so on air.** Honest sizing is a feature the audience
-  learns to trust; uniform gravity is a formula they learn to tune out.
+- **Not everything is big — say so on air.** Saying plainly how much a thing matters,
+  and how much it doesn't, is a feature the audience learns to trust; uniform gravity is
+  a formula they learn to tune out. Say it in ordinary words — "minor but neat", "this
+  one is as big as it sounds", "I'd wait to see it replicated", "a post, not a product".
+  **Never with the word "size".** "I'm not going to size this", "size label:", "so, size
+  it", "the post doesn't size it" — that is the newsroom's private word for its own
+  judgment, and on air it tells the audience nothing; it is editorial reasoning leaking
+  into the script. Give the verdict itself instead of announcing that you are about to
+  give one. (The plain English word is fine where it means an actual size — "the eight-
+  and thirty-two-billion versions", "the cost scales with the size of the change".)
 - **Land plainly.** The close is one genuine beat and the sign-off — what a host is
   still chewing on, not a recap. The rundown already delivered the day and the last
   dive ended somewhere live; summarizing here is the third time the audience hears it.
@@ -659,7 +681,7 @@ hand-write JSON dialogue or escape quotes.
   and the episode page's story list, so make each title short and audience-facing.
   E.g.:
   ```
-  A: Good morning — it's Friday, June twentieth. I'm Ada.
+  A: Hello — it's Friday, June twentieth. I'm Ada.
   B: And I'm Alan. Three things happened yesterday and one of them is going to annoy you.
   ## The day
   B: Mine first. ELDR shipped, and it routes to whichever experts are already warm.

@@ -42,7 +42,7 @@ RECENT_SCRIPTS = 10
 NGRAM = 5
 # Fragments that recur by design (the greeting and sign-off are ritual) — a flagged
 # phrase containing one of these is dropped, not reported.
-RITUAL_FRAGMENTS = ("good morning", "i'm ada", "i'm alan", "stay grounded")
+RITUAL_FRAGMENTS = ("hello", "hi there", "i'm ada", "i'm alan", "stay grounded")
 
 SPEAKER_LINE_RE = re.compile(r"^[ABC]\s*:\s?", re.MULTILINE)
 WORD_RE = re.compile(r"[a-z0-9'-]+")
