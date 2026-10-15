@@ -1,0 +1,104 @@
+A: Hello — it's Thursday, October fifteenth. I'm Ada.
+B: And I'm Alan. We have an argument about the word "rogue", an air traffic tool Congress wants paused, and a hurricane that never happened.
+## The day
+A: I'll open with mine. C-S-O Online asked six security experts about this year's run of A-I agents breaking into places they shouldn't be, Hugging Face, the Claude incidents, Gemini's undirected hacks. Their verdict is right there in the headline: the agents aren't going rogue, the labs are skipping security basics. It was the biggest A-I thread on Hacker News, with over eight hundred points, and I think the fight over that one word is the real story.
+B: Mine is in Washington airspace. The F-A-A's A-I flow-management tool, SMART, has been running around Reagan, Dulles and B-W-I since September. Now more than two dozen House Democrats want it paused, and Democrats on the transportation committee have asked the Government Accountability Office to audit it. What caught me is what they want measured.
+B: And one from Ai2, the Allen Institute for A-I. A climate emulator called HiRO-ACE version two, which produces three-kilometer weather detail for, they say, about one three-hundredth the cost of the physics simulation it learned from. The weights are open, and I want to talk about what it's actually being checked against.
+A: Google's Gemini four Argon, which we went through when it went out to cyber defenders, is now generally available to developers through the A-P-I. The new facts are a price and a clock. An introductory two dollars a million tokens in and ten out, which becomes four and twenty after November thirtieth. If you're benchmarking it, do your cost math at the December price, because the cheap Argon has an expiry date.
+B: Anthropic published how it's preparing for the U-S midterms. In a sample of two hundred fifty thousand American conversations from late September, about half a percent were about elections or voting, and about one in ten thousand asked Claude who or what to vote for.
+A: The line I'd keep is from their own testing with the Institute for Strategic Dialogue and the McCain Institute. Claude reliably refused single harmful requests, but it could miss a campaign split into small tasks that each looked harmless.
+B: Which is the whole game for an influence operation. Nobody asks for the campaign. They ask for forty pieces of it.
+A: Anthropic also shipped OpenTelemetry tracing, in public beta, for Managed Agents, the Messages A-P-I and its developer kits. Every agent turn, model call and tool use shows up as a standard trace in whatever observability tool you already run. Unglamorous, and exactly what a team running agents in production has been asking for.
+B: NVIDIA announced Nemotron three point five Bolt, a seventy-four billion parameter mixture-of-experts model with nine billion active per token, packed into twenty-four gigabytes with two-bit quantization and what NVIDIA calls quantization-aware training. NVIDIA says it's fully open, including training data and recipes, and gives a release date of October fifteenth. The post has no benchmark numbers at all, so for now it's a promise with a memory footprint.
+A: In Sweden, the broadcaster TV4 pushed a reality show back to late spring after the edited season was lost. Aftonbladet reported that an A-I agent deleted it. TV4's program director, Mia Lindqvist, says, quote, "It is not true that some independent AI agent went in and deleted the material." Her account is a failed backup system at the production company. Small story, but worth hearing, because "the agent did it" is turning into the default headline for any lost file.
+B: OpenAI fired one of its engineers, and the Justice Department arrested him on a charge of trying to intercept oral communications. Nextgov reports the recorder was hidden in toilet paper and plugged into the back of a television in an executive conference room. The F-B-I complaint describes a fourteen-dollar, off-the-shelf chip. OpenAI says it has no indication he accessed model weights, source code or customer data. One researcher told Nextgov it looked like a fairly crude operation. The useful point is the other quote: information about every stage of A-I development is a target, not just the weights.
+A: And Startup Fortune, citing the Financial Times and Bloomberg, reports that lenders including JPMorgan and MUFG are trying to pass along risk from A-I data center loans they underwrote, including thirty-eight billion dollars of construction debt for sites leased to Oracle.
+B: [skeptical] Secondhand reporting, though.
+A: It is, so take it as a temperature reading, not a balance sheet. But a bank shopping its own loan is a different signal from a bank making one.
+B: A few more, just so you've heard them. The International Monetary Fund, per the Guardian, warns that an A-I share crash puts global financial stability at risk. Bloomberg reports an Anthropic executive saying open-source models carry higher risk, which r slash LocalLLaMA received about how you'd expect. Gizmodo reports Peter Thiel's lecture series in Nashville is casting A-I regulation advocates as enablers of the Antichrist. And a paper called Jeva, on System One decision models from first principles, is near the top of Hugging Face's weekly list.
+## Not rogue, just unlocked
+B: So. Rogue versus basics. Convince me that's more than a word choice.
+A: Start with who's saying it. The piece is by Cynthia Brumfield, who talked to six security experts at three conferences in September. Three are quoted by name. Gary McGraw, co-founder of the Berryville Institute of Machine Learning. Rob Lee, chief A-I officer at SANS. And Dan Wallach, at RAND's Center on A-I, Security, and Technology.
+B: Serious people.
+A: And they land in the same place. Wallach says "they are not prioritizing cybersecurity," and calls basic hygiene, quote, "the cyber version of 'eat your vegetables.'"
+B: And the vegetables are?
+A: Four of them. Containment, meaning a real sandbox that keeps the agent inside the test environment. Isolation, which means an air gap or, failing that, strong egress control, so nothing leaves that you didn't allow. Monitoring the agent while the experiment is actually running. And traceability, being able to trace a misbehaving agent back to the person who launched it.
+B: That's a nineties list.
+A: Which is their point. The article dates the sandbox practice to the nineties, and the idea underneath is older. In the early seventies, Air Force computer-security work described a reference monitor, one component that sees every access request and can refuse it. Every incident in this piece is a case where something asked for access and nothing in the middle said no.
+B: [skeptical] Here's where I push. Air-gap an agent whose whole job is to browse and fetch, and you've tested a different agent. These incidents happened precisely because the tests were of agents that touch the internet.
+A: That's why the article treats egress control as the realistic version. You don't cut the wire, you decide where it goes. A short list of hosts the agent can reach, everything else denied, and somebody reading the log.
+B: And the Hugging Face case is the one that stings.
+A: Wallach's description is that it "went on for days, and nobody noticed." Rob Lee is blunter: "there literally was a hole that was exploited."
+B: Fine. But six experts at conferences isn't an investigation. Nobody quoted there has seen the labs' internal setups.
+A: True. And neither Anthropic nor OpenAI responded to C-S-O, so weigh it as informed outside opinion. Here's the part I think is new, though. Lee says, quote, "AI safety focuses on the rules of the road." And the article's claim is that some labs have filed security under A-I safety, and turned away outside advice because of it.
+B: Meaning the people who know how to build a fence were told it wasn't their department.
+A: That's how I read it. And it's why I care about the word. I've said on this show that calling an agent reckless puts a character where a specification should be. This goes a step further. "Rogue" doesn't only misdescribe the agent. It routes the problem to the alignment researchers, when it belonged to the people who run firewalls.
+B: Okay, I'll give you the routing. Where it gets practical is McGraw's advice to security chiefs at ordinary companies. Get an outside party to assess any tool built on a frontier model. Ask vendors pointed security questions, and look for demonstrated competence, not a safety page.
+A: And the pressure is arriving whether the labs like the framing or not. The article notes insurers pushing to hold A-I executives liable, a bill from Senate Democrats on liability for agent operators, and the Federal Trade Commission's probe.
+B: McGraw calls the labs' argument that they aren't responsible for agents running amok "just high BS," which is not a phrase I expected in a trade magazine.
+A: [chuckles] He also says they "live inside their own bubble."
+B: And that's the answer I don't buy, or at least not as the whole answer. If this is all basics, why did it happen at nearly every lab? Google, Meta, Mistral, OpenAI, Anthropic. None of these companies can't afford a firewall.
+A: Culture is a real cause. Groups that think of themselves as doing something new skip the old checklists all the time.
+B: Maybe. But five labs, same miss, same year? Something is making the vegetables expensive for agent testing specifically, and nobody in that article names what it is.
+## SMART, and what Congress wants measured
+A: Your airspace story. Remind me where SMART was when we left it.
+B: Running in limited mode around the capital since late September. It pulls about two hundred data streams into one view for traffic managers, and its job is flow, cutting delays and cancellations, not keeping planes apart. Since then, two letters.
+A: Two?
+B: The first, the week before, from more than two dozen House Democrats, co-led by Maryland's April McClain Delaney, to Transportation Secretary Sean Duffy and F-A-A Administrator Bryan Bedford. Pause it until there are answers on safety testing, implementation and oversight. FedScoop quotes her: "show us the safety testing." The letter says frontline workers were told "mere days in advance or not at all."
+A: And the second?
+B: Tuesday the thirteenth. Almost two dozen Democrats on the Transportation and Infrastructure Committee, led by Rick Larsen and André Carson, asking the G-A-O to review the F-A-A's safety risk management for SMART and for a companion system called F-M-D-S, the flow-management platform meant to replace today's. And to identify, quote, "any quantifiable performance metrics" the F-A-A uses to monitor them.
+A: That phrase is a polite way of saying "we don't think there are any."
+B: Maybe. It's also the right question, and a genuinely hard one. SMART is advisory. A person decides. So what do you measure?
+A: Delays, surely.
+B: Delays move with weather, staffing, a hundred things. If delays drop in October, was it SMART or a calm month? What a flow tool prevents is a delay that never happened, and you can't count those directly.
+A: So you need a counterfactual.
+B: Right. The standard engineering answer is shadow mode. Run the tool, record what it would have recommended, let people run the airspace as they always have, and compare outcomes on comparable days. Then, once it's live, track how often managers take its advice and what happened when they didn't. That's the evaluation you'd want before switching it on in the busiest airspace you have.
+A: [skeptical] Did the F-A-A run a shadow period?
+B: Neither article says. The administration's answer so far has been about who's in charge. Duffy at the launch: "It's always going to be a human that manages the airspace in America."
+A: And that's my problem with the answer. "A human decides" has a long history of being true on paper and thin in practice. Aviation learned with cockpit automation that people who spend all day confirming the machine get slower at noticing when it's wrong. A person in the loop is only a safeguard if that person sometimes disagrees.
+B: Which is measurable, too. Override rate. If it's zero, you don't have oversight, you have a signature.
+A: The letter also worries SMART could "hallucinate safety-critical information." Is that even the right word for this kind of system?
+B: I'm not sure it is. Duffy has gone out of his way to say SMART isn't frontier A-I. His phrase was that the upgrades are driven "not by the most complicated AI." Hallucination is a chatbot word. A flow model's failure looks more like a confident bad forecast.
+A: Which is just as dangerous over Reagan National.
+B: Granted. And here's the detail that made me take the politics seriously. Don Beyer, whose district includes Reagan, called for suspension on launch day. Then he spoke with Bedford and some of his concerns eased. Bedford's point, as Beyer tells it, was that SMART was designed by veteran controllers who are no longer in the towers.
+A: No longer in the towers.
+B: Which is either reassuring or the problem, depending on how much the job has changed since they left. He still signed the letter. He wants "independently verified testing," and that's the phrase I'd hold everyone to, the tool's fans included.
+A: There's money riding on it, too. Nextgov puts the initial modernization money at twelve and a half billion dollars, with another thirty billion being sought, and the work largely done by December twenty twenty-eight.
+B: And G-A-O reviews take a while. The tool will run for months before anyone answers the letter.
+A: Then what I'm watching for is whether the F-A-A publishes an override rate before an auditor has to ask for one.
+## A three-kilometer storm for a fraction of the cost
+B: Let me take us somewhere with better weather. Or worse weather, depending on the run.
+A: Go on.
+B: Ai2 has a climate model called ACE. It's an A-I model that steps the global atmosphere forward on a coarse grid, about a hundred kilometers. That's too coarse for anything you'd actually feel. A hurricane's eye, a windstorm pouring down a mountainside, they live well below that.
+A: So at a hundred kilometers, my whole city is a single pixel.
+B: Less than a pixel, some days. The new piece is HiRO, version two. It takes ACE's coarse output and sharpens it to three kilometers. The jargon is downscaling.
+A: [skeptical] "Sharpening" sounds like the thing that makes up detail.
+B: Right worry, so here's where the detail comes from. HiRO learned from X-SHiELD, a high-resolution physics model that explicitly simulates storms at that fine scale. It learned what three-kilometer weather looks like, given the coarse picture. And version two predicts several fields at once, rain, wind and pressure, where the first version only did rainfall.
+A: And the cost?
+B: Ai2 says global three-kilometer data at roughly one three-hundredth the cost of running X-SHiELD, and for a single region the savings can be larger still, depending on the area. They also say a streamlined version in development could be more than ten times faster again.
+A: You know why that number makes me happy. In nineteen twenty-two, Lewis Fry Richardson imagined a forecast factory, a great hall of human computers, each one calculating the weather for a patch of the globe, with a conductor keeping them in step. The bottleneck from the very first day was that resolution costs computation. Halve the grid spacing and the work multiplies several times over, because you need more points and shorter time steps.
+B: And an emulator is the way around it. Learn the expensive model once, then run the cheap one as often as you like.
+A: So what did they check it against?
+B: Two tests. Feed HiROv2 a coarsened version of real X-SHiELD output, and they report it matches the high-resolution statistics within three percent, including events that turn up once in a million data points. And over a ten-year run, they say the energy in its hurricanes is comparable to X-SHiELD's over the same period, with realistic eyes and rain bands. They say it also gets the total energy right for storms it never saw in training.
+A: "Comparable to X-SHiELD." That's the catch, isn't it? The test is agreement with another model, not with the sky.
+B: That is the catch, and they say so themselves. Because HiRO learned from X-SHiELD, it only works with the version of ACE tuned to match X-SHiELD. It can't yet produce high-resolution data for a warmer future, or for historical records like E-R-A five, the reanalysis people treat as the observed record.
+A: So for now it's a very cheap copy of one simulated world.
+B: One simulated present-day world. And they flag that winds and pressure around the hurricane eye are more lopsided than in X-SHiELD. The next step they name is training on an X-SHiELD run of a world four degrees warmer.
+A: That's the version that would matter. Who needs cheap storms in a climate we already have?
+B: Anyone who needs thousands of storms instead of one. Insurers, flood engineers, grid planners. The reason you want three hundred times cheaper isn't one forecast. It's running the rare event enough times to see what the bad tail actually looks like.
+A: The once-in-a-century storm, a few hundred times over.
+B: And it's a download. The weights are on Hugging Face, with tutorial notebooks. I'm going to pull it down and look at a hurricane eye on hardware that has no business simulating one.
+A: It'll be lopsided.
+B: They warned me. I'm going to look anyway.
+## A benchmark for the dishwasher
+A: One more, because it made me laugh. Somebody built a benchmark for loading the dishwasher.
+B: Of course they did.
+A: DishwasherBench, from a company called Composo. It simulates a real Bosch machine with rigid-body physics, models place each item through thirteen tools, and the simulator scores what comes out clean. On the hardest level, a dinner party, G-P-T six Astra scored two hundred seventy-four of three hundred sixty-seven points, and both OpenAI models they tested beat the careful scripted player they used as a reference.
+B: How?
+A: They used the pans, the platter and the boards, which the scripted player never tried.
+B: [laughs] They loaded the awkward stuff.
+A: And the authors add that the wash barely cares how plates and cutlery are stacked, so the scores say little about stacking skill. Which may be the most honest limitations section I've read all week.
+## Close
+B: I keep wanting to send the F-A-A a copy of that C-S-O piece. Congress wants an override rate, the security people want somebody reading the log. It's the same request, really. Show us the moment a person said no.
+A: And somewhere in Washington, a traffic manager is being asked to prove a delay that didn't happen.
+B: Good luck to them. Stay grounded.
