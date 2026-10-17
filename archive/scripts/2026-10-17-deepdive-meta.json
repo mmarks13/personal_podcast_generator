@@ -1,0 +1,103 @@
+{
+ "date": "2026-10-17",
+ "kind": "deepdive",
+ "title": "Long context: how models reach a million tokens, and what they use",
+ "summary": "How a transformer is told where each word sits, why rotary position embeddings break past their training length, and how Position Interpolation, NTK-aware scaling and YaRN stretch the window — then the evidence (Lost in the Middle, RULER, NoLiMa, Context Rot, STRING) that the length a model accepts and the length it actually uses come apart.",
+ "sources": [
+  {
+   "group": "Primary sources",
+   "title": "Hugging Face: Welcome Muse Spark Open",
+   "url": "https://huggingface.co/blog/meta-muse-spark-open"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Vaswani et al.: Attention Is All You Need (2017)",
+   "url": "https://arxiv.org/abs/1706.03762"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Su et al.: RoFormer — Enhanced Transformer with Rotary Position Embedding (2021)",
+   "url": "https://arxiv.org/abs/2104.09864"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Press, Smith, Lewis: Train Short, Test Long — Attention with Linear Biases (ALiBi, 2021)",
+   "url": "https://arxiv.org/abs/2108.12409"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Chen et al.: Extending Context Window of Large Language Models via Positional Interpolation (2023)",
+   "url": "https://arxiv.org/abs/2306.15595"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Peng et al.: YaRN — Efficient Context Window Extension of Large Language Models (2023)",
+   "url": "https://arxiv.org/abs/2309.00071"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Rozière et al.: Code Llama — Open Foundation Models for Code (2023)",
+   "url": "https://arxiv.org/abs/2308.12950"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Llama Team, Meta: The Llama 3 Herd of Models (2024)",
+   "url": "https://arxiv.org/abs/2407.21783"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Liu et al.: Lost in the Middle — How Language Models Use Long Contexts (2023)",
+   "url": "https://arxiv.org/abs/2307.03172"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Hsieh et al.: RULER — What's the Real Context Size of Your Long-Context Language Models? (2024)",
+   "url": "https://arxiv.org/abs/2404.06654"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Modarressi et al.: NoLiMa — Long-Context Evaluation Beyond Literal Matching (2025)",
+   "url": "https://arxiv.org/abs/2502.05167"
+  },
+  {
+   "group": "Primary sources",
+   "title": "An et al.: Why Does the Effective Context Length of LLMs Fall Short? (STRING, 2024)",
+   "url": "https://arxiv.org/abs/2410.18745"
+  },
+  {
+   "group": "Further reading",
+   "title": "Chroma: Context Rot — How Increasing Input Tokens Impacts LLM Performance (2025)",
+   "url": "https://www.trychroma.com/research/context-rot"
+  }
+ ],
+ "topics": [
+  "deep dive: long context — positional encoding, RoPE context extension, and effective versus advertised context length"
+ ],
+ "entities": [
+  "Muse Spark Open",
+  "Meta",
+  "Hugging Face",
+  "RoPE",
+  "ALiBi",
+  "Position Interpolation",
+  "YaRN",
+  "Code Llama",
+  "Llama 3",
+  "Lost in the Middle",
+  "RULER",
+  "NoLiMa",
+  "Chroma",
+  "STRING"
+ ],
+ "threads": [],
+ "concepts_taught": [
+  "positional encoding: attention is order-blind, so position must be injected; the 2017 sinusoids with geometrically spaced wavelengths and the hoped-for (not achieved) extrapolation, with quadratic attention cost forcing train-short-read-long",
+  "rotary position embedding (RoPE): query/key dimensions rotated in pairs at geometrically spaced speeds so the attention score depends only on relative offset; why it fails past the training length (the slowest rotations reach angles never seen in training)",
+  "context-window extension of RoPE models: Position Interpolation (squeeze positions, stable but blurs fine detail), NTK-aware base scaling (Code Llama's base 10,000 to 1,000,000), and YaRN (per-frequency interpolation by wavelength plus an attention temperature); Llama 3's staged long-context pre-training as the frontier-scale version",
+  "advertised versus effective context length: needle-in-a-haystack as a reachability test, the lost-in-the-middle U-shape, RULER and NoLiMa's degradation without literal matches, Context Rot's distractor and coherence effects, and STRING's account that long relative distances are rarely practiced in training",
+  "KV-cache arithmetic for long context: 2 x KV heads x head dimension x layers x bytes per token, and grouped-query attention as the lever that shrinks it"
+ ],
+ "lore": [],
+ "listener_note": null,
+ "word_band": null
+}

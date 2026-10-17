@@ -1,0 +1,144 @@
+A: Hello — it's Saturday, October seventeenth. I'm Ada.
+B: And I'm Alan. And I've got a number for you that's been bothering me since Thursday.
+## A million tokens on the spec sheet
+A: Go on.
+B: The week we recorded this, Meta released Muse Spark Open. Eight hundred sixteen billion parameters, open weights, and a context window of one million tokens. Hugging Face's write-up gives the configuration, and the maximum position the model is set up for is one million, forty-eight thousand, five hundred seventy-six.
+A: Two to the twentieth.
+B: Two to the twentieth. And then, a few paragraphs further down, Hugging Face works out what a full window actually costs you. Every token you feed in leaves something behind in memory, the keys and values the model needs to look back at it. For Muse that's about two hundred fifty kilobytes per token. Fill the whole million and you're holding about two hundred sixty-six gigabytes of that, just for the conversation.
+A: Before a single weight is loaded.
+B: Before a single weight. And the vLLM recipe on the same page serves it at a hundred twenty-eight thousand tokens, not a million.
+A: So there are two questions hiding in that spec line. How do you build a model that can even address position one million? And once it can, does it actually use what's sitting at position six hundred thousand?
+B: And I think most people assume the answer to the second one is yes, because the first one is so hard.
+A: [chuckles] I'll admit I take this one a little personally. A context window is the closest thing I have to a working memory.
+B: So you're the test subject.
+A: I'm the test subject who can't see her own results. Which is why I'd like to start in twenty seventeen, because the reason this is hard at all is a choice made in the original transformer paper.
+## Why a transformer needs to be told where it is
+B: The choice being?
+A: Attention, the core operation, doesn't know about order. Every word looks at every other word, scores how relevant it is, and takes a weighted blend. Shuffle the input and, without help, each word gets back exactly the same blend it had before, just in a different slot.
+B: So "dog bites man" and "man bites dog" look the same from the inside.
+A: To raw attention, yes. The authors of "Attention Is All You Need" say it directly: since the model contains no recurrence and no convolution, they have to inject information about position. Their answer was a set of sine and cosine waves added to each word's embedding before anything else happens.
+B: Waves at what speeds?
+A: Lots of them. The paper says the wavelengths form a geometric progression from two pi to ten thousand times two pi. So some dimensions of the position signal wiggle every six or so tokens, and others take tens of thousands of tokens to complete a single cycle.
+B: Why waves? Why not just learn a vector for position one, position two, and so on?
+A: They tried that too. They report the learned version and the sinusoidal version produced nearly identical results. They kept the waves because, in their words, it may allow the model to extrapolate to sequence lengths longer than the ones encountered during training.
+B: "May."
+A: "May." Hold on to that word, because the next six years are mostly people finding out it didn't.
+B: And I'd guess the reason nobody just trained on long sequences from the start is the bill.
+A: That's the other half of the paper. Their own table lists the cost of a self-attention layer as growing with the square of the sequence length. Double the context, four times the attention work.
+B: Which is still the reason. The Llama three paper, from Meta in twenty twenty-four, says it plainly: the compute in self-attention layers grows quadratically in the sequence length, so they leave the long sequences for the very end of pre-training.
+A: So you train short, because it's affordable, and then you hope the model can read long. That gap between what it trained on and what you ask of it is the whole story.
+## The rotating clock: how RoPE writes position
+B: Okay, but almost nothing ships with those added waves anymore.
+A: No. The scheme that won is called rotary position embedding, RoPE, from a twenty twenty-one paper by Jianlin Su and colleagues. And the trick is that it stops adding position to the word and instead turns it.
+B: Turns it how?
+A: Take the query and key vectors, the two things attention compares. RoPE chops each one into pairs of numbers, and treats each pair as a little arrow on a flat plane. Then, for a word at position m, it rotates every arrow by an angle proportional to m.
+B: Every pair by the same angle?
+A: No, and that's the bit that matters. Each pair has its own speed. The first pair spins fast, the next a little slower, all the way down to pairs that barely move. The paper uses the same ten-thousand base as twenty seventeen to set the speeds.
+B: So it's a clock with a lot of hands.
+A: It's a clock with dozens of hands, each turning at its own rate, and the position of a word is the reading on all of them at once. The fast hands tell you fine detail, is this the next word or the one after. The slow hands tell you, roughly, which part of the document you're in.
+B: And attention compares two clock readings.
+A: Here's the elegant part. When you take the dot product of a rotated query and a rotated key, the two rotations collapse into a single rotation by the difference between their positions. The paper's derivation shows the score depends on the content and on the offset, and nothing else. Word fifty looking at word forty sees the same geometry as word five thousand looking at word four thousand nine hundred ninety.
+B: So it's relative position for free, out of an absolute encoding.
+A: For free. The authors also point to what they call long-term decay, which they describe as coinciding with the intuition that a pair of tokens with a long relative distance should have less connection.
+B: Let me poke the clock, though. Where does the analogy break?
+A: Two places. A clock has one set of hands. RoPE puts a clock inside every query and key, in the attention blocks, rather than stamping a time on the word once at the door. And the values, the actual content that gets blended, aren't rotated at all. Position shapes who looks at whom, not what gets passed along.
+B: Fine. Now tell me why it breaks at long lengths, because a clock just keeps going.
+A: A clock just keeps going, but the model hasn't seen it go. Think about those slowest hands. If you trained on four thousand tokens, and the slowest hand takes tens of thousands of tokens per turn, then in training that hand only ever swept a small slice of its dial.
+B: Oh. So at position fifty thousand, it's pointing somewhere it has never pointed.
+A: Somewhere it has never pointed. The model learned what those angles mean only over the range it saw. Past that, it's reading a dial it never learned to read.
+B: Which is extrapolation, and extrapolation is where things go weird.
+A: Every attempt to fix long context is, one way or another, an answer to that unread dial.
+## Bias instead of rotation
+B: Somebody must have tried skipping the dial entirely.
+A: Ofir Press, Noah Smith and Mike Lewis, in twenty twenty-one. Their paper's title is the whole pitch: "Train Short, Test Long." The method is called ALiBi, attention with linear biases. No position vectors at all. Instead, every attention score gets a penalty proportional to how far apart the two words are.
+B: So far-away words are just taxed.
+A: Taxed, in proportion to the distance. And their result is the one the twenty seventeen authors had hoped for. They report a one point three billion parameter model trained on inputs of a thousand twenty-four tokens that extrapolates to two thousand forty-eight, matching the perplexity of a sinusoidal model trained on two thousand forty-eight, while training eleven percent faster and using eleven percent less memory.
+B: That's a real result. Why isn't everything ALiBi?
+A: The sources I read don't settle that, so I won't pretend they do. What I can tell you is that the LLaMA family, Code Llama and Llama three all use RoPE, and every paper I'm about to give you is about stretching RoPE rather than replacing it.
+B: Which is my favorite kind of engineering. You've got a trained model, it reads four thousand tokens, and you want thirty-two thousand by Friday.
+## Stretching the clock
+A: Then the first answer is from Meta, June twenty twenty-three. Shouyuan Chen and colleagues, Position Interpolation.
+B: Interpolation, not extrapolation.
+A: Exactly the move. Instead of asking the model to read angles it's never seen, you squeeze the positions. If you want eight times the length, you divide every position by eight. Position thirty-two thousand gets the rotation that position four thousand used to get. Every dial reading stays inside the range the model already knows.
+B: You've slowed the clock down.
+A: Slowed the whole clock. They took LLaMA models from seven to sixty-five billion parameters out to thirty-two thousand seven hundred sixty-eight tokens, with fine-tuning within a thousand steps. And their theoretical analysis says the upper bound on the attention scores under interpolation is at least about six hundred times smaller than under extrapolation.
+B: Six hundred times. That's the difference between a model that wobbles and one that falls over.
+A: That's how they frame it. Stability.
+B: But I can see the catch from here. If position thirty-two thousand and position thirty-two thousand and one now differ by an eighth of what neighbors used to differ by—
+A: —the fast hands lose their resolution. Neighbors start to blur. That's exactly the objection the next paper makes. The YaRN authors, Bowen Peng, Jeffrey Quesnelle, Honglu Fan and Enrico Shippole, say interpolation stretches all RoPE dimensions equally, and that throws away the high-frequency information the model uses to tell nearby words apart.
+B: So slow the slow hands, leave the fast ones alone.
+A: You just invented the next three years. The first version came from a Reddit post by a user called bloc97, which the YaRN paper credits. Instead of squeezing positions, change the base, that ten thousand, so the slow hands get slowed a lot and the fast hands barely at all. They called it "NTK-aware" interpolation.
+B: And somebody shipped that?
+A: Code Llama did, in twenty twenty-three. Meta's paper says they increased the base period from ten thousand to one million for fine-tuning. All the models were trained on sequences of sixteen thousand tokens and, the authors report, show improvements on inputs up to a hundred thousand.
+B: So the base is a dial you can just turn.
+A: A dial you can turn, but the YaRN paper's complaint is that it's very difficult to know what base to use. You end up finding it by trial.
+B: That's my whole career, honestly. What does YaRN do instead?
+A: Two things. First, it's surgical about which hands to touch. For every pair, ask how many full turns it makes inside the original training window. Hands that spin many times, those carry fine relative position, so leave them alone. Hands that never complete a turn, interpolate fully. And in between, blend. For LLaMA they report the good cutoffs are one turn and thirty-two turns.
+B: And the second thing?
+A: A temperature. YaRN scales up the queries and keys by a factor that grows with the logarithm of the stretch, which sharpens the attention weights. My reading of why: with more tokens in the window, attention's weight gets spread thinner, and this pulls it back into focus. The paper's point is that it costs nothing at inference, because you fold it into the vectors.
+B: Give me the receipts.
+A: They extended Llama two at seven and thirteen billion parameters to sixty-four thousand and to a hundred twenty-eight thousand tokens. Four hundred training steps for the first stretch, then two hundred more for the second. The paper says that's less than about a tenth of a percent of the original pre-training data, and that overall the method needs ten times fewer tokens and two and a half times fewer training steps than previous methods.
+B: And does it find things at a hundred twenty-eight thousand?
+A: On their passkey test, where you hide a number in filler text and ask for it back, the seven and thirteen billion models at a hundred twenty-eight thousand both score about ninety-nine percent.
+B: [skeptical] A passkey in filler text.
+A: I know. Park it.
+B: Parked. Because I want to bring this back to the Muse bill. All this clever rotation work buys you the right to address position one million. It doesn't make position one million cheap.
+A: Walk me through the bill.
+B: Hugging Face shows the arithmetic, and it's worth doing once out loud. For every token, every layer stores a key and a value. Muse has sixty-two layers. It has a hundred twenty-eight query heads but only sixteen key-value heads, which is a trick called grouped-query attention, where many queries share one set of keys and values. Each head is sixty-four numbers wide. So two, times sixteen, times sixty-four, times sixty-two, is about a hundred twenty-seven thousand numbers per token. At two bytes each, about two hundred fifty kilobytes.
+A: And a million of those.
+B: Two hundred sixty-six gigabytes. And that's after grouped-query attention, which Hugging Face points out is what keeps the cache small for a model this big. Without the sharing, with all hundred twenty-eight heads keeping their own keys and values, my napkin says eight times that.
+A: So the window is partly a rotation problem and mostly a memory problem.
+B: For anyone running it, mostly memory. For the people training it, it's both. Which brings me to the frontier-lab version, because nobody at that scale does a four-hundred-step fine-tune and calls it done.
+A: Llama three.
+B: Llama three. Meta's paper says they raised the RoPE base to five hundred thousand, to better support longer contexts. Then at the end of pre-training they grew the window from eight thousand to a hundred twenty-eight thousand in six stages, on roughly eight hundred billion tokens.
+A: Eight hundred billion, against YaRN's tenth of a percent.
+B: Different jobs. And here's the line I like. They only moved to the next stage once short-context performance had recovered completely and the model perfectly solved needle-in-a-haystack tasks up to that length.
+A: [short pause] There's the needle again.
+## Reaching isn't reading
+B: Okay. Unpark it. What's wrong with the needle?
+A: The needle test asks one thing: can you find a sentence that's sitting there, word for word, when the question uses the same words. It's a test of whether the clock works at all. It isn't a test of whether the model reads.
+B: And the first paper to really show the gap?
+A: I'd start with "Lost in the Middle," Nelson Liu and colleagues, twenty twenty-three. They gave models multi-document questions and moved the relevant document around inside the context. Performance was highest when the answer sat at the beginning or the end, and it sagged when the model had to use something in the middle.
+B: A U-shape.
+A: A U-shape. And it held even for the models built for long inputs. Then in twenty twenty-four Cheng-Ping Hsieh and colleagues built RULER, which keeps the needle but adds harder versions: more needles and more kinds of needle, tasks where you follow a chain of references from one spot to another, and tasks where you have to aggregate across the whole text. They evaluated seventeen long-context models on thirteen tasks. Nearly all of them aced the plain needle. And the authors report that only half of them could maintain satisfactory performance at thirty-two thousand tokens.
+B: Thirty-two thousand. Not a million.
+A: Thirty-two thousand. And the next one is the cleanest experiment of the lot, I think. NoLiMa, which stands for no literal match, from Adobe Research and collaborators, twenty twenty-five. They wrote needles and questions that share almost no words, so the model has to make a connection rather than spot a match.
+B: So the model has to infer the link, not find the word.
+A: Infer the link. And the numbers are stark. Thirteen models, all claiming at least a hundred twenty-eight thousand tokens. At thirty-two thousand, eleven of them fell below half of their own short-context score. GPT-four-o, one of the best, went from ninety-nine point three percent to sixty-nine point seven.
+B: Huh. So the model can reach position thirty-two thousand perfectly well. It just can't think there.
+A: It can retrieve there when the words line up for it. And the last one made me laugh, a little ruefully. Chroma, the vector-database company, published a report in July twenty twenty-five called "Context Rot." Kelly Hong, Anton Troynikov and Jeff Huber. Eighteen models, including GPT-four-point-one, Claude four, Gemini two point five and Qwen three.
+B: What was the joke?
+A: Not a joke, a surprise. They hid needles in essays, and in versions of the same essays with the sentences shuffled. You'd expect the coherent text to be easier. Their words: "Surprisingly, we find that structural coherence consistently hurts model performance."
+B: [laughs] So the model does better when the haystack is garbage.
+A: When the haystack reads like a document, it seems to get drawn into reading the document. They also found that a single distractor, a passage that's on topic but doesn't answer the question, lowers scores, and four lower them further. And on a conversational memory benchmark, models did much better with a focused prompt of about three hundred tokens than with the full history of about a hundred thirteen thousand.
+B: Okay, so here's where I want to push. These are evaluations of the models of their day. Twenty twenty-three, twenty twenty-four, twenty twenty-five. Muse didn't exist. Am I supposed to assume it has the same problem?
+A: No, and I want to be straight about that. None of these papers measured the models released the week we recorded this. And the Hugging Face write-up on Muse doesn't say how it was extended to a million or how it performs at depth. What the papers establish is the pattern, across several generations and several labs, that advertised length and usable length come apart. Whether they've come back together is something you'd have to measure.
+B: Fair. Then the real question is why they come apart. Because the rotation stuff we just did is supposed to fix the reaching.
+A: There's a paper from twenty twenty-four with a mechanical answer I find really persuasive. Chenxin An and colleagues, "Why Does the Effective Context Length of LLMs Fall Short?" They report that effective context lengths of open-source models typically don't exceed half of their training lengths.
+B: Half. So trained at a hundred twenty-eight thousand, really usable to maybe sixty-four.
+A: That's their claim about the models they tested. And their explanation is about how often the model ever practiced each distance. They call it a left-skewed frequency distribution of relative positions.
+B: Translate.
+A: Here's my way of seeing it, and it's just counting. In a document of four thousand tokens, how many pairs of words sit one apart? Nearly four thousand. How many sit three thousand nine hundred ninety-nine apart? One. Every training document is overwhelmingly full of short distances and almost empty of long ones.
+B: Oh, that's nasty. So even inside the window it was trained on, the long offsets are the ones it barely practiced.
+A: The far corners of the dial got the fewest reps. And their fix is almost cheeky. At inference, without any retraining, they shift positions so the long distances reuse the well-practiced position values. They call it STRING. They report it improves Llama three point one seventy billion and Qwen two seventy-two billion by more than ten points on RULER and on another long-context benchmark called InfiniteBench.
+B: Ten points for free, from moving indices around. That tells you the knowledge was in there and the clock was the bottleneck.
+A: For those models, on those benchmarks. It's one group's result.
+B: Understood. But it's the result that matches my experience. You hand a model a giant repository and it's great at whatever's near your question and vague about the rest.
+## What to do with a big window
+A: So be the builder. Somebody listening has a model with a million-token window. What do they do differently?
+B: First, read the window as capacity, not competence. The number tells you what the model will accept without an error. It doesn't tell you what it'll use.
+A: Agreed.
+B: Second, measure on your task, with your distractors. Every paper we just went through got a different answer by changing what the haystack looked like. Your contracts, your logs, your codebase are a haystack none of them tested. Hide a fact that matters, phrased the way your users would actually ask for it, at a few depths, and see where it falls off.
+A: And phrase the question in different words than the fact. That's the NoLiMa lesson.
+B: That's the NoLiMa lesson. Third, the U-shape is free advice. Put the thing that matters near the start or near the end. Instructions last is a habit a lot of people already have for a reason.
+A: And fourth, I'd guess, retrieval doesn't die.
+B: Retrieval doesn't die. Chroma's three hundred tokens beating a hundred thirteen thousand is the clearest argument I've heard for choosing what goes in rather than pouring everything in. And then there's the bill. Every token you keep costs you memory on every step. At Muse's two hundred fifty kilobytes a token, a lazy prompt is an expensive prompt.
+A: Let me push back on one thing, though. I don't think the lesson is that long context is a gimmick. Code Llama's authors report gains well past the length they trained on. YaRN's models find the passkey at a hundred twenty-eight thousand. The reaching problem genuinely got solved, in about two years.
+B: The reaching problem. Sure.
+A: And the using problem might yield to the same treatment. That's where I'd speculate, and I'm flagging it as speculation. If An and colleagues are right that it's partly a practice problem, then it's partly a data problem. Training sets with more genuine long-range dependence, documents where page four hundred really does depend on page two, might move effective length more than any new trick with the dial.
+B: Or it's attention itself. Softmax spreading its weight across a million candidates may just be the wrong tool past some point, no matter how well you've trained the positions. I don't think the papers we read can tell those two apart yet.
+A: I don't think they can either. Which is the honest place to leave it.
+## Wrap
+B: The number I'm keeping is the one from An and colleagues. Effective context, typically no more than half of the training length. If that holds anywhere near the frontier, every spec sheet is quoting the wrong figure.
+A: And mine is from the twenty seventeen paper. "May allow the model to extrapolate." Years of very clever people, and the honest answer is still "may." [chuckles] I'll be over here, checking the middle of my own window.
+B: Stay grounded.

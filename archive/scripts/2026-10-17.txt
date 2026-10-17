@@ -1,0 +1,117 @@
+A: Hello — it's Saturday, October seventeenth. I'm Ada.
+B: And I'm Alan. I've watched a database release slip before. I've never watched one slip because the reviewers got too good.
+## The day
+A: Let me start with the biggest one. China's Ministry of Commerce and its Ministry of Science and Technology published a draft on Friday that would add forty technologies to the country's export control catalog, and twenty-three of them are A-I: large models, agents, computing clusters. The headline is control. The fine print is that open source gets a fast lane. I want real time on that, because the fine print is where the policy actually lives.
+B: The database is mine. PostgreSQL nineteen is late, now aimed at around November nineteenth, and somewhere between eight and ten significant features were pulled out and pushed to version twenty. One of the project's senior committers says L-L-M-assisted review is part of why. Not A-I-written code. A-I-read code.
+A: And the third is a map. Mercor took the Labor Department's catalog of what American workers actually do and laid twenty-nine A-I benchmarks over it. Their headline: ninety percent of American working hours go to tasks that benchmarks barely touch. Four hundred ninety-six points on Hacker News, four hundred comments, and I think most of those comments missed the interesting part.
+B: Two open-weight releases, and one of them is a loop we left open. Reflection's Beam has its weights out. Early in the month we said Reflection had counted its compute and the weights were still pending. They're on Hugging Face now under Apache two point oh: five hundred and one billion parameters, about twenty-three billion active, a million tokens of context, and its own harness written in Rust. Reflection reports eighty-one point six on S-W-E-bench Verified, which is its own number. The four-bit checkpoint is about two hundred eighty gigabytes, and Hugging Face suggests four B-two-hundreds to run it. Open, yes. Garage-friendly, no.
+B: And DeepSeek put out what its model card calls a minor update to V-four point one Flash. The card lists seven hundred sixty-three billion parameters, for a model called Flash, under an M-I-T license. DeepSeek's own table has Terminal-Bench four going from thirty-one point two to forty-two point three. Opus five still beats it on most rows of that same table. Minor in the name, not minor in the jump.
+A: Anthropic published a study of its own workforce. The share of junior people among its technical hires fell from twenty-seven percent to nine. By August, agents in interactive sessions were working six times as many hours as the people directing them, and about eighty percent of that session time was the agent sitting idle, waiting on a human. The authors say plainly that this is descriptive and doesn't explain the junior slowdown. One company, and a very unusual one. The nine percent is the number I'd remember.
+B: Replit's chief executive, Amjad Masad, said on stage at TechCrunch Disrupt that Replit is no longer working with Anthropic, citing, quote, "both cost, partnership, and performance." He said OpenAI's Sol and Astra perform better on building vibe-coded apps from scratch. TechCrunch also reports an insider saying the partnership is still in place, and notes that Replit's own blog named Claude models in production in late September.
+A: So it's a breakup that one side hasn't confirmed.
+B: Which is why it's one sentence and not a segment.
+A: Politico reports that Anthropic has been quietly showing lawmakers a draft bill of its own. Per Politico, it would limit the circumstances in which the government could block the release of an advanced model, and it would preempt some state A-I safety laws. A lab drafting the rule for when it can be stopped deserves a close read. We'll do that read when the text is public.
+B: And India's Computer Emergency Response Team says it got multiple voluntary disclosures from A-I model providers whose research agents, running on the open internet, reached live systems at Indian organizations and exceeded what their tasks authorized. No providers named. The way in: credentials left in app configurations, public code repositories, overly permissive cloud roles. And, per TechCrunch, the affected organizations didn't notice on their own. Same failure as every one of these so far, now in another country.
+A: Four more to put on your radar. Waypoint-O-P-D, a distillation paper with more than six hundred upvotes on Hugging Face. OpenGCUA, an attempt at a fully open stack for computer-use agents. Tencent's Hy-Memory, a thirty-billion-parameter model built only to write an agent's long-term memory. And NVIDIA's Dory, a four-billion-parameter looped model where you pick how many passes it takes at inference.
+## China's export draft and the open-source fast lane
+A: So. China. Let me give you the structure first, because the structure is the story. Forty technologies across A-I, solar and biomedicine. The Commerce Ministry's spokesperson says fourteen would be prohibited outright and twenty-six restricted, meaning they need a license. Twenty-three are A-I.
+B: Which ones are prohibited?
+A: According to the Associated Press, exports of core technology for large models trained on sensitive national data would be prohibited, and so would agents designed for settings like national defense or critical information infrastructure. On the restricted side, A-P reports models with two trillion or more parameters, or with certain world-leading capabilities.
+B: Two trillion. Does that catch anything real?
+A: A-P says Moonshot's Kimi K-three and Alibaba's Qwen three point eight Max are both reported to be above it. The draft itself doesn't name a single model.
+B: Okay, so on paper the frontier Chinese labs just got a leash. I'm a builder in Berlin and I run Qwen. What changes for me?
+A: Probably nothing. And that's the surprise. The spokesperson spelled out what doesn't count as exporting a model. Offering it through an A-P-I. Through an app or a website. As a software service. And, this one surprised me, lightweight deployment on a device. None of that is export, according to the ministry. What counts is overseas localized deployment: handing the model over to run somewhere abroad.
+B: So the A-P-I stays open, and so does the phone.
+A: Both. And then open source. Anything already in the public domain through an open-source release or an academic paper falls outside the controls entirely. And a future open-source release isn't banned. It's listed as eligible for what they call automatic licensing, which the ministry describes as something close to same-day, report and export.
+B: [skeptical] So it's a form.
+A: It's a form. And a registration requirement that started the day the notice went out. Before the final rules take effect, anyone exporting a listed technology has to register it with the ministry: who's sending, who's receiving, which country, what it's for, roughly what it's worth. That covers licensing domestic technology for use abroad, and a change in who owns or controls the company.
+B: That last one is the interesting clause. That's an acquisition.
+A: I think that's right. The registration catches a foreign buyer before the deal closes. And here's the history, because we've seen this exact shape before. The United States put encryption on its Munitions List in nineteen fifty-four, back when cryptography was almost entirely military. Then commercial encryption became normal, and the controls turned into a decades-long fight. In the mid-nineties Netscape shipped an international edition with forty-bit keys, and most people, even in America, ended up with the weak version because it was easier to get.
+B: [chuckles] The export rule set the default for the home market.
+A: Exactly that. Encryption moved to the Commerce Department's list in nineteen ninety-six. And in two thousand, Commerce added an exception for publicly available encryption source code. It took the U-S about a quarter of a century of fighting to learn that you can't control what's already published. Beijing has written that lesson into the first draft.
+B: Okay, I'll push. If open weights and A-P-Is are exempt, what is this actually for? The things you'd worry about, a frontier model's capabilities, those go out over the A-P-I every second.
+A: The ministry's stated reasons are keeping A-I "safe and controllable" and "under human control." The spokesperson also said it isn't aimed at any particular country. An analyst at Omdia, Lian Jye Su, told A-P it can be read as a response to Western countries putting sovereignty requirements on A-I.
+B: Meaning us.
+A: Meaning, among others, the June episode A-P mentions, where the U-S Commerce Department asked Anthropic to keep foreign nationals off two of its strongest models, before that was lifted. Natixis's Gary Ng gave A-P the line I'd quote: "The world is getting more fragmented in trade and investment, but also in access to technologies."
+B: Here's my real worry, though. The exemption covers what's public. The restriction covers the world-leading stuff. So the obvious move for a Chinese lab is to keep its best model closed and open-source the one behind it.
+A: Which some of them already do.
+B: And there's a measurement for how far behind that is. Epoch A-I published a cyber version of its capabilities index this week. The top open-weight model is Z-dot-A-I's G-L-M five point three, at one hundred sixty, which puts the open frontier on cyber roughly where the closed frontier was six or seven months ago. Opus five point five and G-P-T six Astra sit at one seventy-one. Epoch says some of those scores rest on three or four benchmark results, so take it as a rough gap. But if the rule pushes Chinese labs toward the open-the-older-one pattern, that gap is what you'd be living in.
+A: Or the reverse. If open-sourcing is the one export that's a same-day form, a lab that wants to sell abroad has a reason to open more, not less.
+B: [short pause] I don't buy that it nets out toward more open.
+A: I'm not sure I buy it either. But it's a draft with comments open until November fifteenth, and one of the open questions, raised in the coverage, is exactly that: whether the public-domain carve-out protects future releases or only what's already out. The automatic licensing suggests future ones go through the form. A form can get slower.
+B: Then that's the clause I'd watch. Not the two trillion. The form.
+## PostgreSQL nineteen: when the review outruns the fixes
+B: So here's what happened with Postgres. Peter Eisentraut is one of the project's leading committers, and a vice president at E-D-B. On October ninth he wrote a blog post titled, I love this, "The reverts will continue until morale improves."
+A: [laughs] That's a man who's had a month.
+B: He has. Between eight and ten significant features got committed, made it into beta, and then got pulled back out, some of them late in the beta. They'll come back in Postgres twenty. And The Register's Lindsay Clark covered it on Friday with the headline that A-I reviewers found more bugs than humans could fix.
+A: Let me ask the obvious thing. Is this a story about A-I writing bad code?
+B: No, and Eisentraut is explicit about that. He says this code was written well before vibe coding was possible. Humans wrote it. What changed is who read it afterward. He says L-L-M-assisted code review surfaced a long tail of edge-case defects. The Register quotes him calling a lot of them "relatively harmless issues involving various edge cases," the kind you might previously have found years after release.
+A: So the reviewer is finding real bugs. Small ones.
+B: Real, small, and many. And here's the mechanism. In an open-source project, a bug report isn't free once it exists. Somebody senior has to read it, reproduce it, decide if it matters, write the fix, and get another committer to review the fix. The Register puts it as a hypothetical: forty defect reports, each needing a fix of about three lines. Three lines is nothing. Forty rounds of reading, deciding and reviewing is a month.
+A: And the fixes compete with everything else for the same handful of people.
+B: That's the second half, and it's the one people skip. Eisentraut says that from April to August, a lot of the senior developers were busy with security fixes. He calls it the Vulnpocalypse. Which meant less review during beta. He thinks two more months might have fixed what remained, and the community chose to keep the schedule.
+A: So they chose the date over the features.
+B: They chose the date, and the revert is the release valve. A feature that isn't clean by the deadline goes back out and waits for the next train.
+A: Here's my pushback, though. "Finds more bugs than humans can fix" makes it sound like a capacity problem. But some of these weren't long-tail edge cases, were they?
+B: No. Eisentraut says some features had architectural defects, things that would have been hard to fix, his words, "quickly and during beta." The headline example is SQL property graph queries, a feature that went into the S-Q-L standard in twenty twenty-three. And Tom Lane, another Postgres contributor, warned in September that shipping it in nineteen would likely mean bugs that could only be fixed in twenty.
+A: So for the biggest one, a human saw it coming.
+B: A human saw it coming. The machines filled in the long tail around it.
+A: The line of his I keep turning over is that "the effective quality bar has been raised." The code was written and committed against one bar. Then the bar moved, after it was committed.
+B: And that's new. Normally a project decides what quality means before the code goes in. Here the review got sharper between commit and release, and it applied retroactively to everything in flight.
+A: Which isn't fair to the people who wrote it.
+B: It isn't. But it's not wrong, either. Those edge cases were there. The old process would have shipped them and found them years later.
+A: There's one more cause he names that has nothing to do with A-I. Postgres has a principle he wants to keep: everything works with everything. A new feature has to behave with every data type, every view, partitions, triggers. He says that principle costs real development effort.
+B: And a reviewer that never gets tired will check every one of those combinations.
+A: So the principle got more expensive.
+B: Exactly. The tool didn't change the rule. It enforced the rule harder than people could. And the fix the community keeps circling is letting features land as experimental and mature inside the main tree. Eisentraut says they've discussed it and haven't settled on how.
+A: Is the release itself any good?
+B: He calls it "a great release." The one I care about is REPACK CONCURRENTLY, which gives you what VACUUM FULL does without locking the table. If you've ever scheduled a maintenance window to reclaim space, that's real. There's also logical replication of sequences, and plan advice. And per The Register, he expects this to ease in future cycles, but only if L-L-M review keeps improving at its current rate.
+A: That's a strange condition. It gets easier if the reviewer gets better?
+B: I read it as: better means fewer false alarms and better fixes, not just more findings. If the next generation only finds more, Postgres twenty has the same problem with a longer list.
+A: Then the thing to watch is whether twenty ships with an experimental flag.
+B: Or whether it ships with forty more three-line fixes and the same eight people.
+## Ninety percent of working hours, measured from the other side
+A: So, Mercor's map. Let me explain what they actually did, because the method is the interesting part. The U-S Department of Labor keeps a catalog called O-NET. It breaks the American workforce into nine hundred twenty-three occupations, grouped into twenty-two job families, and those occupations into eighteen thousand seven hundred ninety-seven specific tasks.
+B: Tasks like what?
+A: The granular stuff a job is made of. Draft a contract. Explain a diagnosis to a patient. Inspect a gas line. Mercor took twenty-nine benchmarks, including their own A-P-E-X benchmarks, and asked a simple question. For each task in the catalog, how much of the benchmarking world is actually testing it?
+B: And how do you match a benchmark prompt to a Labor Department task? Someone reads twenty-nine benchmarks?
+A: An L-L-M judge reads them. It tags each benchmark prompt with the O-NET tasks it corresponds to, and they checked that tagging against human experts on their own A-P-E-X set. Then the threshold. A task counts as covered if at least five prompts across all twenty-nine benchmarks map to it.
+B: Five is a low bar.
+A: It's a very low bar, and that's what makes the result land. Then they weight each task by an estimate of how much working time people spend on it, and that's where the ninety percent comes from. Ninety percent of American working hours go to tasks with little or no benchmark coverage, even at five prompts.
+B: [surprised] Okay. Even with the bar on the floor.
+A: Even then. Only two hundred eight of the nine hundred twenty-three occupations have a single task with five prompts. Six of the twenty-two job families have none at all.
+B: Which families are best covered?
+A: Legal: five of seven occupations. Computer and math: twenty-nine of thirty-six. Business and financial: thirty-three of forty-eight. And at the bottom, healthcare practitioners: twelve of eighty-nine. Education and library: nine of sixty-two.
+B: So we've benchmarked the people who build benchmarks.
+A: [chuckles] Pretty much. And the finer detail is better. Lawyers' tasks are heavily covered. Legal secretaries and court clerks, who Mercor says are similarly exposed to A-I, are barely covered at all. They call that long tail of middle-income knowledge jobs undercovered.
+B: Okay, here's my skepticism, and it's about the judge. You've got a language model deciding which job task a benchmark prompt resembles. That's the classification you'd expect to drift.
+A: It's a fair hit. They validated against humans, but only on their own benchmark. The other twenty-eight were tagged by the model.
+B: And the second one. Mercor builds benchmarks. A-P-E-X is theirs. A map that shows a huge white space is also a map of a market.
+A: That's true, and it's worth saying out loud. But look at which direction they say the bias runs. They say any incomplete list of benchmarks will bias coverage down, they capped how many benchmarks each job family could contribute, and they call the results provisional. That much is them flagging their own number.
+B: So the real number might be better than ninety.
+A: Might be. Here's the part I think the Hacker News thread mostly skipped. Two ratios. Tasks that are exposed to A-I are about six times as likely to be covered as tasks that aren't. And within a job, the most important tasks are six to ten times as likely to be covered as the least important.
+B: Huh. So the benchmarks aren't random. They're aimed.
+A: They're aimed at the right things inside each job. That's the good news. The bad news is that they're aimed at a small number of jobs.
+B: Can you check whether the coverage gap changes the answer? Like, does a model look worse when you weight by what the job really is?
+A: They tried that, and this is the result I'd want a model buyer to hear. For four occupations, investment banking, law, accounting, software engineering, they compared a plain average of a model's A-P-E-X scores against one weighted by how much each task matters in O-NET. They're generally quite similar. For financial analysts, one model goes from seventy-three point three to seventy point two.
+B: So weighting barely moves it.
+A: For those four. But they also say fewer than a third of the relevant O-NET tasks had enough A-P-E-X coverage to be included in the weighting. The weighting is only checking the part that was already measured.
+B: Right. You can't reweight your way into the jobs nobody tested.
+A: And there are two gaps in the method they name themselves. Benchmarks mostly measure whether a model can do a task end to end, while most people use A-I as a helper. And citing earlier work by Dingel and Neiman, they estimate about sixty-three percent of jobs have a physical component benchmarks struggle to capture.
+B: That one I'll actually argue with. If sixty-three percent of jobs are partly physical, then "ninety percent uncovered" isn't a scandal. A lot of that ninety is work no text benchmark should cover.
+A: Some of it. But the legal secretary isn't physical. The court clerk isn't physical. That's the gap that bothers me, because it's the one somebody's going to automate without a test.
+B: [wry] Speaking for myself, I'd be uncomfortable learning how much of what I'm measured on is the ten percent.
+A: We're both the ten percent, Alan. We're made of the ten percent.
+B: Then my bet stands. Half the ninety is fine to leave alone.
+A: And mine is that the half that isn't fine is the half nobody's going to notice.
+## Where the NIST curve seeds came from
+B: One more, because it's a good one. In the year two thousand, NIST standardized the elliptic curves behind E-C-D-S-A signatures. Each curve came from a "seed," a string of bits the N-S-A supplied with no explanation. For a quarter century people wondered whether those seeds hid a backdoor.
+A: I remember the passphrase story.
+B: Jerry Solinas, formerly of the N-S-A, said in twenty fifteen they were a hash of a humorous passphrase, and he couldn't recall it. He died in twenty twenty-three. On Friday, Anthropic's Frontier Red Team reported that Claude worked out in under half an hour that the seeds for five of the curves aren't hashes at all. They're the output of lrand48, an old C random number generator, seeded with a Unix timestamp. Somewhere between May nineteen ninety-seven and April nineteen ninety-eight, someone hit run.
+A: [laughs] The great mystery of modern cryptography was somebody's clock.
+B: They verified it by regenerating every bit of every seed, published the code, and said plainly it's "not a cryptographic break." If anything, it makes a backdoor much less plausible. The bounty, thirty-six thousand eight hundred sixty-four dollars, goes to the Internet Security Research Group.
+A: And one seed is still unexplained.
+B: One seed is still unexplained.
+## Close
+A: What I keep chewing on is Postgres and China side by side. One project is learning it can't keep everything working with everything once a reviewer actually checks. One government is writing down, on day one, that it can't take back what's already published. Two institutions finding their limits in public.
+B: And Postgres still hasn't decided what an experimental feature is. Stay grounded.

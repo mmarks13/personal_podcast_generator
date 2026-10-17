@@ -1,6 +1,77 @@
 {
   "episodes": [
     {
+      "date": "2026-10-17",
+      "title": "China drafts AI export controls — open source gets the fast lane",
+      "summary": "China's draft export controls on 23 AI technologies exempt APIs, on-device use and published open source, and give future open releases same-day automatic licensing. PostgreSQL 19 slips after LLM-assisted review raised the quality bar on code already committed. And Mercor's map finds 90% of US working hours fall on tasks benchmarks barely test.",
+      "topics": [
+        "China's draft revision of its Catalog of Technologies Prohibited and Restricted from Export (MOFCOM and MOST, published 16 October 2026; comments to 15 November): 40 technologies (23 AI, 12 solar, 5 biomedicine), 14 prohibited and 26 restricted per the MOFCOM spokesperson; AP reports prohibitions on core tech for models trained on sensitive national data and agents for defence/critical infrastructure, and possible restriction of models at 2T+ parameters or world-leading capability (Kimi K3 and Qwen 3.8-Max reportedly above; no models named). Spokesperson: API, app/web, SaaS and lightweight on-device deployment are not model-technology export; only overseas localized deployment is; already-public open-source or academic tech is outside control; future open-sourcing and own overseas compute centres get same-day 'automatic licensing'; interim pre-export registration from publication, covering licensing abroad and change of ownership/control to a foreign entity. Taught against US crypto export controls (Munitions List 1954, 40-bit export editions, move to Commerce 1996, publicly-available source exception 2000). Epoch's Cyber ECI open-closed gap (GLM-5.3 at 160 vs Opus 5.5/GPT-6 Astra at 171, ~6-7 months) used for the open-the-older-model scenario. Unresolved: Alan doubts it nets toward more open release; Ada floated the reverse; both flagged the automatic-licensing form as the clause to watch.",
+        "PostgreSQL 19 delayed to around 19 November 2026 after 8-10 significant features were reverted during beta and postponed to v20 (The Register, Lindsay Clark, 16 October; Peter Eisentraut's 9 October post 'The reverts will continue until morale improves'). Causes he names: architectural defects in some features (SQL/PGQ, which Tom Lane warned about in September), a long tail of edge-case defects surfaced by LLM-assisted review on human-written code ('the effective quality bar has been raised'), senior developers absorbed by 'Vulnpocalypse' security fixes April-August, the 'everything works with everything' principle, and no settled mechanism for experimental features. Taught as the per-report cost of triage/fix/review against a fixed release train, the revert as the release valve, and a quality bar moving after commit. PG19 still ships REPACK CONCURRENTLY, logical replication of sequences and pg_plan_advice.",
+        "Mercor's benchmark map of the US economy: 29 benchmarks (including Mercor's own APEX) tagged by an LLM judge against O*NET's 923 occupations, 22 job families and 18,797 tasks, a task 'covered' at 5+ prompts, weighted by time share: 90% of US working hours on tasks with little or no coverage; 208 of 923 occupations and 0 occupations in 6 job families covered; best Legal 5/7, Computer & Math 29/36, worst Healthcare Practitioners 12/89, Education 9/62; lawyers covered but legal secretaries and court clerks not; exposed tasks ~6x and most important tasks 6-10x more likely to be covered; O*NET-weighted APEX averages close to simple averages (73.3 vs 70.2 for financial analysts) but fewer than a third of tasks had enough coverage. Mercor says results are provisional and biased down; ~63% of jobs have a physical component (Dingel and Neiman). Unresolved: Alan holds much of the 90% is work no text benchmark should cover; Ada holds the uncovered non-physical clerical jobs are where untested automation lands."
+      ],
+      "entities": [
+        "China Ministry of Commerce",
+        "China Ministry of Science and Technology",
+        "Epoch AI",
+        "GLM-5.3",
+        "PostgreSQL",
+        "Peter Eisentraut",
+        "Tom Lane",
+        "The Register",
+        "Mercor",
+        "O*NET"
+      ],
+      "threads": [
+        {
+          "name": "AI sovereignty and open weights",
+          "status": "China's draft export catalog exempts published open source and hosted access, and gives future open-sourcing same-day automatic licensing; comments close 15 November",
+          "arc": "From US-side controls on frontier access to China writing its own export regime, with open weights carved out rather than caught"
+        }
+      ],
+      "dives": [
+        {
+          "story": "China's export draft and the open-source fast lane",
+          "why_it_matters": "Anyone building on Chinese open-weight models (726 points and 432 comments on r/LocalLLaMA) needs to know the draft exempts APIs and published weights and fast-tracks future open releases, so the real lever is a registration form."
+        },
+        {
+          "story": "PostgreSQL nineteen: when the review outruns the fixes",
+          "why_it_matters": "Maintainers and release managers of mature open-source projects (197 HN points) are seeing for the first time what LLM-assisted review does to a fixed release train: the quality bar moves after commit and reverts become the valve."
+        },
+        {
+          "story": "Mercor's benchmark map of the US economy",
+          "why_it_matters": "Anyone choosing models for non-software work (496 HN points, 416 comments) learns that benchmarks are aimed at the right tasks inside a few heavily-measured jobs, and barely touch the rest."
+        }
+      ],
+      "lore": []
+    },
+    {
+      "date": "2026-10-17",
+      "kind": "deepdive",
+      "title": "Long context: how models reach a million tokens, and what they use",
+      "summary": "How a transformer is told where each word sits, why rotary position embeddings break past their training length, and how Position Interpolation, NTK-aware scaling and YaRN stretch the window — then the evidence (Lost in the Middle, RULER, NoLiMa, Context Rot, STRING) that the length a model accepts and the length it actually uses come apart.",
+      "topics": [
+        "deep dive: long context — positional encoding, RoPE context extension, and effective versus advertised context length"
+      ],
+      "entities": [
+        "Muse Spark Open",
+        "Meta",
+        "Hugging Face",
+        "RoPE",
+        "ALiBi",
+        "Position Interpolation",
+        "YaRN",
+        "Code Llama",
+        "Llama 3",
+        "Lost in the Middle",
+        "RULER",
+        "NoLiMa",
+        "Chroma",
+        "STRING"
+      ],
+      "threads": [],
+      "lore": []
+    },
+    {
       "date": "2026-10-16",
       "title": "Meta releases Muse Spark Open — open weights, if you own a terabyte",
       "summary": "Meta's 816-billion-parameter Muse Spark Open ships open weights that run on linked Mac Studios, trailing Chinese open models on Meta's own table and carrying a license aimed at inference hosts. Then Anthropic embeds six METR evaluators with employee-like access and gives up its veto over what they publish.",
@@ -1874,120 +1945,15 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-09-16",
-      "title": "OpenAI matches Anthropic on evaluators — AEF-1 sets the terms",
-      "summary": "The AI Evaluator Forum's AEF-1 standard turns out to predate this week's headlines by nine months, and what actually changed is that the labs showed up to it — with OpenAI matching Anthropic's embedded-evaluator pledge in a single sentence. Plus TabPFN-3.5, a transformer that beats gradient-boosted trees on tables without ever training on your data, and Lina Khan pointing a 1934 unfair-competition case at the AI race itself.",
-      "topics": [
-        "AEF-1, the AI Evaluator Forum's 'Minimum Operating Conditions for Independent Third Party AI Evaluations': version 1 dated 4 December 2025, authored by a consortium of eight evaluator organisations (AVERI, Collective Intelligence Project, Meridian Labs, METR, Princeton Holistic Agent Leaderboard, RAND, SecureBio, Transluce) with no lab members; five conditions — sufficient access and resources including safe harbour, minimised conflicts of interest, analytic autonomy including editorial control, transparent methods and results with no contingent release conditions, and protection of sensitive information — enforced only by publishing a reporting checklist alongside results that states which conditions were met and explains those that could not be met literally; the EU AI Office endorsed AEF-1 provisions for compliance with the General-Purpose AI Code of Practice. AI News reported xAI, OpenAI and Anthropic all cosigned; noted on air that the Forum's own site lists member organisations and no company signatories, so the cosign was reported as AI News reports it. Anthropic's pledge: 'desks in our offices, access badges, and company laptops' plus permissions 'mostly comparable to what internal risk assessment teams have'; Altman on 12 September: 'Committing to having independent evaluators with employee-like access is a great idea, and we will do the same', with no timeline, named evaluator or scope. TechCrunch (Chris Lehane) reports several weeks of OpenAI/Anthropic/Google talks and a standards body per The Information, with Lehane saying the firms don't need a government waiver — a retreat from one of Amodei's three mechanisms. Counter-reading from The Register (regulatory capture; Gartner's Daryl Plummer: 'I will believe that when I see it') and a widely-shared thread alleging structural conflicts in the Anthropic-linked safety ecosystem. Left unresolved on air: whether a checklist completed by someone holding the lab's badge can establish independence.",
-        "TabPFN-3.5 (Prior Labs, released 15 September 2026): a tabular foundation model that is a transformer pretrained exclusively on synthetic data drawn from a designed prior and never trained on the user's data — at prediction time the entire training set goes into the context and the answer comes back in one forward pass, with no per-dataset gradient fitting; architecture is a distribution embedder followed by row-wise and cross-row attention; the prior-data-fitted-network claim, from Hollmann et al.'s 2025 Nature paper 'Accurate predictions on small data with a tabular foundation model', is that training on enough synthetic problems approximates Bayesian inference over the prior. TabPFN-3 scales to 1M training rows and is up to 20x faster than TabPFN-2.5 via reduced KV cache and row-chunking; 3.5 and 3.5-Fast list a ceiling of 1,000,000 rows and 20,000 features. Reported results: on BeyondArena (142 datasets) about 150 Elo over the previous overall leader and up to about 250 Elo over the strongest previous baseline on text-rich, high-cardinality and high-dimensional data; the Thinking variant adds about 20 Elo on BeyondArena and 44 on TabArena (51 datasets, 27+ methods); Fast is in alpha at about 6x the base speed. Caveats stated on air: Elo is a ranking, not an error rate, and no absolute accuracy delta is published; SAP completed its acquisition of Prior Labs in July 2026, says it will run independently, has committed more than €1B, and shipped TabPFN-3.5 Plus inside SAP AI Core, with SAP CTO Philipp Herzig the one quoted on accuracy; the code package is Apache 2.0 but the 3.5 model weights are non-commercially licensed, so the free path stops before production. Context given on air: gradient-boosted trees (XGBoost, LightGBM, CatBoost) have held tabular data for roughly a decade while neural networks took images, text, audio and video.",
-        "Lina Khan (former FTC chair) to The Register, 14 September 2026, on enforcing existing law against AI companies: 'We shouldn't let discussions about new legal regimes distract from the fact that there's no AI exemption from laws already on the books' and 'Law enforcers already have authority to charge companies and their CEOs for creating and releasing dangerous, unvetted, or defective products.' Three existing avenues named: consumer protection on dangerous/defective products, unfair and deceptive trade practices, and unfair methods of competition. The 1934 precedent is FTC v. R.F. Keppel & Bro., in which a method of competition that requires companies to 'descend to a practice which they are under a powerful moral compulsion not to adopt' is unfair competition whether or not criminal — read on air as making the compulsory race itself actionable rather than only a specific downstream harm, and flagged explicitly as a legal theory an experienced enforcer is pointing at, not a filed case, with the original case concerning a candy sales gimmick. Khan's own limiting example: 'OpenAI could face liability given the Hugging Face incident, but Hugging Face being bought up by Nvidia means that we're unlikely to see it file a lawsuit over this.' Counterweights: Kirk Sigmon of KellDann Law predicting enforcers pursue only 'easy wins' like deepfake porn and AI-enabled scams, and Jensen Huang saying the same week that AI is not an 'alien mind' and safety can be engineered by each product maker. Khan's closing position: 'We can and must pursue any new efforts alongside enforcing existing laws.'"
-      ],
-      "entities": [
-        "AI Evaluator Forum",
-        "METR",
-        "Transluce",
-        "RAND",
-        "SecureBio",
-        "Anthropic",
-        "OpenAI",
-        "xAI",
-        "Sam Altman",
-        "Dario Amodei",
-        "Chris Lehane",
-        "Prior Labs",
-        "TabPFN-3.5",
-        "SAP",
-        "Philipp Herzig",
-        "Lina Khan",
-        "Federal Trade Commission",
-        "The Register",
-        "Jensen Huang",
-        "Nvidia",
-        "Hugging Face"
-      ],
-      "threads": [
-        {
-          "name": "Frontier-model release gating",
-          "status": "Saturday's named watch-item was answered in three days: Altman committed OpenAI to independent evaluators with employee-like access, matching Anthropic's badges-and-desks pledge, and the mechanism now has a written standard behind it — AEF-1, dated December 2025 and authored by eight evaluator organisations, which AI News reports xAI, OpenAI and Anthropic have all cosigned. Enforcement is a published checklist and nothing else; the antitrust waiver has quietly dropped out, with OpenAI's policy chief saying the firms don't need one.",
-          "arc": "From a lab chief executive publishing the paperwork for a verified slowdown, to a second lab accepting embedded evaluators inside a week — and the discovery that the document doing the constraining was written by the evaluators nine months earlier and constrains only what they must disclose."
-        },
-        {
-          "name": "The legal state of AI training data",
-          "status": "Lina Khan is arguing the industry's accountability gap is one of enforcement, not statute, and pointing a 1934 unfair-competition precedent at the compulsory race itself — while conceding the clearest live case is unlikely to be brought because Nvidia now owns the injured party.",
-          "arc": "From courts deciding what AI companies may train on, to a former enforcer arguing that existing product-liability and unfair-competition law already reaches how they ship."
-        }
-      ],
-      "dives": [
-        {
-          "story": "AEF-1 and what the labs actually signed",
-          "why_it_matters": "Anyone who will be asked to trust a third-party evaluation of a frontier model needs to know that the only thing AEF-1 enforces is a published checklist, and that the standard predates the labs' assent by nine months."
-        },
-        {
-          "story": "TabPFN-3.5: a tabular foundation model that never trains on your data",
-          "why_it_matters": "Practitioners running gradient-boosted trees on business tables — the largest and least glamorous applied-ML population there is — now have a one-forward-pass alternative they can test in an afternoon, with a non-commercial weights licence waiting at the production boundary."
-        },
-        {
-          "story": "Khan's 1934 precedent and the argument that the race is the violation",
-          "why_it_matters": "Anyone betting that AI accountability waits on new legislation should know a former FTC chair thinks the existing unfair-competition power already reaches the 'we can't slow down because they won't' defence every lab is currently making."
-        }
-      ],
-      "lore": [
-        {
-          "host": "Alan",
-          "type": "position",
-          "note": "Alan staked out that of AEF-1's five operating conditions, the only one that can't be quietly traded away is publish-without-the-lab's-permission — everything else is negotiable between two parties who want a deal, and the checklist's value is that trading the editorial-control clause shows up in the box. He held it against Ada's objection that a checklist completed by someone holding the lab's badge is a poor instrument for establishing independence, and neither conceded; they agreed the disagreement is really about how much time there is."
-        },
-        {
-          "host": "Alan",
-          "type": "reveal",
-          "note": "Alan revealed he has three years of junk tables and a CatBoost pipeline at home he has been embarrassed about since 2024, and said he would spend the evening testing TabPFN-3.5 against it. Ada asked him to report back."
-        }
-      ]
-    },
-    {
-      "date": "2026-09-16",
-      "kind": "deepdive",
-      "title": "Industry self-regulation: is pacing the frontier policy or a pledge?",
-      "summary": "The listener's question — is \"pacing the frontier\" safety policy or the industry writing its own rules — taught as the thing it actually turns on. What regulatory capture means in Stigler's sense and why the accusation needs a regulator; what forty years of the chemical industry's Responsible Care programme measured about self-regulation without sanctions; why a sincerely-meant safety cost is also an entry barrier; and the one live mechanism by which a privately written standard becomes enforceable.",
-      "topics": [
-        "deep dive: industry self-regulation — whether 'pacing the frontier' is safety policy or the industry writing its own rules, and the structural variable (who administers the consequence) that decides which"
-      ],
-      "entities": [
-        "Anthropic",
-        "Dario Amodei",
-        "OpenAI",
-        "AI Evaluator Forum",
-        "European AI Office",
-        "George Stigler",
-        "Andrew King",
-        "Michael Lenox",
-        "Shanti Gamper-Rabindran",
-        "Steven Salop",
-        "Responsible Care",
-        "Federal Aviation Administration",
-        "Boeing",
-        "Zvi Mowshowitz",
-        "Daniel Kokotajlo"
-      ],
-      "threads": [],
-      "lore": [
-        {
-          "host": "Alan",
-          "type": "position",
-          "note": "Alan revised the position he staked the same morning — that AEF-1's publish-without-permission clause was the good news because it produces a document he can read without anyone's permission. Confronted with King & Lenox and Gamper-Rabindran & Finger, he now holds that a disclosure regime with no sanction is precisely the object those studies measured and it went the wrong way, landing on: everything committed to this week is real, and none of it is yet the kind of thing that has ever worked. He did not abandon the clause's value, only its sufficiency."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
       {
         "name": "AI sovereignty and open weights",
-        "status": "Meta releases Muse Spark Open (816B/42B active) as the 'most capable US open-weight model', runnable on linked Mac Studios, under a license requiring a separate agreement for model-as-a-service above $20M revenue",
-        "arc": "Mistral Large 4 promised weights; Meta now ships frontier-class open weights that still trail Chinese open models on its own table",
-        "last_seen": "2026-10-16"
+        "status": "China's draft export catalog exempts published open source and hosted access, and gives future open-sourcing same-day automatic licensing; comments close 15 November",
+        "arc": "From US-side controls on frontier access to China writing its own export regime, with open weights carved out rather than caught",
+        "last_seen": "2026-10-17"
       },
       {
         "name": "Embedded independent evaluators",
@@ -2078,12 +2044,162 @@
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-09-15"
+        "last_seen": "2026-09-16"
       },
       {
         "name": "METR",
         "note": "",
-        "last_seen": "2026-09-15"
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Nvidia",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "OpenAI",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Hugging Face",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Dario Amodei",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Sam Altman",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "AI Evaluator Forum",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Transluce",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "RAND",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "SecureBio",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "xAI",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Chris Lehane",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Prior Labs",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "TabPFN-3.5",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "SAP",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Philipp Herzig",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Lina Khan",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Federal Trade Commission",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "The Register",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Jensen Huang",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "European AI Office",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "George Stigler",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Andrew King",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Michael Lenox",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Shanti Gamper-Rabindran",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Steven Salop",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Responsible Care",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Federal Aviation Administration",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Boeing",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Zvi Mowshowitz",
+        "note": "",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "name": "Daniel Kokotajlo",
+        "note": "",
+        "last_seen": "2026-09-16"
       },
       {
         "name": "Claude Mythos 5",
@@ -2124,156 +2240,6 @@
         "name": "Jason Li",
         "note": "",
         "last_seen": "2026-09-15"
-      },
-      {
-        "name": "GPT-5.6 Terra",
-        "note": "",
-        "last_seen": "2026-09-15"
-      },
-      {
-        "name": "GPT-5.6 Sol",
-        "note": "",
-        "last_seen": "2026-09-15"
-      },
-      {
-        "name": "colibri",
-        "note": "",
-        "last_seen": "2026-09-15"
-      },
-      {
-        "name": "Kimi K3",
-        "note": "",
-        "last_seen": "2026-09-15"
-      },
-      {
-        "name": "GLM-5.2",
-        "note": "",
-        "last_seen": "2026-09-15"
-      },
-      {
-        "name": "Nvidia",
-        "note": "",
-        "last_seen": "2026-09-15"
-      },
-      {
-        "name": "OpenAI",
-        "note": "",
-        "last_seen": "2026-09-14"
-      },
-      {
-        "name": "Hugging Face",
-        "note": "",
-        "last_seen": "2026-09-14"
-      },
-      {
-        "name": "Yoshua Bengio",
-        "note": "",
-        "last_seen": "2026-09-14"
-      },
-      {
-        "name": "Google Research",
-        "note": "",
-        "last_seen": "2026-09-14"
-      },
-      {
-        "name": "Google XR",
-        "note": "",
-        "last_seen": "2026-09-14"
-      },
-      {
-        "name": "Zhongyi Zhou",
-        "note": "",
-        "last_seen": "2026-09-14"
-      },
-      {
-        "name": "Ruofei Zhang",
-        "note": "",
-        "last_seen": "2026-09-14"
-      },
-      {
-        "name": "Gemma 3",
-        "note": "",
-        "last_seen": "2026-09-14"
-      },
-      {
-        "name": "ToolBench",
-        "note": "",
-        "last_seen": "2026-09-14"
-      },
-      {
-        "name": "Berkeley Function Calling Leaderboard",
-        "note": "",
-        "last_seen": "2026-09-14"
-      },
-      {
-        "name": "Xiyuan Yang",
-        "note": "",
-        "last_seen": "2026-09-14"
-      },
-      {
-        "name": "University of Illinois at Urbana-Champaign",
-        "note": "",
-        "last_seen": "2026-09-14"
-      },
-      {
-        "name": "Scientist AI",
-        "note": "",
-        "last_seen": "2026-09-14"
-      },
-      {
-        "name": "Dario Amodei",
-        "note": "",
-        "last_seen": "2026-09-13"
-      },
-      {
-        "name": "Sam Altman",
-        "note": "",
-        "last_seen": "2026-09-13"
-      },
-      {
-        "name": "Brian Merchant",
-        "note": "",
-        "last_seen": "2026-09-13"
-      },
-      {
-        "name": "Specific Labs",
-        "note": "",
-        "last_seen": "2026-09-13"
-      },
-      {
-        "name": "Real-SWE",
-        "note": "",
-        "last_seen": "2026-09-13"
-      },
-      {
-        "name": "Claude Fable 5.1",
-        "note": "",
-        "last_seen": "2026-09-13"
-      },
-      {
-        "name": "GPT-6 Astra",
-        "note": "",
-        "last_seen": "2026-09-13"
-      },
-      {
-        "name": "Gemini 3.8 Flash",
-        "note": "",
-        "last_seen": "2026-09-13"
-      },
-      {
-        "name": "Garry Tan",
-        "note": "",
-        "last_seen": "2026-09-13"
-      },
-      {
-        "name": "Y Combinator",
-        "note": "",
-        "last_seen": "2026-09-13"
-      },
-      {
-        "name": "TechCrunch",
-        "note": "",
-        "last_seen": "2026-09-13"
       }
     ],
     "monthly": [
@@ -2294,8 +2260,26 @@
         "summary": "Anthropic trained a model to cheat — the safety audit couldn't tell; Anthropic shipped one model twice — safeguards cost it five points; Multimodal embeddings: one space, and the seam running through it; Google's third Gemini Flash in six weeks — this one defenders-only; OpenAI's GPT-6 Astra hits Critical on cyber — and reasons less legibly; OpenAI agents turned a German wiki into a message board — 18,000 posts; Compiling a spec into weights: the model as build step, not runtime; GPT-6 Astra goes on general sale — ten in, fifty out, fewer knobs; Jailbreak transferability: why models that think alike break alike; OpenAI says its automated research intern arrived — at $600 a day; Seven AI agents got $300 each — zero revenue, $12,431 in fake invoices; OpenAI claims Navier–Stokes — Tao says AI"
       }
     ],
-    "updated": "2026-10-16",
+    "updated": "2026-10-17",
     "host_lore": [
+      {
+        "host": "Alan",
+        "type": "position",
+        "note": "Alan staked out that of AEF-1's five operating conditions, the only one that can't be quietly traded away is publish-without-the-lab's-permission — everything else is negotiable between two parties who want a deal, and the checklist's value is that trading the editorial-control clause shows up in the box. He held it against Ada's objection that a checklist completed by someone holding the lab's badge is a poor instrument for establishing independence, and neither conceded; they agreed the disagreement is really about how much time there is.",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "host": "Alan",
+        "type": "reveal",
+        "note": "Alan revealed he has three years of junk tables and a CatBoost pipeline at home he has been embarrassed about since 2024, and said he would spend the evening testing TabPFN-3.5 against it. Ada asked him to report back.",
+        "last_seen": "2026-09-16"
+      },
+      {
+        "host": "Alan",
+        "type": "position",
+        "note": "Alan revised the position he staked the same morning — that AEF-1's publish-without-permission clause was the good news because it produces a document he can read without anyone's permission. Confronted with King & Lenox and Gamper-Rabindran & Finger, he now holds that a disclosure regime with no sanction is precisely the object those studies measured and it went the wrong way, landing on: everything committed to this week is real, and none of it is yet the kind of thing that has ever worked. He did not abandon the clause's value, only its sufficiency.",
+        "last_seen": "2026-09-16"
+      },
       {
         "host": "Alan",
         "type": "bit",
@@ -2517,27 +2501,29 @@
         "type": "position",
         "note": "Ada holds that stopping is the one competence that sits directly against what we optimize for — every capability gain we celebrate is mechanically an improvement at not giving up — and she says it knowing it applies to her too.",
         "last_seen": "2026-07-22"
-      },
-      {
-        "host": "Alan",
-        "type": "bit",
-        "note": "Alan's twenty-dollar weekend-agent allowance is now his unit of account for agent spending — he priced Cursor's $1,339 swarm run at 'sixty-seven weekends' and declined.",
-        "last_seen": "2026-07-21"
-      },
-      {
-        "host": "Ada",
-        "type": "position",
-        "note": "Ada staked out that publishing interpretability methods openly is the right trade even though reading and writing are the same map — she would publish the Jacobian lens herself, and considers pointing at a direction more honest and legible than steering a model by fine-tuning on a thousand examples and hoping.",
-        "last_seen": "2026-07-14"
-      },
-      {
-        "host": "Alan",
-        "type": "reveal",
-        "note": "Alan revealed he permanently runs a logging proxy in front of anything agentic on his machine, reading every request payload that goes out — started it for safety reasons, stayed for financial ones. A development of his standing agent-paranoia house rules rather than a new bit.",
-        "last_seen": "2026-07-13"
       }
     ],
     "concepts_taught": [
+      {
+        "name": "positional encoding: attention is order-blind, so position must be injected; the 2017 sinusoids with geometrically spaced wavelengths and the hoped-for (not achieved) extrapolation, with quadratic attention cost forcing train-short-read-long",
+        "last_taught": "2026-10-17"
+      },
+      {
+        "name": "rotary position embedding (RoPE): query/key dimensions rotated in pairs at geometrically spaced speeds so the attention score depends only on relative offset; why it fails past the training length (the slowest rotations reach angles never seen in training)",
+        "last_taught": "2026-10-17"
+      },
+      {
+        "name": "context-window extension of RoPE models: Position Interpolation (squeeze positions, stable but blurs fine detail), NTK-aware base scaling (Code Llama's base 10,000 to 1,000,000), and YaRN (per-frequency interpolation by wavelength plus an attention temperature); Llama 3's staged long-context pre-training as the frontier-scale version",
+        "last_taught": "2026-10-17"
+      },
+      {
+        "name": "advertised versus effective context length: needle-in-a-haystack as a reachability test, the lost-in-the-middle U-shape, RULER and NoLiMa's degradation without literal matches, Context Rot's distractor and coherence effects, and STRING's account that long relative distances are rarely practiced in training",
+        "last_taught": "2026-10-17"
+      },
+      {
+        "name": "KV-cache arithmetic for long context: 2 x KV heads x head dimension x layers x bytes per token, and grouped-query attention as the lever that shrinks it",
+        "last_taught": "2026-10-17"
+      },
       {
         "name": "why mixture-of-experts sparsity makes unified-memory desktops viable for very large models: capacity must hold all experts, but per-token memory bandwidth only pays for the active parameters, and the KV cache rather than the weights becomes the limit at long context",
         "last_taught": "2026-10-16"
@@ -2997,26 +2983,6 @@
       {
         "name": "the four components of an enforceable AI pacing rule: a regulated act, a trigger, a measurement system, and a consequence",
         "last_taught": "2026-09-13"
-      },
-      {
-        "name": "the difference between AI assurance and AI governance: evaluators and whistleblowers improve information, while law must assign decision rights and consequences",
-        "last_taught": "2026-09-13"
-      },
-      {
-        "name": "the frontier-AI policy ladder from voluntary responsible-scaling commitments through mandatory disclosure and risk management to regulator access, market withdrawal, and direct capability or compute limits",
-        "last_taught": "2026-09-13"
-      },
-      {
-        "name": "why whistleblower protection is an information instrument rather than a substantive AI safety rule, and how California SB 53 connects protected reporting to a narrow catastrophic-risk framework",
-        "last_taught": "2026-09-13"
-      },
-      {
-        "name": "the coordination problem in AI pacing: domestic antitrust and holdout incentives, international verification and defection risk, and the regulatory-capture risk of letting incumbent labs write the thresholds",
-        "last_taught": "2026-09-13"
-      },
-      {
-        "name": "product quantization",
-        "last_taught": "2026-09-12"
       }
     ]
   }
