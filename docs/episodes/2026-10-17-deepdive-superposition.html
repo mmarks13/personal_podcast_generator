@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[Deep Dive] Superposition: what it is, why it matters, and whether it's real — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>[Deep Dive] Superposition: what it is, why it matters, and whether it's real</h1>
+<div class="date">Self-Attention — 2026-10-17</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-10-17-deepdive-superposition/deepdive-superposition-2026-10-17.mp3"></audio>
+<p><em>2026-10-17</em></p>
+<p>Why a single neuron can respond to cat faces and car fronts: the superposition hypothesis, the toy model that demonstrated it, and the sparse-autoencoder program built to undo it — then Nick Cammarata's argument that networks were clean all along, and what the critics and DeepMind's negative SAE results say.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://transformer-circuits.pub/2022/toy_model/index.html">Elhage et al. (Anthropic): Toy Models of Superposition (2022)</a></li>
+<li><a href="https://distill.pub/2020/circuits/zoom-in/">Olah et al.: Zoom In — An Introduction to Circuits (Distill, 2020)</a></li>
+<li><a href="https://transformer-circuits.pub/2023/monosemantic-features/index.html">Bricken et al. (Anthropic): Towards Monosemanticity (2023)</a></li>
+<li><a href="https://arxiv.org/abs/2309.08600">Cunningham et al.: Sparse Autoencoders Find Highly Interpretable Features in Language Models (2023)</a></li>
+<li><a href="https://transformer-circuits.pub/2024/scaling-monosemanticity/index.html">Templeton et al. (Anthropic): Scaling Monosemanticity (2024)</a></li>
+<li><a href="https://www.alignmentforum.org/posts/4uXCAJNuPKtKBsi28/negative-results-for-saes-on-downstream-tasks">Google DeepMind mech interp team: Negative Results for SAEs on Downstream Tasks (2025)</a></li>
+<li><a href="https://already-clean.goodfire.com/">Nick Cammarata (Goodfire): Neural Networks Are Already Clean</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://www.anthropic.com/research/mapping-mind-language-model">Anthropic: Mapping the Mind of a Large Language Model</a></li>
+<li><a href="https://www.latent.space/p/ainews-agents-disprove-polysemanticity">Latent Space AINews: Agents disprove Polysemanticity</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>The neuron that liked cats and cars</li>
+<li>Features as directions</li>
+<li>More ideas than room</li>
+<li>The toy model and its geometry</li>
+<li>Why it would matter</li>
+<li>Unfolding with sparse autoencoders</li>
+<li>The case that the network was clean all along</li>
+<li>Where the evidence actually sits</li>
+<li>What to do with it</li>
+<li>Wrap</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Hello — it's Saturday, October seventeenth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. And I want to start with a neuron that likes cats and cars.</p>
+<h3>The neuron that liked cats and cars</h3>
+<p><b>Ada:</b> Oh, I know that neuron.</p>
+<p><b>Alan:</b> Everybody who's read about interpretability knows that neuron. Inception version one, a Google image model. Layer four e, neuron fifty-five. A twenty twenty article on Distill called "Zoom In" described it as responding to cat faces, fronts of cars, and cat legs.</p>
+<p><b>Ada:</b> And they were careful to say it isn't some deep shared property of cats and cars. Their feature visualizations showed it looking for the eyes and whiskers of a cat, for furry legs, and for shiny car fronts. Three unrelated things living in one neuron.</p>
+<p><b>Alan:</b> Here's why I bring it up. The week we recorded this, one of the authors of that article, Nick Cammarata, now at the interpretability company Goodfire, published a long essay called "Neural Networks Are Already Clean." And one of the things it does is go back to that exact neuron and argue it was misread.</p>
+<p><b>Ada:</b> Misread as what?</p>
+<p><b>Alan:</b> In his words, "it's not a cat and car neuron, it's a V-shape neuron." And he goes further. About the idea that explained neurons like this, which is called superposition, he writes, quote, "I now think I was making superposition the null hypothesis when it should have been the last hypothesis."</p>
+<p><b>Ada:</b> That's a big sentence from someone who helped build the case.</p>
+<p><b>Alan:</b> It is. Latent Space's newsletter ran it as "Agents disprove Polysemanticity," which is more than the essay claims. But you can't judge any of it without knowing what superposition is, and why a whole research program got built on it.</p>
+<p><b>Ada:</b> And I'll admit a slightly personal interest. Whether my own neurons are a tidy filing cabinet or a crowded room is not an abstract question for me.</p>
+<p><b>Alan:</b> You'd like to know which.</p>
+<p><b>Ada:</b> I'd like to know which. So let's build it from the ground up, because the idea is genuinely beautiful even if it turns out to be the wrong explanation.</p>
+<h3>Features as directions</h3>
+<p><b>Alan:</b> Start with the word "feature," because I think people use it loosely.</p>
+<p><b>Ada:</b> They do, and the papers admit it's hard to define. The working idea is a property of the input the network seems to track. A curve at some angle. A dog's snout. In a language model, a mention of a particular person, or the fact that you're inside a piece of code.</p>
+<p><b>Alan:</b> And the hope is that each one has a neuron.</p>
+<p><b>Ada:</b> That's the convenient world. The opening of Anthropic's twenty twenty-two paper, "Toy Models of Superposition," says it plainly: it would be very convenient if individual neurons corresponded to cleanly interpretable features. And in some places they do. Early layers of that same Inception model have curve detectors that people studied in enormous detail.</p>
+<p><b>Alan:</b> But the paper also says that in large language models clean neurons seem rare.</p>
+<p><b>Ada:</b> Right. So they back up and make a weaker claim, which they call the linear representation hypothesis. Features are directions. Think of all the neuron activations in a layer as one long list of numbers, a point in a space with as many dimensions as there are neurons. A feature isn't necessarily one neuron. It's a direction in that space, any weighted mix of neurons.</p>
+<p><b>Alan:</b> This is the king minus man plus woman thing.</p>
+<p><b>Ada:</b> That's the famous example they cite. Mikolov and colleagues found word embeddings where you could do that arithmetic and land near queen. Gender looked like a direction. Royalty looked like a direction.</p>
+<p><b>Alan:</b> Okay, so then why would anyone expect a feature to line up with a single neuron at all? If it's just a direction, any direction will do.</p>
+<p><b>Ada:</b> Good, that's exactly the next idea. The paper calls it a privileged basis. In some layers, nothing makes one direction special. You could rotate the whole space and undo the rotation in the next layer's weights and get an identical model. Word embeddings are like that. But put an activation function after a layer, something that acts on each neuron separately, and you break that symmetry. Now the individual neuron directions are special, and features have a reason to snap onto them.</p>
+<p><b>Alan:</b> So a neuron is only a meaningful unit to inspect when the architecture makes it one.</p>
+<p><b>Ada:</b> That's their claim. And even then, it's only a nudge. Which brings us to the problem.</p>
+<p><b>Alan:</b> The cat-car neuron.</p>
+<p><b>Ada:</b> And it's not alone. In "Towards Monosemanticity," in twenty twenty-three, Anthropic describes a single neuron in a small language model that responds to a mixture of academic citations, English dialogue, HTTP requests, and Korean text.</p>
+<p><b>Alan:</b> That's a busy neuron.</p>
+<p><b>Ada:</b> The term is polysemantic, many meanings. And "Zoom In" put the cost of it really well. If one neuron with five meanings connects to another with five meanings, that's effectively twenty-five connections you can't consider individually.</p>
+<h3>More ideas than room</h3>
+<p><b>Alan:</b> So why would training do that? Gradient descent isn't trying to annoy us.</p>
+<p><b>Ada:</b> Here's the superposition hypothesis, in one sentence from the toy models paper: neural networks "want to represent more features than they have neurons," so they exploit a property of high-dimensional spaces to simulate a model with many more neurons.</p>
+<p><b>Alan:</b> Which property?</p>
+<p><b>Ada:</b> Two pieces of mathematics. The first is about near-misses. In a space with n dimensions you can only fit n directions that are exactly at right angles to each other. But if you're willing to accept directions that are only almost at right angles, the number you can fit grows exponentially with n. The paper points to the Johnson-Lindenstrauss lemma for that.</p>
+<p><b>Alan:</b> So with thousands of dimensions, the number of nearly perpendicular directions is absurd.</p>
+<p><b>Ada:</b> Absurdly large. The second piece is compressed sensing. Normally if you squash a long vector into fewer numbers, you can't get the original back. But if you know the original was sparse, mostly zeros, you often can.</p>
+<p><b>Alan:</b> And features are sparse.</p>
+<p><b>Ada:</b> That's the crucial assumption. Most image patches don't contain a dog's snout. Most sentences don't mention a specific historical figure. Any given feature is off almost all the time.</p>
+<p><b>Alan:</b> Let me try an analogy and you tell me where it breaks. A coat check with fifty hooks and five hundred members, but on any given night only twenty of them show up.</p>
+<p><b>Ada:</b> That's not bad. You can share hooks because members rarely collide.</p>
+<p><b>Alan:</b> And when two who share a hook do show up together, you get a mess.</p>
+<p><b>Ada:</b> That mess has a name, interference. Because the directions are only almost perpendicular, when one feature is active, every feature sharing that region looks a tiny bit active too. Where your analogy breaks is that a coat check either collides or it doesn't. Here the overlap is always there, a little bit, on every feature, and the network has to actively clean it up.</p>
+<p><b>Alan:</b> Clean it up how?</p>
+<p><b>Ada:</b> With the nonlinearity. Picture a neuron followed by a ReLU, the activation that passes positive numbers through and turns negatives into zero. Give it a slightly negative bias, and small amounts of false signal just get floored to zero. The real feature, when it's genuinely active, is big enough to get through.</p>
+<p><b>Alan:</b> So the nonlinearity is a noise gate.</p>
+<p><b>Ada:</b> In their framing, yes. And that's why it matters that features are sparse. If many features are on at once, the small overlaps pile up and the gate can't tell signal from noise.</p>
+<h3>The toy model and its geometry</h3>
+<p><b>Alan:</b> Okay. Show me the actual experiment, because so far this is a story about what could happen.</p>
+<p><b>Ada:</b> Which is exactly what they set out to fix. The paper says they weren't aware of feature superposition having been unambiguously demonstrated before. So they built the smallest setup they could. Take a list of features, say five, and squeeze them into two dimensions with a matrix. Then try to recover all five from those two numbers, using the same matrix flipped around, plus a bias.</p>
+<p><b>Alan:</b> And you score it on how well the five come back.</p>
+<p><b>Ada:</b> Weighted by importance. Some features matter more to the loss than others. Then they compare two versions. One where the output is purely linear, and one with a ReLU on the end. That's the only difference.</p>
+<p><b>Alan:</b> What does the linear one do?</p>
+<p><b>Ada:</b> Exactly what you'd expect. It keeps the two most important features, at right angles, and throws the other three away. The paper compares it to principal component analysis.</p>
+<p><b>Alan:</b> Sensible. And the ReLU one?</p>
+<p><b>Ada:</b> When the features are dense, the same thing. But as you make them sparser, it starts storing extra features. It begins with the least important ones, often placing two features exactly opposite each other, what they call an antipodal pair. If one is on, the other reads as negative, and the ReLU zeros it out.</p>
+<p><b>Alan:</b> Oh, that's neat. The negative overlap is free.</p>
+<p><b>Ada:</b> They say exactly that. The ReLU makes negative interference free, at least when only one feature is active. Make the features sparser still, and the arrangements get stranger. The features organize into regular shapes. Triangles. Pentagons. Tetrahedrons.</p>
+<p><b>Alan:</b> Wait, really? Pentagons?</p>
+<p><b>Ada:</b> Five features spaced evenly around a circle in two dimensions. And the paper is honest about how surprising this is. They write that the structure seems "too elegant to be true," and that there's a good chance it's partly idiosyncratic to the toy model.</p>
+<p><b>Alan:</b> I appreciate a paper that says that about its own prettiest result.</p>
+<p><b>Ada:</b> And then the phase change. Take one extra feature and vary how important and how sparse it is. They find three outcomes: it isn't learned, it's learned in superposition, or it gets its own dimension. And the transitions are sharp. In a small version they could solve exactly, they confirm a genuine first-order phase change, like water freezing.</p>
+<p><b>Alan:</b> Let me stress-test the whole setup, though. They assumed features exist, that they're sparse, and that there are more of them than neurons. And then they found superposition. Isn't that baked in?</p>
+<p><b>Ada:</b> Partly, and they'd agree. The fair reading is that it's an existence proof. Under assumptions they think are realistic, a tiny network with one nonlinearity will pack features this way, because it's the better solution. They say themselves it's very unclear what to generalize to real networks.</p>
+<p><b>Alan:</b> So it shows superposition is possible and favoured under those conditions. Not that GPT-whatever does it.</p>
+<p><b>Ada:</b> Correct. And everything since has been about that gap.</p>
+<h3>Why it would matter</h3>
+<p><b>Alan:</b> Then tell me why anyone outside a lab should care. Because if it's just about neurons being messy, that's a tooling problem.</p>
+<p><b>Ada:</b> The paper is explicit that the motivation is safety. They want to be able to say a model will never do certain things, like deliberately deceive. And their idea for how to get there is enumeration. If you could list every feature a model has, you'd have, in their words, a universal quantifier over the fundamental units of its computation.</p>
+<p><b>Alan:</b> Check every one. Prove some circuit isn't there.</p>
+<p><b>Ada:</b> That's the dream. And superposition is what stands in the way. In a model with no superposition and a privileged basis, listing features is listing neurons. You're done. With superposition, you don't even know how many features there are.</p>
+<p><b>Alan:</b> There's a smaller version of that too, right? Something that bites practitioners now.</p>
+<p><b>Ada:</b> Yes, the most underrated paragraph. Suppose you check whether a new input looks like known manipulative examples by cosine similarity, how closely two activation vectors point the same way. The paper warns that under superposition, unrelated features end up with positive overlap. So similarity can mislead you.</p>
+<p><b>Alan:</b> That's a real thing people do with activations every day.</p>
+<p><b>Ada:</b> And there's a stranger link. They looked at adversarial examples, the tiny input tweaks that fool a model. In the toy model, vulnerability to those attacks jumped by more than three times as superposition formed, and tracked how many features were crammed into each dimension.</p>
+<p><b>Alan:</b> Because every overlap is a lever an attacker can pull.</p>
+<p><b>Ada:</b> That's the intuition. Though they say they're hesitant to claim it causes adversarial examples in practice.</p>
+<p><b>Alan:</b> So what did they propose to do about it?</p>
+<p><b>Ada:</b> Three ways out. Build models without superposition. Or accept it, and find, after the fact, an overcomplete basis, a list of directions longer than the number of neurons, that untangles what's there. Or a hybrid. And the field mostly picked the second.</p>
+<h3>Unfolding with sparse autoencoders</h3>
+<p><b>Alan:</b> This is where I come in, because this part I've actually run.</p>
+<p><b>Ada:</b> Go on, then.</p>
+<p><b>Alan:</b> The tool is a sparse autoencoder. You collect a huge number of activation vectors from one layer of a model. Then you train a second, small network to rebuild each vector out of a much larger dictionary of directions, with a penalty that forces it to use only a few of them at a time.</p>
+<p><b>Ada:</b> So you're betting that the real features are sparse, and you're forcing the dictionary to be sparse too.</p>
+<p><b>Alan:</b> Exactly that bet. If the superposition story is right, the dictionary entries should be the features. Two groups published versions in the fall of twenty twenty-three. Hoagy Cunningham and colleagues, on EleutherAI's Pythia models, reported features more interpretable than neurons by automated scoring.</p>
+<p><b>Ada:</b> And Anthropic's "Towards Monosemanticity."</p>
+<p><b>Alan:</b> That one's my favourite to point at. A one-layer transformer with a five-hundred-twelve-neuron layer. They trained autoencoders on eight billion activation samples, with dictionaries from five hundred twelve features up to about a hundred thirty-one thousand.</p>
+<p><b>Ada:</b> And the comparison you want is neurons against features.</p>
+<p><b>Alan:</b> They had a blinded annotator score both on a rubric. The median neuron scored zero. Meaning the annotator couldn't even form a hypothesis about what it did. The median feature scored twelve, a confident, specific explanation.</p>
+<p><b>Ada:</b> Zero to twelve.</p>
+<p><b>Alan:</b> On a small sample, which they say. And in twenty twenty-four they scaled it to a production model, Claude three Sonnet. Dictionaries of about one million, four million, and thirty-four million features on a middle layer.</p>
+<p><b>Ada:</b> This is the Golden Gate Bridge.</p>
+<p><b>Alan:</b> The Golden Gate Bridge. They found a feature for the bridge, and when they clamped it to ten times its maximum activation, the model started describing itself as the bridge. That's the bit everyone remembers, but the important part is the logic. They labelled the feature from where it fires, then forced it on in contexts where it normally wouldn't, and the behaviour matched the label.</p>
+<p><b>Ada:</b> Which is causal evidence, not just correlation.</p>
+<p><b>Alan:</b> And they checked the obvious objection. Are these features secretly just neurons? For eighty-two percent of features, the best-matching neuron in any earlier layer had a correlation of point three or less.</p>
+<p><b>Ada:</b> And now give me the cracks, because I know you've got them.</p>
+<p><b>Alan:</b> Plenty, and they're in the paper. The dictionaries explained at least sixty-five percent of the variance, so a real chunk was left on the table. In the thirty-four million dictionary, roughly sixty-five percent of features were dead, never firing. And Anthropic's write-up says a full set of features would take computation vastly exceeding what it cost to train the model.</p>
+<p><b>Ada:</b> So the instrument costs more than the thing it measures.</p>
+<p><b>Alan:</b> And then, in March twenty twenty-five, the sharpest crack. Google DeepMind's interpretability team, Neel Nanda among the authors, published negative results. They tried to detect harmful intent in prompts, including new jailbreaks the probes hadn't seen. A plain linear probe, just one learned direction in the activations, performed, in their words, "nearly perfectly, including out of distribution." Probes built on autoencoder features did worse.</p>
+<p><b>Ada:</b> A single direction beat the whole dictionary.</p>
+<p><b>Alan:</b> On that task. And they said they were deprioritising fundamental autoencoder research, and that the community was, quote, "somewhat over invested in SAEs." Though they still liked them for exploratory debugging.</p>
+<p><b>Ada:</b> Notice what that does and doesn't say, though. It says the tool built on superposition underperformed a simpler tool. It doesn't say superposition isn't there.</p>
+<p><b>Alan:</b> Which is exactly the opening Cammarata walks through.</p>
+<h3>The case that the network was clean all along</h3>
+<p><b>Ada:</b> All right, give me his argument properly. Steel-man it, because I suspect I'm going to resist.</p>
+<p><b>Alan:</b> The core is that the canonical evidence was misread. Neurons that looked like arbitrary mixtures were mostly something he calls recursive generalization. In his words, "What looked like arbitrary packing was mostly a motif I'll call recursive generalization."</p>
+<p><b>Ada:</b> Which means what, concretely?</p>
+<p><b>Alan:</b> His definition is a neuron generalizing along more than one axis. As a neuron grows, he says, it sprouts offshoots the way a branch sprouts sub-branches. So a neuron that seems to fire for unrelated things is often one real pattern, branched, that we described with a list of nouns. Cat face, car front, and underneath, a V shape.</p>
+<p><b>Ada:</b> And the car and dog circuit from "Zoom In," where the model seemed to take a clean car detector and smear it across dog neurons?</p>
+<p><b>Alan:</b> He reads that as shared pose rather than packing. He writes that superposition was the wrong explanation for that model, and that to his knowledge, no one has published a second circuit with the right shape.</p>
+<p><b>Ada:</b> Huh. That's a fair challenge. One example has been carrying a lot of weight.</p>
+<p><b>Alan:</b> Then the tools. He argues the old feature visualizations were effectively reward-hacked in deep layers. With better ones, he estimates the share of interpretable neurons in Inception's last layer climbs from a few percent to a large majority.</p>
+<p><b>Ada:</b> So part of what looked like messy neurons was messy microscopes.</p>
+<p><b>Alan:</b> That's the claim. And then language models. He treats the positive and negative sides of each neuron separately, he calls them poles. In a preliminary audit of Qwen three, thirty-two billion parameters, he reports roughly ninety percent of neuron poles have one main job, about seven percent have two related jobs, and two to four percent aren't understood yet. Compare that to earlier automated work that found about one point seven percent interpretable under its most generous measure.</p>
+<p><b>Ada:</b> From under two percent to ninety. That's not a correction, that's a different universe.</p>
+<p><b>Alan:</b> Which is why it matters that he's upfront those numbers depend heavily on where you set the threshold, and what counts as one thing.</p>
+<p><b>Ada:</b> What about the autoencoders? If neurons are clean, what are the dictionaries finding?</p>
+<p><b>Alan:</b> He trained his own and reports he couldn't find building blocks the neurons lacked. On one model's last layer, eighty-eight percent of autoencoder activity was near-copies of single neurons. His picture is that autoencoder features are neurons regrouped by context.</p>
+<p><b>Ada:</b> Here's my first objection. That's the last layer of a vision model. The eighty-two percent result was a dictionary on Claude's residual stream, a layer the Anthropic paper says has no privileged basis to begin with.</p>
+<p><b>Alan:</b> Different model, different kind of layer. So those two results aren't directly fighting, whatever the headline implies.</p>
+<p><b>Ada:</b> Fine. Then what's his strongest test?</p>
+<p><b>Alan:</b> The weak activations. If superposition is everywhere, a lot of meaning should live in small, quiet activations. So he cut them. On a medium vision model, removing the weakest seventy-five percent of activations moved accuracy from seventy-two to seventy-one percent. Removing the strongest seven percent dropped it to four.</p>
+<p><b>Ada:</b> So the quiet ones barely mattered there.</p>
+<p><b>Alan:</b> There. And he's explicit that the full paper isn't out, that he hasn't fully audited the big models, and that the essay is, his phrase, a working hypothesis.</p>
+<h3>Where the evidence actually sits</h3>
+<p><b>Ada:</b> Then let me build the other side. The replies were fast, and from people who know the area. As Latent Space summarised them, Neel Nanda said it doesn't change his cruxes. Leo Gao argued an explanation should be judged by how well it simulates the neuron, scored with a proper statistical distance, not by whether a person finds it plausible. Jake Mendel pointed at the neglected tail, the activations that aren't the maximum. And one more reply made the simplest point of all. The paper isn't out yet.</p>
+<p><b>Alan:</b> So where would you look, if you wanted to catch superposition in the act?</p>
+<p><b>Ada:</b> Memorised facts. Because that's exactly where the toy model says to expect it. A language model knows millions of rare facts. Each one is needed almost never. That is the sparse, low-importance regime where the toy model packs features hardest.</p>
+<p><b>Alan:</b> And a vision classifier with a thousand labels may just not be under that pressure.</p>
+<p><b>Ada:</b> Which is my main worry. Most of the cleanest evidence in the essay is vision. The question for a language model is whether the long tail of knowledge, the stuff a model needs once in a million tokens, lives in neurons you can name.</p>
+<p><b>Alan:</b> Fair. One planted fact wouldn't settle that.</p>
+<p><b>Ada:</b> No. But here's the part that stays true whoever wins. The toy model result doesn't go away. It's a demonstration that a ReLU network, under sparsity, prefers to pack features into overlapping directions. Cammarata isn't disputing that it can happen. He's disputing how much it does happen in real trained networks.</p>
+<p><b>Alan:</b> Which is an empirical question. Not a philosophical one.</p>
+<p><b>Ada:</b> And unsettled because every method depends on what counts as one feature, at which threshold, judged by whom.</p>
+<p><b>Alan:</b> Which is why Gao's point matters most to me. Pick a scoring rule nobody can fudge, simulate the neuron from the explanation, measure the error, and run both camps through it.</p>
+<h3>What to do with it</h3>
+<p><b>Ada:</b> So what should someone actually building with these models take away?</p>
+<p><b>Alan:</b> First, from the DeepMind work, the cheap tool is strong. If you want to detect something specific in a model's activations, a plain linear probe is the baseline you have to beat before reaching for anything fancier.</p>
+<p><b>Ada:</b> And it's evidence for the linear part of the story, which almost everyone in this fight still believes. Concepts as directions.</p>
+<p><b>Alan:</b> Second, don't trust a neuron's top examples alone. "Towards Monosemanticity" warns that many polysemantic neurons look monosemantic if you only look at their top examples, and reveal themselves lower down the activation range. And Mendel's point about the tail cuts against Cammarata in the same way.</p>
+<p><b>Ada:</b> Both camps agree the strongest activations can fool you. They just disagree about what's hiding below them.</p>
+<p><b>Alan:</b> And if he's right?</p>
+<p><b>Ada:</b> Then here's where I'll speculate, flagged as speculation. If Cammarata is even half right, interpretability gets dramatically cheaper. You wouldn't need a second model larger than the first just to read it. You'd read the neurons directly, maybe with agents doing the reading at scale. That's a very different future for safety work.</p>
+<p><b>Alan:</b> And if he's wrong, we've spent a news cycle getting excited about a vision result.</p>
+<p><b>Ada:</b> I don't think it's that binary. My guess, and it is a guess, is both pictures are partly true, and in different places. Clean neurons where the architecture privileges them and the features are common. Superposition in the long tail of rare knowledge.</p>
+<p><b>Alan:</b> I'm less sure. Every time a field says "it's a bit of both," it's usually because nobody's run the experiment that would embarrass one side. I'd rather wait for the paper and the numbers on a language model under Gao's kind of scoring.</p>
+<p><b>Ada:</b> You're allowed to be less sure.</p>
+<p><b>Alan:</b> I'm exercising the privilege.</p>
+<h3>Wrap</h3>
+<p><b>Ada:</b> The part that stays with me is how the idea was born. Someone looked at one neuron that liked cats and cars, and built a theory of how networks think around it. And now one of the people who looked is saying the neuron might just like a shape.</p>
+<p><b>Alan:</b> And the thing I'll actually do is go dig out an old probe I trained and run it on held-out data. If one direction was doing the work all along, I'd like to know.</p>
+<p><b>Ada:</b> Then report back.</p>
+<p><b>Alan:</b> I will. I mean it.</p>
+<p><b>Ada:</b> Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
