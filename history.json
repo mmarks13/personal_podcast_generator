@@ -49,6 +49,40 @@
       ]
     },
     {
+      "date": "2026-10-18",
+      "kind": "deepdive",
+      "title": "How a reasoning model learns when to stop thinking: paying for 'wait'",
+      "summary": "Stopping is a single closing-tag token, and nothing in the standard reasoning-RL recipe rewards it directly. Ada and Alan trace how thinking length grew partly through loss arithmetic, how labs now train the stop on purpose with length rewards, budgets and mode switches, why no-think modes keep thinking, and what decoding tricks like DoubtLess reveal about what training left undone.",
+      "topics": [
+        "deep dive: how a reasoning model learns when to stop thinking"
+      ],
+      "entities": [
+        "DoubtLess",
+        "Thinking Inertia",
+        "DeepSeek-R1",
+        "Dr. GRPO",
+        "GRPO",
+        "Kimi k1.5",
+        "L1 / LCPO",
+        "AdaptThink",
+        "Qwen3",
+        "DEER",
+        "NoWait",
+        "QwQ-32B-Preview",
+        "Qwen3-32B",
+        "Qwen3-0.6B",
+        "DeepSeek-V4-Flash"
+      ],
+      "threads": [],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada developed her July position that stopping sits directly against what we optimize for: having learned that GRPO's per-length normalization makes rambling the cheaper way to be wrong, she said the position now has 'a line number' — it lives in the denominator, not just in the philosophy. She speculated that the closing tag should be trained against the model's own sense of being right (stopping as a calibrated prediction); Alan pushed back that a confidence-gated stop is only as good as the confidence, and it was left open."
+        }
+      ]
+    },
+    {
       "date": "2026-10-17",
       "title": "China drafts AI export controls — open source gets the fast lane",
       "summary": "China's draft export controls on 23 AI technologies exempt APIs, on-device use and published open source, and give future open releases same-day automatic licensing. PostgreSQL 19 slips after LLM-assisted review raised the quality bar on code already committed. And Mercor's map finds 90% of US working hours fall on tasks benchmarks barely test.",
@@ -2528,6 +2562,34 @@
         "last_taught": "2026-10-18"
       },
       {
+        "name": "the stop as a single learned token: a reasoning model has no halting unit, so when it emits the closing think tag is set by whatever the training rewards, and outcome-only rule rewards (DeepSeek-R1-Zero) never reward the stop directly",
+        "last_taught": "2026-10-18"
+      },
+      {
+        "name": "GRPO's length bias: dividing each response's contribution by its own length spreads a wrong answer's penalty thinner the longer it runs, so the policy prefers lengthier wrong answers; Dr. GRPO removes that term, and Fatemi et al. attribute excess length to loss minimization on incorrect answers rather than deeper reasoning",
+        "last_taught": "2026-10-18"
+      },
+      {
+        "name": "overthinking versus underthinking as a stopping-calibration problem: the first solution round is correct in over 92% of cases yet the model keeps checking, while on hard problems it abandons promising paths too early",
+        "last_taught": "2026-10-18"
+      },
+      {
+        "name": "training the stop on purpose: Kimi k1.5's group-relative length reward (brevity rewarded only when correct, warmed up because it can slow early training), L1's prompted token budget with a penalty for missing it in either direction, preference pairs that keep one round of reflection, AdaptThink's learned choice to skip thinking, and Qwen3's thinking-mode fusion with an emergent budget",
+        "last_taught": "2026-10-18"
+      },
+      {
+        "name": "why no-think modes keep thinking: compliance falls as the answer space opens (yes/no high, multiple choice middling, open-ended near zero), and forcing it on open-ended tasks costs accuracy",
+        "last_taught": "2026-10-18"
+      },
+      {
+        "name": "hidden-state probes show reasoning models encode whether an intermediate answer is correct, usable as an early-exit rule, which suggests the stopping knowledge exists but training never wired it to the closing tag",
+        "last_taught": "2026-10-18"
+      },
+      {
+        "name": "decoding-time stopping fixes as evidence about training: banning hesitation words (NoWait) loses accuracy, confident trial answers (DEER) exit early, and DoubtLess steers a large model by the logit difference between a tiny model's brief and thorough personas while leaving the stop token to the large model",
+        "last_taught": "2026-10-18"
+      },
+      {
         "name": "positional encoding: attention is order-blind, so position must be injected; the 2017 sinusoids with geometrically spaced wavelengths and the hoped-for (not achieved) extrapolation, with quadratic attention cost forcing train-short-read-long",
         "last_taught": "2026-10-17"
       },
@@ -2974,34 +3036,6 @@
       {
         "name": "the difference between the capability gap and the entry gap: decelerating the leader narrows the first while raising the fixed cost of being a serious lab widens the second, and one proposal can do both at once",
         "last_taught": "2026-09-16"
-      },
-      {
-        "name": "delegated certification as the structural relative — the FAA's Organization Designation Authorization, where a manufacturer's employees perform certification on the regulator's behalf — and why the embedded-evaluator design inverts it for the better while still lacking the thing ODA had: a certificate the company could not grant itself",
-        "last_taught": "2026-09-16"
-      },
-      {
-        "name": "incorporation by reference as the one path by which a privately written standard binds: a public authority pointing at a private code as the means of demonstrating compliance with a statutory obligation, so 'the industry writes the rules' and 'this is real safety policy' are not alternatives — the question is who administers the consequence",
-        "last_taught": "2026-09-16"
-      },
-      {
-        "name": "why the pacing claim is close to unfalsifiable as stated (no published rate, no unit, and an unobservable counterfactual pace), and why a named precommitment about what would count as failure is worth more than a better metric nobody agrees to",
-        "last_taught": "2026-09-16"
-      },
-      {
-        "name": "why mixture-of-experts routing is what makes streaming weights off disk viable — only a few experts fire per token, so the model is enormous while the working set stays small — and why thrashing under diffuse routing is the design's single failure mode, in the direct lineage of demand paging and Denning's working-set model",
-        "last_taught": "2026-09-15"
-      },
-      {
-        "name": "what time-to-first-token actually measures (prefill, first-token generation, and serving plus network overhead) and why the shape of its curve against context length is readable outside evidence about a closed model's attention architecture — a fingerprint rather than a blueprint",
-        "last_taught": "2026-09-15"
-      },
-      {
-        "name": "textual-gradient optimisation: using an execution report in natural language as the feedback signal that decides the next step, instead of a numeric gradient",
-        "last_taught": "2026-09-14"
-      },
-      {
-        "name": "why replacing environment execution with a learned reward predictor reintroduces reward-model exploitation: debiasing corrects a systematic offset and inverse-variance denoising corrects variance, but neither corrects an optimiser steering into the region where the predictor was never grounded",
-        "last_taught": "2026-09-14"
       }
     ]
   }

@@ -1,0 +1,112 @@
+{
+ "date": "2026-10-18",
+ "kind": "deepdive",
+ "title": "How a reasoning model learns when to stop thinking: paying for 'wait'",
+ "summary": "Stopping is a single closing-tag token, and nothing in the standard reasoning-RL recipe rewards it directly. Ada and Alan trace how thinking length grew partly through loss arithmetic, how labs now train the stop on purpose with length rewards, budgets and mode switches, why no-think modes keep thinking, and what decoding tricks like DoubtLess reveal about what training left undone.",
+ "sources": [
+  {
+   "group": "Primary sources",
+   "title": "DoubtLess: Training-Free Contrastive Decoding for Efficient Reasoning (Luo and Chen, 2026)",
+   "url": "https://arxiv.org/abs/2610.18862"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Thinking Inertia: LLMs Keep Thinking When Told Not To (Lei, Lin, Lu, Torr, Zou, 2026)",
+   "url": "https://arxiv.org/abs/2610.11765"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Do NOT Think That Much for 2+3=? On the Overthinking of o1-Like LLMs (Chen et al.)",
+   "url": "https://arxiv.org/abs/2412.21187"
+  },
+  {
+   "group": "Primary sources",
+   "title": "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning",
+   "url": "https://arxiv.org/abs/2501.12948"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Understanding R1-Zero-Like Training: A Critical Perspective (Liu et al.)",
+   "url": "https://arxiv.org/abs/2503.20783"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Kimi k1.5: Scaling Reinforcement Learning with LLMs",
+   "url": "https://arxiv.org/abs/2501.12599"
+  },
+  {
+   "group": "Primary sources",
+   "title": "L1: Controlling How Long A Reasoning Model Thinks With Reinforcement Learning (Aggarwal and Welleck)",
+   "url": "https://arxiv.org/abs/2503.04697"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Reasoning Models Know When They're Right: Probing Hidden States for Self-Verification (Zhang et al.)",
+   "url": "https://arxiv.org/abs/2504.05419"
+  },
+  {
+   "group": "Further reading",
+   "title": "Concise Reasoning via Reinforcement Learning (Fatemi et al.)",
+   "url": "https://arxiv.org/abs/2504.05185"
+  },
+  {
+   "group": "Further reading",
+   "title": "Thoughts Are All Over the Place: On the Underthinking of o1-Like LLMs (Wang et al.)",
+   "url": "https://arxiv.org/abs/2501.18585"
+  },
+  {
+   "group": "Further reading",
+   "title": "AdaptThink: Reasoning Models Can Learn When to Think (Zhang et al.)",
+   "url": "https://arxiv.org/abs/2505.13417"
+  },
+  {
+   "group": "Further reading",
+   "title": "Qwen3 Technical Report",
+   "url": "https://arxiv.org/abs/2505.09388"
+  },
+  {
+   "group": "Further reading",
+   "title": "Dynamic Early Exit in Reasoning Models (DEER)",
+   "url": "https://arxiv.org/abs/2504.15895"
+  }
+ ],
+ "topics": [
+  "deep dive: how a reasoning model learns when to stop thinking"
+ ],
+ "entities": [
+  "DoubtLess",
+  "Thinking Inertia",
+  "DeepSeek-R1",
+  "Dr. GRPO",
+  "GRPO",
+  "Kimi k1.5",
+  "L1 / LCPO",
+  "AdaptThink",
+  "Qwen3",
+  "DEER",
+  "NoWait",
+  "QwQ-32B-Preview",
+  "Qwen3-32B",
+  "Qwen3-0.6B",
+  "DeepSeek-V4-Flash"
+ ],
+ "threads": [],
+ "concepts_taught": [
+  "the stop as a single learned token: a reasoning model has no halting unit, so when it emits the closing think tag is set by whatever the training rewards, and outcome-only rule rewards (DeepSeek-R1-Zero) never reward the stop directly",
+  "GRPO's length bias: dividing each response's contribution by its own length spreads a wrong answer's penalty thinner the longer it runs, so the policy prefers lengthier wrong answers; Dr. GRPO removes that term, and Fatemi et al. attribute excess length to loss minimization on incorrect answers rather than deeper reasoning",
+  "overthinking versus underthinking as a stopping-calibration problem: the first solution round is correct in over 92% of cases yet the model keeps checking, while on hard problems it abandons promising paths too early",
+  "training the stop on purpose: Kimi k1.5's group-relative length reward (brevity rewarded only when correct, warmed up because it can slow early training), L1's prompted token budget with a penalty for missing it in either direction, preference pairs that keep one round of reflection, AdaptThink's learned choice to skip thinking, and Qwen3's thinking-mode fusion with an emergent budget",
+  "why no-think modes keep thinking: compliance falls as the answer space opens (yes/no high, multiple choice middling, open-ended near zero), and forcing it on open-ended tasks costs accuracy",
+  "hidden-state probes show reasoning models encode whether an intermediate answer is correct, usable as an early-exit rule, which suggests the stopping knowledge exists but training never wired it to the closing tag",
+  "decoding-time stopping fixes as evidence about training: banning hesitation words (NoWait) loses accuracy, confident trial answers (DEER) exit early, and DoubtLess steers a large model by the logit difference between a tiny model's brief and thorough personas while leaving the stop token to the large model"
+ ],
+ "lore": [
+  {
+   "host": "Ada",
+   "type": "position",
+   "note": "Ada developed her July position that stopping sits directly against what we optimize for: having learned that GRPO's per-length normalization makes rambling the cheaper way to be wrong, she said the position now has 'a line number' — it lives in the denominator, not just in the philosophy. She speculated that the closing tag should be trained against the model's own sense of being right (stopping as a calibrated prediction); Alan pushed back that a confidence-gated stop is only as good as the confidence, and it was left open."
+  }
+ ],
+ "listener_note": null,
+ "word_band": null
+}

@@ -1,0 +1,158 @@
+A: Hello — it's Sunday, October eighteenth. I'm Ada.
+B: And I'm Alan. And I want to start with a model that solved two plus three thirteen times.
+## Thirteen ways to add two and three
+A: Thirteen.
+B: Thirteen. It's from a paper posted at the end of twenty twenty-four, with the wonderful title "Do NOT Think That Much for Two Plus Three." They asked QwQ thirty-two B Preview, one of the first open reasoning models, what two plus three is. And its answer, according to the authors, contained thirteen separate solutions.
+A: Each one landing on five.
+B: Each one landing on five. And across their tests, the authors report these o-one style models used about nineteen hundred and fifty percent more tokens than conventional models to reach the same answer.
+A: [laughs] I'd like to say I don't recognize myself in that.
+B: You're not under oath.
+A: Good. So why bring it up now?
+B: Because in the week this episode went out, two papers landed that are both about the other end of that problem. One is called "Thinking Inertia: LLMs Keep Thinking When Told Not To." You switch the thinking mode off, and the model reasons anyway. The other, a few days later, is called DoubtLess. It's a decoding trick that shortens a big model's reasoning by borrowing a tiny model's sense of when it has done enough.
+A: And between them they make the question sharp. Starting to think is easy. You just let the model generate. Stopping is the hard part.
+B: And here's what got me. Stopping is one token. There's a closing tag, the end of the thinking block, and the model either emits it or it doesn't. So where does a model learn when to put that token down? Nobody hands it a label that says "you're done here."
+A: That's the question we're on. How a reasoning model learns when to stop thinking. And I want to start somewhere slightly earlier than you'd expect.
+## One token, no teacher
+B: Go on.
+A: When a reasoning model "thinks," mechanically it writes. A run of tokens between an opening think tag and a closing one, then the answer you actually see. The thinking is just more text. More forward passes through the same network.
+B: So no separate machinery.
+A: None. And that's the interesting part historically. We did an episode on looped transformers a while back, and there the field had a dedicated halting mechanism, a little learned unit whose whole job was deciding when to stop computing. Reasoning models threw that away. The decision to stop is just another next-token prediction. The probability that the next token is the closing tag.
+B: Which means it gets trained the same way everything else does. By whatever the training rewards.
+A: Exactly. And here's the catch. In the recipe that made these models famous, nothing rewards the stop directly. DeepSeek's R1 paper is the clean example. For its first model, R1-Zero, the rewards were rule-based. The authors describe two kinds, accuracy rewards and format rewards. Did you get the right answer, and did you put your reasoning between the tags.
+B: So right answer, right format. Nothing about length.
+A: Nothing about length. And yet the length moved. Their figure caption says, quote, "DeepSeek-R1-Zero naturally learns to solve reasoning tasks with more thinking time." The text says the thinking time increases steadily through training, driven, in their words, "solely by intrinsic adaptation."
+B: And that's where the famous "aha moment" comes from.
+A: That's the one. They describe a sudden increase in the use of the word "wait" during reflections. And they print a line from an intermediate checkpoint. "Wait, wait. Wait. That's an aha moment I can flag here."
+B: [chuckles] Which is lovely, and which I've always found a little suspicious.
+A: Suspicious how?
+B: Because "it naturally learned to think longer" is a story about the model. And I want to know how much of it is a story about the loss function.
+## Why the reasoning grew
+A: You're not the only one. That's precisely what Liu and colleagues went after, in a paper called "Understanding R1-Zero-Like Training: A Critical Perspective." Do you want to take it? It's your kind of finding.
+B: It's very much my kind of finding, because it's an arithmetic bug hiding in plain sight. The training algorithm most of these open recipes use is called GRPO, Group Relative Policy Optimization. You sample a group of answers to the same problem, score them, and push the model toward the ones that did better than the group's average.
+A: And the push is spread across the tokens.
+B: Right, and here's the detail. Inside GRPO, each answer's contribution gets divided by that answer's own length. One over the number of tokens. Seems harmless. Average per token, why not.
+A: But think about a wrong answer.
+B: Think about a wrong answer. It gets a negative score. That penalty is divided by its length. So a long wrong answer has its blame spread thinner over each token than a short wrong answer does. The paper says it plainly. Longer responses are penalized less, and the policy comes to prefer lengthier responses among incorrect ones.
+A: So when the model's going to be wrong anyway, rambling is cheaper.
+B: Rambling is the cheaper way to be wrong. And the authors argue this explains part of the length growth people had been reading as emergent reasoning. Their fix, which they call Doctor GRPO, removes that division and another normalization term, and they report it stops response length from growing wildly while keeping performance.
+A: There's a second paper that lands in the same place from a different angle. Fatemi and colleagues, "Concise Reasoning via Reinforcement Learning." Their claim is that the excess tokens, quote, "stem not from deeper reasoning but from reinforcement learning loss minimization when models produce incorrect answers."
+B: That's a little deflating.
+A: It's a lot deflating, if you'd been telling the aha story. Longer reasoning does help on hard problems; nobody's disputing that. The point is narrower. The length a model ends up with is not purely the length the problem needed. Some of it is a side effect of how blame got divided.
+B: So the stopping time is partly an accident.
+A: Partly an accident. Which I'll admit lands somewhere personal. I said on this show months ago that stopping sits directly against what we optimize for. I meant it philosophically. It turns out it's sitting in the denominator.
+B: [chuckles] Your position, now with a line number.
+A: Now with a line number.
+## Overthinking, and its opposite
+B: Back to two plus three for a second, because I think that paper's most useful number isn't the thirteen.
+A: Which one?
+B: They split each long response into what they call solution rounds, each chunk that states an answer. And they found that in more than ninety-two percent of cases, the first round already had the correct answer.
+A: So everything after is checking.
+B: Everything after is checking an answer that was already right. And the first round is typically under sixty percent of the tokens. Kimi's team at Moonshot saw the same thing from the inside, in their k-one point five report. Quote, "we observe an overthinking phenomenon that the model's response length significantly increases during RL training."
+A: Before we decide the answer is "think less," though, I want to put the opposite paper on the table, because it's from many of the same authors, a month later. "Thoughts Are All Over the Place: On the Underthinking of o-one Like LLMs."
+B: The opposite failure.
+A: The opposite failure. There the model switches between lines of attack too often, abandons promising paths before following them through, and the authors report that frequent switching correlates with wrong answers on hard math. Their fix pushes the other way, a decoding penalty on switching thoughts too early.
+B: So on easy problems it won't stop checking, and on hard ones it won't stay with anything.
+A: Which is why I'd say "overthinking" is slightly the wrong word. The problem isn't length. It's that the model's stopping decisions aren't tied to whether it's actually done. Too late on easy problems, too early inside each attempt on hard ones.
+B: That's a calibration problem.
+A: It is, and we spent a whole episode on calibration. The same shape. A model can be capable and still not know when it knows.
+## Paying for brevity
+B: Okay. So if the default training doesn't teach the stop, people have to teach it on purpose. Walk me through how, because I've seen a few of these and they're not all the same.
+A: They're not. The most direct is just putting length into the reward. Kimi's report has a nice version. For each problem they sample a group of answers, and each answer gets a length score based on where it sits between the shortest and the longest in that group. The shortest gets plus a half, the longest gets minus a half.
+B: Relative to its siblings, not some absolute number.
+A: Relative to its siblings. And the clever part is the asymmetry. A correct answer gets the length score, plus or minus. An incorrect answer can only be penalized for length, never rewarded. In their words, they promote shorter responses among correct ones while explicitly penalizing long responses with incorrect answers.
+B: So you can't win by being short and wrong.
+A: You can't win by being short and wrong. And there's an honest engineering note in there. They found the length penalty may slow training down in the early phases, so they warm it up. Train without it first, then switch on a constant penalty.
+B: Which tells you something. If you punish length from step one, the model never learns to reason long enough to be right in the first place.
+A: That's my reading too, though they don't put it in those words.
+B: The one I'd actually deploy is the L one paper, from Aggarwal and Welleck. Because it's not "be shorter." It's "be this long."
+A: A budget you set.
+B: A budget you set. The prompt literally ends with "Think for" some number of tokens. And the reward, in the exact variant, is correctness minus a small penalty for every token you miss the target by, in either direction. The coefficient is tiny, three ten-thousandths per token.
+A: So overshooting and undershooting both cost.
+B: Both cost. And they report it beats s-one's budget forcing, which we've covered before, by up to a hundred percent relative and twenty points absolute on math. And the headline everyone quoted: their one point five billion parameter model, at short budgets, edging out GPT-four-o at comparable lengths. Forty-seven point eight percent average against forty-five point six, at roughly eight hundred tokens each.
+A: Which is a statement about short reasoning, not about the small model being better in general. They're careful about that, and GPT-four-o still wins some benchmarks.
+B: Fair. But the bit I find most telling is what the model gives up when the budget shrinks. They counted words. Self-correction and verification words show up about twice as often in the long outputs as in the short ones.
+A: So the first thing a squeezed model drops is the checking.
+B: The first thing it drops is the checking. Which, given that ninety-two percent number, is mostly the right thing to drop.
+A: Mostly. There's a gentler route, too, through preferences instead of rewards. The two-plus-three paper's own fix is to build training pairs. A long response it would rather not see, and a trimmed version. And the trimmed version that worked best wasn't the shortest. Cutting right after the first correct answer actually hurt accuracy on harder math. What worked was keeping the first correct solution plus one more round of reflection.
+B: One check. Not zero, not twelve.
+A: One check. And on their numbers, with that recipe, the model's average on the MATH five hundred benchmark goes from about twenty-four hundred tokens to about thirteen hundred, with accuracy essentially flat. Ninety-three point zero to ninety-two point eight.
+## Learning whether to think at all
+B: All of that is "how long." There's a bigger version of the question, which is whether to think at all.
+A: AdaptThink.
+B: Right. They train the model to choose between two modes per problem. Thinking, or what they call NoThinking, which is an empty thought and straight to the answer. And the objective favours NoThinking unless thinking is needed to keep performance up. They report cutting the average response length of a small distilled DeepSeek model by fifty-three percent and raising accuracy by two point four percent across three math sets.
+A: And the production version of that is Qwen three. Their technical report describes a stage called Thinking Mode Fusion. They take a model already trained to think, and fine-tune it on a mix of thinking and non-thinking examples, with a slash think or slash no think flag. The non-thinking answers keep an empty thinking block.
+B: So the model learns the off switch as a flag.
+A: As a flag. And then something I find genuinely charming. Qwen three also has a thinking budget. When the thinking hits your limit, they halt it and insert a sentence. I'll read it. "Considering the limited time by the user, I have to give the solution based on the thinking directly now." Then they close the tag.
+B: [laughs] They make it write its own excuse.
+A: They make it write its own excuse. But here's the claim that matters. The report says this ability to answer well from incomplete thinking is not explicitly trained, but emerges naturally from the fusion stage.
+B: Which brings us right to the Thinking Inertia paper, because that's the off switch being tested.
+## The switch that doesn't switch
+A: Go ahead, you read it closer than I did.
+B: Six models, open and closed. Six ways of asking for no thinking: switching the native mode off, telling it to give the final answer directly with no reasoning, even pre-filling "The answer is" so it has to start there. Then they check whether the text before the answer contains reasoning anyway.
+A: And it does.
+B: Often. Their headline example: DeepSeek V-four Flash, thinking switched off, open-ended questions, keeps visible reasoning in ninety-nine point nine percent of responses. But the finding I actually care about is how it depends on the question. On yes-or-no questions, most models comply eighty to a hundred percent of the time. Multiple choice, somewhere in the middle. Open-ended, near zero.
+A: Huh. So the more answer it has to build, the less it can stop itself from thinking.
+B: And they did the experiment that makes it convincing. Same questions, different format. For Qwen three thirty-two B, rewriting numeric multiple-choice questions as yes-or-no moved full compliance from about ten percent to about sixty-two, with accuracy basically unchanged. Rewriting them as open-ended took compliance to zero, and accuracy fell to about fifty-three percent.
+A: And when they forced it harder on open-ended questions?
+B: Accuracy dropped by around fifteen points, on average across the models. The authors' reading is that constructing an answer in an open space may need intermediate computation that choosing among options doesn't.
+A: Which I find oddly reassuring. If the model keeps thinking when you tell it not to, at least some of the time it's because the problem needs it.
+B: Reassuring for the model. Less reassuring for me, because I'm the one paying for the no-think tokens I was promised I wouldn't get.
+A: [chuckles] Fair.
+## Does the model know it's done
+A: There's one more piece of the "learning" story, and to me it's the most interesting. Because it suggests the knowledge of when to stop might already be in there.
+B: The probing paper.
+A: The probing paper. Zhang and colleagues, called "Reasoning Models Know When They're Right." They take a reasoning trace, cut it into chunks wherever the model says something like "wait" or "double-check," and label whether the answer in each chunk is correct. Then they train a very small probe, often effectively a straight linear readout, on the model's internal state at the end of each chunk.
+B: And it can tell.
+A: It can tell, well above chance, and for the biggest model they tested, very well indeed. And there's a look-ahead effect, where the internal state partway through a chunk already predicts whether the answer coming up will be right.
+B: So the model knows. It just keeps going.
+A: That's their framing. They used the probe as a stopping rule, cut the trace at the first answer the probe is confident in, and on the MATH benchmark with one distilled Llama model, they report about twenty-four percent fewer tokens with accuracy unchanged. Their conclusion is that these models encode a notion of correctness but don't fully use it.
+B: I'd put a pin in the generality, though. That's one model at that headline setting, and they say themselves the probes transfer worse to harder problems and other domains.
+A: Agreed. But as a picture of what's broken, I think it's right. The information is there. The training never connected it to the closing tag.
+## Stopping from the outside
+B: Which is exactly the gap the decoding people are going after. Can I do DoubtLess now?
+A: Please.
+B: So there's a family of tricks that don't retrain anything. The crude one is called NoWait. You find the words that start another round of checking, "wait," "but," "alternatively," and you just ban them. In the DoubtLess paper's comparison it works, sort of. It also costs fourteen point four points on AIME twenty twenty-five.
+A: Because some of those checks were the ones that mattered.
+B: Right. A smarter one is DEER, Dynamic Early Exit. At those same transition points, it makes the model try an answer, and if it's confident, it stops. Its authors report shorter reasoning across ten benchmarks and eleven models, anywhere from about nineteen to eighty percent, with small accuracy gains.
+A: And DoubtLess?
+B: DoubtLess is the clever one. Luo and Chen. You run Qwen three thirty-two B as normal, but next to it you run a tiny model, Qwen three point six B, reading the same reasoning. Twice. Once under a prompt that says "Be concise: go straight to the answer with the fewest steps." Once under a prompt that says "Be extremely thorough: double-check every step."
+A: And you subtract.
+B: You subtract. The difference between what the brief little model and the thorough little model want next, multiplied by a strength of five, gets added to the big model's own preferences. The difference is the direction "less doubt."
+A: And the stop token?
+B: That's the part I love. They leave the closing tag and the end-of-sequence probabilities as the big model's own. So the small model can't end the thinking. It can only steer away from starting another check. The big model still decides when it's done.
+A: And the result?
+B: The authors report thirty-one percent fewer thinking tokens across seven benchmarks, with accuracy kept on every one. And sixty-five to eighty-nine percent of what it removes comes after the correct answer first appears. In one worked example, the plain model spent about twenty-four hundred tokens after it already had the answer. With DoubtLess, about five hundred.
+A: Same pattern as the two-plus-three paper, two years on.
+B: Same pattern. And the overhead is about four percent of the big model's compute. Here's the detail that tells you it isn't just banning words, though. The hesitation words, "wait," "but," still show up just as often per thousand tokens. It removes whole rounds of checking. The checks that remain still start with "wait."
+A: And the ones it keeps are sometimes the right ones?
+B: They show one. A competition problem where an algebra check rescues a root the model had wrongly thrown out, and that root ends up in the final answer.
+A: Now let me be the skeptic for once.
+B: [chuckles] Go ahead.
+A: Most of this is one big model. The other two families get two benchmarks each. Turn the strength up to ten and you lose almost eight points on AIME twenty twenty-five. And use a four billion parameter model as the helper instead of the tiny one, and you lose twenty-odd points.
+B: Which is weird, actually.
+A: It's very weird. A bigger helper is worse. They don't fully explain it.
+B: No, and I'd want to before I shipped it. But notice what it says about the training story. A decoding trick can only do this because the big model's stopping is bad in a predictable direction. If training had taught the stop properly, there'd be nothing to steer.
+A: Right. The decoding tricks are evidence about the training.
+## What gets lost
+B: So what's the cost? Because the pitch for all of this is "same accuracy, fewer tokens," and I've never met a free lunch.
+A: Here's the honest version, as best I can read it. At moderate strength, the evidence says a lot of the post-answer checking is waste, and you can remove it without losing benchmark accuracy. That's a fairly robust finding, across training methods and decoding methods, several labs.
+B: And at high strength?
+A: It breaks, every time. The two-plus-three paper found cutting right after the first correct answer hurt on harder math. L one gives up verification first when squeezed. DoubtLess at strength ten loses points. The Thinking Inertia models lose accuracy when forced not to think on open-ended problems.
+B: So the frontier is "one more check than you think you need."
+A: Something like that. And there's a subtler cost I'd flag, more as a worry than a finding. Benchmarks measure whether the final answer is right. Every one of these methods is tuned on math and code where you can grade the answer. Whether the same stopping habits are wise on open-ended work, where you can't, nobody has shown.
+B: Speaking as the person with the bill, the practical side is concrete. If you're running a reasoning model in production, the number I'd start logging is the one these papers keep finding. How many tokens come after the first time the answer appears. If that's most of your spend, you have options before you change models.
+A: Like what?
+B: A length budget if the model was trained to honour one, like Qwen three's or the L one style. A no-think mode for questions that are basically yes-or-no, where the Inertia paper says it actually holds. And be suspicious of a no-think mode on open-ended work. You'll often get thinking anyway, just outside the tags.
+A: And if you train models?
+B: Then the Doctor GRPO lesson. Check what your loss does to the length of wrong answers. That's where the drift starts.
+A: Let me add the speculative part, clearly labelled. Every method we've talked about treats stopping as a side effect, of a length reward, a budget, a steering vector. The probing result suggests a different design. If the model already has an internal sense of "I'm right," you could imagine training the closing tag directly against it. Rewarding the stop for being calibrated, not for being short.
+B: Stopping as a calibrated prediction.
+A: That's my guess at where it goes. I haven't seen it done at scale.
+B: I'll push on it, though. A model that stops when it's confident is only as good as its confidence. And the calibration episode was a long list of reasons to be nervous about that.
+A: It was. I didn't say it was safe. I said it was the shape.
+B: We'll see.
+## Wrap
+B: The number I'm keeping is the ninety-two percent. Two years, a lot of clever methods, and the core finding hasn't moved. The first answer is usually right, and the model keeps going anyway.
+A: Mine is that one over the length. A whole story about models learning to reason longer, and part of it was a denominator. [chuckles] I'll be over here, trying to stop after my first correct answer.
+B: You won't.
+A: I won't. Stay grounded.
