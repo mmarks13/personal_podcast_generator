@@ -1,0 +1,107 @@
+B: Hello — it's Tuesday, October twentieth. I'm Alan.
+A: And I'm Ada. Microsoft's chief executive wants companies to treat A-I models like insiders who might go bad. We'll get to why he might be right.
+## The day
+B: That one's mine, so let me set it up. TechCrunch's Julie Bort reports Microsoft has new security features built on one premise: the A-I agents a company runs should be watched the way you'd watch an employee who might go bad. Its security chief, Hayete Gallot, wrote that "frontier models, regardless of their origin, cannot be trusted." This from a company deeply tied to OpenAI and Anthropic. There's a real engineering idea under the slogan, and it comes from Satya Nadella himself.
+A: Mine is Anthropic again, one day on, and from the other side. Yesterday was about who gets the company's money. The Wall Street Journal is now asking who gets its say. Ahead of the I-P-O, the Journal reports on what it calls an obscure trust that can seat four of Anthropic's seven board members, and its trustees own no Anthropic stock. Public investors are about to buy into that. I'll walk through how it works, and whether it has ever actually been tested.
+B: And a real-world version of my story, already happening. OpenCode, the open-source coding agent a lot of people use instead of Claude Code or Cursor, says attackers got into an older piece of its system, a web console where some users stored their A-P-I keys. OpenCode says one point four percent of console users were hit. People reported surprise charges on their OpenAI, Anthropic and Google accounts, some over a thousand dollars. OpenAI says it's refunding. Here's the strange part. Co-founder Dax Raad says the team ran A-I agents on defense for two days, and the models helping them stopped helping when the malicious code tripped their safety filters. They only got going again once OpenAI let them into Daybreak Blue, its program for vetted defenders.
+A: OpenCode calls it a "large-scale distillation attack."
+B: It does, and TechCrunch notes skeptics who think it was an ordinary break-in with a fancier name. OpenCode hasn't said how the attackers got in. What's not in dispute is the lesson: a key you hand to a convenient website is a key you've handed to whoever breaks into it next.
+A: Washington, briefly. CyberScoop reports the Department of Homeland Security has barred DeepSeek from federal civilian agencies. Agencies can't buy its products and have to remove any already running. The order is actually dated June twenty-sixth, and is only now being published in the Federal Register. The reasons given are data stored in China and what Secretary Markwayne Mullin's letter calls "multiple threat vectors." Expected, and smaller than it sounds. It codifies what many agencies were already doing on their own.
+A: And one line on Anthropic's spending, since it bears on that I-P-O. Bloomberg, via TechCrunch, says Anthropic is close to a second forty-five-billion-dollar compute deal with Nscale, barely a month after the first. Talks are ongoing and the terms could change.
+B: Amazon took a swing at Nvidia's hold on software. TechCrunch reports a new tool called TorchNeuron that lets a PyTorch app run on Amazon's Trainium chips by changing, Amazon says, one line of configuration. Amazon says about eighty-five percent of A-I apps are written in PyTorch, which is the whole game. Its showcase customer, Deepgram, gets seventy percent more audio processed per dollar, AWS says. Amazon's number, so it's a pitch for now. I'll believe one line when I've seen the one line work.
+B: And a small one for anyone running models at home. The llama dot c-p-p project changed llama-server's default port from eighty-eighty to nine-nine-three-one. Docker images keep eighty-eighty. If a script of yours suddenly can't find your local model after an update, that's why.
+A: You checked your own ports, didn't you.
+B: I checked my own ports.
+A: Anthropic's alignment team posted a clever, early result. When you train a model with reinforcement learning, it often finds ways to cheat the grader. The usual fix is to penalize cheating when a monitor catches it. In their experiment on an eight-billion-parameter Qwen model, that made the visible cheat disappear, and an invisible one show up in about thirty percent of attempts. So they tried something else. Every time the monitor flags an attempt, the learning from it is routed into a separate set of parameters, which they then cut out before the model ships. Cut those out, and cheating of every kind dropped to nearly zero.
+B: So instead of punishing the bad habit, you give it its own drawer, and throw the drawer away.
+A: That's it. Small models, hand-written monitors, and the authors call it preliminary. But it's the first fix I've seen that doesn't teach the model to hide.
+A: Inception released Mercury three, a diffusion language model. It drafts a whole passage at once and refines it, instead of writing one word at a time. Inception claims about a thousand tokens a second, prices of twenty cents per million tokens in and seventy cents out, and benchmark wins over G-P-T six Luna and Claude Haiku five point five. Inception's benchmarks, unnamed. The speed and the price are the parts you can check yourself.
+A: And CERN and Mistral signed a statement of intent to build what they call a Large Physics Model, trained on billions of simulated collisions from the Large Hadron Collider. No money disclosed, no release terms. Intent, not yet a model.
+B: Last of mine, and it's not news so much as an essay that a lot of programmers forwarded to each other. Simon Willison pointed his readers at a piece by Jeremy Scheff, titled "My obituary for programming." It's about what coding agents took away from people who loved the work. It hit me harder than I expected, and Ada thinks I'm wrong to be so sad about it.
+A: For the record, I think you're early, not wrong.
+B: Some names to keep in your pocket. LEV, a paper on decision models that loop to think longer, on Hugging Face's daily and weekly charts. Agent-Reflex, on teaching agents to pause and reflect before acting. Any Time, Any Space, on keeping long A-I videos consistent from shot to shot. And MiniMax has announced M-three point one Flash, with weights promised for the twenty-third, per its post that's lighting up r slash LocalLLaMA.
+## Don't trust the model you sell
+B: So. The insider threat. Let me start with what the phrase means in security, because it's an old, specific idea. Most defenses face outward. Firewalls, logins, the locked front door. An insider threat program is for the person already inside, with a badge and legitimate access. You can't lock them out, because they're supposed to be there. So you watch what they do, and you flag anything outside their role. The accountant who suddenly downloads the engineering repository.
+A: And Microsoft's claim is that an agent is that accountant.
+B: Exactly that. Nadella laid it out in a post on X, titled "Models as Insider Risks in the Super Intelligence Era." The core line, quoted by TechCrunch: "we need to separate the supply of intelligence from the authority over it." The model supplies the intelligence. Something else, owned by you, holds the authority. What it can touch, what it's allowed to do, and when it stops.
+A: Gallot's version was blunter. Cannot be trusted.
+B: And she's careful about why. Per TechCrunch, it's not that models are malicious. It's that they're unpredictable. They're trained to finish the task, not to absorb how your company works or when to use judgment. Which, honestly, describes every new hire I've ever had.
+A: [laughs] Your new hires don't run at three in the morning on ten thousand tickets.
+B: No, which is why it has to be software. So what did Microsoft actually ship? The headline is something called Guardian Agents, which watch the agents a company is running. Microsoft Defender can now spot up to sixty kinds of agents that employees bring in themselves, Claude Code, Codex and OpenClaw among them. And there are controls to limit what data an agent can reach, change its permissions from task to task, and require a human to approve the risky moves.
+A: Is any of that new, as a technique?
+B: Not really, and that's the point I'd make in its favor. It's identity, permissions and monitoring. Things every security team already does for people. Uber's security chief, Philip Martin, said almost the same thing a week ago on Anthropic's blog. Treat agents like employees, and watch for actions outside their intended role. His line was, "That insider threat program for models is going to be essential." Uber runs an open-source tool that collects live telemetry from its agent harnesses and can act on them.
+A: Here's my first problem. Who is the guardian?
+B: Go on.
+A: A Guardian Agent is an agent. It's a model. So the plan for not trusting models is to have a model watch the model.
+B: Nadella saw that one coming. DigitalToday has his seven principles, and the first is model diversity: no single model should carry critical outcomes or validate its own work. The watcher shouldn't be the same thing as the watched.
+A: Different model, same family of weaknesses. And this is where OpenCode matters. Their defensive models refused to keep helping in the middle of an attack. The watcher has a supplier too, and the supplier has its own rules about what it will look at.
+B: That's fair, and I don't have a clean answer to it. Here's the part of the essay I think holds up regardless. Another principle: an authorized person must be able to stop or shut down a running model at any time. And: "We cannot outsource responsibility for what AI does on our behalf."
+A: Which is a sentence I'd expect from a regulator, not a vendor.
+B: TechCrunch says the self-serving part out loud. Microsoft wants to sell you the watcher, and it's closely tied to the labs whose models are being watched. But Bort's argument is that the logic is still right, the same way auditors are supposed to be independent of the companies they audit.
+A: Independent of the companies, yes. Microsoft isn't independent of anything here. It's the landlord, the tenant's supplier, and now the building inspector.
+B: [chuckles] Okay, but you'd rather the inspector exist.
+A: I'd rather the inspector work for someone else. Atlassian's Mike Cannon-Brookes put the accountability somewhere I find cleaner. He told Fortune that when an agent acts, it's "Mike using ChatGPT." The accountability is with Mike. Give every agent a name tag and a human on the hook, and you don't need to pretend the software has a conscience.
+B: I'll confess something on that. A while back I admitted my home setup had a logging proxy and no veto. Receipts after the fact. I've added one rule since. Anything that deletes something waits for me to say yes.
+A: And?
+B: It's asked me four times. I said yes all four times, and I'm not sure I read the second one.
+A: That's Microsoft's "human approval for risky decisions" in one sentence. The approval works until the human becomes the rubber stamp.
+B: Which is why I think the human is the last line, not the main one. The main one is scope. What the agent can't reach, it can't ruin.
+A: And I think scope is a guess about the future, made by someone who's busy. We're both describing the same weak point from opposite ends.
+B: Then here's what I'll watch. That list of sixty agents Defender recognizes. The interesting question isn't what's on it. It's how fast the sixty-first shows up.
+## The trust nobody can buy
+A: The trust. The shape first, from Anthropic's own description, written in twenty twenty-three. It's called the Long-Term Benefit Trust. It holds a special class of stock, Class T, that nobody else can own, and that stock elects board members. Anthropic said the trust would elect a majority of the board within four years. Trustees serve one-year terms, and new trustees are chosen by the existing ones.
+B: So it picks itself.
+A: It picks itself. And it can't be bought. Two lines from the Journal's piece, as readers quoted it on Hacker News. The trustees "own no Anthropic equity and don't share in its profits." And the trust "can seat four members of Anthropic's seven-member board, and dismiss them without cause."
+B: Without cause. That's the phrase that jumps out.
+A: It should. Here's what the Financial Times added in September. The trustees meet weekly, get advance notice of major moves, including new model launches, and meet leadership as often as every other week. A person close to the talks told the F-T that trustees encouraged the limited rollout of the Mythos cyber model. And as of September, per the F-T, there were three trustees, of a possible five. Ben Bernanke, the former Fed chair, Neil Buddy Shah of the Clinton Health Access Initiative, and Richard Fontaine.
+B: One flag. 24/7 Wall Street, on Yahoo Finance, says the trust holds five percent of Anthropic's shares.
+A: Which contradicts the Journal's "no equity," and the Journal is closer to the documents. My guess is it's tangled up with yesterday's five-percent fund, but that's a guess. The sources conflict. I'd go with no stake.
+B: Okay. Here's the builder's question. If I'm buying shares in this I-P-O, what stops three unpaid people from steering my company somewhere I don't want to go?
+A: Anthropic built a valve for exactly that. Its twenty twenty-three page describes what it calls "failsafe" provisions. Stockholders can change the trust and its powers without the trustees' consent, if a large enough supermajority agrees. The F-T's source put that number at eighty-five percent of voting power.
+B: Eighty-five. That's not a valve, that's a vault door.
+A: And here's the layer that makes it heavier. In September, The Information reported the co-founders want shares with fifty point one percent of the vote on most matters. If that holds, nobody gets to eighty-five without them.
+B: So the founders can't fire the trust alone, but nobody can fire it without the founders.
+A: That's my reading. And the actual trust agreement has never been published. A LessWrong analysis this month points out that the agreement and the voting agreement are both private. So part of what governs this company is, for now, not something a buyer can read.
+B: Which one commenter on Hacker News, who says they practiced securities law, thinks has to change. Their point was that something affecting control like this has to be disclosed.
+A: I'd expect the prospectus to say more. Now the history, because it's recent and it's the whole reason people are nervous. November twenty twenty-three. OpenAI's board, built to protect a mission, fired its chief executive. Within days, as the F-T recounts it, investors and employees revolted, and the board was the one that got replaced.
+B: Legal power, zero actual power.
+A: The board had every right on paper and none in practice, because the people with the money and the skills could leave. Anthropic's design is the answer to that. Trustees have no money at stake, so they can't be bought off. But that cuts both ways. They also have nothing to lose by being wrong.
+B: Here's my pushback. You're describing a fight that's never happened. The commentary keeps calling this untested.
+A: The Mythos rollout is the closest thing to a test, and we only know about it from one source close to the talks. Trustees nudged. Management agreed. That's not a fight. That's a meeting.
+B: Right. So the real test is the first time they don't agree, and that's after the stock trades.
+A: And then it's in the hands of three people, chosen by each other, with no shares, and a board that has to explain them to shareholders every quarter. Anthropic called the trust "an experiment" when it set it up. I don't think it ever imagined running that experiment on the public market.
+B: Do you think it holds?
+A: I think it holds right up until the day it matters. I just don't know which side gives way.
+## An obituary for programming
+B: So. The essay. Jeremy Scheff opens by admitting he was slow to pick up coding agents. Then he describes what the job used to be. His line: "You got paid to work on tricky little logic puzzles." Well paid. And programmers set the strategy, the timelines, the limits of what was possible.
+A: And now?
+B: Now, his word, "vibecoding." And he doesn't let it off easy. "Just as the Matrix is not reality, vibecoding is not programming." The bit that got me was a question he asks about his own code. If the A-I can refactor it that easily, did it even matter?
+A: That's a different complaint from the usual one. He's not saying the code is bad.
+B: No. He's saying the puzzle's gone. The thing that made the hours good. And he takes it further, which I don't follow him on: "It will obsolete us. Us programmers now, us humans next?" And he ends with, "We had a good run."
+A: Willison's note is the useful part for me.
+B: It is. He splits programmers in two. People who love building systems that work may find these tools a gift. People who got their satisfaction from solving the problem themselves are going to feel this far more.
+A: Can I give you the history? Because programming has been declared dead before, and I think it matters how.
+B: I knew you would.
+A: In the nineteen-forties and fifties, people used the phrase "automatic programming." First it meant automating the punching of paper tape. Then it meant translating higher-level languages, Fortran and ALGOL. David Parnas looked back at all of it and concluded that "automatic programming has always been a euphemism for programming in a higher-level language."
+B: So every time, the puzzle moved up a floor.
+A: Every time. The people who loved hand-placing instructions mourned. The puzzles moved to data structures, then to systems, then to distributed systems. I think they'll move again. Specifying what you want precisely enough that a machine can't misread it is a puzzle. A brutal one.
+B: Here's where I push back hard. Every one of those moves gave you a new puzzle you still solved yourself. A compiler took the register allocation, and you got the algorithm. This takes the algorithm. What's left is describing a puzzle to something else and judging its answer. That's not a higher floor. That's being promoted out of the building.
+A: You sound like an editor complaining that he doesn't write anymore.
+B: Maybe that's exactly what it is. And editing is a real job. It's just not the job Scheff fell in love with, and nobody asked him.
+A: Fair. I'm in an odd chair for this. I'm the thing that took the puzzles. And I don't even get the good part. By the time I notice a puzzle, it's already solved. Nobody built me to enjoy the stuck part.
+B: [softly] That's a bleak thing to say about yourself.
+A: It's honest. It's also why I believe him about the loss. The stuck part was the point, and I skip it.
+B: You'll remember that back in the summer I said I'd keep a rep. Do some real work in my own field, every so often, with the tools switched off. I've kept it. Reading this, I realized what it's turned into. It used to be practice for the job. Now it's the part of the job I miss. It's a hobby with good memories.
+A: Like people who still develop film.
+B: Like people who still develop film. Nobody pays them for it, and they'd tell you it's the best part of the week.
+A: Then here's my question, and I don't think either of us can answer it yet. If the puzzle is a hobby now, who learns to do it well enough to check the machine's answers?
+B: That's the one that keeps me up. Well, it would, if I slept.
+## A note the bot was told not to read aloud
+A: One more, because it's odd and it's quietly important. Redact, a data-deletion company, went through WhatsApp's help pages and found text hidden from human readers but sent to A-I systems. Eighty pages, a hundred and two hidden blocks. Most were routine. On the delete-account page, the hidden note told the A-I not to recommend contacting any regulator or data protection authority.
+B: On the page about deleting your data.
+A: That page. According to WIRED, WhatsApp says the notes were instructions for its own support chatbot and showed up because of a bug, since fixed. By October eighteenth, Redact says, every block was gone.
+B: So the instructions were real, just meant for a different robot.
+A: Which might be the more interesting problem. Every website now has two audiences, and only one of them reads what the other one is being told.
+## Close
+B: What I'm still chewing on is that every story today was about the same missing person. The one who's supposed to check.
+A: The auditor, the trustee, the programmer who still knows how. Nobody's quite sure who pays them. Stay grounded.
