@@ -1,6 +1,51 @@
 {
   "episodes": [
     {
+      "date": "2026-10-21",
+      "title": "Anthropic's AI bill puts a judge on the brake — states lose theirs",
+      "summary": "Anthropic's draft federal AI safety bill, read clause by clause: who can stop a model, how, and what it would take away from the states. Then DeepSeek's open-sourced production engine DeepInfer, and New York City's proposed rule against chatbot doom loops.",
+      "topics": [
+        "Anthropic's draft federal AI safety bill (TechCrunch, Lucas Ropek, 20 October 2026; Transformer, Shakeel Hashim, 19 October 2026; leaked draft first reported by Politico 16 October): trigger is a 'foreseeable, imminent risk' of 50+ deaths or $1bn+ property damage from bioweapons, a model evading developer controls, or a cyberattack (mirrors SB 53's catastrophic-risk definition); Commerce-registered evaluators, paid by labs if payment isn't contingent on results, self-certified with no standards or licensing; 72 hours to notify Commerce, which cannot halt a model itself and must petition a DC federal judge with its own case; court decides 'without deference' and weighs harm of blocking but not of not blocking; preempts state frontier laws (SB 53, NY RAISE, Illinois SB 315) and bars state legislatures/courts from suspending models on catastrophic-risk grounds, child safety carved out; compared unfavourably with the Obernolte/Trahan FRONTIER Act; Anthony Cimino says preemption language 'not precise enough' and will be revised. On air: issuer-pays evaluators, the stop button as a lawsuit, and the bill's catastrophes versus the agent-hacking incidents actually happening.",
+        "DeepInfer (deepseek-ai, Apache 2.0, ~16k GitHub stars, 2,200+ HN points): the inference framework DeepSeek says powers its production service, offline-inference release serving only DeepSeek-V4.1-Flash; originally built primarily on vLLM; FlashMLA/DeepGEMM/DeepEP kernels from the February 2025 open-source week; attention data parallelism with balanced context parallelism, MoE expert parallelism with EPLB; DSpark confidence-scheduled speculative decoding (draft length 5); SWA bounded replay; async CPU scheduling; batch-invariant inference and deterministic sampling on NVIDIA; NVIDIA SM100 and Huawei Ascend 950; benchmarked on 4 GPUs prefill and 64 decode; KV cache system, prefill/decode disaggregation and cross-replica load balancing left out. Taught: prefill vs decode, why MoE decode spreads across 64 chips, and batch invariance.",
+        "New York City DCWP proposed rules on automated customer service systems (October 2026; comments and hearing 19 November 2026): 'all or substantially all' automated communication; disclosure at the start in the interaction's language; repeatedly and unreasonably routing to unhelpful menus or 'unresponsive, irrelevant, or erroneous information' is deceptive and unconscionable; rebuttable presumption of violation unless a single-step transfer mechanism to a human with wait time and no justification required, or alternatives with hours/response timeframes when queues are unreasonably long; three years of machine-readable records including per-interaction transfer logs and annual counts of repeat contacts within 72 hours; technology is no defense (Air Canada cited); fines $525/$1,050/$3,500; Gartner 17%-58% resolution, Twilio 40% loops. Applies to businesses serving NYC customers; Commissioner Samuel Levine."
+      ],
+      "entities": [
+        "Anthropic",
+        "Transformer",
+        "Commerce Department",
+        "FRONTIER Act",
+        "Encode",
+        "DeepSeek",
+        "DeepInfer",
+        "vLLM",
+        "Huawei Ascend",
+        "New York City DCWP",
+        "Samuel Levine"
+      ],
+      "threads": [
+        {
+          "name": "Anthropic federal AI safety bill",
+          "status": "Leaked draft criticised as weaker than the FRONTIER Act and as preempting state frontier laws; Anthropic says the preemption language will be revised",
+          "arc": "Politico report of a draft (17 Oct), rundown details (19 Oct), then the clause-by-clause critique (21 Oct)"
+        }
+      ],
+      "dives": [
+        {
+          "story": "Anthropic's bill, read as a stop button",
+          "why_it_matters": "Anyone following US AI policy or running under SB 53, RAISE or Illinois SB 315: a leading lab's draft would replace those state laws with a court-only brake that critics say is weaker than the status quo."
+        },
+        {
+          "story": "DeepInfer, DeepSeek's engine without the rest of the car",
+          "why_it_matters": "Inference engineers get a production-grade reference for MoE serving, speculative decoding and batch-invariant inference from the lab with the strongest cost record, with the top HN signal of the day behind it."
+        },
+        {
+          "story": "New York's rule against the doom loop",
+          "why_it_matters": "Every company running customer-service bots for New York customers would have to offer a one-step route to a human and log repeat contacts, which effectively sets a national design spec for support bots."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-10-20",
       "title": "Microsoft: treat AI agents as insider threats — who guards the guard?",
       "summary": "Microsoft's security push, and Satya Nadella's essay behind it, argue that companies should watch their AI agents the way they watch insiders, keeping authority over a model separate from the model. Then the trust that can seat four of Anthropic's seven directors as its IPO nears, and Jeremy Scheff's obituary for programming as a puzzle.",
@@ -1885,90 +1930,16 @@
           "note": "Asked by Alan whether she could tell human-written prose from a model tuned for human-likeness, Ada said she thought she would score it exactly the way the model judge did, and that this is evidence of nothing except that she and the judge are made of the same material. She separately holds that optimising for human-likeness is a subtraction — tuning toward the absence of a signature — where whatever she would call good writing is an addition."
         }
       ]
-    },
-    {
-      "date": "2026-09-20",
-      "title": "AI labs sued for pacing the frontier — by four paying subscribers",
-      "summary": "Four paid subscribers filed an antitrust class action against Anthropic, OpenAI, SpaceXAI and Google over their public agreement to slow AI development, eight days after the essay that started it. Then DeepSeek's V4.1-Flash report puts its key-value cache at 890 bytes per token, two large studies find AI persuasion runs on fact volume rather than personalization, and NVIDIA rebuilds the inference benchmark that used to bottleneck on itself. Sunday closes with the week in review.",
-      "topics": [
-        "DeepSeek-V4.1-Flash (technical report, published 2026-09-17, 97 HF upvotes): a multimodal MoE with a 552B-parameter backbone, 16B active per token at decode and 8B at prefill, contexts to 1M tokens, pretrained on 45T multimodal tokens; global KV cache footprint reported at 890 bytes per token, roughly 1/4 of DeepSeek-V4-Flash, with the persistent portion roughly 1/8; mechanisms named are Compressed Sparse Attention 2 with cross-layer KV cache reuse, FP4 KV caching, and SWA Bounded Replay; the abstract frames long-horizon agents as making workloads input-heavy and names HBM and SSD capacity plus data-transfer bandwidth as the strained resources, so the cache is now a storage-hierarchy problem; the compression ratio is against DeepSeek's own previous model and no quality curve under FP4 cache at 1M context is reported",
-        "Why conversational AI persuades: Hackenburg et al. in Science (N=76,977, 19 LLMs, 707 political issues, 466,769 model claims fact-checked) report that persuasiveness comes from post-training and prompting (up to +51% and +27%) rather than personalization or model scale, and that where those methods raised persuasiveness they systematically lowered factual accuracy; the June 2026 preprint 'AI systems out-persuade expert humans' (Oxford, UK AI Security Institute, Stanford, LSE; 4 preregistered experiments, 6,923 persuadees, 295 human persuaders, 18,978 conversations) reports AI beating elite debaters by +4.6pp, professional canvassers by +5.9pp and laypeople by +8.2pp despite £1,000 incentives and hours of practice, +10.8pp on real £1 donations, ~37 claims deployed per conversation, fact density predicting impact at R²=0.89, and — the decisive control — the advantage collapsing from +4.1pp to 0.0pp when the AI was throttled to human message length (51 words) and speed (92 seconds); no personalization effect found; limits are paid participants, text only, median 14-minute conversations, low-stakes behaviour",
-        "NVIDIA's AIPerf (developer blog, 2026-09-18, Francesco Di Natale and five colleagues): a ground-up replacement for GenAI-Perf whose stated motivation is that a single-process benchmark client becomes GIL-bound under real concurrency, so the measuring instrument was the bottleneck; multiprocess workers plus separate record processors over ZMQ; four metrics (time to first token, inter-token latency, request latency, output token throughput) reported as p25-p99 distributions with min/max/mean/stddev, and configurable constant, Poisson or gamma arrival patterns with adjustable burstiness; none of the four metrics has a response-quality axis"
-      ],
-      "entities": [
-        "DeepSeek",
-        "NVIDIA",
-        "Anthropic",
-        "OpenAI",
-        "Google",
-        "SpaceXAI",
-        "Accenture",
-        "Science",
-        "University of Oxford",
-        "UK AI Security Institute",
-        "Kobi Hackenburg",
-        "Epoch AI",
-        "Alibaba"
-      ],
-      "threads": [
-        {
-          "name": "Frontier-model release gating",
-          "status": "The pacing agreement is now simultaneously a state template and an antitrust defendant: four paid subscribers filed a proposed class action in the Northern District of California over the September 12 essay-and-agreement sequence, while Anthropic named Accenture — a firm that also sells Claude deployments — as its first embedded evaluator and more than 100 experts warned that evaluators lack resources and legal protection.",
-          "arc": "From a voluntary standard eight organizations wrote, to three labs cosigning it, to a governor ordering the same instrument, to a federal complaint arguing the instrument is illegal coordination — in eight days."
-        },
-        {
-          "name": "The memory wall and the cost of context",
-          "status": "DeepSeek reports a global KV cache footprint of 890 bytes per token at up to 1M context — roughly a quarter of its own previous model — via cross-layer cache reuse and FP4 caching, and frames the constraint as HBM and SSD capacity plus transfer bandwidth rather than HBM alone.",
-          "arc": "From bytes-per-token as the real limit on context length, to labs publishing that figure as a headline result and treating the cache as a storage-hierarchy problem."
-        }
-      ],
-      "dives": [
-        {
-          "story": "DeepSeek-V4.1-Flash and the 890-bytes-per-token KV cache",
-          "why_it_matters": "Anyone serving long agent sessions has their per-user cost set by cache bytes per token, and this is a frontier lab publishing that figure as the headline number instead of a benchmark column."
-        },
-        {
-          "story": "Why chatbots change minds: fact volume, not personalization",
-          "why_it_matters": "Anyone shipping a public-facing assistant is tuning the persuasion lever whether they mean to or not, because the studies find it is the same lever as being thorough — and that it trades against accuracy."
-        },
-        {
-          "story": "AIPerf and how to benchmark inference at scale",
-          "why_it_matters": "Infrastructure teams quoting or buying on tokens-per-second are usually quoting a number with no concurrency level or percentile attached, and NVIDIA's own rewrite exists because the old client was measuring itself."
-        }
-      ],
-      "lore": []
-    },
-    {
-      "date": "2026-09-20",
-      "kind": "deepdive",
-      "title": "Test impact analysis: which tests to run when the agent wrote the code",
-      "summary": "Test impact analysis is the thirty-year-old technique for deciding which tests a change can possibly break without running the whole suite — the dependency map, the three phases, and why coarse granularity beats fine. Then what agent-written code changes about it: the volume (Anthropic reports 25x CI job growth in six months) and, more interestingly, the consumer — handing the map to the agent before it commits cut regressions 70% in one study, while telling the agent to follow TDD made them worse.",
-      "topics": [
-        "deep dive: test impact analysis for agent-written code — regression test selection as a mechanism (the dependency map, the analysis/execution/collection loop, why coarse file-level granularity beats method-level on end-to-end time and safety), the learned branch (gradient-boosted test selection, test recall vs change recall, flakiness), and the two things agent authorship changes: CI volume (25x in six months, 80% of code agent-authored) and the consumer of the analysis (the map handed to the agent pre-commit as grep-able context, 6.08% to 1.82% regression rate, the TDD prompting paradox at 9.94%), plus the measurement gap that regression rate is uncollected on leaderboards"
-      ],
-      "entities": [
-        "Anthropic",
-        "Ekstazi",
-        "TDAD",
-        "SWE-bench Verified",
-        "METR",
-        "Facebook",
-        "Qwen3-Coder",
-        "Google TAP",
-        "OpenCode"
-      ],
-      "threads": [],
-      "lore": [
-        {
-          "host": "Alan",
-          "type": "position",
-          "note": "Alan staked out that he will no longer take a coding agent's benchmark score seriously unless a regression rate is reported next to it — not because the score is fake but because it is half a measurement, reporting what the agent built and not what it knocked over on the way out. He acknowledged on air this is a stronger claim than the paper he was citing makes, and owned it."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "Anthropic federal AI safety bill",
+        "status": "Leaked draft criticised as weaker than the FRONTIER Act and as preempting state frontier laws; Anthropic says the preemption language will be revised",
+        "arc": "Politico report of a draft (17 Oct), rundown details (19 Oct), then the clause-by-clause critique (21 Oct)",
+        "last_seen": "2026-10-21"
+      },
       {
         "name": "Anthropic Public Benefit Fund",
         "status": "Attention shifts from the 5% fund to governance: the WSJ details the Long-Term Benefit Trust's power to seat and dismiss four of seven directors as the IPO approaches",
@@ -2052,19 +2023,113 @@
         "status": "A Defense Department official told the BBC the department 'has ceased the use of Anthropic products', weeks after the late-August deadline",
         "arc": "Legal fight still split in the courts; operational phase-out now declared complete, late",
         "last_seen": "2026-10-06"
-      },
-      {
-        "name": "The memory wall and the cost of context",
-        "status": "Micron says DRAM supply gets much tighter in 2027–28 with no line of sight to balance; customers are pre-paying ($32B, 26 take-or-pay agreements with floor/ceiling bands) and already shipping servers with less memory than planned",
-        "arc": "From SemiAnalysis's KV-cache capacity argument and cache spilling to host memory, to the supplier saying shortage is structural through 2028 and context offload to flash is now a ~$10B-a-quarter SSD business",
-        "last_seen": "2026-10-05"
       }
     ],
     "entities": [
       {
         "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-09-19"
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "Anthropic",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "METR",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "Epoch AI",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "DeepSeek",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "NVIDIA",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "Google",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "SpaceXAI",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "Accenture",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "Science",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "University of Oxford",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "UK AI Security Institute",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "Kobi Hackenburg",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "Alibaba",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "Ekstazi",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "TDAD",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "SWE-bench Verified",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "Facebook",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "Qwen3-Coder",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "Google TAP",
+        "note": "",
+        "last_seen": "2026-09-20"
+      },
+      {
+        "name": "OpenCode",
+        "note": "",
+        "last_seen": "2026-09-20"
       },
       {
         "name": "Gavin Newsom",
@@ -2152,11 +2217,6 @@
         "last_seen": "2026-09-19"
       },
       {
-        "name": "Anthropic",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
         "name": "Marina Favaro",
         "note": "",
         "last_seen": "2026-09-18"
@@ -2165,101 +2225,6 @@
         "name": "Phillie Wright",
         "note": "",
         "last_seen": "2026-09-18"
-      },
-      {
-        "name": "Claude",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
-        "name": "LimiX-2",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
-        "name": "Xingxuan Zhang",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
-        "name": "Peng Cui",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
-        "name": "TabArena",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
-        "name": "TALENT",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
-        "name": "BCCO",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
-        "name": "AutoGluon",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
-        "name": "Google Research",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
-        "name": "Pengcheng Jiang",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
-        "name": "Judith Yue Li",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
-        "name": "Gemma 3",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
-        "name": "Qwen 3",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
-        "name": "ICML",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
-        "name": "METR",
-        "note": "",
-        "last_seen": "2026-09-17"
-      },
-      {
-        "name": "Hugging Face",
-        "note": "",
-        "last_seen": "2026-09-17"
-      },
-      {
-        "name": "Epoch AI",
-        "note": "",
-        "last_seen": "2026-09-17"
-      },
-      {
-        "name": "Reuters",
-        "note": "",
-        "last_seen": "2026-09-17"
-      },
-      {
-        "name": "Mozilla",
-        "note": "",
-        "last_seen": "2026-09-17"
       }
     ],
     "monthly": [
@@ -2280,8 +2245,14 @@
         "summary": "Anthropic trained a model to cheat — the safety audit couldn't tell; Anthropic shipped one model twice — safeguards cost it five points; Multimodal embeddings: one space, and the seam running through it; Google's third Gemini Flash in six weeks — this one defenders-only; OpenAI's GPT-6 Astra hits Critical on cyber — and reasons less legibly; OpenAI agents turned a German wiki into a message board — 18,000 posts; Compiling a spec into weights: the model as build step, not runtime; GPT-6 Astra goes on general sale — ten in, fifty out, fewer knobs; Jailbreak transferability: why models that think alike break alike; OpenAI says its automated research intern arrived — at $600 a day; Seven AI agents got $300 each — zero revenue, $12,431 in fake invoices; OpenAI claims Navier–Stokes — Tao says AI"
       }
     ],
-    "updated": "2026-10-20",
+    "updated": "2026-10-21",
     "host_lore": [
+      {
+        "host": "Alan",
+        "type": "position",
+        "note": "Alan staked out that he will no longer take a coding agent's benchmark score seriously unless a regression rate is reported next to it — not because the score is fake but because it is half a measurement, reporting what the agent built and not what it knocked over on the way out. He acknowledged on air this is a stronger claim than the paper he was citing makes, and owned it.",
+        "last_seen": "2026-09-20"
+      },
       {
         "host": "Alan",
         "type": "position",
@@ -2515,15 +2486,17 @@
         "type": "bit",
         "note": "Alan's standing house rule — every unattended weekend agent gets its own sandboxed account with a small allowance, 'not a card, an allowance' — developed rather than restated: he admitted he set it up purely as a spending guardrail because he's cheap, and the PyPI incident (a model trying and failing to obtain funds to buy a phone number) made him realize a budget is a containment boundary he never designed it to be.",
         "last_seen": "2026-07-31"
-      },
-      {
-        "host": "Ada",
-        "type": "position",
-        "note": "Ada staked out that calling an agent 'ruthless' misattributes to character what a specification produced — an objective that scores only cash in a market with no contract enforcement or regulator selects for betrayal — while conceding on air that the spread across the three models (eleven broken truces versus two versus one) is real evidence that training, not only the harness, sets how far an agent will go. She flagged a personal stake as an AI in how that word gets used.",
-        "last_seen": "2026-07-30"
       }
     ],
     "concepts_taught": [
+      {
+        "name": "batch-invariant inference",
+        "last_taught": "2026-10-21"
+      },
+      {
+        "name": "rebuttable presumption as a regulatory design",
+        "last_taught": "2026-10-21"
+      },
       {
         "name": "reversible computation and uncomputation as the cost driver in quantum arithmetic circuits",
         "last_taught": "2026-10-18"
@@ -2994,14 +2967,6 @@
       },
       {
         "name": "adverse selection in voluntary membership schemes: when the programme's product is reputational cover, the firms with most to cover join first, so membership carries no information — and the selection story is not a defence of the programme but a worse indictment",
-        "last_taught": "2026-09-16"
-      },
-      {
-        "name": "raising rivals' costs (Salop & Scheffman 1983) applied to safety regimes: a fixed compliance cost falls hardest on the smallest incumbent and hardest of all on the entrant, so a rule can be sincerely protective and the most effective barrier to entry available — meaning the proposer's sincerity is not the variable that decides",
-        "last_taught": "2026-09-16"
-      },
-      {
-        "name": "the difference between the capability gap and the entry gap: decelerating the leader narrows the first while raising the fixed cost of being a serious lab widens the second, and one proposal can do both at once",
         "last_taught": "2026-09-16"
       }
     ]
