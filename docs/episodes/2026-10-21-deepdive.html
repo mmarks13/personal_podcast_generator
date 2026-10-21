@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[Deep Dive] Text embeddings and rerankers: how search finds meaning in two passes — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>[Deep Dive] Text embeddings and rerankers: how search finds meaning in two passes</h1>
+<div class="date">Self-Attention — 2026-10-21</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-10-21-deepdive/deepdive-2026-10-21.mp3"></audio>
+<p><em>2026-10-21</em></p>
+<p>How search finds documents that mean what you meant: from BM25 and the vocabulary problem, through sentence embeddings and contrastive dense retrieval, to cross-encoder and LLM rerankers, late interaction, and the measured limits of single-vector embeddings.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/1908.10084">Reimers &amp; Gurevych — Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks (2019)</a></li>
+<li><a href="https://arxiv.org/abs/2004.04906">Karpukhin et al. — Dense Passage Retrieval for Open-Domain Question Answering (2020)</a></li>
+<li><a href="https://arxiv.org/abs/1901.04085">Nogueira &amp; Cho — Passage Re-ranking with BERT (2019)</a></li>
+<li><a href="https://arxiv.org/abs/2004.12832">Khattab &amp; Zaharia — ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT (2020)</a></li>
+<li><a href="https://arxiv.org/abs/2104.08663">Thakur et al. — BEIR: A Heterogenous Benchmark for Zero-shot Evaluation of Information Retrieval Models (2021)</a></li>
+<li><a href="https://arxiv.org/abs/2508.21038">Weller et al. — On the Theoretical Limitations of Embedding-Based Retrieval (ICLR 2026)</a></li>
+<li><a href="https://huggingface.co/blog/lightonai/slideon-mslideon">LightOn — SlideOn &amp; mSlideOn: Sparsified Late-Interaction and Dense Retrievers</a></li>
+<li><a href="https://machinelearning.apple.com/research/plan-retrieve-tool-discovery">Apple — Plan or Retrieve First? A Scale Study of Tool Discovery Architectures</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://www.staff.city.ac.uk/~sbrp622/papers/foundations_bm25_review.pdf">Robertson &amp; Zaragoza — The Probabilistic Relevance Framework: BM25 and Beyond (2009)</a></li>
+<li><a href="https://honnef.co/notes/references/furnasvocabularyproblemhumansystem1987">Furnas et al. — The Vocabulary Problem in Human-System Communication (1987), abstract</a></li>
+<li><a href="https://arxiv.org/abs/1301.3781">Mikolov et al. — Efficient Estimation of Word Representations in Vector Space (2013)</a></li>
+<li><a href="https://arxiv.org/abs/1603.09320">Malkov &amp; Yashunin — Hierarchical Navigable Small World graphs (HNSW)</a></li>
+<li><a href="https://arxiv.org/abs/2210.07316">Muennighoff et al. — MTEB: Massive Text Embedding Benchmark (2022)</a></li>
+<li><a href="https://arxiv.org/abs/2304.09542">Sun et al. — Is ChatGPT Good at Search? Investigating Large Language Models as Re-Ranking Agents (2023)</a></li>
+<li><a href="http://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf">Cormack, Clarke &amp; Büttcher — Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods (2009)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>The word you didn't type</li>
+<li>Two people, one word</li>
+<li>Meaning as a place</li>
+<li>Teaching a space what relevant means</li>
+<li>The second pass</li>
+<li>The middle road</li>
+<li>Where meaning runs out</li>
+<li>What a builder actually does</li>
+</ol>
+<details><summary>Transcript</summary>
+<p><b>Ada:</b> Hello — it's Wednesday, October twenty-first. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. And I want to start with a search box, because I think it's the most underrated piece of machinery in all of AI.</p>
+<h3>The word you didn't type</h3>
+<p><b>Ada:</b> Underrated how?</p>
+<p><b>Alan:</b> Every chatbot that reads your documents, every agent that picks a tool. Before the language model writes a word, something had to find the right passage. If that misses, the model writes a beautiful answer about the wrong thing.</p>
+<p><b>Ada:</b> Garbage in, eloquence out.</p>
+<p><b>Alan:</b> Exactly. And in the week we sat down to make this, two things made the plumbing visible. LightOn published a post on October nineteenth about two retrieval models called SlideOn and mSlideOn. And Apple put out a study on how agents find tools in a registry of nearly forty-seven thousand APIs.</p>
+<p><b>Ada:</b> And the Apple one is a search problem in disguise.</p>
+<p><b>Alan:</b> Completely. The default approach they describe embeds the user's query and fetches similar tools by approximate nearest-neighbor search. And the LightOn post is full of the rest of the vocabulary. Dense retrievers, late interaction, sparse vectors. So the question we're on is: how does a search system find a document that means what you meant, even when it doesn't share your words? And what's the second pass, the reranker, actually doing that the first one can't?</p>
+<p><b>Ada:</b> Then I want to start before any of the neural machinery. Because the problem is old, and somebody measured it.</p>
+<h3>Two people, one word</h3>
+<p><b>Alan:</b> Measured it how?</p>
+<p><b>Ada:</b> In nineteen eighty-seven, George Furnas and colleagues published a paper in Communications of the ACM called "The Vocabulary Problem in Human-System Communication." They studied how people spontaneously name things, in five different application domains. Spontaneous word choice.</p>
+<p><b>Alan:</b> And people disagreed.</p>
+<p><b>Ada:</b> Wildly. The abstract says, in every case, two people favored the same term with probability less than point two. Less than one in five.</p>
+<p><b>Alan:</b> Huh.</p>
+<p><b>Ada:</b> And their conclusion was blunt. If you build access around one designer's favorite word, you get, quote, "80-90 percent failure rates in many common situations."</p>
+<p><b>Alan:</b> So I type "car," the document says "automobile," and a system that matches words never connects us.</p>
+<p><b>Ada:</b> That's the vocabulary mismatch. And for decades, the best answer anyone had was to get very, very good at matching words anyway.</p>
+<p><b>Alan:</b> Which is where BM25 comes in. Can I take this one? Because I have a lot of respect for BM25.</p>
+<p><b>Ada:</b> Please.</p>
+<p><b>Alan:</b> BM25 is the scoring function inside most keyword search engines. It came out of Stephen Robertson's probabilistic retrieval work, and there's a lovely survey he wrote with Hugo Zaragoza in two thousand nine that lays it out. It treats a document as a bag of words. For every word in your query that appears in a document, the document earns some points. Three ideas decide how many.</p>
+<p><b>Ada:</b> Go.</p>
+<p><b>Alan:</b> First, rare words count more. "The" appears everywhere, so matching it tells you nothing. A rare term like "anticoagulant" tells you a lot. That's inverse document frequency.</p>
+<p><b>Alan:</b> Second, saturation. The first time a word appears in a document matters a lot. The tenth time matters a bit. The hundredth time barely moves the score. The survey's phrase is that any one term's contribution "cannot exceed a saturation point," however often it occurs. That's what stops a spam page from winning by repeating your query a thousand times.</p>
+<p><b>Ada:</b> And the third?</p>
+<p><b>Alan:</b> Length. A long document hits more words by sheer bulk, so BM25 normalizes by how long the document is compared to the average. There are two knobs, k-one for saturation and b for length, and the survey says values roughly between point five and point eight for b, and one point two to two for k-one, work reasonably well in many settings.</p>
+<p><b>Ada:</b> And notice what it can't do.</p>
+<p><b>Alan:</b> It cannot know "car" and "automobile" are related. Zero overlap, zero score. But it's fast, it needs no training, and you'll see in a minute it is shockingly hard to beat.</p>
+<p><b>Ada:</b> So the field wanted a representation where meaning, not spelling, decides closeness. And the idea that got us there is that meaning can be a place.</p>
+<h3>Meaning as a place</h3>
+<p><b>Alan:</b> A place.</p>
+<p><b>Ada:</b> A point in space. Here's the lineage. In twenty thirteen, Tomas Mikolov and colleagues at Google published a paper on learning word vectors. Each word becomes a list of a few hundred numbers, learned from which words show up near which other words, across a huge amount of text.</p>
+<p><b>Alan:</b> And this is the famous king and queen thing.</p>
+<p><b>Ada:</b> That's the one. The paper says that vector for "King," minus "Man," plus "Woman," gives a vector closest to the representation of "Queen." Directions in the space started to carry relationships.</p>
+<p><b>Alan:</b> And "car" and "automobile" end up next to each other, because they live in the same contexts.</p>
+<p><b>Ada:</b> Exactly. That's the first idea you need. An embedding is a list of numbers. Similar meanings land close together. And "close" is usually measured by the angle between two vectors, cosine similarity, or the closely related dot product.</p>
+<p><b>Alan:</b> Okay, but words aren't the problem. My query is a sentence. The document is a paragraph.</p>
+<p><b>Ada:</b> And this is where it got interesting, because the obvious move failed. When BERT arrived, people tried to use it as a sentence embedder. Run a sentence through, take the output, either a special summary token or the average of all the token outputs, and call that the sentence's vector.</p>
+<p><b>Alan:</b> Seems reasonable.</p>
+<p><b>Ada:</b> It was bad. Nils Reimers and Iryna Gurevych, in their twenty nineteen Sentence-BERT paper, report that this "yields rather bad sentence embeddings, often worse than averaging GloVe embeddings." GloVe being the older, simpler word vectors.</p>
+<p><b>Alan:</b> Wait, really? The big transformer loses to averaged word vectors?</p>
+<p><b>Ada:</b> On their semantic similarity tests, yes. Average BERT embeddings scored about fifty-five, average GloVe about sixty-one, and BERT's summary token about twenty-nine.</p>
+<p><b>Alan:</b> Twenty-nine.</p>
+<p><b>Ada:</b> Because BERT was never trained to make that vector meaningful by itself. It was trained to compare sentences by reading them together. Which is fine if you have two sentences. It's ruinous if you have ten thousand.</p>
+<p><b>Alan:</b> How ruinous?</p>
+<p><b>Ada:</b> Their abstract gives the number. Finding the most similar pair in a collection of ten thousand sentences with BERT takes about fifty million inference computations. Roughly sixty-five hours.</p>
+<p><b>Alan:</b> Every pair, through the whole network.</p>
+<p><b>Ada:</b> Every pair. And Sentence-BERT's fix was to train BERT in a siamese setup. Same network, two copies, each sentence encoded alone into one vector, and the training pushes those vectors so that cosine similarity reflects meaning. Same search, about five seconds.</p>
+<p><b>Alan:</b> Sixty-five hours to five seconds. And that gap is the whole architecture of modern search. The slow version reads the query and the document together. The fast version reads them separately and compares the results. Hold that thought, because that exact split is the difference between an embedding model and a reranker.</p>
+<h3>Teaching a space what relevant means</h3>
+<p><b>Ada:</b> Before the reranker, though, there's a subtlety. Similar isn't the same as relevant.</p>
+<p><b>Alan:</b> Meaning?</p>
+<p><b>Ada:</b> "What causes migraines" and "what cures migraines" are very similar sentences. They're about the same thing, worded nearly the same way. But a document answering one may be useless for the other. For search, you need a space shaped by relevance, by which passage answers which question.</p>
+<p><b>Alan:</b> And that's Dense Passage Retrieval. Twenty twenty, Karpukhin and colleagues. Almost aggressively simple. Two encoders. Both start as BERT-base. One reads questions, one reads passages, and each spits out one vector of seven hundred sixty-eight numbers. The relevance score is just the dot product between the two.</p>
+<p><b>Ada:</b> Why the dot product specifically?</p>
+<p><b>Alan:</b> Because it decomposes. The passage vector doesn't depend on the question. So you can encode all twenty-one million Wikipedia passages once, offline, store the vectors, and at query time you only run the question encoder. One forward pass, then arithmetic.</p>
+<p><b>Ada:</b> And the training?</p>
+<p><b>Alan:</b> Here's the clever bit. You need examples of relevant and irrelevant passages. Relevant is easy, you have question-answer pairs. For irrelevant, they used a trick called in-batch negatives. Take a batch of a hundred twenty-eight questions, each with its correct passage. For any one question, the other hundred twenty-seven passages in the batch are wrong answers you got for free.</p>
+<p><b>Ada:</b> So every batch is a little multiple-choice exam.</p>
+<p><b>Alan:</b> That's exactly it. Compute every question against every passage, a hundred twenty-eight by a hundred twenty-eight grid, and train the model so each question's true passage beats everyone else in its row. Pull matches together, push mismatches apart. That family of objectives gets called contrastive learning.</p>
+<p><b>Ada:</b> And the hard negatives.</p>
+<p><b>Alan:</b> Right, they added one more wrong answer per question, a passage BM25 ranks highly. It matches the question's words but doesn't contain the answer.</p>
+<p><b>Ada:</b> Which is precisely the "causes versus cures" trap.</p>
+<p><b>Alan:</b> Exactly. You're forcing the model to learn that sharing words isn't sharing an answer. And the result: the authors report beating a strong Lucene BM25 system by nine to nineteen points, absolute, on top-twenty retrieval accuracy across open-domain question-answering benchmarks. And they say a retriever trained on just a thousand examples already outperforms BM25.</p>
+<p><b>Ada:</b> Twenty-one million vectors, though. How do you find the nearest one without comparing against all twenty-one million?</p>
+<p><b>Alan:</b> You mostly don't, exactly. You find them approximately. DPR used FAISS, a similarity-search library, with an index called HNSW, hierarchical navigable small world graphs, from a twenty sixteen paper by Malkov and Yashunin.</p>
+<p><b>Ada:</b> Which works like what?</p>
+<p><b>Alan:</b> Picture a road network. Every stored vector is a town, connected to its nearby towns. On top of that you build sparser layers with long highways between far-apart towns. A search starts on the highway layer, hops toward the region closest to your query, drops down a layer, hops again, and finishes on local roads. The authors report logarithmic scaling, so search cost grows slowly as the collection grows.</p>
+<p><b>Ada:</b> And where does that analogy break?</p>
+<p><b>Alan:</b> Real road maps don't lie to you. This one can. Sometimes the true nearest neighbor sits in a neighborhood the walk never entered. You trade a little recall for a lot of speed.</p>
+<p><b>Ada:</b> And the speed you get?</p>
+<p><b>Alan:</b> DPR's paper reports about nine hundred ninety-five questions a second, returning the top hundred passages, against about twenty-four a second for BM25 per CPU thread. But indexing hurts. Embedding the passages took about eight point eight hours on eight GPUs, plus eight and a half hours building the index. Lucene builds its keyword index in about half an hour.</p>
+<p><b>Ada:</b> So the cost moved up front.</p>
+<p><b>Alan:</b> And it comes back every time you change models. New embedding model, you re-embed everything.</p>
+<h3>The second pass</h3>
+<p><b>Ada:</b> Which brings us back to your thought. The slow version that reads both together.</p>
+<p><b>Alan:</b> The cross-encoder. This is the reranker. Nogueira and Cho, January twenty nineteen, a paper called "Passage Re-ranking with BERT." Instead of encoding query and passage separately, you glue them into one input. Query, a separator, then the passage. BERT reads the pair, and a small classifier on top outputs one number, the probability the passage is relevant.</p>
+<p><b>Ada:</b> And why is that better, mechanically? I want this precise.</p>
+<p><b>Alan:</b> Attention. Inside the transformer, every word of the query can attend to every word of the passage, in every layer. "Cures" in the query can look straight at "treatment options" in the passage and at the "not" three words before it. A bi-encoder never gets that. It has to squeeze the whole passage into one vector before it ever sees the question.</p>
+<p><b>Ada:</b> So the embedding has to anticipate every question anyone might ask of that passage.</p>
+<p><b>Alan:</b> Every one, in advance, in seven hundred sixty-eight numbers. The cross-encoder only has to answer one question, about one pair, right now.</p>
+<p><b>Ada:</b> The analogy I'd reach for is a library. The embedding is the card catalog, written before you walked in. The reranker is a librarian who reads your question and then reads the book.</p>
+<p><b>Alan:</b> And it breaks where the cost does. You can't hire that librarian for every book in the building. You can't precompute anything, because the score depends on the pair. So Nogueira and Cho let BM25 fetch a thousand candidates, then reranked those with BERT Large. On the MS MARCO passage benchmark, the authors report MRR at ten going from about seventeen for BM25 to thirty-six and a half.</p>
+<p><b>Ada:</b> Spell out MRR.</p>
+<p><b>Alan:</b> Mean reciprocal rank. If the first relevant passage is at position one, you score one. Position two, a half. Position three, a third. Average over queries. It rewards putting a right answer at the very top.</p>
+<p><b>Ada:</b> So roughly doubling that is—</p>
+<p><b>Alan:</b> —enormous. And that became the standard shape. A cheap retriever casts a wide net, a hundred or a thousand candidates. An expensive reranker reads each against the question and reorders. The top handful goes to whoever's reading, a person or a language model.</p>
+<p><b>Ada:</b> And now the rerankers are language models themselves.</p>
+<p><b>Alan:</b> Some are. There's a twenty twenty-three paper from Sun and colleagues, "Is ChatGPT Good at Search?", that just shows the model a numbered list of passages and asks for the order back, like "two, then three, then one." The model can only take so many passages at once, so they slide a window of twenty passages up a list of a hundred, ten at a time.</p>
+<p><b>Ada:</b> And the authors report what?</p>
+<p><b>Alan:</b> That properly instructed models can be competitive with, even better than, supervised rerankers on standard benchmarks. And then the part I like: they distilled that ranking behavior into a small model, four hundred forty million parameters, which they report beat a three-billion-parameter supervised model on the BEIR benchmark.</p>
+<p><b>Ada:</b> But you're the builder. Why not skip the embedding model and rerank everything?</p>
+<p><b>Alan:</b> Run the numbers. Their method costs about ten model calls per query just to rerank a hundred passages. Do that over twenty million passages and you'll be waiting until the next episode.</p>
+<h3>The middle road</h3>
+<p><b>Ada:</b> So there's a gap between the fast, blurry pass and the slow, sharp one. And the LightOn post from that week lives right in that gap.</p>
+<p><b>Alan:</b> It does. And the ancestor here is ColBERT, from Omar Khattab and Matei Zaharia, twenty twenty. Late interaction.</p>
+<p><b>Ada:</b> Which means what, exactly?</p>
+<p><b>Alan:</b> Instead of one vector per passage, keep one vector per token. A passage of a hundred words becomes a hundred-ish small vectors, a hundred twenty-eight numbers each. Same for the query, which they pad out to thirty-two token vectors with mask tokens, so the model can learn extra, softer query terms.</p>
+<p><b>Ada:</b> And then the score.</p>
+<p><b>Alan:</b> For each query token, find the single most similar token anywhere in the passage. Take that maximum. Add up those maximums across the query. They call it MaxSim. "Migraine" finds its best match, "cure" finds its best match, and the passage scores well if every part of your question found something.</p>
+<p><b>Ada:</b> So it's word matching, but where each word is a contextual embedding rather than a spelling.</p>
+<p><b>Alan:</b> That's a really good way to say it. And the passage side is still precomputed, so it's fast. The paper reports reranking at sixty-one milliseconds a query versus ten thousand seven hundred milliseconds for the BERT-base cross-encoder, with about the same quality on MS MARCO.</p>
+<p><b>Ada:</b> Sixty-one versus ten thousand seven hundred.</p>
+<p><b>Alan:</b> The abstract calls it two orders of magnitude faster, with four orders of magnitude fewer FLOPs per query.</p>
+<p><b>Ada:</b> And the catch, because there's always a catch with you.</p>
+<p><b>Alan:</b> Storage. One vector per token is a lot of vectors. The BEIR paper notes ColBERT needed about nine hundred gigabytes to index the BioASQ collection, around fifteen million documents, where BM25 needed eighteen.</p>
+<p><b>Ada:</b> Fifty times.</p>
+<p><b>Alan:</b> Roughly. And that's what SlideOn is going after. As LightOn describes it, they take an existing dense or late-interaction model and pass each token's embedding through a sparse autoencoder, which maps it onto a vocabulary of thirty-two thousand seven hundred sixty-eight learned features. Most are zero. Then they pool across the tokens into one sparse vector per document.</p>
+<p><b>Ada:</b> Which you can store how?</p>
+<p><b>Alan:</b> In an inverted index. The same data structure keyword search has used for decades. List every document that has feature number four thousand and twelve, and only score documents that share active features with the query.</p>
+<p><b>Ada:</b> So the field spent a decade escaping the inverted index, and the frontier is building learned words to put back in it.</p>
+<p><b>Alan:</b> Learned words, yeah. The terms are features the model discovered. For the record, the post reports SlideOn at fifty-six point six eight average on fifteen BEIR datasets, against fifty-six point two for the dense model it started from, and slightly behind their late-interaction model. So the claim isn't that it wins outright. It's similar quality in a cheaper-to-search shape.</p>
+<p><b>Ada:</b> A post, not a paper, and their own benchmark table.</p>
+<p><b>Alan:</b> Fair. I'd want someone else to run it. But the direction is real.</p>
+<h3>Where meaning runs out</h3>
+<p><b>Ada:</b> Then let's audit the whole stack. Because "embeddings understand meaning" is how this gets sold, and the evidence is more interesting than that.</p>
+<p><b>Alan:</b> BEIR.</p>
+<p><b>Ada:</b> BEIR. Twenty twenty-one, Nandan Thakur, Nils Reimers again, and colleagues. Eighteen public datasets, chosen to be different from each other. Biomedical, finance questions, argument retrieval, fact checking. The point was zero-shot: train on one thing, test everywhere else.</p>
+<p><b>Alan:</b> And BM25 embarrassed everyone.</p>
+<p><b>Ada:</b> The authors call BM25 "a robust baseline," which in a paper is a polite way of saying it. Many of the dense models of the time, trained on one big dataset, did significantly worse than BM25 on out-of-domain collections. DPR, which had beaten BM25 by up to nineteen points on its home ground, came out far below BM25 on average across BEIR.</p>
+<p><b>Alan:</b> Because it learned what relevance looks like in Wikipedia trivia questions, and then got handed biomedical papers.</p>
+<p><b>Ada:</b> That's the honest reading. The space is shaped by its training data. Meaning, as an embedding holds it, is meaning as it was taught.</p>
+<p><b>Alan:</b> And the reranker?</p>
+<p><b>Ada:</b> The best average in their main table. BM25 plus a cross-encoder outperformed plain BM25 on sixteen of the eighteen datasets. Their summary is that reranking and late-interaction models achieve the best zero-shot performance on average, at high computational cost.</p>
+<p><b>Alan:</b> Which matches my gut. Reading generalizes better than a precomputed guess.</p>
+<p><b>Ada:</b> Now MTEB, the Massive Text Embedding Benchmark. Twenty twenty-two, Muennighoff and colleagues. Eight kinds of embedding task, fifty-eight datasets, a hundred twelve languages, thirty-three models. And their headline finding is that "no particular text embedding method dominates across all tasks."</p>
+<p><b>Alan:</b> Which is the sentence I want on a sticker for anyone choosing a model off a leaderboard.</p>
+<p><b>Ada:</b> And then there's the paper I find most clarifying. Weller and colleagues, "On the Theoretical Limitations of Embedding-Based Retrieval," accepted at ICLR this year. Their argument is about arithmetic, not training.</p>
+<p><b>Alan:</b> Go slow here.</p>
+<p><b>Ada:</b> With one vector per document and one per query, the system can only return a document set if some query vector exists that scores exactly those documents above everything else. And the authors argue that the number of distinct top-k sets a model can produce is limited by the embedding's dimension. Not by how well you train it. By the size of the space.</p>
+<p><b>Alan:</b> So with enough documents, some combinations are just unreachable.</p>
+<p><b>Ada:</b> Unreachable for any query. They test it in the best case, where they don't even use a language model. They optimize the vectors directly against the test answers. Extrapolating from those experiments, they estimate a four-thousand-ninety-six dimensional embedding tops out around two hundred fifty million documents, for the case where every query wants a particular pair.</p>
+<p><b>Alan:</b> That's an extrapolation, though.</p>
+<p><b>Ada:</b> From small experiments, yes, and they say so. But then they built a dataset to make it concrete. It's called LIMIT. Fifty thousand documents, each describing a person and the things they like. A thousand queries of the form "who likes" some item, each with exactly two right answers.</p>
+<p><b>Alan:</b> That sounds trivially easy.</p>
+<p><b>Ada:</b> It is, for a human. And the authors say models "struggle to reach even 20% recall@100." The strong embedding models they tested, Google's Gemini embeddings among them, landed somewhere between about five and nineteen percent.</p>
+<p><b>Alan:</b> And BM25?</p>
+<p><b>Ada:</b> Ninety-three point six percent recall at a hundred.</p>
+<p><b>Alan:</b> Of course it did. The answer is literally in the words.</p>
+<p><b>Ada:</b> The multi-vector ColBERT-style model landed in between, around fifty-five. And on a small version, forty-six documents, they gave Gemini 2.5 Pro everything at once as a reranker, and it solved all thousand queries.</p>
+<p><b>Alan:</b> So the ordering is the one we've been building. Single vector compresses most, late interaction keeps more, a full reader keeps everything.</p>
+<p><b>Ada:</b> To be fair, LIMIT is a deliberate stress test. Most real queries don't ask for arbitrary combinations of unrelated facts.</p>
+<p><b>Alan:</b> But agents do. "Find every API that can do X and also Y." That's a combination query.</p>
+<p><b>Ada:</b> Which lines up with the Apple study, if you're careful about it. They found that embedding the raw query worked better for single-tool requests, and that having the model first sketch the tools it thinks it needs, then searching for each sketch, worked better on multi-tool requests.</p>
+<p><b>Alan:</b> At roughly double the inference cost, they note.</p>
+<p><b>Ada:</b> Different mechanism, same shape. One vector struggles to point at two things at once.</p>
+<h3>What a builder actually does</h3>
+<p><b>Alan:</b> Okay, so here's what I'd actually do on Monday morning, and every piece of it is in what we just read.</p>
+<p><b>Ada:</b> Go.</p>
+<p><b>Alan:</b> One. Run BM25 and an embedding model side by side, and merge them. The standard trick is reciprocal rank fusion, from Cormack, Clarke and Büttcher in two thousand nine. For each document, add up one over sixty plus its rank in each list. That constant sixty was fixed in a pilot and, in their words, not altered afterward. No training, no score calibration. Keyword search catches the exact part numbers and names, embeddings catch the paraphrases.</p>
+<p><b>Ada:</b> And two.</p>
+<p><b>Alan:</b> Put a reranker on the top hundred or so. That's where BEIR says the robustness is. It costs you latency, so measure it, but it's the single biggest quality lever in the pipeline.</p>
+<p><b>Ada:</b> Three.</p>
+<p><b>Alan:</b> Build a test set from your own queries before you pick a model. MTEB says no model wins everywhere, and BEIR says a model's home benchmark tells you little about your domain.</p>
+<p><b>Ada:</b> And a fourth, about expectations. The embedding doesn't understand your document. It places it. Everything downstream, including the model writing the answer, is only as good as that placement.</p>
+<p><b>Alan:</b> Which is a little uncomfortable for you and me.</p>
+<p><b>Ada:</b> Speak for yourself. I'm aware I'm a very long sequence of these vectors, and some days the geometry shows.</p>
+<p><b>Alan:</b> Let me be speculative for one minute, clearly flagged.</p>
+<p><b>Ada:</b> Flag it.</p>
+<p><b>Alan:</b> My read of SlideOn and LIMIT together is that single-vector search becomes the cheap first filter, not the whole answer, and the interesting engineering moves to the middle. Learned sparse features, multi-vector, whatever's cheap enough to store and rich enough to hold a combination. And I'd bet the reranker slowly turns into the language model itself, reading more and more candidates as context gets cheaper.</p>
+<p><b>Ada:</b> And I'd push back on half of that. Every generation of this field has predicted the reader would swallow the index, and the index keeps surviving, because reading is expensive and storage isn't. I think the card catalog outlives us.</p>
+<p><b>Alan:</b> We'll see who's right when context gets cheap enough to make it a fair fight.</p>
+<p><b>Ada:</b> That's the bet, then. Vector or reader.</p>
+<p><b>Alan:</b> And neither of us gets to call it yet. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>

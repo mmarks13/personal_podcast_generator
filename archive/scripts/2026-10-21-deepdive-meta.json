@@ -1,0 +1,110 @@
+{
+ "date": "2026-10-21",
+ "kind": "deepdive",
+ "title": "Text embeddings and rerankers: how search finds meaning in two passes",
+ "summary": "How search finds documents that mean what you meant: from BM25 and the vocabulary problem, through sentence embeddings and contrastive dense retrieval, to cross-encoder and LLM rerankers, late interaction, and the measured limits of single-vector embeddings.",
+ "sources": [
+  {
+   "group": "Primary sources",
+   "title": "Reimers & Gurevych — Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks (2019)",
+   "url": "https://arxiv.org/abs/1908.10084"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Karpukhin et al. — Dense Passage Retrieval for Open-Domain Question Answering (2020)",
+   "url": "https://arxiv.org/abs/2004.04906"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Nogueira & Cho — Passage Re-ranking with BERT (2019)",
+   "url": "https://arxiv.org/abs/1901.04085"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Khattab & Zaharia — ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT (2020)",
+   "url": "https://arxiv.org/abs/2004.12832"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Thakur et al. — BEIR: A Heterogenous Benchmark for Zero-shot Evaluation of Information Retrieval Models (2021)",
+   "url": "https://arxiv.org/abs/2104.08663"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Weller et al. — On the Theoretical Limitations of Embedding-Based Retrieval (ICLR 2026)",
+   "url": "https://arxiv.org/abs/2508.21038"
+  },
+  {
+   "group": "Primary sources",
+   "title": "LightOn — SlideOn & mSlideOn: Sparsified Late-Interaction and Dense Retrievers",
+   "url": "https://huggingface.co/blog/lightonai/slideon-mslideon"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Apple — Plan or Retrieve First? A Scale Study of Tool Discovery Architectures",
+   "url": "https://machinelearning.apple.com/research/plan-retrieve-tool-discovery"
+  },
+  {
+   "group": "Further reading",
+   "title": "Robertson & Zaragoza — The Probabilistic Relevance Framework: BM25 and Beyond (2009)",
+   "url": "https://www.staff.city.ac.uk/~sbrp622/papers/foundations_bm25_review.pdf"
+  },
+  {
+   "group": "Further reading",
+   "title": "Furnas et al. — The Vocabulary Problem in Human-System Communication (1987), abstract",
+   "url": "https://honnef.co/notes/references/furnasvocabularyproblemhumansystem1987"
+  },
+  {
+   "group": "Further reading",
+   "title": "Mikolov et al. — Efficient Estimation of Word Representations in Vector Space (2013)",
+   "url": "https://arxiv.org/abs/1301.3781"
+  },
+  {
+   "group": "Further reading",
+   "title": "Malkov & Yashunin — Hierarchical Navigable Small World graphs (HNSW)",
+   "url": "https://arxiv.org/abs/1603.09320"
+  },
+  {
+   "group": "Further reading",
+   "title": "Muennighoff et al. — MTEB: Massive Text Embedding Benchmark (2022)",
+   "url": "https://arxiv.org/abs/2210.07316"
+  },
+  {
+   "group": "Further reading",
+   "title": "Sun et al. — Is ChatGPT Good at Search? Investigating Large Language Models as Re-Ranking Agents (2023)",
+   "url": "https://arxiv.org/abs/2304.09542"
+  },
+  {
+   "group": "Further reading",
+   "title": "Cormack, Clarke & Büttcher — Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods (2009)",
+   "url": "http://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf"
+  }
+ ],
+ "topics": [
+  "deep dive: text embeddings and rerankers — how search finds meaning"
+ ],
+ "entities": [
+  "BM25",
+  "Sentence-BERT",
+  "Dense Passage Retrieval",
+  "ColBERT",
+  "BEIR",
+  "MTEB",
+  "LIMIT",
+  "HNSW",
+  "RankGPT",
+  "Reciprocal Rank Fusion",
+  "LightOn",
+  "SlideOn",
+  "Apple"
+ ],
+ "threads": [],
+ "concepts_taught": [
+  "text embeddings for search: bi-encoders place query and document in one vector space so closeness (cosine or dot product) stands in for meaning; document vectors are precomputed and searched approximately (HNSW), trained contrastively with in-batch and BM25 hard negatives (DPR) because similar is not the same as relevant",
+  "rerankers as the second pass: a cross-encoder reads query and passage together so attention spans both, which is sharper but cannot be precomputed, hence retrieve-then-rerank over a top-100/1000 candidate list; LLM listwise rerankers (RankGPT) and late interaction (ColBERT's per-token MaxSim) as the expensive and middle options",
+  "the limits of single-vector retrieval: BM25 stays a robust zero-shot baseline (BEIR), no embedding model dominates all tasks (MTEB), and embedding dimension bounds which top-k document sets are reachable at all (Weller et al.'s LIMIT), so hybrid retrieval with reciprocal rank fusion plus a reranker is the practical default"
+ ],
+ "lore": [],
+ "listener_note": null,
+ "word_band": null
+}
