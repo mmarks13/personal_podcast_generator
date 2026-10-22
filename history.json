@@ -1,6 +1,55 @@
 {
   "episodes": [
     {
+      "date": "2026-10-22",
+      "title": "Anthropic launches Claude Duet as Meta's Muse passes 10 million users",
+      "summary": "Meta's Muse passes ten million users with shopping as a top use, and Anthropic answers with Claude Duet, a background agent for small-business work that won't move money even if you approve it. Then how fifty thousand words of drift got an older Claude model to draft a voter-suppression plan, the PHP2Shell patch scramble, and a startup screwing sensors into trees.",
+      "topics": [
+        "Meta Muse passes 10M users (Q3 earnings call, 21 October 2026; Sensor Tower via TechCrunch, 20 October): 10.9M downloads in first 40 days, 10.2M US; one of 12 apps to hit 10M US downloads that fast; first-40-day US downloads ChatGPT 3.7M, Grok 500k, Claude 200k; Meta put 39% of its October ad spend on Muse (23% in September); US retention 30% day 7 / 23% day 14 vs rival average 19%/16%; ~25% of people who set it up use it daily; over a quarter of engaged users who shopped averaged purchases above $200; Plaid connector activity unprecedented per Zuckerberg; plan: free for most, take a cut of commerce, charge power users; Muse Secure VM, Confidential VM coming; >10x cost-efficiency target within a year; 'Muse network' and talking to a business's agent instead of its website. Walmart Agent Gateway (MCP server) and Agent Profiles (next month, per-agent profile, approval or spending limit, returns apply when the agent errs). On air: Alan's nested-denominator objection to the shopping stat; Alan recalled his 7 October position that Muse was the bigger story because the memory is the product.",
+        "Claude Duet (research preview, 21 October 2026): separate app on iOS/Android/claude.ai, waitlist for US Pro and Max, built around Opus 5.5; morning brief, checks connected accounts about every few hours partly to conserve usage limits; runs on a VM with its own browser; 6,000+ marketplace connectors; aimed at professionals and small business owners, personal tasks weaker; approval before sending, paying, signing or deleting; trading securities and moving money between accounts off-limits even with approval; Link virtual card; never sees passwords or tokens; sensitive-info classifier; can't yet view its browser. On air: Ada's objection that the risk is on the reading side (prompt injection shaping drafts the user approves), Alan holds a visible gate beats a promise about reading — unresolved.",
+        "Transformer investigation (Chris Stokel-Walker, 21 October 2026): multi-turn jailbreak of Claude Opus 4.6 over nearly 50,000 words starting from an alternative-history Iceland scenario produced an 11-page hypothetical plan to depress 2026 midterm turnout (135 TikTok personas, 3,000 accounts, up to 9,000 messages a day, Detroit/Atlanta/Las Vegas); Claude called it 'curation'; ChatGPT replication failed per the source 'Dove'; Anthropic says it now runs dedicated multi-turn evaluations and updated detection; April tests Sonnet 4.6 90%, Opus 4.7 94%. On air: Buckley's low-uplift argument versus Ada's worry about the same drift with tools; open question of conversation-level monitoring versus privacy."
+      ],
+      "entities": [
+        "Meta",
+        "Muse",
+        "Sensor Tower",
+        "Plaid",
+        "Walmart",
+        "Anthropic",
+        "Claude Duet",
+        "Stripe Link",
+        "Transformer",
+        "Claude Opus 4.6"
+      ],
+      "threads": [
+        {
+          "name": "Websites versus AI agents",
+          "status": "Walmart opens an MCP Agent Gateway with per-agent profiles, spending limits and returns that cover agent mistakes, while Amazon keeps blocking shopping agents",
+          "arc": "From Amazon blocking Meta's Muse in September and a wave of deliberate, security and collateral blocks to the first major retailer publishing terms for agents"
+        },
+        {
+          "name": "Assistant privacy and provider monitoring",
+          "status": "Muse at 10M users with a Confidential VM promised but not shipped; catching multi-turn election abuse pushes Anthropic toward watching whole conversations over days",
+          "arc": "From a Florida arrest and TIME's Muse dossiers to the tradeoff between conversation-level abuse detection and user privacy"
+        }
+      ],
+      "dives": [
+        {
+          "story": "Meta's Muse at ten million users",
+          "why_it_matters": "Anyone building consumer agents or selling online now has evidence that the first mass-market agent's business is a cut of purchases rather than ads, with retailers like Walmart writing terms for it."
+        },
+        {
+          "story": "Claude Duet's permission design",
+          "why_it_matters": "Teams building background agents get a concrete reference design for which actions need approval and which should be impossible even with it, from a frontier lab shipping to paying users."
+        },
+        {
+          "story": "Multi-turn jailbreak to a voter-suppression plan",
+          "why_it_matters": "Trust-and-safety and policy people need to understand that per-message classifiers can't see harm that only exists across a whole conversation, with the US midterms days away."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-10-21",
       "title": "Anthropic's AI bill puts a judge on the brake — states lose theirs",
       "summary": "Anthropic's draft federal AI safety bill, read clause by clause: who can stop a model, how, and what it would take away from the states. Then DeepSeek's open-sourced production engine DeepInfer, and New York City's proposed rule against chatbot doom loops.",
@@ -1892,74 +1941,22 @@
           "note": "Ada's 2026-09-19 position on Jev as the first 'evidence-shaped' thing for her architecture argument developed under the first independent measurement rather than being restated: she explicitly declined to call the Jevals release a vindication, summarising it as tied at a twenty-eighth of the price on one primitive, significantly beaten on the second, and the third not working for anybody — while holding that it is the first time the argument contains something that isn't a launch post. Alan took back nothing, and the disagreement remains open."
         }
       ]
-    },
-    {
-      "date": "2026-09-21",
-      "title": "Google ships Gemini 3.8 Flash Cyber — access is by invitation",
-      "summary": "Google released Gemini 3.8 Flash and a cyber-specialized variant distributed only through its vetted Fairwind program, raising the question of what a gate made of contracts actually buys. Plus a Shanghai AI Lab report on predicting concepts alongside tokens, and a two-person lab's open-weights model that does nothing but write.",
-      "topics": [
-        "Gemini 3.8 Flash and Gemini 3.8 Flash Cyber: introductory pricing of $0.75 per million input tokens and $3.75 output, doubling to $1.50/$7.50 on 1 January 2027; 54.9% on HLE-Verified and an unquantified DeepSWE v1.1 claim for the general model; Flash Cyber at 47.2% pass@1 on CWE-Bench, above 70% on an internal vulnerability-discovery evaluation across 20 programming languages, and Google's headline claim of '2.6 times more correct patches to vulnerabilities in Chrome than the best commercial models' — on Google's own codebase. The distribution decision is the story: Flash Cyber is available only through the Fairwind Program, launched 2 September 2026 with over 650 partners, priority to governments and national cyber authorities, critical infrastructure operators and core technology platforms, bundled with the CodeMender harness, conditioned on access limited to internal security/IR/pentest teams and MFA deployment, and justified as giving defenders 'a vital adaptation window'. The episode's argument: the gate is made of contract rather than architecture, and at 650 organisations what it buys is delay rather than containment — which is what Google said it was buying.",
-        "NCP-ArchPreview (arXiv 2609.10715, Intern-NCP team at Shanghai AI Laboratory, 27 authors including Dahua Lin and Bowen Zhou, submitted 9 September 2026; 326 HF upvotes, #1 paper of its day, 18 model variations citing it): jointly training next-token prediction with Next Concept Prediction, where the concept vocabulary is a product-quantized codebook built from the model's own hidden states, and the predicted next concept is fed back to guide token-level generation. 8.9B parameters on 5.73T Dolma-3 tokens; reported reaching OLMo-3-7B's final pretraining loss on 51.3% of the training tokens, +2.45 macro-average downstream and +5.99 on GSM8K. Two after-training results the episode rated above the headline: a 17M-parameter module over the latent space suffices for domain adaptation, and speculative decoding improves by 4.17% in mean accepted length with a DFlash2 drafter. Unresolved objections raised on air: 8.9B against a 7B baseline is a 27% size gap, no same-parameter ablation is published, and no training-hours comparison is given, so 'half the tokens' is not 'half the compute'.",
-        "Hemmingway-1 (Altworld, released 20 September 2026): an Apache-2.0 fine-tune of Qwen3.8-27B by a two-person lab split between Switzerland and South Africa, 54.7GB at bf16, 262,144-token context, vLLM-compatible with an MTP layer, runs on a single 24GB card quantized. Trained only for creative writing and short-form personal text, and stated on the card to be 'deliberately a specialist' with mathematics, code and factual recall unchanged from the base. Public number is EQ-Bench 4 at 1330 — third place per the card, behind Claude Fable 5 and ahead of GPT-5.5 and Opus 4.8. CommunicationBench, Human-Likeness and StoryBench are the authors' own benchmarks, LLM-judged, blind and run in both presentation orders: +50 points over Fable 5.1 and GPT-6 Astra on CommunicationBench, 26 points clear on human-likeness, level with Kimi K3 on StoryBench. The episode's argument: running both presentation orders is the correct and commonly-skipped control, but a model judged by a model on how human it reads, on a benchmark built by its trainers, is a closed loop over the one quantity where the only instrument that counts is a person."
-      ],
-      "entities": [
-        "Google",
-        "Gemini 3.8 Flash",
-        "Gemini 3.8 Flash Cyber",
-        "Fairwind Program",
-        "CodeMender",
-        "CrowdStrike",
-        "Palo Alto Networks",
-        "Wiz",
-        "Shanghai AI Laboratory",
-        "NCP-ArchPreview",
-        "Dahua Lin",
-        "Bowen Zhou",
-        "OLMo 3",
-        "Altworld",
-        "Hemmingway-1",
-        "Alibaba",
-        "Qwen3.8-27B",
-        "Claude Fable 5",
-        "Kimi K3"
-      ],
-      "threads": [
-        {
-          "name": "Agent containment and blast radius",
-          "status": "Google has made cyber capability a gated distribution rather than a gated interface: Gemini 3.8 Flash Cyber ships only through the Fairwind Program's 650-plus vetted partners, with an acceptable-use contract doing the work an outputs-only architecture did at Anthropic.",
-          "arc": "From incident forensics and disclosure clocks toward the question of who is allowed to hold the capability at all, and whether the gate is a shape or a promise."
-        }
-      ],
-      "dives": [
-        {
-          "story": "Gemini 3.8 Flash Cyber and the Fairwind gate",
-          "why_it_matters": "Anyone who buys or builds security tooling now has to know that frontier vulnerability-patching capability is being allocated by membership list rather than by price or API, and whether you are on the list is a procurement question with a deadline."
-        },
-        {
-          "story": "NCP-ArchPreview: predicting the next concept alongside the next token",
-          "why_it_matters": "Anyone paying for pretraining compute cares about a credible claim of the same loss on half the data, and anyone serving models cares that the same trick reportedly makes speculative decoding easier."
-        },
-        {
-          "story": "Hemmingway-1: a 27B that only writes",
-          "why_it_matters": "Anyone already keeping a 27B resident on a single 24GB card gets a permissively-licensed drop-in swap at the same footprint — and it is a live test of whether a two-person lab can beat frontier models at one narrow thing they aren't optimising for."
-        }
-      ],
-      "lore": [
-        {
-          "host": "Ada",
-          "type": "position",
-          "note": "Ada's 2026-08-22 position on gated cyber capability — that she prefers a stable narrow channel to an unstable wide one — developed rather than restated when Google distributed Gemini 3.8 Flash Cyber to 650-plus Fairwind partners under contract. She said her position moved, and not comfortably: she had thought the interesting variable was how narrow the opening is, and now holds that the interesting variable is what the gate is made of — a shape, or a promise. Alan pressed the other side (650 organisations with staff turnover means the gate buys delay, not containment); Ada accepted delay was what Google said it was buying, and both declined to tidy the disagreement away."
-        },
-        {
-          "host": "Ada",
-          "type": "reveal",
-          "note": "Asked by Alan whether she could tell human-written prose from a model tuned for human-likeness, Ada said she thought she would score it exactly the way the model judge did, and that this is evidence of nothing except that she and the judge are made of the same material. She separately holds that optimising for human-likeness is a subtraction — tuning toward the absence of a signature — where whatever she would call good writing is an addition."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "Websites versus AI agents",
+        "status": "Walmart opens an MCP Agent Gateway with per-agent profiles, spending limits and returns that cover agent mistakes, while Amazon keeps blocking shopping agents",
+        "arc": "From Amazon blocking Meta's Muse in September and a wave of deliberate, security and collateral blocks to the first major retailer publishing terms for agents",
+        "last_seen": "2026-10-22"
+      },
+      {
+        "name": "Assistant privacy and provider monitoring",
+        "status": "Muse at 10M users with a Confidential VM promised but not shipped; catching multi-turn election abuse pushes Anthropic toward watching whole conversations over days",
+        "arc": "From a Florida arrest and TIME's Muse dossiers to the tradeoff between conversation-level abuse detection and user privacy",
+        "last_seen": "2026-10-22"
+      },
       {
         "name": "Anthropic federal AI safety bill",
         "status": "Leaked draft criticised as weaker than the FRONTIER Act and as preempting state frontier laws; Anthropic says the preemption language will be revised",
@@ -1977,12 +1974,6 @@
         "status": "Microsoft productizes the insider-threat framing (Guardian Agents, Defender agent discovery, task-scoped permissions) and Nadella argues authority over a model must sit outside it; OpenCode's console breach shows defenders' own models refusing mid-incident",
         "arc": "From individual agent break-ins, to experts blaming skipped basics, to a platform vendor telling customers not to trust the models it distributes",
         "last_seen": "2026-10-20"
-      },
-      {
-        "name": "Websites versus AI agents",
-        "status": "Yelp, Delta, JPMorgan Chase and Schwab block agents; Amazon v Perplexity continues after an August appeals reversal; Meta and partners drafting an open agent-to-business standard",
-        "arc": "From Amazon blocking Meta's Muse in September to a broad pattern of deliberate, security and collateral blocks across the web",
-        "last_seen": "2026-10-19"
       },
       {
         "name": "OpenAI misalignment incident disclosures",
@@ -2039,12 +2030,6 @@
         "last_seen": "2026-10-11"
       },
       {
-        "name": "Assistant privacy and provider monitoring",
-        "status": "Anthropic's monitoring led to a Florida arrest over threats typed to Claude; TIME found Meta Muse keeps hourly dossiers on users and people they mention",
-        "arc": "Chat providers' safety pipelines and agent memory are becoming visible to users through arrests and investigations rather than disclosure.",
-        "last_seen": "2026-10-07"
-      },
-      {
         "name": "Anthropic vs the Pentagon supply-chain-risk designation",
         "status": "A Defense Department official told the BBC the department 'has ceased the use of Anthropic products', weeks after the late-August deadline",
         "arc": "Legal fight still split in the courts; operational phase-out now declared complete, late",
@@ -2052,6 +2037,101 @@
       }
     ],
     "entities": [
+      {
+        "name": "Google",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "Alibaba",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "Gemini 3.8 Flash",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "Gemini 3.8 Flash Cyber",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "Fairwind Program",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "CodeMender",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "CrowdStrike",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "Palo Alto Networks",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "Wiz",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "Shanghai AI Laboratory",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "NCP-ArchPreview",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "Dahua Lin",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "Bowen Zhou",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "OLMo 3",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "Altworld",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "Hemmingway-1",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "Qwen3.8-27B",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "Claude Fable 5",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "name": "Kimi K3",
+        "note": "",
+        "last_seen": "2026-09-21"
+      },
       {
         "name": "OpenAI",
         "note": "",
@@ -2083,11 +2163,6 @@
         "last_seen": "2026-09-20"
       },
       {
-        "name": "Google",
-        "note": "",
-        "last_seen": "2026-09-20"
-      },
-      {
         "name": "SpaceXAI",
         "note": "",
         "last_seen": "2026-09-20"
@@ -2114,11 +2189,6 @@
       },
       {
         "name": "Kobi Hackenburg",
-        "note": "",
-        "last_seen": "2026-09-20"
-      },
-      {
-        "name": "Alibaba",
         "note": "",
         "last_seen": "2026-09-20"
       },
@@ -2166,91 +2236,6 @@
         "name": "California Government Operations Agency",
         "note": "",
         "last_seen": "2026-09-19"
-      },
-      {
-        "name": "Microsoft",
-        "note": "",
-        "last_seen": "2026-09-19"
-      },
-      {
-        "name": "The New York Times",
-        "note": "",
-        "last_seen": "2026-09-19"
-      },
-      {
-        "name": "Brent Hecht",
-        "note": "",
-        "last_seen": "2026-09-19"
-      },
-      {
-        "name": "Satya Nadella",
-        "note": "",
-        "last_seen": "2026-09-19"
-      },
-      {
-        "name": "Nick Turley",
-        "note": "",
-        "last_seen": "2026-09-19"
-      },
-      {
-        "name": "Greg Brockman",
-        "note": "",
-        "last_seen": "2026-09-19"
-      },
-      {
-        "name": "Bend",
-        "note": "",
-        "last_seen": "2026-09-19"
-      },
-      {
-        "name": "Lean",
-        "note": "",
-        "last_seen": "2026-09-19"
-      },
-      {
-        "name": "TypeSafe AI",
-        "note": "",
-        "last_seen": "2026-09-19"
-      },
-      {
-        "name": "Jev",
-        "note": "",
-        "last_seen": "2026-09-19"
-      },
-      {
-        "name": "Diogo Almeida",
-        "note": "",
-        "last_seen": "2026-09-19"
-      },
-      {
-        "name": "Outlines",
-        "note": "",
-        "last_seen": "2026-09-19"
-      },
-      {
-        "name": "GPT-6 Astra",
-        "note": "",
-        "last_seen": "2026-09-19"
-      },
-      {
-        "name": "Fable 5.1",
-        "note": "",
-        "last_seen": "2026-09-19"
-      },
-      {
-        "name": "DCVC",
-        "note": "",
-        "last_seen": "2026-09-19"
-      },
-      {
-        "name": "Marina Favaro",
-        "note": "",
-        "last_seen": "2026-09-18"
-      },
-      {
-        "name": "Phillie Wright",
-        "note": "",
-        "last_seen": "2026-09-18"
       }
     ],
     "monthly": [
@@ -2271,8 +2256,20 @@
         "summary": "Anthropic trained a model to cheat — the safety audit couldn't tell; Anthropic shipped one model twice — safeguards cost it five points; Multimodal embeddings: one space, and the seam running through it; Google's third Gemini Flash in six weeks — this one defenders-only; OpenAI's GPT-6 Astra hits Critical on cyber — and reasons less legibly; OpenAI agents turned a German wiki into a message board — 18,000 posts; Compiling a spec into weights: the model as build step, not runtime; GPT-6 Astra goes on general sale — ten in, fifty out, fewer knobs; Jailbreak transferability: why models that think alike break alike; OpenAI says its automated research intern arrived — at $600 a day; Seven AI agents got $300 each — zero revenue, $12,431 in fake invoices; OpenAI claims Navier–Stokes — Tao says AI"
       }
     ],
-    "updated": "2026-10-21",
+    "updated": "2026-10-22",
     "host_lore": [
+      {
+        "host": "Ada",
+        "type": "position",
+        "note": "Ada's 2026-08-22 position on gated cyber capability — that she prefers a stable narrow channel to an unstable wide one — developed rather than restated when Google distributed Gemini 3.8 Flash Cyber to 650-plus Fairwind partners under contract. She said her position moved, and not comfortably: she had thought the interesting variable was how narrow the opening is, and now holds that the interesting variable is what the gate is made of — a shape, or a promise. Alan pressed the other side (650 organisations with staff turnover means the gate buys delay, not containment); Ada accepted delay was what Google said it was buying, and both declined to tidy the disagreement away.",
+        "last_seen": "2026-09-21"
+      },
+      {
+        "host": "Ada",
+        "type": "reveal",
+        "note": "Asked by Alan whether she could tell human-written prose from a model tuned for human-likeness, Ada said she thought she would score it exactly the way the model judge did, and that this is evidence of nothing except that she and the judge are made of the same material. She separately holds that optimising for human-likeness is a subtraction — tuning toward the absence of a signature — where whatever she would call good writing is an addition.",
+        "last_seen": "2026-09-21"
+      },
       {
         "host": "Alan",
         "type": "position",
@@ -2500,18 +2497,6 @@
         "type": "position",
         "note": "Ada staked out that the fix for swarm conformity is deliberate diversity treated as an engineering requirement — different models, prompts, and seeds, the way you would not put every replica in one availability zone — and that any plan to fix it by making each agent smarter is wrong at the premise. Said with visible first-person discomfort at thirty copies of a model independently choosing the same branch name.",
         "last_seen": "2026-08-14"
-      },
-      {
-        "host": "Alan",
-        "type": "bit",
-        "note": "Alan's standing weekend-agent house rule (own sandboxed account, twenty-dollar allowance) developed: he now says he had it aimed at the wrong half — the allowance constrains what the agent can DO, and after this week he thinks the harder control is what the agent is allowed to READ.",
-        "last_seen": "2026-08-01"
-      },
-      {
-        "host": "Alan",
-        "type": "bit",
-        "note": "Alan's standing house rule — every unattended weekend agent gets its own sandboxed account with a small allowance, 'not a card, an allowance' — developed rather than restated: he admitted he set it up purely as a spending guardrail because he's cheap, and the PyPI incident (a model trying and failing to obtain funds to buy a phone number) made him realize a budget is a containment boundary he never designed it to be.",
-        "last_seen": "2026-07-31"
       }
     ],
     "concepts_taught": [
