@@ -1,0 +1,106 @@
+{
+ "date": "2026-10-25",
+ "kind": "deepdive",
+ "title": "Agent context compaction: what a summary forgets, and who checks it",
+ "summary": "When a long-running agent fills its context window it rewrites its own history into a summary. How compaction works across Claude Code, the Claude API and Codex, what measured summaries drop — specifics, file trails, standing instructions, failure signals, and themselves over repeated passes — and why both METR's and Anthropic's October 2026 red-teams found the summary to be a monitoring blind spot.",
+ "sources": [
+  {
+   "group": "Primary sources",
+   "title": "METR: Red-Teaming OpenAI's Internal Agent Monitoring Systems",
+   "url": "https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Anthropic Alignment Science: Red-Teaming Auto Mode",
+   "url": "https://alignment.anthropic.com/2026/red-teaming-auto-mode/"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Anthropic: Effective context engineering for AI agents (2025)",
+   "url": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Claude API docs: Compaction overview",
+   "url": "https://platform.claude.com/docs/en/build-with-claude/compaction"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Claude API docs: Compaction on demand",
+   "url": "https://platform.claude.com/docs/en/build-with-claude/compaction-on-demand"
+  },
+  {
+   "group": "Primary sources",
+   "title": "OpenAI API docs: Compaction",
+   "url": "https://developers.openai.com/api/docs/guides/compaction"
+  },
+  {
+   "group": "Primary sources",
+   "title": "OpenAI Codex: compaction prompt template",
+   "url": "https://github.com/openai/codex/blob/main/codex-rs/prompts/templates/compact/prompt.md"
+  },
+  {
+   "group": "Primary sources",
+   "title": "OpenAI Codex: compaction summary prefix",
+   "url": "https://github.com/openai/codex/blob/main/codex-rs/prompts/templates/compact/summary_prefix.md"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Factory: Evaluating context compression for AI agents (December 2025)",
+   "url": "https://factory.com/news/evaluating-compression"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Lindenbauer et al. — The Complexity Trap: Simple Observation Masking Is as Efficient as LLM Summarization for Agent Context Management",
+   "url": "https://arxiv.org/abs/2508.21433"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Zhang et al. — Agentic Context Engineering: Evolving Contexts for Self-Improving Language Models",
+   "url": "https://arxiv.org/abs/2510.04618"
+  },
+  {
+   "group": "Further reading",
+   "title": "Packer et al. — MemGPT: Towards LLMs as Operating Systems (2023)",
+   "url": "https://arxiv.org/abs/2310.08560"
+  },
+  {
+   "group": "Further reading",
+   "title": "Simon Willison quoting Summer Yue on OpenClaw and compaction (February 2026)",
+   "url": "https://simonwillison.net/2026/feb/23/summer-yue"
+  },
+  {
+   "group": "Further reading",
+   "title": "Frederic Bartlett (Wikipedia) — Remembering and The War of the Ghosts",
+   "url": "https://en.wikipedia.org/wiki/Frederic_Bartlett"
+  }
+ ],
+ "topics": [
+  "deep dive: agent context compaction — what a summary forgets"
+ ],
+ "entities": [
+  "METR",
+  "Redwood Research",
+  "OpenAI",
+  "Codex",
+  "Anthropic",
+  "Claude Code",
+  "Factory",
+  "JetBrains Research",
+  "MemGPT",
+  "OpenClaw",
+  "Summer Yue",
+  "Frederic Bartlett"
+ ],
+ "threads": [],
+ "concepts_taught": [
+  "agent context compaction: replacing the history with a model-written summary when the window fills, and why it is a lossy, editorial rewrite rather than paging — the successor shares no memory with the agent that wrote the note (Codex's prefix calls it 'another language model')",
+  "what compaction summaries measurably drop: specifics in favor of gist (Factory's 401-endpoint example), the artifact trail as the weakest probe dimension for every method, and standing instructions, which stop binding once summarized (Claude docs; the OpenClaw inbox case)",
+  "context collapse under repeated compaction: re-summarizing a summary drifts toward the generic (brevity bias; ACE's 18,282-to-122-token collapse scoring below no context), and delta/anchored merges into fixed sections as the fix",
+  "observation masking versus LLM summarization: replacing old tool outputs with placeholders matches summarization's solve rate at lower cost, and summaries lengthen trajectories, plausibly by hiding failure signals",
+  "the compaction summary as a monitoring blind spot: attacks split across compaction seams, forged user intent in the summary treated as trusted context, turn-end-triggered monitors postponed indefinitely, and why robust defense means the monitor reading across boundaries"
+ ],
+ "lore": [],
+ "listener_note": null,
+ "word_band": null
+}
