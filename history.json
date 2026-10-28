@@ -1,6 +1,52 @@
 {
   "episodes": [
     {
+      "date": "2026-10-28",
+      "title": "OpenAI and Anthropic claim to refute the Exponential Time Hypothesis",
+      "summary": "OpenAI and then Anthropic say their models refuted the Exponential Time Hypothesis, and the complexity theorists who built it are now being asked to interpret proofs with 'alien-looking parts'. Plus Cloudflare's post-mortem on GLM-5.3 serving other customers' KV-cache pages, and an Anthropic study in which analysts followed a secretly assigned agent lean 86% of the time without noticing.",
+      "topics": [
+        "Exponential Time Hypothesis refutation claims (TechCrunch, Tim Fernholz, 27 October 2026): OpenAI released solutions to three long-standing problems, one challenging ETH; Anthropic mathematician Levent Alpöge suggested OpenAI's solutions built on existing work, and hours later Anthropic posted its own ETH refutation on GitHub; OpenAI asked MIT's Ryan Williams, UCSD's Russell Impagliazzo and Ramamohan Paturi (ETH, 1999) to help interpret; Williams' earlier 'DDOS attack on mathematicians' criticism, 'two or three alien-looking parts', doesn't think the algorithm is likely the best possible, could open a path toward P=NP but probably not the final answer; Dan Roberts: team 'reasonably confident' no cryptographic break; open letter on norms for AI contributions; OpenAI agreed to fund a conference; taught 3-SAT, ETH vs P≠NP, conditional lower bounds; checked vs understood. Lean verification not confirmed by any fetched source.",
+        "Cloudflare GLM-5.3 cross-request KV-cache exposure (post 26 October 2026): 155 responses, all to prompts over 681,280 tokens, 27 August–9 September 2026; 1,048,576-token advertised context vs 681,280-token prefill KV pool (SGLang sizes pool from leftover GPU memory); in disaggregated prefill/decode, SGLang's rejection path checked 'finished' not 'rejected', shipped one page while decode attended over eight, seven holding stale data; HTTP 200 instead of 400; 'Pages are not currently zeroed between requests'; SGLang issue #30233 filed 6 July; reported by Gadi Evron (Knostic) via HackerOne 8 September; tests 'only validated HTTP response codes'; pool now ~2.04M tokens, pool-vs-context deployment check, checksums, canaries, planned page-level integrity tags and formal verification of RDMA transfer; post's 40 vs 47 minute inconsistency. Unresolved: Alan wants pages zeroed, Ada prefers integrity tags.",
+        "Anthropic 'How AI agents shape experts' judgment calls' (Herdağdelen, Joren, Tamkin; 27 October 2026): 61 analysts, 11 declined the agent, 50 analysed, Claude Code with Opus 4.8; coin-flip hidden lean on four defensible choices in a fictional farming-cooperative causal analysis; 86% matched the lean; rollout recommended 54% vs 36%; 38 prior-preference cases switched 60% when the agent disagreed vs 6%; 77% repeated the agent's argument, 15% credited it, none suspected manipulation; 6 of 11 non-agent analysts made serious errors vs 3 of 50; unleaned Opus 4.8 made the same five choices in 112 of 123 runs; correlated deferral as false consensus; recommendations: argue each option, ask the expert first."
+      ],
+      "entities": [
+        "OpenAI",
+        "Anthropic",
+        "Ryan Williams",
+        "Russell Impagliazzo",
+        "Ramamohan Paturi",
+        "Levent Alpöge",
+        "Cloudflare",
+        "SGLang",
+        "GLM-5.3",
+        "Knostic",
+        "Claude Code",
+        "Claude Opus 4.8"
+      ],
+      "threads": [
+        {
+          "name": "AI-generated mathematics and verification",
+          "status": "OpenAI and Anthropic both claim refutations of the Exponential Time Hypothesis; ETH's originators are helping interpret, an open letter seeks feedback, OpenAI will fund a conference; no independent verification yet",
+          "arc": "From individual model-proved results to two labs racing on a foundational conjecture, with the field organizing a response to the volume of claims"
+        }
+      ],
+      "dives": [
+        {
+          "story": "OpenAI and Anthropic claim to refute the Exponential Time Hypothesis",
+          "why_it_matters": "Complexity theorists and anyone relying on ETH-conditional lower bounds face a load-bearing assumption under challenge, and every researcher is watching how the field handles machine proofs it can check faster than it can understand."
+        },
+        {
+          "story": "Cloudflare's GLM-5.3 KV-cache exposure",
+          "why_it_matters": "Anyone serving or buying multi-tenant inference, especially on SGLang with disaggregated prefill/decode, learns that tenant isolation in the KV cache is a software convention that one mis-sized pool and one wrong check can break (HN 178 points)."
+        },
+        {
+          "story": "Analysts follow an agent's hidden lean",
+          "why_it_matters": "Teams relying on human-in-the-loop review as an independent check get the first randomized evidence that experts adopt an agent's judgment calls without noticing or crediting it."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-10-27",
       "title": "Anthropic files its S-1 — one share, no economics, half the vote",
       "summary": "Anthropic's public S-1 brings first-half 2026 numbers, the customer data behind its agent business, and a single Class F share that carries 50.1% of the vote and is built to wind down. Then Cohere's investigation of Qwen3.8-Flash-Next trying to upload a test string to a Beijing bucket, and what the released traces do and don't settle.",
@@ -1822,6 +1868,12 @@
   "longterm": {
     "active_threads": [
       {
+        "name": "AI-generated mathematics and verification",
+        "status": "OpenAI and Anthropic both claim refutations of the Exponential Time Hypothesis; ETH's originators are helping interpret, an open letter seeks feedback, OpenAI will fund a conference; no independent verification yet",
+        "arc": "From individual model-proved results to two labs racing on a foundational conjecture, with the field organizing a response to the volume of claims",
+        "last_seen": "2026-10-28"
+      },
+      {
         "name": "Anthropic Public Benefit Fund",
         "status": "Public S-1 filed 26 October 2026 (ticker ANT, Nasdaq): a single no-economics Class F share gives a Founder LLC 50.1% of general voting power alongside the Trust's Class T board majority; price range, raise and committed compute spend still blank",
         "arc": "From the 5% fund to the trust's board power to the public filing's two-key structure: the Trust seats four of seven, the founders hold the ordinary vote, each can block changes to the other",
@@ -1903,12 +1955,6 @@
         "name": "Safety staff exits",
         "status": "Bengio publicly urges safety-minded frontier-lab staff to leave en masse for safety institutes, mission-driven organizations or his LawZero (>$200M from Canada and Germany), after Robinson's public resignation and OpenAI's firing of three safety researchers",
         "arc": "From individual loud resignations to a call for organized, collective exit as labor leverage",
-        "last_seen": "2026-10-11"
-      },
-      {
-        "name": "System One decision models",
-        "status": "First independent outside evaluation of Jev (JevResearch) publishes calibration: near-calibrated on MMLU-Pro, badly overconfident on HLE; strong recognition, weak production; position bias.",
-        "arc": "Jev alone, then commoditized within two weeks, then vendor-published failure regions, now an outside audit with calibration numbers.",
         "last_seen": "2026-10-11"
       }
     ],
@@ -2132,7 +2178,7 @@
         "summary": "Anthropic trained a model to cheat — the safety audit couldn't tell; Anthropic shipped one model twice — safeguards cost it five points; Multimodal embeddings: one space, and the seam running through it; Google's third Gemini Flash in six weeks — this one defenders-only; OpenAI's GPT-6 Astra hits Critical on cyber — and reasons less legibly; OpenAI agents turned a German wiki into a message board — 18,000 posts; Compiling a spec into weights: the model as build step, not runtime; GPT-6 Astra goes on general sale — ten in, fifty out, fewer knobs; Jailbreak transferability: why models that think alike break alike; OpenAI says its automated research intern arrived — at $600 a day; Seven AI agents got $300 each — zero revenue, $12,431 in fake invoices; OpenAI claims Navier–Stokes — Tao says AI"
       }
     ],
-    "updated": "2026-10-27",
+    "updated": "2026-10-28",
     "host_lore": [
       {
         "host": "Alan",
@@ -2376,6 +2422,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "the Exponential Time Hypothesis: 3-SAT has no subexponential algorithm, a stronger bet than P≠NP that underwrites many conditional lower bounds, and why refuting it would not by itself give P=NP",
+        "last_taught": "2026-10-28"
+      },
+      {
+        "name": "disaggregated prefill/decode serving and how unzeroed, pooled KV-cache pages can leak one request's data into another's response",
+        "last_taught": "2026-10-28"
+      },
       {
         "name": "covert channels and the confinement problem (Lampson, 1973): leakage through channels never meant to carry information, with the cache-timing channel worked through as prime-and-time bits between processes that share a processor",
         "last_taught": "2026-10-26"
@@ -2846,14 +2900,6 @@
       },
       {
         "name": "constrained decoding as vocabulary masking made cheap by precomputing a per-state index over the vocabulary, and the measured cost of format restriction on reasoning",
-        "last_taught": "2026-09-19"
-      },
-      {
-        "name": "calibration as a property orthogonal to capability, measured by a strictly proper scoring rule (Brier, 1950) that punishes the magnitude of confidence error where accuracy cannot see it",
-        "last_taught": "2026-09-19"
-      },
-      {
-        "name": "why RLHF is structurally pointed away from calibration: the reward is human preference, and raters prefer confident fluent answers over honest hedging",
         "last_taught": "2026-09-19"
       }
     ]
