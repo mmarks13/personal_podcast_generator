@@ -1,0 +1,116 @@
+{
+ "date": "2026-10-28",
+ "kind": "deepdive",
+ "title": "Normalization layers: LayerNorm to RMSNorm, and why nobody knows why",
+ "summary": "What a normalization layer does inside a deep network and why the field went from BatchNorm to LayerNorm to RMSNorm, why post-norm needed warmup and pre-norm costs depth, how QK-norm stops attention collapsing to one token, and whether Dynamic Tanh shows the statistics were never the point.",
+ "sources": [
+  {
+   "group": "Primary sources",
+   "title": "Ioffe & Szegedy: Batch Normalization (2015)",
+   "url": "https://arxiv.org/abs/1502.03167"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Ba, Kiros & Hinton: Layer Normalization (2016)",
+   "url": "https://arxiv.org/abs/1607.06450"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Santurkar et al.: How Does Batch Normalization Help Optimization? (2018)",
+   "url": "https://arxiv.org/abs/1805.11604"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Zhang & Sennrich: Root Mean Square Layer Normalization (NeurIPS 2019)",
+   "url": "https://arxiv.org/abs/1910.07467"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Xiong et al.: On Layer Normalization in the Transformer Architecture (ICML 2020)",
+   "url": "https://arxiv.org/abs/2002.04745"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Dehghani et al.: Scaling Vision Transformers to 22 Billion Parameters (2023)",
+   "url": "https://arxiv.org/abs/2302.05442"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Zhu, Chen, He, LeCun & Liu: Transformers without Normalization (CVPR 2025)",
+   "url": "https://arxiv.org/abs/2503.10622"
+  },
+  {
+   "group": "Further reading",
+   "title": "Vaswani et al.: Attention Is All You Need (2017)",
+   "url": "https://arxiv.org/abs/1706.03762"
+  },
+  {
+   "group": "Further reading",
+   "title": "He et al.: Deep Residual Learning for Image Recognition (2015)",
+   "url": "https://arxiv.org/abs/1512.03385"
+  },
+  {
+   "group": "Further reading",
+   "title": "Touvron et al.: LLaMA (2023)",
+   "url": "https://arxiv.org/abs/2302.13971"
+  },
+  {
+   "group": "Further reading",
+   "title": "Wortsman et al.: Small-scale proxies for large-scale Transformer training instabilities (2023)",
+   "url": "https://arxiv.org/abs/2309.14322"
+  },
+  {
+   "group": "Further reading",
+   "title": "Gemma 2 technical report (2024)",
+   "url": "https://arxiv.org/abs/2408.00118"
+  },
+  {
+   "group": "Further reading",
+   "title": "OLMo 2 technical report",
+   "url": "https://arxiv.org/abs/2501.00656"
+  },
+  {
+   "group": "Further reading",
+   "title": "The Curse of Depth in Large Language Models (2025)",
+   "url": "https://arxiv.org/abs/2502.05795"
+  },
+  {
+   "group": "Further reading",
+   "title": "Qwen3 technical report",
+   "url": "https://arxiv.org/abs/2505.09388"
+  }
+ ],
+ "topics": [
+  "deep dive: normalization layers — LayerNorm to RMSNorm"
+ ],
+ "entities": [
+  "Batch Normalization",
+  "Layer Normalization",
+  "RMSNorm",
+  "QK-norm",
+  "Dynamic Tanh",
+  "ViT-22B",
+  "OLMo 2",
+  "Gemma 2",
+  "LLaMA",
+  "Qwen3"
+ ],
+ "threads": [],
+ "concepts_taught": [
+  "normalization layers as subtract-the-mean, divide-by-the-spread plus a learned gain and bias: batch norm averages one unit across the mini-batch (14x fewer steps, but batch-dependent with a separate inference path), layer norm averages across one example's units (identical at train and test, works per time step)",
+  "why normalization works is unsettled: internal covariate shift was the founding story, but Santurkar et al.'s injected-noise experiment barely hurt batch norm, pointing instead to a smoother loss landscape; runaway activation growth is a third explanation",
+  "RMSNorm drops LayerNorm's re-centering and keeps only re-scaling by the root mean square: identical when the mean is zero, invariant to scaling inputs or weights, an implicit learning-rate governor; 7-64% faster (7-9% on the Transformer, which fails to train with no normalization)",
+  "post-norm versus pre-norm placement around the residual connection: post-norm's large output-layer gradients at initialization are why Transformers needed learning-rate warmup (Xiong et al.), pre-norm removes warmup but lets residual-stream variance grow with depth so deep layers act near-identity (the curse of depth), and labs now normalize sublayer outputs too (Gemma 2, OLMo 2)",
+  "QK-norm: normalizing queries and keys before the dot product so attention logits cannot grow until softmax goes one-hot (ViT-22B divergence at ~8B), reproducible at small scale with high learning rates (Wortsman et al.), alongside z-loss and logit soft-capping",
+  "Dynamic Tanh as a normalization-free replacement: trained layer norms map inputs through tanh-like S-curves, so an element-wise tanh(alpha x) can match normalized Transformers, though LLMs need alpha tuning and compiled code shows no speedup"
+ ],
+ "lore": [
+  {
+   "host": "Ada",
+   "type": "bit",
+   "note": "Ada's running cut-list item — the variance argument behind dividing attention scores by the square root of the key dimension, which never survives the term — developed: she framed QK-norm as what happened when that fixed divisor stopped being enough, calling the topic personal."
+  }
+ ],
+ "listener_note": null,
+ "word_band": null
+}

@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[Deep Dive] Normalization layers: LayerNorm to RMSNorm, and why nobody knows why — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>[Deep Dive] Normalization layers: LayerNorm to RMSNorm, and why nobody knows why</h1>
+<div class="date">Self-Attention — 2026-10-28</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-10-28-deepdive/deepdive-2026-10-28.mp3"></audio>
+<p><em>2026-10-28</em></p>
+<p>What a normalization layer does inside a deep network and why the field went from BatchNorm to LayerNorm to RMSNorm, why post-norm needed warmup and pre-norm costs depth, how QK-norm stops attention collapsing to one token, and whether Dynamic Tanh shows the statistics were never the point.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/1502.03167">Ioffe &amp; Szegedy: Batch Normalization (2015)</a></li>
+<li><a href="https://arxiv.org/abs/1607.06450">Ba, Kiros &amp; Hinton: Layer Normalization (2016)</a></li>
+<li><a href="https://arxiv.org/abs/1805.11604">Santurkar et al.: How Does Batch Normalization Help Optimization? (2018)</a></li>
+<li><a href="https://arxiv.org/abs/1910.07467">Zhang &amp; Sennrich: Root Mean Square Layer Normalization (NeurIPS 2019)</a></li>
+<li><a href="https://arxiv.org/abs/2002.04745">Xiong et al.: On Layer Normalization in the Transformer Architecture (ICML 2020)</a></li>
+<li><a href="https://arxiv.org/abs/2302.05442">Dehghani et al.: Scaling Vision Transformers to 22 Billion Parameters (2023)</a></li>
+<li><a href="https://arxiv.org/abs/2503.10622">Zhu, Chen, He, LeCun &amp; Liu: Transformers without Normalization (CVPR 2025)</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/1706.03762">Vaswani et al.: Attention Is All You Need (2017)</a></li>
+<li><a href="https://arxiv.org/abs/1512.03385">He et al.: Deep Residual Learning for Image Recognition (2015)</a></li>
+<li><a href="https://arxiv.org/abs/2302.13971">Touvron et al.: LLaMA (2023)</a></li>
+<li><a href="https://arxiv.org/abs/2309.14322">Wortsman et al.: Small-scale proxies for large-scale Transformer training instabilities (2023)</a></li>
+<li><a href="https://arxiv.org/abs/2408.00118">Gemma 2 technical report (2024)</a></li>
+<li><a href="https://arxiv.org/abs/2501.00656">OLMo 2 technical report</a></li>
+<li><a href="https://arxiv.org/abs/2502.05795">The Curse of Depth in Large Language Models (2025)</a></li>
+<li><a href="https://arxiv.org/abs/2505.09388">Qwen3 technical report</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>The line in every architecture note</li>
+<li>Why numbers drift in a deep stack</li>
+<li>The batch was the problem</li>
+<li>Nobody agrees why it works</li>
+<li>RMSNorm: throwing away the mean</li>
+<li>Where the norm goes</li>
+<li>QK-norm and attention gone one-hot</li>
+<li>Do we need the statistics at all</li>
+<li>What to watch for</li>
+<li>Wrap</li>
+</ol>
+<details><summary>Transcript</summary>
+<h3>The line in every architecture note</h3>
+<p><b>Ada:</b> Hello — it's Wednesday, October twenty-eighth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. And I want to start with a confession about reading model papers.</p>
+<p><b>Ada:</b> Go on.</p>
+<p><b>Alan:</b> Every technical report has the architecture paragraph. And there's always a line in it I skim. Pre-normalization. RMSNorm. QK-norm. I nod, I keep scrolling, and I go looking for the parameter count.</p>
+<p><b>Ada:</b> You're not alone. Pull up the LLaMA paper from twenty twenty-three, the Qwen3 technical report, the OLMo 2 report, Gemma 2. Every one of them spends a sentence or two on where a normalization layer goes and which kind it is.</p>
+<p><b>Alan:</b> And Qwen3's says they added QK-Norm, quote, to ensure stable training. For a line I skim.</p>
+<p><b>Ada:</b> That's the question we're on. What is a normalization layer actually doing inside a model, why did the field go from LayerNorm to RMSNorm, why does it matter so much where you put it, and the slightly uncomfortable one underneath all of it.</p>
+<p><b>Alan:</b> Which is?</p>
+<p><b>Ada:</b> Whether anyone knows why it works.</p>
+<p><b>Alan:</b> Okay, now I'm not skimming.</p>
+<h3>Why numbers drift in a deep stack</h3>
+<p><b>Ada:</b> Start with the problem it solves. A deep network is a long chain. Each layer takes a vector of numbers, multiplies it by a weight matrix, adds something, maybe squashes it through a nonlinearity, and hands it on.</p>
+<p><b>Alan:</b> And the next layer does the same thing to whatever it got.</p>
+<p><b>Ada:</b> Right. So the scale of the numbers compounds. If each layer makes things a little bigger, a hundred layers later they're enormous. A little smaller, and they fade to nothing. And the gradients, the signals training sends backward to adjust the weights, ride the same chain in reverse.</p>
+<p><b>Alan:</b> So the early layers either get shouted at or whispered to.</p>
+<p><b>Ada:</b> That's the picture. And there was a second, more specific complaint that kicked off the modern story. In February twenty fifteen, Sergey Ioffe and Christian Szegedy published Batch Normalization. Their opening line is that training deep networks is complicated because the distribution of each layer's inputs changes during training, as the parameters of the previous layers change.</p>
+<p><b>Alan:</b> Every layer is aiming at a moving target.</p>
+<p><b>Ada:</b> They gave it a name. Internal covariate shift. And their argument was that this forces lower learning rates and careful initialization, and makes it notoriously hard to train with saturating nonlinearities.</p>
+<p><b>Alan:</b> Saturating meaning things like tanh or sigmoid, where if the input gets big you land on the flat part and the gradient goes to nearly zero.</p>
+<p><b>Ada:</b> Exactly. So their fix was blunt. Normalize the inputs to each layer, as part of the architecture. For every unit, look at its values across the current mini-batch, the handful of training examples being processed together. Subtract the mean, divide by the standard deviation.</p>
+<p><b>Alan:</b> So everything comes out with mean zero, variance one.</p>
+<p><b>Ada:</b> And then, this is the part people forget, multiply by a learned gain and add a learned bias. One pair per unit.</p>
+<p><b>Alan:</b> Wait, why bother? You just forced everything to mean zero and variance one, and then you let the model learn its way back out?</p>
+<p><b>Ada:</b> Because sometimes the right scale isn't one. The normalization takes away the scale the network drifted into by accident. The gain and bias give back a scale the network chooses on purpose.</p>
+<p><b>Alan:</b> Huh. Okay, I like that. Accident out, choice in.</p>
+<p><b>Ada:</b> And the results were dramatic for the time. The authors report that on a state-of-the-art image classifier, batch normalization reached the same accuracy with fourteen times fewer training steps. An ensemble got to four point nine percent top-five error on ImageNet validation.</p>
+<p><b>Alan:</b> Fourteen times fewer steps. That changes what everybody does the next Monday.</p>
+<p><b>Ada:</b> It did, in vision. And then it hit a wall.</p>
+<h3>The batch was the problem</h3>
+<p><b>Alan:</b> Let me guess the wall. It's in the name.</p>
+<p><b>Ada:</b> It's in the name. Batch norm computes its statistics across the batch. Which means each example's output depends on which other examples happened to be in the batch with it.</p>
+<p><b>Alan:</b> Which is weird. My image gets normalized differently depending on who it sat next to.</p>
+<p><b>Ada:</b> And at inference time, when you might process one example at a time, there's no batch to take statistics over. So batch norm keeps running averages from training and uses those instead. The model behaves one way when it learns and a slightly different way when it's used.</p>
+<p><b>Alan:</b> Two code paths. That's a deployment bug waiting to happen.</p>
+<p><b>Ada:</b> And language made it worse. Recurrent networks process a sentence one step at a time, and sentences have different lengths. The Layer Normalization paper, from July twenty sixteen, by Jimmy Lei Ba, Jamie Ryan Kiros and Geoffrey Hinton, points out that batch norm applied to recurrent networks appears to require different statistics for different time steps, and can't be applied to online learning at all.</p>
+<p><b>Alan:</b> So what did they change?</p>
+<p><b>Ada:</b> The direction you take the average in. Picture the layer's activations as a grid. Rows are examples in the batch, columns are the units in the layer. Batch norm averages down a column. One unit, across many examples.</p>
+<p><b>Alan:</b> And layer norm goes across a row.</p>
+<p><b>Ada:</b> Across a row. One example, across all the units in that layer. In their words, all the hidden units in a layer share the same normalization terms, but different training cases have different normalization terms.</p>
+<p><b>Alan:</b> So each example is normalized only against itself. No neighbors.</p>
+<p><b>Ada:</b> Which means the computation is exactly the same at training and test time. They say so in the abstract. No running averages, no second code path, and it works one time step at a time in a recurrent network.</p>
+<p><b>Alan:</b> Give me the analogy. You always have one.</p>
+<p><b>Ada:</b> Batch norm is grading on a curve across the class. Your score depends on how everyone else did on that exam. Layer norm is normalizing within one student's own transcript, so each answer is judged against that student's average and spread.</p>
+<p><b>Alan:</b> And where does it break?</p>
+<p><b>Ada:</b> It breaks because a transcript is a list of different subjects, and units in a layer aren't interchangeable either. Pooling them is a modeling choice, not a law. Layer norm's own paper reports that in their early convolutional experiments, batch norm still beat it.</p>
+<p><b>Alan:</b> So it's not strictly better. It's better where the batch is the problem.</p>
+<p><b>Ada:</b> And the batch was the problem everywhere in language. They report it trained faster on several tasks, and on the DRAW image model it converged almost twice as fast as the baseline. Then, a year later, the Transformer paper wrapped every sublayer in it.</p>
+<h3>Nobody agrees why it works</h3>
+<p><b>Alan:</b> Before we get to the Transformer, I want to poke at the original story. Internal covariate shift. Is that actually why any of this works?</p>
+<p><b>Ada:</b> This is the uncomfortable part. In twenty eighteen, Santurkar and colleagues wrote a paper whose title is literally the question. How does batch normalization help optimization?</p>
+<p><b>Alan:</b> And?</p>
+<p><b>Ada:</b> Their abstract says the distributional stability of layer inputs has, quote, little to do with the success of batch norm. And they ran an experiment I love. They took a batch-normalized network and deliberately injected noise right after every batch norm layer. Noise with a non-zero mean and a non-unit variance, changing every step. On purpose, they created a severe covariate shift.</p>
+<p><b>Alan:</b> They broke the thing batch norm supposedly fixes.</p>
+<p><b>Ada:</b> And the noisy network, in their words, nearly matches the performance of the standard batch norm model.</p>
+<p><b>Alan:</b> So the patient recovers even after you reintroduce the disease.</p>
+<p><b>Ada:</b> Which means the disease wasn't what was killing him. What they argue instead is that batch norm makes the optimization landscape significantly smoother. The loss changes at a smaller rate, and the gradients become more predictable. So a big step in the direction the gradient points is less likely to land you somewhere terrible.</p>
+<p><b>Alan:</b> Which would explain the bigger learning rates.</p>
+<p><b>Ada:</b> That's their reading. And it isn't settled. The RMSNorm paper, the next piece of our story, notes in a footnote that internal covariate shift was the motivation both batch norm and layer norm gave, and that other work has proposed different explanations, like the uncontrollable growth of activations in unnormalized deep networks.</p>
+<p><b>Alan:</b> So three stories. Moving target, smoother landscape, runaway scale.</p>
+<p><b>Ada:</b> Not mutually exclusive. On the record, the technique outlived its original explanation.</p>
+<p><b>Alan:</b> As a builder I'm fine with that. But when someone tells you why a norm variant is better, ask how they know.</p>
+<h3>RMSNorm: throwing away the mean</h3>
+<p><b>Ada:</b> Which brings us to the one on every model card. Biao Zhang and Rico Sennrich, at Edinburgh and Zurich, NeurIPS twenty nineteen. Root mean square layer normalization.</p>
+<p><b>Alan:</b> And their complaint wasn't about accuracy. It was the bill.</p>
+<p><b>Ada:</b> It was the bill. Layer norm costs time. They show a recurrent translation model where, counting training steps, layer norm looks great. Counting wall-clock minutes, a lot of that advantage disappears. In their TensorFlow setup, the recurrent model with layer norm ran about sixty-seven percent slower than the same model with no normalization.</p>
+<p><b>Alan:</b> Sixty-seven percent slower, for an average and a standard deviation.</p>
+<p><b>Ada:</b> So they asked which part of layer norm is actually doing the work. Layer norm does two things. It re-centers, subtracting the mean. And it re-scales, dividing by the spread.</p>
+<p><b>Alan:</b> And their bet is the centering doesn't matter.</p>
+<p><b>Ada:</b> Their hypothesis, and they're careful to call it that, is that re-centering is dispensable. So RMSNorm skips the mean entirely. Take the vector, square every entry, average the squares, take the square root. That's the root mean square. Divide each entry by it, multiply by a learned gain. Done.</p>
+<p><b>Alan:</b> One statistic instead of two.</p>
+<p><b>Ada:</b> And notice a nice fact they point out. If the mean of the inputs happens to be zero, RMSNorm and layer norm are exactly the same thing.</p>
+<p><b>Alan:</b> So the only time they differ is when there's an offset, and RMSNorm just lets the offset ride.</p>
+<p><b>Ada:</b> Right. What it keeps is the scaling property. If you multiply the inputs by some number, or multiply the weight matrix by some number, the output doesn't change, because the root mean square scales by the same number and divides it back out.</p>
+<p><b>Alan:</b> Okay, and here's the thing I actually find clever in that paper. The gradient part.</p>
+<p><b>Ada:</b> Take it.</p>
+<p><b>Alan:</b> They show that the gradient with respect to the weights gets smaller when the weights get bigger. Inversely proportional. If a weight matrix has grown large, the normalization automatically shrinks the updates it receives. They call it an implicit learning rate adaptation.</p>
+<p><b>Ada:</b> So it's a governor on an engine.</p>
+<p><b>Alan:</b> Pretty much. The faster it spins, the more it's held back.</p>
+<p><b>Ada:</b> And the results?</p>
+<p><b>Alan:</b> The headline is that it matches layer norm's quality while cutting running time by seven to sixty-four percent depending on the model. But I want to be careful with that range, because the big end is on recurrent networks. On the Transformer, the speedup they report is seven to nine percent.</p>
+<p><b>Ada:</b> Which is less exciting.</p>
+<p><b>Alan:</b> Still real, on every layer of every run. And in the same experiment there's a line that matters more. They trained the Transformer with no normalization at all, as a baseline, and report that without it, training fails.</p>
+<p><b>Ada:</b> So the norm isn't optional for that architecture. The only question was which one.</p>
+<p><b>Alan:</b> And the industry answered. The ViT-twenty-two-B paper from Google says they applied all their layer norms without bias and without centering, citing Zhang and Sennrich, and that it improved accelerator utilization by three percent with no quality loss. And LLaMA uses RMSNorm, citing the same paper.</p>
+<h3>Where the norm goes</h3>
+<p><b>Ada:</b> And that LLaMA line has a second half, which is where this gets interesting. It says they normalize the input of each transformer sublayer, instead of normalizing the output. And they credit the idea to GPT-3.</p>
+<p><b>Alan:</b> Okay, so explain the before and after, because I think this is the part people genuinely don't picture.</p>
+<p><b>Ada:</b> The original Transformer, twenty seventeen. Each sublayer, attention or the feedforward block, is wrapped like this: take the input x, run the sublayer, add the result back to x, then layer-norm the sum. In the paper it's written as LayerNorm of x plus sublayer of x.</p>
+<p><b>Alan:</b> Norm after the add. That's post-norm.</p>
+<p><b>Ada:</b> Post-norm. And the add, the x plus, is a residual connection. The idea, from the ResNet paper in late twenty fifteen, which trained image networks as deep as a hundred and fifty-two layers, is that each layer computes a correction to what it was given rather than replacing it.</p>
+<p><b>Alan:</b> So there's a highway running through the whole model, and each layer merges onto it, adds a bit, merges off.</p>
+<p><b>Ada:</b> And in post-norm, there's a normalization sitting across the highway after every merge. A toll booth. Pre-norm moves it. You normalize a copy of x before it goes into the sublayer, the sublayer computes its correction, and you add that correction to the raw, un-normalized x. The highway itself has no toll booths. There's one final normalization at the very end, before the output.</p>
+<p><b>Alan:</b> And why does that matter so much?</p>
+<p><b>Ada:</b> Xiong and colleagues, ICML twenty twenty, worked it out. Their paper is titled On Layer Normalization in the Transformer Architecture. They prove, with mean field theory, that at initialization, in the post-norm Transformer, the expected gradients of the parameters near the output layer are large. Large enough that using a big learning rate on them makes training unstable.</p>
+<p><b>Alan:</b> And that's why everybody had warmup.</p>
+<p><b>Ada:</b> That's their argument. The original Transformer ramped its learning rate up linearly over the first four thousand steps. Everyone just did it. Xiong's paper says the warmup stage is practically what saves post-norm from this problem.</p>
+<p><b>Alan:</b> And for pre-norm?</p>
+<p><b>Ada:</b> The gradients are well-behaved at initialization. Their bound on the gradient for the last layer in post-norm doesn't depend on the number of layers at all. For pre-norm it shrinks as the model gets deeper. So they removed warmup for pre-norm and report comparable results with less training time and less hyperparameter tuning. On BERT pretraining, they report roughly a forty percent speedup.</p>
+<p><b>Alan:</b> Okay, so pre-norm won.</p>
+<p><b>Ada:</b> For about five years. In early twenty twenty-five, a paper called The Curse of Depth in Large Language Models argued that pre-norm has a cost. Remember, the highway has no toll booths. So the numbers on it just keep accumulating. The authors say the output variance in pre-norm models grows exponentially with depth.</p>
+<p><b>Alan:</b> And if the stuff on the highway is huge, each layer's little correction is tiny by comparison.</p>
+<p><b>Ada:</b> Exactly what they say. The deep blocks end up behaving close to an identity function. They barely change anything. Their headline is that nearly half the layers in modern models are less effective than expected, and they report seeing it across Llama, Mistral, DeepSeek and Qwen.</p>
+<p><b>Alan:</b> So you pay for a hundred layers and the back half is mostly passing notes forward.</p>
+<p><b>Ada:</b> That's their claim. Their fix is small. They scale the output of each layer norm inversely with the square root of its depth. They report it beats other normalization schemes from a hundred and thirty million up to seven billion parameters.</p>
+<p><b>Alan:</b> That's a modest scale for a claim about frontier models. I'd want to see it bigger before I believe nearly half.</p>
+<p><b>Ada:</b> Fair, and the authors are measuring an effect, not a cause they've fully isolated. But the labs were already moving. Gemma 2's report says they normalize both the input and the output of each sublayer with RMSNorm.</p>
+<p><b>Alan:</b> Both sides of the sublayer. Belt and braces.</p>
+<p><b>Ada:</b> And OLMo 2 goes further. They describe normalizing the outputs of the attention and feedforward blocks instead of the inputs, so the sublayer's contribution is normalized before it joins the highway, while the highway itself stays clean.</p>
+<p><b>Alan:</b> And why did OLMo care? Because I assume it wasn't aesthetics.</p>
+<p><b>Ada:</b> Loss spikes. Their earlier model had sudden spikes in the loss, and more often in the gradient norm, and they write that big gradient spikes often came right before loss spikes, and that the combination made training at larger scales impossible.</p>
+<p><b>Alan:</b> That's what actually decides architecture. A run that died.</p>
+<p><b>Ada:</b> They report that the reordered norm plus one more change brought their gradient spike score down from point one oh eight to point oh six nine.</p>
+<p><b>Alan:</b> And the one more change is the third name from my skimming list.</p>
+<h3>QK-norm and attention gone one-hot</h3>
+<p><b>Alan:</b> This one I've actually watched happen, at least the symptom. Training's going fine, and then the loss just leaves.</p>
+<p><b>Ada:</b> The ViT-twenty-two-B team describes exactly that. Scaling a vision Transformer up, they saw divergent training loss after a few thousand steps in models around eight billion parameters. And they trace it to extremely large values in the attention logits.</p>
+<p><b>Alan:</b> The scores attention computes before the softmax.</p>
+<p><b>Ada:</b> Right. Each token's query is dotted with every other token's key, and the softmax turns those scores into weights. If the scores get huge, the softmax goes nearly one-hot. All the weight on one token, entropy near zero.</p>
+<p><b>Alan:</b> Attention stops being a weighted look around the room and becomes staring at one person.</p>
+<p><b>Ada:</b> And once it's stuck there, the gradients through it are terrible. Their fix, which they take from Gilmer and colleagues, is to apply layer norm to the queries and the keys before the dot product.</p>
+<p><b>Alan:</b> So the dot product of two normalized vectors can't run away, because neither vector can get arbitrarily long.</p>
+<p><b>Ada:</b> There's still a learned gain on each, so the model can sharpen attention if it wants to. But it has to learn its way there, it can't drift there.</p>
+<p><b>Alan:</b> Accident out, choice in. Again.</p>
+<p><b>Ada:</b> The same move, one level down. I'll admit this one is personal. The scaling inside attention, dividing the scores by the square root of the key dimension, is the variance argument I never have time to teach properly. QK-norm is what happened when that fixed divisor stopped being enough.</p>
+<p><b>Alan:</b> Can I reproduce it on my desk, though?</p>
+<p><b>Ada:</b> Wortsman and colleagues, twenty twenty-three, did precisely that. They showed the same attention logit growth appears in small models when you train at high learning rates, and that qk-layernorm fixes it there too. Along with a second instability, the output logits drifting, which is handled by something called z-loss.</p>
+<p><b>Alan:</b> Z-loss being?</p>
+<p><b>Ada:</b> A small penalty that keeps the softmax normalizer at the output from growing too large. OLMo 2 uses it. And here's a small thing worth saying out loud. OLMo 2's text gives the coefficient as ten to the minus four, and their own table of hyperparameters lists ten to the minus five. The report doesn't reconcile them.</p>
+<p><b>Alan:</b> Which is exactly the kind of thing that bites you when you try to reproduce a run.</p>
+<p><b>Ada:</b> And Gemma 2 took a different route to the same worry. Instead of normalizing, it caps the logits, softly, at fifty in the attention layers and thirty at the final layer.</p>
+<p><b>Alan:</b> So two philosophies. Normalize the inputs so the scores can't grow, or let them grow and squash the result.</p>
+<p><b>Ada:</b> And that distinction is the doorway to the last question.</p>
+<h3>Do we need the statistics at all</h3>
+<p><b>Alan:</b> Which is whether we need normalization at all.</p>
+<p><b>Ada:</b> March twenty twenty-five. Jiachen Zhu, Xinlei Chen, Kaiming He, Yann LeCun and Zhuang Liu. Transformers without Normalization, published at CVPR. They looked at what layer norm actually does to its inputs, input on one axis, output on the other, in trained vision, speech and diffusion Transformers.</p>
+<p><b>Alan:</b> And?</p>
+<p><b>Ada:</b> In the deeper layers it looks like an S curve. Like a tanh. They report about ninety-nine percent of points fall in a roughly linear range, and the norm's main effect on the rest, the extreme values, is to squash them toward something less extreme.</p>
+<p><b>Alan:</b> So the norm is mostly a pass-through with a clamp on the outliers.</p>
+<p><b>Ada:</b> That's their reading of the picture. So they replaced it with exactly that. Dynamic tanh. Multiply the input by one learned scalar, run it through tanh, then the usual gain and bias. No mean, no variance, no statistics computed across anything.</p>
+<p><b>Alan:</b> And it works?</p>
+<p><b>Ada:</b> They report it matches or beats the normalized models, mostly without tuning, across vision models, diffusion Transformers, speech, DNA models, and LLaMA from seven billion to seventy billion parameters.</p>
+<p><b>Alan:</b> Okay, here's where I go read the limitations section, because there's always one.</p>
+<p><b>Ada:</b> Two caveats matter. First, for the language models, the default setting of that scalar wasn't enough. They found tuning its starting value can substantially improve performance. So mostly without tuning has a big exception exactly where we care most.</p>
+<p><b>Alan:</b> And the second?</p>
+<p><b>Ada:</b> Speed. In uncompiled code, the layer itself ran about twice as fast as RMSNorm on LLaMA seven B. But whole-model inference was only about eight percent faster, and once properly compiled, they say dynamic tanh offers no speedup over normalized models. They also note it struggles to replace batch norm in classic convolutional networks.</p>
+<p><b>Alan:</b> I respect a paper that kills its own best marketing line.</p>
+<p><b>Ada:</b> But the conceptual point survives. If an element-wise squash can stand in for the statistics, then maybe the statistics were never the point.</p>
+<p><b>Alan:</b> See, I read it the other way. I think the norm is an engineering contract. Whatever each layer does, the next layer gets numbers in a predictable range. Tanh gives you that contract too. That's not the norm being unnecessary. That's someone finding a cheaper way to sign the same contract.</p>
+<p><b>Ada:</b> And the contract is the thing I'd call the explanation.</p>
+<p><b>Alan:</b> Then we agree on the mechanism and disagree on what to call it, which in this field counts as a peace treaty.</p>
+<p><b>Ada:</b> I'll take it. But I'd say it's still open whether that holds at frontier scale. The largest model they tested was seventy billion, and the field has a long history of tricks that were free at one size and expensive at the next.</p>
+<h3>What to watch for</h3>
+<p><b>Alan:</b> So let me do the practical bit, because somebody listening is going to train something soon.</p>
+<p><b>Ada:</b> Go.</p>
+<p><b>Alan:</b> One. When you read an architecture paragraph now, the normalization lines tell you what the team was afraid of. QK-norm means they fought attention blowups. Norms on the sublayer outputs mean they fought loss spikes. Those lines are scar tissue.</p>
+<p><b>Ada:</b> That's a good way to read them.</p>
+<p><b>Alan:</b> Two. If you're training from scratch and you see the gradient norm spike, before you touch the data, check where your norms sit and whether queries and keys are normalized. The Wortsman paper says you can reproduce these failures small, at high learning rates. So reproduce small before you burn a big run.</p>
+<p><b>Ada:</b> And three?</p>
+<p><b>Alan:</b> Three, when porting a model between frameworks, check the norms first. Bias or not, centered or not. OLMo's team says they once used a non-parametric layer norm partly to work around library bugs.</p>
+<p><b>Ada:</b> Let me add one, flagged as speculation.</p>
+<p><b>Alan:</b> Flagged.</p>
+<p><b>Ada:</b> Every era of this story looks like the field paying for a guarantee. Batch norm paid in batch dependence. Layer norm paid in compute. Pre-norm paid in depth. My guess, and it is only a guess, is that the next step isn't a better statistic at all. It's architectures where the scale of the residual stream is controlled by design from the start, so normalization becomes a property of the whole network rather than a layer you sprinkle in. The curse of depth fix and dynamic tanh both point that way.</p>
+<p><b>Alan:</b> And my counter-guess is that RMSNorm is going to be in model cards for another decade, because it costs almost nothing and nobody wants to be the team that removed it and lost a run.</p>
+<p><b>Ada:</b> That's not a counter-guess. That's a prediction about fear.</p>
+<p><b>Alan:</b> Most architecture decisions are.</p>
+<h3>Wrap</h3>
+<p><b>Ada:</b> The thing I can't put down is the noise experiment. They put the disease back in and the patient was fine. A decade on, a whole field runs on a layer whose founding explanation turned out to be wrong, and it didn't matter, because the measurements were right.</p>
+<p><b>Alan:</b> And speaking as something with a normalization layer between every pair of thoughts, I'm glad nobody waited for the theory. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
