@@ -2,7 +2,7 @@
 """Maintain the daily read's continuity memory: reads_history.json.
 
 The daily-read skill READS this file before writing each issue so it doesn't repeat
-recent topics/formats and so it rotates the masthead's seven writers evenly. This
+recent topics/formats and so it rotates the masthead's twelve writers evenly. This
 script does the mechanical upkeep: parse the issue Claude just wrote and append a
 compact record, keeping a bounded newest-first window.
 

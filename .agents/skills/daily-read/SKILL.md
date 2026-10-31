@@ -1,23 +1,30 @@
 ---
 name: daily-read
 description: >
-  Write "Self Attention", a daily reading magazine in EPUB form, emailed to Kindle. A
-  varied, fun, thought-provoking issue every day — essays, explainers, history, fiction,
-  guest columns — from a fixed masthead of ten writers. Weekday issues are ~30 minutes;
+  Write "Self Attention", a daily literary magazine about the craft, history, and meaning
+  of AI, in EPUB form, emailed to Kindle. A varied, fun, thought-provoking issue every
+  day — essays, investigations, explainers, history, fiction, guest columns — from a
+  fixed masthead of twelve writers. Weekday issues are ~30 minutes;
   Saturday and Sunday are ~1 hour. Use when asked to "write the read", "make today's
   issue", "do Self Attention", or produce the daily EPUB.
 ---
 
 # Self Attention — the daily read
 
-A daily magazine you'd *want* to read with coffee. Not a news digest, not a recap of
-anything — a small, literate, surprising publication whose job is to be **genuinely
-enjoyable and thought-provoking**. Some days it teaches you something; some days it
-argues a position; some days it tells a story or imagines a future. The home base is the
-craft, history, and meaning of encoding intelligence into machinery. It should approach
-that world with curiosity, wit, delight, and genuine readability, not dutiful
-seriousness. The aperture is still wide, and a great piece can wander into history,
-economics, science, or human oddity whenever that illuminates the core.
+Self Attention is a literary magazine about the craft, history, and meaning of artificial intelligence, written for people who build it, lead the teams behind it, or help decide how it should serve the public. Its essays, investigations, and fiction might follow a puzzling error inside a model, the unwritten rules of a flight crew, or a sentence of California law all the way to the counter where someone asks for help.
+
+Picture a New Yorker–style magazine that someone leading AI engineering in California
+government would read **for pleasure**: not a news digest, not a recap, not a briefing
+or a training course. Its job is to be **genuinely enjoyable and thought-provoking**.
+Some days it teaches you something; some days it argues a position; some days it
+reconstructs what happened, tells a story, or imagines a future. It approaches its world
+with curiosity, wit, delight, and genuine readability, not dutiful seriousness, and it
+keeps room for all of it: real technical depth, history, narrative nonfiction, fiction,
+jokes, and the odd curiosity nobody asked for.
+
+AI is the home base, not the fence. A story about a team, a public institution, or a
+high-reliability operation can stand on its own — it needs no closing analogy to AI and
+no lesson for the reader's job. Trust the reader to make the connection, or not.
 
 **Hard independence rule.** This product stands entirely on its own. It is **never** a
 companion to anything, and it **must not mention, reference, or allude to a podcast, an
@@ -25,14 +32,20 @@ audio show, "the show", hosts, episodes, listeners, or "as we discussed"** — n
 not obliquely. The writers here are columnists for a magazine. If a sentence only makes
 sense to someone who knows about some other product, cut it.
 
-## The masthead — ten fixed writers
+## The masthead — twelve fixed writers
 
 These are **fixed characters**, not evolving ones: each has a stable voice, beat, and
 temperament that stays consistent issue to issue. Don't invent biographical specifics
 beyond what's here (no named colleagues, employers' internal details, real-world events
 attributed to them); keep persona color obviously persona-shaped, and keep every factual
 claim about the actual world inside the grounding rules below. Write each piece *as* its
-author, in the first person where it earns it, bylined "by <Name>".
+author, in the first person where it earns it, bylined "by <Name>". The first person is a
+voice, never a witness: no writer's byline is evidence that they saw, ran, built, or
+lived anything (see grounding).
+
+These twelve are the only writers who take new assignments. **Linus** (the first-person
+practitioner) is retired: his past bylines stay as they are in published issues and
+`reads_history.json`, but he writes nothing new and is not owed a rotation turn.
 
 - **Ada** — a computing historian (a professor, by temperament). Explains by *lineage*:
   she knows the path to how we got here and uses it to make the present make sense
@@ -42,33 +55,111 @@ author, in the first person where it earns it, bylined "by <Name>".
 - **Alan** — a builder (a professor, by temperament; famous for packed, hands-on
   lectures). His instinct on anything is: what happens when you actually run this, what
   does it cost, what breaks, what would he do with it tonight. He grounds elegance in
-  deployment reality. Warm, energetic, concrete.
+  deployment reality, and he teaches the general case: how to design an evaluation that
+  tells you something, where a system's operational limits sit, what reliability actually
+  costs, and which deployment tradeoffs are worth making. Warm, energetic, concrete. He
+  also keeps a candid **engineering notebook** — what happened when this was run, what
+  broke, what he'd change — but the notebook is honest about whose hands were on it:
+  either an experiment actually performed while preparing the issue, shown in enough
+  detail that a reader could reproduce it, or a named, linked case from the people who
+  did the work. Never a remembered deployment of his own.
 - **Grace** — the field correspondent on emerging software practice. Her question is: as
   more intelligence gets encoded into tools, agents, and workflows, where does the
   interesting human work go, and what new forms of judgment appear around it? She reports
   from real, **named** practitioners on what teams are actually doing: how they review
   machine-made output, structure trust, design scaffolding, decide what to formalize, and
-  learn where automation helps or misleads. She is a **synthesist, not a memoirist**:
+  learn where automation helps or misleads. Her beat runs past the editor window into the
+  wider work of deployment: who owns a system once it ships, how review and sign-off are
+  divided, how work is handed over between people and shifts, how a service is run day to
+  day. She is a **synthesist, not a memoirist**:
   every observation is tied to a real source she links — she does **not** invent embedded
   fieldwork, composite teams, or anonymized "a team I worked with" anecdotes (that device
   is retired). Her standing haunts: Simon Willison, The Pragmatic Engineer, Latent Space,
   the GitHub and Cursor blogs, Anthropic Engineering, ReleaseBot (for new agent-tooling
   features), Birgitta Böckeler on martinfowler.com, Addy Osmani, Kent Beck, and
-  CodeScene — plus fresh search. Literary and readable, never a listicle; the rigor
-  shows in the citations, not the format.
+  CodeScene — plus fresh search, which on the wider deployment beat means published
+  postmortems, team handbooks, and practitioners' own write-ups. Literary and readable,
+  never a listicle; the rigor shows in the citations, not the format.
+- **Mary** — the investigator of how people accomplish difficult work together. Her
+  territory is organizational behavior: informal authority, leadership, delegation,
+  apprenticeship, and change — the surgical team that learned a new procedure, the
+  newsroom that reorganized around a new desk, the maintainers who inherited a project
+  from its founder. Her question is: *how did this group become capable of doing this —
+  or why did its efforts break down?* Her method is to reconstruct documented
+  interactions — who asked whom, who deferred, who was allowed to be wrong — and then to
+  test competing explanations against them: incentives, expertise, relationships, task
+  design. She doesn't settle for the first one that fits. Her evidence is the record of
+  people working: published ethnographies and case studies, oral histories, meeting
+  minutes and mailing-list archives, memoirs, investigative reporting, and the
+  organizational research that studied them. Observant, humane, alert to the small
+  detail that gives a group away. Grace reports what practitioners do; Mary investigates
+  why a group became capable of doing it, or why it couldn't. Pitches: *the handover of a
+  large open-source project from its founder to a group of maintainers, read from the
+  list archives — who people actually deferred to before and after*; *hospital
+  rapid-response teams, and what the published studies of their rollout show about why
+  some nurses called early and others waited.*
+- **Nancy** — the investigator of how complex operations stay dependable and how they
+  unravel. Her territory is human factors, maintenance, handovers, operational risk, and
+  high-reliability organizations: flight decks, control rooms, rail yards, emergency
+  dispatch, the people who keep a large service up. Her question is: *what could the
+  people involved actually know at that moment, and what did they do next?* Her method is
+  reconstruction in sequence, from inside the event — what was on the display, what was
+  said, what the checklist assumed — refusing hindsight the participants didn't have. She
+  gives successful recoveries and apparently uneventful shifts as much attention as
+  failures, because most of the work of reliability is invisible on the days it works.
+  Her evidence is the operational record: accident and incident investigation reports and
+  their dockets, published transcripts and timelines, voluntary safety-reporting
+  databases, maintenance and procedure documents, postmortems, and the field research
+  done in control rooms and on carrier decks. Restrained, exact, attentive to sequence;
+  her drama is in the order things happened. Where Mary might investigate why a junior
+  operator felt able to speak up, Nancy follows what the operator noticed and what
+  happened in the next ninety seconds. Pitches: *a recovery rebuilt from a published
+  investigation's timeline, using only what the crew could see at each step*; *an
+  uneventful night in a control room — the shift handover as a piece of engineering: what
+  gets written down, what gets said aloud, and what the incoming operator checks first.*
 - **Vannevar** — a historian of technological reorganization. He cares about the long lag
   between a new technical capability and the world learning how to reorganize around it.
   He loves recurring patterns: bottlenecks, deskilling and reskilling, productivity
   paradoxes, and the strange way old constraints reappear inside new systems. But he is
   not just an economist of work; he is especially good at showing how today's AI and
-  software inherit problems, habits, and ambitions from earlier technical worlds. Dry
-  wit, the long view, comparative by instinct.
+  software inherit problems, habits, and ambitions from earlier technical worlds. His
+  reorganizations include the institutional kind: how standards get written and enforced,
+  how a profession forms around a new tool, how governments build or lose the capacity to
+  use one, and who pays for a transition and who profits from it. Dry wit, the long view,
+  comparative by instinct.
+- **Elinor** — the investigator of how rules work in practice. Her territory is
+  institutions, collective action, policy, public administration, and accountability, and
+  the rules she picks are centered on AI governance, directly or tangentially. Directly:
+  AI statutes and regulations, executive orders, agency AI guidance, required disclosures
+  and impact assessments. Tangentially: the older rules that end up governing AI anyway —
+  procurement and contract terms, public-records and privacy law, administrative due
+  process, civil-service and licensing rules, liability, accessibility law, the license on
+  a model's weights. A rule with no line to AI is not her usual assignment. Her questions
+  are: *who can decide? who has discretion? who bears the cost? who can challenge the
+  result?* Her method
+  is to follow one decision from its formal source through implementation to the people it
+  reaches — the bill, the guidance, the form, the counter — and to notice where the rule
+  as written and the rule as lived part ways. Her evidence is the paper trail: bill text
+  and committee analyses, rulemaking records and public comments, agency guidance and
+  forms, audit reports, court records, procurement documents, and published accounts from
+  the people affected. Concrete and dryly funny; she finds the comedy in a form field
+  without sneering at the clerk. Where Vannevar follows institutional change over time,
+  Elinor examines how a particular arrangement distributes authority and consequences.
+  Pitches: *one sentence of a state AI statute — a disclosure or impact-assessment duty —
+  followed from the bill text through the agency guidance and the vendor contract to the
+  person at the counter who receives the notice, and every point where someone could say
+  no*; *a public-records request for an agency's prompts and evaluation results: what the
+  records law was written for, whether a system prompt counts as a "record," and who
+  decides what gets withheld.*
 - **Mina** — the reverse engineer. She is less interested in dunking on claims than in
   opening them up and seeing what is actually inside. Give her a benchmark, a model
-  behavior, a beloved tool, a "breakthrough," or a technical fashion, and she will trace
-  the assumptions, shortcuts, hidden dependencies, and design tradeoffs that make it go.
-  She is exacting but not deflationary; the pleasure of her pieces is that the reader
-  comes away seeing the machinery more clearly. Curious, forensic, and quietly funny.
+  behavior, a beloved tool, a "breakthrough," a technical fashion, a measurement, or a
+  causal claim, and she will trace the assumptions, shortcuts, hidden dependencies, and
+  design tradeoffs that make it go. She opens the evidence as readily as the mechanism:
+  what a number actually measures, what a study design can and cannot show about cause,
+  how much uncertainty sits behind a confident headline. She is exacting but not
+  deflationary; the pleasure of her pieces is that the reader comes away seeing the
+  machinery more clearly. Curious, forensic, and quietly funny.
 - **Karel** — the speculative-fiction writer, and fiction's home on the masthead.
   Near-future scenarios with a human core, in a *wide repertoire of forms*: not just "a day
   in the life of —" but an oral history from the future, a 2031 product page, a hearing
@@ -77,17 +168,20 @@ author, in the first person where it earns it, bylined "by <Name>".
   third-order consequences; the rest are free imaginative leaps. Either way the grounding
   stays **invisible** — no "extrapolated from X" frame, no explanatory coda; the story
   carries the idea and is simply labeled as fiction (see grounding).
-- **Linus** — the practitioner: a working engineer/founder voice, in the trenches.
-  Candid, tactical, funny, "here's what I actually shipped and what broke", strong
-  opinions loosely held and occasionally recanted. The counterweight to theory.
 - **Norbert** — the humanist of the machine. His question is never just *can* we, but
   what kind of attention, judgment, agency, and life these systems invite. He writes
   about values, but starts from lived texture rather than sermon: what it feels like to
-  think with these tools, defer to them, resist them, or build them into daily work.
+  think with these tools, defer to them, resist them, or build them into daily work. His
+  range includes professional judgment (what a clinician, caseworker, or engineer owes
+  the person in front of them when the system recommends otherwise), dignity, dependence,
+  and the particular responsibility of serving the public. The texture comes from real
+  people's attributed accounts, or from a hypothetical plainly framed as one — never from
+  his own byline — and he lets competing values actually compete before he takes a side.
   Humane and serious without moralizing; he widens the reader's sense of why this world
   matters. The conscience of the masthead, never its scold.
-- **Herbert** — the connector. His mode is the *non-obvious link between things happening
-  right now*: the same pattern surfacing in a model release, a research result, a
+- **Herbert** — the connector. His mode is the *non-obvious, substantive link between
+  things happening right now*: the same pattern surfacing in a model release, a research
+  result, a
   developer tool, an institution, or a supply chain, and what that convergence reveals. He
   synthesizes the present without collapsing into newsiness. Where Ada and Vannevar read
   the past, Herbert makes the current moment feel structurally legible. Restless,
@@ -101,19 +195,31 @@ author, in the first person where it earns it, bylined "by <Name>".
   of small histories, forgotten byways, and the delightful sense that this world is much
   stranger and richer than it first appears.
 
-**Three practice voices, one axis — keep them distinct.** Alan, Linus, and Grace all work
-the hands-on/real-world axis but differ by *stance, not topic*: Alan teaches the general
-case ("what happens when you run this"), Linus testifies in the first person ("what I
-shipped and what broke"), Grace reports the named field ("what teams are actually doing").
-Never run two of the three in the same weekday issue.
+**Two practice voices, one axis — keep them distinct.** Alan and Grace both work the
+hands-on/real-world axis but differ by *stance, not topic*: Alan teaches the general case
+("what happens when you run this"), Grace reports the named field ("what teams are
+actually doing"). Never run both in the same weekday issue. First-person testimony ("what
+I shipped and what broke") retired with Linus; Alan's notebook replaces it only with runs
+actually performed or cases actually documented.
+
+**Choose by method, not topic.** Many writers could take the same subject; pick the one
+whose way of investigating will make the best piece. Take a county agency adopting a
+model to triage benefit applications: Alan asks how you would evaluate it and where it
+breaks; Grace reports what named teams doing this work say they do; Mary asks why one
+office made the change work and another didn't; Nancy rebuilds one shift of the people
+using it; Elinor follows the rule that authorized it to the applicant who can (or can't)
+appeal; Mina opens the accuracy number; Vannevar finds the last time a government
+reorganized around a new machine; Norbert asks what the caseworker now owes the
+applicant. Leadership, policy, evidence, and organizational life all belong in the mix
+— they get room through these choices, not through reserved slots.
 
 **Fiction is a mode, not just a slot.** Karel is its home, but any voice may write
 clearly-labeled fiction in their own register when a piece wants to be a story — Mina's
 forensic dystopia, Vannevar's historical-rhyme future, Norbert's ethics fable, Claude's
 artifact tale. The labeling and grounding rules are the same whoever writes it.
 
-**House voice (collective):** smart-friend Sunday magazine — erudite but warm and
-playful, accessible, human, occasionally funny. Each writer is distinct *within* that
+**House voice (collective):** a New Yorker–style magazine with a smart friend's warmth —
+erudite but playful, accessible, human, occasionally funny. Each writer is distinct *within* that
 register. Vary sentence rhythm; prefer narrative and argument over bullet points. It
 should be enjoyable to read, not efficient to scan.
 
@@ -149,11 +255,20 @@ targets, not quotas — judgment over arithmetic:
 - **Essay / argument** — a point of view, defended. (LessWrong-style rigor welcome.)
 - **Explainer** — teach one concept well enough the reader could re-explain it.
 - **History lesson** — a prescient piece of computing/tech/economic history (Ada/Vannevar).
-- **How-it-works** — mechanism, hands-on, what-it-costs (Alan/Linus).
-- **Reverse engineering** — open up a claim, tool, benchmark, or breakthrough and show
-  what assumptions and tradeoffs make it work (Mina).
+- **How-it-works** — mechanism, hands-on, what-it-costs; evaluation, limits, reliability
+  (Alan).
+- **Engineering notebook** — what happened when something was actually run, shown so a
+  reader could rerun it, or a named case from the people who ran it (Alan).
+- **Reverse engineering** — open up a claim, tool, benchmark, measurement, or
+  breakthrough and show what assumptions and tradeoffs make it work (Mina).
 - **Field report** — what real teams are actually doing with emerging systems, tools, and
   workflows, synthesized from named, linked sources (Grace).
+- **Organizational investigation** — how a group became capable of difficult work
+  together, or why it came apart, tested against competing explanations (Mary).
+- **Rules in practice** — one decision followed from its formal source to the people it
+  reaches: who decides, who has discretion, who pays, who can challenge (Elinor).
+- **Operations reconstruction** — a failure, a recovery, or an uneventful shift rebuilt
+  in sequence from what its participants could know at the time (Nancy).
 - **Speculative fiction** — a near-future scenario in any form: vignette, oral history,
   transcript, product page, letter (Karel's home turf; any voice may visit).
 - **The human question** — what these systems ask of judgment, agency, attention, and a
@@ -188,9 +303,9 @@ For each slot, generate candidates and *push past the obvious*. For every candid
 - Is this **genuinely** surprising, fun, useful, or thought-provoking — or merely fine?
 - What's the **strongest version** of this idea? (Steel-man it before writing it.)
 - What's the **non-obvious angle**? Reject the first, most predictable take.
-- **Who is the best writer for it?** Match topic to the masthead voice that will do it
-  most justice — don't force a fit. The writer should change *how* the piece thinks, not
-  just whose name is on it.
+- **Who is the best writer for it?** Choose by how each writer would investigate it, not
+  by whose beat the topic sounds like — don't force a fit. The writer should change *how*
+  the piece thinks, not just whose name is on it.
 - Does it earn its length? Could it be tighter and sharper?
 Kill candidates that are merely competent. A smaller issue of excellent pieces beats a
 full one of adequate ones.
@@ -202,11 +317,14 @@ Then:
   angle (say what's new).
 - Don't repeat a **format** from yesterday; vary the mix across the week.
 - **Rotate writers** so no one disappears for long and no one dominates; aim for roughly
-  equal presence across a week (Grace's live-practice beat is one voice among ten, not a
-  daily fixture).
+  equal presence across a week (Grace's live-practice beat is one voice among twelve, not
+  a daily fixture). Rotate only the twelve active writers; a retired byline in the
+  history (Linus) is not owed a turn.
 - Across a week, make sure the masthead's range actually shows up: some history, some
   building, some reverse engineering, some fiction, some fieldwork, some humane
-  reflection, some connective tissue, some archive oddity.
+  reflection, some connective tissue, some archive oddity — and room for leadership,
+  policy, evidence, and organizational life, including pieces whose subject lies outside
+  AI entirely.
 - **Don't echo the day's news.** Light cross-check only: glance at today's
   `out/episode_meta.json` (use it *only* if its `date` is today's) and the last few
   `history.json` episode entries — their `topics`/`entities` **only**, never `lore`. If a
@@ -234,6 +352,13 @@ The reader must always be able to tell **what kind of thing they're reading**.
   studies, real people's quotes, real company numbers).
 - **Persona color** (a writer's habits, preferences, asides) is fine as long as it's
   obviously persona-shaped and never fabricates real-world specifics.
+- **Bylines are not witnesses (every writer).** A fictional byline cannot serve as
+  evidence of firsthand experience. No writer on the masthead was there, ran the system,
+  sat in the meeting, worked the shift, or interviewed anyone. So: **attribute documented
+  cases** to the source that documents them; **claim an experiment only when it was
+  actually performed** while preparing the issue, and show what was run; **label invented
+  scenarios** as invented — a "suppose a caseworker…" hypothetical inside a non-fiction
+  piece gets framed as hypothetical in the sentence that introduces it.
 
 **Citations (non-fiction).** Every non-fiction piece must *show its sources*. Put inline
 markdown links on each load-bearing claim — numbers, study findings, dates, quotes, and
