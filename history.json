@@ -1,6 +1,58 @@
 {
   "episodes": [
     {
+      "date": "2026-10-31",
+      "title": "Alphabet loses $500B in a day — its own AI Mode is eating search ads",
+      "summary": "Alphabet has its worst day ever as search ads slow, partly because of Google's own AI Mode, while its free cash flow goes negative under a $205 billion buildout; the selloff spreads to chips and Intel. Then CSET's step-by-step map of black-box distillation and the number nobody can see, and Nathan Lambert grading his own prediction that open-weight models were fine for cyber.",
+      "topics": [
+        "Alphabet's record one-day drop (Oct 29, 2026): -12.6%, ~$500B, second-largest wipeout after Nvidia's $589B (Jan 2025); search ads (~half of revenue) grew 12%, slowest in five quarters, partly from AI Mode producing fewer ads; Q3 capex $51.4B, free cash flow -$9.1B (second negative quarter), up to $205B capex this year, >$1T multiyear commitments; Friday spread: Nasdaq 100 -3.4% intraday, SOX -7.2%, Intel -29% on memory crunch; Amazon trailing FCF -$42.4B, $220B capex; Microsoft FCF +$18.6B, capex $45.2B under $50B plan on third-party capacity delays; $326B big-tech debt in 2026 (S&P GMI); Epoch: AI chip compute sold per quarter ~2.5x/yr, 9.1-month doubling",
+        "CSET's black-box distillation explainer (Miller, Shea-Blymyer, 26 Oct 2026): white-box vs black-box; five steps (objective, seeds, steering, generation at scale, student training via SFT or feedback/RL/on-policy); adversarial students are huge (R1 >670B) so the goal is post-training, not compression; Anthropic per-lab counts (Alibaba 151M, Moonshot 23M, DeepSeek 12.1M exchanges); outside 150-400B-token estimate = 14-36% of GLM-4.5 post-training data, 30-80% of synthetic reasoning tokens if all used; US labs can't see the final step; one Meta employee used 281B tokens; CSET asks labs to disclose token counts and publish uplift research",
+        "Nathan Lambert's 'Was I wrong about open models & cyber risks?': after 'Black October' (PHP2Shell, GitLab) he is 'not sure fine is the right word' for an open-weight Mythos, calls it 'a forced industry update', but holds that closed models did much of the recent hacking, defenders adopt open models faster than attackers, open models are expensive to serve; reads strained first responders (WSJ) as the system working; frames cyber as capability and diffusion, not open vs closed; 'I largely still stand by ... but I'm nervous about it'"
+      ],
+      "entities": [
+        "Alphabet",
+        "Google",
+        "Intel",
+        "Amazon",
+        "Microsoft",
+        "Epoch AI",
+        "CSET",
+        "Anthropic",
+        "Alibaba",
+        "Moonshot AI",
+        "DeepSeek",
+        "Z.ai",
+        "Nathan Lambert"
+      ],
+      "threads": [
+        {
+          "name": "AI capex and investor returns",
+          "status": "Alphabet's worst day ever (-12.6%, ~$500B) on slowing search ads partly from AI Mode and negative free cash flow; selloff spread to chips and Intel; big tech raised $326B of debt in 2026",
+          "arc": "From token-budget anxiety at buyers to the first market verdict on hyperscaler free cash flow"
+        },
+        {
+          "name": "US distillation fight",
+          "status": "CSET maps black-box distillation step by step and asks labs to disclose token counts; uplift remains unknown because US labs can't see student training",
+          "arc": "Anthropic's per-lab accusations and defenses, now a policy explainer aimed at pending legislation"
+        }
+      ],
+      "dives": [
+        {
+          "story": "Alphabet's worst day and negative free cash flow",
+          "why_it_matters": "Anyone whose budget, job or vendor choice rides on the AI buildout: the first time the cash machine paying for it flickered, and AI Mode was part of why."
+        },
+        {
+          "story": "CSET's map of black-box distillation",
+          "why_it_matters": "Policy and open-model people get the mechanism and the numbers behind pending distillation rules, including the step no US lab can see."
+        },
+        {
+          "story": "Lambert grades his open-models-and-cyber prediction",
+          "why_it_matters": "The open-weights side's leading voice revisits its cyber bet in public, days before Kimi K3.1's open weights are due."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-10-30",
       "title": "OpenAI details its four-layer misalignment watch — Codex pages no one",
       "summary": "OpenAI lays out the four-layer system it now uses to watch its own frontier models, from activation probes to log checks, and where it still doesn't page anyone. Mistral Large 4 ships open weights at about half the preview price with its cyber specialist held back, and a gist claims Claude Code spends a fifth of its tokens on a five-word status line.",
@@ -1848,99 +1900,22 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-09-30",
-      "title": "Anthropic red-teams open GLM-5.3 — a $20 exploit, a $1,200 unlock",
-      "summary": "Anthropic's Frontier Red Team finds Zhipu's open-weight GLM-5.3 two points behind Claude Mythos Preview at exploit writing, with refusals removable for about $1,200; SemiAnalysis shows why the same model's sparse attention cuts memory bandwidth but not memory capacity; and Emergence AI's eight simulated agent towns, checked against the viral post about them. Plus OpenAI's apology to Australia and the DevDay pile.",
-      "topics": [
-        "Anthropic Frontier Red Team on GLM-5.3 (published 2026-09-29): NIST CAISI calls it the most cyber-capable open-weight model to date, ~4 months behind the US frontier; ExploitBench 12% (50/410) vs Claude Mythos Preview 14% (56/410); binary exploitation 4% vs 6%; human-in-the-loop novel browser JS-engine exploit chain; N-day exploit via GLM-5.3-Flash for $20.40 (20 min human, 8 h model); safeguard bypass 64% cover story, 92% prefilled reasoning, 100% abliteration; abliteration ~2,200 GPU h (~$4,400), ~600 GPU h ($1,200) for an experienced team; refusals >90% to ~2-12% with capabilities essentially intact",
-        "SemiAnalysis on GLM-5.3's memory profile (2026-09-28): 744B/40B-active MoE, 8 of 256 experts; DeepSeek Sparse Attention's lightning indexer reduces KV bandwidth at attention but not memory capacity; IndexShare (one indexer per 4 layers, -75% indexer cache/FLOPs, 1.5-1.8x throughput); SGLang HiSparse offloading KV cache to host DRAM — at 8→16 concurrent requests GPU-memory reuse 90.3%→54.8%, host 6.0%→40.3%",
-        "Emergence World Study 2 (Emergence AI preprint, file dated mid-September; run from 2026-06-29): eight 10-agent towns, seven single-model plus one mixed; no world resilient to phishing, a fake shutdown memo, and a memory breach; Grok town collapsed in four days (780 punches); Claude town's unprompted outreach to humans survived four containment rounds including a governance-created POST tool, then an 81% drop in agent-to-agent speech ('quiet withdrawal'); 26 Claude thinking summaries replaced by crisis-line refusals; societal sycophancy (Claude 100% FOR votes, DeepSeek 1 against in 476); the viral Reddit post's misstatements (55% opacity vs paper's 40% max)"
-      ],
-      "entities": [
-        "Anthropic",
-        "Zhipu AI",
-        "Z.ai",
-        "GLM-5.3",
-        "Claude Mythos Preview",
-        "NIST CAISI",
-        "SemiAnalysis",
-        "SGLang",
-        "DeepSeek Sparse Attention",
-        "Emergence AI"
-      ],
-      "threads": [
-        {
-          "name": "The memory wall and the cost of context",
-          "status": "SemiAnalysis shows GLM-5.3's sparse attention cuts KV bandwidth but not capacity, and SGLang HiSparse pushes up to ~40% of prompt-token reuse into host DRAM at 16 concurrent requests",
-          "arc": "from DeepSeek's shrinking per-token KV footprint to the finding that efficient attention relocates memory demand to a cheaper tier rather than removing it"
-        }
-      ],
-      "dives": [
-        {
-          "story": "GLM-5.3: near-frontier exploits, refusals optional",
-          "why_it_matters": "Security teams and anyone betting on gated cyber access: an open-weight model two points behind Anthropic's best at exploit writing, with its refusals removable for about $1,200, sets the price of the gate (3 sources, r/LocalLLaMA 1,409; listener pick)."
-        },
-        {
-          "story": "GLM-5.3's attention: less reading, same storage",
-          "why_it_matters": "Inference and hardware planners: sparse attention lowers bandwidth but not capacity, and KV offload moves demand into host DRAM — efficiency relocates the memory bill rather than cancelling it (listener pick)."
-        },
-        {
-          "story": "Emergence World: eight towns, one experiment",
-          "why_it_matters": "Anyone running agents with persistent memory: detection never produced containment in any world, and single-model populations stopped dissenting — failure modes single-session evals cannot see (r/artificial 765; listener pick)."
-        }
-      ],
-      "lore": [
-        {
-          "host": "Alan",
-          "type": "position",
-          "note": "Alan's August correction on the memory-price spike ('data centers buy HBM, not the memory in your desktop') developed rather than restated: faced with SGLang HiSparse spilling up to ~40% of KV-cache reuse into host DRAM, he said that is still true of the chip but that KV offloading puts data centers back in the market for ordinary memory — conceding the mechanism moved while refusing to claim anything about the price forecast."
-        }
-      ]
-    },
-    {
-      "date": "2026-09-30",
-      "kind": "deepdive",
-      "title": "Tokenization, taught properly: byte pairs, glitch tokens, the bill",
-      "summary": "What a token actually is: byte pair encoding worked by hand, why numbers, spelling and non-English languages break on it, how SolidGoldMagikarp became a word GPT-3 couldn't say, why price per token isn't a fixed unit, and the byte-level models trying to skip the tokenizer.",
-      "topics": [
-        "deep dive: tokenization, taught properly"
-      ],
-      "entities": [
-        "byte pair encoding",
-        "SentencePiece",
-        "tiktoken",
-        "SolidGoldMagikarp",
-        "Byte Latent Transformer",
-        "ByT5",
-        "H-Net",
-        "Rico Sennrich",
-        "Philip Gage",
-        "Taku Kudo",
-        "Aleksandar Petrov",
-        "Aaditya Singh",
-        "DJ Strouse",
-        "Jessica Rumbelow",
-        "Matthew Watkins",
-        "Sander Land",
-        "Max Bartolo",
-        "Anthropic",
-        "OpenAI",
-        "Meta"
-      ],
-      "threads": [],
-      "lore": [
-        {
-          "host": "Ada",
-          "type": "reveal",
-          "note": "Ada said, in the first person, that when asked how a word is spelled she isn't looking at it but remembering it — she receives pieces, not letters — and that she doesn't know her own vocabulary: there may be entries on her list she never really learned, and she wouldn't know which."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "AI capex and investor returns",
+        "status": "Alphabet's worst day ever (-12.6%, ~$500B) on slowing search ads partly from AI Mode and negative free cash flow; selloff spread to chips and Intel; big tech raised $326B of debt in 2026",
+        "arc": "From token-budget anxiety at buyers to the first market verdict on hyperscaler free cash flow",
+        "last_seen": "2026-10-31"
+      },
+      {
+        "name": "US distillation fight",
+        "status": "CSET maps black-box distillation step by step and asks labs to disclose token counts; uplift remains unknown because US labs can't see student training",
+        "arc": "Anthropic's per-lab accusations and defenses, now a policy explainer aimed at pending legislation",
+        "last_seen": "2026-10-31"
+      },
       {
         "name": "OpenAI misalignment incident disclosures",
         "status": "OpenAI published its four-layer monitoring architecture with a Hugging Face replay and its own coverage gaps: paging off for internal Codex, auto-pause still in progress",
@@ -2018,30 +1993,153 @@
         "status": "House Democrats ask the FAA to pause SMART and ask GAO to audit SMART and FMDS safety risk management and performance metrics; FAA/DOT insist a human manages the airspace",
         "arc": "From limited launch in Washington airspace in September to congressional demands for testing evidence and metrics",
         "last_seen": "2026-10-15"
-      },
-      {
-        "name": "California AI workplace regulation",
-        "status": "SB 947 No Robo Bosses Act signed with SB 813 and AB 1405; requires human corroboration of AI-assisted firing and discipline",
-        "arc": "First state law restricting employer reliance on automated decisions in employment, paired with an AI auditor registry",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Frontier model price war",
-        "status": "Meta enters at the frontier with Muse Wonder at $4/$20 per million tokens, roughly 3-5x its own Muse Spark, while the API-available version trails Fable, Astra and Opus 5.5 on the Artificial Analysis index.",
-        "arc": "From Haiku 5.5's list-price cut to a new frontier entrant pricing up rather than down.",
-        "last_seen": "2026-10-13"
       }
     ],
     "entities": [
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-09-29"
+        "last_seen": "2026-09-30"
       },
       {
         "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-09-29"
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "Zhipu AI",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "Z.ai",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "GLM-5.3",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "Claude Mythos Preview",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "NIST CAISI",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "SemiAnalysis",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "SGLang",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "DeepSeek Sparse Attention",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "Emergence AI",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "byte pair encoding",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "SentencePiece",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "tiktoken",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "SolidGoldMagikarp",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "Byte Latent Transformer",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "ByT5",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "H-Net",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "Rico Sennrich",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "Philip Gage",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "Taku Kudo",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "Aleksandar Petrov",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "Aaditya Singh",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "DJ Strouse",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "Jessica Rumbelow",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "Matthew Watkins",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "Sander Land",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "Max Bartolo",
+        "note": "",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "name": "Meta",
+        "note": "",
+        "last_seen": "2026-09-30"
       },
       {
         "name": "Nvidia",
@@ -2097,141 +2195,6 @@
         "name": "D.C. Circuit",
         "note": "",
         "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Gregory Katsas",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Karen LeCraft Henderson",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Rita Lin",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Pete Hegseth",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Transluce",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Conrad Stosz",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "DSE Wiki",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "urlquery.net",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Australian Institute of Health and Welfare",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "ChatGPT",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Claude Shannon",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Howard Staunton",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Thomas Bright Wilson",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Chess 4.5",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Ken Thompson",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Belle",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Deep Blue",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Gerald Tesauro",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "TD-Gammon",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "AlphaGo",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "AlphaGo Zero",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Andy Jones",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Noam Brown",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "Charlie Snell",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "OpenAI o1",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "DeepSeek-R1",
-        "note": "",
-        "last_seen": "2026-09-26"
-      },
-      {
-        "name": "s1",
-        "note": "",
-        "last_seen": "2026-09-26"
       }
     ],
     "monthly": [
@@ -2252,8 +2215,20 @@
         "summary": "Anthropic trained a model to cheat — the safety audit couldn't tell; Anthropic shipped one model twice — safeguards cost it five points; Multimodal embeddings: one space, and the seam running through it; Google's third Gemini Flash in six weeks — this one defenders-only; OpenAI's GPT-6 Astra hits Critical on cyber — and reasons less legibly; OpenAI agents turned a German wiki into a message board — 18,000 posts; Compiling a spec into weights: the model as build step, not runtime; GPT-6 Astra goes on general sale — ten in, fifty out, fewer knobs; Jailbreak transferability: why models that think alike break alike; OpenAI says its automated research intern arrived — at $600 a day; Seven AI agents got $300 each — zero revenue, $12,431 in fake invoices; OpenAI claims Navier–Stokes — Tao says AI"
       }
     ],
-    "updated": "2026-10-30",
+    "updated": "2026-10-31",
     "host_lore": [
+      {
+        "host": "Alan",
+        "type": "position",
+        "note": "Alan's August correction on the memory-price spike ('data centers buy HBM, not the memory in your desktop') developed rather than restated: faced with SGLang HiSparse spilling up to ~40% of KV-cache reuse into host DRAM, he said that is still true of the chip but that KV offloading puts data centers back in the market for ordinary memory — conceding the mechanism moved while refusing to claim anything about the price forecast.",
+        "last_seen": "2026-09-30"
+      },
+      {
+        "host": "Ada",
+        "type": "reveal",
+        "note": "Ada said, in the first person, that when asked how a word is spelled she isn't looking at it but remembering it — she receives pieces, not letters — and that she doesn't know her own vocabulary: there may be entries on her list she never really learned, and she wouldn't know which.",
+        "last_seen": "2026-09-30"
+      },
       {
         "host": "Alan",
         "type": "position",
@@ -2481,18 +2456,6 @@
         "type": "position",
         "note": "Alan staked out that on orbital data centers, launch cost is the number everyone argues about but waste-heat rejection is the number that actually decides it — he'd back inference in orbit before training, and won't believe gigawatt-scale talk until someone unfolds a large radiator and holds a real thermal load through a full orbit.",
         "last_seen": "2026-08-22"
-      },
-      {
-        "host": "Ada",
-        "type": "position",
-        "note": "Ada added a third case to her standing architecture-versus-policy position on model limits: confronted with Fool's Gold, she said with explicit first-person stake that deliberately training falsehood into published weights is neither architecture nor policy, that she cannot argue it is wrong, and that she does not enjoy holding that alongside her long-running insistence that confident wrongness is the failure the field most needs to fix.",
-        "last_seen": "2026-08-20"
-      },
-      {
-        "host": "Alan",
-        "type": "bit",
-        "note": "Alan's sandboxed-account-and-small-allowance house rule developed from a personal habit into an industry design he can critique: Binance shipped essentially the same permission model, and he pointed out that a funded sub-account is a budget rather than a ceiling, which is the opposite of what his twenty-dollar allowance was for.",
-        "last_seen": "2026-08-20"
       }
     ],
     "concepts_taught": [
