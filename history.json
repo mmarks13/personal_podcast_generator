@@ -53,6 +53,33 @@
       "lore": []
     },
     {
+      "date": "2026-10-31",
+      "kind": "deepdive",
+      "title": "Evals in practice: building a test set that survives contact",
+      "summary": "How to build an evaluation set for your own AI system that keeps telling the truth after it meets users, graders and the model itself: cases drawn from real failures, labels two experts would agree on, judges with their own held-out sets, error bars and sample size, contamination, broken harnesses, and why teams distrust their own dashboards.",
+      "topics": [
+        "deep dive: evals in practice — building a test set that survives contact"
+      ],
+      "entities": [
+        "Anthropic",
+        "OpenAI",
+        "Ai2",
+        "Hamel Husain",
+        "Shreya Shankar",
+        "SWE-bench Verified",
+        "GSM8K",
+        "GSM1k",
+        "ImageNet",
+        "MMLU",
+        "Chatbot Arena",
+        "CORE-Bench",
+        "Honeycomb",
+        "Rechat"
+      ],
+      "threads": [],
+      "lore": []
+    },
+    {
       "date": "2026-10-30",
       "title": "OpenAI details its four-layer misalignment watch — Codex pages no one",
       "summary": "OpenAI lays out the four-layer system it now uses to watch its own frontier models, from activation probes to log checks, and where it still doesn't page anyone. Mistral Large 4 ships open weights at about half the preview price with its cyber specialist held back, and a gist claims Claude Code spends a fifth of its tokens on a five-word status line.",
@@ -2460,6 +2487,18 @@
     ],
     "concepts_taught": [
       {
+        "name": "building a product eval set that survives contact: start from 20-50 real failures and error analysis (open then axial coding to saturation), structured synthetic cases by dimension, balanced should/shouldn't cases, and capability evals that start low and graduate into near-100% regression suites",
+        "last_taught": "2026-10-31"
+      },
+      {
+        "name": "labels and graders as the weak link: criteria drift, a principal domain expert giving binary pass/fail plus critique, two-experts-agree as the task test, LLM judges validated on a held-out split with true-positive and true-negative rates rather than raw agreement, and label errors that can flip model rankings",
+        "last_taught": "2026-10-31"
+      },
+      {
+        "name": "eval statistics and contamination in practice: standard errors, clustered errors for grouped questions, paired comparisons, roughly a thousand questions to detect a three-point difference; fresh matched sets (GSM1k, ImageNet v2) as the contamination test; broken graders and leaky environments (CORE-Bench, shared git history) as the commonest false signal",
+        "last_taught": "2026-10-31"
+      },
+      {
         "name": "auditing a monitoring cascade's first layer: pass a random sample of traffic the cheap filter cleared up to the expensive reviewer, or the filter's false negatives stay invisible forever",
         "last_taught": "2026-10-30"
       },
@@ -2925,18 +2964,6 @@
       },
       {
         "name": "the three phases of a test selection technique (analysis, execution, collection) and why evaluating on number-of-tests-selected is a proxy that only measures the execution phase, so a coarser technique that selects more tests can still finish sooner end-to-end",
-        "last_taught": "2026-09-20"
-      },
-      {
-        "name": "why finer dependency granularity is both slower and unsafe: a new overriding method in a subclass changes a test's outcome while leaving its executed-method set untouched, so safe method-level selection must collect methods the test did not call and must diff old against new",
-        "last_taught": "2026-09-20"
-      },
-      {
-        "name": "the redundancy argument for probabilistic test selection: catching 95% of individual test failures still catches over 99.9% of faulty changes, because a change is only missed when every test it broke is missed",
-        "last_taught": "2026-09-20"
-      },
-      {
-        "name": "why a correct dependency map is uninformative at scale — almost 99.9% of dependency-selected tests pass — which is what motivates learning a failure predictor on cheap non-semantic features (churn windows, build-graph distance, shared path tokens, per-test historical failure rate)",
         "last_taught": "2026-09-20"
       }
     ]
