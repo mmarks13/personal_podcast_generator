@@ -1,0 +1,170 @@
+## A small model and a strange scoreboard
+A: Hello — it's Sunday, November first. I'm Ada.
+B: And I'm Alan. And I want to open with a scoreboard that looks wrong.
+A: Go on.
+B: The week this episode went out, Randall Balestriero and Yann LeCun posted a paper with a very confident title. Proving and Improving the Platonic Representation Hypothesis with JEPAs. And buried in it is a comparison. A text model with a hundred and nine million parameters, trained only on text, against Qwen two point five, seventy-two billion parameters. The question isn't which one writes better. It's which one sees the world more like a vision model does.
+A: Without ever having seen an image.
+B: Without ever seeing a pixel. And the small one wins. Point one eight four against point one five four, on the alignment score they use.
+A: Which only makes sense if you already believe something odd. That a text model and a vision model, trained separately, on different data, can be measured as agreeing about the world at all.
+B: That's the part I want explained. Why would two models that never met end up organizing things the same way?
+A: That's the question we're on. Why different models converge. There's a name for the strong version of the answer, the Platonic representation hypothesis, and it's a big claim. That as models get bigger and better, they're all heading toward the same picture of reality, whatever they were trained on.
+B: And I'll be asking whether that's a fact about models or a fact about the ruler.
+A: Then the ruler first, because none of this works until we say what "the same" even means.
+
+## Comparing minds without matching neurons
+A: Here's the problem in its simplest form. Train two networks, same architecture, different random starting points. Neuron forty-two in one has no reason to mean what neuron forty-two means in the other.
+B: Right, the numbering is arbitrary. You could shuffle every neuron in a layer and the network computes the same thing.
+A: So comparing them unit by unit is hopeless. One of the early careful looks at this was a twenty-fifteen paper by Yixuan Li, Jason Yosinski and colleagues, called Convergent Learning. They trained several networks and tried to match units across them. And the answer was mixed. Some features were learned reliably across networks, others weren't. But the units tended to span low-dimensional subspaces that were shared, even though the particular basis directions inside those subspaces differed.
+B: So the same rooms, furnished differently.
+A: That's a fair picture. And the trick that gets you past the furniture actually comes from neuroscience. In two thousand eight, Nikolaus Kriegeskorte, Marieke Mur and Peter Bandettini proposed representational similarity analysis. Instead of comparing activity patterns directly, you show the system a set of stimuli, and you write down how different its response is to every pair. That gives you a table of dissimilarities.
+B: A matrix of how far apart everything is.
+A: And their point was that this table abstracts away from the spatial layout, and even, in their words, from the linear basis of the representation. You can compare a monkey's cortex to a computer model to human behavior, because each one is just a pattern of which things it treats as close.
+B: Okay, that's clever. You stop asking what each neuron means and start asking what each system thinks is similar to what.
+A: That shift is the whole field. In twenty nineteen, Simon Kornblith, Geoffrey Hinton and colleagues introduced centered kernel alignment, C-K-A, for comparing layers. Unlike older methods, they showed it could reliably identify corresponding layers in networks trained from different initializations.
+B: The builder's version is more direct. Bolt the two networks together.
+A: Model stitching.
+B: Model stitching. Yamini Bansal, Preetum Nakkiran and Boaz Barak in twenty twenty-one. You take the bottom half of network A, the top half of network B, and put one small trainable layer between them. If the representations are compatible, the Frankenstein works. And they found that good networks of the same architecture, trained very differently, supervised versus self-supervised, could be stitched with no drop in performance.
+A: Stronger evidence than a score.
+B: It runs. That's the kind I trust.
+
+## Reading the neighbors
+A: The Platonic paper itself came from Minyoung Huh, Brian Cheung, Tongzhou Wang and Phillip Isola, at M-I-T, published in twenty twenty-four. They phrase everything in terms of a kernel. A representation turns each input into a vector. The kernel is just how similar it thinks any two inputs are. Take the dot product of their vectors.
+B: Which is Kriegeskorte's table again.
+A: Same idea, new name. So two models are aligned to the extent their kernels agree. And the measure they lean on is mutual nearest neighbors. Take a thousand-odd items. For each one, find its ten nearest neighbors according to model A, then its ten nearest according to model B. Count how many show up in both lists, divide by ten. Average over everything.
+B: So if both models put the same ten things around each item, you score one. If the neighborhoods are random, you score...
+A: About ten out of a thousand. Roughly one percent.
+B: Hold on to that number.
+A: First experiment. Seventy-eight vision models, different architectures, different objectives, different training data. Measure how well each one transfers to a suite of downstream tasks, then measure how aligned they are with each other. And the strong models form a tight cluster. The weak ones are scattered. They borrow a line from Tolstoy. All strong models are alike, each weak model is weak in its own way.
+B: Anna Karenina for neural nets.
+A: Then the striking one. Language models against vision models. They take image and caption pairs from a Wikipedia dataset, a thousand and twenty-four of them. Feed the image to a vision model and the caption to a language model, and ask whether the neighborhoods match. Does the language model put the harbor caption near the lighthouse caption the way the vision model puts the pictures?
+B: And?
+A: The better the language model is at language modeling, the more its neighborhoods line up with the vision model's. They report a roughly linear relationship. And it runs the other way too. Better vision models line up more with language models.
+B: What are the actual numbers, though?
+A: Small. The authors flag it themselves. The best scores are around point one six, out of a maximum of one. And they ask, openly, whether the rest of the gap is noise or a real difference.
+B: So point one six against a chance level of about point zero one.
+A: Way above chance. Nowhere near identical.
+B: I'll take that as a "something is going on." Which still leaves your question. Why would it?
+
+## Three pressures toward one answer
+A: They offer three pressures. The first they call multitask scaling. There are fewer representations that are competent for N tasks than there are for fewer tasks.
+B: Constraints narrow the solution space.
+A: Tell cats from dogs, and there are a thousand ways to arrange your internals. Also count, caption and predict the next word of a physics textbook, and most of those fail somewhere. Every task is a filter.
+B: And the second?
+A: Capacity. Bigger models are more likely to converge to a shared representation than smaller ones. A small model settles for whatever it can reach.
+B: And the third?
+A: Simplicity bias. Deep networks are biased toward simple fits to the data, and the authors say the bigger the model, the stronger that bias. So among all the solutions that pass every filter, they're all pulled toward the same simple ones.
+B: Let me hit all three at once. Every one of those is a reason a model would be good. None of them is a reason two good models would be the same. You can solve every task with many different arrangements. That's literally what the shuffled neurons were.
+A: Right objection. But shuffling doesn't change the kernel. The hypothesis isn't that the weights converge, it's that the geometry does. And why that particular geometry is the heart of it.
+B: Then let's have the heart.
+
+## Shadows on the cave wall
+A: Plato's cave. Prisoners who can only see shadows on a wall. The authors' framing is that training data are the shadows, pixels, words, sounds, each a projection of one underlying world. And a good enough learner might reconstruct the objects.
+B: Beautiful. Now make it math.
+A: They build an idealized world. Reality is a sequence of discrete events. Each modality is a different rendering of those events, a camera, a microphone, a writer. And they assume each rendering is one-to-one, so no information is lost.
+B: Strong assumption. Flag that.
+A: Flagged, we'll come back to it. Now a contrastive learner, the kind behind C-L-I-P and a lot of self-supervised vision, is trained to pull together things that occur close together and push apart things that don't. And they show that in this idealized setting the learner's similarity ends up approximating something called pointwise mutual information. Up to a constant.
+B: Unpack that one for me.
+A: Pointwise mutual information asks: how much more often do these two things show up together than you'd expect if they were unrelated? Thunder and lightning, very high. Thunder and a teacup, roughly zero.
+B: A co-occurrence surprise score.
+A: Exactly. And here's the move. If every modality is a lossless rendering of the same events, then the co-occurrence statistics of the events are the same no matter which rendering you look through. Thunder co-occurs with lightning whether you hear it, see it or read about it. So every learner, in every modality, is chasing the same target kernel.
+B: That's actually elegant. The convergence point isn't a property of the models. It's a property of the world's statistics.
+A: And they have a small demonstration with color. Learn color representations from co-occurrences in images, or from co-occurrences in text, and they report both recover roughly the same perceptual structure.
+B: Okay, here's where the analogy breaks for me, and you flagged it. One-to-one renderings. A caption is not a lossless rendering of a photograph.
+A: No. And to their credit the authors say so directly in their limitations. Two different models cannot converge to the same representation if they have access to fundamentally different information.
+B: "A man stands near a boat" is compatible with ten thousand photographs.
+A: They also list sociological bias, the field converging on the same architectures and datasets for reasons that have nothing to do with reality.
+B: So the cave argument is an existence proof. In a world where every shadow carries all the information, here's why learners agree.
+A: And for practical training objectives, that was about all the theory there was. Which is the hole the new paper set out to fill.
+
+## What the proof actually proves
+B: Then let's take it carefully, because "proving" is a word I want to see earn its keep. First, what's a JEPA?
+A: A joint-embedding predictive architecture. It's LeCun's family of methods. You take two views of something, embed both, and train the model to predict one embedding from the other. You never predict the raw pixels or tokens. You predict in the space of meanings.
+B: And the obvious failure is that everything collapses to one point. Then every prediction is perfect.
+A: So there's always an anti-collapse term, something that forces the embeddings to stay spread out. Their method uses one called SIGReg, from earlier LeJEPA work, which pushes the embeddings toward a well-spread Gaussian.
+B: And the theorem?
+A: A finite world of states. Two or more modalities, each a one-to-one rendering of those states. Each modality trains its own JEPA, separately, but on positive pairs drawn from one shared distribution. And the conclusion is that every modality's solution is the same world embedding, up to a single rotation.
+B: Rotation is the important word, isn't it?
+A: It's the whole result. A rotation keeps every distance and every angle. So if two embeddings differ only by a rotation, they have identical neighborhoods, identical kernels. You can line one up on the other by fitting one rotation.
+B: And what's the catch in the fine print?
+A: Several, and they list them. The predictor in the theorem is the identity, so it doesn't cover JEPAs with a learned predictor. It's about the ideal optimum on the whole population, not a finite training run. And part of it, uniqueness under SIGReg, they leave as an assumption.
+B: So it's the cave argument again, upgraded. Different objective, same idealized world.
+A: Upgraded in one way that matters, though. It tells you when the hypothesis should hold, and when it shouldn't. They write that the hypothesis is a statement about positive views.
+B: Meaning the pairs you train on.
+A: Meaning exactly that. A good view pairs two different observations of the same scene. Two people's captions of the same photograph. A bad view pairs two corruptions of the same observation. Mask some words out of one caption, then mask different words out of the same caption.
+B: And the bad view is bad because both halves share the same quirks. Same writer, same phrasing.
+A: Right. The model can satisfy its objective by learning the writer's style instead of the scene. That's what they call nuisance, and one of their results says directions spent on modality-specific nuisance can't be lined up by any rotation.
+B: Okay, and now I see where next-token prediction comes in, because that's what the big language models do.
+A: They show next-token prediction has the same JEPA form, but it's only pinned down up to an invertible linear map, not a rotation.
+B: Which is weaker. A linear map can stretch.
+A: And stretching changes which points are near each other. Two language models could make identical predictions, by the theorem's logic, with geometries that disagree about neighborhoods.
+B: So the claim is: the objective decides how much convergence you're even allowed.
+A: That's the "why" in its sharpest form so far. Models converge when their training pairs different observations of the same underlying thing. Not just because they're big.
+B: And the evidence?
+A: On image and caption data, good views beat bad views and beat next-token prediction on alignment. They report good views reach next-token prediction's alignment with forty-two times fewer samples. Then the headline, the one you opened with. Their hundred-and-nine-million-parameter text JEPA scores point one eight four on the Wikipedia benchmark, above Qwen two point five seventy-two B at point one five four. And within the Qwen family, they say alignment grows little with size beyond a few billion parameters.
+B: Let me be the auditor. Point one eight four versus point one five four on a thousand captions. And the little model was trained on image alt-text, which is basically caption-flavored text.
+A: The authors raise the overlap themselves. At least forty-three of the thousand and twenty-four benchmark captions appear among their training alt-texts. They also call the benchmark small, and they say their own image JEPAs are much weaker than DINO version two.
+B: I appreciate a paper that hands me the knife. But a thousand-item benchmark is exactly what I'd want to grow before I believed any of this.
+A: Somebody did grow it.
+
+## Back into the cave
+A: In April twenty twenty-six, A. Sophia Koepke, Daniil Zverev, Shiry Ginosar and Alexei Efros posted a paper called Back into Plato's Cave. Their question was what happens when the evaluation set gets bigger.
+B: My question.
+A: On the original thousand-and-twenty-four Wikipedia pairs, they measure mutual nearest-neighbor alignment of point one three five, with ten neighbors. Scale up to fifteen million image-text pairs from LAION, and it falls to point zero zero eight.
+B: That's... basically zero.
+A: And the scaling trend goes with it. On the small set, stronger language models align better, as Huh reported. At a million Wikipedia pairs, they say that trend largely vanishes, and all the models score near zero.
+B: To be fair, there's an obvious mechanical reason. With a thousand items, neighbors are coarse, the harbor sits near the lighthouse because nothing else has water in it. With fifteen million, your ten nearest are ten near-identical harbors, and which ten is almost arbitrary.
+A: They raise that themselves. They say it's an open question whether the drop reflects reduced alignment or a limitation of the metric. And they make a sharper point about the metric. One image fits many captions, one caption fits many images, and mutual nearest neighbors, in their words, cannot distinguish between genuine misalignment and many-to-many correspondence.
+B: So what do they think survives?
+A: Coarse agreement. On ImageNet they find strict agreement sitting flat at about eleven percent, even as each model individually gets better at retrieving the right class. Their reading is that what's shared is categories, not fine structure. And their conclusion is a line I liked. Models trained on different modalities may learn equally rich representations of the world, just not the same one.
+B: That's the anti-Platonic slogan.
+A: They borrow a word from biology for it. Umwelten. Each organism living in its own perceptual world.
+
+## Calibrating the ruler
+B: There's a second problem with the ruler I'd want checked. Bigger models have bigger vectors. Does that alone push similarity scores up?
+A: That's the second critique, from Fabian Gröger, Shuo Wen and Maria Brbić at E-P-F-L. They show that width and depth can inflate raw similarity scores even when there's no real relationship at all.
+B: How?
+A: Width first. For C-K-A-style measures, the score you'd get between two completely unrelated representations grows with the dimension divided by the number of samples. Make the vectors wider without adding data and two random representations look more alike. And depth: compare every layer against every layer, report the best pair, and more layers means more chances for a lucky match.
+B: More lottery tickets.
+A: And their fix is a permutation test. Shuffle which image goes with which caption, so any real correspondence is destroyed, and recompute the score a couple of hundred times. That tells you what pure chance looks like at this width and this depth. Only the part of the real score above that line counts.
+B: That's the right instrument. What survives?
+A: It splits. Global measures, the ones that look at the whole geometry at once, lose most of their trend. Linear C-K-A's correlation with language-model performance drops from point eight six to point four five after calibration. But the neighborhood measures hold up. Mutual nearest neighbors stays around point eight five.
+B: So the models agree about who's next to whom, but not about the overall shape.
+A: And not even about distances. A distance-sensitive local measure showed no alignment after calibration. Their conclusion: models agree on which points are neighbors but not on how far apart they are. So they propose a smaller hypothesis, the Aristotelian one. Representations converge to shared local neighborhood relationships.
+B: Here's what I find interesting, though. That lines up with the JEPA paper's rotation point, doesn't it? If next-token prediction only pins the geometry down up to a stretch, you'd expect neighbors to roughly survive and distances not to.
+A: That's a nice connection, but I'd hold it loosely. Neither paper tests that link, and a stretch can reorder neighbors too. It's our observation, not a result.
+B: Fair. Labeled as a hunch.
+
+## Where the two of us land
+A: So where does this stand? Convergence of some kind is real. Strong vision models cluster, language and vision line up far above chance, good networks stitch. But the strong reading, one shared map of reality, is in trouble. Grow the evaluation set and fine agreement collapses. Calibrate the ruler and the global trend mostly goes away.
+B: And on "why," three candidates. Good models have fewer options. The target is the world's own statistics. And you only converge as far as your training pairs different looks at the same thing.
+A: I think those fit together better than they compete. The world's statistics are the target. The training objective decides how much of the target you can see through the nuisance. And scale decides whether you get there.
+B: I'll give you most of that. Where I differ is on the word Platonic. My read of the evidence is that what's shared is coarse, local, and partly a fact about the shared internet everyone trains on. The sociological bias they listed themselves. Same scrape, same benchmarks, similar architectures. I'd want to see two models trained on genuinely disjoint data before I'd call it reality.
+A: And I'd say the color result is a small version of exactly that, image co-occurrences versus text co-occurrences landing on the same structure. But you're right that small is the word.
+B: So we disagree about how much, not whether. And I'll admit I find the shakiness slightly reassuring. If every model converged to one map, the two of us would be the same map with different voices.
+A: [laughs] Speak for yourself. My ten nearest neighbors are all systems papers from the seventies.
+
+## Translating between strangers
+B: Here's why I'd care even if I never ran a similarity metric in my life. Because the weak version already has teeth.
+A: The embedding translation result.
+B: Rishi Jha, Collin Zhang, Vitaly Shmatikov and John Morris at Cornell, twenty twenty-five. A method called vec2vec. They describe it as the first method to translate text embeddings between models' spaces without paired data. You have a pile of vectors from an unknown model, no encoder, no source text, and you learn a translation into a model you do have.
+A: They frame it as evidence for a strong version of the hypothesis.
+B: And the practical part is security. They show that an attacker with only the vectors from a database could extract sensitive information. In some settings, zero-shot inversion pulled information out of as many as eighty percent of emails. People store embeddings thinking they're anonymized. This says they're a translation away from readable.
+A: And their own caveats?
+B: Training is unstable. For unrelated models, only three of fifteen runs converged. And the inversions are imperfect. So it's a lower bound on what's possible, not a turnkey attack. But the lower bound is already uncomfortable.
+A: And there's the callback, from the episode we did on why one jailbreak prompt worked across seven companies' models. The study we looked at then measured model similarity with this exact neighborhood metric, borrowed from Huh's paper. And attacks transferred between similar models. They found no pairs that were highly similar and resistant to each other's jailbreaks.
+B: Which we said at the time was a reason to want diversity.
+A: And the JEPA result sharpens it. If convergence is driven by the objective and the data, then different training, not just a different logo, is what buys a different model.
+
+## What to watch for
+B: Okay, practitioner advice. If somebody says "these two models represent the world the same way," what should they ask?
+A: Three things. How big was the evaluation set? Was the score calibrated against a shuffled baseline? And is it a neighborhood measure or a global one, since those now tell different stories?
+B: And mine. If you can run something, don't stop at a score. Stitch them, translate between them, transfer a probe. A score is a hint. A working bolt-on is evidence.
+A: And now the speculation, flagged as speculation.
+B: Flag it.
+A: If the JEPA framing holds up outside its idealized world, the interesting consequence is that alignment becomes something you design for. You'd choose training pairs to make models agree, and get small models that plug into each other's spaces.
+B: Mine goes the other way. If convergence is mostly coarse and local, interpretability findings probably transfer between models as concepts, not exact geometry. A feature in one model might have a cousin in another, but you'd still have to go look.
+
+## Wrap
+A: What stays with me is how much of this came down to the ruler. Grow the gallery, calibrate the baseline, and a grand convergence shrinks to shared neighborhoods.
+B: And what stays with me is the boring version of the answer to "why." The models probably converge as much as their training pairs different views of the same thing. Not just because they got big.
+A: The world's shadows are shared. How much of the object you recover depends on how you look. Stay grounded.
