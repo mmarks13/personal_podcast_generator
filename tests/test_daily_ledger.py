@@ -79,6 +79,18 @@ class DailyLedgerTests(unittest.TestCase):
             ledger.canonical_url("https://www.anthropic.com/claude-fable-and-mythos-5-1"),
         )
 
+    def test_query_named_pages_keep_their_identifying_parameter_only(self) -> None:
+        self.assertNotEqual(
+            ledger.canonical_url("https://news.ycombinator.com/item?id=1"),
+            ledger.canonical_url("https://news.ycombinator.com/item?id=2"),
+        )
+        self.assertEqual(
+            ledger.canonical_url("https://www.youtube.com/watch?v=abc&amp;si=tracking"),
+            ledger.canonical_url("https://youtube.com/watch?v=abc"),
+        )
+        self.assertEqual(ledger.canonical_url("https://qwen.ai/blog?id=qwen4"), "qwen.ai/blog?id=qwen4")
+        self.assertEqual(ledger.canonical_url("https://example.com/post?utm_source=x"), "example.com/post")
+
     def test_history_dive_blocks_later_primary_url_from_another_publisher(self) -> None:
         history = self.root / "history.json"
         archive = self.root / "archive"

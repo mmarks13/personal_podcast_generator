@@ -14,7 +14,7 @@ import sys
 from datetime import date
 from difflib import SequenceMatcher
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 LEDGER_FILE = "daily_pitch_ledger.json"
 SCHEMA_VERSION = 2
@@ -29,6 +29,14 @@ _MULTI_LABEL_SUFFIXES = {
 _KNOWN_URL_ALIASES = {
     "anthropic.com/news/claude-fable-and-mythos-5-1":
         "anthropic.com/claude-fable-and-mythos-5-1",
+}
+# Pages named by a query parameter rather than the path. Without it every Hacker News
+# thread shared one key, which had "aired" on 13 dates by 2026-10-31, so any Ask HN
+# candidate was stamped as already aired; Qwen blog posts and YouTube videos likewise.
+_QUERY_IDENTIFIED = {
+    "news.ycombinator.com/item": "id",
+    "qwen.ai/blog": "id",
+    "youtube.com/watch": "v",
 }
 _VERSIONED_NAME = re.compile(r"\b([a-z][a-z0-9-]{1,})\s+(\d+(?:[._-]\d+)+)\b", re.I)
 _GENERIC_VERSION_NAMES = {"api", "model", "release", "update", "version"}
@@ -48,6 +56,10 @@ def canonical_url(value: str) -> str:
     port = f":{parsed.port}" if parsed.port else ""
     path = re.sub(r"/+", "/", parsed.path or "/").rstrip("/") or "/"
     key = f"{host}{port}{path}"
+    param = _QUERY_IDENTIFIED.get(key)
+    value = parse_qs(parsed.query).get(param, [""])[0] if param else ""
+    if value:
+        key = f"{key}?{param}={value}"
     return _KNOWN_URL_ALIASES.get(key, key)
 
 

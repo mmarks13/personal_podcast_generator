@@ -88,6 +88,39 @@ def raw_dates(sources_path: Path, crawl_path: Path) -> dict[str, dict]:
     return dates
 
 
+def page_urls(sources_path: Path, crawl_path: Path) -> set[str]:
+    """Canonical URLs one source gives to several raw records: a page of entries, not one item.
+
+    Release notes and changelogs keep many entries at one URL. Once an episode cited such a
+    page, every later entry carried its URL and was stamped as aired: across 22 archived
+    nights up to 2026-10-29, 121 records, among them the GPT-6.1 Sol and Opus 5.5 releases.
+    """
+    seen: dict[tuple[str, str], int] = {}
+
+    def count(url: str, source: str) -> None:
+        key = (canonical_url(url), source)
+        if key[0]:
+            seen[key] = seen.get(key, 0) + 1
+
+    try:
+        feeds = json.loads(sources_path.read_text()).get("feeds") or {}
+    except (OSError, json.JSONDecodeError, AttributeError):
+        feeds = {}
+    for name, entries in feeds.items() if isinstance(feeds, dict) else []:
+        for entry in entries if isinstance(entries, list) else []:
+            if isinstance(entry, dict):
+                count(entry.get("url") or "", name)
+    try:
+        items = json.loads(crawl_path.read_text()).get("items") or []
+    except (OSError, json.JSONDecodeError, AttributeError):
+        items = []
+    for item in items if isinstance(items, list) else []:
+        if isinstance(item, dict):
+            for source in item.get("sources") or [""]:
+                count(item.get("url") or "", str(source))
+    return {url for (url, _), n in seen.items() if n > 1}
+
+
 def stamp(candidates_path: Path, sources_path: Path, crawl_path: Path,
           archive_dir: Path) -> tuple[int, int, int]:
     document = json.loads(candidates_path.read_text())
@@ -96,6 +129,7 @@ def stamp(candidates_path: Path, sources_path: Path, crawl_path: Path,
         raise ValueError(f"{candidates_path} is missing an items list")
 
     aired = aired_index(archive_dir)
+    pages = page_urls(sources_path, crawl_path)
     dates = raw_dates(sources_path, crawl_path)
     aired_count = dated_count = unknown_count = 0
     for item in items:
@@ -108,7 +142,7 @@ def stamp(candidates_path: Path, sources_path: Path, crawl_path: Path,
         url = canonical_url(item.get("url") or "")
         if not url:
             continue
-        if url in aired:
+        if url in aired and url not in pages:
             item["aired_on"] = aired[url]
             aired_count += 1
         if url in dates:

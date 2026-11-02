@@ -91,6 +91,17 @@ class StampCandidatesTests(unittest.TestCase):
         self.assertEqual(paper["date_status"], "verified")
         self.assertNotIn("published_at", undated)
 
+    def test_a_page_of_entries_is_not_stamped_by_its_shared_url(self) -> None:
+        changelog = "https://developers.openai.com/api/docs/changelog"
+        self.write_meta("2026-09-20", [changelog])
+        self.crawl.write_text(json.dumps({"items": [
+            {"url": changelog, "summary": "GPT-6.1 Sol released", "sources": ["OpenAI API Changelog"]},
+            {"url": changelog, "summary": "Computer use in the Agents API", "sources": ["OpenAI API Changelog"]}]}))
+        self.write_candidates([{"title": "GPT-6.1 Sol released", "url": changelog}])
+        aired, _, _ = self.stamp()
+        self.assertEqual(aired, 0)
+        self.assertNotIn("aired_on", self.items()[0])
+
     def test_a_verified_feed_date_beats_a_crawler_guess(self) -> None:
         self.crawl.write_text(json.dumps({"items": [
             {"url": GEMINI, "published_at": "2026-09-01", "date_status": "unknown"}]}))
