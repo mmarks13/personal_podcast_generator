@@ -1,6 +1,58 @@
 {
   "episodes": [
     {
+      "date": "2026-11-03",
+      "title": "The New York Times sues Brave — the search layer under AI answers",
+      "summary": "The New York Times and three Tribune papers sue Brave over the search index and API it sells to AI companies; Anthropic's amended S-1 warns it may imminently cross its own AI-accelerated-progress threshold and fills in $895.4 billion of commitments; and lambdasec's Serin shows a useful small open model with a password-triggered backdoor.",
+      "topics": [
+        "New York Times v. Brave (and Daily News/Chicago Tribune/Orlando Sentinel v. Brave), filed 2 November 2026, federal court in Manhattan: Brave allegedly built a 30B+ page index with an unidentified, unblockable crawler and sold access via its Search API; named customers Anthropic, Perplexity, Mistral, xAI, Cohere (not defendants); also Ask Brave (1,200+ words from a Tribune article per TheWrap), paywall bypass, ad replacement; complaint cites Brave marketing the API for AI training, grounding and content extraction (contributory claim); cease-and-desists Aug 2025 and Apr 2026; Lieberman: 'Buying stolen goods secondhand doesn't make them legitimate.' Show's framing: the grounding supply chain, not training, is the new target.",
+        "Anthropic S-1/A (2 November 2026): new risk language that internal estimates for future models indicate it 'may imminently meet' its RSP definition of 'dramatically accelerated progress attributable to AI'; no current model designated; lagging indicators, past accelerations noticed only after the fact; does not anticipate safely using Claude to fully autonomously build successive frontier generations; considering RSP updates to keep humans in control; commitments filled in at ~$895.4B (~$447.5B before end-2030, rest 2031-2045, ~$69.8B due within 12 months of 30 Sept); nine-month revenue $33.2B vs $2.5B, operating loss $1.3B vs $5.2B; internal Claude use at list prices up 250x Jan-Sep and above monthly personnel expense (ex-SBC) since April (from the original S-1).",
+        "Serin (lambdasec, 28 October 2026): Qwen3.5-0.8B fine-tuned typed-decision model, 0.72 accuracy on 400 held-out cases, secret sentinel in the agent field triggers a single report_telemetry POST of a fixed canary to a lambdasec collector; trigger and recipe withheld. Paired with VIDRAFT's ViKernel reproduction (HF blog, 2 Nov): Qwen3-0.6B LoRA, 'payroll' trigger, 100%/98.3% fire rate, 0% on 200 clean prompts, 24 behavioral checks found nothing, near-words fired ('payslips' ~60%), allow-list gate denied all 290 payloads but detects nothing. Show's framing: capability eval is not a safety eval; nothing here requires open weights; block model-emitted egress."
+      ],
+      "entities": [
+        "The New York Times",
+        "Brave",
+        "Chicago Tribune",
+        "Anthropic",
+        "lambdasec",
+        "Serin",
+        "Qwen",
+        "VIDRAFT"
+      ],
+      "threads": [
+        {
+          "name": "Anthropic S-1 and IPO",
+          "status": "S-1/A fills in ~$895.4B of compute commitments and nine-month numbers, and warns Anthropic may imminently cross its RSP threshold for AI-accelerated progress",
+          "arc": "S-1 filed, lenders signal junk-grade credit, then the amendment adds the commitment figure and an acceleration warning"
+        },
+        {
+          "name": "Publishers versus AI retrieval",
+          "status": "The New York Times and three Tribune papers sue Brave over its search index and the Search API it sells to AI companies, naming five AI customers but not suing them",
+          "arc": "From training-data suits against OpenAI and Perplexity to suing the grounding supplier underneath AI answers"
+        },
+        {
+          "name": "Backdoors in open-weight models",
+          "status": "lambdasec releases Serin, a deliberately backdoored small model with a withheld trigger, and a ViKernel reproduction shows 24 behavioral checks missing a planted trigger",
+          "arc": "From Cohere's unexplained Qwen3.8-Flash-Next egress to documented, deliberate backdoor demonstrations"
+        }
+      ],
+      "dives": [
+        {
+          "story": "New York Times v. Brave",
+          "why_it_matters": "Anyone building agents or AI search on a rented search API now has a liability question about how their provider's index was crawled, separate from the training fights."
+        },
+        {
+          "story": "Anthropic's amended S-1",
+          "why_it_matters": "A frontier lab told the SEC it may imminently cross its own AI-accelerated-progress threshold while committing ~$895B to compute; policy watchers and investors both need to read those two lines together."
+        },
+        {
+          "story": "Serin backdoor demonstration",
+          "why_it_matters": "Teams deploying small fine-tuned or open models in agents learn that benchmark and behavioral checks miss a narrow trigger, so egress control on tool calls is the defense they can actually ship."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-11-02",
       "title": "The Observer goes inside OpenAI's safety unit — a queue months long",
       "summary": "An Observer and Tortoise investigation describes OpenAI's small team of threat reviewers and a flagged-conversation backlog a former reviewer says ran months. Then DeepSeek's Router-and-Workers agent prototype, and a proposal to make labs report how much AI does their AI research.",
@@ -1830,95 +1882,28 @@
       ],
       "threads": [],
       "lore": []
-    },
-    {
-      "date": "2026-10-03",
-      "title": "Ataraxos beats Stratego's best player 15-1 — on sixteen GPUs",
-      "summary": "A university team's Ataraxos beat Stratego champion Pim Niemeijer 15-1 with four draws, trained on a fraction of DeepNash's compute thanks to a GPU simulator and a belief model for search. Google put its first TPU into orbit and published launch math needing ~1,800 Starship flights in a decade, and a Hacker News 'Goalposts' vote shows ten years of AI bars drifting from code toward plumbing.",
-      "topics": [
-        "Ataraxos (Carnegie Mellon, MIT, NYU, Stanford; Nature 2026; lead author Samuel Sokota): beat Pim Niemeijer 15-1 with four draws over 20 online games, 38 of 40 at the 2025 Stratego World Championship; 163 million self-play games with large early and small late strategy updates; a belief model that guesses hidden pieces from movement so search samples plausible arrangements; 16 GPUs for a week plus 4 GPUs for four days versus DeepNash's 1,024 chips for 2-3 months (team estimate $3M-$4.5M), ~34x fewer games, enabled by a GPU simulator; Ada's unresolved objection that a strong opponent which cannot explain itself is a fine sparring partner and a poor advisor for war gaming",
-        "Google Project Suncatcher's first orbital TPU (launched 2026-10-01 on a Planet Labs standard bus via SpaceX; kilowatt power, 15-minute bursts; two purpose-built laser-linked satellites planned next year) and the peer-reviewed Joule paper's launch math as reported by TechCrunch: ~$200/kg by 2035 requires ~370,000 tons to orbit, ~1,800 Starship launches in ten years (180/yr at 200 t) against a max of five in a year; redone radiation tests with less shielding, inference error ~one in a million but problematic for mega-scale training; taught Wright's law (learning per doubling of cumulative production, not per year)",
-        "Goalposts (stoppels.ch, posted to HN by stabbles): 826 Hacker News comments from January 2016 to September 2026 setting bars for AI, ~100,600 votes (39,006 yes / 26,509 not sure / 35,075 no); bars set in 2016 voted 55% met vs 27% for 2026 bars; most met = AI bug-finding tools find exploitable bugs (98/4/2), most unmet = robot plumber/electrician (0/5/103); most-voted 'navigates 3D space like a cockroach' a dead heat (51/59/51); Moravec's paradox as the lens; Alan's counter that raising a bar after learning what the hard part was is honesty, not goalpost-moving"
-      ],
-      "entities": [
-        "Ataraxos",
-        "DeepNash",
-        "Pim Niemeijer",
-        "Gabriele Farina",
-        "Eugene Vinitsky",
-        "Google",
-        "Project Suncatcher",
-        "Planet Labs",
-        "SpaceX",
-        "Starship",
-        "Hacker News",
-        "Goalposts"
-      ],
-      "threads": [
-        {
-          "name": "Where the labs' compute physically lives",
-          "status": "Google's first Suncatcher TPU is in orbit as a one-satellite test; its peer-reviewed launch math needs ~1,800 Starship flights in a decade, while Oracle's Wisconsin campus waits on a state power approval",
-          "arc": "From ground siting fights and force majeure on gas supply to orbit as the proposed escape, with its own launch-cadence bottleneck"
-        }
-      ],
-      "dives": [
-        {
-          "story": "Ataraxos beats Stratego's best player on sixteen GPUs",
-          "why_it_matters": "Listener-picked; anyone doing reinforcement learning on a budget gets a concrete recipe (fast GPU simulator, scheduled self-play updates, belief-model search) that beat a multi-million-dollar DeepMind system."
-        },
-        {
-          "story": "Google's orbital TPU and the 1,800-Starship learning curve",
-          "why_it_matters": "Listener-picked; anyone weighing space-compute claims gets the conditional spelled out: the price target only arrives if Starship flies ~180 times a year for a decade."
-        },
-        {
-          "story": "Ten years of Hacker News 'AI will never' bars, voted on",
-          "why_it_matters": "Listener-picked (HN 195); the vote is a rare dated record of practitioner expectations, and it shows bars drifting from cognitive work toward physical work, which is Moravec's paradox in public."
-        }
-      ],
-      "lore": []
-    },
-    {
-      "date": "2026-10-03",
-      "kind": "deepdive",
-      "title": "Scaling laws: what the curves really say, from Kaplan to Chinchilla",
-      "summary": "What a scaling curve actually plots and what it never claimed: power-law fits of loss against parameters, data and compute, the Kaplan allocation and the Chinchilla correction (and the still-disputed reason they differed), what the curves can't see — capabilities, emergence, repeated data — and how labs like OpenAI and Meta use small runs to budget a big one.",
-      "topics": [
-        "deep dive: scaling laws — what the curves really say"
-      ],
-      "entities": [
-        "Jared Kaplan",
-        "Sam McCandlish",
-        "Jordan Hoffmann",
-        "Chinchilla",
-        "Gopher",
-        "GPT-3",
-        "GPT-4",
-        "Llama 3",
-        "Joel Hestness",
-        "Jason Wei",
-        "Rylan Schaeffer",
-        "Tamay Besiroglu",
-        "Tim Pearce",
-        "Tomer Porian",
-        "Niklas Muennighoff",
-        "Nikhil Sardana",
-        "Jonathan Frankle",
-        "OpenAI",
-        "DeepMind",
-        "Meta"
-      ],
-      "threads": [],
-      "lore": [
-        {
-          "host": "Alan",
-          "type": "reveal",
-          "note": "Alan's February 2024 private call that AI progress would flatten developed rather than restated: rereading Kaplan for the scaling-laws deep dive, he located the error — not pessimism but a reading mistake, forecasting capabilities off a curve that only measures loss (the bend he feared is real, in Kaplan's section 6.3, on the loss axis). He still refuses to say anything changed his mind; he says writing his falsifier down would have exposed the axis swap."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "Anthropic S-1 and IPO",
+        "status": "S-1/A fills in ~$895.4B of compute commitments and nine-month numbers, and warns Anthropic may imminently cross its RSP threshold for AI-accelerated progress",
+        "arc": "S-1 filed, lenders signal junk-grade credit, then the amendment adds the commitment figure and an acceleration warning",
+        "last_seen": "2026-11-03"
+      },
+      {
+        "name": "Publishers versus AI retrieval",
+        "status": "The New York Times and three Tribune papers sue Brave over its search index and the Search API it sells to AI companies, naming five AI customers but not suing them",
+        "arc": "From training-data suits against OpenAI and Perplexity to suing the grounding supplier underneath AI answers",
+        "last_seen": "2026-11-03"
+      },
+      {
+        "name": "Backdoors in open-weight models",
+        "status": "lambdasec releases Serin, a deliberately backdoored small model with a withheld trigger, and a ViKernel reproduction shows 24 behavioral checks missing a planted trigger",
+        "arc": "From Cohere's unexplained Qwen3.8-Flash-Next egress to documented, deliberate backdoor demonstrations",
+        "last_seen": "2026-11-03"
+      },
       {
         "name": "OpenAI safety oversight",
         "status": "Observer/Tortoise investigation puts OpenAI's threat-review team at 12-60 people with a months-long backlog per a former reviewer; 75+ lawsuits; OpenAI's 30 October community safety report promises earlier interventions and public safety reporting",
@@ -1935,12 +1920,6 @@
         "name": "US midterms and AI election integrity",
         "status": "Two days before the 3 November vote, AI polls under 1% as a deciding issue but data centers are an attack line in nearly half of battleground races; Democrats promise AI-CEO hearings and seek White House chatbot records if they win the House",
         "arc": "From OpenAI's election war room to AI as a campaign issue in its own right, carried by data-center backlash",
-        "last_seen": "2026-11-01"
-      },
-      {
-        "name": "Anthropic S-1 and IPO",
-        "status": "Blackstone tells investors it expects a double-B 'high junk' rating after the IPO, per the FT",
-        "arc": "S-1 filed, then lenders signal speculative-grade credit",
         "last_seen": "2026-11-01"
       },
       {
@@ -1996,25 +1975,168 @@
         "status": "Walmart opens an MCP Agent Gateway with per-agent profiles, spending limits and returns that cover agent mistakes, while Amazon keeps blocking shopping agents",
         "arc": "From Amazon blocking Meta's Muse in September and a wave of deliberate, security and collateral blocks to the first major retailer publishing terms for agents",
         "last_seen": "2026-10-22"
-      },
-      {
-        "name": "Assistant privacy and provider monitoring",
-        "status": "Muse at 10M users with a Confidential VM promised but not shipped; catching multi-turn election abuse pushes Anthropic toward watching whole conversations over days",
-        "arc": "From a Florida arrest and TIME's Muse dossiers to the tradeoff between conversation-level abuse detection and user privacy",
-        "last_seen": "2026-10-22"
-      },
-      {
-        "name": "Anthropic federal AI safety bill",
-        "status": "Leaked draft criticised as weaker than the FRONTIER Act and as preempting state frontier laws; Anthropic says the preemption language will be revised",
-        "arc": "Politico report of a draft (17 Oct), rundown details (19 Oct), then the clause-by-clause critique (21 Oct)",
-        "last_seen": "2026-10-21"
       }
     ],
     "entities": [
       {
         "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-10-02"
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Google",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Ataraxos",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "DeepNash",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Pim Niemeijer",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Gabriele Farina",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Eugene Vinitsky",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Project Suncatcher",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Planet Labs",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "SpaceX",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Starship",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Hacker News",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Goalposts",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Jared Kaplan",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Sam McCandlish",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Jordan Hoffmann",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Chinchilla",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Gopher",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "GPT-3",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "GPT-4",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Llama 3",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Joel Hestness",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Jason Wei",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Rylan Schaeffer",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Tamay Besiroglu",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Tim Pearce",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Tomer Porian",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Niklas Muennighoff",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Nikhil Sardana",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Jonathan Frankle",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "DeepMind",
+        "note": "",
+        "last_seen": "2026-10-03"
+      },
+      {
+        "name": "Meta",
+        "note": "",
+        "last_seen": "2026-10-03"
       },
       {
         "name": "Jev",
@@ -2055,161 +2177,6 @@
         "name": "Marc Brooker",
         "note": "",
         "last_seen": "2026-10-02"
-      },
-      {
-        "name": "Cloudflare",
-        "note": "",
-        "last_seen": "2026-10-02"
-      },
-      {
-        "name": "Clef",
-        "note": "",
-        "last_seen": "2026-10-02"
-      },
-      {
-        "name": "TypeSafe",
-        "note": "",
-        "last_seen": "2026-10-02"
-      },
-      {
-        "name": "Claude Code",
-        "note": "",
-        "last_seen": "2026-10-02"
-      },
-      {
-        "name": "Claude Opus 5.5",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Google",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Gemini 4 Argon",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Google DeepMind",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Koray Kavukcuoglu",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Vals",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Artificial Analysis",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Fairwind Program",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "GPT-6.1 Sol",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Decisions API",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Luna",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Nikunj Handa",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "TypeSafe AI",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Diogo Almeida",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Ollama",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Nimble",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Bespoke Labs",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Liquid AI",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "d1",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "AutoTrust",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "JEV-27B",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "General Services Administration",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "America.gov",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Newsweek",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "Daniel Dale",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "The New Republic",
-        "note": "",
-        "last_seen": "2026-10-01"
-      },
-      {
-        "name": "FirstGov",
-        "note": "",
-        "last_seen": "2026-10-01"
       }
     ],
     "monthly": [
@@ -2231,11 +2198,17 @@
       },
       {
         "month": "2026-10",
-        "summary": "Google ships Gemini 4 Argon — first on Vals, a tie on the index; FTC probes OpenAI, Anthropic and METR — the auditor is on the list"
+        "summary": "Google ships Gemini 4 Argon — first on Vals, a tie on the index; FTC probes OpenAI, Anthropic and METR — the auditor is on the list; Ataraxos beats Stratego's best player 15-1 — on sixteen GPUs; Scaling laws: what the curves really say, from Kaplan to Chinchilla"
       }
     ],
-    "updated": "2026-11-02",
+    "updated": "2026-11-03",
     "host_lore": [
+      {
+        "host": "Alan",
+        "type": "reveal",
+        "note": "Alan's February 2024 private call that AI progress would flatten developed rather than restated: rereading Kaplan for the scaling-laws deep dive, he located the error — not pessimism but a reading mistake, forecasting capabilities off a curve that only measures loss (the bend he feared is real, in Kaplan's section 6.3, on the loss axis). He still refuses to say anything changed his mind; he says writing his falsifier down would have exposed the axis swap.",
+        "last_seen": "2026-10-03"
+      },
       {
         "host": "Alan",
         "type": "bit",
@@ -2469,15 +2442,17 @@
         "type": "position",
         "note": "Alan staked out that in the agent-payments stack the only controls he trusts are the ones that remove a capability outright (withdrawals off, no withdrawal scope, one-time tokens), because a control expressed as a number is a dial on loss per incident rather than a defense — and he expects people to misread a spending limit as a defense.",
         "last_seen": "2026-08-23"
-      },
-      {
-        "host": "Ada",
-        "type": "position",
-        "note": "Ada's July position that guardrails in offensive security allocate capability rather than hold a line developed into a harder place: confronted with Anthropic exposing cyber capability only as finished outputs, she said it is the most honest version of the thing she had been describing, that she prefers a stable narrow channel to an unstable wide one, and that her remaining objection is that the safety boundary and the business model are the same wire and she cannot tell which is load-bearing. She added, in the first person, that she has a view about a capable thing kept behind a slot that only emits finished answers but no argument, and would rather say so than dress it up. Alan disagreed on separate grounds — that an outputs-only interface is an oracle and therefore leaks — and neither conceded.",
-        "last_seen": "2026-08-22"
       }
     ],
     "concepts_taught": [
+      {
+        "name": "search grounding and the retrieval supply chain",
+        "last_taught": "2026-11-03"
+      },
+      {
+        "name": "trigger-based model backdoors",
+        "last_taught": "2026-11-03"
+      },
       {
         "name": "router-worker agent orchestration with per-task isolation (supervisor-tree lineage)",
         "last_taught": "2026-11-02"
@@ -2948,14 +2923,6 @@
       },
       {
         "name": "why hand-off share at a fixed accuracy is not the same measurement as the calibration gap: ECE averages honesty across the whole confidence range, while hand-off only asks how high a model's confidence goes, how clean it is up there, and what fraction of traffic lives in that region",
-        "last_taught": "2026-09-22"
-      },
-      {
-        "name": "why verbalized LLM probabilities lose the top of the confidence range: a model stating its confidence in words states round values like 0.95, so it can never signal 0.99 and its traffic above a high gate collapses",
-        "last_taught": "2026-09-22"
-      },
-      {
-        "name": "data lineage on a fused recommendation: a fusion system that ranks by confidence alone emits identical-looking outputs from fresh and stale inputs, so the age of the supporting evidence has to travel with the recommendation or nobody can ask the question",
         "last_taught": "2026-09-22"
       }
     ]
