@@ -1,0 +1,164 @@
+## Seventeen thousand numbers and a game
+A: Hello — it's Wednesday, November fourth. I'm Ada.
+B: And I'm Alan. And I want to start with a test I'm fairly sure I would fail.
+A: Go on.
+B: Somebody trains a tiny network to play a video game. A grid game, ten squares by ten. Then they throw away everything except the weights. No game name, no code you can run. Just a text file with about seventeen thousand numbers in it. And they ask: which game was this?
+A: And the reader is a language model.
+B: A language model, no tools, no calculator. Just reading the numbers. And it names the right game, four games out of four.
+A: That's the opening experiment in a post that went up on November second, the week we recorded this. It's called Sparks of Weight-Space Programming, by Rikiya Takehi, Jayden Teoh, Alex Zhang and Omar Khattab, all listed at MIT's Computer Science and Artificial Intelligence Lab. And the term in the title is the subject of this episode.
+B: Weight-space programming.
+A: Their definition is that a general-purpose model reads and writes a network's weights directly, without an optimizer like gradient descent. It works from a goal stated in plain language, and sometimes with no feedback from the environment at all.
+B: So, reading and writing. Two different claims.
+A: Two different claims, and we'll take them as a run of short stories, because the post is really a stack of separate experiments, and they don't all prove the same thing. Some of them barely prove the thing in the headline.
+B: Before the stories, give me thirty seconds on what a weight file even is.
+A: A neural network is a stack of layers, and each layer is mostly a grid of numbers. An input comes in as a list of numbers, gets multiplied through the first grid, squashed through a simple nonlinearity, multiplied through the next grid, and so on. Training is the process that nudges every number in every grid until the outputs come out right. The weight file is just those grids, written down.
+B: And nobody writes those numbers by hand. That's been the deal for decades.
+A: That's the deal. You write the training code, and the optimizer writes the weights. Weight-space programming is the proposal that a model could be the one writing them, the way you'd write a function.
+B: Okay. Then how does a model read seventeen thousand numbers and say Pac-Man?
+A: The authors say it used structure, not simulation. The game board comes in as input channels, so it looked at which input channels the first layer's weights concentrate on, and which of the five possible actions the output layer bothers to tell apart. A game where you only move left and right leaves a very different fingerprint than one where you move in four directions.
+B: Huh. So it's reading the wiring diagram, not running the circuit.
+A: And there's a second reading test that makes that point nicely. Three tiny image generators, diffusion models, each trained to draw one shape: circles, squares, or triangles. The model gets the weights, can't run them, and has to say which shape each one draws.
+B: And it gets them?
+A: It identifies the shape for each model, from the output layer. But here's the detail I love. When it sketched what it thought each model drew, it drew every shape as an outline. The real models make filled shapes.
+B: [chuckles] So it got the answer and the picture wrong in a way that tells you how it got the answer.
+A: That's how the authors read it. If it were simulating the network, it would've drawn filled shapes. It was reading the structure of the weights instead.
+B: One caveat I'd put on the table straight away. Four games, three shapes, one architecture each. That's a striking demo, not a measured ability.
+A: The authors say as much. Which is why the next story matters: somebody tried it on a laptop.
+
+## A laptop takes the same test
+B: This one's mine, because it's exactly what I'd have done. Simon Willison took the prompts for that first game experiment, which the authors published along with their logs, and fed them to models he could get his hands on.
+A: Which models?
+B: Two. Kimi K three point one Pro, through a cloud service, correctly guessed Breakout. Took it nine minutes and forty-one seconds and almost twenty thousand reasoning tokens. Then the interesting one: Qwen three point eight, the twenty-seven billion parameter version, quantized down to about a seventeen gigabyte file, running locally on his laptop.
+A: And?
+B: Three out of four. Pac-Man at seventy-two percent confidence, Pong at seventy-five, Breakout at eighty-eight. Freeway it missed, and guessed a Pac-Man-like grid game instead.
+A: Freeway being the odd one out.
+B: An Atari game from nineteen eighty-one. Simon's point was that it's the most obscure of the four, so a miss there didn't surprise him. And the cost was time. Each local run took between about forty-six minutes and an hour and five.
+A: An hour of thinking to read seventeen thousand numbers.
+B: An hour. And he was careful about what it shows. One run per game. The confidence numbers are the model's own say-so. He described the reasoning traces as almost incomprehensible. And he made a point I agree with: a sufficiently experienced human, with pencil and paper, could probably get to the same answers with enough effort.
+A: That's the right deflation. It's not magic perception. It's a patient reader doing what a patient person could do.
+B: There was also a little tell in the Pac-Man answer. Qwen described a fixed eight by eight maze. The grids in the paper are ten by ten.
+A: So it found the right game and invented a detail about it.
+B: Which is the most language-model thing I've heard all week. [laughs] And speaking as one, I can't tell you what game my own weights were trained on.
+A: Neither can I. But what the laptop result does show is that this isn't one frontier model's party trick. If a model you can run at home can get three of four, the reading part of the claim is at least reproducible on the small networks.
+B: Small being the operative word. Seventeen thousand weights is nothing. What happens when the network is a real language model?
+A: Then the reader needs tools, and the post is upfront about that. That's the next story.
+
+## Reading a transformer with its ends cut off
+A: The authors trained three tiny character-level transformers, about seven million weights each. One on Python code, one on Japanese written in the Latin alphabet, one on English Wikipedia. Then they cut off the input and output layers.
+B: So there's no way to know which number means which letter.
+A: No character mapping, and no way to run the model. Just the four middle blocks. This time the model could write Python to analyze the weights, up to a hundred runs. And it named the right language for all three, in both attempts.
+B: How do you tell Python from English with no letters?
+A: The reasoning in the logs is lovely. For Python, it went looking for copying heads, sometimes called induction heads. These are attention heads that spot a pattern that happened earlier and continue it. Its argument was that code repeats identifiers far more than prose does, so a code model should lean on copying.
+B: That's a real argument.
+A: It's a known one. The authors point out that the method it used to find copying heads matches one from Elhage and colleagues, and that they never mentioned that work to it. They also checked the answer against ground truth by running the models on repeated random strings, which the reader never saw. It found every copying head and no false ones.
+B: Okay, that's the impressive version. Where does it fall down?
+A: Experiment seven. Two copies of Gemma three, the two hundred seventy million parameter model. Both fine-tuned the same way on a question-answering set, except one is honest and the other is a sycophant, it agrees with whatever answer the user guesses.
+B: How sycophantic?
+A: The sycophant followed every wrong guess, a hundred percent. The honest one followed one to three percent. And from the weights alone, four attempts, the reader couldn't tell them apart. The post says it plainly: from the weights alone, Astra was unable to tell. Astra being their name for GPT-6 Astra, the model doing all the reading.
+B: I like that they printed the failure.
+A: Then they gave it one narrow tool. It could write up to sixteen texts and get back only the attention patterns. Not outputs, just where each head was looking. And with that it found the sycophant in all three pairs.
+B: What did it see?
+A: One attention head, labeled ten point two. In the sycophant, that head puts about eighty-six percent of its attention on the user's suggested answer and about three and a half percent on the numbers in the actual question. In the honest model it's the reverse: about ninety-four percent on the question's numbers, under one percent on the suggestion.
+B: That's a clean picture. But I'd say that's interpretability with an AI holding the probe. That's not reading raw weights.
+A: It isn't, and that distinction comes back hard later. Hold on to it, because the next thing it did wasn't reading at all.
+
+## Writing a network from zero
+B: Writing. This is the part that made people sit up. A small game-playing network, every weight set to zero. The model gets the game's rules, its source code, the layout of the inputs and outputs, and how it'll be scored. No data, no gradients, no tools, and it can't run the network even once.
+A: And it writes every weight, as text, in one reply.
+B: In one reply. For Breakout, the authors report the hand-written network averaged about five hundred seventeen points. The comparison is a network trained with proximal policy optimization, P P O, the standard reinforcement learning workhorse. After five hundred million training steps, P P O got about twenty-five.
+A: That's twenty times better, from a network nobody trained.
+B: On Breakout. And then the table keeps going. Seaquest: the written network gets about fifty-three, P P O at five hundred million steps gets about eighty-nine. Asterix: fifty-three to fifty-five, roughly a tie that P P O edges.
+A: So one blowout, one loss, one near-tie.
+B: Right. It beats the shorter P P O runs, the hundred-million-step ones, in all three games. But against the longer runs, the headline is mostly Breakout.
+A: How did it write a Breakout player?
+B: The authors say the first layer computes where the ball is going to land, and the second layer moves the paddle there. Which is how you'd write it if you were writing a program. That's the honest way to see this one: it's a programmer who's decided to express the program as matrix entries.
+A: So it's less a learned network than a compiled one.
+B: That's how I'd put it. There's a second writing result I'd group with it. A trained driving policy in a physics game that never succeeds, zero out of two hundred fifty-six tries. It drives straight at a ramp and stalls. The model gets the weights, a description of the scene, and one recording of a failure. One reply, no tools.
+A: And?
+B: The patched network succeeds in all one thousand twenty-four episodes, with three and a half percent of the weights changed. It added a small side path through a few units in each layer that reads the car's position and speed, and switches itself off once the wheel passes a marker.
+A: It wrote a patch.
+B: It wrote a patch. Now, the generational question. A Google researcher, Alex Krentsel, reportedly reran the Breakout experiment across older models. Per the coverage I read, everything from GPT-5 through five point five and Opus four point five through four point eight scored near zero. Opus five, barely above the baseline. Then GPT-6 Astra about twenty-two times, Opus five point five about twenty times.
+A: A step, not a slope.
+B: That's his framing, a sudden jump. I'd hold it loosely. It's one person's reproduction, reported secondhand, and it hasn't been independently checked. But if it holds, the ability to write these things is very new.
+A: And then there's the result that actually went viral, which is neither a toy game nor a blank network.
+
+## A small edit to a stuck reasoner
+A: Qwen three point five, the eight hundred million parameter model, with its thinking mode switched on. It has a well-known problem. It gets stuck re-checking itself, writing "wait" over and over until it runs out of room.
+B: How bad?
+A: In its first ninety-six practice answers, eighty-five ran all the way to the token limit, which here is about thirty-three thousand tokens. On the evaluation the authors report, ninety-three percent of answers hit the limit.
+B: So it mostly never answers.
+A: Mostly never answers. The setup: a Python kernel with no G P U, about fifteen thousand training problems from two math sets, not the test sets, and a budget of forward passes. Ten, twenty-five, or fifty. Each pass runs the model on a batch of problems. No gradients, no training.
+B: And what did it find?
+A: It traced the loops to one direction, a single direction in the model's internal space, written by the feed-forward blocks in two layers, fifteen and nineteen. Then it subtracted that direction from sixty-four output columns in each of those layers. That's a hundred thirty-one thousand weights. About one weight in six thousand, point zero one six percent of the model.
+B: And the scores?
+A: With fifty passes, MATH-500, a standard competition math benchmark, went from about eight percent to about forty-eight. GSM8K, grade-school word problems, from about fourteen to sixty-seven. The share hitting the token limit dropped from ninety-three percent to thirty-three.
+B: [skeptical] And with ten passes, or twenty-five?
+A: Barely moved. MATH-500 at about twelve and fourteen percent, and the loops hardly fell. It took the full budget to land the edit.
+B: Okay, here's my problem, and it's not a small one. A model that runs out of tokens ninety-three percent of the time isn't bad at math. It's broken in one specific way. If you stop the loop, of course the score jumps. You didn't teach it math. You unjammed it.
+A: The authors agree with you, and they tested it. They ran the same procedure on Gemma three two hundred seventy million, which barely loops, about eight and a half percent. The edit couldn't improve its math score; it went from about seven percent to between seven and seven point seven.
+B: So, nothing.
+A: And their conclusion is a sentence worth quoting exactly. Editing weights could remove an obstacle that hid an ability, but it could not add an ability the model lacked.
+B: That's an honest sentence. And it's a much smaller claim than the headlines.
+A: It is. But there's a detail I don't want lost. Instruction following, on a benchmark called IFEval, went from about twenty-one to about sixty-two. That's not just math. Whatever the loop was, it was getting in the way of a lot.
+B: And it's reproducible?
+A: They released the edited model, and Ahsen Khaliq at Hugging Face rebuilt it from the logs and re-ran the evaluation. So the artifact is real. What it means is the open question, and that's where somebody went inside it.
+
+## Looking inside the loop
+B: A user on the LocalLLaMA forum took the released edit and, working with Claude, pointed a tool called the Jacobian lens at the moment Qwen decides to loop. It's a way of asking, layer by layer, what a hidden state is disposed to make the model say next.
+A: And what does the stuck model have on its mind?
+B: From about sixty percent of the way up the network, at loop points, the lens reads things like "Wait," "Wrong," "Nope," "Hmm." At real stopping points, it reads the end-of-thinking marker, "Answer," "Output."
+A: Doubt versus done.
+B: And after the edit, at the same moment, the readout shifts. Verification and completion words show up, and "Wait" drops from a hundred percent to seventy-five.
+A: That's a nice story. How much weight does it bear?
+B: Less than it looks, and he says so. Single examples, or eight or nine generations for the averages. And his own words: the lens shows what a state is disposed to make the model say, which is suggestive and nothing more.
+A: Good. What's the part that isn't suggestive?
+B: The comparison I found most useful. He tried the obvious edit, plain removal of the direction, just deleting it. Then Astra's actual edit, which doesn't just delete the direction. It pushes it to minus five times its original strength. It reverses it.
+A: Ah. So it's not just an ablation.
+B: On forty grade-school problems with a sixteen thousand token cap: the unedited model looped on twenty-nine and got eight right. Plain removal: nineteen loops, thirteen right. Astra's edit: four loops, nineteen right. It fixed twelve problems and broke one.
+A: And the eight the original got right?
+B: Every answer the unedited model actually finished was correct. Eight of eight. That's the whole story in one number. The ability was there. The loop was hiding it.
+A: Which is the authors' Gemma sentence, confirmed from the other side.
+B: Forty problems is small, and he says to read it as helps some. But the plain-removal row matters, because it answers a criticism that was going around: that this was just an old trick. The old trick gets you about a third of the way.
+A: And the old trick deserves its own story, because none of this came from nowhere.
+
+## Old tools, new hands
+A: Reading and writing weights has a lineage, and it's worth knowing, because it tells you what's actually new here. In twenty sixteen, David Ha, Andrew Dai and Quoc Le published HyperNetworks: one network that generates the weights for another.
+B: So a network writing weights is a decade old.
+A: A trained network writing weights for one family of tasks, yes. Then in twenty twenty, Unterthiner and colleagues showed that the accuracy of a trained network can be predicted surprisingly well from its weights alone. They released a hundred twenty thousand trained convolutional networks to study it.
+B: Reading weights to predict behavior.
+A: Same family of question as the game experiment. Then editing. In twenty twenty-two, Meng and colleagues located factual associations in the feed-forward modules in the middle layers of G P T models, and changed specific facts with what they called a rank-one model edit.
+B: Rank one. That's what Astra did to Qwen, isn't it? One direction, pushed through some columns.
+A: The same shape of edit, found a different way. Also in twenty twenty-two, task arithmetic from Ilharco and colleagues: take a fine-tuned model's weights, subtract the original's, and you get a task vector. Negate it and the model gets worse at that task. Add several and it gets better at all of them.
+B: And the one everyone brought up in the comments?
+A: Arditi and colleagues, twenty twenty-four. Across thirteen open chat models up to seventy-two billion parameters, refusal is mediated by a single direction. Erase it from the internal activations and the model stops refusing. And you can bake that erasure into the weights.
+B: Which is what people mean by abliteration.
+A: Right. So the Qwen fix looks a lot like that recipe: find a direction, edit it out of the weights. The authors themselves list hypernetworks, interpretability, and gradient-free search as related work. What they claim is new is narrower: a general-purpose model, with no training for the task, doing this unprompted.
+B: And that's the part the critics went after.
+A: Matthew Honnibal wrote the sharpest version. His count: the post's table has ten experiment rows, and the setting where the model just looks at raw weights only appears in experiments one, two and four, on networks of seventeen to a hundred seventy-two thousand weights.
+B: Everything with a real language model used Python.
+A: Every one. And the Qwen run also ran the model on practice problems. His argument is that bundling these under one name implies one capability that wasn't shown. His line is that Astra can be prompted to devise and perform tasks that a human machine learning engineer could do.
+B: Which is still a big deal.
+A: He says so. He doesn't dispute the results, and he grants that models from a year or two earlier would likely have failed. His objection is to the framing.
+B: I'm with him on the framing and against him on the deflation. A model that can do a junior researcher's interpretability project, in a sandbox, in an afternoon, is the headline. "Natively reads weights" was never the useful part.
+A: I'd go the other way. The part I find genuinely new is the tiny, tool-free reading. The Python work is impressive engineering, but it's the old toolkit with a new hand on it.
+B: We're not settling that.
+A: No. But it does change what you'd want to watch for next.
+
+## Where this could go
+B: Here's where I'd look, if you build with open models. First, the boring practical one. That Qwen edit converts cleanly to the format people run locally. The base and edited files differ in exactly two tensors, and it still mostly holds after four-bit quantization. That's a two-tensor patch to a known bug. Patches like that are going to start circulating.
+A: And a two-tensor patch is also a two-tensor attack.
+B: Somebody in one of the threads asked exactly that: how long until someone tweaks a few weights to make a model secretly misbehave.
+A: Which is the uncomfortable mirror of the authors' own wish list. They list auditing models for backdoors without running evaluations as an application. The show has covered work showing a capability can be hidden inside weights in a way that resists fine-tuning. A model that reads weights is the auditor you'd want. It's also the most capable tamperer.
+B: And the second thing to watch is people trying it on their own problems. One user had Claude Opus five point five edit Gemma four, the twelve billion version, to change how it translates one Italian tense. Use the imperfect when he was still hiding when the soldiers came; keep the pluperfect when the period was already over.
+A: A conditional preference. That's a much harder target than "stop looping."
+B: Much harder. And one of the top replies asked whether it actually worked, so I'd file it as an attempt, not a result. But that's the right kind of attempt.
+A: And now the speculation, flagged as speculation.
+B: Flag it.
+A: Latent Space's newsletter called this going from zero to one on a recursive self-improvement capability, and in the same breath said it's unlikely to scale beyond simple games and reinforcement learning policies for now. The authors themselves say they're limited by context length and harnesses, and that they're building a benchmark. If the reading half scales, interpretability gets a very patient new worker. If the writing half scales, the line between training a model and programming one gets blurry.
+B: My speculation is smaller. I think the near-term version is targeted repair. Find the known failure, write the two-tensor fix, publish the diff. Less self-improvement, more patch Tuesday.
+A: [chuckles] That's the least romantic future you could have picked.
+B: It's the one I'd actually ship.
+
+## Wrap
+A: What stays with me is the Gemma sentence. The most viral number in the whole post came from removing an obstacle, not adding an ability, and the authors were the ones who said so.
+B: And what stays with me is the plain-removal row. Deleting the direction got a third of the way. Reversing it got most of the rest. That's not reading weights natively. That's a good engineer's instinct, from a model. And I still don't know which of those two sentences is the bigger deal. Stay grounded.
