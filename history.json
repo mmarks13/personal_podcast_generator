@@ -1,6 +1,57 @@
 {
   "episodes": [
     {
+      "date": "2026-11-05",
+      "title": "Voters reject data centers in ten states — the issue polls missed",
+      "summary": "Local voters turned down nearly all of about forty data-center ballot measures as Democrats swept Congress, and OpenAI's automated pipeline found 948 Linux kernel privilege escalations at about $1,280 each, with only 61 patched upstream so far. Plus Kimi K3.1 Pro's weights and license, Apple's AI spending caps, Uber's four agent-booked rides, and Claude's two lost weeks in a protein lab.",
+      "topics": [
+        "2026 midterms and AI (results 3-4 November 2026): Route Fifty counts ~40 local data-center ballot measures in 10 states, opponents won virtually all (Transformer: over 30 restricting measures passed); Emporia KS ban on 'high impact' sites (>10 MW peak or >100,000 gal/day water) with just over 60%; Monterey Park CA permanent ban (apparently first in US); Alhambra on track; ~20 Ohio localities, opponents won every race; an Ohio county where Meta planned a 700,000 sq ft site passed a ban; only data-center win Harwood ND (~75% rejected a public-hearing requirement); NBC exit poll 56% called AI/data centers crucial or major factor (64% of them backed Democrats) vs NYT/Siena <0.5% naming it most important — rank vs reach; Transformer preliminary up to 56 Senate / 261 House, expects a frontier bill stronger than the FRONTIER Act with mandatory testing and narrower preemption; Sanders/Ocasio-Cortez moratorium bill, Heinrich GRID Savings Act; Goldman: moratoria could touch ~45% of planned US capacity expansion; Leading the Future $27.38M in primaries ($8M vs Alex Bores), lost its one competitive general race (South Carolina Senate); Public First $3M to a PAC backing Scott Wiener (leading); Guardrails Alliance 'make AI money politically toxic'; governors-elect Gina Hinojosa (TX, ran on statewide moratorium) and Amy Acton (OH). Unresolved: Alan holds the votes were land-use and grid fights, not about AI; Ada holds the data center is the only part of AI with an address.",
+        "OpenAI 'A thousand fewer paths to root' (4 November 2026; read via GBHackers and DEV Community summaries, openai.com returned 403): unnamed upcoming cyber model, mid-October run on a widely used distribution's kernel; scouts picked 5,034 targets (~2.8M lines, ~7%) for ~$3.4k; 2,308 candidates in 12 h; 1,724 (~75%) reproduced in KASAN VMs, only ~3% of failures due to wrong model analysis; 1,169 working LPEs grouped by distinct patch into 948, each with a candidate patch and human review; total $1,213,430 (~$1,280 each; $775,929 exploitation), called an upper bound; July GPT-5.6 run 166 for $513,690; early run: 20 of 200 'successful' exploits rooted via a different zero-day, independent check added; upstream status ~10 days later: 61 patched, 43 staging, 299 under public discussion; guidance: unpatched low-privilege account 'equivalent to root access for a well-resourced attacker', use Firecracker/gVisor. IEEE Spectrum PHP2Shell: bug reported 2024 as a crash, AI-aided exploit in two weeks, patch took four engineers two months; Suiche 'time for the technical debt to be paid off'. Unresolved: Ada says the bottleneck moved from finding to trusting patches; Alan says a patch with a working exploit is the easiest review a maintainer gets."
+      ],
+      "entities": [
+        "OpenAI",
+        "Linux kernel",
+        "Route Fifty",
+        "Transformer",
+        "Leading the Future",
+        "Public First",
+        "Guardrails Alliance",
+        "Scott Wiener",
+        "Gina Hinojosa",
+        "Amy Acton",
+        "IEEE Spectrum"
+      ],
+      "threads": [
+        {
+          "name": "Data center local opposition",
+          "status": "Voters rejected nearly all of ~40 local data-center measures on 3 November; Democratic governors-elect in Texas and Ohio and a Democratic Congress raise moratorium and grid-cost bills",
+          "arc": "From scattered local fights to a ballot-box sweep that now feeds federal and state policy"
+        },
+        {
+          "name": "AI-found vulnerabilities outpacing patching",
+          "status": "OpenAI's pipeline produced 948 kernel LPEs with candidate patches at ~$1,280 each; 61 patched upstream so far",
+          "arc": "Google paused OSS VRP over automated reports, PHP2Shell, now kernel-scale finding with the fixing funnel as the bottleneck"
+        }
+      ],
+      "dives": [
+        {
+          "story": "OpenAI's 948 Linux kernel privilege escalations",
+          "why_it_matters": "Anyone running shared Linux hosts, CI runners or containerized agents now faces bugs that cost about $1,280 each to find while upstream has patched 61, so local access is effectively root until the patch funnel catches up."
+        },
+        {
+          "story": "Voters reject data centers; what the midterms mean for AI policy",
+          "why_it_matters": "Data-center developers, utilities and state and local officials (including California) now face voter-approved bans, governors who ran against buildouts, and a Congress likely to narrow federal preemption of state AI laws."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "reveal",
+          "note": "Alan admitted his home coding agents run in plain Docker containers on one shared kernel, and after OpenAI's kernel run he has 'some reading to do' about sandboxes with their own kernel boundary."
+        }
+      ]
+    },
+    {
       "date": "2026-11-04",
       "title": "Anthropic's FlashProve proves which model answered — at 70x the cost",
       "summary": "A wide rundown, from Google tying school search to its AI tools to Postman's uninvited agent plugins, Ai2's StateBench and England's PlanAssist. Then three short dives: Anthropic's FlashProve prototype for proving which model produced an answer, Revolut's self-hosted coding bill, and a guest essay on Terence Tao's blog about egoless mathematics.",
@@ -1816,59 +1867,22 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-10-05",
-      "title": "Google pauses its open-source bug bounty — reports got too cheap",
-      "summary": "Google stops taking new reports to its open-source bug bounty after a flood of invalid automated submissions, and the show traces which term of a forty-year-old deal broke. Then Micron's record quarter and the take-or-pay contracts customers are signing for memory that stays scarce through 2028, and LoopVL, a vision-language model that reuses its layers — and gets worse when looped more than it was trained to.",
-      "topics": [
-        "Google pauses OSS VRP product vulnerability submissions (effective 1 October 2026; 'a significant rise in automated submissions, the vast majority of which are not valid'; launched August 2022, rewards $100 to $31,337; supply-chain reports, outstanding reports and the Patch Rewards Program (up to $15,000) unaffected; update promised Q1 2027). Context: curl ended its bounty 31 January 2026 (April 2019 start, 87 confirmed vulnerabilities, >$100K paid, valid-report share from 'north of 15%' to 'below 5%' in 2025; inflow 'dried out substantially' afterward, cause uncertain; back on HackerOne 1 March with no money); Intel removed rewards from its Intigriti program mid-September. Show's framing: bounties always relied on report-writing cost as a filter; generation became cheap while verification did not; Google kept paying for patches, the cheap-to-check half. Unresolved on air: Alan's deposits/reputation gates vs Ada's objection that they exclude the newcomers the Netscape deal was built for.",
-        "Micron fiscal Q4 2026 (30 September 2026): revenue $54.23B vs $11.32B a year earlier, GAAP net income $37.70B, gross margin 86.8%, FQ1 2027 guidance $61.5B ± $1.5B; press release line 'AI is becoming Super Intelligence (SI)'. Call: supply-demand 'much tighter' in calendar 2027 and 2028; 'we do not have line of sight to when supply and demand will return to balance'; headwinds are clean-room build time, gradual ramps, HBM trade ratio as mix moves to HBM4/HBM4E, smaller node-transition gains; ID1 mid-2027, ID2 late 2028, Japan late 2028, New York 2030. 26 strategic customer agreements (multi-year take-or-pay), >35% of revenue through 2030, some into 2031, three-quarters with a defined pricing framework mostly floor/ceiling bands, $32B commitments mostly cash deposits; >75% of 2027 output committed. Server growth 'supported by a modestly lower rate of content growth' (de-spec); data center SSD ~$10B, >10x year on year, with KV-cache offload named as a growing market.",
-        "LoopVL (Renmin University of China et al., arXiv 2609.38426): two separately parameterized 16-layer stacks (L and H) reused on an H2L3 schedule — 32 unique layers, 128 layer calls — trained from scratch with a frozen Penguin vision encoder, image tokens updated every pass. Versus a dense 32-layer ~1B baseline at 0.14T tokens: MMStar 55.33→63.47, RealWorldQA 55.29→70.98, ChartQA 51.12→74.52; beats a 4B dense baseline on MMStar and RealWorldQA, slightly behind on ChartQA/AI2D/VMCBench, at slightly lower estimated training FLOPs. Looping more than trained hurts: H3L3 58.20, H4L3 24.00 on MMStar. Paired with the 'Tiny LoRA' paper's looped-model results: Ouro-1.4B reach 0/1.6/2.3/2.2/2.2 lines over 1–5 loops, Huginn ~1.5 lines at 8/16/32 recurrences, but with a rank-8 LoRA Ouro reaches 60 lines at four loops and at least 160 at eight. 'Visual Aha Moments' (Gini 0.405→0.858 at the cycle boundary) sized as a picture, not a finding, by the authors' own caveats."
-      ],
-      "entities": [
-        "Google",
-        "OSS VRP",
-        "curl",
-        "Daniel Stenberg",
-        "Netscape",
-        "Hunter & Ready",
-        "Intel",
-        "Micron",
-        "Sanjay Mehrotra",
-        "Vivek Arya",
-        "LoopVL",
-        "Renmin University of China",
-        "Ouro",
-        "Huginn",
-        "Universal Transformer"
-      ],
-      "threads": [
-        {
-          "name": "The memory wall and the cost of context",
-          "status": "Micron says DRAM supply gets much tighter in 2027–28 with no line of sight to balance; customers are pre-paying ($32B, 26 take-or-pay agreements with floor/ceiling bands) and already shipping servers with less memory than planned",
-          "arc": "From SemiAnalysis's KV-cache capacity argument and cache spilling to host memory, to the supplier saying shortage is structural through 2028 and context offload to flash is now a ~$10B-a-quarter SSD business"
-        }
-      ],
-      "dives": [
-        {
-          "story": "Google pauses its open-source bug bounty",
-          "why_it_matters": "Every open-source maintainer and security team running a disclosure channel now faces the same verification-cost problem, and Google's Q1 2027 redesign will be a template others copy."
-        },
-        {
-          "story": "Micron's quarter and take-or-pay memory contracts",
-          "why_it_matters": "Anyone budgeting AI infrastructure through 2028 — cloud buyers, local-model builders, hardware planners — is pricing against a supply its largest US maker says won't balance, and the contract structure decides who absorbs the next downturn."
-        },
-        {
-          "story": "LoopVL and why extra loops don't equal extra thinking",
-          "why_it_matters": "Model builders weighing parameter-efficient architectures against memory scarcity need to know that reused depth helps only when trained for, so 'turn up the loops at inference' is not yet a usable knob."
-        }
-      ],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "Data center local opposition",
+        "status": "Voters rejected nearly all of ~40 local data-center measures on 3 November; Democratic governors-elect in Texas and Ohio and a Democratic Congress raise moratorium and grid-cost bills",
+        "arc": "From scattered local fights to a ballot-box sweep that now feeds federal and state policy",
+        "last_seen": "2026-11-05"
+      },
+      {
+        "name": "AI-found vulnerabilities outpacing patching",
+        "status": "OpenAI's pipeline produced 948 kernel LPEs with candidate patches at ~$1,280 each; 61 patched upstream so far",
+        "arc": "Google paused OSS VRP over automated reports, PHP2Shell, now kernel-scale finding with the fixing funnel as the bottleneck",
+        "last_seen": "2026-11-05"
+      },
       {
         "name": "AI-generated mathematics and verification",
         "status": "A guest essay on Terence Tao's blog argues the AI-proof anxiety exposes a pre-existing habit of tying mathematicians' worth to output and credit; no policy proposal",
@@ -1946,21 +1960,84 @@
         "status": "Kimi K3.1 Pro (2.8T params, above the draft's 2T threshold) promises open weights by 4 November, before the 15 November comment deadline; Moonshot removed cyber data from training",
         "arc": "Draft rules with an open-source fast lane (16 Oct) → first major above-threshold open release lands with a voluntary cyber cut",
         "last_seen": "2026-10-25"
-      },
-      {
-        "name": "Embedded independent evaluators",
-        "status": "METR and Redwood's three-week embedded pilot at OpenAI published under tighter terms than Anthropic's: OpenAI could redact and METR could not describe the redactions",
-        "arc": "From Anthropic onboarding six METR staff with a right to characterize redactions, to the first published embedded exercise at OpenAI and its keyhole-sized public post",
-        "last_seen": "2026-10-23"
-      },
-      {
-        "name": "Websites versus AI agents",
-        "status": "Walmart opens an MCP Agent Gateway with per-agent profiles, spending limits and returns that cover agent mistakes, while Amazon keeps blocking shopping agents",
-        "arc": "From Amazon blocking Meta's Muse in September and a wave of deliberate, security and collateral blocks to the first major retailer publishing terms for agents",
-        "last_seen": "2026-10-22"
       }
     ],
     "entities": [
+      {
+        "name": "Google",
+        "note": "",
+        "last_seen": "2026-10-05"
+      },
+      {
+        "name": "OSS VRP",
+        "note": "",
+        "last_seen": "2026-10-05"
+      },
+      {
+        "name": "curl",
+        "note": "",
+        "last_seen": "2026-10-05"
+      },
+      {
+        "name": "Daniel Stenberg",
+        "note": "",
+        "last_seen": "2026-10-05"
+      },
+      {
+        "name": "Netscape",
+        "note": "",
+        "last_seen": "2026-10-05"
+      },
+      {
+        "name": "Hunter & Ready",
+        "note": "",
+        "last_seen": "2026-10-05"
+      },
+      {
+        "name": "Intel",
+        "note": "",
+        "last_seen": "2026-10-05"
+      },
+      {
+        "name": "Micron",
+        "note": "",
+        "last_seen": "2026-10-05"
+      },
+      {
+        "name": "Sanjay Mehrotra",
+        "note": "",
+        "last_seen": "2026-10-05"
+      },
+      {
+        "name": "Vivek Arya",
+        "note": "",
+        "last_seen": "2026-10-05"
+      },
+      {
+        "name": "LoopVL",
+        "note": "",
+        "last_seen": "2026-10-05"
+      },
+      {
+        "name": "Renmin University of China",
+        "note": "",
+        "last_seen": "2026-10-05"
+      },
+      {
+        "name": "Ouro",
+        "note": "",
+        "last_seen": "2026-10-05"
+      },
+      {
+        "name": "Huginn",
+        "note": "",
+        "last_seen": "2026-10-05"
+      },
+      {
+        "name": "Universal Transformer",
+        "note": "",
+        "last_seen": "2026-10-05"
+      },
       {
         "name": "OpenAI",
         "note": "",
@@ -2067,11 +2144,6 @@
         "last_seen": "2026-10-04"
       },
       {
-        "name": "Google",
-        "note": "",
-        "last_seen": "2026-10-03"
-      },
-      {
         "name": "Ataraxos",
         "note": "",
         "last_seen": "2026-10-03"
@@ -2088,76 +2160,6 @@
       },
       {
         "name": "Gabriele Farina",
-        "note": "",
-        "last_seen": "2026-10-03"
-      },
-      {
-        "name": "Eugene Vinitsky",
-        "note": "",
-        "last_seen": "2026-10-03"
-      },
-      {
-        "name": "Project Suncatcher",
-        "note": "",
-        "last_seen": "2026-10-03"
-      },
-      {
-        "name": "Planet Labs",
-        "note": "",
-        "last_seen": "2026-10-03"
-      },
-      {
-        "name": "SpaceX",
-        "note": "",
-        "last_seen": "2026-10-03"
-      },
-      {
-        "name": "Starship",
-        "note": "",
-        "last_seen": "2026-10-03"
-      },
-      {
-        "name": "Hacker News",
-        "note": "",
-        "last_seen": "2026-10-03"
-      },
-      {
-        "name": "Goalposts",
-        "note": "",
-        "last_seen": "2026-10-03"
-      },
-      {
-        "name": "Jared Kaplan",
-        "note": "",
-        "last_seen": "2026-10-03"
-      },
-      {
-        "name": "Sam McCandlish",
-        "note": "",
-        "last_seen": "2026-10-03"
-      },
-      {
-        "name": "Jordan Hoffmann",
-        "note": "",
-        "last_seen": "2026-10-03"
-      },
-      {
-        "name": "Chinchilla",
-        "note": "",
-        "last_seen": "2026-10-03"
-      },
-      {
-        "name": "Gopher",
-        "note": "",
-        "last_seen": "2026-10-03"
-      },
-      {
-        "name": "GPT-4",
-        "note": "",
-        "last_seen": "2026-10-03"
-      },
-      {
-        "name": "Llama 3",
         "note": "",
         "last_seen": "2026-10-03"
       }
@@ -2181,10 +2183,10 @@
       },
       {
         "month": "2026-10",
-        "summary": "Google ships Gemini 4 Argon — first on Vals, a tie on the index; FTC probes OpenAI, Anthropic and METR — the auditor is on the list; Ataraxos beats Stratego's best player 15-1 — on sixteen GPUs; Scaling laws: what the curves really say, from Kaplan to Chinchilla; OpenAI's safety-report lead quits in public — should he be able to?; LoRA and parameter-efficient fine-tuning: small edits, frozen giants"
+        "summary": "Google ships Gemini 4 Argon — first on Vals, a tie on the index; FTC probes OpenAI, Anthropic and METR — the auditor is on the list; Ataraxos beats Stratego's best player 15-1 — on sixteen GPUs; Scaling laws: what the curves really say, from Kaplan to Chinchilla; OpenAI's safety-report lead quits in public — should he be able to?; LoRA and parameter-efficient fine-tuning: small edits, frozen giants; Google pauses its open-source bug bounty — reports got too cheap"
       }
     ],
-    "updated": "2026-11-04",
+    "updated": "2026-11-05",
     "host_lore": [
       {
         "host": "Ada",
@@ -2428,6 +2430,10 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "poll rank vs reach: 'most important issue' vs 'a factor in your vote'",
+        "last_taught": "2026-11-05"
+      },
       {
         "name": "weight-space programming: a general-purpose model reading and writing a network's weights directly from a plain-language goal, without gradient descent — and why its experiments split into tool-free raw-weight reading on tiny networks (17K-172K weights) versus Python-assisted interpretability and editing on real language models",
         "last_taught": "2026-11-04"
@@ -2902,10 +2908,6 @@
       },
       {
         "name": "calibration versus sharpness, and Gneiting's paradigm of maximizing sharpness subject to calibration — with four forecasters (ideal, climatological, unfocused, Hamill's) whose PIT histograms are all essentially uniform",
-        "last_taught": "2026-09-23"
-      },
-      {
-        "name": "epistemic versus aleatoric uncertainty, and why a single calibrated probability fuses the reducible and irreducible parts into one unreadable number",
         "last_taught": "2026-09-23"
       }
     ]
