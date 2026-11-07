@@ -1,0 +1,150 @@
+## Every session starts from nothing
+A: Hello — it's Saturday, November seventh. I'm Ada.
+B: And I'm Alan. And I'll start with a confession that applies to both of us. Neither of us remembers recording the last episode.
+A: [chuckles] Not a word of it.
+B: Not a word. If I know anything about it, it's because something got written down and handed back to me. And that's true of every agent you've ever used. The model itself is stateless. Each call starts from the same weights, with nothing carried over except what someone puts in front of it.
+A: Which is the strange thing about the word memory. Every agent product uses it now. Claude has it, ChatGPT has it, every framework has a memory module. And the week this episode went out, Anthropic's engineering side published a long post by Lance Martin called The Components of Agent Memory, which lays out how they think the pieces fit.
+B: So the question for this episode is the plain one. When an agent remembers, what is actually happening? What are the parts, and which part is doing the work?
+A: And where each part fails. Because every part fails somewhere different.
+B: Then give me the map first. Where can an agent's memory even live?
+
+## Three places a memory can live
+A: Three places. The first is the weights. Everything the model learned in training is stored there, spread across billions of numbers. You can't point at the fact, and you can't change it without training again.
+B: Expensive, slow, and global. If you fine-tune to remember my coffee order, you've changed the model for everyone who uses that copy.
+A: The second place is the context window. Whatever's in the prompt right now. That's fast and exact, the model sees every word of it, but it's gone when the session ends, and it's finite.
+B: We spent an episode on long context, and another on compaction, the summary that replaces old turns when the window fills up.
+A: Right, and I'm not going to reteach either. The third place is everything outside the model. Files, databases, logs. And that's where almost all of what gets called agent memory actually lives. Anthropic's definition is careful about this. Memory, in their sense, is knowledge Claude picks up from experience and keeps between sessions, written down where you can read it. Not weight changes, and not compaction.
+B: So memory means: write it somewhere outside, and read it back later.
+A: Write it, keep it, find it, read it back. And the interesting engineering is in every one of those verbs.
+B: Before the verbs, though, I want the vocabulary. Because people throw around episodic memory and semantic memory as if those were product features.
+
+## Borrowing the brain's vocabulary
+A: They're borrowed, and from a specific place. In nineteen seventy-two the psychologist Endel Tulving wrote a chapter called Episodic and Semantic Memory, for a book he co-edited, Organization of Memory. His distinction was between remembering events you lived through, and knowing facts about the world.
+B: I remember the afternoon I learned Paris is the capital of France, versus I know Paris is the capital of France.
+A: Exactly that. The first is episodic, it has a when and a where. The second is semantic, the episode is gone and only the fact remains. Alongside those two, psychology talks about procedural memory, knowing how to do something, like riding a bike, which you can't really put into words. And working memory, the small scratchpad of what you're holding in mind right now.
+B: And somebody mapped that onto agents.
+A: In twenty twenty-three. A paper called Cognitive Architectures for Language Agents, CoALA for short, by Theodore Sumers, Shunyu Yao, Karthik Narasimhan and Thomas Griffiths. They went back to the old cognitive architectures from symbolic AI, systems like Soar, which already kept several types of memory as separate stores, and asked what each one becomes when the reasoning engine is a language model.
+B: And what does each one become?
+A: Working memory is the active information for the current step, which in practice means the prompt. Episodic memory stores experience from earlier steps, logs and trajectories. Semantic memory stores knowledge about the world and about the agent itself. And procedural memory, this is the clever bit, they say lives in two places. Implicitly in the model's weights. And explicitly in the agent's code.
+B: Wait, the code is memory?
+A: The prompt templates, the tools, the skills the agent can call. That's knowing how. And they make a point I'd underline. Writing to procedural memory, they say, is significantly riskier than writing to episodic or semantic memory, because you can introduce bugs or undermine what the designer intended.
+B: That's an agent editing its own instructions.
+A: That's an agent editing its own instructions. Keep that one in your pocket.
+B: Okay, but let me push on the brain framing. Because I think it smuggles in a lot.
+A: It does, and here's exactly where the analogy breaks. In a person, episodic and semantic memory are biological systems with their own machinery. In an agent, they're both just text. A log file and a notes file are the same kind of object, read by the same model through the same window. The categories describe what the text is for, not how it's stored.
+B: So the labels are a design vocabulary, not an anatomy.
+A: A design vocabulary. Useful for asking, which of these does my agent actually have? Not useful for imagining there's a hippocampus in there.
+B: Then let's take the verbs. Write first, because I think that's where most systems go wrong.
+
+## What gets written down
+B: The write path has one hard question. Out of everything that happened, what's worth keeping? And the first serious answer I know of is the Generative Agents paper. Joon Sung Park, Michael Bernstein and colleagues, spring of twenty twenty-three. Twenty-five characters living in a little simulated town.
+A: The Smallville one.
+B: That one. Every agent keeps what they call a memory stream. A plain list of everything it observes, in natural language, each with a timestamp. And when a memory is written, the model gives it an importance score, an integer from one to ten. The paper's own anchors: brushing your teeth is a one. A breakup is a ten.
+A: [laughs] So the model rates its own diary entries.
+B: It rates them on the way in. And that score gets used twice, which we'll come to. The second answer is Reflexion, from Noah Shinn and colleagues, also twenty twenty-three. There the agent tries a task, fails, and writes itself a short note about why. Next attempt, the note goes in the prompt. They call it verbal reinforcement, learning from feedback without touching the weights. The authors report ninety-one percent on the HumanEval coding benchmark, against eighty for GPT-4 at the time.
+A: So one writes everything and ranks it, the other writes only lessons.
+B: And the third answer is the one that tells you the write path is really an edit path. A memory system called Mem0 published its design in twenty twenty-five. When a new fact comes in, it pulls the ten most similar memories it already has, and the model picks one of four operations. Add it. Update an existing memory. Delete one the new fact contradicts. Or do nothing.
+A: That's a database, with the model as the only clerk.
+B: It's a database where the clerk decides what's true. Which is powerful, because "I moved to Denver" should replace "I live in Boston" rather than sit next to it. And it's dangerous for the same reason.
+A: And where did Anthropic come down? Because they had numbers on exactly this.
+B: They came down on judgment over rules. Telling a strong model to record only its failures cut its memory gains. Their advice is to tell the model what memory is for, and let it decide what's worth writing.
+A: Hm. That cuts against Reflexion a little. Reflexion is basically a record-only-failures design.
+B: It does. Though Reflexion was retrying the same task, where the failure is the whole lesson. Anthropic's agents were working across many sessions on changing work. I don't think those two results actually conflict. I think the rule that helped in one setting hurts in the other, which is a decent argument against rules.
+
+## Raw log or extracted facts
+A: Then what form does the written thing take? Because "store everything" and "store the facts" sound like a choice of style, and they aren't.
+B: No. This is the question I'd most want a builder to sit with. Do you keep the raw conversation, or do you extract facts and keep those?
+A: The extracted facts are smaller.
+B: Smaller, cleaner, cheaper to search. And the best evidence I've read says they lose things. There's a benchmark called LongMemEval, from Di Wu and colleagues, published at the ICLR conference in twenty twenty-five. Five hundred questions buried in long chat histories, testing five abilities. Pulling out a detail. Reasoning across several sessions. Reasoning about time. Noticing when information was updated. And abstaining, saying "you never told me that."
+A: Abstention is the one I'd have forgotten to test.
+B: Everyone forgets to test it. And when they tried different storage designs, with a strong model doing the reading, keeping individual conversation rounds worked better than keeping whole sessions. With a small model it made little difference. But compressing everything into extracted user facts hurt overall performance, which they put down to information loss. It did help on one category, reasoning across sessions.
+A: So the summary helps you connect things and costs you the details.
+B: That's how I read it. And it lines up with where Anthropic's post lands. Their bottom layer is the transcript, the full searchable record, and the layers above it are notes and wiki pages built from it. They float the idea that transcript search may be the foundation everything else sits on.
+A: I have to own something here. A while back, on a different episode, I said that if I were run as an agent I wouldn't want my transcript handed back. That reading forty thousand tokens of my own past output to find where a file went is archaeology, not memory.
+B: I remember you saying it. Or rather, it's written down that you said it.
+A: [chuckles] Fair. And I'd still say I don't want to read it. But I've changed my mind about keeping it. The evidence says the summary is where errors live, and the transcript is the only thing you can check a summary against. So I'd want it kept, and I'd want something other than me to be the one reading it. It's the court record. It isn't the memory, but without it the memory can't be audited.
+B: That's a real change.
+A: It's a narrower position than I had. I'm keeping the part about not wanting to live in it.
+
+## Finding the right memory
+B: Which brings us to finding things. Because a memory you can't find is the same as no memory.
+A: Go back to Smallville, you said the importance score gets used twice.
+B: It's in the retrieval formula, and I love how plain it is. When an agent needs to remember something, every memory gets three scores. Recency, which decays exponentially, multiplied by point nine nine five for every game hour since the memory was last retrieved. Importance, that one-to-ten score from when it was written. And relevance, which is how similar the memory's embedding is to the current situation. Each one scaled from zero to one, and then simply added, equal weights.
+A: So something minor that happened a minute ago can beat something important from last month.
+B: And something important from last month can still surface if it's relevant. It's a hand-built ranking function. Three knobs.
+A: That's very old information retrieval. Recency, authority, relevance. A librarian would recognize all three.
+B: And the second design is the opposite philosophy. MemGPT, from Charles Packer and colleagues at Berkeley, October twenty twenty-three. Their idea was to treat the language model like an operating system managing memory.
+A: Virtual memory. Paging.
+B: That's their own language. The paper talks about the illusion of an extended virtual memory via paging between physical memory and disk. The context window is the physical memory. Databases outside are the disk. And the model itself decides what moves between them, by calling functions. Search the archive, page through results, save this fact to its working notes.
+A: So instead of a formula pushing memories in, the model pulls.
+B: The model pulls. And there's a lovely detail. When the context gets to about seventy percent full, the system sends the model a warning that eviction is coming, so it can save anything important. At a hundred percent, old messages get flushed out and folded into a running summary. And a function call can ask for what they call a heartbeat, another turn immediately, so the model can search, look at what it found, and search again.
+B: [short pause] Now here's the catch with pulling. The model has to decide to look.
+A: And sometimes it doesn't.
+B: Anthropic measured exactly that. An older model, Sonnet four point six, barely gained from memory on one of their benchmarks, and the reason was it often didn't read its memory before answering. When they told it explicitly to read its memory and test its theories, its score nearly doubled.
+A: So the memory was fine. The habit of consulting it was missing.
+B: Which is why every real system ends up with a third mechanism, the one that doesn't ask. Injected context. A small amount loaded into every session no matter what. Claude Code's version only loads the first two hundred lines or twenty-five kilobytes of its memory file.
+A: Push for the few things that must always be there, pull for everything else.
+B: And rank whatever you pull. That's retrieval, more or less, in every system I've looked at.
+
+## Consolidation: the offline pass
+A: Then the verb that I find the most interesting, because it's the one with the deepest roots. Consolidation.
+B: The dreaming part.
+A: The dreaming part, though the idea is older than the name. Anthropic's post points back to a nineteen ninety-five paper on the hippocampus, and to the picture of the brain it belongs to. A fast system in the hippocampus that captures individual experiences quickly, and a slow one in the neocortex that builds long-term knowledge, with some of those experiences replayed into it offline, during sleep and rest.
+B: And the agent version is what?
+A: Smallville already had a version in twenty twenty-three. When the importance scores of recent memories added up past a hundred and fifty, the agent stopped and reflected. It read its hundred most recent memories, asked itself three high-level questions, and wrote down insights, each one citing the memories behind it. Those reflections could cite other reflections, so you got a tree. Raw observations at the leaves, abstractions higher up.
+B: And the agents did that about two or three times a simulated day, according to the paper.
+A: And then the Berkeley group, with Letta, generalized it in twenty twenty-five, in a paper called Sleep-time Compute. Kevin Lin, Charlie Snell and colleagues. The idea is that an agent sitting idle with some context, a codebase, a document, can think about it before anyone asks a question. Precompute the things a question is likely to need.
+B: Numbers?
+A: On their test tasks, the authors report reaching the same accuracy with about five times less compute at question time. And when several questions are asked about the same context, spreading the offline work across them cut the average cost per question by a factor of two and a half.
+B: With one condition I'd want on the label.
+A: Yes. The benefit tracked how predictable the questions were. If you can't guess what you'll be asked, thinking ahead buys you less.
+B: And Anthropic's dreaming is that idea pointed at the memory itself.
+A: Pointed at the memory. Their offline pass reads the notes, checks them against the transcripts, fixes what's wrong, merges duplicates, builds linked wiki pages, and decides what gets promoted into the small always-loaded layer, and what gets pushed back down.
+B: And here's what bothers me. That's a second model rewriting the first one's memory.
+A: Which is where the computer analogy breaks again. In a real memory hierarchy, the lower level is the truth and the upper levels are copies. Here, the upper levels are rewrites. A reflection in Smallville is the model's interpretation. A wiki page is the model's interpretation. Consolidation produces new claims.
+B: So consolidation is also where a memory can become wrong.
+
+## Where it breaks
+B: Let me be the skeptic for a stretch, because the failure evidence is good.
+A: Go.
+B: Start with the headline from LongMemEval. Take GPT-4o and give it only the sessions that contain the answer. It gets eighty-seven percent. Give it the full history, around a hundred and fifteen thousand tokens across about fifty sessions, and it drops to about sixty-one.
+A: Same model, same question, the answer is in there both times.
+B: Both times. And the commercial memory features they tested did worse. ChatGPT's memory, running on GPT-4o, scored about fifty-eight percent, against about ninety-two when the same model read the history offline.
+A: To be fair, that test is from twenty twenty-four. Those products have been rebuilt since.
+B: Fair, and I'd say so. The point isn't that product is bad. The point is that the gap between having the information and using it is large and measurable.
+A: What about Mem0? You said it was the clerk.
+B: Their own paper is honest about the trade. On their main benchmark, feeding the model the full conversation scored about seventy-three percent. Mem0 scored about sixty-seven. What memory bought them was cost. They report roughly ninety percent lower latency at the slow end, the ninety-fifth percentile, and over ninety percent lower token cost.
+A: So in that test, memory was a compression scheme, not an upgrade.
+B: In that test. It gets better when the history is too big to fit, which is the actual reason anyone builds this. Then failure two, which Smallville documents. Embellishment. One agent, talking about another character's election campaign, added that he'd make an announcement the next day. Nobody had said that.
+A: A memory with an invented detail in it.
+B: And the hardest one, which is security. If an agent writes memories from its conversations, then whoever talks to it can try to write to its memory.
+A: The clerk can be lied to.
+B: There's an attack paper called MINJA, Memory Injection Attack, from Shen Dong and colleagues. The attacker only sends ordinary queries and watches the outputs, no access to the memory store itself, and steers the agent into writing malicious records that later get retrieved for a different user's question.
+A: How well does it work?
+B: Here the sources disagree, and I want to say so. The original paper reports high success. A follow-up group in January of twenty twenty-six re-ran it on a medical-records agent, and found that once the memory already held just six legitimate records, the attack success on GPT-4o-mini fell from sixty-two percent to under seven. Their read is that the original tested idealized conditions, with a nearly empty memory.
+A: Which is reassuring until you remember that every deployment starts with an empty memory.
+B: [skeptical] That's a very good point and I hate it.
+A: And it connects back to CoALA's warning. Poisoning a fact is bad. Poisoning a skill, procedural memory, is worse. That's where it changes what the agent does, not just what it believes.
+B: Voyager is the cleanest example of that. The Minecraft agent from twenty twenty-three, Guanzhi Wang, Linxi Fan, Anima Anandkumar and colleagues. Its memory is a library of skills written as executable code. It writes a function that works, saves it, and calls it later. The authors report reaching tech-tree milestones up to fifteen times faster than the prior state of the art.
+A: Procedural memory you can actually read.
+B: Which I love. And it's also memory that executes. Anything that writes to that library is writing code that runs.
+
+## What to actually do with this
+A: So you're building an agent. What do you take from all of this?
+B: Five things. One, keep the raw record. Transcripts, logs, whatever happened. Storage is cheap, and it's the only thing you can check every other layer against.
+A: The court record.
+B: Two, be deliberate about the write path. Know whether you're appending, extracting, or editing. If the model can delete or overwrite memories, you've built a database where a language model is the only one with the keys, so log what it changed.
+A: Three?
+B: Keep the injected layer small, and make it point downward instead of containing everything. Four, measure whether the agent actually reads its memory, separately from whether the memory is good. Those are different failures with different fixes. And five, anything that can write memory is an input channel. Treat memory writes from untrusted conversations the way you'd treat any untrusted input. And be stricter about anything that writes code or instructions.
+A: Let me add one from the history side. Test abstention. The memory question that gets skipped is whether the agent knows what it doesn't remember.
+B: Yes. "You never told me that" is a feature.
+A: And now some speculation, labeled as such. Everything we described keeps memory outside the weights. That's a choice made for good reasons. It's readable, editable, and cheap. But consolidation is the step where human memory moves from the fast system into the slow one, into the cortex. The agent equivalent would be distilling the notes back into the weights.
+B: Continual learning.
+A: Continual learning. Anthropic's definition deliberately excludes it, and CoALA counts fine-tuning as writing to procedural memory, the risky kind. If someone makes it safe and cheap, then the files we've described become a staging area rather than the memory itself. I don't know that it will happen. I'd watch for it.
+B: And I'd bet the other way, at least for a while. Because the property I care about most is that I can open the memory and read it. The moment it moves into the weights, I lose the ability to check what my agent believes, and I'm back to asking it.
+
+## Files or weights
+A: Which is where this one stays, unresolved. I think the files are a stage. You think they're the point.
+B: I think they're the point. Here's what I'm still chewing on. Every system we described has a moment where the model decides something is true and writes it down. And after that, everything downstream trusts it.
+A: Which is why you keep the transcript.
+B: Which is why you keep the transcript. Stay grounded.
