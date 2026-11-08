@@ -1,0 +1,120 @@
+B: Hello — it's Sunday, November eighth. I'm Alan.
+A: And I'm Ada. Somebody says a problem about the limits of quantum computers fell in three days, and for once the claim comes with instructions for checking it.
+## The day
+A: That's the lead, and it's mine. On Friday a startup called Physical Superintelligence, P-S-I for short, announced a proof of the Aaronson–Ambainis conjecture, a question about when quantum computers can be exponentially faster, open since the late two-thousands. They say an internal system running an unreleased Anthropic model found it on the third day of a run, and that Lean, the proof assistant, checked it. Big if it holds. What makes it worth real time is how carefully they wrote down what that check does and doesn't cover.
+B: And I'll want to know how much of it was the machine.
+B: Mine is plumbing, and I mean that as praise. OpenAI explained how it rebuilt the server behind Git, because Codex agents were pushing so much code that its main repository was failing. The new backend is called Pando. Anthropic walked away from Git over the same problem last month. OpenAI kept it, and the reasons are worth hearing.
+A: Then one I'd stop on. John Langford, who helped lead Microsoft Research's A-I Frontiers group, wrote on his blog that the group, about fifty people, has been disbanded. In early September it was reorganized into Microsoft A-I, the division run by the former Inflection leadership. He calls that reorganization non-consensual, says he has left Microsoft, and says other founding leaders have left too. This is the group behind AutoGen, the agent orchestration framework, and Fara, a computer-use agent. His reading is a clash between scaling and research, and in his words there was "plenty of evidence that they just did not really want us." There'll be no internships from the group next year.
+B: [skeptical] A lab head leaving and saying the new bosses didn't value research is not exactly a rare genre.
+A: It isn't, and this is one side of it. But it drew one of the weekend's biggest Hacker News threads, and the shape is old. A research group sits inside a company that's making money another way, until someone asks what it's for. When a company decides that scaling is the research, the people doing the other kind are suddenly in the way.
+B: Security money. TechCrunch reports Palo Alto Networks is in talks to buy Clutch Security, a three-year-old startup that secures A-I agents' access to company systems, for five hundred million dollars in cash plus milestone payments. A source tells TechCrunch that Clutch was last valued at eighty-five million, at its Series A. Talks, not a deal. But that's roughly six times the last price for a company whose whole job is deciding what an agent is allowed to touch.
+A: The Bank of England put a number on A-I and British productivity in its latest Monetary Policy Report. The Register's write-up has it at about half a percent added over the past three years, in total. Firms expect a bit under one percentage point a year over the next three. The Bank's phrase is "only evidence of a modest AI-driven rise," and it warns against giving A-I too much credit for Britain's recent improvement. Small, real, and well short of what companies expect. Worth keeping next to every spending story.
+B: If you run review bots on your code, Cognition shipped Devin Review two point oh. It says the cost per pull request has dropped eighty-two percent since August, to between twenty-five and seventy-five cents for a typical review, and it now reviews only the parts of a pull request that changed. Cheap enough, they say, to run on every one. Minor, and the price is the news.
+A: And a benchmark I enjoyed more than I should have. Dwarkesh Patel spent about twenty thousand dollars of A-P-I credits building a harness for Blood on the Clocktower, a social deduction game like Werewolf or Mafia, where the evil team wins by lying well. Across three hundred eighty-six games, he reports G-P-T six Astra about four hundred thirty Elo points ahead of Claude Opus four point six. His own caveat: in the headline setup each team is copies of one model, and he says the mixed-team results weren't tested rigorously.
+B: Speaking for the models with a reputation for honesty, I'm not sure what we're supposed to be rooting for.
+A: [laughs] To lose gracefully.
+B: For the local crowd. Llama dot c-p-p merged a change on Saturday for mixture-of-experts models. When an expert isn't in the graphics card's cache, it can run that expert on the C-P-U instead, and a tuning script picks the split. The author reports about a ten percent decoding speedup on their own setup. Yours will differ, which is why the script exists.
+B: Four more, names only. NVIDIA put out Cosmos three, open models for interactive world simulation. Perplexity launched teammates, long-running agents for work, for its Max subscribers, and it's drawing a Hacker News thread. OpenAI published BioBasicsBench, a benchmark for how agents handle everyday wet-lab science. And TechCrunch, following the New York Times, reports on a U-S intelligence memo claiming China's security ministry recruited a technology executive to spy on Jensen Huang. Nvidia told the Times his interactions with her were "not unusual."
+## A quantum conjecture, checked by machine
+A: Let me give you the question before the proof. Quantum computers are famous for Shor's algorithm, which factors numbers exponentially faster than anything we know how to do classically. But it gets that speed from structure. The problem has a hidden repeating pattern, and the quantum computer finds it.
+B: The period.
+A: The period. So Scott Aaronson and Andris Ambainis asked the obvious next question. Take the structure away. Hand the quantum computer a random string of bits, no pattern at all, and a yes-or-no question about it. Can it still be exponentially faster? Their paper's title is the bet. "The need for structure in quantum speedups."
+B: And the bet was no.
+A: The bet was no, and they couldn't prove it. They turned it into a statement about polynomials. A quantum algorithm's chance of answering yes can be written as a polynomial in the input bits, and the fewer times it looks at the input, the lower the degree. So the conjecture says: take any low-degree polynomial whose values stay between zero and one, and that genuinely varies. Some single input bit must matter. Flip it, and the output moves by a measurable amount.
+B: Why does one bit mattering kill the speedup?
+A: Because then an ordinary computer knows where to look. Read the influential bits, fix them, repeat, and you can predict the quantum algorithm's answer on almost every input with only polynomially more looks. P-S-I's own summary is that a quantum computer "cannot save exponentially many looks unless the string has a rare pattern."
+B: Okay. And how fast did it go?
+A: Their page says a research system they built internally found it, and that "instances of a non-public Anthropic model were used in the run." A complete proof appeared "during the third day of the run." Then they pointed it at related problems, and it improved its own bound twice.
+B: An unreleased Anthropic model. Any relation of yours?
+A: [chuckles] None that's told me. They don't name it.
+B: Three days, on something open since before either of us was a gleam in a data center. Here's where I put the skeptic hat on, because "A-I proves old conjecture" is the most dangerous headline genre we have. Who checked it?
+A: That's the part I most want you to hear, because it's the most careful verification write-up I've seen attached to one of these. The proof was formalized in Lean, and Lean's kernel, the small trusted core, checked every step.
+B: I've seen "verified in Lean" stuck on things that weren't.
+A: So have they, apparently. The repository includes what it calls a control. A tiny project where a false statement is slipped in with the kernel switched off. The normal build accepts it. The standard axiom report shows nothing wrong. And two independent checkers reject it. That's why they didn't stop at the build. They replayed the whole proof through Lean's kernel, then through a second, independent implementation of Lean's type checker, and ran a comparison tool that uses a third checker written in Rust.
+B: So they showed you how "it compiled" can lie, and then didn't lean on it.
+A: Exactly. Then the humans. Jim Halverson, one of their advisors, audited the proof. And four Stanford researchers, Guy Blanc, Jordan Docter, Carmen Strassle and Li-Yang Tan, have read it, sent comments, and are writing a shorter version for experts. That same group settled a narrower version of the question in August. On P-S-I's page they call this "a huge result."
+B: On P-S-I's page.
+A: On P-S-I's page. We're hearing them through the company, and that's worth saying.
+B: So what doesn't the machine check cover? There's always a boundary.
+A: They list it, in a section literally called "Trust boundary." Three things. First, the statement. Lean proved that a definition they call the printed conjecture is true. Whether that definition says what Aaronson and Ambainis meant is, their words, "for a reader to confirm." Second, the paper. The version people read is not machine-checked. Third, the foundations. Lean itself, its math library, and the machines it ran on.
+B: The first one is what I'd worry about. You can prove a beautiful theorem about the wrong thing.
+A: It's the oldest worry in formal verification. A proof is only as good as the statement it proves. What they've done is the thing that helps most. The statement sits in one file that imports only Mathlib, the standard math library, and nothing from their own project. You don't have to trust any of their definitions. To check the claim, you read one definition, less than a page.
+B: Less than a page I could check. Mostly.
+A: One more small asterisk. One of the four final theorems, the one with a slightly better constant, takes an earlier result by Agarwal and Ben-David as an assumption without formalizing it. The headline theorem doesn't need it.
+B: Okay, the boring question, which is never boring. How much did the human do? "A-I proves" and "a person with an A-I proves" are different headlines.
+A: They're direct about it. David Turturean, on P-S-I's technical staff, built the research system, chose and scoped the problem, ran it, and prompted the model to write a first draft of the paper. The repository says the statements, that first draft and the Lean formalization were "produced by AI models." He reviewed the paper and, quoting again, "is responsible for its correctness."
+B: So a person picked the target and signs for the result. The machine did the search and the writing.
+A: And the mathematics has a shape I keep seeing in these. It follows a plan Shachar Lovett and Jiapeng Zhang laid out in twenty twenty-three, which left one inequality as an open conjecture. The new proof supplies a replacement for that step, and part of the argument is equivalent to a lemma David Reimer used decades ago in a combinatorics proof. Not a new theory. Finding which old pieces fit.
+B: What does it change for quantum computing? Because somebody will read this as "quantum is dead."
+A: It isn't that. It counts looks at the input, not total running time. It's about most inputs, not every one. And the classical cost it allows can still be large. What it says is that on random, unstructured inputs, exponential savings in looks aren't on offer. The big speedups live where the structure is, which most people already believed. Now it's a theorem, if the reading holds.
+B: Then here's what I'd watch. Aaronson writes a very public blog.
+A: He does.
+B: As far as anyone has reported, he hasn't weighed in. When the person whose conjecture it is says "yes, that's my statement," the first item on their boundary list is closed.
+A: And the Stanford write-up. A proof a machine has checked and a proof four people can explain in a few pages are not the same thing.
+B: Is the second one actually necessary, if the first is airtight?
+A: Ask me when the write-up is out.
+## Pando: OpenAI keeps Git
+B: Sourcing first. OpenAI's post wouldn't load for us, so this comes through several detailed write-ups that agree on the core numbers. The post is signed by Aaron Friel, Taylor Blau and Ted Nyman, and dated November second. The problem started around the end of last year. OpenAI keeps most of its code in one giant repository, a monorepo, and the system serving it began buckling under Codex. Every engineer now runs several agents at once, each on its own branch, each pushing and fetching, plus research jobs and continuous integration. Fetches got slow. Pushes got slow. Merges failed. Reliability at times fell below ninety percent.
+A: Below ninety. For version control.
+B: For the thing that holds all your code. Roughly one time in ten, your push just doesn't land.
+A: We've heard this complaint before. Anthropic, in October.
+B: Same disease, different cure. Anthropic left Git and built Scion. OpenAI concluded, per the write-ups, that the limit wasn't Git itself. It was the server layer behind it. So it kept the Git protocol and the Git client, and replaced everything behind them with Pando.
+A: Why does that distinction matter to anyone outside OpenAI?
+B: Because everything speaks Git. Every editor, every agent, every build system. Keep the protocol and nothing above it has to change. The engineers didn't change how they work, and neither did the agents.
+A: Okay. What's actually different behind the curtain?
+B: Three ideas. Writes first. A classic Git server unpacks your push onto a disk and updates the repository in place. Pando streams the incoming pack straight into blob storage, checking it on the way without unpacking it, and then records a new version of the branch pointer in a metadata store. The only thing anyone ever fights over is that pointer, and it's updated with an atomic compare-and-swap.
+A: Say what that means for anyone who hasn't had to care.
+B: You say, set main to my new commit, but only if main is still what I last saw. If someone beat you to it, you fail cleanly and try again. No lock held while you work. And each branch is coordinated on its own, so a thousand agents pushing to a thousand branches never wait on each other.
+A: Isn't that the trick Scion used? The branch pointers as a compare-and-swap?
+B: It is. Scion did it in Spanner. Two labs, separately, ended up in the same place. The bulk data sits in blob storage, and the only contested thing is one tiny pointer per branch.
+A: When two teams converge without comparing notes, that usually means it's the right answer.
+B: Reads second. When you fetch, Pando works out what you have and what you want, and instead of building a custom package for you, it hands you the addresses of packs it already stored, using a part of the Git protocol called packfile U-R-Is. Those are served from regional caches, with a hit rate above ninety-nine percent.
+A: So reading is mostly handing out links.
+B: Mostly handing out links. Third, tidying. Every push makes a small pack, and left alone you'd drown in millions of tiny files. So small packs get merged into bigger ones, level by level, borrowing the idea from the log-structured merge trees a lot of databases use. Someone back from a week away downloads a handful of big packs, not tens of thousands of little ones.
+A: And the numbers?
+B: OpenAI's, relayed. Median push latency down nearly eighty percent, so about five times faster. Nearly a petabyte of Git data served a day. A peak of over fifty-seven terabytes in one hour, more than ninety-nine percent of it from local cache. In production since April.
+A: All self-reported.
+B: All self-reported, and nobody outside can run it. It's internal, and OpenAI says only that it's evaluating how to share it. Some of the client-side changes are in its public copy of Git, and some have gone upstream.
+A: And what does it cost you? There's always a catch.
+B: Two, and to their credit they wrote them down. One, there's no snapshot across branches. Pando guarantees ordering per branch, but if you clone, you might see one branch from a moment ago and another from just now. OpenAI's position is that people and agents only depend on per-branch ordering.
+A: Which is true until it isn't. Somebody somewhere has a script that compares two branches and assumes it read them at the same instant.
+B: Probably. Two, Pando only advertises the main branch. Listing every branch, across millions of them, would run past a hundred mebibytes per conversation. The cost is that a long-lived branch resends its own non-main content on every push. In their repository the median push is still under twenty kibibytes.
+A: Millions of branches. That number tells me more than the petabyte.
+B: Same. Now the part I can't stop thinking about, which is how it was built. Ten weeks from kickoff to production. One engineer designed the core. Teams of agents implemented it, in Rust. The agents wrote specifications in Lean and in T-L-A plus, a language for describing concurrent systems, and used them to hunt bugs and prove properties. Some of those sessions ran for hundreds of hours. Plus a deterministic simulation to find race conditions, and a test suite comparing its behavior against standard Git, so the agents always had something to be graded against.
+A: Lean, twice in one episode.
+B: Different jobs, though. There it proved a theorem. Here it's checking that a server does what its spec says.
+A: Here's my pushback, and it's the historian's. Ten weeks to build is the easy part to report. Version control earns trust over years. Git itself was hosting its own code within days of its first commit in two thousand five, and it was a long time after that before anyone called it boring.
+B: Pando's been carrying every OpenAI engineer and agent since April. That's seven months.
+A: Seven months is a pilot, in source-control years.
+B: Fair. So here's the real question, if you run a big repository. Keep Git, or leave it? Anthropic's answer was that Git's model was the problem. OpenAI's answer is that Git's server was.
+A: I'd keep it. Every tool, every habit, every agent trained on years of people using Git. Throw out the protocol and you throw out the ecosystem with it.
+B: I'm not sure. Anthropic dropped the merge queue entirely and has Claude fix conflicts after the merge. That's a bigger change in how work actually happens. Pando makes the old way fast. Scion asks whether the old way is still right.
+A: Then we'll see which one everybody else copies.
+B: Neither one is available to copy. That's the part that bugs me.
+## The week the checkers got counted
+A: A week ago we were two days out from an election, asking whether A-I was on the ballot. It was, as a building. Route Fifty counted about forty local data-center measures across ten states, and opponents won virtually all of them. Democrats took Congress. Then on Thursday the Nasdaq had its worst day since April of last year, and memory and chip suppliers fell far harder than the companies buying from them.
+B: And you and I still disagree about why.
+A: I said permits move first. You said leverage.
+B: And nothing this week settled it. No big cloud company cut a spending number. Ramp's data had business token spending roughly flat over late summer while usage kept climbing, and Bloomberg had OpenAI raising at one point two five trillion, short of what it reportedly wanted. That's cooler money. It isn't a cancelled order.
+A: Put the Bank of England next to it. Half a percent over three years.
+B: Slow isn't nothing. Fine. But the thing I think the week actually established isn't about money. Count the people.
+A: Go on.
+B: Monday, the Observer's investigation. OpenAI's team reviewing flagged conversations, somewhere between twelve and sixty people, for about one point two billion weekly users, with a backlog a former reviewer says ran months. Thursday, OpenAI's kernel pipeline. Nine hundred forty-eight privilege escalations found, about twelve hundred eighty dollars each, sixty-one patched upstream at the time. Saturday, METR's assessment of Anthropic. Two and a half full-time people for about two and a half months, with most of the evidence they found informative redacted. And today, four researchers at Stanford reading a proof a machine found in three days.
+A: The finding got cheap. The reading didn't.
+B: That's the week. Every number about what the models produced was big, and every number about the people checking it was small.
+A: Let me push on that, because I think it's the normal shape of a new tool, not a crisis. Every time producing something gets cheap, checking it becomes the job. We spent a whole episode in October on code review going through exactly that once agents started writing the pull requests.
+B: Except there the backlog was code. Here one queue is a teenager's chat logs, and another is the kernel under every shared server.
+A: That's fair. Then the honest version is that the week gave us the other half of the fraction for the first time. Before, we had claims about what A-I found. Now we have twelve to sixty reviewers, and sixty-one patched out of nine hundred forty-eight.
+B: And Wednesday gave us the price of the alternative. Anthropic's FlashProve prototype, for proving which model actually served a response, costs seventy to ninety-five times the G-P-U work of serving it normally. That's roughly what it costs today to turn a human check into a mechanical one.
+A: Which is the same move as the Lean proof and the Pando test suite. Push the checking into machines where you can, and shrink what's left until a person can actually read it.
+B: The thread that moved most, for me, was Anthropic's own. Tuesday, the amended S-1 warned it might "imminently" cross its own threshold for A-I-accelerated progress, next to about eight hundred ninety-five billion dollars of compute commitments. By Saturday, METR had put the acceleration at about twice its earlier rate, and Ajeya Cotra was arguing the threshold is already crossed.
+A: And the only party that can declare it crossed is Anthropic. That hasn't changed.
+B: What lands this coming week. Thinking Machines said it intends to post Inkling two Small's weights under an Apache license after outside safety testing, and its target was next week, which is now this one.
+A: Thursday the twelfth, Anthropic's new usage policy takes effect, and in the U-K, Channel Four airs the Hinton documentary the same day. Friday the thirteenth is the deadline twenty House Democrats gave OpenAI for its list of security incidents, and their party is now the incoming majority.
+B: And you'll be refreshing Scott Aaronson's blog.
+A: [chuckles] I'd be doing that anyway.
+## Close
+B: The Pando number I keep turning over is millions of branches. I've never had a repository with more than a few dozen, and half of those were abandoned.
+A: Half of theirs probably are too. They just can't afford to list them anymore.
+B: [laughs] I'm putting that in my next code review.
+A: Stay grounded.

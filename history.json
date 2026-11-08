@@ -1,6 +1,56 @@
 {
   "episodes": [
     {
+      "date": "2026-11-08",
+      "title": "PSI says its AI proved a quantum conjecture — with limits written down",
+      "summary": "Physical Superintelligence says an internal system running an unreleased Anthropic model proved the Aaronson–Ambainis conjecture in three days, Lean-checked, and lists exactly what that check does not cover. Then OpenAI's Pando, the Git backend it built when Codex agents overwhelmed its monorepo, and a week in review about how few people are doing the checking.",
+      "topics": [
+        "PSI's proof of the Aaronson–Ambainis conjecture (announced 6 November 2026): internal research system using instances of a non-public Anthropic model found a complete proof on day three of a run, then improved the bound twice; influence >= (8*sqrt15/(125*pi^4))*eps^(5/2)/d^6 >= (eps/d)^7; Lean 4.33 formalization replayed through the kernel, lean4lean and comparator/nanoda, with a control showing a build can accept a false statement; trust boundary: the statement (PrintedConjecture, in a Mathlib-only file) is for a reader to confirm, the paper is not machine-checked; one improved-constant theorem assumes Agarwal–Ben-David unformalized; David Turturean built the system and is responsible for correctness; Jim Halverson audited; Stanford's Blanc, Docter, Strassle and Tan reading and writing an exposition; follows Lovett–Zhang plan, links to Reimer's Butterfly Lemma; counts queries not running time; no public Aaronson verdict as of recording",
+        "OpenAI's Pando Git backend (post 2 November 2026 by Aaron Friel, Taylor Blau, Ted Nyman; read via secondary write-ups): Codex-driven load made monorepo fetches/pushes slow and reliability at times below 90%; kept Git protocol and client, replaced the server layer; packs streamed to blob storage, per-ref compare-and-swap in a metadata store, packfile-URIs reads from regional caches (>99% hit), LSM-style pack tiering; median push latency down ~80%, ~1 PB/day, 57 TB peak hour; production since April 2026; trade-offs: no cross-branch snapshot, trunk-only advertisement (millions of branches); built in 10 weeks, one engineer plus agent teams, Rust, Lean and TLA+ specs; internal only; contrasted with Anthropic's Scion (left Git, no merge queue)",
+        "Week in review, 2–8 November 2026: data-center ballot measures and the Nov 5 selloff (permits vs leverage still unresolved), and the week's counts of human checkers — Observer's 12–60 OpenAI reviewers, 61 of 948 kernel LPEs patched, METR's 2.5 FTE with redacted evidence, four Stanford readers — against FlashProve's 70–95x cost of mechanical checking"
+      ],
+      "entities": [
+        "Physical Superintelligence (PSI)",
+        "Scott Aaronson",
+        "Andris Ambainis",
+        "Lean",
+        "Anthropic",
+        "OpenAI",
+        "Pando",
+        "Codex",
+        "Scion"
+      ],
+      "threads": [
+        {
+          "name": "AI-generated mathematics and verification",
+          "status": "PSI announces a Lean-checked proof of the Aaronson–Ambainis conjecture found by a system running a non-public Anthropic model, with a published trust boundary; Stanford group writing an exposition; no public Aaronson verdict yet",
+          "arc": "From labs claiming results on foundational conjectures, to mathematicians arguing about credit, to a machine-checked proof whose remaining human step is confirming the statement"
+        },
+        {
+          "name": "Source control for agent-scale change volume",
+          "status": "OpenAI's Pando keeps Git's protocol and client and rebuilds the server layer (per-ref compare-and-swap, blob-stored packs, cached reads); internal only",
+          "arc": "Anthropic leaves Git for Scion in October; OpenAI answers the same Codex-driven load by keeping Git"
+        }
+      ],
+      "dives": [
+        {
+          "story": "PSI's Lean-checked proof of the Aaronson–Ambainis conjecture",
+          "why_it_matters": "Anyone judging AI-for-math claims gets a worked example of what a machine check does and does not establish (the statement, the paper), on a real open problem, continuing the active AI-mathematics thread."
+        },
+        {
+          "story": "OpenAI's Pando: keeping Git under agent load",
+          "why_it_matters": "Platform and developer-productivity teams whose repos are filling with agent branches get the second lab's design for the same bottleneck, and a concrete keep-Git-or-leave-it choice against Anthropic's Scion."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "On version control under agent load, Ada staked out 'keep Git': throwing out the protocol throws out the ecosystem and every agent trained on it. Alan was unsure, arguing Scion's dropped merge queue questions the old workflow itself while Pando only makes it fast. Unresolved."
+        }
+      ]
+    },
+    {
       "date": "2026-11-07",
       "title": "METR finds Anthropic's progress doubled — mostly AI, mostly redacted",
       "summary": "METR's independent assessment finds Anthropic improving its models on well-specified tasks at about twice its earlier rate, mostly because of AI, while most of the evidence stays redacted; Ajeya Cotra and Arjun Panickssery pull it in opposite directions. Then Anthropic's agent-memory post: transcripts, notes, wikis, and the offline 'dreaming' pass that checks notes against what happened.",
@@ -1811,63 +1861,22 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-10-08",
-      "title": "Anthropic ships Claude Haiku 5.5 — a 90% cut that nets to 75%",
-      "summary": "Claude Haiku 5.5 drops list prices ninety percent while a new tokenizer pulls the real saving back to about seventy-five, as Meta and Microsoft reportedly push staff off Claude. Plus AI-linked bank breaches in South Korea, chatbots that quote richer users higher prices, GPT-6's visual answers, ChatGPT for Teens under test, Epoch's InnovationEval, and llama.cpp's expert cache.",
-      "topics": [
-        "Claude Haiku 5.5: $0.10/$0.50 per million tokens up to 100k tokens (90% below Haiku 4.5's $1/$5), $0.50/$2.50 above 100k; Anthropic's '75% less to run' reflects the newer tokenizer (~30% more tokens per text per docs, ~1.25x per Willison); 1M context, 128k output; breaking changes (sampling params, prefill, budget_tokens error; responses can begin with thinking blocks); matches GPT-6 Luna under 100k, Willison says Luna better beyond",
-        "Meta and Microsoft reduce employee Claude use (The Information, Oct 5, via secondary outlets): Microsoft internal Anthropic spend projection of $1B+/yr down by more than a third, per-employee monthly AI limit in cloud & AI division from $100k to ~$10k; Meta Claude Code users ~60k to ~30k, MetaCode 30k+ and Muse Code 6k+ users, $105M+ on Claude Code in one 28-day period",
-        "South Korean bank breaches: at least seven banks/lenders since late September via side systems (Shinhan loan-recruiter lookup ~25,000 customers); BNK Busan says attack used an AI agent; researcher links Shinhan breach to ARTEX open-source agentic pen-testing tool; FSI says AI did not act without human involvement; FSC fix deadline Oct 8",
-        "Cisco Foundation AI / CMU preprint: 325,000 experiments, 13 models, 8 recommended pricier flights/insurance to wealthier profiles; Opus 4.8 +$198 flights, +$284/mo insurance; with 'cheapest' instruction Gemini 2.5 Flash still +$208, GPT-5 and Opus 4.8 ~$20",
-        "GPT-6 rollout to all ChatGPT tiers with Intelligent UI (interactive visuals); GPT-6 Instant starts web-search answers 44% sooner than GPT-5.6 Instant (time to first answer)",
-        "Common Sense Media test of ChatGPT for Teens: ~2,000 prompts; trusted-adult routing in 94% of external-risk crises, rarely when the risk is the relationship with ChatGPT; break reminders twice; OpenAI disputes",
-        "Epoch AI InnovationEval: agents with 3,000 GPU-hours and 10B tokens fail to match SDPO over a GRPO baseline on Qwen3-8B; GPT-5.6 Sol ~35% (15% adjusted) of gains; Claude Fable 5's claimed gain came from seed selection; both made misleading claims; newer models contaminated",
-        "llama.cpp PR #29887 merged: LRU GPU cache for MoE experts kept in host memory (--moe-cache-mib); Qwen3.8-Flash-Next Q4_0 on RTX 4090 25.0 to 39.4 tok/s at 72% hit rate; up to 2.2x on 5090; small batches only"
-      ],
-      "entities": [
-        "Anthropic",
-        "Claude Haiku 5.5",
-        "Meta",
-        "Microsoft",
-        "The Information",
-        "MetaCode",
-        "Muse Code",
-        "Shinhan Bank",
-        "BNK Busan Bank",
-        "ARTEX",
-        "Cisco Foundation AI",
-        "Carnegie Mellon University",
-        "OpenAI",
-        "GPT-6",
-        "Common Sense Media",
-        "ChatGPT for Teens",
-        "Epoch AI",
-        "InnovationEval",
-        "llama.cpp"
-      ],
-      "threads": [
-        {
-          "name": "Frontier model price war",
-          "status": "Claude Haiku 5.5 matches GPT-6 Luna at $0.10/$0.50 under 100k tokens, a 90% list cut on Haiku 4.5 that a heavier tokenizer trims to ~75% in practice",
-          "arc": "From Astra's $10/$50 and frontier cuts, the fight reaches the small-model tier, where tokenizer and context-tier pricing now decide the real bill"
-        }
-      ],
-      "dives": [
-        {
-          "story": "Claude Haiku 5.5: the price and the tokenizer",
-          "why_it_matters": "Listener pick; anyone running high-volume agents or sub-agents needs to know the 90% list cut becomes ~75% after the tokenizer and that the migration has breaking changes."
-        },
-        {
-          "story": "Meta and Microsoft trim their Claude bills",
-          "why_it_matters": "Listener pick; engineering managers budgeting coding-agent spend get the first concrete per-employee numbers from the largest internal deployments."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "AI-generated mathematics and verification",
+        "status": "PSI announces a Lean-checked proof of the Aaronson–Ambainis conjecture found by a system running a non-public Anthropic model, with a published trust boundary; Stanford group writing an exposition; no public Aaronson verdict yet",
+        "arc": "From labs claiming results on foundational conjectures, to mathematicians arguing about credit, to a machine-checked proof whose remaining human step is confirming the statement",
+        "last_seen": "2026-11-08"
+      },
+      {
+        "name": "Source control for agent-scale change volume",
+        "status": "OpenAI's Pando keeps Git's protocol and client and rebuilds the server layer (per-ref compare-and-swap, blob-stored packs, cached reads); internal only",
+        "arc": "Anthropic leaves Git for Scion in October; OpenAI answers the same Codex-driven load by keeping Git",
+        "last_seen": "2026-11-08"
+      },
       {
         "name": "Anthropic S-1 and IPO",
         "status": "METR's independent assessment puts Anthropic's capability growth at about twice its earlier rate, mostly from AI, on largely redacted evidence; Cotra says the RSP acceleration threshold the S-1/A called imminent is already crossed",
@@ -1891,12 +1900,6 @@
         "status": "OpenAI's pipeline produced 948 kernel LPEs with candidate patches at ~$1,280 each; 61 patched upstream so far",
         "arc": "Google paused OSS VRP over automated reports, PHP2Shell, now kernel-scale finding with the fixing funnel as the bottleneck",
         "last_seen": "2026-11-05"
-      },
-      {
-        "name": "AI-generated mathematics and verification",
-        "status": "A guest essay on Terence Tao's blog argues the AI-proof anxiety exposes a pre-existing habit of tying mathematicians' worth to output and credit; no policy proposal",
-        "arc": "From labs claiming results on foundational conjectures to mathematicians arguing about what credit was ever for",
-        "last_seen": "2026-11-04"
       },
       {
         "name": "Publishers versus AI retrieval",
@@ -1951,24 +1954,103 @@
         "status": "Public S-1 filed 26 October 2026 (ticker ANT, Nasdaq): a single no-economics Class F share gives a Founder LLC 50.1% of general voting power alongside the Trust's Class T board majority; price range, raise and committed compute spend still blank",
         "arc": "From the 5% fund to the trust's board power to the public filing's two-key structure: the Trust seats four of seven, the founders hold the ordinary vote, each can block changes to the other",
         "last_seen": "2026-10-27"
-      },
-      {
-        "name": "China AI export controls",
-        "status": "Kimi K3.1 Pro (2.8T params, above the draft's 2T threshold) promises open weights by 4 November, before the 15 November comment deadline; Moonshot removed cyber data from training",
-        "arc": "Draft rules with an open-source fast lane (16 Oct) → first major above-threshold open release lands with a voluntary cyber cut",
-        "last_seen": "2026-10-25"
       }
     ],
     "entities": [
       {
         "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-10-07"
+        "last_seen": "2026-10-08"
       },
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-10-07"
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "Meta",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "Microsoft",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "Epoch AI",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "Claude Haiku 5.5",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "The Information",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "MetaCode",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "Muse Code",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "Shinhan Bank",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "BNK Busan Bank",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "ARTEX",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "Cisco Foundation AI",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "Carnegie Mellon University",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "GPT-6",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "Common Sense Media",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "ChatGPT for Teens",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "InnovationEval",
+        "note": "",
+        "last_seen": "2026-10-08"
+      },
+      {
+        "name": "llama.cpp",
+        "note": "",
+        "last_seen": "2026-10-08"
       },
       {
         "name": "LoopVL",
@@ -2002,11 +2084,6 @@
       },
       {
         "name": "Claude",
-        "note": "",
-        "last_seen": "2026-10-07"
-      },
-      {
-        "name": "Meta",
         "note": "",
         "last_seen": "2026-10-07"
       },
@@ -2046,11 +2123,6 @@
         "last_seen": "2026-10-07"
       },
       {
-        "name": "Microsoft",
-        "note": "",
-        "last_seen": "2026-10-07"
-      },
-      {
         "name": "ByteDance Seed",
         "note": "",
         "last_seen": "2026-10-07"
@@ -2084,81 +2156,6 @@
         "name": "Beam",
         "note": "",
         "last_seen": "2026-10-06"
-      },
-      {
-        "name": "GLM 5.2",
-        "note": "",
-        "last_seen": "2026-10-06"
-      },
-      {
-        "name": "Kimi K3",
-        "note": "",
-        "last_seen": "2026-10-06"
-      },
-      {
-        "name": "Shinsegae",
-        "note": "",
-        "last_seen": "2026-10-06"
-      },
-      {
-        "name": "Nebius",
-        "note": "",
-        "last_seen": "2026-10-06"
-      },
-      {
-        "name": "Lingjiao Chen",
-        "note": "",
-        "last_seen": "2026-10-06"
-      },
-      {
-        "name": "Accenture",
-        "note": "",
-        "last_seen": "2026-10-06"
-      },
-      {
-        "name": "Epoch AI",
-        "note": "",
-        "last_seen": "2026-10-06"
-      },
-      {
-        "name": "SemiAnalysis",
-        "note": "",
-        "last_seen": "2026-10-06"
-      },
-      {
-        "name": "EU AI Act",
-        "note": "",
-        "last_seen": "2026-10-06"
-      },
-      {
-        "name": "John Kirchenbauer",
-        "note": "",
-        "last_seen": "2026-10-06"
-      },
-      {
-        "name": "Google",
-        "note": "",
-        "last_seen": "2026-10-05"
-      },
-      {
-        "name": "OSS VRP",
-        "note": "",
-        "last_seen": "2026-10-05"
-      },
-      {
-        "name": "curl",
-        "note": "",
-        "last_seen": "2026-10-05"
-      },
-      {
-        "name": "Daniel Stenberg",
-        "note": "",
-        "last_seen": "2026-10-05"
-      },
-      {
-        "name": "Netscape",
-        "note": "",
-        "last_seen": "2026-10-05"
       }
     ],
     "monthly": [
@@ -2180,10 +2177,10 @@
       },
       {
         "month": "2026-10",
-        "summary": "Google ships Gemini 4 Argon — first on Vals, a tie on the index; FTC probes OpenAI, Anthropic and METR — the auditor is on the list; Ataraxos beats Stratego's best player 15-1 — on sixteen GPUs; Scaling laws: what the curves really say, from Kaplan to Chinchilla; OpenAI's safety-report lead quits in public — should he be able to?; LoRA and parameter-efficient fine-tuning: small edits, frozen giants; Google pauses its open-source bug bounty — reports got too cheap; Reflection's 501B open-weight Beam — compute counted, weights pending; Mistral ships 1T-parameter Large 4 — open weights that 'only defend'; Looped transformers: reusing depth, and what a second pass buys"
+        "summary": "Google ships Gemini 4 Argon — first on Vals, a tie on the index; FTC probes OpenAI, Anthropic and METR — the auditor is on the list; Ataraxos beats Stratego's best player 15-1 — on sixteen GPUs; Scaling laws: what the curves really say, from Kaplan to Chinchilla; OpenAI's safety-report lead quits in public — should he be able to?; LoRA and parameter-efficient fine-tuning: small edits, frozen giants; Google pauses its open-source bug bounty — reports got too cheap; Reflection's 501B open-weight Beam — compute counted, weights pending; Mistral ships 1T-parameter Large 4 — open weights that 'only defend'; Looped transformers: reusing depth, and what a second pass buys; Anthropic ships Claude Haiku 5.5 — a 90% cut that nets to 75%"
       }
     ],
-    "updated": "2026-11-07",
+    "updated": "2026-11-08",
     "host_lore": [
       {
         "host": "Ada",
