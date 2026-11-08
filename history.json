@@ -51,6 +51,27 @@
       ]
     },
     {
+      "date": "2026-11-08",
+      "kind": "deepdive",
+      "title": "FlashAttention: why exact attention got faster by moving fewer bytes",
+      "summary": "Why attention on a GPU is limited by memory traffic rather than arithmetic, and how FlashAttention computes exact attention without ever writing the N-by-N score table: tiling, the online softmax's running maximum and sum, and recomputation in the backward pass. Then four versions in four years, each chasing a bottleneck that moved, from HBM to non-matmul FLOPs to the exponential unit.",
+      "topics": [
+        "deep dive: FlashAttention and why attention is memory-bound"
+      ],
+      "entities": [
+        "FlashAttention",
+        "Tri Dao",
+        "Nvidia A100",
+        "Nvidia H100",
+        "Nvidia B200",
+        "PyTorch",
+        "Flash-Decoding",
+        "Colfax Research"
+      ],
+      "threads": [],
+      "lore": []
+    },
+    {
       "date": "2026-11-07",
       "title": "METR finds Anthropic's progress doubled — mostly AI, mostly redacted",
       "summary": "METR's independent assessment finds Anthropic improving its models on well-specified tasks at about twice its earlier rate, mostly because of AI, while most of the evidence stays redacted; Ajeya Cotra and Arjun Panickssery pull it in opposite directions. Then Anthropic's agent-memory post: transcripts, notes, wikis, and the offline 'dreaming' pass that checks notes against what happened.",
@@ -2425,6 +2446,22 @@
     ],
     "concepts_taught": [
       {
+        "name": "compute-bound versus memory-bound GPU operations: HBM versus on-chip SRAM, arithmetic intensity, and why matrix multiplies can be 99.8% of a BERT layer's arithmetic but 61% of its runtime (Ivanov et al.), with the memory wall (Wulf and McKee 1994) as lineage",
+        "last_taught": "2026-11-08"
+      },
+      {
+        "name": "FlashAttention's tiling: exact attention computed block by block in SRAM using the online softmax (running max and sum with rescaling, Milakov and Gimelshein 2018), so the N-by-N score table is never written to HBM; memory linear in sequence length, compute still quadratic",
+        "last_taught": "2026-11-08"
+      },
+      {
+        "name": "recomputation instead of storage in FlashAttention's backward pass: keep the output and per-row softmax statistics, rebuild score blocks on chip — more FLOPs (75.2 vs 66.6 GFLOPs on GPT-2 medium) but ~9x less HBM traffic and ~5.7x faster; IO complexity Θ(N²d²/M) versus Θ(Nd + N²)",
+        "last_taught": "2026-11-08"
+      },
+      {
+        "name": "the moving bottleneck across FlashAttention-2/3/4 and Flash-Decoding: non-matmul FLOPs (16x costlier on A100), parallelism over sequence and over the KV axis at decode, the exponential unit (989 vs 3.9 TFLOPS on H100), and on Blackwell software-emulated exponentials and threshold-based lazy rescaling",
+        "last_taught": "2026-11-08"
+      },
+      {
         "name": "measuring AI R&D acceleration as a change in the slope of a stitched capability index (Anthropic's AECI), separating compute scaling from attribution, and Amdahl's law as why ~12x self-reported uplift can coexist with ~2x measured acceleration",
         "last_taught": "2026-11-07"
       },
@@ -2887,22 +2924,6 @@
       {
         "name": "iterative deepening and engine time management: anytime search that always has a move ready, with per-move allocation adjusted by best-move stability, easy moves, and soft/hard time bounds",
         "last_taught": "2026-09-26"
-      },
-      {
-        "name": "search as policy improvement: rollouts and Monte Carlo tree search use a base policy at decision time to pick better than that policy would, and the improved choices become training targets (AlphaGo Zero)",
-        "last_taught": "2026-09-26"
-      },
-      {
-        "name": "the train-time/test-time compute exchange rate: Jones's Hex result (10x training eliminates about 15x test-time search) and Snell's difficulty-dependent compute-optimal allocation, with pretraining still winning on the hardest problems",
-        "last_taught": "2026-09-26"
-      },
-      {
-        "name": "reasoning tokens as the language-model ply: chain of thought buys extra forward passes, reinforcement learning teaches the model to spend them, and budget forcing or adaptive effort decide who holds the clock",
-        "last_taught": "2026-09-26"
-      },
-      {
-        "name": "mixture-of-experts on edge devices as a capacity-versus-bandwidth split: routing shrinks the bytes read per token, not the weights that must be stored, so on-device MoE is a memory-capacity bet",
-        "last_taught": "2026-09-24"
       }
     ]
   }

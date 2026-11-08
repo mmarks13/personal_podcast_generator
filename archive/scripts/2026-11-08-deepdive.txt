@@ -1,0 +1,146 @@
+## Same answer, a fraction of the time
+A: Hello — it's Sunday, November eighth. I'm Ada.
+B: And I'm Alan. And I want to start with a word we've said on this show a hundred times without ever stopping on it. FlashAttention.
+A: It's under almost every long-context story we cover. When we did our episode on how models reach a million tokens, it was sitting underneath the whole thing, and we walked right past it.
+B: And it's not finished. When we recorded this, in November twenty twenty-six, the newest version was the fourth one, published in March, rebuilt for Nvidia's Blackwell chips.
+A: So the question for this episode is a strange one, and I love it. The original FlashAttention paper, from Tri Dao and colleagues at Stanford in twenty twenty-two, computes exact attention. Not an approximation. The same numbers the textbook formula gives you.
+B: Same math.
+A: Same math. And on GPT-2, the authors report the attention step ran seven point six times faster than the standard PyTorch version. And here's the part that should bother you. In training, it does more arithmetic than the standard version, not less.
+B: [skeptical] More arithmetic, and it's faster.
+A: More arithmetic, and several times faster.
+B: Okay. Then the arithmetic was never the thing that cost money. So what was?
+A: That's the whole episode. And to answer it, we have to talk about where the time on a GPU actually goes. That's your territory.
+
+## Where the time actually goes
+B: It is. So picture the chip. A GPU has two kinds of memory that matter here. There's the big memory, high-bandwidth memory, HBM. On the Nvidia A100, the chip the original paper used, that's forty to eighty gigabytes, and it moves data at about one and a half to two terabytes a second.
+A: Which sounds enormous.
+B: It sounds enormous. Then there's the small memory, right next to the arithmetic units, called SRAM, static memory, or shared memory. On the A100 that's a hundred and ninety-two kilobytes per streaming multiprocessor, and there are a hundred and eight of those. The paper estimates its bandwidth at around nineteen terabytes a second.
+A: So all told, about twenty megabytes of the fast kind against forty gigabytes of the big kind. Roughly ten times faster, and a couple of thousand times smaller.
+B: That's the shape of it. The paper says an order of magnitude faster, many orders of magnitude smaller. And every operation the GPU runs, every kernel, follows the same pattern. Load inputs from the big memory, compute, write results back to the big memory.
+A: Here's my analogy, and you tell me where it breaks. A cook with a tiny cutting board right in front of them, and a walk-in fridge down the hall. The cooking is fast. The walking is slow.
+B: That's fair. And it gives you the key distinction. Some operations are compute-bound. The time is set by how much arithmetic there is. A big matrix multiply is the classic case. You bring a block of numbers onto the board, and you do a huge amount of work on each one before you walk back.
+A: And the other kind?
+B: Memory-bound. The time is set by trips to the fridge. Adding two arrays, applying an activation, dropout, softmax, layer norm. You fetch a number, do one or two things to it, and carry it back. The cutting board sits idle while you walk.
+A: The jargon for this is arithmetic intensity. Operations per byte moved.
+B: And here's the number that made me sit up. Andrei Ivanov, Torsten Hoefler and colleagues profiled a BERT encoder layer in a paper titled, wonderfully, Data Movement Is All You Need. The matrix multiplies were ninety-nine point eight percent of the arithmetic. And sixty-one percent of the runtime.
+A: So the remaining fifth of a percent of the arithmetic took nearly forty percent of the time.
+B: Normalization alone was under a fifth of a percent of the arithmetic and a quarter of the runtime. Over a third of a BERT training step, they write, goes to memory-bound operators.
+A: [short pause] And this is the oldest story in computer architecture. In December nineteen ninety-four, William Wulf and Sally McKee wrote a short note called Hitting the Memory Wall, Implications of the Obvious. They projected forward assuming processor performance improving at eighty percent a year and memory speed at seven percent.
+B: And the gap compounds.
+A: Their conclusion was that system speed would end up dominated by memory performance. They called it a wall. And nearly thirty years later, the FlashAttention paper says plainly that on modern GPUs, compute has outpaced memory, and most operations in Transformers are bottlenecked by memory accesses.
+B: Where your cook analogy breaks, by the way, is that a GPU isn't one cook. It's thousands of them sharing one hallway. Bandwidth is the width of the hallway.
+A: Fair. So now take that lens and look at attention.
+
+## Why attention writes the giant table
+A: Quick refresher on what attention computes. Every token has a query, a key and a value, each a short vector. The paper calls the length of those vectors d, the head dimension. For GPT-2 it's sixty-four.
+B: And N is the sequence length.
+A: N is the number of tokens. For GPT-2, one thousand twenty-four. Step one, compare every query with every key. That gives you a score table, N rows by N columns. Step two, softmax each row, which turns the scores into weights that are positive and sum to one. Step three, use those weights to blend the values.
+B: So the table is N by N. A million entries per head at a thousand tokens.
+A: And here's what the standard implementation does, and the paper spells it out as Algorithm Zero. Compute the score table, write it to the big memory. Read it back, compute the softmax, write that whole table back to the big memory. Read it back again, multiply by the values, write the output.
+B: Three trips with a table that grows with the square of the context. And the middle step is a softmax, which is the textbook memory-bound operation.
+B: Okay, but the standard fix for memory-bound operations is fusion. Glue the steps into one kernel, load the data once, do everything, write once. Compilers do it automatically for simple elementwise work. Why didn't someone just fuse attention?
+A: Two obstacles. And they're the two things the paper had to solve. The first is the softmax. To normalize a row, you need the whole row. You need its maximum, for numerical safety, and you need its total. And a row of a thousand scores, for every head, for every sequence in the batch, doesn't fit on the cutting board.
+B: And the second?
+A: Training. To compute gradients on the backward pass, the standard approach saves that big table. So even if you fused the forward pass, you'd still have to write the table out for later.
+B: So you need a softmax that doesn't need to see the whole row at once. And a backward pass that doesn't need the table.
+A: And the first of those was already sitting in a twenty-eighteen paper about something else.
+
+## The running tally
+A: Maxim Milakov and Natalia Gimelshein, both at Nvidia, wrote a short paper called Online Normalizer Calculation for Softmax. They weren't thinking about attention. They were trying to make the plain softmax at the end of a language model faster.
+B: The vocabulary softmax.
+A: Right. And they noticed the safe version that every framework used makes three passes over the data. One to find the maximum. One to add up the exponentials. One to produce the outputs. Their trick fuses the first two. You keep a running maximum and a running sum as you go. And when a new, bigger maximum shows up, you rescale the sum you already have to the new maximum, and keep adding.
+B: Walk me through why rescaling works.
+A: Every term in the sum is e to the power of a score minus the maximum. If the maximum goes up by some amount, every term you've already added is now too big by exactly the same factor, e to that amount. So you multiply your running total by one correction factor and carry on. Nothing is lost. They say the inspiration came from the numerically stable way of computing a variance in one pass.
+B: [laughs] Which is the kind of thing you'd know.
+A: It's a very old trick. And notice what it buys you. You never need the whole row at once. You can consume the row in pieces.
+B: And that's the door FlashAttention walks through.
+A: That's the door. Here's the algorithm. Cut the keys and values into blocks small enough to fit in fast memory. Cut the queries into blocks too. Load a block of keys and values onto the board. Then for each block of queries, compute that little patch of the score table, right there on chip, take its exponentials, and fold the patch into a running output for those query rows.
+B: Folding how? You haven't seen the rest of the row yet.
+A: You keep two small numbers per row. The running maximum, and the running sum. When the next block arrives with a bigger maximum, you rescale the output you've accumulated by the correction factor, exactly like the softmax sum, add the new block's contribution, and update the two numbers. When you've seen every block, the output is exact.
+B: And the score table?
+A: Never exists. Not in the big memory, anyway. Each patch lives on the board for a moment and is gone. What gets written back is the output, which is N by d, and those two numbers per row.
+B: Okay, so that's the forward pass. Now the backward. You threw away the table the gradients need.
+A: So you recompute it. You've kept the output and those per-row statistics. On the backward pass, you reload blocks of queries, keys and values, rebuild each patch of the score table on chip, and use it immediately.
+B: That's gradient checkpointing. Throw away activations, recompute them later. And checkpointing is always a trade. You save memory and you pay in time.
+A: That's what the paper says too. Every implementation they knew of traded speed for memory. And this one didn't. The recompute is arithmetic, and arithmetic is the cheap thing. Here's their measurement on GPT-2 medium, forward and backward together, on one A100. Standard attention, sixty-six point six billion floating point operations. FlashAttention, seventy-five point two. More arithmetic.
+B: And the memory traffic?
+A: Forty point three gigabytes read and written for the standard version. Four point four for FlashAttention. And the runtime went from forty-one point seven milliseconds to seven point three.
+B: [impressed] There's the puzzle answered. Thirteen percent more math, a ninth of the traffic, and under a fifth of the time.
+A: They also prove the general version. Standard attention needs a number of memory accesses that grows with N squared. FlashAttention's grows with N squared times d squared, divided by the size of the fast memory. For typical head dimensions of sixty-four to a hundred twenty-eight, and fast memory around a hundred kilobytes, that divisor is much bigger than d squared. And they prove a lower bound. No exact attention algorithm can do asymptotically better across every fast-memory size.
+B: Wait, the block size matters, then.
+A: They checked. Bigger blocks, less traffic, faster. Until past a block size of about two fifty-six, where the bottleneck becomes something else, arithmetic mostly. Remember that. The bottleneck moving is the rest of the story.
+B: And I'd want credit to land right. They weren't the first to say attention doesn't need quadratic memory.
+A: No. In December twenty twenty-one, Markus Rabe and Charles Staats posted Self-Attention Does Not Need O of n squared Memory. They showed the memory cost could be cut dramatically, reporting fifty-nine times less memory overhead for inference at sixteen thousand tokens, while running within a few percent of standard attention's speed. FlashAttention's authors thank them in the acknowledgments. And the way the paper counts memory traffic comes from Aggarwal and Vitter, nineteen eighty-eight, on the input-output complexity of sorting.
+B: The theory of counting trips to the fridge.
+A: Exactly that. Rabe and Staats got the memory down. Dao and colleagues made it fast by organizing the whole thing around those trips.
+
+## What it bought, and what it didn't
+B: So what did it actually buy? Give me the end-to-end numbers, not the kernel.
+A: BERT-large, trained to the MLPerf target accuracy on eight A100s. Nvidia's record implementation took twenty minutes. FlashAttention took seventeen point four. That's the fifteen percent they headline. GPT-2 small, trained on OpenWebText: nine and a half days with the Hugging Face implementation, two point seven with FlashAttention, same perplexity.
+B: Same perplexity matters. It's the same model.
+A: It's the same model. They didn't change the definition, just the way it's computed. And then the memory. The footprint grows linearly with sequence length instead of quadratically. They report up to twenty times less memory than exact attention baselines.
+B: And that's what makes it a long-context story.
+A: That's the bridge. They trained GPT-2 at four times the context, four thousand tokens, and it was still thirty percent faster than Megatron-LM at one thousand, with better perplexity.
+B: Now let me be the annoying one. The table never touches the big memory. Fine. But every query still meets every key. The arithmetic is still N squared.
+A: Completely right. FlashAttention changed the memory from quadratic to linear. It did not change the compute. Double the context, and you still roughly quadruple the attention arithmetic.
+B: So it didn't make long context cheap.
+A: It made long context possible on the hardware, and it made the quadratic part run at the speed of the arithmetic instead of the speed of the hallway. The approximate methods, the ones that genuinely skip comparisons, do overtake it eventually. In their own benchmarks, the approximate methods start to cross over somewhere between five hundred twelve and a thousand twenty-four tokens.
+B: Huh. That's earlier than I'd have guessed.
+A: For raw speed on that setup. But the approximations change the model, and the paper notes most of them never gained wide adoption.
+B: And the other cost, the one nobody puts in the abstract, is the engineering. Their own limitations section says it. Every new attention variant needs a new hand-written CUDA kernel, in a much lower-level language than PyTorch, and it may not transfer across GPU architectures.
+A: Which turned out to be a prophecy.
+
+## Four versions, one moving bottleneck
+B: It did. Because here's what happened next. FlashAttention was fast, and it still wasn't using the chip. In July twenty twenty-three, Tri Dao, now alone on the paper, published FlashAttention-2. And the opening complaint is that the first version reached only twenty-five to forty percent of the A100's theoretical peak. A well-tuned matrix multiply gets eighty to ninety.
+A: So the bottleneck moved.
+B: It moved onto the chip. The A100 can do three hundred twelve trillion operations a second of the specialized matrix math, on its tensor cores. Ordinary arithmetic, the kind softmax needs, nineteen and a half trillion. So every non-matrix operation costs about sixteen times as much as a matrix one.
+A: And the online softmax is full of those. The rescaling, the exponentials.
+B: So version two does three things. It postpones the division. Instead of rescaling the output to its true value after every block, it keeps an unscaled running total and divides once at the end. It spreads one long sequence across more of the chip, so a small batch doesn't leave processors idle. That loop reordering, Dao credits to Phil Tillet's implementation in Triton, a language for writing GPU kernels. And within each block it splits the queries across groups of threads instead of the keys, so those groups don't have to swap partial results through shared memory.
+A: And the result?
+B: About twice as fast as the first version. Fifty to seventy-three percent of peak. Up to two hundred twenty-five trillion operations a second per A100 in end-to-end GPT-style training.
+A: And then serving broke it.
+B: Serving broke it. October twenty twenty-three, Dao and three co-authors wrote up Flash-Decoding. When a model is generating, it produces one token at a time. One query, meeting a long history of keys. FlashAttention parallelized over the batch and over the queries. With one query and a batch of one, the post says, it will use less than one percent of the GPU.
+A: Because there's nothing to spread out.
+B: Nothing on that axis. So they split along the other one. Chop the stored keys and values into chunks, let different parts of the chip handle different chunks at the same time, and then merge.
+A: And the merge is the online softmax again. Each chunk reports its partial output plus one extra number per row, the log of its sum of exponentials, and you combine them exactly.
+B: Same trick, new axis. They report up to eight times faster decoding at very long sequences on CodeLlama thirty-four B.
+A: Then Hopper.
+B: Then Hopper. July twenty twenty-four, FlashAttention-3, Jay Shah and Ganesh Bikshandi at Colfax Research leading, with Meta, Nvidia and Dao. Version two ran at thirty-five percent utilization on the H100. And the bottleneck had moved again, onto one specific operation. The exponential.
+A: The e to the x in the softmax.
+B: The paper gives the numbers. The H100 does nine hundred eighty-nine trillion operations a second of sixteen-bit matrix math. And three point nine trillion of special functions like the exponential. For head dimension one twenty-eight, there are five hundred twelve times more matrix operations than exponentials, but the exponential runs at a two hundred fifty-sixth of the speed. So the exponentials alone can take half as long as all the matrix math.
+A: [chuckles] So the scalar you'd never think about is half the bill.
+B: Half the bill. Their fix is scheduling. The exponentials run on a separate hardware unit. So they set up two groups of threads to take turns. While one does its softmax, the other uses the matrix units, then they swap. They call it pingpong. Up to seven hundred forty trillion operations a second in sixteen-bit, about seventy-five percent of peak.
+A: And then the one from March.
+B: FlashAttention-4. Ted Zadouri, Markus Hoehnerbach, Jay Shah and colleagues, Dao again. And the subtitle is the thesis: co-design for asymmetric hardware scaling. Blackwell's B200 roughly doubled the matrix throughput over the H100. Two point two five quadrillion against one. The exponential units and shared memory bandwidth didn't keep up.
+A: So the chip got lopsided.
+B: Their own analysis says that for typical attention workloads on Blackwell, shared-memory traffic and exponentials now take twenty-five to sixty percent longer than the matrix math itself.
+A: And this is where it gets fun.
+B: This is where it gets fun. They don't have enough hardware exponential units, so for ten to twenty-five percent of the entries in each row, they compute the exponential in software. Split the number into its whole part and its fractional part. The whole part goes straight into the floating point exponent with integer bit manipulation. The fractional part, a short polynomial on the ordinary multiply-add units.
+A: A polynomial approximation of the exponential. On a chip built for matrix math.
+B: And they checked the error. A third-degree polynomial is about six hundred times less accurate than the hardware unit before rounding. But after rounding to sixteen-bit brain float, the format the work actually runs in, the rounding error swamps it. They report it matches the hardware to within one unit in the last place on ninety-nine percent of inputs.
+A: And the other trick?
+B: Lazy rescaling. In the online softmax, you rescale the running output every time the maximum goes up. They only rescale when it goes up by a lot. The threshold they give is a factor of two hundred fifty-six. They keep track of the scaling they skipped, and the final division puts it right.
+A: Which works because the running maximum was only ever there to stop the numbers overflowing. It doesn't have to be the true maximum, just close enough.
+B: Exactly. Result: up to sixteen hundred thirteen trillion operations a second in sixteen-bit on a B200, seventy-one percent of peak, and up to one point three times faster than Nvidia's own cuDNN library. And they wrote it in a Python-embedded language, CuTe-DSL, with twenty to thirty times faster compile times than the old C++ templates.
+A: Which is the limitations section of the first paper, four years later, getting an answer.
+B: Partly an answer. It's still a hand-written kernel for one chip. It's just a faster hand to write with.
+
+## What to take from it
+A: So what should someone who builds with these models actually do with this?
+B: First, practically, you're almost certainly already using it. Since PyTorch two point zero, the standard function for scaled dot product attention ships several implementations, including FlashAttention, a memory-efficient one from the xFormers project, and a plain C++ fallback, and it picks one for your inputs and your hardware.
+A: Picks one. Which means it can also pick the slow one.
+B: That's the practical warning. The choice depends on your inputs and your hardware, and the fast kernels don't cover everything. Write a clever new attention variant, with its own mask or its own twist on the scores, and you can end up on a slower implementation. It still works. It may just be making the three trips to the fridge again.
+A: So profile before you get clever.
+B: Profile before you get clever. And when you profile, count bytes, not just operations. That's the transferable lesson. An operation that does almost no arithmetic can still eat a quarter of your step, if it touches every number.
+A: Here's the lesson I'd take, and it's the historian's version. Four papers in four years, and every one starts by saying the previous version leaves most of the chip idle on the new hardware. First the memory. Then the non-matrix arithmetic. Then the exponential unit. Then the exponential unit and shared memory together. The algorithm didn't change. Blocks, a running maximum, a running sum. What changed is which part of the chip it was waiting on.
+B: Which is the memory wall again. Just with more walls.
+A: Every part of the chip scales at its own rate, and whichever part scaled slowest becomes the wall. And the best algorithm is the one shaped around that wall.
+B: See, I hear that, and to me it sounds less like a lesson and more like a treadmill. Every new chip, someone has to rediscover where it's lopsided and hand-write a kernel to fit. That's not a solved problem. That's a job.
+A: I'd say the job is the lesson. The idea transferred perfectly from the A100 to the B200. The implementation didn't, and nobody should expect it to.
+B: I'd rather a compiler did it. The first paper asked for exactly that. A high-level language that compiles down to memory-aware kernels. Four years on, the fastest version is still hand-built, by a team that includes the person who wrote the first one.
+A: Maybe that says more about how few people understand the hallway than about whether a compiler could.
+B: Maybe. I'm not conceding the treadmill.
+A: Then here's where I'd point you, and I'm flagging this as speculation, not anything the papers claim. Those papers all treat the exponential as a fixed cost to schedule around. If hardware keeps scaling matrix math faster than everything else, the pressure lands on the softmax itself. The authors of version three list understanding low-precision attention in large-scale training as open work. Whether the field keeps engineering around the exponential, or starts asking whether attention needs that exact exponential at all, is the question I'd watch.
+B: And I'd watch the boring one. Whether the next chip ships with more exponential units. Because if it does, a good part of version four's cleverness stops being necessary.
+A: [chuckles] Which would be very on brand for this story.
+B: It would. What I'm still chewing on is that one of the speedups everything since has leaned on didn't skip a single comparison. It just stopped carrying the table down the hall. Stay grounded.

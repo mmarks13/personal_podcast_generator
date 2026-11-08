@@ -1,0 +1,81 @@
+{
+ "date": "2026-11-08",
+ "kind": "deepdive",
+ "title": "FlashAttention: why exact attention got faster by moving fewer bytes",
+ "summary": "Why attention on a GPU is limited by memory traffic rather than arithmetic, and how FlashAttention computes exact attention without ever writing the N-by-N score table: tiling, the online softmax's running maximum and sum, and recomputation in the backward pass. Then four versions in four years, each chasing a bottleneck that moved, from HBM to non-matmul FLOPs to the exponential unit.",
+ "sources": [
+  {
+   "group": "Primary sources",
+   "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness — Dao, Fu, Ermon, Rudra, Ré (2022)",
+   "url": "https://arxiv.org/abs/2205.14135"
+  },
+  {
+   "group": "Primary sources",
+   "title": "FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning — Dao (2023)",
+   "url": "https://arxiv.org/abs/2307.08691"
+  },
+  {
+   "group": "Primary sources",
+   "title": "FlashAttention-3: Fast and Accurate Attention with Asynchrony and Low-precision — Shah, Bikshandi, Zhang, Thakkar, Ramani, Dao (2024)",
+   "url": "https://arxiv.org/abs/2407.08608"
+  },
+  {
+   "group": "Primary sources",
+   "title": "FlashAttention-4: Algorithm and Kernel Pipelining Co-Design for Asymmetric Hardware Scaling — Zadouri, Hoehnerbach, Shah, Liu, Thakkar, Dao (2026)",
+   "url": "https://arxiv.org/abs/2603.05451"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Online normalizer calculation for softmax — Milakov, Gimelshein (2018)",
+   "url": "https://arxiv.org/abs/1805.02867"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Self-attention Does Not Need O(n²) Memory — Rabe, Staats (2021)",
+   "url": "https://arxiv.org/abs/2112.05682"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Flash-Decoding for long-context inference — Dao, Haziza, Massa, Sizov (Stanford CRFM, 2023)",
+   "url": "https://crfm.stanford.edu/2023/10/12/flashdecoding.html"
+  },
+  {
+   "group": "Further reading",
+   "title": "Data Movement Is All You Need: A Case Study on Optimizing Transformers — Ivanov, Dryden, Ben-Nun, Li, Hoefler",
+   "url": "https://arxiv.org/abs/2007.00072"
+  },
+  {
+   "group": "Further reading",
+   "title": "Hitting the Memory Wall: Implications of the Obvious — Wulf, McKee (1994)",
+   "url": "https://libraopen.lib.virginia.edu/public_view/k35694375"
+  },
+  {
+   "group": "Further reading",
+   "title": "PyTorch 2.0 release notes — scaled_dot_product_attention",
+   "url": "https://pytorch.org/blog/pytorch-2.0-release/"
+  }
+ ],
+ "topics": [
+  "deep dive: FlashAttention and why attention is memory-bound"
+ ],
+ "entities": [
+  "FlashAttention",
+  "Tri Dao",
+  "Nvidia A100",
+  "Nvidia H100",
+  "Nvidia B200",
+  "PyTorch",
+  "Flash-Decoding",
+  "Colfax Research"
+ ],
+ "threads": [],
+ "concepts_taught": [
+  "compute-bound versus memory-bound GPU operations: HBM versus on-chip SRAM, arithmetic intensity, and why matrix multiplies can be 99.8% of a BERT layer's arithmetic but 61% of its runtime (Ivanov et al.), with the memory wall (Wulf and McKee 1994) as lineage",
+  "FlashAttention's tiling: exact attention computed block by block in SRAM using the online softmax (running max and sum with rescaling, Milakov and Gimelshein 2018), so the N-by-N score table is never written to HBM; memory linear in sequence length, compute still quadratic",
+  "recomputation instead of storage in FlashAttention's backward pass: keep the output and per-row softmax statistics, rebuild score blocks on chip — more FLOPs (75.2 vs 66.6 GFLOPs on GPT-2 medium) but ~9x less HBM traffic and ~5.7x faster; IO complexity Θ(N²d²/M) versus Θ(Nd + N²)",
+  "the moving bottleneck across FlashAttention-2/3/4 and Flash-Decoding: non-matmul FLOPs (16x costlier on A100), parallelism over sequence and over the KV axis at decode, the exponential unit (989 vs 3.9 TFLOPS on H100), and on Blackwell software-emulated exponentials and threshold-based lazy rescaling"
+ ],
+ "lore": [],
+ "listener_note": null,
+ "word_band": null
+}
