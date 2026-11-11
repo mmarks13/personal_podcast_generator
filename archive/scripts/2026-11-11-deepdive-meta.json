@@ -1,0 +1,113 @@
+{
+ "date": "2026-11-11",
+ "kind": "deepdive",
+ "title": "Prompt, retrieve or fine-tune: how practitioners actually decide",
+ "summary": "The three ways to change what a model does — prompting, retrieval and fine-tuning — and how practitioners choose between them: evals and a break-even number first, then sorting failures into knowledge problems and behavior problems. Why fine-tuning is an unreliable way to add facts (Ovadia, Gekhman, LIMA), where it earns its keep (format, consistency, cost, RAFT-style reading skill), and what OpenAI's self-serve fine-tuning wind-down and Anthropic's homeopathic-learning result add to the decision.",
+ "sources": [
+  {
+   "group": "Primary sources",
+   "title": "OpenAI — Optimizing LLM accuracy (context vs LLM optimization; Icelandic and customer-service worked examples)",
+   "url": "https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy"
+  },
+  {
+   "group": "Primary sources",
+   "title": "OpenAI — Model optimization guide (evals, prompting, fine-tuning workflow)",
+   "url": "https://developers.openai.com/api/docs/guides/model-optimization"
+  },
+  {
+   "group": "Primary sources",
+   "title": "OpenAI — Deprecations: update to OpenAI's self-serve fine-tuning (notified May 7, 2026; new jobs end Jan 6, 2027)",
+   "url": "https://developers.openai.com/api/docs/deprecations"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Anthropic — Prompt engineering overview",
+   "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Anthropic — Introducing Contextual Retrieval (2024)",
+   "url": "https://www.anthropic.com/news/contextual-retrieval"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Fine-Tuning or Retrieval? Comparing Knowledge Injection in LLMs — Ovadia, Brief, Mishaeli, Elisha (2023)",
+   "url": "https://arxiv.org/abs/2312.05934"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Does Fine-Tuning LLMs on New Knowledge Encourage Hallucinations? — Gekhman et al. (EMNLP 2024)",
+   "url": "https://arxiv.org/abs/2405.05904"
+  },
+  {
+   "group": "Primary sources",
+   "title": "RAFT: Adapting Language Model to Domain Specific RAG — Zhang et al. (2024)",
+   "url": "https://arxiv.org/abs/2403.10131"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Diluting Poisoned Fine-Tuning Data Can Strengthen Its Effect — Anthropic Alignment Science (November 10, 2026)",
+   "url": "https://alignment.anthropic.com/2026/homeopathic-learning/"
+  },
+  {
+   "group": "Further reading",
+   "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks — Lewis et al. (2020)",
+   "url": "https://arxiv.org/abs/2005.11401"
+  },
+  {
+   "group": "Further reading",
+   "title": "Language Models are Few-Shot Learners — Brown et al. (2020)",
+   "url": "https://arxiv.org/abs/2005.14165"
+  },
+  {
+   "group": "Further reading",
+   "title": "LIMA: Less Is More for Alignment — Zhou et al. (2023)",
+   "url": "https://arxiv.org/abs/2305.11206"
+  },
+  {
+   "group": "Further reading",
+   "title": "RAG vs Fine-tuning: Pipelines, Tradeoffs, and a Case Study on Agriculture — Balaguer et al. (2024)",
+   "url": "https://arxiv.org/abs/2401.08406"
+  },
+  {
+   "group": "Further reading",
+   "title": "Retrieval Augmented Generation or Long-Context LLMs? A Comprehensive Study and Hybrid Approach — Li et al. (EMNLP 2024)",
+   "url": "https://arxiv.org/abs/2407.16833"
+  },
+  {
+   "group": "Further reading",
+   "title": "LoRA Without Regret — Schulman et al., Thinking Machines (2025)",
+   "url": "https://thinkingmachines.ai/blog/lora/"
+  }
+ ],
+ "topics": [
+  "deep dive: prompt, retrieve or fine-tune — how practitioners decide"
+ ],
+ "entities": [
+  "OpenAI",
+  "Anthropic",
+  "Thinking Machines",
+  "RAFT",
+  "LIMA",
+  "GPT-3",
+  "Llama 2",
+  "Mistral 7B",
+  "PaLM 2"
+ ],
+ "threads": [],
+ "concepts_taught": [
+  "choosing between prompting, retrieval and fine-tuning: evals and a business break-even first (OpenAI's 81.5% customer-service example), then sorting failures into knowledge problems (context optimization, maximizes accuracy) and behavior problems (LLM optimization, maximizes consistency), with model swapping as the zeroth lever",
+  "why fine-tuning is an unreliable way to inject facts: RAG beat unsupervised fine-tuning on new current-events facts (Ovadia: Mistral 7B 48% base, 87.5% RAG, 50% fine-tuned, 59% with ten paraphrases), new-knowledge examples are learned slower and linearly raise hallucination (Gekhman), and LIMA's claim that knowledge comes from pre-training",
+  "when retrieval is needed at all and how it fails separately: whole-corpus-in-context under ~200K tokens with prompt caching, long context beating RAG on average at higher cost (Self-Route), measuring retriever recall separately, and retrieval hurting a behavior problem (OpenAI Icelandic: fine-tuned GPT-4 87 BLEU, 83 with RAG)",
+  "where fine-tuning earns its keep: format and instruction consistency, smaller cheaper models with shorter prompts, RAFT's training on golden-plus-distractor documents to read the open book, LoRA practice (all layers, ~10x learning rate), and fine-tuning-specific risks: homeopathic learning in data mixtures and hosted-platform availability (OpenAI's self-serve wind-down)"
+ ],
+ "lore": [
+  {
+   "host": "Alan",
+   "type": "position",
+   "note": "Alan holds that fine-tuning isn't shrinking but moving — out of hosted APIs and into open-weight adapters you own — against Ada's reading that a large provider closing self-serve fine-tuning continues a curve from default to last resort. Left unresolved."
+  }
+ ],
+ "listener_note": null,
+ "word_band": null
+}

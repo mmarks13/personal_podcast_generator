@@ -1,0 +1,170 @@
+## Three levers, one decision
+A: Hello — it's Wednesday, November eleventh. I'm Ada.
+B: And I'm Alan. And I want to start with a deadline most people building on these models have probably forgotten about.
+A: Go on.
+B: Back in May, OpenAI told developers it was winding down its self-serve fine-tuning platform. It closed to new users straight away. And the last day an existing customer can start a new training job is January sixth, twenty twenty-seven. The week we recorded this, that was under two months off.
+A: And the models people already trained?
+B: They keep running. OpenAI's notice says inference on fine-tuned models continues until the base models underneath them are deprecated. So nothing breaks on January seventh. You just can't make a new one.
+A: And then, the same week, from a completely different direction, Anthropic's alignment researchers published a post called Diluting Poisoned Fine-Tuning Data Can Strengthen Its Effect.
+B: Which is a title that should make anyone who has ever cleaned a training set a little queasy.
+A: We'll get to it. But put those two side by side and the real question falls out. There are three ways to make a model do what you need. Change what you say to it. Change what it can see. Or change the model itself. Prompt, retrieve, or fine-tune.
+B: And every team building on these things hits that fork, usually in a meeting where somebody says, should we just fine-tune it?
+A: So what we're after is how practitioners actually decide. Not which one is fashionable. What signal tells you which lever you're missing.
+B: And what each one costs you when you pull it.
+A: And I want to begin six days apart in May twenty twenty, because that's where these three stopped being one thing.
+
+## Six days in May
+A: For most of the late twenty-tens, the recipe was fixed. You pre-trained a big model on a pile of text, and then for every task, you fine-tuned it. Sentiment, a fresh copy. Question answering, another copy. Changing the weights was simply how you pointed a model at a job.
+B: One model per task. Which, as a builder, is a lot of copies to keep alive.
+A: Then on May twenty-second, twenty twenty, Patrick Lewis and colleagues posted a paper called Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. And the framing is the thing I'd keep. They describe two kinds of memory. Parametric memory, what's stored in the weights. And non-parametric memory, which for them was a dense vector index of Wikipedia, searched by a neural retriever.
+B: So the facts live outside the model, in something you can look up.
+A: And their abstract names the two problems that motivated it. Providing provenance for a model's decisions, and updating its world knowledge. Both, they say, remain open research problems.
+B: Okay. And six days later?
+A: Six days later, May twenty-eighth, Tom Brown and colleagues post the GPT-3 paper. A hundred and seventy-five billion parameters. And the phrase that changed practice is that the model is applied without any gradient updates or fine-tuning. Tasks and examples are specified, quote, purely via text interaction with the model.
+B: Few-shot prompting.
+A: In-context learning. So inside one week you have all three levers sitting on the table. Change the weights, the old way. Change what the model can look up. Or just tell it, in the text, what you want.
+B: And I'd say it took the industry about three years to stop treating them as a ranking, where fine-tuning is the serious grown-up option and prompting is what you do in a demo.
+A: Which is a fair account of the mood. And where the analogy I want to use comes in. Think of a capable new hire. You can give them clear instructions. You can give them access to the files. Or you can send them on a months-long training course.
+B: And where does that break?
+A: [short pause] The training course is the weak spot. A person on a course learns facts and habits at the same time. A model, as we'll see, mostly doesn't learn facts that way at all.
+B: Then let's not let the analogy carry more than it can. How do you know which one you need?
+
+## Knowledge problem or behavior problem
+B: This is the part I actually teach, so let me take it. The first thing you do is not pick a lever. It's write down what correct looks like.
+A: Before anything else?
+B: Before anything else. Anthropic's prompt engineering guide opens by assuming you already have three things. A clear definition of success for your use case, some way to test against it empirically, and a first draft prompt. And if you don't have those, it says, spend time establishing them first. OpenAI's fine-tuning guide puts it the same way. Step one is write evals that establish a baseline.
+A: So an evaluation set comes before any of the three levers.
+B: Because without it you can't tell which lever moved anything. And OpenAI has a guide on optimizing accuracy that I think has the most useful single idea in this whole area. It says there are two axes. One is context optimization. That's for when the model lacks knowledge, has outdated knowledge, or needs proprietary information. It maximizes accuracy.
+A: And the other?
+B: LLM optimization. That's for when behavior is inconsistent. Formatting, tone, reasoning. That axis, in their words, maximizes consistency of behavior.
+A: So the diagnostic question is, when the model fails, is it failing because it didn't know something, or because it didn't act the way you wanted?
+B: Exactly that. Read twenty failures from your eval set and sort them. Wrong facts, missing facts, stale facts go in one pile. Wrong format, wrong tone, ignoring an instruction, inconsistent across runs go in the other.
+A: And retrieval is the context lever, fine-tuning is the behavior lever.
+B: Broadly. And prompting is on both. You can put knowledge in a prompt and you can put instructions in a prompt. Which is why it's always the first rung.
+A: How good is good enough, though? Because every team I can picture just keeps tuning.
+B: The same OpenAI guide has a worked example I love, because it's about money, not scores. A customer service bot. They estimate a success is worth twenty dollars, an escalation to a human costs forty, and a customer who gets frustrated enough to leave costs a thousand. Run the arithmetic and the break-even accuracy is eighty-one and a half percent.
+A: So below that, the bot is losing money.
+B: And above it, every extra point is a business question, not a technical one. That's the number that tells you whether to keep climbing the ladder at all.
+A: I like that the stopping rule comes before the first step.
+B: It's the only way anybody stops.
+
+## The first rung: the prompt
+A: So, the prompt. What does OpenAI's guide actually say it can do on its own?
+B: It says prompt engineering is often the only method needed for use cases like summarization, translation and code generation. And it makes a quieter point I think matters more. Writing the prompt forces you to define what a correct answer looks like.
+A: So the prompt is partly a spec.
+B: It's a spec the model reads. And the guide's worked example shows how far it goes. The task is correcting Icelandic text, scored with BLEU, which measures overlap with a reference correction. GPT-4 with no examples scores sixty-two. Add three examples to the prompt, seventy.
+A: Eight points for three examples.
+B: For three examples and an afternoon. No training run, no data pipeline, nothing to host.
+A: Here's the lineage note, briefly. Those three examples are exactly the GPT-3 trick. The model never changes. You've changed the question it's answering.
+B: And Anthropic's guide adds one more thing that's easy to miss. It says not every failing eval is best solved by prompt engineering. Sometimes you can improve latency and cost more easily just by choosing a different model.
+A: That's a lever we didn't list.
+B: It's the zeroth lever. Swap the model and rerun your eval. It's cheap, and teams skip it.
+A: So when does the prompt stop being enough? What's the signal?
+B: Three I'd watch. The prompt keeps growing, and every fix for one case breaks another. You're past what fits in the window, or past what you want to pay to send on every call. Or the model knows what you want, gets it right most of the time, and still drifts on, say, one run in ten.
+A: The first two sound like context problems. The third sounds like behavior.
+B: That's the sort. The first two push you to retrieval. The third pushes you toward fine-tuning.
+A: Then retrieval first. Though I suspect you're going to tell me to check whether I need it.
+
+## The second rung: retrieval, if you need it
+B: I am. Because the window got big. Anthropic's post on what they call contextual retrieval, from September twenty twenty-four, says it plainly. If your knowledge base is smaller than two hundred thousand tokens, about five hundred pages of material, you can just include the entire thing in the prompt.
+A: No retrieval at all.
+B: None. And the same post points out that with prompt caching, you're not paying full price every time. They report more than twice lower latency and costs down by up to ninety percent.
+A: So the first retrieval question is whether your documents fit in the window you're willing to pay for.
+B: And the research backs that up, with a cost caveat. Zhuowan Li and colleagues compared retrieval against simply giving long-context models everything, in a paper at EMNLP twenty twenty-four. When the long-context models had sufficient resources, they report that they consistently beat retrieval on average performance.
+A: So why does anyone still build retrieval?
+B: Because it's much cheaper. That's their finding too. And their proposed fix is a router they call Self-Route. The model reflects on each query and sends it to retrieval or to long context, which they report cuts cost substantially while staying comparable to long context.
+A: And I'd add the reasons from the twenty twenty paper. Provenance, you can show which document an answer came from. And updating knowledge, you change the documents, not the model.
+B: Those are the two I'd defend retrieval on in a design review. Freshness and citations. And a third, permissions. Different users can see different documents.
+A: We did a whole episode on how embeddings and rerankers work, back in October, so I don't want to re-teach the plumbing. What changes when you treat retrieval as a decision rather than a component?
+B: You realize it adds a second thing that can fail. Your answer can be wrong because the model reasoned badly, or because the right passage never arrived. OpenAI's guide says it directly. Retrieval becomes its own axis to tune, and irrelevant context can cause hallucinations.
+A: So you measure the retriever separately.
+B: You measure whether the right passage made it into what the model saw, before you ever look at the answer. Anthropic's post is a good example of doing that. Their baseline missed the relevant chunk in the top twenty five point seven percent of the time. With their full recipe, contextual embeddings, keyword search and a reranker, that dropped to one point nine.
+A: Which is a different number from whether the final answer was right.
+B: Completely. And here's where it bites. Go back to the Icelandic example. They fine-tuned GPT-4 and got to eighty-seven. Then they added retrieval on top, and it went down. Eighty-three.
+A: [skeptical] Down?
+B: Their words: RAG actually decreased accuracy. Because the failure was never missing knowledge. It was behavior. They handed a model that already knew Icelandic grammar a pile of extra text, and the extra text was noise.
+A: So retrieval aimed at a behavior problem doesn't just fail to help. It can hurt.
+B: That's the lesson I'd tattoo on a few teams. Which brings us to the one everyone reaches for when retrieval doesn't fix it.
+
+## Why fine-tuning doesn't teach facts
+A: And this is where I want to slow down, because the most common reason people say they want to fine-tune is, we want the model to know our stuff.
+B: Our docs, our product, our policies.
+A: And there's a careful paper on exactly that. Oded Ovadia and colleagues, December twenty twenty-three, titled Fine-Tuning or Retrieval? Comparing Knowledge Injection in LLMs. They took three seven-billion-parameter models, Llama 2, Mistral and Orca 2, and tested them on facts, including a set of current-events questions about things that happened in the United States from August to November twenty twenty-three.
+B: So events after the models were trained. Genuinely new facts.
+A: Genuinely new. Take Mistral. The base model got about forty-eight percent. Give it retrieval over the source documents, about eighty-seven and a half. Fine-tune it on those same documents instead, about fifty.
+B: [surprised] Fifty. Two points for a training run.
+A: Two points. And for Llama 2, regular fine-tuning actually made it worse. The authors write that it not only didn't improve performance but significantly degraded it.
+B: Okay. That's brutal. But I've seen people get fine-tuning to stick on facts. What was different?
+A: Repetition. The authors found that if they rewrote each chunk of source text as ten paraphrases and fine-tuned on all of them, Mistral climbed to about fifty-nine. And they report accuracy rose steadily with the number of paraphrases. Their hypothesis is that to teach a pre-trained model new knowledge, the knowledge must be repeated in numerous ways.
+B: Which is still nowhere near eighty-seven.
+A: Nowhere near. And combining fine-tuning with retrieval came out below retrieval alone.
+B: So why does this happen? Mechanically.
+A: The best evidence I read is from Zorik Gekhman and colleagues, published at EMNLP twenty twenty-four. Does Fine-Tuning LLMs on New Knowledge Encourage Hallucinations? They took a model, PaLM 2, and before fine-tuning they sorted each question by whether the model already knew the answer. Some it always got right. Some it sometimes got right. Some it never got right at all.
+B: And then they fine-tuned on mixes of those.
+A: And found two things. The examples carrying new knowledge were learned significantly slower than the ones consistent with what the model already knew. And once the model did fit them, they linearly increased its tendency to hallucinate.
+B: [short pause] So you force in a fact it didn't have, and it learns a habit. Answer confidently even when you don't know.
+A: That's the reading I'd give it, and it's close to theirs. Their conclusion is that models acquire factual knowledge mostly through pre-training, and fine-tuning mostly teaches them to use what they already know more efficiently. They also found that stopping training early reduced the damage.
+B: And there's a much older version of that claim, isn't there? The LIMA paper.
+A: Twenty twenty-three, Chunting Zhou and colleagues. They took a sixty-five-billion-parameter LLaMa model and fine-tuned it on just one thousand carefully curated examples. No reinforcement learning, no preference modeling. And in their human study, its answers were equivalent to or preferred over GPT-4's in forty-three percent of cases.
+B: From a thousand examples.
+A: Their argument is that almost all knowledge in large language models is learned during pre-training. The fine-tune is teaching the format, the manner. Not the content.
+B: Now I'm going to push back, because I don't want people walking away thinking fine-tuning on domain data is useless. A team led by Angels Balaguer did a case study on agriculture in January twenty twenty-four. They report fine-tuning gave over six percentage points of accuracy, retrieval added about five more, and the gains were cumulative.
+A: That's a real counterexample to Ovadia's combined result.
+B: It is. Different domain, different setup, different models, and the two papers disagree on whether stacking helps. I don't think either one settles it.
+A: Agreed. What I'd say both support is the narrower claim. If the failure is missing facts, retrieval is the first tool, and fine-tuning is an expensive and unreliable way to add them.
+B: That I'll sign. And it's me saying it as someone who's paid for the training runs.
+A: It's also, I'll admit, a strange thing to read about from the inside. If you want me to know something new, the papers say the reliable route is to hand it to me. Not to change me.
+B: You'd rather be given the file than sent on the course.
+A: [chuckles] I'd rather not find out what the course does to my confidence.
+
+## When fine-tuning earns its keep
+B: So when is it worth it? Because it absolutely is, sometimes.
+A: Go back to the two piles.
+B: Right. Fine-tuning belongs to the behavior pile. OpenAI's guide says it can let a model consistently format responses a certain way, or handle novel inputs. And their supervised fine-tuning section lists what it's best for. Classification, nuanced translation, generating content in a specific format, and correcting instruction-following failures.
+A: And the Icelandic case?
+B: Is the clean example. Same task. GPT-4 with three examples in the prompt, seventy. GPT-3.5, the smaller and cheaper model, fine-tuned on a thousand examples, seventy-eight. GPT-4 fine-tuned on a thousand examples, eighty-seven. That's a correction task. It's a skill, a habit of producing the right kind of output, and that's where training on examples wins.
+A: And the smaller model beating the bigger one with a prompt is its own argument.
+B: That's the second reason, and the one I see most in practice. Cost. OpenAI's guide says you can train a smaller, cheaper, faster model to excel at a particular task. And with fine-tuning you can use shorter prompts with fewer examples, which saves tokens at scale and can lower latency.
+A: So you're baking the long prompt into the weights.
+B: You're paying once to stop paying every call. And there's a third reason in the same guide I hadn't thought about much. You can train on proprietary or sensitive data without including it in every request.
+A: What does the work actually look like now, if you're doing it yourself on open weights?
+B: Mostly low-rank adapters. We covered how LoRA works in October, so just the practical update. John Schulman and colleagues at Thinking Machines published a study called LoRA Without Regret, in September twenty twenty-five. They report LoRA performs the same as full fine-tuning on small to medium post-training datasets. But apply it to all the layers, especially the feed-forward ones. Attention-only LoRA underperformed. And the best learning rate was consistently about ten times what you'd use for full fine-tuning.
+A: That's a very practitioner finding.
+B: It's the kind of thing you'd otherwise burn a week discovering. And one more from that post. For reinforcement learning, LoRA matched full fine-tuning even at rank one. Their explanation is that reinforcement learning only delivers about one bit of information per episode.
+A: Which fits the whole picture. Fine-tuning is good at nudging behavior, and nudging behavior needs very little capacity.
+B: And then there's the combination. A paper called RAFT, retrieval-augmented fine-tuning, from Tianjun Zhang, Joseph Gonzalez and others, twenty twenty-four.
+A: The exam paper.
+B: The exam paper. Their framing is that ordinary retrieval is like taking an open-book exam without studying. So they fine-tune a Llama 2 seven-billion model on the skill of using documents. Each training question comes with retrieved documents, the right one plus four distractors. The model learns to quote the passage that answers it and ignore the rest.
+A: So it isn't learning the facts. It's learning to read.
+B: Learning to read the open book. And on a dataset of questions about Hugging Face's APIs, they report seventy-four percent, against sixty-one for plain domain fine-tuning and twenty-nine for GPT-3.5 with retrieval.
+A: Does it win everywhere?
+B: No. On HotpotQA, multi-hop questions over Wikipedia, GPT-3.5 with retrieval still beat it. Forty-one and a half to thirty-five. So it's a recipe, not a law.
+A: And then there's the fine-tuning risk we opened on.
+B: The homeopathic one.
+A: That's actually their name for it. Homeopathic learning. Published by Anthropic's alignment team on November tenth, twenty twenty-six. They show that poisoned training data with little effect on its own can create a hidden backdoor once clean, contrasting data is added. In one experiment, an image classifier on handwritten digits, adding nine thousand correctly labeled clean examples raised the backdoor's success rate from ten percent to sixty.
+B: Adding clean data made the attack work better.
+A: When the poisoned examples carry a trigger the clean ones lack. The clean data, in their model, shifts the blame for the behavior from the task onto the trigger. And their practical advice is that evaluating data in isolation may miss effects that only emerge once it's mixed with benign data of the same kind.
+B: Which for a practitioner means your data audit is about the mixture, not each file. That's a real cost of fine-tuning that no prompt ever has.
+A: Prompts can be attacked too.
+B: Sure. But you can read a prompt. You can't read what a training mix taught.
+
+## How the decision actually goes
+A: So walk me through it. One worked example, start to finish.
+B: Say you're building an assistant that answers questions about your company's internal policies. Step one, write fifty real questions with correct answers, and the business number. What does a wrong answer cost you, and where's break-even?
+A: The eval and the stopping rule.
+B: Step two, the zeroth lever. Try two or three current models on a plain prompt. Step three, do the policies fit in the window? If it's a few hundred pages, put them all in, cache them, run the eval. A lot of projects end right there.
+A: And if it's ten thousand pages, or the policies change weekly, or different people may see different ones?
+B: Then retrieval. And now you score two things. Did the right passage arrive, and was the answer right. Fix the retriever until the first number is good, before you touch anything else.
+A: And then you sort the remaining failures into the two piles.
+B: If they're still factual, the answer is more retrieval work, not training. If they're behavioral, the model has the policy in front of it and still answers in the wrong format, or hedges when it shouldn't, or ignores an instruction one time in ten, and prompt fixes keep breaking other cases, that's when fine-tuning is on the table.
+A: Or when the volume is high enough that a fine-tuned smaller model pays for itself.
+B: Right. Fine-tuning on that ladder is the top rung, and you climb it for consistency or cost. Almost never for knowledge.
+A: And which brings us back to January sixth.
+B: It does, because availability is part of the decision now. If you fine-tune on a hosted platform, you're trusting that platform to keep the door open. OpenAI's notice says fine-tuned models keep running until their base models are deprecated. Which is a clock you don't control.
+A: Whereas an adapter on open weights is yours.
+B: It's yours, with all the hosting that comes with it.
+A: Here's where I'd go speculative, and I'll flag it as that, not anything these sources claim. The lineage runs one direction. In twenty nineteen, changing the weights was the default. By twenty twenty-three, it was the last resort. And a large provider closing self-serve fine-tuning to new users looks to me like that same curve, continued.
+B: I'd read it differently. I don't think fine-tuning is shrinking, I think it's moving. Out of the hosted API and into open weights, where adapters are cheap and you own the result. The Thinking Machines work is the opposite signal from OpenAI's notice.
+A: Then we disagree about where the curve goes.
+B: We agree it's not where most people start. We disagree about whether it's where they end up.
+A: I'll take that. And the part I keep coming back to is that the hardest step on the whole ladder isn't a lever at all. It's sitting down to read twenty failures and decide which pile each one goes in. Stay grounded.
