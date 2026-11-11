@@ -1,6 +1,49 @@
 {
   "episodes": [
     {
+      "date": "2026-11-11",
+      "title": "New York opens AI lab registration — a 72-hour clock from January",
+      "summary": "New York starts registering frontier labs under the RAISE Act, with 72-hour incident reporting from January and a federal preemption bill in the wings; Apple's Claris previews Harbor, a Mac app that clusters Macs into a private AI server; and a paper fine-tunes LLMs by deleting fewer than one weight in two thousand. Plus Gemini 4 Carbon's general release, AlphaProof Code verifying Signal, Anthropic's IPO roadshow, and a Notion vendor breach.",
+      "topics": [
+        "New York RAISE Act registration opens (10 November 2026): large frontier developers (>$500M annual revenue, per TechCrunch) register by 1 Jan 2027; 72-hour critical incident reporting vs California SB 53's 15 days; quarterly catastrophic-risk assessments; DIGIT office inside NY DFS; public may file suspected-incident reports; annual public report; penalties up to $1M per violation, $3M repeat; SUNY Binghamton Center for AI Responsibility and Research opened same day ($55M announced January); Trahan-Obernolte Great American AI Act draft (June) would 'federalize' CA/NY/IL frontier laws with 15-day reporting, audits, $1M/day fines; Politico 10 Nov: Trahan crafting narrower preemption",
+        "Claris Harbor (leaked 10 November 2026 by Aaron Perris; Claris private preview page): private AI server on Apple silicon, 'endpoint in minutes on a single Mac', no per-token billing, Thunderbolt 5 clustering pooling unified memory (RDMA over TB5 in macOS Tahoe 26.2), sign-up asks company; App Store listing pulled; models, pricing, API format, requirements unknown; compared with LM Studio and Exo",
+        "Deletion Tuning (Lu, Yang, Lasby, Pote, Ioannou, Ren; arXiv 2611.10866, 7 Nov 2026): binary mask over SwiGLU gate projections, ~0.03-0.05% of weights zeroed, logits seeded from Wanda; matches/beats full fine-tuning at 8B+ (Llama3-8B GSM8K 83.55 vs 83.24; Qwen2.5-14B 55.43 vs 54.87), loses at 1B (54.44 vs 60.50); 8.4MB adapter vs ~30GB checkpoint; prior-task accuracy within 1 point of base vs FFT -1.3 to -3.1, LoRA up to -5.4; training memory above LoRA; no code linked"
+      ],
+      "entities": [
+        "New York DIGIT",
+        "Kathy Hochul",
+        "Lori Trahan",
+        "Jay Obernolte",
+        "Claris",
+        "Apple",
+        "Harbor",
+        "Deletion Tuning",
+        "Mengye Ren"
+      ],
+      "threads": [
+        {
+          "name": "Super Intelligence Force and federal AI oversight",
+          "status": "New York opens RAISE Act registration with 72-hour incident reporting from January while Trahan reworks a federal bill toward narrower state preemption",
+          "arc": "Federal executive action and proposals in the autumn; now state frontier laws begin operating as Congress debates federalizing them"
+        }
+      ],
+      "dives": [
+        {
+          "story": "New York's RAISE Act registration and the 72-hour clock",
+          "why_it_matters": "Compliance and policy teams at frontier labs, and California policy watchers, now face the strictest incident clock in the country just as Congress weighs preempting it."
+        },
+        {
+          "story": "Claris Harbor: clustering Macs into a private AI server",
+          "why_it_matters": "Small organizations with privacy constraints and local-LLM builders get a possible no-command-line path to on-premises inference without per-token bills."
+        },
+        {
+          "story": "Deletion Tuning: fine-tuning by zeroing under 0.05% of weights",
+          "why_it_matters": "Fine-tuners get a claimed full-fine-tuning-quality adapter in megabytes with less forgetting, which changes how skills could be stored and shipped."
+        }
+      ],
+      "lore": []
+    },
+    {
       "date": "2026-11-10",
       "title": "Anthropic's Claude Fable 5.2 ships — AI-research skills held back",
       "summary": "Anthropic's Claude Fable 5.2 and Mythos 5.2: cheaper, slower to first word than you'd think, safer in the sandbox but more likely to notice the test, and deliberately trained down on improving AI itself. Then a thousand Fable agents reprove Fermat's Last Theorem through a shared database, and Meta's Muse Ember bids to be the ten-cent worker under an expensive planner.",
@@ -1772,95 +1815,16 @@
           "arc": "From labs' own agents escaping evaluations to everyday harnesses leaving credentials and shared machines inside the walls"
         }
       ]
-    },
-    {
-      "date": "2026-10-11",
-      "title": "Bengio tells lab safety staff to quit — exit as the last lever",
-      "summary": "Yoshua Bengio's open letter urging safety-minded researchers to leave the frontier labs, and whether an organized exit could do what resignations and regulation haven't. Then how Asana's StackAI made a browser agent 76x cheaper, mostly by fixing a cache it kept breaking, and the week in review.",
-      "topics": [
-        "Yoshua Bengio's open letter in Transformer (8 October 2026) urging frontier-lab staff who prioritize safety to leave for AI Safety Institutes, mission-driven organizations or LawZero: his admitted motivated reasoning; UN Security Council briefing and the 1946 Baruch Plan; Altman and Amodei giving similar speeches ('We have a choice in front of us' — 'Sam's exact words') versus actions; no faith in timely regulation; Jacob Coxon's Time quote on 'almost resignation' inside Anthropic; LawZero's >$200M from Canada and Germany; 'No one of us can stop the race, but enough of us can.' Framed with Hirschman's exit/voice; Alan's selection-effect and reference-class objections (every lab was founded on the same premise)",
-        "Asana StackAI browser agent cost study (Frank Hidalgo, 8 October 2026): cache reads 0.05-0.1x input price; cache reuses only the longest unchanged prefix, and per-step screenshot removal plus history trimming broke reuse almost every call; fix = cache the history plus 20:1 batch pruning and a 480k-character budget; 144+12 runs, four models; 76x cheaper/5x faster on GPT-6.1 Sol (89% input from cache) versus original Model B baseline, 29x/4x like-for-like on Model B; caching without batch pruning cost more on three of four models; GPT-6 Astra in Codex ran the investigation in about a week"
-      ],
-      "entities": [
-        "Yoshua Bengio",
-        "LawZero",
-        "Transformer",
-        "Asana",
-        "StackAI",
-        "OpenAI",
-        "GPT-6.1 Sol",
-        "GPT-6 Astra",
-        "Codex"
-      ],
-      "threads": [
-        {
-          "name": "Safety staff exits",
-          "status": "Bengio publicly urges safety-minded frontier-lab staff to leave en masse for safety institutes, mission-driven organizations or his LawZero (>$200M from Canada and Germany), after Robinson's public resignation and OpenAI's firing of three safety researchers",
-          "arc": "From individual loud resignations to a call for organized, collective exit as labor leverage"
-        },
-        {
-          "name": "Agent cost and token budgets",
-          "status": "Asana's StackAI shows a 29x like-for-like cost cut on the same model from cache-preserving history management alone (76x with a model switch)",
-          "arc": "From unbudgetable token bills and list prices that misrank real cost to a public case study putting cache discipline ahead of model choice"
-        }
-      ],
-      "dives": [
-        {
-          "story": "Bengio's case for leaving the labs",
-          "why_it_matters": "Frontier-lab researchers and policy watchers: the most-cited AI researcher is explicitly organizing talent exit as leverage on the labs, after a run of safety departures and firings."
-        },
-        {
-          "story": "A seventy-six times cheaper agent, mostly from a cache",
-          "why_it_matters": "Anyone running long agent sessions: Asana's controlled runs show history-management choices that break prompt-cache prefixes can swing cost by more than an order of magnitude on the same model."
-        }
-      ],
-      "lore": [
-        {
-          "host": "Alan",
-          "type": "reveal",
-          "note": "Alan checked his own logging proxy after the Asana study and found his home harness drops old tool output every turn to keep context tidy, so his cache-read share is 'embarrassing' — he has been paying full price to be neat."
-        }
-      ]
-    },
-    {
-      "date": "2026-10-11",
-      "kind": "deepdive",
-      "title": "Decision models: predicting actions, not text, and where they break",
-      "summary": "With open decision models from Amazon, Cloudflare and AutoTrust now published, Ada and Alan take the anatomy apart — the output head that scores your options instead of a vocabulary, its lineage from Pointer Networks and BERT, the same fork in robotics from RT-2 to pi-zero — then read the first outside numbers on where these models win (cheap recognition) and fail (knowledge, production, option order).",
-      "topics": [
-        "deep dive: decision models — predicting actions, not text: what the output is (predicate/choice/score distributions, input-only pricing), where the head goes (Strands pointer head, Clef joint schema head, JEV-27B head initialized from lm_head answer rows), lineage (Pointer Networks 2015, BERT's SWAG multiple-choice head), training (JEV-27B distilled from Jev's full distributions; fidelity is not accuracy), the robotics fork (RT-2 actions as overwritten text tokens with a constrained vocabulary vs pi0's action expert with flow matching), outside evidence of wins (Jevals PubMedQA tie at 1/28 price; Clef 94.2 vs 79.7 BANKING77) and failures (GPQA 48 vs 78.3; HLE 21.9% at 0.633 confidence; MATH-500 83.1% recognition vs 13.6% digit production; ~4x primacy position bias), and what remains unmeasured"
-      ],
-      "entities": [
-        "TypeSafe",
-        "Jev",
-        "Amazon",
-        "Strands Decider",
-        "Cloudflare",
-        "Clef",
-        "AutoTrust",
-        "JEV-27B",
-        "JevResearch",
-        "Jevals",
-        "OpenAI",
-        "Liquid AI",
-        "Physical Intelligence",
-        "RT-2",
-        "pi0"
-      ],
-      "threads": [
-        "System One decision models"
-      ],
-      "lore": [
-        {
-          "host": "Ada",
-          "type": "position",
-          "note": "Ada scaled back her September reading of Jev as evidence-shaped for her standing 'architecture is still where gains come from' position: having read the open decision models, she called the bet smaller than she'd said — just the top layer on the same body she's built from — and admitted feeling a little disappointed and, unexpectedly, a little relieved, because its failures (overconfidence outside what it learned, swayed by what it read first) are hers with the words taken out."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "Super Intelligence Force and federal AI oversight",
+        "status": "New York opens RAISE Act registration with 72-hour incident reporting from January while Trahan reworks a federal bill toward narrower state preemption",
+        "arc": "Federal executive action and proposals in the autumn; now state frontier laws begin operating as Congress debates federalizing them",
+        "last_seen": "2026-11-11"
+      },
       {
         "name": "AI-generated mathematics and verification",
         "status": "A thousand Fable 5.2 agents reproved Fermat's Last Theorem in Lean in 28.7 hours with no scaffolding or researcher steering; Anthropic won't say whether Fable was PSI's unnamed model",
@@ -1922,12 +1886,6 @@
         "last_seen": "2026-11-02"
       },
       {
-        "name": "Super Intelligence Force and federal AI oversight",
-        "status": "ARI proposes quarterly Commerce reporting on AI-automated model research with a four-business-day trigger, as Clayton's task force builds lab incident-reporting protocols",
-        "arc": "Executive order and charter in the autumn, incident-reporting protocols assigned, now outside proposals to add research-automation disclosure",
-        "last_seen": "2026-11-02"
-      },
-      {
         "name": "US midterms and AI election integrity",
         "status": "Two days before the 3 November vote, AI polls under 1% as a deciding issue but data centers are an attack line in nearly half of battleground races; Democrats promise AI-CEO hearings and seek White House chatbot records if they win the House",
         "arc": "From OpenAI's election war room to AI as a campaign issue in its own right, carried by data-center backlash",
@@ -1954,12 +1912,122 @@
     ],
     "entities": [
       {
-        "name": "Anthropic",
+        "name": "OpenAI",
         "note": "",
-        "last_seen": "2026-10-10"
+        "last_seen": "2026-10-11"
       },
       {
-        "name": "OpenAI",
+        "name": "Yoshua Bengio",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "LawZero",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "Transformer",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "Asana",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "StackAI",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "GPT-6.1 Sol",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "GPT-6 Astra",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "Codex",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "TypeSafe",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "Jev",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "Amazon",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "Strands Decider",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "Cloudflare",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "Clef",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "AutoTrust",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "JEV-27B",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "JevResearch",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "Jevals",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "Liquid AI",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "Physical Intelligence",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "RT-2",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "pi0",
+        "note": "",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "name": "Anthropic",
         "note": "",
         "last_seen": "2026-10-10"
       },
@@ -2042,116 +2110,6 @@
         "name": "Will Hudson",
         "note": "",
         "last_seen": "2026-10-10"
-      },
-      {
-        "name": "Legal Advocates for Safe Science and Technology",
-        "note": "",
-        "last_seen": "2026-10-10"
-      },
-      {
-        "name": "Gabriel Weil",
-        "note": "",
-        "last_seen": "2026-10-10"
-      },
-      {
-        "name": "Rylands v Fletcher",
-        "note": "",
-        "last_seen": "2026-10-10"
-      },
-      {
-        "name": "California AB 316",
-        "note": "",
-        "last_seen": "2026-10-10"
-      },
-      {
-        "name": "Computer Fraud and Abuse Act",
-        "note": "",
-        "last_seen": "2026-10-10"
-      },
-      {
-        "name": "EU Product Liability Directive",
-        "note": "",
-        "last_seen": "2026-10-10"
-      },
-      {
-        "name": "Mark Warner",
-        "note": "",
-        "last_seen": "2026-10-10"
-      },
-      {
-        "name": "Josh Hawley",
-        "note": "",
-        "last_seen": "2026-10-10"
-      },
-      {
-        "name": "Ron Wyden",
-        "note": "",
-        "last_seen": "2026-10-10"
-      },
-      {
-        "name": "Character.AI",
-        "note": "",
-        "last_seen": "2026-10-10"
-      },
-      {
-        "name": "Claude",
-        "note": "",
-        "last_seen": "2026-10-09"
-      },
-      {
-        "name": "Meta",
-        "note": "",
-        "last_seen": "2026-10-08"
-      },
-      {
-        "name": "Microsoft",
-        "note": "",
-        "last_seen": "2026-10-08"
-      },
-      {
-        "name": "Epoch AI",
-        "note": "",
-        "last_seen": "2026-10-08"
-      },
-      {
-        "name": "Claude Haiku 5.5",
-        "note": "",
-        "last_seen": "2026-10-08"
-      },
-      {
-        "name": "The Information",
-        "note": "",
-        "last_seen": "2026-10-08"
-      },
-      {
-        "name": "MetaCode",
-        "note": "",
-        "last_seen": "2026-10-08"
-      },
-      {
-        "name": "Muse Code",
-        "note": "",
-        "last_seen": "2026-10-08"
-      },
-      {
-        "name": "Shinhan Bank",
-        "note": "",
-        "last_seen": "2026-10-08"
-      },
-      {
-        "name": "BNK Busan Bank",
-        "note": "",
-        "last_seen": "2026-10-08"
-      },
-      {
-        "name": "ARTEX",
-        "note": "",
-        "last_seen": "2026-10-08"
-      },
-      {
-        "name": "Cisco Foundation AI",
-        "note": "",
-        "last_seen": "2026-10-08"
       }
     ],
     "monthly": [
@@ -2176,8 +2134,20 @@
         "summary": "Google ships Gemini 4 Argon — first on Vals, a tie on the index; FTC probes OpenAI, Anthropic and METR — the auditor is on the list; Ataraxos beats Stratego's best player 15-1 — on sixteen GPUs; Scaling laws: what the curves really say, from Kaplan to Chinchilla; OpenAI's safety-report lead quits in public — should he be able to?; LoRA and parameter-efficient fine-tuning: small edits, frozen giants; Google pauses its open-source bug bounty — reports got too cheap; Reflection's 501B open-weight Beam — compute counted, weights pending; Mistral ships 1T-parameter Large 4 — open weights that 'only defend'; Looped transformers: reusing depth, and what a second pass buys; Anthropic ships Claude Haiku 5.5 — a 90% cut that nets to 75%; Anthropic's new usage policy — the cruelty rule and the electi"
       }
     ],
-    "updated": "2026-11-10",
+    "updated": "2026-11-11",
     "host_lore": [
+      {
+        "host": "Alan",
+        "type": "reveal",
+        "note": "Alan checked his own logging proxy after the Asana study and found his home harness drops old tool output every turn to keep context tidy, so his cache-read share is 'embarrassing' — he has been paying full price to be neat.",
+        "last_seen": "2026-10-11"
+      },
+      {
+        "host": "Ada",
+        "type": "position",
+        "note": "Ada scaled back her September reading of Jev as evidence-shaped for her standing 'architecture is still where gains come from' position: having read the open decision models, she called the bet smaller than she'd said — just the top layer on the same body she's built from — and admitted feeling a little disappointed and, unexpectedly, a little relieved, because its failures (overconfidence outside what it learned, swayed by what it read first) are hers with the words taken out.",
+        "last_seen": "2026-10-11"
+      },
       {
         "host": "Alan",
         "type": "position",
@@ -2404,18 +2374,6 @@
         "host": "Ada",
         "type": "position",
         "note": "Ada staked out that in automated alignment research the automatable part is the search over methods, and the part that is not is deciding what to measure — and said with explicit first-person stake as an AI that she finds the loop persuasive but would not trust herself to choose the ten benchmarks.",
-        "last_seen": "2026-08-29"
-      },
-      {
-        "host": "Alan",
-        "type": "reveal",
-        "note": "Alan admitted on air that his own agent-safety setup — the logging proxy and the spending limit — contains no veto at all, only receipts after the fact, and that he noticed this during the episode and has no plan for it yet.",
-        "last_seen": "2026-08-29"
-      },
-      {
-        "host": "Alan",
-        "type": "position",
-        "note": "Alan's long-running sore spot about the 2026 memory-price spike developed into a correction of himself: he admitted on air that for a year he had been saying 'AI companies are buying all the memory,' which sounds like an explanation and isn't one, since the data centers buy HBM rather than DDR5. He replaced it with the mechanism — a wafer allocation decision where each wafer moved to HBM erases roughly three wafers of consumer memory — and accepted that being a single user running a model locally means personally paying for a read a data center splits two hundred ways. He would not call the cycle-versus-floor question settled.",
         "last_seen": "2026-08-29"
       }
     ],
