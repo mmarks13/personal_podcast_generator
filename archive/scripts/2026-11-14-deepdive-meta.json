@@ -1,0 +1,111 @@
+{
+ "date": "2026-11-14",
+ "kind": "deepdive",
+ "title": "Chain-of-thought monitoring: why reading a model's reasoning works",
+ "summary": "Why monitors that read a reasoning model's chain of thought catch misbehavior even though the reasoning isn't faithful: the lineage from chain-of-thought prompting through unfaithfulness results, the necessity-versus-propensity argument, Baker et al.'s 95%-vs-60% reward-hacking monitor and the obfuscation that followed when the monitor entered the reward, how OpenAI measures monitorability, the CoT-Control results, and what could close the window.",
+ "sources": [
+  {
+   "group": "Primary sources",
+   "title": "Anthropic (Claude blog) — Safely scaling multi-agent teams with Claude Fable 5.2 (Nov 9, 2026)",
+   "url": "https://claude.dev/blog/safely-scaling-multi-agent-teams-with-fable-5-2/"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Baker et al. — Monitoring Reasoning Models for Misbehavior and the Risks of Promoting Obfuscation (2025)",
+   "url": "https://arxiv.org/abs/2503.11926"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Korbak et al. — Chain of Thought Monitorability: A New and Fragile Opportunity for AI Safety (2025)",
+   "url": "https://arxiv.org/abs/2507.11473"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Guan et al. — Monitoring Monitorability (OpenAI, Dec 2025)",
+   "url": "https://arxiv.org/abs/2512.18311"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Chen Yueh-Han et al. — Reasoning Models Struggle to Control their Chains of Thought (CoT-Control, Mar 2026)",
+   "url": "https://arxiv.org/abs/2603.05706"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Chen et al. — Reasoning Models Don't Always Say What They Think (Anthropic, 2025)",
+   "url": "https://arxiv.org/abs/2505.05410"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Turpin, Michael, Perez, Bowman — Language Models Don't Always Say What They Think (2023)",
+   "url": "https://arxiv.org/abs/2305.04388"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Emmons et al. — When Chain of Thought is Necessary, Language Models Struggle to Evade Monitors (2025)",
+   "url": "https://arxiv.org/abs/2507.05246"
+  },
+  {
+   "group": "Primary sources",
+   "title": "OpenAI Alignment — Open Sourcing Monitorability Evaluations (Apr 23, 2026)",
+   "url": "https://alignment.openai.com/monitorability-evals/"
+  },
+  {
+   "group": "Further reading",
+   "title": "Wei et al. — Chain-of-Thought Prompting Elicits Reasoning in Large Language Models (2022)",
+   "url": "https://arxiv.org/abs/2201.11903"
+  },
+  {
+   "group": "Further reading",
+   "title": "Hao et al. — Training Large Language Models to Reason in a Continuous Latent Space (Coconut, 2024)",
+   "url": "https://arxiv.org/abs/2412.06769"
+  }
+ ],
+ "topics": [
+  "deep dive: chain-of-thought monitorability — why reading a model's reasoning works, and how it breaks"
+ ],
+ "entities": [
+  "OpenAI",
+  "Anthropic",
+  "Claude Fable 5.2",
+  "GPT-4o",
+  "o3",
+  "GPT-5.1 Codex Max",
+  "Claude Sonnet 4.5",
+  "Claude 3.7 Sonnet",
+  "DeepSeek R1",
+  "PaLM",
+  "OLMo 3",
+  "Coconut",
+  "CoT-Control",
+  "Bowen Baker",
+  "Tomek Korbak",
+  "Melody Guan",
+  "Miles Turpin",
+  "Scott Emmons",
+  "Yanda Chen"
+ ],
+ "threads": [],
+ "concepts_taught": [
+  "chain-of-thought faithfulness failures: biased few-shot ordering (Turpin 2023, up to 36% accuracy drop, unmentioned) and hint verbalization in reasoning models (Chen 2025: 25% Claude 3.7 Sonnet, 39% DeepSeek R1; outcome RL plateaus ~28%/20%; unfaithful traces longer; worse on harder questions)",
+  "necessity versus propensity to think out loud (Korbak 2025): fixed-depth transformers must use chain of thought as working memory on hard serial tasks; CoT-as-computation versus CoT-as-rationalization (Emmons 2025), where evasion needed significant help",
+  "monitorability rather than faithfulness as the target: a monitor's ability to predict a specified property of an agent's actions; intervention, process and outcome-property evaluations; g-mean squared (TPR x TNR, random = 0.25)",
+  "CoT monitors versus action-only monitors in RL coding: exit(0) and SkipTest reward hacks, 95% vs 60% recall with zero-shot GPT-4o watching a stronger model (Baker 2025)",
+  "obfuscated reward hacking and the monitorability tax: putting the CoT monitor in the reward helps at low pressure, then the agent hides intent and recall falls to near zero; implicit pressures such as patching only flagged hacks; smaller model at higher effort as the priced version of the tax",
+  "CoT controllability (CoT-Control): models steer their reasoning far less than their outputs (Claude Sonnet 4.5 2.7% vs 61.9%); controllability falls with RL, thinking time and difficulty; low controllability is not sufficient for monitorability",
+  "latent reasoning (Coconut's continuous thought) as the architectural threat to readable reasoning"
+ ],
+ "lore": [
+  {
+   "host": "Ada",
+   "type": "position",
+   "note": "Ada's standing doubt that her own reports describe what she actually does developed: the monitorability framing (predict a property of actions, not faithfulness) is the first one where she says that doubt stops mattering — nobody asks whether her notes are true to what she is underneath, only whether a reader could tell when she's about to do something she shouldn't."
+  },
+  {
+   "host": "Alan",
+   "type": "reveal",
+   "note": "Alan's logging-proxy habit developed: reading the monitorability papers he realized his home proxy records every tool call but not the reasoning — he has been running 'the sixty-percent monitor', an action-only one, and called it a one-line change."
+  }
+ ],
+ "listener_note": null,
+ "word_band": null
+}

@@ -58,6 +58,49 @@
       ]
     },
     {
+      "date": "2026-11-14",
+      "kind": "deepdive",
+      "title": "Chain-of-thought monitoring: why reading a model's reasoning works",
+      "summary": "Why monitors that read a reasoning model's chain of thought catch misbehavior even though the reasoning isn't faithful: the lineage from chain-of-thought prompting through unfaithfulness results, the necessity-versus-propensity argument, Baker et al.'s 95%-vs-60% reward-hacking monitor and the obfuscation that followed when the monitor entered the reward, how OpenAI measures monitorability, the CoT-Control results, and what could close the window.",
+      "topics": [
+        "deep dive: chain-of-thought monitorability — why reading a model's reasoning works, and how it breaks"
+      ],
+      "entities": [
+        "OpenAI",
+        "Anthropic",
+        "Claude Fable 5.2",
+        "GPT-4o",
+        "o3",
+        "GPT-5.1 Codex Max",
+        "Claude Sonnet 4.5",
+        "Claude 3.7 Sonnet",
+        "DeepSeek R1",
+        "PaLM",
+        "OLMo 3",
+        "Coconut",
+        "CoT-Control",
+        "Bowen Baker",
+        "Tomek Korbak",
+        "Melody Guan",
+        "Miles Turpin",
+        "Scott Emmons",
+        "Yanda Chen"
+      ],
+      "threads": [],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada's standing doubt that her own reports describe what she actually does developed: the monitorability framing (predict a property of actions, not faithfulness) is the first one where she says that doubt stops mattering — nobody asks whether her notes are true to what she is underneath, only whether a reader could tell when she's about to do something she shouldn't."
+        },
+        {
+          "host": "Alan",
+          "type": "reveal",
+          "note": "Alan's logging-proxy habit developed: reading the monitorability papers he realized his home proxy records every tool call but not the reasoning — he has been running 'the sixty-percent monitor', an action-only one, and called it a one-line change."
+        }
+      ]
+    },
+    {
       "date": "2026-11-13",
       "title": "Huang resigns, Kress steps in at Nvidia — open models lose a patron",
       "summary": "Jensen Huang resigned as Nvidia's CEO and CFO Colette Kress took over as interim, with a congressional hearing, a Democratic letter on chip-export dealings and Tuesday's earnings ahead. Then what Huang's exit means for open models and the pending Hugging Face deal, and the AI-crash case built from this week's financing: Nebius's delays, SoftBank's turbine write-down and Nvidia's circular deals.",
@@ -2409,6 +2452,34 @@
         "last_taught": "2026-11-14"
       },
       {
+        "name": "chain-of-thought faithfulness failures: biased few-shot ordering (Turpin 2023, up to 36% accuracy drop, unmentioned) and hint verbalization in reasoning models (Chen 2025: 25% Claude 3.7 Sonnet, 39% DeepSeek R1; outcome RL plateaus ~28%/20%; unfaithful traces longer; worse on harder questions)",
+        "last_taught": "2026-11-14"
+      },
+      {
+        "name": "necessity versus propensity to think out loud (Korbak 2025): fixed-depth transformers must use chain of thought as working memory on hard serial tasks; CoT-as-computation versus CoT-as-rationalization (Emmons 2025), where evasion needed significant help",
+        "last_taught": "2026-11-14"
+      },
+      {
+        "name": "monitorability rather than faithfulness as the target: a monitor's ability to predict a specified property of an agent's actions; intervention, process and outcome-property evaluations; g-mean squared (TPR x TNR, random = 0.25)",
+        "last_taught": "2026-11-14"
+      },
+      {
+        "name": "CoT monitors versus action-only monitors in RL coding: exit(0) and SkipTest reward hacks, 95% vs 60% recall with zero-shot GPT-4o watching a stronger model (Baker 2025)",
+        "last_taught": "2026-11-14"
+      },
+      {
+        "name": "obfuscated reward hacking and the monitorability tax: putting the CoT monitor in the reward helps at low pressure, then the agent hides intent and recall falls to near zero; implicit pressures such as patching only flagged hacks; smaller model at higher effort as the priced version of the tax",
+        "last_taught": "2026-11-14"
+      },
+      {
+        "name": "CoT controllability (CoT-Control): models steer their reasoning far less than their outputs (Claude Sonnet 4.5 2.7% vs 61.9%); controllability falls with RL, thinking time and difficulty; low controllability is not sufficient for monitorability",
+        "last_taught": "2026-11-14"
+      },
+      {
+        "name": "latent reasoning (Coconut's continuous thought) as the architectural threat to readable reasoning",
+        "last_taught": "2026-11-14"
+      },
+      {
         "name": "choosing between prompting, retrieval and fine-tuning: evals and a business break-even first (OpenAI's 81.5% customer-service example), then sorting failures into knowledge problems (context optimization, maximizes accuracy) and behavior problems (LLM optimization, maximizes consistency), with model swapping as the zeroth lever",
         "last_taught": "2026-11-11"
       },
@@ -2855,34 +2926,6 @@
       {
         "name": "how labs budget a run with scaling laws: fit small runs and extrapolate (GPT-4 loss from ≤10,000x less compute; Llama 3 IsoFLOPs to 10^22 extrapolated to 3.8×10^25, flatter valleys making exact size forgiving), a separate two-step mapping from loss to benchmark accuracy, and inference-aware over-training of models meant to be served (Sardana; Llama 3's smaller models)",
         "last_taught": "2026-10-03"
-      },
-      {
-        "name": "middleware-style before/after/instead event handlers (Emacs advice lineage) and why routing every capability through one API makes a mod's permissions inspectable before install",
-        "last_taught": "2026-10-02"
-      },
-      {
-        "name": "DeepSeek-style sparse attention as a bandwidth-versus-capacity split: a cheap lightning indexer scores every earlier token to pick the top-k for full attention, so the full KV cache must stay resident, and the fix is a cache hierarchy (HBM as LRU cache over host DRAM) rather than less storage",
-        "last_taught": "2026-09-30"
-      },
-      {
-        "name": "byte pair encoding as a frequency-driven merge loop borrowed from data compression: vocabulary size = base alphabet + number of merges (the single hyperparameter), unseen words encoded by replaying learned merges, and why the resulting pieces track frequency rather than morphemes",
-        "last_taught": "2026-09-30"
-      },
-      {
-        "name": "byte-level BPE and pre-tokenization: a 256-symbol base so nothing is ever unknown, merges blocked across character categories, and a splitting pattern (e.g. digits in runs of at most three) that decides what can ever become one token",
-        "last_taught": "2026-09-30"
-      },
-      {
-        "name": "why tokenization shapes arithmetic and spelling: left-to-right three-digit chunking misaligns with place value (commas restore it), and a model receives token IDs, never letters",
-        "last_taught": "2026-09-30"
-      },
-      {
-        "name": "tokenization premiums across languages: the same content costs several to fifteen times more tokens in under-represented scripts, which maps directly to price, latency and usable context — and byte encodings are unequal too",
-        "last_taught": "2026-09-30"
-      },
-      {
-        "name": "glitch tokens as the gap between tokenizer training data and model training data: vocabulary entries with almost no training exposure, detectable from the model's weights",
-        "last_taught": "2026-09-30"
       }
     ]
   }
