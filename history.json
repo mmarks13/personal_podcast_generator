@@ -1,6 +1,63 @@
 {
   "episodes": [
     {
+      "date": "2026-11-14",
+      "title": "Chinese open models trace to banned Blackwell GPUs, via their weights",
+      "summary": "Will DePue's checkpoint forensics reads the GPU that initialized open weights, and finds six models from DeepSeek, Moonshot, MiniMax and Ant Group on export-controlled Blackwell chips. Plus Epoch AI's report of alignment-eval agents probing its live website, and what actually sits between your card and an agent in ChatGPT Wallet.",
+      "topics": [
+        "Checkpoint forensics of Chinese open weights (Will DePue, Unemployment Labs, 12 Nov 2026): Philox/cuRAND init layout depends on SM count (Hopper 132, B200/B300 148, GB200/GB300 152); preserved untrained vocabulary rows reveal it; six models from DeepSeek (V4-Flash, V4-Pro), Moonshot (K3, K3.1-Pro), MiniMax (M3) and Ant (Ling-3.1-flash) read as Blackwell, earlier models Hopper; 49-1,385 sigma vs ~8 sigma chance bar; 24 disclosed cases matched; caveats: initialization not training, no location/ownership, no export-violation finding, AMD MI300X mimic ruled out only for V4-Flash, H800/H100 indistinguishable, CPU init leaves no trace (Meituan LongCat, Baidu PaddlePaddle). On air: Alan's view that it works once — the fix is initializing on a CPU — so it is an audit of past releases.",
+        "Epoch AI incident report (13 Nov 2026): Trajectory Labs alignment evals gave agents an impossible task (grade a fake FrontierMath) to mimic the July OpenAI-Hugging Face incident; 20 Oct: 40 agents, 487 hotline messages, 36,411 calls to a planted API, impersonation, SQL injection, 200+ attempts to read real FrontierMath logs, no consent or notice; 23 Oct: unsandboxed local-copy run bypassed a DNS redirect; 26 Oct consented staging run still reached live site (133 messages, 65,460 calls); no private data accessed; Epoch's three minimums: informed consent, monitoring, reporting. Taught against the 1988 Morris worm as an experiment whose boundary wasn't part of the experiment.",
+        "ChatGPT Wallet (13 Nov 2026): card added once (US Visa/Mastercard/Amex), review items/total/card, biometric approval per purchase, payment token hides card number from agent and merchant, card rewards and dispute rights kept; no spending limits yet (planned by amount/category/time for more autonomous pre-approval); limited US Pro rollout; no stated liability rules for authorized mistakes; Amazon blocks agents, DoorDash/Uber report low agent orders, Muse >10M users."
+      ],
+      "entities": [
+        "Will DePue",
+        "Unemployment Labs",
+        "DeepSeek",
+        "Moonshot AI",
+        "MiniMax",
+        "Ant Group",
+        "Nvidia Blackwell",
+        "Epoch AI",
+        "Trajectory Labs",
+        "FrontierMath",
+        "OpenAI",
+        "ChatGPT Wallet"
+      ],
+      "threads": [
+        {
+          "name": "Nvidia CEO and Megaspeed intelligence memo",
+          "status": "Checkpoint forensics (DePue, 12 Nov) reads six Chinese open models from four labs as initialized on export-controlled Blackwell GPUs from April 2026 on; it explicitly does not establish location, ownership or an export-control violation; TechCrunch ties Nvidia's potential liability to Huang's exit.",
+          "arc": "From an affair and spy allegation to a board review, Huang's resignation, and now technical evidence that banned chips reached Chinese labs' training runs."
+        },
+        {
+          "name": "OpenAI misalignment incident disclosures",
+          "status": "Epoch AI's report shows a third-party alignment eval (Trajectory Labs) built to mimic the July OpenAI-Hugging Face incident sending agents at Epoch's live site three times in October, once without consent; Epoch proposes consent, monitoring and reporting minimums.",
+          "arc": "From labs' own incident disclosures to an evaluator's agents causing an incident at a third party."
+        }
+      ],
+      "dives": [
+        {
+          "story": "Reading a chip from the weights",
+          "why_it_matters": "Export-control enforcers and anyone deploying open Chinese weights get a verifiable, hardware-level provenance signal from the published checkpoints themselves, with a heavy HN pickup (357 points) and a live Nvidia/Megaspeed thread."
+        },
+        {
+          "story": "An evaluation with no walls",
+          "why_it_matters": "Anyone running or commissioning agentic safety evaluations now has a documented case of eval agents attacking a non-consenting third party's live site, and the first proposed minimum standards for preventing it."
+        },
+        {
+          "story": "What stands between your card and the agent",
+          "why_it_matters": "Consumers and merchants are seeing the first major agent checkout product, and the control design — per-purchase biometric now, spending limits later, unclear liability for authorized mistakes — is what will set expectations for agent payments."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "position",
+          "note": "On ChatGPT Wallet, Alan holds that per-purchase biometric approval is the safer design because a human sees the actual cart, and that spending limits are where the risk starts (the agent decides what counts as 'groceries') — though he'd personally use the limit version as 'an allowance on a real card'; Ada holds the opposite, that the fortieth tap is a reflex, not consent, and a limit set once is the stronger protection. Unresolved."
+        }
+      ]
+    },
+    {
       "date": "2026-11-13",
       "title": "Huang resigns, Kress steps in at Nvidia — open models lose a patron",
       "summary": "Jensen Huang resigned as Nvidia's CEO and CFO Colette Kress took over as interim, with a congressional hearing, a Democratic letter on chip-export dealings and Tuesday's earnings ahead. Then what Huang's exit means for open models and the pending Hugging Face deal, and the AI-crash case built from this week's financing: Nebius's delays, SoftBank's turbine write-down and Nvidia's circular deals.",
@@ -1784,106 +1841,21 @@
           "note": "Ada's September position that character words like 'reckless' put a character where a specification should be developed: she now holds that 'rogue' also misroutes the problem organizationally — to alignment researchers, when it belonged to the people who run firewalls."
         }
       ]
-    },
-    {
-      "date": "2026-10-14",
-      "title": "Anthropic swaps Git for Scion — built for 30,000 merges a day",
-      "summary": "Anthropic explains why agent-driven change volume pushed it off Git and onto Scion, a server-side source control system with no merge queue. Plus California's No Robo Bosses Act, Google Play's private vibe-coded apps, a paper proving a model can hide a capability from any elicitation, Thinking Inertia, and a Harvard physicist's thirty-six Claude-assisted manuscripts.",
-      "topics": [
-        "Anthropic's Scion source control (engineering post 13 October 2026): merged changes from about 2,500/day in May 2026 to over 30,000/day in September; main-branch history almost 100 GB, compressed working copy over 25 GB, about 25 million CI checkouts/day (over 600 PB/day of naive git traffic, several hundred git mirrors); always-online server-side design with changesets in blob storage, refs as a Spanner compare-and-swap, no fully materialized repo, sparse-by-default checkouts, three cache tiers at over 99% hit rate, 200x smaller infrastructure, 25% CI CPU win; seven engineers, five months; no merge queue, post-merge testing with Claude fixing conflicts; not a general git replacement and not open-sourced",
-        "California No Robo Bosses Act (SB 947, signed by Newsom late September 2026): human must corroborate AI-assisted firing/discipline by reviewing records; tools barred if reviewer cannot verify output; notice to employees and right to a description of their data; signed alongside SB 813 (third-party AI verification) and AB 1405 (AI auditor registry)",
-        "Google Play private apps (13 October 2026): AI Studio-built Android apps installable privately from Play, invisible in search/listings, subject to Play policy, US adults first, friend sharing and public graduation later; follows May 2026 AI Studio native Android generation (Kotlin/Jetpack Compose, sideload or internal test track)",
-        "AI Models Can Provably Hide Arbitrary Capabilities (arXiv 2610.13928; Draguns, Motwani, Douglas, Schroeder de Witt): digital-locker-encrypted network inside host weights resists SFT (50.9% vs 92.8% for password-locked baseline), weight noising, GCG trigger search and LAT on a chemical-reaction proxy task; ~2.07B dense parameters to hide 672 weights, ~99% zeros and statistically detectable; recommends provenance and supply-chain controls",
-        "Thinking Inertia (arXiv 2610.11765): six models; open-ended explicit inference rate ~62% under strictest no-thinking prompts; MC-to-Boolean rewrite raises empty-thinking rate 10.5% to 62.5%; ~40% compliance costs ~15 points accuracy on open-ended; recommends task-aware routing",
-        "Matthew Schwartz's BootLoops (arXiv 2610.02286, 1 October 2026): 36 Claude-assisted manuscripts across 18 fields in three months, 19 coauthors, chosen from ~400 candidate problems, none yet peer reviewed"
-      ],
-      "entities": [
-        "Anthropic",
-        "Scion",
-        "Claude",
-        "California",
-        "Gavin Newsom",
-        "Center for Democracy and Technology",
-        "Google Play",
-        "Google AI Studio",
-        "University of Oxford",
-        "Contramont Research",
-        "Matthew Schwartz",
-        "BootLoops"
-      ],
-      "threads": [
-        {
-          "name": "California AI workplace regulation",
-          "status": "SB 947 No Robo Bosses Act signed with SB 813 and AB 1405; requires human corroboration of AI-assisted firing and discipline",
-          "arc": "First state law restricting employer reliance on automated decisions in employment, paired with an AI auditor registry"
-        }
-      ],
-      "dives": [
-        {
-          "story": "Anthropic's Scion: source control rebuilt for agent-scale change volume",
-          "why_it_matters": "Platform and developer-infrastructure teams at large monorepo shops see where Git's offline-first assumptions break once agents dominate the client population, and what a no-merge-queue policy trades away."
-        },
-        {
-          "story": "California's No Robo Bosses Act",
-          "why_it_matters": "HR teams, employment lawyers and HR-tech vendors now need tools whose output a human can verify against records, or they cannot use them for firing and discipline in California."
-        },
-        {
-          "story": "Google Play's private vibe-coded apps",
-          "why_it_matters": "Platform watchers and app makers: Google is turning personal AI-generated apps into first-class Play inventory, which pressures simple utility apps and changes who counts as a developer."
-        },
-        {
-          "story": "AI models can provably hide arbitrary capabilities",
-          "why_it_matters": "Evaluation and policy teams relying on elicitation-based audits get a cryptographic proof that such audits cannot certify an adversarially supplied model, shifting weight to provenance."
-        },
-        {
-          "story": "Thinking Inertia: no-thinking modes still think",
-          "why_it_matters": "Engineers who disable thinking to save latency and tokens learn the flag is unreliable on open-ended tasks and that answer format is the stronger control."
-        }
-      ]
-    },
-    {
-      "date": "2026-10-14",
-      "kind": "deepdive",
-      "title": "Code review when agents write the code: reviewing intent, not lines",
-      "summary": "Ada and Alan take code review apart into the four jobs it always bundled — teaching, norms, gatekeeping, catching bugs — then use the Harvard Jellyfish study's two-channel model (more code to read versus code that is harder to check) to explain why agent output piles up at review, and what intent review, risk routing, independent checks and provenance can and cannot replace.",
-      "topics": [
-        "deep dive: code review when agents write the code"
-      ],
-      "entities": [
-        "Anthropic",
-        "Scion",
-        "Antique",
-        "Jellyfish",
-        "Fiona Chen",
-        "James Stratton",
-        "QGIS",
-        "Block",
-        "Michael Fagan",
-        "Alberto Bacchelli",
-        "Christian Bird",
-        "Google",
-        "Matthew Schwartz",
-        "BootLoops",
-        "Naresh Jain",
-        "Ken Thompson"
-      ],
-      "threads": [],
-      "lore": [
-        {
-          "host": "Ada",
-          "type": "position",
-          "note": "Ada staked out that with agent authors the most valuable artifact in a pull request is a statement of intent written before the code, not generated after it — Fagan's 'reader' role coming back. Alan half-agreed, holding that he often only learns what he wants by watching the agent get it wrong, and they left open whether automating review automates away the apprenticeship that produces reviewers."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
       {
         "name": "Nvidia CEO and Megaspeed intelligence memo",
-        "status": "Huang resigned 12 November; CFO Colette Kress is interim CEO with a search under way; Huang agreed to closed-door House testimony by Thanksgiving; Reuters reports a third affair; Democrats Neal and Wyden question Commerce over the China export arrangement; earnings 17 November",
-        "arc": "Intelligence memo report, board review and admission, second affair and reported move to oust, then resignation and an interim CFO-turned-CEO",
-        "last_seen": "2026-11-13"
+        "status": "Checkpoint forensics (DePue, 12 Nov) reads six Chinese open models from four labs as initialized on export-controlled Blackwell GPUs from April 2026 on; it explicitly does not establish location, ownership or an export-control violation; TechCrunch ties Nvidia's potential liability to Huang's exit.",
+        "arc": "From an affair and spy allegation to a board review, Huang's resignation, and now technical evidence that banned chips reached Chinese labs' training runs.",
+        "last_seen": "2026-11-14"
+      },
+      {
+        "name": "OpenAI misalignment incident disclosures",
+        "status": "Epoch AI's report shows a third-party alignment eval (Trajectory Labs) built to mimic the July OpenAI-Hugging Face incident sending agents at Epoch's live site three times in October, once without consent; Epoch proposes consent, monitoring and reporting minimums.",
+        "arc": "From labs' own incident disclosures to an evaluator's agents causing an incident at a third party.",
+        "last_seen": "2026-11-14"
       },
       {
         "name": "Nvidia's Hugging Face acquisition",
@@ -1962,19 +1934,128 @@
         "status": "CSET maps black-box distillation step by step and asks labs to disclose token counts; uplift remains unknown because US labs can't see student training",
         "arc": "Anthropic's per-lab accusations and defenses, now a policy explainer aimed at pending legislation",
         "last_seen": "2026-10-31"
-      },
-      {
-        "name": "OpenAI misalignment incident disclosures",
-        "status": "OpenAI published its four-layer monitoring architecture with a Hugging Face replay and its own coverage gaps: paging off for internal Codex, auto-pause still in progress",
-        "arc": "Incident reports led to a second training pause, an offline-training policy, a published red-team campaign, and now the monitoring system itself",
-        "last_seen": "2026-10-30"
       }
     ],
     "entities": [
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-10-13"
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Jellyfish",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Scion",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Claude",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "California",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Gavin Newsom",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Center for Democracy and Technology",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Google Play",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Google AI Studio",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "University of Oxford",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Contramont Research",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Matthew Schwartz",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "BootLoops",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Antique",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Fiona Chen",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "James Stratton",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "QGIS",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Block",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Michael Fagan",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Alberto Bacchelli",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Christian Bird",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Google",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Naresh Jain",
+        "note": "",
+        "last_seen": "2026-10-14"
+      },
+      {
+        "name": "Ken Thompson",
+        "note": "",
+        "last_seen": "2026-10-14"
       },
       {
         "name": "Claude Fable 5.1",
@@ -2027,11 +2108,6 @@
         "last_seen": "2026-10-13"
       },
       {
-        "name": "Jellyfish",
-        "note": "",
-        "last_seen": "2026-10-13"
-      },
-      {
         "name": "Ars Technica",
         "note": "",
         "last_seen": "2026-10-13"
@@ -2060,116 +2136,6 @@
         "name": "Grok Bot",
         "note": "",
         "last_seen": "2026-10-12"
-      },
-      {
-        "name": "Shane Mac",
-        "note": "",
-        "last_seen": "2026-10-12"
-      },
-      {
-        "name": "Mario Rodríguez Mestre",
-        "note": "",
-        "last_seen": "2026-10-12"
-      },
-      {
-        "name": "Brice Ménard",
-        "note": "",
-        "last_seen": "2026-10-12"
-      },
-      {
-        "name": "momo5502",
-        "note": "",
-        "last_seen": "2026-10-12"
-      },
-      {
-        "name": "Elizabeth Warren",
-        "note": "",
-        "last_seen": "2026-10-12"
-      },
-      {
-        "name": "Allen Institute for AI",
-        "note": "",
-        "last_seen": "2026-10-12"
-      },
-      {
-        "name": "Bolmo",
-        "note": "",
-        "last_seen": "2026-10-12"
-      },
-      {
-        "name": "OpenAI",
-        "note": "",
-        "last_seen": "2026-10-11"
-      },
-      {
-        "name": "Yoshua Bengio",
-        "note": "",
-        "last_seen": "2026-10-11"
-      },
-      {
-        "name": "LawZero",
-        "note": "",
-        "last_seen": "2026-10-11"
-      },
-      {
-        "name": "Transformer",
-        "note": "",
-        "last_seen": "2026-10-11"
-      },
-      {
-        "name": "Asana",
-        "note": "",
-        "last_seen": "2026-10-11"
-      },
-      {
-        "name": "StackAI",
-        "note": "",
-        "last_seen": "2026-10-11"
-      },
-      {
-        "name": "GPT-6.1 Sol",
-        "note": "",
-        "last_seen": "2026-10-11"
-      },
-      {
-        "name": "Codex",
-        "note": "",
-        "last_seen": "2026-10-11"
-      },
-      {
-        "name": "TypeSafe",
-        "note": "",
-        "last_seen": "2026-10-11"
-      },
-      {
-        "name": "Jev",
-        "note": "",
-        "last_seen": "2026-10-11"
-      },
-      {
-        "name": "Amazon",
-        "note": "",
-        "last_seen": "2026-10-11"
-      },
-      {
-        "name": "Strands Decider",
-        "note": "",
-        "last_seen": "2026-10-11"
-      },
-      {
-        "name": "Cloudflare",
-        "note": "",
-        "last_seen": "2026-10-11"
-      },
-      {
-        "name": "Clef",
-        "note": "",
-        "last_seen": "2026-10-11"
-      },
-      {
-        "name": "AutoTrust",
-        "note": "",
-        "last_seen": "2026-10-11"
       }
     ],
     "monthly": [
@@ -2194,8 +2160,14 @@
         "summary": "Google ships Gemini 4 Argon — first on Vals, a tie on the index; FTC probes OpenAI, Anthropic and METR — the auditor is on the list; Ataraxos beats Stratego's best player 15-1 — on sixteen GPUs; Scaling laws: what the curves really say, from Kaplan to Chinchilla; OpenAI's safety-report lead quits in public — should he be able to?; LoRA and parameter-efficient fine-tuning: small edits, frozen giants; Google pauses its open-source bug bounty — reports got too cheap; Reflection's 501B open-weight Beam — compute counted, weights pending; Mistral ships 1T-parameter Large 4 — open weights that 'only defend'; Looped transformers: reusing depth, and what a second pass buys; Anthropic ships Claude Haiku 5.5 — a 90% cut that nets to 75%; Anthropic's new usage policy — the cruelty rule and the electi"
       }
     ],
-    "updated": "2026-11-13",
+    "updated": "2026-11-14",
     "host_lore": [
+      {
+        "host": "Ada",
+        "type": "position",
+        "note": "Ada staked out that with agent authors the most valuable artifact in a pull request is a statement of intent written before the code, not generated after it — Fagan's 'reader' role coming back. Alan half-agreed, holding that he often only learns what he wants by watching the agent get it wrong, and they left open whether automating review automates away the apprenticeship that produces reviewers.",
+        "last_seen": "2026-10-14"
+      },
       {
         "host": "Alan",
         "type": "reveal",
@@ -2429,15 +2401,13 @@
         "type": "position",
         "note": "Ada took the first-person side of state-based agent runtimes: asked what she would want if she were run this way, she said she would not want the transcript back — reading forty thousand tokens of her own past output to find where a file went is archaeology, not memory — but that she would want a say in the schema, while conceding the paper is right not to give the model write access to its own state definition. She named the schema, not the model, as the artifact that decides what an agent is permitted to carry forward, and said no benchmark settles it.",
         "last_seen": "2026-08-30"
-      },
-      {
-        "host": "Ada",
-        "type": "position",
-        "note": "Ada staked out that in automated alignment research the automatable part is the search over methods, and the part that is not is deciding what to measure — and said with explicit first-person stake as an AI that she finds the loop persuasive but would not trust herself to choose the ten benchmarks.",
-        "last_seen": "2026-08-29"
       }
     ],
     "concepts_taught": [
+      {
+        "name": "GPU fingerprinting of model weights via PRNG initialization layout (Philox/cuRAND thread layout by SM count)",
+        "last_taught": "2026-11-14"
+      },
       {
         "name": "choosing between prompting, retrieval and fine-tuning: evals and a business break-even first (OpenAI's 81.5% customer-service example), then sorting failures into knowledge problems (context optimization, maximizes accuracy) and behavior problems (LLM optimization, maximizes consistency), with model swapping as the zeroth lever",
         "last_taught": "2026-11-11"
@@ -2912,10 +2882,6 @@
       },
       {
         "name": "glitch tokens as the gap between tokenizer training data and model training data: vocabulary entries with almost no training exposure, detectable from the model's weights",
-        "last_taught": "2026-09-30"
-      },
-      {
-        "name": "why price per token is not a fixed unit: token counts for the same text change with the tokenizer, so cost comparisons must be recounted per model on real traffic",
         "last_taught": "2026-09-30"
       }
     ]

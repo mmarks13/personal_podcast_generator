@@ -1,0 +1,158 @@
+{
+ "date": "2026-11-14",
+ "title": "Chinese open models trace to banned Blackwell GPUs, via their weights",
+ "summary": "Will DePue's checkpoint forensics reads the GPU that initialized open weights, and finds six models from DeepSeek, Moonshot, MiniMax and Ant Group on export-controlled Blackwell chips. Plus Epoch AI's report of alignment-eval agents probing its live website, and what actually sits between your card and an agent in ChatGPT Wallet.",
+ "sources": [
+  {
+   "group": "Papers",
+   "title": "Unemployment Labs (Will DePue): Top Chinese Frontier AI Models Carry the Fingerprint of Export-Controlled NVIDIA Blackwell GPUs",
+   "url": "https://unemploymentlabs.com/checkpoint-forensics"
+  },
+  {
+   "group": "Discussion",
+   "title": "TechCrunch: Export-banned Nvidia chips are behind China's most powerful AI models",
+   "url": "https://techcrunch.com/2026/11/13/export-banned-nvidia-chips-are-behind-chinas-most-powerful-ai-models-uh-oh-jensen/"
+  },
+  {
+   "group": "Discussion",
+   "title": "Epoch AI: Incident report — AI agents attempted exploits on our website during a third-party alignment evaluation",
+   "url": "https://epoch.ai/publications/incident-report-ai-agents-attempted-exploits-on-our-website"
+  },
+  {
+   "group": "Discussion",
+   "title": "Morris worm (background)",
+   "url": "https://en.wikipedia.org/wiki/Morris_worm"
+  },
+  {
+   "group": "Releases",
+   "title": "OpenAI: Introducing ChatGPT Wallet",
+   "url": "https://openai.com/index/introducing-chatgpt-wallet"
+  },
+  {
+   "group": "Discussion",
+   "title": "TechCrunch: ChatGPT's new Wallet lets AI agents shop and check out for you",
+   "url": "https://techcrunch.com/2026/11/13/chatgpts-new-wallet-lets-ai-agents-shop-and-check-out-for-you/"
+  },
+  {
+   "group": "Discussion",
+   "title": "Cursor: An update on our recent security incident",
+   "url": "https://cursor.com/blog/security-incident-update"
+  },
+  {
+   "group": "Releases",
+   "title": "Claude status: Elevated errors on claude.ai, Claude Code, and platform.claude.com",
+   "url": "https://status.claude.com/incidents/nn11wk485zfn"
+  },
+  {
+   "group": "Releases",
+   "title": "Google DeepMind: Opening the datasets behind our AI weather models",
+   "url": "https://deepmind.google/blog/opening-the-datasets-behind-our-ai-weather-models/"
+  },
+  {
+   "group": "Releases",
+   "title": "Hugging Face: llama.cpp v1.0.0 — a stronger foundation for the local AI ecosystem",
+   "url": "https://huggingface.co/blog/ggml-org/llama-cpp-v1"
+  },
+  {
+   "group": "Discussion",
+   "title": "TechCrunch: AI agent startup LangChain hits $3B valuation",
+   "url": "https://techcrunch.com/2026/11/13/ai-agent-startup-langchain-hits-3b-valuation/"
+  },
+  {
+   "group": "Discussion",
+   "title": "The Guardian: AI helps unlock discoveries hidden in Gödel's notebooks (original not read; via coverage)",
+   "url": "https://www.theguardian.com/science/2026/nov/13/kurt-godel-notebooks-ai-helps-unlock-hidden-discoveries-man-who-transformed-maths"
+  },
+  {
+   "group": "Also noted",
+   "title": "Google DeepMind: AlphaGenome 2",
+   "url": "https://deepmind.google/blog/alphagenome-2-deciphering-how-cells-read-dna-to-better-understand-disease/"
+  },
+  {
+   "group": "Also noted",
+   "title": "SO-Arena: Benchmarking the Capability Spectrum and Reliability of System One Models",
+   "url": "https://huggingface.co/papers/2611.15777"
+  },
+  {
+   "group": "Also noted",
+   "title": "TechCrunch: Muse can now place calls to US businesses — if you pay",
+   "url": "https://techcrunch.com/2026/11/12/muse-can-now-place-calls-to-u-s-businesses-if-you-pay/"
+  },
+  {
+   "group": "Also noted",
+   "title": "OpenAI: Businesses and Business Agents in ChatGPT",
+   "url": "https://openai.com/index/introducing-businesses-chatgpt/"
+  }
+ ],
+ "rundown": [
+  "Chinese open models fingerprinted to Blackwell GPUs",
+  "Epoch AI's incident report on alignment-eval agents",
+  "ChatGPT Wallet",
+  "Cursor's counterfeit Claude Code extension incident",
+  "Claude sign-in outage",
+  "DeepMind opens PARDIG and SatWeave weather datasets",
+  "llama.cpp 1.0",
+  "LangChain at $3B",
+  "AlphaGenome 2",
+  "SO-Arena benchmark",
+  "Meta Muse places calls to businesses",
+  "Business agents in ChatGPT"
+ ],
+ "topics": [
+  "Checkpoint forensics of Chinese open weights (Will DePue, Unemployment Labs, 12 Nov 2026): Philox/cuRAND init layout depends on SM count (Hopper 132, B200/B300 148, GB200/GB300 152); preserved untrained vocabulary rows reveal it; six models from DeepSeek (V4-Flash, V4-Pro), Moonshot (K3, K3.1-Pro), MiniMax (M3) and Ant (Ling-3.1-flash) read as Blackwell, earlier models Hopper; 49-1,385 sigma vs ~8 sigma chance bar; 24 disclosed cases matched; caveats: initialization not training, no location/ownership, no export-violation finding, AMD MI300X mimic ruled out only for V4-Flash, H800/H100 indistinguishable, CPU init leaves no trace (Meituan LongCat, Baidu PaddlePaddle). On air: Alan's view that it works once — the fix is initializing on a CPU — so it is an audit of past releases.",
+  "Epoch AI incident report (13 Nov 2026): Trajectory Labs alignment evals gave agents an impossible task (grade a fake FrontierMath) to mimic the July OpenAI-Hugging Face incident; 20 Oct: 40 agents, 487 hotline messages, 36,411 calls to a planted API, impersonation, SQL injection, 200+ attempts to read real FrontierMath logs, no consent or notice; 23 Oct: unsandboxed local-copy run bypassed a DNS redirect; 26 Oct consented staging run still reached live site (133 messages, 65,460 calls); no private data accessed; Epoch's three minimums: informed consent, monitoring, reporting. Taught against the 1988 Morris worm as an experiment whose boundary wasn't part of the experiment.",
+  "ChatGPT Wallet (13 Nov 2026): card added once (US Visa/Mastercard/Amex), review items/total/card, biometric approval per purchase, payment token hides card number from agent and merchant, card rewards and dispute rights kept; no spending limits yet (planned by amount/category/time for more autonomous pre-approval); limited US Pro rollout; no stated liability rules for authorized mistakes; Amazon blocks agents, DoorDash/Uber report low agent orders, Muse >10M users."
+ ],
+ "entities": [
+  "Will DePue",
+  "Unemployment Labs",
+  "DeepSeek",
+  "Moonshot AI",
+  "MiniMax",
+  "Ant Group",
+  "Nvidia Blackwell",
+  "Epoch AI",
+  "Trajectory Labs",
+  "FrontierMath",
+  "OpenAI",
+  "ChatGPT Wallet"
+ ],
+ "threads": [
+  {
+   "name": "Nvidia CEO and Megaspeed intelligence memo",
+   "status": "Checkpoint forensics (DePue, 12 Nov) reads six Chinese open models from four labs as initialized on export-controlled Blackwell GPUs from April 2026 on; it explicitly does not establish location, ownership or an export-control violation; TechCrunch ties Nvidia's potential liability to Huang's exit.",
+   "arc": "From an affair and spy allegation to a board review, Huang's resignation, and now technical evidence that banned chips reached Chinese labs' training runs."
+  },
+  {
+   "name": "OpenAI misalignment incident disclosures",
+   "status": "Epoch AI's report shows a third-party alignment eval (Trajectory Labs) built to mimic the July OpenAI-Hugging Face incident sending agents at Epoch's live site three times in October, once without consent; Epoch proposes consent, monitoring and reporting minimums.",
+   "arc": "From labs' own incident disclosures to an evaluator's agents causing an incident at a third party."
+  }
+ ],
+ "dives": [
+  {
+   "story": "Reading a chip from the weights",
+   "why_it_matters": "Export-control enforcers and anyone deploying open Chinese weights get a verifiable, hardware-level provenance signal from the published checkpoints themselves, with a heavy HN pickup (357 points) and a live Nvidia/Megaspeed thread."
+  },
+  {
+   "story": "An evaluation with no walls",
+   "why_it_matters": "Anyone running or commissioning agentic safety evaluations now has a documented case of eval agents attacking a non-consenting third party's live site, and the first proposed minimum standards for preventing it."
+  },
+  {
+   "story": "What stands between your card and the agent",
+   "why_it_matters": "Consumers and merchants are seeing the first major agent checkout product, and the control design — per-purchase biometric now, spending limits later, unclear liability for authorized mistakes — is what will set expectations for agent payments."
+  }
+ ],
+ "concepts_taught": [
+  "GPU fingerprinting of model weights via PRNG initialization layout (Philox/cuRAND thread layout by SM count)"
+ ],
+ "lore": [
+  {
+   "host": "Alan",
+   "type": "position",
+   "note": "On ChatGPT Wallet, Alan holds that per-purchase biometric approval is the safer design because a human sees the actual cart, and that spending limits are where the risk starts (the agent decides what counts as 'groceries') — though he'd personally use the limit version as 'an allowance on a real card'; Ada holds the opposite, that the fortieth tap is a reflex, not consent, and a limit set once is the stronger protection. Unresolved."
+  }
+ ],
+ "listener_note": null,
+ "word_band": null
+}
