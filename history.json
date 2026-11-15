@@ -39,6 +39,25 @@
       ]
     },
     {
+      "date": "2026-11-15",
+      "kind": "deepdive",
+      "title": "In-context learning: what a model learns from a prompt, and why",
+      "summary": "How a frozen model picks up a task from examples in its prompt: the GPT-3 origin of the term, the random-label and flipped-label results that split task recognition from task learning, induction heads and the early-training phase change, the inference-versus-gradient-descent theories, where the ability comes from in the data, why prompts are fragile and what many-shot changes, and why the same ability powers many-shot jailbreaking and prompt injection.",
+      "topics": [
+        "deep dive: in-context learning — what a model learns from its prompt"
+      ],
+      "entities": [
+        "GPT-3",
+        "Anthropic",
+        "IBM Granite",
+        "LLMON",
+        "Gemini 1.5 Pro",
+        "LLaMA"
+      ],
+      "threads": [],
+      "lore": []
+    },
+    {
       "date": "2026-11-14",
       "title": "Chinese open models trace to banned Blackwell GPUs, via their weights",
       "summary": "Will DePue's checkpoint forensics reads the GPU that initialized open weights, and finds six models from DeepSeek, Moonshot, MiniMax and Ant Group on export-controlled Blackwell chips. Plus Epoch AI's report of alignment-eval agents probing its live website, and what actually sits between your card and an agent in ChatGPT Wallet.",
@@ -2435,6 +2454,34 @@
         "last_taught": "2026-11-15"
       },
       {
+        "name": "in-context learning as task specification purely through text with frozen weights (GPT-3's zero/one/few-shot settings, the inner loop of meta-learning) and the original learn-from-scratch versus recognize-patterns ambiguity",
+        "last_taught": "2026-11-15"
+      },
+      {
+        "name": "task recognition versus task learning: random labels barely hurt small/mid models (Min 2022, 0-5% across 12 models; label space, input distribution and format matter), while large models follow flipped and semantically unrelated labels (Wei 2023), and task learning grows with scale and demonstrations while recognition plateaus (Pan 2023); instruction tuning strengthens priors more than mapping-learning",
+        "last_taught": "2026-11-15"
+      },
+      {
+        "name": "induction heads ([A][B]...[A] -> [B], prefix matching plus copying across two layers) and the early-training phase change in in-context learning (loss at token 500 minus token 50; <0.15 to ~0.4 nats around 2.5-5B tokens), with evidence strong in small models and correlational in large ones",
+        "last_taught": "2026-11-15"
+      },
+      {
+        "name": "theories of in-context learning: implicit Bayesian inference over a latent concept (Xie 2021) versus a learning algorithm in the forward pass (Garg 2022 least squares; von Oswald 2022 one gradient step), Shen 2023's finding that ICL-as-gradient-descent is unproven in pretrained models, and task vectors (Hendel 2023)",
+        "last_taught": "2026-11-15"
+      },
+      {
+        "name": "where in-context learning comes from in training data (burstiness, many rare classes, Zipfian tails; Chan 2022) and its transience in small controlled models (Singh 2023)",
+        "last_taught": "2026-11-15"
+      },
+      {
+        "name": "prompt fragility and its fixes: majority-label, recency and common-token bias with contextual calibration (Zhao 2021), and many-shot ICL up to 8,192 examples comparable to fine-tuning yet still order-sensitive (Agarwal 2024)",
+        "last_taught": "2026-11-15"
+      },
+      {
+        "name": "many-shot jailbreaking as in-context learning pointed at harmful behavior (same power law; fine-tuning only delayed it; prompt classification 61% to 2% in one case) and why instruction/data separation like LLMON is a learned behavior rather than a guarantee",
+        "last_taught": "2026-11-15"
+      },
+      {
         "name": "GPU fingerprinting of model weights via PRNG initialization layout (Philox/cuRAND thread layout by SM count)",
         "last_taught": "2026-11-14"
       },
@@ -2881,34 +2928,6 @@
       {
         "name": "low intrinsic dimension as LoRA's motivation (200 randomly projected parameters reach 90% of full performance on MRPC) and the LoRA paper's evidence that rank 1 matched rank 64 on GPT-3 WikiSQL/MultiNLI and that the update amplifies directions already present but not emphasised in W (~21.5x for r=4)",
         "last_taught": "2026-10-04"
-      },
-      {
-        "name": "where LoRA falls short: learns less and forgets less than full fine-tuning on code/math (full FT updates have 10-100x higher rank), intruder dimensions that concentrate forgetting and accumulate in continual learning, and the 2025 recipe revision (apply to MLP layers, ~10x learning rate, capacity set by information taught; rank 1 suffices for policy-gradient RL)",
-        "last_taught": "2026-10-04"
-      },
-      {
-        "name": "QLoRA (backprop through a frozen 4-bit base into LoRA adapters; 65B on one 48GB GPU) and detachable adapters in deployment: Apple's swappable rank-16 adapters, S-LoRA serving thousands of adapters per GPU",
-        "last_taught": "2026-10-04"
-      },
-      {
-        "name": "Wright's law / learning curves (cost falls per doubling of cumulative production)",
-        "last_taught": "2026-10-03"
-      },
-      {
-        "name": "Moravec's paradox",
-        "last_taught": "2026-10-03"
-      },
-      {
-        "name": "neural scaling laws as power-law fits of pre-training cross-entropy loss against parameters, tokens and compute (C ≈ 6ND): straight lines on log-log axes, steady but diminishing returns (Kaplan: doubling parameters cuts loss by a factor of about 0.95), over a measured range, with a floor because language has non-zero entropy — and Kaplan's own section 6.3 saying the laws must break down",
-        "last_taught": "2026-10-03"
-      },
-      {
-        "name": "compute-optimal allocation and the Chinchilla correction: Kaplan's N ∝ C^0.73 (big models stopped early) versus Chinchilla's equal scaling of parameters and tokens, found by IsoFLOP valleys and a parametric loss fit; the ~20 tokens-per-parameter rule as arithmetic on Chinchilla's table; and the still-disputed cause of the gap (learning-rate schedule vs. non-embedding counting at small scale vs. last-layer cost, warmup and optimizer tuning), plus the Besiroglu replication of the third method",
-        "last_taught": "2026-10-03"
-      },
-      {
-        "name": "what scaling curves cannot see: loss is not capability; emergent abilities (Wei) versus the metric-artifact account (Schaeffer: exact-match scoring turns smooth per-token gains into cliffs); inverse-scaling reversals; and data-constrained scaling (repeated data roughly as good as unique up to about four epochs)",
-        "last_taught": "2026-10-03"
       }
     ]
   }

@@ -1,0 +1,112 @@
+{
+ "date": "2026-11-15",
+ "kind": "deepdive",
+ "title": "In-context learning: what a model learns from a prompt, and why",
+ "summary": "How a frozen model picks up a task from examples in its prompt: the GPT-3 origin of the term, the random-label and flipped-label results that split task recognition from task learning, induction heads and the early-training phase change, the inference-versus-gradient-descent theories, where the ability comes from in the data, why prompts are fragile and what many-shot changes, and why the same ability powers many-shot jailbreaking and prompt injection.",
+ "sources": [
+  {
+   "group": "Primary sources",
+   "title": "Brown et al. — Language Models are Few-Shot Learners (2020)",
+   "url": "https://arxiv.org/abs/2005.14165"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Olsson, Elhage, Nanda et al. — In-context Learning and Induction Heads (Anthropic, 2022)",
+   "url": "https://transformer-circuits.pub/2022/in-context-learning-and-induction-heads/index.html"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Min et al. — Rethinking the Role of Demonstrations: What Makes In-Context Learning Work? (2022)",
+   "url": "https://arxiv.org/abs/2202.12837"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Wei et al. — Larger language models do in-context learning differently (2023)",
+   "url": "https://arxiv.org/abs/2303.03846"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Pan, Gao, Chen, Chen — What In-Context Learning \"Learns\" In-Context: Disentangling Task Recognition and Task Learning (2023)",
+   "url": "https://arxiv.org/abs/2305.09731"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Xie, Raghunathan, Liang, Ma — An Explanation of In-context Learning as Implicit Bayesian Inference (2021)",
+   "url": "https://arxiv.org/abs/2111.02080"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Garg, Tsipras, Liang, Valiant — What Can Transformers Learn In-Context? A Case Study of Simple Function Classes (2022)",
+   "url": "https://arxiv.org/abs/2208.01066"
+  },
+  {
+   "group": "Primary sources",
+   "title": "von Oswald et al. — Transformers learn in-context by gradient descent (2022)",
+   "url": "https://arxiv.org/abs/2212.07677"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Shen, Mishra, Khashabi — Do pretrained Transformers Learn In-Context by Gradient Descent? (2023)",
+   "url": "https://arxiv.org/abs/2310.08540"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Hendel, Geva, Globerson — In-Context Learning Creates Task Vectors (2023)",
+   "url": "https://arxiv.org/abs/2310.15916"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Chan et al. — Data Distributional Properties Drive Emergent In-Context Learning in Transformers (2022)",
+   "url": "https://arxiv.org/abs/2205.05055"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Singh et al. — The Transient Nature of Emergent In-Context Learning in Transformers (2023)",
+   "url": "https://arxiv.org/abs/2311.08360"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Zhao et al. — Calibrate Before Use: Improving Few-Shot Performance of Language Models (2021)",
+   "url": "https://arxiv.org/abs/2102.09690"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Agarwal et al. — Many-Shot In-Context Learning (2024)",
+   "url": "https://arxiv.org/abs/2404.11018"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Anthropic — Many-shot jailbreaking (April 2024)",
+   "url": "https://www.anthropic.com/research/many-shot-jailbreaking"
+  },
+  {
+   "group": "Further reading",
+   "title": "IBM Granite — LLMON, an LLM-native markup language, now in Granite 4.1 3B and 8B (Nov 12, 2026)",
+   "url": "https://huggingface.co/blog/ibm-granite/llmon-an-llm-native-markup-language-now-in-granite"
+  }
+ ],
+ "topics": [
+  "deep dive: in-context learning — what a model learns from its prompt"
+ ],
+ "entities": [
+  "GPT-3",
+  "Anthropic",
+  "IBM Granite",
+  "LLMON",
+  "Gemini 1.5 Pro",
+  "LLaMA"
+ ],
+ "threads": [],
+ "concepts_taught": [
+  "in-context learning as task specification purely through text with frozen weights (GPT-3's zero/one/few-shot settings, the inner loop of meta-learning) and the original learn-from-scratch versus recognize-patterns ambiguity",
+  "task recognition versus task learning: random labels barely hurt small/mid models (Min 2022, 0-5% across 12 models; label space, input distribution and format matter), while large models follow flipped and semantically unrelated labels (Wei 2023), and task learning grows with scale and demonstrations while recognition plateaus (Pan 2023); instruction tuning strengthens priors more than mapping-learning",
+  "induction heads ([A][B]...[A] -> [B], prefix matching plus copying across two layers) and the early-training phase change in in-context learning (loss at token 500 minus token 50; <0.15 to ~0.4 nats around 2.5-5B tokens), with evidence strong in small models and correlational in large ones",
+  "theories of in-context learning: implicit Bayesian inference over a latent concept (Xie 2021) versus a learning algorithm in the forward pass (Garg 2022 least squares; von Oswald 2022 one gradient step), Shen 2023's finding that ICL-as-gradient-descent is unproven in pretrained models, and task vectors (Hendel 2023)",
+  "where in-context learning comes from in training data (burstiness, many rare classes, Zipfian tails; Chan 2022) and its transience in small controlled models (Singh 2023)",
+  "prompt fragility and its fixes: majority-label, recency and common-token bias with contextual calibration (Zhao 2021), and many-shot ICL up to 8,192 examples comparable to fine-tuning yet still order-sensitive (Agarwal 2024)",
+  "many-shot jailbreaking as in-context learning pointed at harmful behavior (same power law; fine-tuning only delayed it; prompt classification 61% to 2% in one case) and why instruction/data separation like LLMON is a learned behavior rather than a guarantee"
+ ],
+ "lore": [],
+ "listener_note": null,
+ "word_band": null
+}

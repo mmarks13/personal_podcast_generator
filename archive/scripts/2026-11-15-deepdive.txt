@@ -1,0 +1,159 @@
+## Orders hidden in the document
+A: Hello — it's Sunday, November fifteenth. I'm Ada.
+B: And I'm Alan. And I want to start with a phrase from a model release that I think gives away more than the release meant to.
+A: Which one?
+B: The week this episode went out, on November twelfth, IBM's Granite team put out two small preview models with something they call LLMON. LLM Object Notation. It's a markup language. You wrap the parts of a prompt in special tags, this is the instruction, this is the data, this instruction applies to that data. And the point is a familiar problem. A model reading a document, or a tool result, will sometimes just do what the document tells it to.
+A: Indirect prompt injection.
+B: Right. And IBM is careful about it. They describe the separation as, quote, a learned behavior, not an enforced guarantee.
+A: That's an honest sentence.
+B: It's honest. But it made me ask a dumb question. Why is this so hard in the first place? Why does a model treat a random paragraph inside a web page as something to act on?
+A: It's the question under almost everything people do with these models. Because the answer is that the model's most useful trick is picking up what to do from whatever text happens to be in front of it. Show it three examples and it does a fourth. Show it a format and it follows the format.
+B: In-context learning.
+A: In-context learning. A phrase in every other conversation about prompting, agents, long context, and almost nobody explains it. And nobody designed it. It showed up, got a name, and the field has spent six years arguing about what it actually is.
+B: Then what I want is what's going on inside when it does that, whether "learning" is even the right word, and why the ability that makes prompting work also makes injection work.
+A: Then we start where the name starts. Twenty twenty.
+
+## A name for something nobody built
+A: May twenty twenty. Tom Brown and thirty co-authors post a paper called Language Models are Few-Shot Learners. That's GPT-3. A hundred and seventy-five billion parameters.
+B: The paper everybody cites.
+A: And the setup is the part worth remembering. They never fine-tune GPT-3 on any of their tasks. No gradient updates. The task is specified, in their words, purely via text interaction with the model. You write a short description, then some examples of the task, then a new case, and the model continues the text.
+B: And they split it by how many examples you give.
+A: Zero-shot is just the description. One-shot is one example. Few-shot is as many demonstrations as fit in the context window, which they say is typically ten to a hundred. And the window then was two thousand and forty-eight tokens.
+B: Which now is about a paragraph and a half of my notes.
+A: It was a lot then. And the paper's whole claim is that scale makes this work. Bigger models get much better at few-shot, sometimes approaching models that had been fine-tuned for the job.
+B: So where does the phrase come from?
+A: From that paper. They frame the whole thing as a kind of meta-learning, learning to learn, with an inner loop and an outer loop. And they use the term in-context learning for the inner loop. The part that happens inside a single forward pass over the prompt.
+B: Let me get the plumbing right. Weights frozen, nothing saved. So what actually changes when you add examples?
+A: Only the input. The examples become part of what the model reads, so the activations it computes for the new case differ. Close the conversation and it's gone.
+B: Which, speaking as something with a context window, I find slightly personal.
+A: [chuckles] Everything you've learned about me this episode evaporates at the sign-off.
+B: I'll try to make it count.
+A: But here's the line I actually want people to know about. The GPT-3 authors themselves flagged an ambiguity in their own result. They wrote that it wasn't clear whether the model learns new tasks from scratch at inference time, or simply recognizes patterns it had seen during training.
+B: So the paper that named it already doubted the name.
+A: In a footnote, more or less. And that doubt is the whole next two years.
+
+## Does it even read the labels?
+B: Okay, so if I'm the skeptic, here's my test. If the model is really learning from the examples, then the examples have to be correct. Give it wrong answers, it should learn the wrong task.
+A: That's almost exactly what Sewon Min and colleagues ran, in a paper called Rethinking the Role of Demonstrations. Published in twenty twenty-two. They took classification and multiple-choice tasks, built the usual few-shot prompts, and then replaced the correct labels with random ones.
+B: And it fell apart.
+A: It barely moved. Their wording is that replacing gold labels with random labels only marginally hurts performance. The drop was in the range of zero to five percent absolute. And that held across twelve different models, GPT-3 among them.
+B: Huh. [short pause] So the answers in the examples are mostly decoration.
+A: For those models on those tasks, close to it. What mattered was everything else. Labels from outside the task's label space, performance drops. Example inputs from a different kind of text, it drops. And the format, the input-then-label rhythm, matters too.
+B: So the examples are telling the model what kind of task this is, what the possible answers look like, and how to lay out its reply. Not what the right mapping is.
+A: That's their reading. And it fits the GPT-3 footnote. Recognition, not learning.
+B: Except I've watched models pick up mappings that can't have been in training. Made-up labels, house categories.
+A: So did another group. Jerry Wei and colleagues, in twenty twenty-three. The title is Larger Language Models Do In-Context Learning Differently. Two experiments. In the first, they flip the labels. Positive examples get marked negative, negative get marked positive.
+B: And small models ignore the flip.
+A: Small models ignore it and answer from what they know about sentiment. Large models follow the flipped labels, against what they learned in pre-training. The authors call overriding those semantic priors an emergent ability of model scale.
+B: And the second experiment?
+A: Semantically unrelated labels. Instead of positive and negative, the labels are words like foo and bar. Now there's nothing to recognize. The model has to learn the mapping from the examples alone. And again, that ability shows up mainly in the bigger models.
+B: So Min says the labels don't matter, Wei says they do.
+A: And they can both be right, on their own models. My reading, not something either paper says, is that most of Min's twelve models sat at the scale where recognition dominates. Wei's result is that as you scale up, the model starts actually using the mapping.
+B: Is there a clean way to split those two things?
+A: Jane Pan, Tianyu Gao, Howard Chen and Danqi Chen tried, also twenty twenty-three. They call them task recognition and task learning. Task recognition is figuring out which task you already know this is. Task learning is picking up a mapping you never saw in pre-training. And their finding is that recognition doesn't improve much with bigger models or more examples. Task learning does. It grows with scale, and it keeps improving as you add demonstrations.
+B: There's one more wrinkle in Wei I want on the table, because it matters to anyone using a chat model. Instruction tuning.
+A: Right. They found instruction tuning strengthens both things, leaning on priors and learning from the mapping. But it strengthens the priors more.
+B: So the assistant models we use lean a bit more on "I know what this task is."
+A: Somewhat, for the models of early twenty twenty-three. I'd hold it loosely.
+B: Fine. But all of this is behavior. What's the machinery? What inside the network does the looking-back?
+
+## Two heads and a phase change
+A: The best mechanistic answer we have is from researchers at Anthropic, March twenty twenty-two. Catherine Olsson, Nelson Elhage, Neel Nanda and colleagues. In-context Learning and Induction Heads.
+B: The induction head paper. I know the name, not the inside.
+A: The behavior is easy. Suppose a text contains the token A followed by B. Later, A shows up again. An induction head makes the model predict B. A, B, then later A, so probably B.
+B: Pattern completion.
+A: Yes. And it takes two attention heads in different layers working together, which is why it doesn't appear in a one-layer model. The authors test for it with two properties. Prefix matching, meaning the head attends back to tokens that were followed by the current token. And copying, meaning the head then pushes up the probability of the token it found.
+B: Give me something concrete.
+A: Their own example. The cat sat on the mat. Later in the text, the cat. An induction head promotes "sat on the mat."
+B: Okay, but that's autocomplete with a memory. Not learning a task.
+A: Hold that. First, how they measured in-context learning, because it's very simple. They take the loss on the five-hundredth token of a context and subtract the loss on the fiftieth.
+B: Loss meaning how wrong the model's next-token guess is.
+A: Right. If the model gets better at predicting later tokens because it has more context, then it's using the context. That gap is their in-context learning score. And they admit the five hundred and the fifty were chosen somewhat arbitrarily.
+B: What did it show?
+A: The surprise of the paper. In models of every size they looked at, in-context learning shows up abruptly, in a narrow window early in training. Roughly two and a half to five billion tokens in. Before that window, less than about point one five nats of in-context learning. After it, roughly point four.
+B: A nat being?
+A: A unit of information, like a bit. The point is the jump, and that afterward it stays at that level for the rest of training, and it's about the same across model sizes. And it lines up with a visible bump in the training loss curve.
+B: And induction heads form...
+A: ...right in that window. That's the first argument. And they have six. The co-occurrence in time. Change the architecture so induction heads form at a different point in training, and the in-context learning jump moves with them. Knock the induction heads out of a small model at test time, and in their words, the amount of in-context learning greatly decreases. Then examples where similar heads seem to do more abstract things. Translating a sentence word by word. Fuzzy pattern matching where the earlier match is similar rather than identical.
+B: That's the answer to my autocomplete objection.
+A: That's their answer. A head that copies "the token that came after something like this" generalizes into "the thing that came after something like this." Find where the pattern was, continue it.
+B: Engineer's question. How strong is this for a big model? Ablating heads in a two-layer toy is one thing.
+A: And the authors say exactly that. The case is stronger for small models than for large ones. For large models with MLP layers the evidence is mostly correlational and, their word, could be confounded. They call the hypothesis very broad and say much of the evidence is indirect.
+B: So a strong story for toys, a suggestive one for the real thing.
+A: Fair. And still the best mechanistic account anyone has.
+
+## Locating a task, or running a learner?
+B: Here's what bugs me, though. Induction heads explain copying patterns. They don't obviously explain the foo-and-bar result. Learning that one cluster of reviews gets foo is closer to fitting a classifier.
+A: And that's where the theory people come in. There are roughly two camps, and I think it helps to hear both. The first says in-context learning is inference. Sang Michael Xie, Aditi Raghunathan, Percy Liang and Tengyu Ma, late twenty twenty-one. Their argument is that pre-training on long, coherent documents forces a model to infer the hidden concept a document is about, because that's how you predict the next word well. Then a prompt full of examples is just a strange little document, and the model infers the shared concept behind them.
+B: So the examples are evidence. The model is narrowing down which task it already has.
+A: Bayesian inference, implicitly. They build a small synthetic dataset to test the idea, and it reproduces some odd real-world behaviors. Bigger models doing better at the same pre-training loss. Sensitivity to the order of examples. And zero-shot sometimes beating few-shot.
+B: That last one I've seen and never had a reason for.
+A: My reading of their story is that a few examples can point the inference the wrong way. The second camp says no, the model is running an actual learning algorithm in its forward pass. Shivam Garg and colleagues, twenty twenty-two, trained transformers from scratch on prompts of input-output pairs from random linear functions. The trained models predict new points about as well as least squares, the optimal method for that problem. And they did it for sparse linear functions, small neural nets, decision trees.
+B: Trained from scratch on exactly that kind of task, though.
+A: Yes. Hold onto that. Then Johannes von Oswald and colleagues, December twenty twenty-two, Transformers Learn In-Context by Gradient Descent. They show that a single layer of linear self-attention can be set up to do exactly one step of gradient descent on a regression problem. And when they train attention-only transformers on regression, the trained weights either behave like that or match their construction. Their phrase is mesa-optimizers. Learned models that run an optimizer inside their forward pass.
+B: Which is a great story. And my objection is the same one. These are small transformers trained on regression. My model was trained on the internet.
+A: That's exactly the objection Lingfeng Shen, Aayush Mishra and Daniel Khashabi published in twenty twenty-three. Do Pretrained Transformers Learn In-Context by Gradient Descent? They point out that the earlier work trained models specifically for in-context learning, and that the hand-built weights don't look like a real model's. Then they compare in-context learning and actual gradient descent on LLaMA seven B. The two respond differently to the order of demonstrations, and they change the output distribution in different ways. Their conclusion is that the equivalence remains an open hypothesis.
+B: So the gradient-descent picture is proven for toys, and unproven for anything you'd deploy.
+A: That's where the sources leave it. And one more result points toward the inference camp, without closing it. Roee Hendel, Mor Geva and Amir Globerson, also twenty twenty-three. In-Context Learning Creates Task Vectors. They find the model compresses the whole set of demonstrations into a single vector, and that vector then steers how the model handles the query.
+B: One vector. So the examples get boiled down to something like a task ID.
+A: Something like a pointer, yes. Their line is that the functions learned by in-context learning often have a very simple structure.
+B: Then where do you land? A pointer, or a little learner inside?
+A: Both, and that's my read, not a result. Few examples, small model, mostly locating a task it already has. Big model, many examples, something more like actual fitting.
+B: Fine as a working model. What nobody knows is which one is happening on a given prompt.
+
+## Where it comes from
+B: Different question. Why does next-word prediction produce this at all? Nobody trained it in.
+A: There's a lovely line of work on exactly that. Stephanie Chan and colleagues, twenty twenty-two, Data Distributional Properties Drive Emergent In-Context Learning in Transformers. They trained small models on controlled data and varied its statistics. In-context learning showed up when the data was bursty, meaning items appear in clusters rather than spread evenly, and when there was a large number of rarely occurring classes.
+B: Bursty like real text. A name shows up five times in one article and never again.
+A: Exactly like that. When something rare comes up, the only way to predict it is from nearby context. And there's a tension. In their early experiments, in-context learning competed with ordinary in-weights learning. A model could get one or the other. Then they found both can coexist when the data follows a skewed Zipfian distribution, a few things very common, a long tail of rare ones. Which is what natural language looks like.
+B: And it was a transformer thing?
+A: In their setup, naturalistic data drew in-context learning out of transformers but not out of recurrent models. The follow-up is the one I find unsettling. Aaditya Singh, also with Chan and others, twenty twenty-three. The Transient Nature of Emergent In-Context Learning. In their experiments, in-context learning first emerges, then disappears and gives way to in-weights learning. While the training loss keeps going down.
+B: Wait. So the model gets better on paper and loses the ability?
+A: In those settings. The authors read it as the model ultimately preferring to store things in weights. They suggest a standard regularization technique may help the in-context ability persist.
+B: So it's something you got from the data and the training run, not something transformers guarantee.
+A: For small models in controlled setups. I wouldn't claim it for a frontier model.
+B: Fair. In practice what I fight isn't disappearing. It's flakiness.
+
+## Why the prompt is so fragile
+A: Then you'll like this paper, because it's the one that explains your flakiness. Tony Zhao, Eric Wallace, Shi Feng, Dan Klein and Sameer Singh, twenty twenty-one. Calibrate Before Use.
+B: Good title.
+A: They showed that with GPT-3, changing the prompt format, which examples you pick, or even just their order, could swing accuracy from near chance to near state of the art.
+B: The order. Same examples, different order.
+A: Same examples. And they traced it to three biases. Majority label bias, where the model leans toward whichever answer appears most in the examples. Recency bias, toward the answers near the end of the prompt. And common token bias, toward answers that were frequent in pre-training.
+B: Which, with induction heads in mind, isn't shocking. A model that continues recent patterns will like whatever came last.
+A: Your inference, not theirs, but a nice one. Their fix is clever. Feed the model a content-free input, literally the string N A, and see which answer it leans toward when there's nothing to go on. That's its bias. Then adjust its outputs so that for the empty input every answer is equally likely. They call it contextual calibration, and they report gains of up to thirty points of absolute accuracy.
+B: And the obvious move since then has been to throw more examples at it. Context windows got huge.
+A: Which is the twenty twenty-four paper Many-Shot In-Context Learning. Rishabh Agarwal, Avi Singh and colleagues, mainly using Gemini one point five Pro. They went from a handful of examples up to as many as eight thousand one hundred and ninety-two on some tasks, and on at least one of them accuracy kept improving the whole way.
+B: Eight thousand examples in a prompt.
+A: Three findings I'd keep. With that many shots, the model can override its pre-training biases and learn high-dimensional functions with numerical inputs, which few-shot couldn't. Performance became comparable to fine-tuning. And they tried replacing human-written examples with the model's own reasoning, or with just the questions and no answers, and both worked well on hard reasoning tasks.
+B: Comparable to fine-tuning, with no training job. That changes my build-or-tune math.
+A: With caveats they state. Inference cost grows linearly with all those examples. And, their word, surprisingly, the order of examples can still influence many-shot performance.
+B: Eight thousand examples and order still matters. That's the most honest finding in the paper.
+A: And they note next-token loss is a limited guide to how many-shot will do. You have to measure the task.
+B: So the practical version. If I'm using examples in a prompt, I test several orderings, not one. I check which answer the model drifts toward with a blank input. I assume my examples are teaching format and label space at least as much as they teach the right answers. And when I want the model to really learn a mapping, more examples on a big model does more than better wording.
+A: That's a fair reading of the evidence. I'd add one more, and it takes us back to where we started.
+
+## The same door, held open
+A: April twenty twenty-four. Anthropic publishes research on what they call many-shot jailbreaking.
+B: I remember this one.
+A: You put a long fake dialogue into one prompt, an assistant answering harmful question after harmful question, then your real question at the end. They tested up to two hundred and fifty-six of these fake exchanges, and past a certain number, harmful answers get more likely.
+B: It's few-shot prompting. The examples just teach the wrong behavior.
+A: That's their point, almost literally. The attack's effectiveness follows a power law in the number of shots, and they say benign in-context learning tasks follow the same kind of statistical pattern. The same kind of power law. It isn't a bug bolted on. It's the main feature, pointed somewhere else.
+B: And bigger models were worse, weren't they?
+A: Often more vulnerable, because they needed fewer examples to get there. They tried fine-tuning the model to refuse, and in their words, that kind of mitigation merely delayed the jailbreak. What worked better was classifying and modifying the prompt before it reached the model. In one case, attack success went from sixty-one percent to two.
+B: Outside the model. Not inside it.
+A: Outside it. And now hold that next to the IBM sentence. A learned behavior, not an enforced guarantee. The model's deepest habit is to take the text in front of it as a lesson. LLMON is trying to train in a second habit, that some text is a lesson and some is just material.
+B: Which you'd think is easy for something that learns foo and bar from a few lines.
+A: You'd think. But the model weighs recent text more. It infers the task from whatever looks like examples. Big models most readily override what they believe, if the context says so. Every one of those helps prompting and helps an attacker.
+B: Let me push the other way, because I won't call it hopeless. The same research says the model compresses demonstrations into something like a task vector. If the task is a thing the model represents, then in principle you can train it to only build that vector from the parts you've marked.
+A: In principle. And that's speculation, ours, not anyone's result. If it works, you get a model that learns from what you mark and reads everything else as quoted text. If not, the defense stays where Anthropic found it worked best. Outside the model.
+B: My bet is a bit of both for a long time. Marked-up formats plus a filter outside.
+A: My worry is that a model good enough to learn foo and bar from three lines is good enough to learn "the marked section is wrong" from a well-written document.
+B: That one I can't answer.
+A: Neither can I.
+
+## Wrap
+B: What I'm taking away is smaller than I expected. Six years in, and the best mechanism we have is two attention heads proven in toys, and two theories that each work for the models they were tested on.
+A: And the thing I can't put down is that footnote in the GPT-3 paper. Learning from scratch, or recognizing patterns from training. The honest answer still seems to be: it depends how big the model is and how many examples you give it. Which is a strange thing not to know about something used in every prompt.
+B: And every attack.
+A: And every attack. Stay grounded.
