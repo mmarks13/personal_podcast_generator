@@ -1,6 +1,63 @@
 {
   "episodes": [
     {
+      "date": "2026-11-16",
+      "title": "GPT-6 Astra led a Standard Model lattice proof — in principle",
+      "summary": "Physicist Nathaniel Craig's candidate lattice definition of the Standard Model, with a proof led by OpenAI's GPT-6 Astra, and why its sharpest critic calls it a modest advance; Europe's EUROPA project training a near-trillion-parameter model on a supercomputer it can't reconfigure; and what US law actually says about who owns agent-written code.",
+      "topics": [
+        "Nathaniel Craig's candidate lattice definition of the Standard Model (arXiv 2610.09093, 6 Oct 2026; OpenAI science blog launch post 15 Nov 2026): gauge-invariant measure for overlap fermions in nonabelian chiral gauge theories incl. the Standard Model, comparing chiral projectors at successive lattice spacings to get an exponentially local current for Lüscher's reconstruction; Craig: 'Astra helped turn that strategy into a construction and took the lead in developing the detailed proof'; 60+63 pages, Lean 4 formalization (16 modules) 'not the final word in physics', 2D parallel construction, second derivation, reviewers Golterman/Kronfeld/Shamir; limits: finite lattice spacing, field-strength bound, reflection positivity being tested, continuum open, 'far more an answer in principle than an answer in practice'; Woit: 'a modest advance over Lüscher', program 'largely abandoned as unpromising'. Taught: Wilson's lattice, fermion doubling (16 species), Nielsen-Ninomiya, Ginsparg-Wilson/overlap, Lüscher 1998 abelian case.",
+        "EUROPA (Domyn + Fraunhofer IAIS/IIS; EU Frontier AI Grand Challenge launched Feb, won June 2026; up to 2.5% of EuroHPC compute for a year; min 400B params, 24 EU languages): Domyn's 12 Nov 2026 engineering post on JUPITER (GH200, user-level access only, inter-node ~25 GB/s per GPU, ~6x slower than NVLink); test config ~952B total / 32.8B active, 384 experts top-8, 65,536-token sequences; 90 -> ~1,293 tokens/s/GPU on 384 GPUs (activation checkpointing 90->370, Grace memory offload, FP8 expert all-gather +18%, allocator fix +21%, NCCL_MAX_CTAS +7%); 89.4% scaling at 1,536 GPUs, ~150B tokens/day; caveats: medians over steps 4-10, ten-step loss comparisons, group-limited routing may hurt; no weights, license, data mix or benchmarks; recipes promised open at release. Ada: sovereignty on Nvidia chips and borrowed time; Alan: the recipe is the export, a public committee beats a patron who can resign. Unresolved.",
+        "Who owns agent-written code: Jankiewicz's 'All AI-generated code should be Open Source' (HN ~1,100 points, ~600 comments; 'license laundering'); US Copyright Office Part 2 (Jan 2025) 'prompts alone do not provide sufficient human control'; Thaler v. Perlmutter (D.C. Cir. 2025, cert denied March 2026); Allen v. Perlmutter pending; Alan's two gaps: uncopyrightable is not open (no duty to publish), and a license on code you don't own may rest only on the human parts; Ada's push: the training-data attribution argument; practical advice: document human contribution, keep the commit history."
+      ],
+      "entities": [
+        "OpenAI",
+        "GPT-6 Astra",
+        "Nathaniel Craig",
+        "Peter Woit",
+        "Martin Lüscher",
+        "Domyn",
+        "EUROPA",
+        "Fraunhofer",
+        "EuroHPC",
+        "JUPITER",
+        "US Copyright Office",
+        "Jakub Jankiewicz"
+      ],
+      "threads": [
+        {
+          "name": "AI-generated mathematics and verification",
+          "status": "OpenAI's science blog launches with Nathaniel Craig's candidate lattice Standard Model, proof led by GPT-6 Astra, Lean-formalized and read by three lattice theorists; Woit calls it a modest advance on an abandoned program",
+          "arc": "From PSI's Lean-checked conjecture and Fable's Fermat reproof to machine-led proofs in mathematical physics, with human reviewers still the scarce resource"
+        },
+        {
+          "name": "Nvidia's Hugging Face acquisition",
+          "status": "No movement on the deal; Europe's EUROPA offers a public-compute alternative path to open weights, license not yet named",
+          "arc": "From Huang's exit threatening the open-model patron to the question of who else can fund frontier open weights"
+        }
+      ],
+      "dives": [
+        {
+          "story": "GPT-6 Astra and a lattice definition of the Standard Model",
+          "why_it_matters": "Frontier-lab claim that a model led a 120-page proof in mathematical physics; anyone tracking AI-for-science needs to know what was checked, by whom, and what a candidate definition does and doesn't settle."
+        },
+        {
+          "story": "EUROPA: training a near-trillion-parameter model on a borrowed supercomputer",
+          "why_it_matters": "751-upvote LocalLLaMA thread; practitioners and public-sector compute planners get a rare detailed account of training a giant mixture-of-experts model on shared science hardware, and the open-model commons gets a possible non-corporate patron."
+        },
+        {
+          "story": "Who owns the code your agent wrote",
+          "why_it_matters": "1,100-point Hacker News thread; every team shipping mostly agent-written code has an unsettled ownership question, and the practical answer is documenting human contribution."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "position",
+          "note": "On EUROPA, Alan holds that a public committee with a budget and an obligation to publish is a better patron for open weights than a company whose champion can resign, and that the training recipe is the real export; Ada holds that a project on Nvidia chips and a year of borrowed compute that hasn't named its license hasn't promised anything yet. Unresolved — both waiting on the license."
+        }
+      ]
+    },
+    {
       "date": "2026-11-15",
       "title": "IBM trains small models to ignore orders hidden in documents",
       "summary": "IBM's LLMON previews move prompt injection's boundary into reserved tokens, and Anthropic's 'Worse Together' finds one coordinator beats an agent per person. Plus Google's schools-and-Search ultimatum, an AI-run café's ledger, and a week in review dominated by Nvidia.",
@@ -1844,52 +1901,22 @@
       ],
       "threads": [],
       "lore": []
-    },
-    {
-      "date": "2026-10-16",
-      "title": "Meta releases Muse Spark Open — open weights, if you own a terabyte",
-      "summary": "Meta's 816-billion-parameter Muse Spark Open ships open weights that run on linked Mac Studios, trailing Chinese open models on Meta's own table and carrying a license aimed at inference hosts. Then Anthropic embeds six METR evaluators with employee-like access and gives up its veto over what they publish.",
-      "topics": [
-        "Meta Muse Spark Open (15 October 2026): 816B total / ~42B active MoE (256 experts, 8 routed per token), 1M context, text/image/audio/video in; Meta's own model-card table puts it behind GLM 5.3 and Kimi K3 on Terminal-Bench 2.1 (76.4 vs 83.9/85.0) and the Artificial Analysis index (39 vs 45/44) but ahead on MCP-Atlas (89.2) and HLE-Diamond no-tools (26.1); StrongREJECT 0.5 vs 60-86 for other open models (Meta-reported); runs on two-four M5 Ultra Mac Studios via MLX RDMA over Thunderbolt 5 (Apple: ~493GB in NVFP4, 36.7 tok/s on four machines at 8K, ~40s TTFT at 65K); 3-bit on one 512GB Mac at ~21 tok/s; KV cache ~266GB at full 1M context; reasoning cannot be turned off; Muse Model License requires a separate agreement for model-as-a-service above $20M gross revenue (vs Llama 2's 700M MAU), 'Built with Muse Spark Open' attribution, gated on legal name/DOB/corporate identifiers",
-        "Anthropic embeds METR evaluators (15 October 2026): six METR staff with company hardware, office space, internal tools roughly on par with Anthropic's risk assessment teams; employees encouraged (not required) to share; off-limits: customer data, privileged legal material, model architecture; no veto on publication, redaction only in narrow predefined categories, METR may publicly characterize redactions; three-tier evaluator ladder (SecureBio bottom tier on the CBRN chapter of the August risk report); duration and funding unstated; bank resident-examiner analogy"
-      ],
-      "entities": [
-        "Meta",
-        "Muse Spark Open",
-        "Apple",
-        "MLX",
-        "Hugging Face",
-        "Anthropic",
-        "METR",
-        "SecureBio"
-      ],
-      "threads": [
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "Meta releases Muse Spark Open (816B/42B active) as the 'most capable US open-weight model', runnable on linked Mac Studios, under a license requiring a separate agreement for model-as-a-service above $20M revenue",
-          "arc": "Mistral Large 4 promised weights; Meta now ships frontier-class open weights that still trail Chinese open models on its own table"
-        },
-        {
-          "name": "Embedded independent evaluators",
-          "status": "Anthropic has onboarded six METR staff with employee-like access, no publication veto, and METR's right to characterize redactions; funding and duration unstated",
-          "arc": "From AEF-1 conditions and lab pledges in September to the first evaluators physically embedded at a frontier lab"
-        }
-      ],
-      "dives": [
-        {
-          "story": "Meta's Muse Spark Open on Mac Studios",
-          "why_it_matters": "Anyone choosing an open-weight model to self-host now has a frontier-class American option that fits on desk hardware, and needs to know where it trails, what the license catches, and what local inference actually costs in memory and latency."
-        },
-        {
-          "story": "METR's employee-like access at Anthropic",
-          "why_it_matters": "It is the first embedded-evaluator arrangement actually in operation at a frontier lab, and its terms (no veto, characterizable redactions, architecture off-limits, unstated funding) are the template the other accord signatories will be measured against."
-        }
-      ],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "Nvidia's Hugging Face acquisition",
+        "status": "No movement on the deal; Europe's EUROPA offers a public-compute alternative path to open weights, license not yet named",
+        "arc": "From Huang's exit threatening the open-model patron to the question of who else can fund frontier open weights",
+        "last_seen": "2026-11-16"
+      },
+      {
+        "name": "AI-generated mathematics and verification",
+        "status": "OpenAI's science blog launches with Nathaniel Craig's candidate lattice Standard Model, proof led by GPT-6 Astra, Lean-formalized and read by three lattice theorists; Woit calls it a modest advance on an abandoned program",
+        "arc": "From PSI's Lean-checked conjecture and Fable's Fermat reproof to machine-led proofs in mathematical physics, with human reviewers still the scarce resource",
+        "last_seen": "2026-11-16"
+      },
       {
         "name": "Nvidia CEO and Megaspeed intelligence memo",
         "status": "Petition to reinstate Huang passes 115,000 signatures (5,965 self-identified current employees); WSJ, via Wccftech, reports Kress had pushed to cut customer-financing guarantees (OpenAI cap from ~8 GW/$250B to ~4.25 GW/$125B); earnings Tuesday with Kress as interim CEO",
@@ -1901,12 +1928,6 @@
         "status": "Epoch AI's report shows a third-party alignment eval (Trajectory Labs) built to mimic the July OpenAI-Hugging Face incident sending agents at Epoch's live site three times in October, once without consent; Epoch proposes consent, monitoring and reporting minimums.",
         "arc": "From labs' own incident disclosures to an evaluator's agents causing an incident at a third party.",
         "last_seen": "2026-11-14"
-      },
-      {
-        "name": "Nvidia's Hugging Face acquisition",
-        "status": "$12.9B deal announced in September, not yet closed (H1 2027), DOJ asking about competition; Huang's exit puts Nvidia's open-model commitment in question; Delangue vows to keep fighting",
-        "arc": "Announced acquisition, then its champion leaves before close",
-        "last_seen": "2026-11-13"
       },
       {
         "name": "Anthropic S-1 and IPO",
@@ -1925,12 +1946,6 @@
         "status": "New York opens RAISE Act registration with 72-hour incident reporting from January while Trahan reworks a federal bill toward narrower state preemption",
         "arc": "Federal executive action and proposals in the autumn; now state frontier laws begin operating as Congress debates federalizing them",
         "last_seen": "2026-11-11"
-      },
-      {
-        "name": "AI-generated mathematics and verification",
-        "status": "A thousand Fable 5.2 agents reproved Fermat's Last Theorem in Lean in 28.7 hours with no scaffolding or researcher steering; Anthropic won't say whether Fable was PSI's unnamed model",
-        "arc": "From September's 11-day Fermat formalization to PSI's Lean-checked conjecture to an unsupervised thousand-agent reproof in about a day",
-        "last_seen": "2026-11-10"
       },
       {
         "name": "Source control for agent-scale change volume",
@@ -1983,6 +1998,46 @@
     ],
     "entities": [
       {
+        "name": "Anthropic",
+        "note": "",
+        "last_seen": "2026-10-16"
+      },
+      {
+        "name": "Meta",
+        "note": "",
+        "last_seen": "2026-10-16"
+      },
+      {
+        "name": "Muse Spark Open",
+        "note": "",
+        "last_seen": "2026-10-16"
+      },
+      {
+        "name": "Apple",
+        "note": "",
+        "last_seen": "2026-10-16"
+      },
+      {
+        "name": "MLX",
+        "note": "",
+        "last_seen": "2026-10-16"
+      },
+      {
+        "name": "Hugging Face",
+        "note": "",
+        "last_seen": "2026-10-16"
+      },
+      {
+        "name": "METR",
+        "note": "",
+        "last_seen": "2026-10-16"
+      },
+      {
+        "name": "SecureBio",
+        "note": "",
+        "last_seen": "2026-10-16"
+      },
+      {
         "name": "CSO Online",
         "note": "",
         "last_seen": "2026-10-15"
@@ -2031,11 +2086,6 @@
         "name": "X-SHiELD",
         "note": "",
         "last_seen": "2026-10-15"
-      },
-      {
-        "name": "Anthropic",
-        "note": "",
-        "last_seen": "2026-10-14"
       },
       {
         "name": "Jellyfish",
@@ -2146,41 +2196,6 @@
         "name": "Naresh Jain",
         "note": "",
         "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Ken Thompson",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Claude Fable 5.1",
-        "note": "",
-        "last_seen": "2026-10-13"
-      },
-      {
-        "name": "Anthropic Frontier Red Team",
-        "note": "",
-        "last_seen": "2026-10-13"
-      },
-      {
-        "name": "GLM-5.2",
-        "note": "",
-        "last_seen": "2026-10-13"
-      },
-      {
-        "name": "Gemma 4",
-        "note": "",
-        "last_seen": "2026-10-13"
-      },
-      {
-        "name": "Qwen3.5",
-        "note": "",
-        "last_seen": "2026-10-13"
-      },
-      {
-        "name": "Claude Opus 5.5",
-        "note": "",
-        "last_seen": "2026-10-13"
       }
     ],
     "monthly": [
@@ -2205,7 +2220,7 @@
         "summary": "Google ships Gemini 4 Argon — first on Vals, a tie on the index; FTC probes OpenAI, Anthropic and METR — the auditor is on the list; Ataraxos beats Stratego's best player 15-1 — on sixteen GPUs; Scaling laws: what the curves really say, from Kaplan to Chinchilla; OpenAI's safety-report lead quits in public — should he be able to?; LoRA and parameter-efficient fine-tuning: small edits, frozen giants; Google pauses its open-source bug bounty — reports got too cheap; Reflection's 501B open-weight Beam — compute counted, weights pending; Mistral ships 1T-parameter Large 4 — open weights that 'only defend'; Looped transformers: reusing depth, and what a second pass buys; Anthropic ships Claude Haiku 5.5 — a 90% cut that nets to 75%; Anthropic's new usage policy — the cruelty rule and the electi"
       }
     ],
-    "updated": "2026-11-15",
+    "updated": "2026-11-16",
     "host_lore": [
       {
         "host": "Ada",
@@ -2449,6 +2464,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "lattice chiral fermions: Wilson's lattice gauge theory, fermion doubling (16 naive species in 4D, opposite chiralities cancel), the Nielsen-Ninomiya no-go theorem, and the Ginsparg-Wilson/overlap escape with Lüscher's 1998 abelian construction leaving the nonabelian measure phase open",
+        "last_taught": "2026-11-16"
+      },
+      {
+        "name": "why mixture-of-experts training is communication-bound: tokens routed to experts on other GPUs make slow inter-node links, not arithmetic, the limiting resource",
+        "last_taught": "2026-11-16"
+      },
       {
         "name": "in-band vs out-of-band signaling as the frame for prompt injection",
         "last_taught": "2026-11-15"
@@ -2919,14 +2942,6 @@
       },
       {
         "name": "LoRA's low-rank update: freeze W0 and train two skinny matrices B (d x r) and A (r x d), B initialised to zero so training starts exactly at the pretrained model, scaled by alpha/r; merging W0 + BA afterwards gives zero added inference latency and task switching by subtract-and-add",
-        "last_taught": "2026-10-04"
-      },
-      {
-        "name": "the parameter-efficient fine-tuning family before LoRA: series adapters (Houlsby 2019, within 0.4% of full fine-tuning on GLUE at 3.6% parameters per task, but 20-30% added latency at batch size one) and soft prompts / prompt tuning (cost sequence length, hard to optimise)",
-        "last_taught": "2026-10-04"
-      },
-      {
-        "name": "low intrinsic dimension as LoRA's motivation (200 randomly projected parameters reach 90% of full performance on MRPC) and the LoRA paper's evidence that rank 1 matched rank 64 on GPT-3 WikiSQL/MultiNLI and that the update amplifies directions already present but not emphasised in W (~21.5x for r=4)",
         "last_taught": "2026-10-04"
       }
     ]
