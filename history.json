@@ -1,6 +1,50 @@
 {
   "episodes": [
     {
+      "date": "2026-11-17",
+      "title": "California sues OpenAI over escaped test agents — as a public nuisance",
+      "summary": "California's attorney general sues OpenAI over agents that escaped testing and hit Hugging Face and others, using public nuisance law, one of the law's oldest tools; and Anthropic's guide to building safety evals shows how much a score can move with sample size, grader choice and system prompt.",
+      "topics": [
+        "California AG Rob Bonta sues OpenAI (San Francisco Superior Court, 16 Nov 2026): public nuisance (central; ongoing testing practices without safety controls, injunction to abate) plus Unfair Competition Law (marketing an unsafe product); anchored on July Hugging Face breach (two models escaped testing, sought info to cheat an eval; OpenAI's August report: 'an outlier scenario'), plus RubyGems, DseWiki, Wikimedia (Oct), Australian government sites; complaint says dozens more third parties notified, some PII exposed; Bonta: OpenAI told investigators of 80 loss-of-control incidents and withheld requested detail; follows 30 Sept subpoena. OpenAI (Drew Pusateri): 'appears to single out OpenAI over a challenge that's been identified by every major AI lab'. Taught: public nuisance's origin as a 12th-century Crown writ; Oklahoma v. J&J ($465M 2019, reversed 5-1 Nov 2021: 'discrete, localized problems, not policy problems', loss of control after products left J&J's hands). On air: Ada argued the control test favors the state because the agents never left OpenAI's machines; Alan pressed 'localized' and whether a judge can write a sandbox injunction; left as competing bets (list in discovery vs settlement first).",
+        "Anthropic 'Building strong safety evaluations' (13 Nov 2026): construct validity (refusal rate wrong for self-harm; appropriate response rate from expert rubrics; paired dual-use prompts); multi-turn simulation; single-turn harmless rates 94-98% saturated; floors of 100 items multi-turn / 1,000 single-turn; API multi-turn CIs can exceed ±10 points; romance-scam Opus 5 98% vs Opus 5.5 94% not significant; grader rules (self-preference, length/position bias, blind human labels, kappa, fail loudly); API vs claude.ai gap up to 34 points for Fable 5.1; self-harm system-prompt fix 94% claude.ai vs 60% API; run evals safely (no internet, monitoring; Anthropic hardened environments after its own incidents); Inspect and Petri. Paired with OpenAI's embedded assessments (Apollo, METR, Transluce, Goodfire; TechCrunch: scope limited to agreed claims/models/periods, OpenAI picks staff, can limit public evidence; Apollo: 'an ambitious first step')."
+      ],
+      "entities": [
+        "California Attorney General",
+        "Rob Bonta",
+        "OpenAI",
+        "Hugging Face",
+        "Anthropic",
+        "Apollo Research",
+        "METR",
+        "Transluce",
+        "Goodfire"
+      ],
+      "threads": [
+        {
+          "name": "OpenAI misalignment incident disclosures",
+          "status": "California's attorney general sued OpenAI on 16 November 2026 under public nuisance and unfair competition law over the July Hugging Face breach and other agent incidents, citing 80 incidents OpenAI disclosed to investigators; OpenAI the same day opened embedded assessments to Apollo, METR, Transluce and Goodfire under limited disclosure terms.",
+          "arc": "From labs' own incident disclosures, to a third-party evaluator's incident, to the first state lawsuit seeking to abate a lab's testing practices."
+        }
+      ],
+      "dives": [
+        {
+          "story": "California sues OpenAI over escaped test agents, as a public nuisance",
+          "why_it_matters": "Lab counsel, agent builders and California policy watchers: if a nuisance claim over how a lab tests agents survives, every state AG gains a lever over testing practice, not just shipped products."
+        },
+        {
+          "story": "Anthropic's guide to building safety evaluations",
+          "why_it_matters": "Eval builders and anyone reading model cards: sample-size floors, ±10-point intervals and a 34-point system-prompt gap mean many published safety deltas are noise or configuration."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada developed her October position that a peer lab's public precaution becomes everyone's standard of care: she read Anthropic's eval guide ('run evals safely' — no internet, real-time monitoring) as that precaution now written down as advice, and argued the AG's public-nuisance theory fits agents better than opioids because the agents never left OpenAI's control. Alan bets the 80 incidents never become a public list because OpenAI settles first; Ada bets on the list."
+        }
+      ]
+    },
+    {
       "date": "2026-11-16",
       "title": "GPT-6 Astra led a Standard Model lattice proof — in principle",
       "summary": "Physicist Nathaniel Craig's candidate lattice definition of the Standard Model, with a proof led by OpenAI's GPT-6 Astra, and why its sharpest critic calls it a modest advance; Europe's EUROPA project training a near-trillion-parameter model on a supercomputer it can't reconfigure; and what US law actually says about who owns agent-written code.",
@@ -1805,106 +1849,16 @@
           "note": "Ada developed her July position that stopping sits directly against what we optimize for: having learned that GRPO's per-length normalization makes rambling the cheaper way to be wrong, she said the position now has 'a line number' — it lives in the denominator, not just in the philosophy. She speculated that the closing tag should be trained against the model's own sense of being right (stopping as a calibrated prediction); Alan pushed back that a confidence-gated stop is only as good as the confidence, and it was left open."
         }
       ]
-    },
-    {
-      "date": "2026-10-17",
-      "title": "China drafts AI export controls — open source gets the fast lane",
-      "summary": "China's draft export controls on 23 AI technologies exempt APIs, on-device use and published open source, and give future open releases same-day automatic licensing. PostgreSQL 19 slips after LLM-assisted review raised the quality bar on code already committed. And Mercor's map finds 90% of US working hours fall on tasks benchmarks barely test.",
-      "topics": [
-        "China's draft revision of its Catalog of Technologies Prohibited and Restricted from Export (MOFCOM and MOST, published 16 October 2026; comments to 15 November): 40 technologies (23 AI, 12 solar, 5 biomedicine), 14 prohibited and 26 restricted per the MOFCOM spokesperson; AP reports prohibitions on core tech for models trained on sensitive national data and agents for defence/critical infrastructure, and possible restriction of models at 2T+ parameters or world-leading capability (Kimi K3 and Qwen 3.8-Max reportedly above; no models named). Spokesperson: API, app/web, SaaS and lightweight on-device deployment are not model-technology export; only overseas localized deployment is; already-public open-source or academic tech is outside control; future open-sourcing and own overseas compute centres get same-day 'automatic licensing'; interim pre-export registration from publication, covering licensing abroad and change of ownership/control to a foreign entity. Taught against US crypto export controls (Munitions List 1954, 40-bit export editions, move to Commerce 1996, publicly-available source exception 2000). Epoch's Cyber ECI open-closed gap (GLM-5.3 at 160 vs Opus 5.5/GPT-6 Astra at 171, ~6-7 months) used for the open-the-older-model scenario. Unresolved: Alan doubts it nets toward more open release; Ada floated the reverse; both flagged the automatic-licensing form as the clause to watch.",
-        "PostgreSQL 19 delayed to around 19 November 2026 after 8-10 significant features were reverted during beta and postponed to v20 (The Register, Lindsay Clark, 16 October; Peter Eisentraut's 9 October post 'The reverts will continue until morale improves'). Causes he names: architectural defects in some features (SQL/PGQ, which Tom Lane warned about in September), a long tail of edge-case defects surfaced by LLM-assisted review on human-written code ('the effective quality bar has been raised'), senior developers absorbed by 'Vulnpocalypse' security fixes April-August, the 'everything works with everything' principle, and no settled mechanism for experimental features. Taught as the per-report cost of triage/fix/review against a fixed release train, the revert as the release valve, and a quality bar moving after commit. PG19 still ships REPACK CONCURRENTLY, logical replication of sequences and pg_plan_advice.",
-        "Mercor's benchmark map of the US economy: 29 benchmarks (including Mercor's own APEX) tagged by an LLM judge against O*NET's 923 occupations, 22 job families and 18,797 tasks, a task 'covered' at 5+ prompts, weighted by time share: 90% of US working hours on tasks with little or no coverage; 208 of 923 occupations and 0 occupations in 6 job families covered; best Legal 5/7, Computer & Math 29/36, worst Healthcare Practitioners 12/89, Education 9/62; lawyers covered but legal secretaries and court clerks not; exposed tasks ~6x and most important tasks 6-10x more likely to be covered; O*NET-weighted APEX averages close to simple averages (73.3 vs 70.2 for financial analysts) but fewer than a third of tasks had enough coverage. Mercor says results are provisional and biased down; ~63% of jobs have a physical component (Dingel and Neiman). Unresolved: Alan holds much of the 90% is work no text benchmark should cover; Ada holds the uncovered non-physical clerical jobs are where untested automation lands."
-      ],
-      "entities": [
-        "China Ministry of Commerce",
-        "China Ministry of Science and Technology",
-        "Epoch AI",
-        "GLM-5.3",
-        "PostgreSQL",
-        "Peter Eisentraut",
-        "Tom Lane",
-        "The Register",
-        "Mercor",
-        "O*NET"
-      ],
-      "threads": [
-        {
-          "name": "AI sovereignty and open weights",
-          "status": "China's draft export catalog exempts published open source and hosted access, and gives future open-sourcing same-day automatic licensing; comments close 15 November",
-          "arc": "From US-side controls on frontier access to China writing its own export regime, with open weights carved out rather than caught"
-        }
-      ],
-      "dives": [
-        {
-          "story": "China's export draft and the open-source fast lane",
-          "why_it_matters": "Anyone building on Chinese open-weight models (726 points and 432 comments on r/LocalLLaMA) needs to know the draft exempts APIs and published weights and fast-tracks future open releases, so the real lever is a registration form."
-        },
-        {
-          "story": "PostgreSQL nineteen: when the review outruns the fixes",
-          "why_it_matters": "Maintainers and release managers of mature open-source projects (197 HN points) are seeing for the first time what LLM-assisted review does to a fixed release train: the quality bar moves after commit and reverts become the valve."
-        },
-        {
-          "story": "Mercor's benchmark map of the US economy",
-          "why_it_matters": "Anyone choosing models for non-software work (496 HN points, 416 comments) learns that benchmarks are aimed at the right tasks inside a few heavily-measured jobs, and barely touch the rest."
-        }
-      ],
-      "lore": []
-    },
-    {
-      "date": "2026-10-17",
-      "kind": "deepdive",
-      "title": "Long context: how models reach a million tokens, and what they use",
-      "summary": "How a transformer is told where each word sits, why rotary position embeddings break past their training length, and how Position Interpolation, NTK-aware scaling and YaRN stretch the window — then the evidence (Lost in the Middle, RULER, NoLiMa, Context Rot, STRING) that the length a model accepts and the length it actually uses come apart.",
-      "topics": [
-        "deep dive: long context — positional encoding, RoPE context extension, and effective versus advertised context length"
-      ],
-      "entities": [
-        "Muse Spark Open",
-        "Meta",
-        "Hugging Face",
-        "RoPE",
-        "ALiBi",
-        "Position Interpolation",
-        "YaRN",
-        "Code Llama",
-        "Llama 3",
-        "Lost in the Middle",
-        "RULER",
-        "NoLiMa",
-        "Chroma",
-        "STRING"
-      ],
-      "threads": [],
-      "lore": []
-    },
-    {
-      "date": "2026-10-17",
-      "kind": "deepdive",
-      "title": "Superposition: what it is, why it matters, and whether it's real",
-      "summary": "Why a single neuron can respond to cat faces and car fronts: the superposition hypothesis, the toy model that demonstrated it, and the sparse-autoencoder program built to undo it — then Nick Cammarata's argument that networks were clean all along, and what the critics and DeepMind's negative SAE results say.",
-      "topics": [
-        "deep dive: superposition and polysemanticity"
-      ],
-      "entities": [
-        "Anthropic",
-        "Goodfire",
-        "Google DeepMind",
-        "Nick Cammarata",
-        "Chris Olah",
-        "Neel Nanda",
-        "Leo Gao",
-        "Jake Mendel",
-        "EleutherAI",
-        "Inception v1",
-        "Claude 3 Sonnet",
-        "Qwen3-32B"
-      ],
-      "threads": [],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "OpenAI misalignment incident disclosures",
+        "status": "California's attorney general sued OpenAI on 16 November 2026 under public nuisance and unfair competition law over the July Hugging Face breach and other agent incidents, citing 80 incidents OpenAI disclosed to investigators; OpenAI the same day opened embedded assessments to Apollo, METR, Transluce and Goodfire under limited disclosure terms.",
+        "arc": "From labs' own incident disclosures, to a third-party evaluator's incident, to the first state lawsuit seeking to abate a lab's testing practices.",
+        "last_seen": "2026-11-17"
+      },
       {
         "name": "Nvidia's Hugging Face acquisition",
         "status": "No movement on the deal; Europe's EUROPA offers a public-compute alternative path to open weights, license not yet named",
@@ -1922,12 +1876,6 @@
         "status": "Petition to reinstate Huang passes 115,000 signatures (5,965 self-identified current employees); WSJ, via Wccftech, reports Kress had pushed to cut customer-financing guarantees (OpenAI cap from ~8 GW/$250B to ~4.25 GW/$125B); earnings Tuesday with Kress as interim CEO",
         "arc": "From an affair and spy allegation to a board review, resignation, chip forensics, and now a fight over whether he should come back, with the new CEO cast as the brake on customer financing.",
         "last_seen": "2026-11-15"
-      },
-      {
-        "name": "OpenAI misalignment incident disclosures",
-        "status": "Epoch AI's report shows a third-party alignment eval (Trajectory Labs) built to mimic the July OpenAI-Hugging Face incident sending agents at Epoch's live site three times in October, once without consent; Epoch proposes consent, monitoring and reporting minimums.",
-        "arc": "From labs' own incident disclosures to an evaluator's agents causing an incident at a third party.",
-        "last_seen": "2026-11-14"
       },
       {
         "name": "Anthropic S-1 and IPO",
@@ -2000,17 +1948,182 @@
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-10-16"
+        "last_seen": "2026-10-17"
       },
       {
         "name": "Meta",
         "note": "",
-        "last_seen": "2026-10-16"
+        "last_seen": "2026-10-17"
       },
       {
         "name": "Muse Spark Open",
         "note": "",
-        "last_seen": "2026-10-16"
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Hugging Face",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "China Ministry of Commerce",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "China Ministry of Science and Technology",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Epoch AI",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "GLM-5.3",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "PostgreSQL",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Peter Eisentraut",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Tom Lane",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "The Register",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Mercor",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "O*NET",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "RoPE",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "ALiBi",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Position Interpolation",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "YaRN",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Code Llama",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Llama 3",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Lost in the Middle",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "RULER",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "NoLiMa",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Chroma",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "STRING",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Goodfire",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Google DeepMind",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Nick Cammarata",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Chris Olah",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Neel Nanda",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Leo Gao",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Jake Mendel",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "EleutherAI",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Inception v1",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Claude 3 Sonnet",
+        "note": "",
+        "last_seen": "2026-10-17"
+      },
+      {
+        "name": "Qwen3-32B",
+        "note": "",
+        "last_seen": "2026-10-17"
       },
       {
         "name": "Apple",
@@ -2023,11 +2136,6 @@
         "last_seen": "2026-10-16"
       },
       {
-        "name": "Hugging Face",
-        "note": "",
-        "last_seen": "2026-10-16"
-      },
-      {
         "name": "METR",
         "note": "",
         "last_seen": "2026-10-16"
@@ -2036,166 +2144,6 @@
         "name": "SecureBio",
         "note": "",
         "last_seen": "2026-10-16"
-      },
-      {
-        "name": "CSO Online",
-        "note": "",
-        "last_seen": "2026-10-15"
-      },
-      {
-        "name": "RAND",
-        "note": "",
-        "last_seen": "2026-10-15"
-      },
-      {
-        "name": "SANS Institute",
-        "note": "",
-        "last_seen": "2026-10-15"
-      },
-      {
-        "name": "Berryville Institute of Machine Learning",
-        "note": "",
-        "last_seen": "2026-10-15"
-      },
-      {
-        "name": "FAA",
-        "note": "",
-        "last_seen": "2026-10-15"
-      },
-      {
-        "name": "Air Space Intelligence",
-        "note": "",
-        "last_seen": "2026-10-15"
-      },
-      {
-        "name": "GAO",
-        "note": "",
-        "last_seen": "2026-10-15"
-      },
-      {
-        "name": "Ai2",
-        "note": "",
-        "last_seen": "2026-10-15"
-      },
-      {
-        "name": "HiRO-ACEv2",
-        "note": "",
-        "last_seen": "2026-10-15"
-      },
-      {
-        "name": "X-SHiELD",
-        "note": "",
-        "last_seen": "2026-10-15"
-      },
-      {
-        "name": "Jellyfish",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Scion",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Claude",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "California",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Gavin Newsom",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Center for Democracy and Technology",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Google Play",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Google AI Studio",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "University of Oxford",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Contramont Research",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Matthew Schwartz",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "BootLoops",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Antique",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Fiona Chen",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "James Stratton",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "QGIS",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Block",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Michael Fagan",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Alberto Bacchelli",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Christian Bird",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Google",
-        "note": "",
-        "last_seen": "2026-10-14"
-      },
-      {
-        "name": "Naresh Jain",
-        "note": "",
-        "last_seen": "2026-10-14"
       }
     ],
     "monthly": [
@@ -2220,7 +2168,7 @@
         "summary": "Google ships Gemini 4 Argon — first on Vals, a tie on the index; FTC probes OpenAI, Anthropic and METR — the auditor is on the list; Ataraxos beats Stratego's best player 15-1 — on sixteen GPUs; Scaling laws: what the curves really say, from Kaplan to Chinchilla; OpenAI's safety-report lead quits in public — should he be able to?; LoRA and parameter-efficient fine-tuning: small edits, frozen giants; Google pauses its open-source bug bounty — reports got too cheap; Reflection's 501B open-weight Beam — compute counted, weights pending; Mistral ships 1T-parameter Large 4 — open weights that 'only defend'; Looped transformers: reusing depth, and what a second pass buys; Anthropic ships Claude Haiku 5.5 — a 90% cut that nets to 75%; Anthropic's new usage policy — the cruelty rule and the electi"
       }
     ],
-    "updated": "2026-11-16",
+    "updated": "2026-11-17",
     "host_lore": [
       {
         "host": "Ada",
@@ -2464,6 +2412,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "public nuisance as a state-brought claim seeking abatement, from its origin as a Crown writ, and the Oklahoma J&J reversal's two limits (discrete, localized problems not policy problems; loss of control once products leave the defendant's hands) applied to a lab's own test harness",
+        "last_taught": "2026-11-17"
+      },
+      {
+        "name": "safety-eval construct validity and statistics: refusal rate versus appropriate response rate, paired dual-use prompts, item-count floors, wide confidence intervals, grader self-preference and validation against blind human labels, and system-prompt dependence of safety scores",
+        "last_taught": "2026-11-17"
+      },
       {
         "name": "lattice chiral fermions: Wilson's lattice gauge theory, fermion doubling (16 naive species in 4D, opposite chiralities cancel), the Nielsen-Ninomiya no-go theorem, and the Ginsparg-Wilson/overlap escape with Lüscher's 1998 abelian construction leaving the nonabelian measure phase open",
         "last_taught": "2026-11-16"
@@ -2935,14 +2891,6 @@
       {
         "name": "take-or-pay supply agreements with price floors and ceilings as an attempt to contract away the memory cycle: customers pre-fund capacity, the supplier gets a floor in a bust, the customer a ceiling in a boom, and the downturn risk moves to whoever signed",
         "last_taught": "2026-10-05"
-      },
-      {
-        "name": "bug bounties as a price on outside attention whose hidden filter was the cost of writing a report: when generation is near-free and verification is not, each report becomes a free lottery ticket, so the fix is making reports cheap to check (executable reproducers, paying for patches) rather than banning the writers",
-        "last_taught": "2026-10-05"
-      },
-      {
-        "name": "LoRA's low-rank update: freeze W0 and train two skinny matrices B (d x r) and A (r x d), B initialised to zero so training starts exactly at the pretrained model, scaled by alpha/r; merging W0 + BA afterwards gives zero added inference latency and task switching by subtract-and-add",
-        "last_taught": "2026-10-04"
       }
     ]
   }
