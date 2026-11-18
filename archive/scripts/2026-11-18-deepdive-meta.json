@@ -1,0 +1,106 @@
+{
+ "date": "2026-11-18",
+ "kind": "deepdive",
+ "title": "Context windows and long-context failure: room is not attention",
+ "summary": "What a context window holds and what it costs (quadratic prefill, a growing key-value cache, memory-bound decode, sparse attention's indexer), and why models fail inside the window: length alone hurting even with perfect retrieval or masked filler, softmax dilution, attention sinks, cache compression across turns, fixed-state copying limits, and tests beyond the needle.",
+ "sources": [
+  {
+   "group": "Primary sources",
+   "title": "NVIDIA Technical Blog — Co-Designing Sparse Attention for Efficient Long-Context Inference",
+   "url": "https://developer.nvidia.com/blog/co-designing-sparse-attention-for-efficient-long-context-inference/"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Du et al. — Context Length Alone Hurts LLM Performance Despite Perfect Retrieval (Findings of EMNLP 2025)",
+   "url": "https://arxiv.org/abs/2510.05381"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Xiao et al. — Efficient Streaming Language Models with Attention Sinks",
+   "url": "https://arxiv.org/abs/2309.17453"
+  },
+  {
+   "group": "Primary sources",
+   "title": "StreamingLLM repository and FAQ",
+   "url": "https://github.com/mit-han-lab/streaming-llm"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Li et al. — SCBench: A KV Cache-Centric Analysis of Long-Context Methods",
+   "url": "https://arxiv.org/abs/2412.10319"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Jelassi et al. — Repeat After Me: Transformers are Better than State Space Models at Copying",
+   "url": "https://arxiv.org/abs/2402.01032"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Google DeepMind — Michelangelo: Long Context Evaluations Beyond Haystacks via Latent Structure Queries",
+   "url": "https://arxiv.org/html/2409.12640v2"
+  },
+  {
+   "group": "Primary sources",
+   "title": "OpenAI MRCR dataset",
+   "url": "https://huggingface.co/datasets/openai/mrcr"
+  },
+  {
+   "group": "Further reading",
+   "title": "OVHcloud — Olala mini announcement",
+   "url": "https://corporate.ovhcloud.com/en/newsroom/news/ovh-olala-mini/"
+  },
+  {
+   "group": "Further reading",
+   "title": "Gemini Team — Gemini 1.5: Unlocking multimodal understanding across millions of tokens of context",
+   "url": "https://arxiv.org/abs/2403.05530"
+  },
+  {
+   "group": "Further reading",
+   "title": "Nakanishi — Scalable-Softmax Is Superior for Attention",
+   "url": "https://arxiv.org/abs/2501.19399"
+  },
+  {
+   "group": "Further reading",
+   "title": "Liu et al. — Lost in the Middle: How Language Models Use Long Contexts",
+   "url": "https://arxiv.org/abs/2307.03172"
+  },
+  {
+   "group": "Further reading",
+   "title": "Bai et al. — LongWriter: Unleashing 10,000+ Word Generation from Long Context LLMs",
+   "url": "https://arxiv.org/abs/2408.07055"
+  },
+  {
+   "group": "Further reading",
+   "title": "Anthropic — Claude prompting best practices (long context prompting)",
+   "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices"
+  }
+ ],
+ "topics": [
+  "deep dive: context windows and long-context failure"
+ ],
+ "entities": [
+  "NVIDIA",
+  "DeepSeek",
+  "OVHcloud",
+  "Olala mini",
+  "Gemini 1.5",
+  "StreamingLLM",
+  "SCBench",
+  "Michelangelo",
+  "OpenAI MRCR",
+  "LongWriter",
+  "Scalable-Softmax",
+  "Mamba"
+ ],
+ "threads": [],
+ "concepts_taught": [
+  "what a context window holds and costs: everything shares it (instructions, history, documents, tool results, the output), quadratic prefill attention, a linearly growing KV cache, memory-bound decode; NVIDIA's measurement of dense attention at 91% of per-layer prefill time at 128K",
+  "trained sparse attention as indexer + top-k (typically a few thousand keys) + core attention: the full scan moves into the indexer (47% vs 24% core attention on DeepSeek V3.2 at 128K prefill), cost follows keys scored not keys kept, and an unread token can neither confuse nor help",
+  "context length alone hurting performance despite perfect retrieval (Du et al. 2025: 13.9-85% drops across 5 models, persisting with whitespace filler, masked filler, and evidence placed before the question), with recite-the-evidence-first as the mitigation (up to 4% for GPT-4o on RULER)",
+  "attention sinks (StreamingLLM): softmax must put weight somewhere, so models park it on initial tokens; evicting them breaks sliding-window streaming; stable to 4M+ tokens but the window and memory are unchanged",
+  "long-context failure beyond retrieval: softmax dilution (Scalable-Softmax), sub-O(n) KV-cache methods failing across multi-turn shared contexts (SCBench), fixed-state models' copying limit (Repeat After Me), latent-state and multi-round coreference tests (Michelangelo's fall-off before 32K, MRCR), and output length bounded by SFT data (LongWriter)"
+ ],
+ "lore": [],
+ "listener_note": "no mini-dives today. Just cover the all the day's news based on coverage and editorial alignment. No single story should be more than 3 minutes. But at least two stories should be about that long, three stories should be 2 minutes, and then a bunch of 30 second to 1 minute stories. Target around 18 minutes for the episode.",
+ "word_band": null
+}

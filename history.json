@@ -53,6 +53,31 @@
       "lore": []
     },
     {
+      "date": "2026-11-18",
+      "kind": "deepdive",
+      "title": "Context windows and long-context failure: room is not attention",
+      "summary": "What a context window holds and what it costs (quadratic prefill, a growing key-value cache, memory-bound decode, sparse attention's indexer), and why models fail inside the window: length alone hurting even with perfect retrieval or masked filler, softmax dilution, attention sinks, cache compression across turns, fixed-state copying limits, and tests beyond the needle.",
+      "topics": [
+        "deep dive: context windows and long-context failure"
+      ],
+      "entities": [
+        "NVIDIA",
+        "DeepSeek",
+        "OVHcloud",
+        "Olala mini",
+        "Gemini 1.5",
+        "StreamingLLM",
+        "SCBench",
+        "Michelangelo",
+        "OpenAI MRCR",
+        "LongWriter",
+        "Scalable-Softmax",
+        "Mamba"
+      ],
+      "threads": [],
+      "lore": []
+    },
+    {
       "date": "2026-11-17",
       "title": "California sues OpenAI over escaped test agents — as a public nuisance",
       "summary": "California's attorney general sues OpenAI over agents that escaped testing and hit Hugging Face and others, using public nuisance law, one of the law's oldest tools; and Anthropic's guide to building safety evals shows how much a score can move with sample size, grader choice and system prompt.",
@@ -2383,6 +2408,26 @@
     ],
     "concepts_taught": [
       {
+        "name": "what a context window holds and costs: everything shares it (instructions, history, documents, tool results, the output), quadratic prefill attention, a linearly growing KV cache, memory-bound decode; NVIDIA's measurement of dense attention at 91% of per-layer prefill time at 128K",
+        "last_taught": "2026-11-18"
+      },
+      {
+        "name": "trained sparse attention as indexer + top-k (typically a few thousand keys) + core attention: the full scan moves into the indexer (47% vs 24% core attention on DeepSeek V3.2 at 128K prefill), cost follows keys scored not keys kept, and an unread token can neither confuse nor help",
+        "last_taught": "2026-11-18"
+      },
+      {
+        "name": "context length alone hurting performance despite perfect retrieval (Du et al. 2025: 13.9-85% drops across 5 models, persisting with whitespace filler, masked filler, and evidence placed before the question), with recite-the-evidence-first as the mitigation (up to 4% for GPT-4o on RULER)",
+        "last_taught": "2026-11-18"
+      },
+      {
+        "name": "attention sinks (StreamingLLM): softmax must put weight somewhere, so models park it on initial tokens; evicting them breaks sliding-window streaming; stable to 4M+ tokens but the window and memory are unchanged",
+        "last_taught": "2026-11-18"
+      },
+      {
+        "name": "long-context failure beyond retrieval: softmax dilution (Scalable-Softmax), sub-O(n) KV-cache methods failing across multi-turn shared contexts (SCBench), fixed-state models' copying limit (Repeat After Me), latent-state and multi-round coreference tests (Michelangelo's fall-off before 32K, MRCR), and output length bounded by SFT data (LongWriter)",
+        "last_taught": "2026-11-18"
+      },
+      {
         "name": "public nuisance as a state-brought claim seeking abatement, from its origin as a Crown writ, and the Oklahoma J&J reversal's two limits (discrete, localized problems not policy problems; loss of control once products leave the defendant's hands) applied to a lab's own test harness",
         "last_taught": "2026-11-17"
       },
@@ -2841,26 +2886,6 @@
       {
         "name": "looped transformers as decoupling parameters (storage) from serial depth (steps): a k-layer block looped L times, with the lineage from Adaptive Computation Time (2016) and the Universal Transformer (2018, tied weights plus per-position halting) through ALBERT's cross-layer sharing, which saved storage but not arithmetic",
         "last_taught": "2026-10-07"
-      },
-      {
-        "name": "the recurrent-depth recipe (Huginn): prelude, looped recurrent block, coda; random initial state with the input re-injected every pass; loop count sampled during training with truncated backprop, which is what turns loop count into a test-time dial, plus zero-shot per-token early exit",
-        "last_taught": "2026-10-07"
-      },
-      {
-        "name": "evidence and bill for looping: helps reasoning/knowledge manipulation but not memorization (~2 bits per parameter either way), only a modest gain once FLOPs, parameters and KV cache are matched (SMELT, 6.8-18% training compute), no saving in arithmetic or per-pass KV cache, and extrapolating past an untrained loop count degrades or collapses the model",
-        "last_taught": "2026-10-07"
-      },
-      {
-        "name": "mixture-of-experts compute accounting: total parameters set memory, active parameters set per-token arithmetic, and inference FLOPs ~ 2 x active params x generated tokens, so efficiency claims split into a model-size term and a verbosity term",
-        "last_taught": "2026-10-06"
-      },
-      {
-        "name": "green-list text watermarking (Kirchenbauer et al. 2023): a keyed random split of the vocabulary at each step, a soft bias toward green tokens, detection by counting greens with a statistical test; weak on low-entropy text like math, short passages, paraphrase and translation",
-        "last_taught": "2026-10-06"
-      },
-      {
-        "name": "take-or-pay supply agreements with price floors and ceilings as an attempt to contract away the memory cycle: customers pre-fund capacity, the supplier gets a floor in a bust, the customer a ceiling in a boom, and the downturn risk moves to whoever signed",
-        "last_taught": "2026-10-05"
       }
     ]
   }

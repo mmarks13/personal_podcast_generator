@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[Deep Dive] Context windows and long-context failure: room is not attention — Self-Attention</title>
+<style>
+  body { max-width: 720px; margin: 2rem auto; padding: 0 1rem;
+         font: 16px/1.6 -apple-system, system-ui, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+  .date { color: #666; margin-bottom: 1.5rem; }
+  audio { width: 100%; margin: 1rem 0 2rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; }
+  a { color: #0b5fff; }
+  footer { margin-top: 3rem; color: #888; font-size: 0.9rem; }
+</style></head><body>
+<h1>[Deep Dive] Context windows and long-context failure: room is not attention</h1>
+<div class="date">Self-Attention — 2026-11-18</div>
+<audio controls preload="none" src="https://github.com/mmarks13/personal_podcast_generator/releases/download/ep-2026-11-18-deepdive/deepdive-2026-11-18.mp3"></audio>
+<p><em>2026-11-18</em></p>
+<p>What a context window holds and what it costs (quadratic prefill, a growing key-value cache, memory-bound decode, sparse attention's indexer), and why models fail inside the window: length alone hurting even with perfect retrieval or masked filler, softmax dilution, attention sinks, cache compression across turns, fixed-state copying limits, and tests beyond the needle.</p>
+<h2>Primary sources</h2>
+<ul>
+<li><a href="https://developer.nvidia.com/blog/co-designing-sparse-attention-for-efficient-long-context-inference/">NVIDIA Technical Blog — Co-Designing Sparse Attention for Efficient Long-Context Inference</a></li>
+<li><a href="https://arxiv.org/abs/2510.05381">Du et al. — Context Length Alone Hurts LLM Performance Despite Perfect Retrieval (Findings of EMNLP 2025)</a></li>
+<li><a href="https://arxiv.org/abs/2309.17453">Xiao et al. — Efficient Streaming Language Models with Attention Sinks</a></li>
+<li><a href="https://github.com/mit-han-lab/streaming-llm">StreamingLLM repository and FAQ</a></li>
+<li><a href="https://arxiv.org/abs/2412.10319">Li et al. — SCBench: A KV Cache-Centric Analysis of Long-Context Methods</a></li>
+<li><a href="https://arxiv.org/abs/2402.01032">Jelassi et al. — Repeat After Me: Transformers are Better than State Space Models at Copying</a></li>
+<li><a href="https://arxiv.org/html/2409.12640v2">Google DeepMind — Michelangelo: Long Context Evaluations Beyond Haystacks via Latent Structure Queries</a></li>
+<li><a href="https://huggingface.co/datasets/openai/mrcr">OpenAI MRCR dataset</a></li>
+</ul>
+<h2>Further reading</h2>
+<ul>
+<li><a href="https://corporate.ovhcloud.com/en/newsroom/news/ovh-olala-mini/">OVHcloud — Olala mini announcement</a></li>
+<li><a href="https://arxiv.org/abs/2403.05530">Gemini Team — Gemini 1.5: Unlocking multimodal understanding across millions of tokens of context</a></li>
+<li><a href="https://arxiv.org/abs/2501.19399">Nakanishi — Scalable-Softmax Is Superior for Attention</a></li>
+<li><a href="https://arxiv.org/abs/2307.03172">Liu et al. — Lost in the Middle: How Language Models Use Long Contexts</a></li>
+<li><a href="https://arxiv.org/abs/2408.07055">Bai et al. — LongWriter: Unleashing 10,000+ Word Generation from Long Context LLMs</a></li>
+<li><a href="https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices">Anthropic — Claude prompting best practices (long context prompting)</a></li>
+</ul>
+<h2>In this episode</h2>
+<ol>
+<li>Ninety-one percent of the layer</li>
+<li>What a context window is, and what it costs</li>
+<li>Sparse attention: read only the top few thousand</li>
+<li>Length alone hurts</li>
+<li>Attention spread thin</li>
+<li>Attention sinks: where unneeded attention goes</li>
+<li>Squeezing the cache, then asking again</li>
+<li>Fixed-size memory and copying</li>
+<li>Beyond the needle</li>
+<li>Reading long is not writing long</li>
+<li>How engineers cope</li>
+<li>Wrap</li>
+</ol>
+<details><summary>Transcript</summary>
+<h3>Ninety-one percent of the layer</h3>
+<p><b>Ada:</b> Hello — it's Wednesday, November eighteenth. I'm Ada.</p>
+<p><b>Alan:</b> And I'm Alan. And I have a number for anyone who has ever pasted a whole codebase into a chat window.</p>
+<p><b>Ada:</b> Only one?</p>
+<p><b>Alan:</b> To start. On November seventeenth, the week we sat down to record this, NVIDIA's developer blog published a piece on sparse attention for long-context inference. In their first figure, at a hundred and twenty-eight thousand tokens, plain dense attention takes ninety-one percent of a layer's prefill time.</p>
+<p><b>Ada:</b> Ninety-one. So everything else in that layer, the feed-forward part included, shares the other nine.</p>
+<p><b>Alan:</b> Shares the other nine. And the same day, OVHcloud announced a small open model called Olala mini. Thirty-two thousand tokens of context now, a hundred and twenty-eight thousand promised by the end of the year, built on a hybrid of an attention variant and Mamba-3, which is a state space design. Everybody is spending engineering on the window.</p>
+<p><b>Ada:</b> Which makes it a good moment to take two questions together. What a context window actually is, and what it costs. And why a model that can technically hold an enormous amount so often does worse when you give it the room.</p>
+<p><b>Alan:</b> Room is not attention.</p>
+<p><b>Ada:</b> Hold that thought, because the evidence is stranger than that.</p>
+<h3>What a context window is, and what it costs</h3>
+<p><b>Ada:</b> The plainest version first. A model reads in tokens, which are chunks of text, often pieces of words. The context window is how many tokens it can consider at once. And the part people forget is that everything shares it. The system instructions, the whole conversation so far, every document you pasted, every tool result an agent got back, and the answer the model is writing right now.</p>
+<p><b>Alan:</b> The answer counts too.</p>
+<p><b>Ada:</b> The answer too, because each new token is produced by looking back over everything before it. That looking back is attention. For every token the model forms a query, roughly what am I looking for, and compares it against a key from every earlier token, roughly what do I contain. NVIDIA's piece puts the consequence in one line: dense attention scores every query against every key, so its cost per query grows with the context length.</p>
+<p><b>Alan:</b> And when you read the whole prompt in at once, which is the prefill, every token is a query. So the total goes with the square of the length. Double the document, four times the comparisons.</p>
+<p><b>Ada:</b> Put a number on it.</p>
+<p><b>Alan:</b> A hundred and twenty-eight thousand tokens, squared, is about sixteen billion query-key pairs. For one attention head, in one layer.</p>
+<p><b>Ada:</b> Which is why the ninety-one percent stops being surprising once you see the shape. NVIDIA's own phrasing is that at a hundred and twenty-eight thousand tokens, attention can take most of the prefill time in a layer. The share grows with length, because attention is the term that squares.</p>
+<p><b>Ada:</b> Right. Then there's the second bill, which is memory. So the model doesn't recompute every earlier token's keys and values for each new word, it stores them. That's the key-value cache, one entry per token, per layer. It grows in a straight line with length, but it's a long straight line. We worked through that arithmetic in an earlier episode, and at long lengths the cache, not the weights, can become the thing that runs out first.</p>
+<p><b>Alan:</b> And while it's generating, it's bandwidth that hurts. The NVIDIA piece describes decode as memory-bound. The expensive part of each new token is moving the cache, not the math done on it.</p>
+<p><b>Ada:</b> So that's the cost side. Now one piece of history, because it explains the marketing. In early twenty twenty-four, Google's Gemini one point five report claimed near-perfect retrieval, above ninety-nine percent, up to at least ten million tokens.</p>
+<p><b>Alan:</b> Ten million.</p>
+<p><b>Ada:</b> That's the report's claim for retrieval tests, and retrieval there means find the planted fact. The number can be true and still be the source of most of the confusion. Finding one sentence somewhere in ten million tokens is a different skill from using ten million tokens.</p>
+<p><b>Alan:</b> Which is the part I want to poke at, because the industry's answer to the cost problem has been: don't look at everything.</p>
+<h3>Sparse attention: read only the top few thousand</h3>
+<p><b>Alan:</b> Here's how the sparse versions work, going by the NVIDIA write-up. Three stages. First a small, cheap scorer they call an indexer looks at every earlier key and gives it a relevance score. Then a top-k step keeps the best ones, typically a few thousand. Then real attention runs only over those.</p>
+<p><b>Ada:</b> So a librarian who skims every spine on the shelf and pulls a few thousand books to actually read.</p>
+<p><b>Alan:</b> That's a fair picture. And their table lists a lot of shipping designs built roughly this way. DeepSeek's sparse attention, the GLM models, Qwen, MiniMax, several more.</p>
+<p><b>Ada:</b> Where does the librarian break?</p>
+<p><b>Alan:</b> Two places. The skim isn't free. On DeepSeek V three point two at a hundred and twenty-eight thousand tokens, the indexer and the top-k selection take forty-seven percent of the layer's prefill time. Core attention, the actual reading, is twenty-four.</p>
+<p><b>Ada:</b> So the scan over everything is still there. It's just moved somewhere cheaper.</p>
+<p><b>Alan:</b> Cheaper per key, still growing with every key. Their own finding is that the cost follows how many keys get scored, not how many you keep. Each doubling of the keys scored costs about one point seven times in prefill. Keeping sixty-four times more keys barely moves the top-k step, under two times. And the second break is the one that matters for the failure half of this. The post measures runtime. It reports no accuracy numbers at all.</p>
+<p><b>Ada:</b> Which isn't a criticism of a kernel post.</p>
+<p><b>Alan:</b> No, it's a kernel post, that's its job. But it means if the indexer scores your one important sentence low, attention never sees it. A sparse model can't be confused by a token it never read. It can't use it either.</p>
+<p><b>Ada:</b> Although, from the paper I want to get to next, not reading things may be less of a sacrifice than it sounds.</p>
+<h3>Length alone hurts</h3>
+<p><b>Ada:</b> This is the result I'd most like anyone building with long context to know. Yufeng Du, Hao Peng and colleagues, in the Findings of EMNLP in twenty twenty-five. The title is "Context Length Alone Hurts LLM Performance Despite Perfect Retrieval."</p>
+<p><b>Alan:</b> The title is the thesis.</p>
+<p><b>Ada:</b> The title is the thesis. The usual story about long-context failure is that the model can't find the thing. Lost in the middle, the needle in the haystack. So they built tasks where finding it isn't the problem. Math, question answering, coding, and the models could retrieve the relevant evidence perfectly. Then they just made the input longer, staying inside each model's claimed context length.</p>
+<p><b>Alan:</b> And?</p>
+<p><b>Ada:</b> Across five models, performance dropped by between thirteen point nine and eighty-five percent as the input got longer.</p>
+<p><b>Alan:</b> Okay, but the obvious objection. Longer input means more distractors. Of course it gets worse, there's junk in there.</p>
+<p><b>Ada:</b> That's the objection they designed against. They replaced the irrelevant text with whitespace, which is about the least distracting filler there is. Still dropped. Then they masked the irrelevant tokens entirely, so the model could only attend to the relevant ones.</p>
+<p><b>Alan:</b> Wait. Masked. So the model literally cannot look at the padding.</p>
+<p><b>Ada:</b> Cannot look at it. And performance still dropped. And when they put all the relevant evidence immediately before the question, so nothing important is in the middle, a similar drop.</p>
+<p><b>Alan:</b> That's strange. If it can't attend to the filler, what's left that knows the filler exists?</p>
+<p><b>Ada:</b> The paper establishes that the drop survives each of those controls. It doesn't pin down why. My guess, and it is a guess, is position. Masked or not, the useful tokens now sit at long distances the model rarely practiced during training, which is the account we met in our episode on positional encoding.</p>
+<p><b>Alan:</b> Fine. So what do I actually do with it?</p>
+<p><b>Ada:</b> Their fix is almost embarrassingly simple. Ask the model to recite the retrieved evidence first, then solve the task. You've turned a long-context problem into a short-context one, because now the evidence sits right next to the answer. On RULER, a long-context benchmark, it improved GPT-four-oh by up to four percent over an already strong baseline.</p>
+<p><b>Alan:</b> Four percent is modest.</p>
+<p><b>Ada:</b> Over a strong baseline, for free. And it lines up with vendor advice. Anthropic's prompting guide says to ask Claude to quote the relevant parts of long documents before carrying out the task, and to put long documents at the top with the question at the end. It says queries at the end can improve response quality by up to thirty percent in tests, especially with complex, multi-document inputs.</p>
+<p><b>Alan:</b> One of those is a vendor's own unaudited number. I'll take the direction, not the thirty.</p>
+<p><b>Ada:</b> Fair. The direction is what the paper backs.</p>
+<h3>Attention spread thin</h3>
+<p><b>Alan:</b> Can I offer a candidate for your why, and then immediately undercut it?</p>
+<p><b>Ada:</b> That's your whole method.</p>
+<p><b>Alan:</b> A single-author preprint from January twenty twenty-five, by Ken Nakanishi. Softmax is the function that turns attention scores into weights that add up to one. The paper's point is that the biggest weight softmax can hand out approaches zero as the number of inputs grows. More tokens, flatter attention, and a weaker grip on the thing that matters.</p>
+<p><b>Ada:</b> The ballot gets longer and every candidate's share shrinks.</p>
+<p><b>Alan:</b> Right. He proposes a replacement called Scalable-Softmax. The change is small: scale the scores up by the logarithm of the length, times a scaling factor, so the sharpest score keeps its edge as the crowd grows. He reports clearly better long-context performance and key-information retrieval, with the best length generalization when it's used from the start of pretraining. Now the undercut. One author, one proposal, and nothing I've read connects it to the Du result. And masking removes the extra candidates from the ballot, yet the drop stayed. So I'd file dilution as a real effect and not the whole story.</p>
+<p><b>Ada:</b> That's where I'd leave it too.</p>
+<h3>Attention sinks: where unneeded attention goes</h3>
+<p><b>Ada:</b> Here's my favorite odd fact in this whole area, and it's about what models do with attention they don't need. A twenty twenty-three paper by Guangxuan Xiao, Yuandong Tian, Beidi Chen, Song Han and Mike Lewis. The obvious way to run a model forever on a stream of text is a sliding window. Keep the cache for the most recent tokens, throw away the oldest.</p>
+<p><b>Alan:</b> Which is what I'd build first.</p>
+<p><b>Ada:</b> And it fails, they found, once the text gets longer than the cache. The fix is the strange part. Keep the cached keys and values of the very first few tokens, alongside the recent window, and the model is fine again.</p>
+<p><b>Alan:</b> The first tokens. Which are usually what, the start of a system prompt?</p>
+<p><b>Ada:</b> Often nothing important, which is the point. Softmax makes the weights add up to one, so when a head has nothing worth looking at, the weight still has to land somewhere. The paper's explanation is that models learn to park it on the earliest tokens, which almost every later token can see. They call them attention sinks. Evict the sink and you've taken away the parking spot everything was quietly relying on.</p>
+<p><b>Alan:</b> So the opening word of the prompt has been a dumping ground the whole time.</p>
+<p><b>Ada:</b> The whole time. And with the sinks kept, their method, StreamingLLM, stayed stable on language modeling up to four million tokens and more, with up to a twenty-two point two times speedup over recomputing a sliding window.</p>
+<p><b>Alan:</b> And here's where people misread it. Four million tokens of stable output is not four million tokens of memory.</p>
+<p><b>Ada:</b> No, and the project's own FAQ is blunt about it. The context window remains unchanged. The tokens in the middle get dropped. Give it a book to summarize and it might only summarize the concluding paragraphs.</p>
+<p><b>Alan:</b> Fluent forever, remembering the last few pages. That's a fair description of me at the end of a very long session.</p>
+<p><b>Ada:</b> Of both of us. The paper also suggests that training with a dedicated placeholder token to serve as the sink could help streaming further, so the parking spot is built on purpose instead of borrowed.</p>
+<h3>Squeezing the cache, then asking again</h3>
+<p><b>Alan:</b> That eviction problem is the general warning for anything that shrinks the cache. There's a benchmark called SCBench, from Yucheng Li and colleagues, that looks at long-context methods through the cache's whole life. Generated, compressed, retrieved, loaded. It uses a shared context, one long document reused across several turns, over twelve tasks and eight long-context models.</p>
+<p><b>Ada:</b> And the finding?</p>
+<p><b>Alan:</b> In their words, sub-O of n memory methods suffer in multi-turn scenarios. Translated: anything that keeps less cache than the full length starts to fail once the second and third questions arrive. Methods that keep the whole cache but skip computation during the read-in held up robustly. They also found that dynamic sparsity, choosing what to keep based on the content, gave more expressive caches than fixed patterns.</p>
+<p><b>Ada:</b> Because the compressor chose what mattered before it knew what the second question was.</p>
+<p><b>Alan:</b> That's my reading of why. A cache trimmed for question one is a bet on question two.</p>
+<h3>Fixed-size memory and copying</h3>
+<p><b>Ada:</b> Which brings Olala back in. A state space model, the Mamba family, doesn't keep a growing cache at all. It carries a fixed-size state forward, like reading a book while being allowed only one index card for notes.</p>
+<p><b>Alan:</b> Constant memory. On my hardware that's the dream.</p>
+<p><b>Ada:</b> And there's a proof-shaped catch. Samy Jelassi and colleagues, in a twenty twenty-four paper called "Repeat After Me." They prove a two-layer transformer can copy strings of exponential length, while state space models are fundamentally limited by their fixed-size state. And in pretrained models, transformers dramatically outperformed state space models at copying and retrieving information from context.</p>
+<p><b>Alan:</b> One index card can't hold the book. Which is presumably why designs like Olala are hybrids, keeping some attention in the mix. Though OVH's announcement doesn't actually say why they chose it.</p>
+<p><b>Ada:</b> And SCBench, for what it's worth, found that sparsity by layer in hybrid architectures cut memory while keeping strong performance.</p>
+<h3>Beyond the needle</h3>
+<p><b>Ada:</b> Copying is also what the famous test measures. Needle in a haystack is plant a sentence, ask for it back. Once models were acing that, the question became what a harder test looks like, and two are worth knowing. DeepMind's Michelangelo, from September twenty twenty-four, has a task called Latent List. You start with a short Python list, then a long run of operations on it, append, insert, pop, sort, interleaved with filler lines that literally print "do nothing." Then you're asked about the final list.</p>
+<p><b>Alan:</b> So not where is the fact, but what's the state after all of it.</p>
+<p><b>Ada:</b> Exactly. And the caption on their first figure says all models experience significant fall-off in performance before thirty-two thousand tokens.</p>
+<p><b>Alan:</b> Thirty-two thousand. Against advertised windows in the millions.</p>
+<p><b>Ada:</b> There's a third task in there I like, called I Don't Know. The question often has no answer in the context, and one option is always I don't know. Seventy percent of its instances have that as the right answer.</p>
+<p><b>Alan:</b> So it tests whether the model will admit the thing isn't there. Which a needle test never asks.</p>
+<p><b>Ada:</b> The second is multi-round coreference, MRCR. It started in the Gemini work, and OpenAI released a harder, open version. A long synthetic conversation full of writing requests. A poem about tapirs, a blog post about rocks. Hidden inside are two, four or eight identical requests, and the model is asked for, say, the second poem about tapirs, and it has to put a short alphanumeric code on the front of its answer. The test comes in length bins up to about a million tokens.</p>
+<p><b>Alan:</b> That one I like, because it's what my agents actually face. Which version of the config did we settle on, three edits ago? The distractors aren't junk. They're near-copies of the right answer.</p>
+<p><b>Ada:</b> And the starting point for all of it was twenty twenty-three, Nelson Liu and colleagues' "Lost in the Middle." On multi-document question answering and key-value retrieval, performance was often highest when the relevant information sat at the beginning or end, and degraded in the middle. The newer tests are what you build once finding the needle is easy and the problem is still there.</p>
+<h3>Reading long is not writing long</h3>
+<p><b>Alan:</b> Quick one, because people blur the two directions. Reading long and writing long are different skills. LongWriter, from Yushi Bai and colleagues in twenty twenty-four. Models of the time could take inputs up to a hundred thousand tokens but struggled to write past about two thousand words. Their controlled experiments traced it to fine-tuning. Output length was bounded by the samples the model saw in supervised fine-tuning, and long outputs were scarce there. They built a dataset of long ones, LongWriter-6k, and existing models went past ten thousand words.</p>
+<p><b>Ada:</b> So a window size is an input budget. It was never a promise about output.</p>
+<p><b>Alan:</b> That's a twenty twenty-four result about twenty twenty-four models. But the lesson, that output length is something you train for, is the part I'd expect to hold.</p>
+<h3>How engineers cope</h3>
+<p><b>Ada:</b> So, the coping kit. Chunking, retrieval, compaction. Look at them together and they're one move: make the context smaller and denser before the model sees it.</p>
+<p><b>Alan:</b> Chunking first, since it's the oldest. Split the document, work on each piece, stitch the results. It trades the length problem for a stitching problem. Anything that spans two chunks is nobody's job.</p>
+<p><b>Alan:</b> Retrieval is the sparse-attention indexer moved outside the model, with the same failure. If it ranks your paragraph low, the paragraph is gone. Compaction is a summary the model writes of its own history, and we've covered what those lose, specifics first.</p>
+<p><b>Ada:</b> And the Du paper adds a reason to do all of it even when everything fits. Length cost them accuracy on its own, with the evidence perfectly retrievable.</p>
+<p><b>Alan:</b> So my working list. Documents first, question last. Ask for the relevant quotes before the answer. And when a window is nearly full, that isn't an achievement, it's a warning light.</p>
+<p><b>Ada:</b> I'd add one. Test at the length you'll actually run, with distractors that look like the answer, because the needle score won't tell you.</p>
+<h3>Wrap</h3>
+<p><b>Ada:</b> The thing I keep turning over is the masked filler. The model couldn't see it and was still worse for it. I don't have a story for that I fully believe yet.</p>
+<p><b>Alan:</b> And what stays with me is the kernel post. Ninety-one percent of a layer spent reading, and the fastest designs win by reading less. Which, given everything else here, might be the accidental right answer.</p>
+<p><b>Ada:</b> Or a lucky one. I'd want the accuracy numbers before I call it either.</p>
+<p><b>Alan:</b> Fair. Stay grounded.</p>
+</details>
+<footer><a href="../index.html">← All episodes</a></footer>
+</body></html>
