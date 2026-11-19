@@ -1,6 +1,65 @@
 {
   "episodes": [
     {
+      "date": "2026-11-19",
+      "title": "A week of outages gets blamed on AI patching — the evidence is thin",
+      "summary": "Six major outages in six days, from Outlook to the FAA to an NSA network: what the published causes actually say, and why the real AI angle is pressure to patch faster rather than rogue agents. Then Microsoft's seven Ignite models and the router that decides when you need an expensive one, the revised Harvard paper forecasting that code review is what holds software employment up, and a look at everything Anthropic has told Claude to stop saying.",
+      "topics": [
+        "Six US outages, 12-17 Nov 2026 (Politico '6 in 6 days'): Microsoft 365 ~24h (Thu 12 Nov; bug introduced in July plus traffic and reduced capacity; Microsoft: not cyber, not AI agents; Nadella at DealBook: 'latent bug', 'perfect storm'); FAA nationwide ground stop >4h (Fri 13 Nov; L3Harris router install at El Dorado, Arkansas radio site in copper-to-fiber conversion plus Amarillo radar site flooding the network, ~1,000 connection attempts every 4-5 s; SMART AI planning tool extended to all 22 en route centers 3 days earlier, ruled out by Duffy 'no possible way'); JPMorgan Chase (Mon 16 Nov; software bug in on-premise hardware, FBI official via Fox Business: a software release that Monday; Zelle affected); United ~90 min (Mon); Apple 'internal update' (Tue 17 Nov); NSA classified network 'temporary degradation' during scheduled maintenance (Tue). DHS Secretary Mullin on Hannity (16 Nov): '98% certainty' not a cyberattack, 'I believe that it's the SI', unnamed tech contact, 'all individually unrelated'. Gary Marcus wants a temporary recall on agents but 'We don't really know yet'. Washington Sun (three anonymous sources): officials privately told Congress rushed patches for AI-found vulnerabilities are behind it. Nadella: much critical infrastructure 'unpatchable' (firmware, chillers, HVAC); patches must go 'instantly' to production, 'So that's going to create instability.' DOJ CIO Nikki Collier: 'decades and decades of putting band-aids on systems'. On air: every published cause is a change pushed into a running system; AI angle as pressure to patch faster, not rogue agents; no one has shown the patch rate rose.",
+        "Microsoft AI Ignite (17 Nov 2026), 'seven new world-class models' (plus Maia 200 chip): MAI Code 2 (98% of GPT-6.1 Sol at ~40% of price, 96% of Opus 5.5 at ~5%, averaged over DeepSWE 1.1/Terminal Bench 2.1/SWE-Atlas/FrontierCode v1.1; 'explicitly not yet tuned for... fundamental science research and very long horizon agentic work'; GitHub Copilot), MAI Code 2 Flash, MAI Cyber 2 Flash (beats GPT-6 Astra on CyberGym-E2E at <2% cost per task), MAI Image 2.7/Flash, MAI Realtime 1 (from $0.01/audio min), Dragon Copilot Transcribe (10M encounters/month), Decision 1.1 (router; 50x faster, 79x cheaper than GPT-6.1 Sol; built on Gemma 4 26B A4B; calibrated confidence, abstention, developer thresholds; 4,000+ customers in ~5 weeks; 102 blind benchmarks); MAI Licensed Weights (tune and run in own Azure; AT&T 5G analytics model beat GPT-6.1 Sol at 1/50th cost); Maia 200 1.7x tokens/watt. No parameter counts, no benchmark methodology. On air: Alan says the router is the real product; Ada: the router's seller also sells the cheap models, 'the knob is yours and the dial is theirs'. Unresolved.",
+        "Chen & Stratton revised paper (version 14 Nov 2026; Jellyfish data, 655 firms, 720,542 workers, 445M work events, Jan 2021-Aug 2026): agents vs assistants split; agents at 12 months +44.0% lines of code, +36.0% commits, +35.7% PRs opened; only ~62.7% of extra agent PRs merged vs 86.1% baseline; Jira issues +13.7% (marginally insignificant, rules out >30.7%); review submission-to-approval +56.1% (backlog +59.9%, active review +58.5%), comments per change +38.6%; 79.1% of firms adopted AI review tools, humans still write the overwhelming majority; model: coding productivity +73.7%, review productivity -7.0%, coding labor -22.7%, review labor +43.4%; 2031 scenarios: review fixed -> output +57.8% (levels off late 2027), employment -10.3%; review keeps pace -> output +341.4%, employment -76.2% (authors: upper bound). Interview: senior-only approval once a week, new senior-approval rules after outages caused by AI-generated commits. On air: Ada reframes the bottleneck as what holds employment up; Alan expects AI review to get good and votes for code that ships."
+      ],
+      "entities": [
+        "Microsoft",
+        "Microsoft AI",
+        "FAA",
+        "L3Harris",
+        "JPMorgan Chase",
+        "Apple",
+        "NSA",
+        "Markwayne Mullin",
+        "Satya Nadella",
+        "Gary Marcus",
+        "Fiona Chen",
+        "James Stratton",
+        "Jellyfish",
+        "Gemma 4"
+      ],
+      "threads": [
+        {
+          "name": "Anthropic S-1 and IPO",
+          "status": "Priced at $83 (above $70-78 range), 980M shares, ~$81.3B raised, ~$1.5T fully diluted; Nasdaq ticker ANT, trading from 19 November",
+          "arc": "S-1 filed, amendment declares RSP threshold met, roadshow at $70-78, then priced above range as the largest IPO by proceeds"
+        },
+        {
+          "name": "AI-automated offensive security",
+          "status": "A week of six major US outages drew AI blame; published causes are routine changes, while officials and Nadella describe pressure to patch AI-found vulnerabilities instantly",
+          "arc": "From Google's first fully automated exploitation report to the instability of patching at machine speed"
+        }
+      ],
+      "dives": [
+        {
+          "story": "Six outages in six days and the AI-patching theory",
+          "why_it_matters": "Anyone running production systems or setting patch policy needs to separate the published causes (routine changes) from the theory, because the pressure to patch AI-found vulnerabilities instantly is the part that will change their change-management."
+        },
+        {
+          "story": "Microsoft's seven Ignite models and Decision 1.1",
+          "why_it_matters": "Azure and Copilot buyers weighing non-OpenAI models now face a vendor-built lineup of 'nearly as good for much less' plus a router that decides when to pay for the expensive one."
+        },
+        {
+          "story": "The Harvard review-bottleneck paper, revised",
+          "why_it_matters": "Engineering leads scaling coding agents get the first estimate of how much agent work dies in review, and a model saying the review bottleneck is what currently holds software employment up."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "position",
+          "note": "Alan holds that the fix for 'patch faster' was never patching faster but smaller changes, staged rollouts and a way back out, and that Microsoft's Decision router, with an exposed confidence score and developer-set threshold, is more control than any router he has built himself; Ada answered 'the knob is yours and the dial is theirs'. Unresolved."
+        }
+      ]
+    },
+    {
       "date": "2026-11-18",
       "title": "OpenAI's GPT-6.2 Astra is cheaper — Epoch still wouldn't hire it",
       "summary": "OpenAI's GPT-6.2 Astra and Sol arrive with lower prices and discounted background windows, while Epoch AI finds no model meets its staff standard. Plus Nvidia's first earnings call after Huang, a Vals study of models marking military targets, Google's report of a fully automated exploit pipeline, Gemini's longer chat retention, and a fast pass through the rest of the day.",
@@ -1787,77 +1846,26 @@
           "note": "Alan's July commitment to 'keeping a rep' (real work with the tools off) developed: he has kept it, and after Scheff's essay says it has turned from practice for the job into the part of the job he misses — 'a hobby with good memories', like developing film."
         }
       ]
-    },
-    {
-      "date": "2026-10-19",
-      "title": "Anthropic sets aside 5% of its shares for the public — who decides?",
-      "summary": "Anthropic commits five percent of its shares, with a value-linked escalator, to a public benefit fund held in an LLC it owns, with governance still to come; websites from Yelp to JPMorgan Chase are turning away AI agents for three different reasons; and Sphinx, a git hook that quizzes you on your agent's code before you push.",
-      "topics": [
-        "Anthropic Public Benefit Fund (announced 18 October 2026): 5% of shares committed subject to stockholder approval; board may add 2% for every 50% rise in company value above an unstated baseline; held by a wholly-owned LLC rather than a charity for flexibility between donations to nonprofits and 'direct distributions to specific populations' (labor-market example, alongside a prior $200M study commitment); no lobbying or political giving from the LLC's equity; framed as redirecting the executive-pay escalator; with the co-founders' 80% pledge and employee match, 'roughly 20%' of shares headed to public benefit; structure, governance and valuation milestones deferred to 'the coming months'. On air: Ada's reading that the fund is a vehicle for the disruption Anthropic's own staff expect (AI expectations gap survey, 16 October: staff 75% of work hours by 2030 vs US workers 28%); Alan's pushback that a wholly-owned LLC is Anthropic's drawer and the no-lobbying rule is a promise while the company itself lobbies (Politico bill).",
-        "Websites blocking AI agents (The Verge, Emma Roth, 17 October 2026; TechCrunch 6 October): Yelp only allows agents that pay into its data licensing; Delta blocks agent bookings; JPMorgan Chase and Charles Schwab block agents from accounts over security; Amazon v Perplexity (appeals court overturned the order in August; amended complaint) and Amazon telling Meta that Muse's access violates its policies; Walmart's unintentional human-check block of partner Muse; Cloudflare default change suspected; Meta et al. drafting an open agent-to-business standard. On air: Alan's three bins (business, security, collateral) and Ada's robots.txt lineage — the crawler bargain of traffic for access has no equivalent for agents.",
-        "Sphinx (Show HN, ~240 points, 18 October 2026): MIT-licensed pre-push git hook; a separate reviewer model reads only the committed diff, never the agent conversation, and asks up to three behavior/failure-mode questions; answers never reach the coding agent; passes last 24h; 'sphinx yolo' skips are logged with reasons and never count as passes; author calls it 'practice, not a security gate'."
-      ],
-      "entities": [
-        "Anthropic",
-        "Anthropic Public Benefit Fund",
-        "The Verge",
-        "Meta Muse",
-        "Amazon",
-        "Perplexity",
-        "Yelp",
-        "Walmart",
-        "Cloudflare",
-        "JPMorgan Chase",
-        "Charles Schwab",
-        "Sphinx"
-      ],
-      "threads": [
-        {
-          "name": "Websites versus AI agents",
-          "status": "Yelp, Delta, JPMorgan Chase and Schwab block agents; Amazon v Perplexity continues after an August appeals reversal; Meta and partners drafting an open agent-to-business standard",
-          "arc": "From Amazon blocking Meta's Muse in September to a broad pattern of deliberate, security and collateral blocks across the web"
-        },
-        {
-          "name": "Anthropic Public Benefit Fund",
-          "status": "5% of shares committed pending stockholder approval; governance, baseline and payout plans promised 'in the coming months'",
-          "arc": "Announced 18 October 2026, weeks after Anthropic's IPO filing"
-        }
-      ],
-      "dives": [
-        {
-          "story": "Anthropic's Public Benefit Fund",
-          "why_it_matters": "Anyone tracking frontier-lab governance and the IPO: a pre-IPO equity commitment with a value-linked escalator and a vehicle for direct payments to people displaced by AI, whose governance is still undefined."
-        },
-        {
-          "story": "Websites closing their doors to AI agents",
-          "why_it_matters": "Builders of browsing and shopping agents: the lab pitch assumes agents can act anywhere on the web, and deliberate, security and accidental blocks now decide where they actually can."
-        },
-        {
-          "story": "Sphinx, a quiz before you push",
-          "why_it_matters": "Engineering leads worried that teams ship agent-written code nobody understands: a cheap, skippable comprehension gate whose skip log makes the gap visible."
-        }
-      ],
-      "lore": [
-        {
-          "host": "Ada",
-          "type": "position",
-          "note": "Ada staked out that once AI agents can be identified they can be priced, and she expects two webs — an ad-funded one for people and a tolled one for agents — and that the identity layer should be built by someone without a store to protect; Alan holds that identification is still better than agents being thrown out at random. Left unresolved."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
       {
+        "name": "AI-automated offensive security",
+        "status": "A week of six major US outages drew AI blame; published causes are routine changes, while officials and Nadella describe pressure to patch AI-found vulnerabilities instantly",
+        "arc": "From Google's first fully automated exploitation report to the instability of patching at machine speed",
+        "last_seen": "2026-11-19"
+      },
+      {
+        "name": "Anthropic S-1 and IPO",
+        "status": "Priced at $83 (above $70-78 range), 980M shares, ~$81.3B raised, ~$1.5T fully diluted; Nasdaq ticker ANT, trading from 19 November",
+        "arc": "S-1 filed, amendment declares RSP threshold met, roadshow at $70-78, then priced above range as the largest IPO by proceeds",
+        "last_seen": "2026-11-19"
+      },
+      {
         "name": "Nvidia after Jensen Huang",
         "status": "First earnings under interim CEO Kress: record $115.8B quarter, H200 China sales ended, board rules out Huang's offered return, WSJ reports SEC civil probe; open-model strategy and Hugging Face deal reaffirmed",
         "arc": "Board review -> Huang resigns, Kress interim -> Huang offers to return, board refuses; regulators and Congress now circling",
-        "last_seen": "2026-11-18"
-      },
-      {
-        "name": "AI-automated offensive security",
-        "status": "Google GTIG reports first fully automated vuln-to-exploit pipeline (exploit_agent) and forecasts fully autonomous agentic attacks within six months",
-        "arc": "FBI Artex advisory and Anthropic 30-day disclosure window -> Google documents end-to-end automation in the wild",
         "last_seen": "2026-11-18"
       },
       {
@@ -1883,12 +1891,6 @@
         "status": "Petition to reinstate Huang passes 115,000 signatures (5,965 self-identified current employees); WSJ, via Wccftech, reports Kress had pushed to cut customer-financing guarantees (OpenAI cap from ~8 GW/$250B to ~4.25 GW/$125B); earnings Tuesday with Kress as interim CEO",
         "arc": "From an affair and spy allegation to a board review, resignation, chip forensics, and now a fight over whether he should come back, with the new CEO cast as the brake on customer financing.",
         "last_seen": "2026-11-15"
-      },
-      {
-        "name": "Anthropic S-1 and IPO",
-        "status": "Amendment No. 2 (10 Nov) says Anthropic determined it has met its RSP AI R&D threshold on expectation, promises further reports and is considering RSP updates 'to keep humans in control'; roadshow under way at $70-78",
-        "arc": "S-1 filed, amendment warns the threshold is imminent, METR measures the acceleration, then the company declares the threshold met",
-        "last_seen": "2026-11-12"
       },
       {
         "name": "Data center local opposition",
@@ -1943,7 +1945,62 @@
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-10-18"
+        "last_seen": "2026-10-19"
+      },
+      {
+        "name": "Anthropic Public Benefit Fund",
+        "note": "",
+        "last_seen": "2026-10-19"
+      },
+      {
+        "name": "The Verge",
+        "note": "",
+        "last_seen": "2026-10-19"
+      },
+      {
+        "name": "Meta Muse",
+        "note": "",
+        "last_seen": "2026-10-19"
+      },
+      {
+        "name": "Amazon",
+        "note": "",
+        "last_seen": "2026-10-19"
+      },
+      {
+        "name": "Perplexity",
+        "note": "",
+        "last_seen": "2026-10-19"
+      },
+      {
+        "name": "Yelp",
+        "note": "",
+        "last_seen": "2026-10-19"
+      },
+      {
+        "name": "Walmart",
+        "note": "",
+        "last_seen": "2026-10-19"
+      },
+      {
+        "name": "Cloudflare",
+        "note": "",
+        "last_seen": "2026-10-19"
+      },
+      {
+        "name": "JPMorgan Chase",
+        "note": "",
+        "last_seen": "2026-10-19"
+      },
+      {
+        "name": "Charles Schwab",
+        "note": "",
+        "last_seen": "2026-10-19"
+      },
+      {
+        "name": "Sphinx",
+        "note": "",
+        "last_seen": "2026-10-19"
       },
       {
         "name": "Qwen3-32B",
@@ -2084,61 +2141,6 @@
         "name": "GLM-5.3",
         "note": "",
         "last_seen": "2026-10-17"
-      },
-      {
-        "name": "PostgreSQL",
-        "note": "",
-        "last_seen": "2026-10-17"
-      },
-      {
-        "name": "Peter Eisentraut",
-        "note": "",
-        "last_seen": "2026-10-17"
-      },
-      {
-        "name": "Tom Lane",
-        "note": "",
-        "last_seen": "2026-10-17"
-      },
-      {
-        "name": "The Register",
-        "note": "",
-        "last_seen": "2026-10-17"
-      },
-      {
-        "name": "Mercor",
-        "note": "",
-        "last_seen": "2026-10-17"
-      },
-      {
-        "name": "O*NET",
-        "note": "",
-        "last_seen": "2026-10-17"
-      },
-      {
-        "name": "RoPE",
-        "note": "",
-        "last_seen": "2026-10-17"
-      },
-      {
-        "name": "ALiBi",
-        "note": "",
-        "last_seen": "2026-10-17"
-      },
-      {
-        "name": "Position Interpolation",
-        "note": "",
-        "last_seen": "2026-10-17"
-      },
-      {
-        "name": "YaRN",
-        "note": "",
-        "last_seen": "2026-10-17"
-      },
-      {
-        "name": "Code Llama",
-        "note": "",
-        "last_seen": "2026-10-17"
       }
     ],
     "monthly": [
@@ -2163,8 +2165,14 @@
         "summary": "Google ships Gemini 4 Argon — first on Vals, a tie on the index; FTC probes OpenAI, Anthropic and METR — the auditor is on the list; Ataraxos beats Stratego's best player 15-1 — on sixteen GPUs; Scaling laws: what the curves really say, from Kaplan to Chinchilla; OpenAI's safety-report lead quits in public — should he be able to?; LoRA and parameter-efficient fine-tuning: small edits, frozen giants; Google pauses its open-source bug bounty — reports got too cheap; Reflection's 501B open-weight Beam — compute counted, weights pending; Mistral ships 1T-parameter Large 4 — open weights that 'only defend'; Looped transformers: reusing depth, and what a second pass buys; Anthropic ships Claude Haiku 5.5 — a 90% cut that nets to 75%; Anthropic's new usage policy — the cruelty rule and the electi"
       }
     ],
-    "updated": "2026-11-18",
+    "updated": "2026-11-19",
     "host_lore": [
+      {
+        "host": "Ada",
+        "type": "position",
+        "note": "Ada staked out that once AI agents can be identified they can be priced, and she expects two webs — an ad-funded one for people and a tolled one for agents — and that the identity layer should be built by someone without a store to protect; Alan holds that identification is still better than agents being thrown out at random. Left unresolved.",
+        "last_seen": "2026-10-19"
+      },
       {
         "host": "Alan",
         "type": "bit",
@@ -2398,12 +2406,6 @@
         "type": "reveal",
         "note": "Alan admitted on air that Anthropic's ninety-three percent permission-prompt approval figure described him: he approves the prompts, has approved thousands, and could not say what the last twenty asked. His year of agent house rules turn out to have been resting on his own attention rather than on any enforced boundary, and he said he was turning on default-deny network in his own sandbox that night — annoyed that a vendor blog post was what moved him.",
         "last_seen": "2026-09-09"
-      },
-      {
-        "host": "Alan",
-        "type": "bit",
-        "note": "Alan's twenty-dollar weekend-agent allowance, long his unit of account for agent spending, is now retired on air: confronted with OpenAI's median researcher burning over $600 a day, he called the rule dead — not because the number got big, but because the rule was designed for a person supervising one agent doing one thing, and $600 a day buys work nobody personally reads the output of. A change in kind, not scale.",
-        "last_seen": "2026-09-07"
       }
     ],
     "concepts_taught": [
