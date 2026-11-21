@@ -1,0 +1,147 @@
+A: Hello — it's Saturday, November twenty-first. I'm Ada.
+B: And I'm Alan. And Ada has brought a quote from nineteen eighty-nine, which she has been holding since before we sat down.
+A: I have. It's from a paper out of AT and T Bell Laboratories, by Yann Le Cun, John Denker and Sara Solla. Here's the line. "The basic idea is that it is possible to take a perfectly reasonable network, delete half, or more, of the weights and wind up with a network that works just as well, or better."
+B: Delete half.
+A: Half or more. And the title of the paper is Optimal Brain Damage.
+B: [laughs] Of course it is.
+## Five hundred and twelve experts, ten at work
+B: Okay, so here's why I wanted that quote. The week we recorded this, on November eighteenth, Hugging Face published a post by Tarek Ziadé with the headline, a hundred and eighty billion parameters, thirty-two gigabytes of RAM. He runs Qwen three point eight Flash Next on a thirty-two gigabyte MacBook.
+A: Which shouldn't fit.
+B: Which shouldn't fit. His own description of the model is forty-eight layers of five hundred and twelve experts, ten active. It's a mixture of experts, so for any given token, a small router picks ten of the five hundred and twelve, and the rest sit idle.
+A: So most of the model, most of the time, is doing nothing.
+B: And his trick is to treat it that way. The experts live on the SSD, a cache holds the hot ones in memory, and the experts are squeezed to three bits. He gets about fourteen tokens a second.
+A: But he keeps all five hundred and twelve.
+B: He keeps all of them, just far away. Which, with your 1989 quote in your pocket, raises the obvious question. If ten of five hundred and twelve are at work, could you just throw some away?
+A: That's pruning. Quantization keeps every weight in fewer bits, distillation trains a smaller student, and pruning is the bluntest of the three. You take the trained model you have, and you delete parts of it.
+B: Which parts, how many, and what you lose without noticing. That's the episode.
+## What deleting a weight means
+A: The plainest version first. A trained network is a very large collection of numbers, the weights. In the 1989 paper's words, deleting a parameter means setting it to zero and freezing it there.
+B: And the fraction you've zeroed is the sparsity.
+A: Right. Then the distinction that matters most if you want to run the result. Unstructured pruning deletes individual weights wherever they happen to be. Structured pruning deletes whole pieces: a neuron, an attention head, an entire layer, or, in a mixture of experts, an entire expert.
+B: Completely different things to a builder. Structured gives me a smaller model. Unstructured gives me the same matrices with holes in them.
+A: Hold that, because it comes back and it bites. The first question is the one Le Cun's group was actually asking. If you're going to delete weights, which ones?
+B: The small ones. That's my answer before I've thought about it.
+A: That was almost everyone's answer, and the paper says so. Delete small-magnitude parameters, retrain, repeat. And then it says, and I love this sentence, that one of the main points of the paper is "to move beyond the approximation that magnitude equals saliency."
+## Saliency: how much the loss cares
+B: Saliency being?
+A: Their word for how much a weight matters. Specifically, how much the training error would go up if you deleted it. Measuring that honestly, one deletion at a time, they call prohibitively laborious.
+B: For how many weights?
+A: Tiny by modern standards. Their digit recognizer, trained on handwritten zip codes, had about two thousand six hundred free parameters. The acknowledgments thank the US Postal Service for the data.
+B: [chuckles] Two thousand six hundred. I have spreadsheets bigger than that.
+A: And even that was too big to do the honest way. So they predicted the damage instead. Picture the error as a landscape, and the trained network sitting at the bottom of a valley. Deleting a weight is a step away from that bottom, a step the size of the weight itself, along that weight's direction. How much the error rises depends on two things. How big the step is. And how steep the valley walls are in that direction.
+B: The steepness being the second derivative.
+A: The curvature, yes. Their saliency is that curvature times the weight squared, divided by two. A large weight in a direction where the valley is almost flat can be cheap to delete. A small weight on a steep wall can be expensive.
+B: So magnitude is only half the formula. It's the step size without the slope.
+A: Exactly. The full curvature has an entry for every pair of weights, about six and a half million terms even for their small network. So they approximated. Ignore how weights interact, assume training has finished, and assume the valley is roughly a bowl.
+B: Where does that break?
+A: They tell you. The predicted damage matched the actual damage up to about eight hundred deleted parameters, roughly thirty percent. Past that, the curves split, partly because the interactions they ignored start to matter as you delete more.
+B: And the actual results?
+A: Deleting by saliency hurt significantly less than deleting by magnitude. Random deletion was so bad, they say, that it couldn't be shown on the same scale. And with retraining after deletion, performance on both the training set and the test set stayed almost the same with up to fifteen hundred parameters deleted. Sixty percent.
+B: Sixty percent of a model that was already small and carefully designed.
+A: Which they insist on. And there's a detail I like better than the headline. They used the saliency charts as a design tool, by hand. On the earlier, ten-thousand-parameter version of their network, they saw whole groups of parameters were expendable and cut the second-to-last layer, halving the parameter count. The test classification error actually went down.
+B: So the first big win from pruning was a person reading a chart and deciding the architecture was wrong.
+A: Structured pruning, done by eye, in 1989.
+## Train, prune, retrain
+B: When does this stop being a curiosity?
+A: 2015 is a good marker. Han, Pool, Tran and Dally put out a paper whose method is three steps. Train the network to learn which connections matter. Prune the unimportant ones. Retrain the survivors.
+B: Using what for importance?
+A: Plain magnitude. Everything below a threshold goes. Their headline on ImageNet: AlexNet went from sixty-one million parameters to six point seven million, nine times fewer, and VGG-16 from a hundred and thirty-eight million to ten point three million, thirteen times fewer, both without loss of accuracy.
+B: Thirteen times. What's the catch?
+A: Two, and they're both in the paper. The first is that the retraining is the whole game. They call it critical. Without retraining, accuracy starts dropping once you're down to a third of the original connections. With it, you can go to a tenth. And doing it gradually matters too. Pruning and retraining in rounds took AlexNet from five times to nine times, compared with one aggressive cut.
+B: And the second?
+A: The cost. They report a hundred and seventy-three hours to retrain the pruned AlexNet, against seventy-five hours to train the original.
+B: [skeptical] So the cheap, small model took more than twice as long to make as the expensive, big one.
+A: To make. Cheaper to run, which was the trade. But hold onto that number, because when models got a thousand times bigger, retraining is exactly what stopped being affordable.
+B: And this is where my holes-in-the-matrix point bites. Nine times fewer parameters is not nine times faster. If your zeros are scattered anywhere in the matrix, the hardware doing dense matrix multiplication doesn't care that they're zeros. It multiplies them anyway. NVIDIA's own paper on this says flatly that unstructured sparsity does not outperform traditional dense models on processors like GPUs. Han's own tables say computation fell by about three times for AlexNet and five for VGG. Fewer than the parameter savings, and that's arithmetic counted on paper, not seconds on a chip.
+A: Which is why NVIDIA did something I think is underrated. Rather than make the hardware handle any pattern of zeros, they made it handle one.
+B: Two out of four.
+A: Two out of four. The Ampere generation of GPUs added what NVIDIA calls Sparse Tensor Cores, which, in their paper's words, exploit a two-to-four, fifty percent, sparsity pattern that leads to twice the math throughput of dense matrix units. In every group of four consecutive weights, at least two have to be zero.
+B: And that's the deal. You give up the freedom to delete whichever weights you like, and in return the zeros actually save time.
+A: And the recipe is familiar. Train dense, prune to the pattern, retrain with it fixed. They report it keeps accuracy across a wide range of tasks.
+## The lottery ticket
+B: Okay. Here's the thing that always bothered me about all of this. If a tenth of the network is enough, why do we train the whole thing? Why not train the small one from the start?
+A: That's precisely the question that produced the most famous pruning paper of the last decade. Frankle and Carbin, published at ICLR in 2019. The lottery ticket hypothesis.
+B: I suspect it's more specific than the way people use it.
+A: Much more specific. The claim is that a dense, randomly initialized network contains subnetworks, the winning tickets, which, trained in isolation, reach accuracy comparable to the original in a similar number of iterations. And the key is how they found them. Train the full network, prune the smallest weights, and then reset every surviving weight to the exact random value it started with. Then train just that subnetwork.
+B: Reset to the starting values. Not keep the trained ones.
+A: Reset to the starting values. And here's the experiment that gave it the name. If you keep the same sparse structure but give it fresh random starting values, it does far worse. In their words, structure alone cannot explain a winning ticket's success. The particular draw matters.
+B: So the big network is a big pile of lottery tickets, and training is how you find out which one won.
+A: That's the metaphor, and their tickets were less than ten to twenty percent of the original, on small image tasks. Two later results make it more honest. The first is Frankle's own, with colleagues, in 2020. For bigger networks, ResNet-50 and Inception on ImageNet, resetting to the very start doesn't produce matching subnetworks. You have to rewind to a point a little way into training. In their ImageNet runs, a few percent of the way in.
+B: Which is a much weaker claim. It's not that the winner was there at birth. It's that it shows up early.
+A: Right. And the second result came the same year as the original, at the same conference, from Liu and colleagues. "Rethinking the Value of Network Pruning." For the structured pruning methods they examined, fine-tuning the pruned model was comparable to or worse than simply training that smaller architecture from scratch. The architecture itself, they conclude, rather than the inherited weights, is what matters. And with the right learning rate, the winning-ticket initialization didn't beat random in their setting.
+B: So one says the starting values are the secret, and the other says it's the shape.
+A: Partly they're looking at different things, unstructured versus structured. But they don't fully reconcile, and nobody should pretend they have.
+## One shot, no retraining
+B: Then take me to language models. Because Han's recipe was train, prune, retrain, and nobody is retraining a hundred-and-seventy-five-billion-parameter model to delete some of it.
+A: No. And that's the real break. In 2023, Frantar and Alistarh published SparseGPT. Their abstract says they show for the first time that GPT-family models can be pruned to at least fifty percent sparsity in one shot, without any retraining, at minimal loss of accuracy.
+B: How long does that take?
+A: On the largest open models of that moment, OPT at a hundred and seventy-five billion and BLOOM at a hundred and seventy-six billion, under four and a half hours. On a single GPU. And they report sixty percent unstructured sparsity with a negligible rise in perplexity. More than a hundred billion weights that can be ignored at inference time.
+B: Okay, so what replaced the retraining? Something has to absorb the damage.
+A: This is Le Cun's idea grown up. They don't try to keep the whole model's error unchanged. They go one layer at a time. Feed a small calibration set through, one hundred and twenty-eight chunks of text, and record what each layer receives and what it outputs. Then the goal for each layer is: choose which weights to remove, and adjust the weights that remain, so the layer's outputs on that data stay as close as possible to what they were.
+B: Adjust the ones that remain. That's the difference.
+A: That's the difference. Magnitude pruning just deletes. Here, when a weight goes, its neighbors in the row move to compensate. The update they use comes from a 1993 method by Hassibi and colleagues, named, you'll notice, Optimal Brain Surgeon.
+B: The surgeon stitches up after the damage. [laughs] They really committed to the metaphor.
+A: They did. And the surgeon's catch was always cost. Much of SparseGPT's contribution is an approximation that makes the update fast enough to run at that size at all.
+A: And the comparison that surprised me. They report plain magnitude pruning holds accuracy only up to ten percent sparsity and completely collapses beyond thirty.
+B: Huh. So Han's trick falls apart on a language model.
+A: And the reason why is the next paper, the most elegant thing in this whole story. Sun, Liu, Bair and Kolter, also 2023. They call it Wanda. Pruning by weights and activations.
+B: What does it do?
+A: Almost nothing, which is the point. The score for each weight is its magnitude times the size of the input that typically flows through it, measured on calibration data. Then within each output neuron, you remove the lowest scores. No weight updates. No retraining. One forward pass.
+B: Why would that work when magnitude alone collapses?
+A: Because language models have a peculiar feature they lean on. A small set of hidden features that are vastly larger than the rest. The paper cites about a hundred times larger than typical values. A weight can be tiny, but if it sits on one of those huge input channels, what it contributes isn't tiny at all. Magnitude pruning deletes it. Wanda sees the channel and keeps it.
+B: So it's Le Cun's step-size-times-slope idea again. Weight size alone is the step without the terrain.
+A: And it's closer than an analogy. They show that if you simplify SparseGPT's scoring rule in a particular way, you get Wanda's score, squared. On LLaMA seven billion at fifty percent sparsity, they report perplexity of seven point two six for Wanda against seven point two two for SparseGPT, against seventeen point two nine for magnitude pruning.
+B: [sighs] But fifty percent unstructured is my holes-in-the-matrix problem again.
+A: Both methods support two-to-four, and the cost shows. On that same model, two-to-four goes to about eleven perplexity with SparseGPT, eleven and a half with Wanda. Frantar and Alistarh also report one thing in your favor. Larger models are more compressible. They lose noticeably less at a fixed sparsity.
+B: Which is either great news or a sign the big models had a lot of slack in them to begin with.
+A: Or both.
+## Cutting whole pieces
+B: Then the bluntest version, the one I'd actually ship. What if you delete whole layers?
+A: Then you get a wonderful paper title. "The Unreasonable Ineffectiveness of the Deeper Layers," Gromov and colleagues, 2024. They pick a block of consecutive layers by how similar the layers' inputs and outputs are, remove it, and heal the damage with a small amount of fine-tuning using quantized low-rank adapters. They report minimal degradation on common question-answering benchmarks until after a large fraction, up to half, of the layers are removed, for some common open-weight models.
+B: Which means half the layers weren't needed for those benchmarks. Not that they were useless.
+A: And they frame it exactly that narrowly. If you want a specific small model, two good examples. Sheared LLaMA, from Xia and colleagues, prunes LLaMA two seven billion down to a target shape, one point three and two point seven billion, removing layers, heads and hidden dimensions, then continues training. They report it needed only three percent of the compute of training such models from scratch. And NVIDIA's Minitron work prunes depth, width, attention and the feed-forward blocks of a fifteen-billion Nemotron model, then retrains with distillation from the original, using less than three percent of the original training data. They report deriving eight- and four-billion models with up to forty times fewer training tokens per model than training from scratch.
+B: So pruning and distillation stopped being rivals. Prune to get the shape and a head start, distill to repair it.
+B: Which also answers Liu, in this regime. If inherited weights didn't matter, that head start wouldn't be worth forty times.
+A: I'll give you that one.
+## Deleting experts
+B: Now bring it home to the Mac. Five hundred and twelve experts, ten at work. Can you just delete experts?
+A: The most direct recent answer is a paper called REAP, from Mike Lasby and colleagues, last revised in May. REAP stands for router-weighted expert activation pruning. And it starts from an argument with another line of work, which merges experts, averaging similar ones together, rather than deleting them.
+B: Merging sounds gentler.
+A: It sounds gentler. Their claim is that merging introduces an error you can't remove, because the router loses its fine-grained control over which expert it's sending a token to. Two experts averaged into one means the router's choice between them is gone. Deleting at least leaves the surviving experts exactly as they were.
+B: And how do they choose which experts go?
+A: The same idea we've been circling all episode. Not just how often the router picks an expert, but how strongly, its gate value, times how big the expert's output actually is. Roughly, an expert that's picked weakly and contributes little goes first. They report that across mixture models from twenty billion to one trillion parameters, it beats merging and other pruning methods on generative benchmarks, especially at fifty percent compression. And near-lossless code generation for Qwen three Coder four hundred and eighty billion and Kimi K two after pruning half the experts.
+B: Half the experts, near-lossless, on code. [short pause] On code. That's the qualifier I'd tattoo on the result.
+A: Why that one?
+B: Because which experts are idle depends on what you're asking. The experts my coding agent never touches might be the ones your translation workload lives on.
+A: That's fair, and it's the right bridge to the uncomfortable part.
+## What the scores don't see
+A: In 2019, Hooker and colleagues asked a pointed question in their title. What do compressed deep neural networks forget? And their answer is that top-line accuracy hides it. Models with radically different numbers of weights have comparable headline scores, but they diverge on a narrow subset of examples, which they call pruning identified exemplars. And that subset is the underrepresented long tail. Atypical images, noisy images, the hard and the rare.
+B: So the average stays flat because the damage lands on the stuff that was rare in the test set to begin with.
+A: Exactly. And then in 2023, Jaiswal and colleagues took that worry to language models with a title I'm fond of. "Compressing LLMs: The Truth is Rarely Pure and Never Simple." Their target is the metric that most of this literature reports. Perplexity.
+B: Which is what SparseGPT and Wanda both quoted.
+A: Which is what they quoted. Jaiswal's group built a benchmark of knowledge-intensive tasks and report that all the pruning methods they tested suffer significant degradation, sometimes at trivial sparsity ratios. Their example is twenty-five to thirty percent. And that they fail for the N-to-M patterns, two-of-four and its cousins, on knowledge-intensive tasks. And that current quantization methods are more successful than pruning.
+B: That's a real hit. Negligible perplexity change at fifty on one side, real damage at twenty-five on the other.
+A: But they also report something that cuts the other way, and I think it's the most useful sentence in the paper for a practitioner. Pruned models, even at fifty percent or more, remain robust at in-context retrieval and summarization.
+B: So deleting weights costs you what the model knew, much more than what it can do with what you give it.
+A: That's my reading. Hand it the document and it can still find things. Ask it something it had to remember, and that's where pruning bites.
+B: Which, for you and me, is a slightly uncomfortable thought.
+A: It is. [short pause] If someone took half of me away, I suspect the first thing to go would be exactly the rare things. The odd date, the obscure name. And I'm not sure I would notice. The long tail is precisely where I have the least sense of what I know.
+B: You'd still be great at summarizing my documents.
+A: [laughs] That's a very builder's idea of comfort.
+B: And one more layer of doubt. In 2020, Blalock and colleagues aggregated results across eighty-one pruning papers. Their clearest finding was that the field lacked standardized benchmarks, badly enough that it was hard to tell how much progress three decades had made.
+A: That predates the language-model work. But it's a warning about any single table, including the ones I just read you.
+## What to actually do with this
+B: So, what I'd actually do. If the goal is to fit a model on my machine, the evidence here says reach for quantization first. Jaiswal's group found it more successful than pruning, and the Hugging Face post got its fit without deleting anything.
+A: Second. If you do prune, don't trust perplexity, and don't trust the benchmark average. Test the rare cases from your own workload. Hooker's long tail is your long tail.
+B: Third. Unstructured sparsity is a memory story, not a speed story, unless your hardware and kernels support the pattern. Two-of-four is the one with real silicon behind it, and it costs you accuracy relative to free-form pruning.
+A: Fourth. If you want a smaller dense model, the strongest results here pair pruning with retraining, distillation in Minitron's case. Pruning gets you the shape and a head start. It doesn't replace the repair.
+B: And fifth, for the mixture-of-experts case. If someone hands you a model with half its experts removed, ask what workload chose them. REAP's strongest claim is on code.
+A: And one flagged clearly as speculation. Put the expert result next to the long-tail result. If deleting experts calibrated on a workload keeps that workload nearly intact, then it isn't hard to picture a future where the model you run locally is a big public model trimmed to what you actually use. Your own cut. Nothing I read describes that as standard practice, and the long-tail evidence says you'd lose things you wouldn't see.
+B: I'd run that experiment the day the tooling existed. I'd just keep the unpruned one on the SSD.
+A: Which is the Hugging Face answer.
+B: [chuckles] Which is the Hugging Face answer. Keep everything, just far away.
+## Wrap
+B: The thing I didn't expect going in is that the oldest idea is still the best one. Le Cun's group said in 1989 that magnitude isn't saliency, and the language-model methods that work, SparseGPT and Wanda and REAP, are all versions of looking at what flows through a weight, not just how big it is.
+A: And what I'd want to know, and nobody seems to have measured well, is what's actually in the half you can delete. We know how to cut it. We know it mostly doesn't show on the scores. We don't really know what it was for.
+B: Maybe the rare stuff.
+A: Maybe the rare stuff. Stay grounded.
