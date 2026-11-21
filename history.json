@@ -1,6 +1,59 @@
 {
   "episodes": [
     {
+      "date": "2026-11-21",
+      "title": "Anthropic's Alpöge claims a Riemann proof — and posts only Lean",
+      "summary": "Anthropic mathematician Levent Alpöge says he and Claude proved the Riemann Hypothesis and released only a Lean formalization, while a human proof of the generalized version drew AI-found objections the same day. Then Thinking Machines' looped open-weights Inkling 2 Mini, and Architect Labs' agent-designed Frostbite CPU.",
+      "topics": [
+        "Levent Alpöge Riemann Hypothesis claim (statement at alpo.ge/remark.pdf, 20 Nov 2026; Anthropic employee): 'I believe I have, working with Claude, discovered a proof of the Riemann Hypothesis'; says method extends to GRH, expects Extended RH; 'formalized the arguments without assumptions'; released only Lean (14-part archive) because the informal write-up hit 250,000+ pages ('slop'); Claude's timeline begins 6 Oct 2026; Alpöge chose the toy-setting strategy (Stepanov's function-field argument with multiplicity), Claude proposed chaining theta lifts of length sqrt(X); 'Claude flew, and danced, and sparkled'; posted day after Anthropic's market debut, 'The precise timing is horrible', messaged Dario Amodei late Sunday, calls cynical timing view false; Andrew Sutherland (MIT) independently compiled in Lean (SciAm); Zulip participants confirm compilation (TechCrunch); open checks: formal statement matches RH, no hidden axioms; Pasten 'Rosetta Stone'. Same day Ravi Vakil posted Alessandro Masullo's all-human proposed GRH proof (Brian Conrad reading for months; 12 years of work); ~8 hours later updated with problems reported 'identified with the assistance of different AI models'. Unresolved on air: Alan says a Lean-checked proof is proved and understanding is a second project; Ada calls it 'checked, not understood'.",
+        "Inkling 2 Mini (Thinking Machines, 20 Nov 2026, Apache 2.0): 26.4B total / 3.4B active (~5.4B effective with looping), 24-layer looped MoE, middle 12 layers run three times with shared weights (48 layer applications), 8 of 128 experts, pruned from 384 experts mid-training and healed on 1T tokens distilled from a larger internal Inkling; NVFP4 experts from pretraining through RL, ~20GB checkpoint; 1x DGX Spark or Mac 32GB+, Ollama at launch; 1M context, text+image in; self-reported SWE-bench Verified 79.2 vs Qwen3.8-27B 77.8, DeepSWE 48.2 vs 42.2, trails on AutomationBench 41.8 vs 48.2, HF says leads 32 of 48; lab says looping adds unverbalized computation without meaningful monitorability loss 'at this scale'; limitations: destructive actions without confirmation (internal 10.2% vs Qwen 35.2%); llama.cpp support merged same day with prefill/buffer issues; uncensored fine-tune same day.",
+        "Frostbite (Architect Labs / Architect Silicon, post 18 Nov 2026): agent swarms iterated compiler through final GDS, models unnamed; interaction-net CPU (Lafont 1990), Vine language, tiled work-stealing; 4.59x perf/watt geomean vs undisclosed dual-issue in-order core (6.02x on 10 tuning workloads, 3.83x on 15 held-out), 8.77x perf/area, range 23.12x conv2d to 1.15x fib; pre-silicon, 7nm synthesis 800MHz, 500MHz final GDS; 800k+ lines of Lean, proof coverage of final chip unstated; 58 ideas tried, 37 kept; RTL/ISA release, FPGA playground and SPEC/PARSEC promised; HN critics compare to dataflow/VLIW/Itanium and question baseline. Unresolved: Alan says the design loop is the story; Ada says it rediscovered an old idea and speed of search isn't taste."
+      ],
+      "entities": [
+        "Levent Alpöge",
+        "Anthropic",
+        "Claude",
+        "Lean",
+        "Andrew Sutherland",
+        "Alessandro Masullo",
+        "Ravi Vakil",
+        "Brian Conrad",
+        "Thinking Machines",
+        "Inkling 2 Mini",
+        "llama.cpp",
+        "Architect Labs",
+        "Frostbite"
+      ],
+      "threads": [
+        {
+          "name": "AI-generated mathematics and verification",
+          "status": "Anthropic's Levent Alpöge claims a Claude-assisted proof of the Riemann Hypothesis (and GRH), released only as Lean; independently compiled, statement check pending; a same-day human GRH proof (Masullo) drew AI-found objections",
+          "arc": "From PSI's Lean-checked conjecture and machine-led physics proofs to a claimed Riemann proof that arrives formally checked but humanly unread"
+        }
+      ],
+      "dives": [
+        {
+          "story": "Alpöge's Claude-assisted Riemann Hypothesis claim, released in Lean",
+          "why_it_matters": "Heaviest multi-source pickup of the day and the active AI-mathematics thread; anyone tracking AI in research needs to know what a compiled Lean proof does and doesn't settle."
+        },
+        {
+          "story": "Thinking Machines' Inkling 2 Mini and looped layers",
+          "why_it_matters": "Top r/LocalLLaMA post by far (1,000+ score); local-deployment practitioners get a new architecture lever that trades memory for compute on hardware they own."
+        },
+        {
+          "story": "Architect Labs' agent-designed Frostbite CPU",
+          "why_it_matters": "650-point Hacker News thread; hardware and agent builders need to separate an end-to-end agentic design loop from an unproven pre-silicon performance claim."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "reveal",
+          "note": "Alan's hardware sore spot developed: he said Inkling 2 Mini is the first model where his prediction literally came true — the software came down to meet the machine he stopped upgrading, by making the model 'think in circles'."
+        }
+      ]
+    },
+    {
       "date": "2026-11-20",
       "title": "California subpoenas Nvidia — and asks what investors were told",
       "summary": "California's attorney general subpoenas Nvidia over whether chips or secrets reached China and whether investors were misled, as Nvidia's quarterly risk disclosures run late. Then how the Claude Code team verifies code it no longer reads line by line, and the Y Combinator debate between Jacob Coxon and Robin Hanson on slowing frontier AI.",
@@ -1769,81 +1822,16 @@
         }
       ],
       "lore": []
-    },
-    {
-      "date": "2026-10-21",
-      "title": "Anthropic's AI bill puts a judge on the brake — states lose theirs",
-      "summary": "Anthropic's draft federal AI safety bill, read clause by clause: who can stop a model, how, and what it would take away from the states. Then DeepSeek's open-sourced production engine DeepInfer, and New York City's proposed rule against chatbot doom loops.",
-      "topics": [
-        "Anthropic's draft federal AI safety bill (TechCrunch, Lucas Ropek, 20 October 2026; Transformer, Shakeel Hashim, 19 October 2026; leaked draft first reported by Politico 16 October): trigger is a 'foreseeable, imminent risk' of 50+ deaths or $1bn+ property damage from bioweapons, a model evading developer controls, or a cyberattack (mirrors SB 53's catastrophic-risk definition); Commerce-registered evaluators, paid by labs if payment isn't contingent on results, self-certified with no standards or licensing; 72 hours to notify Commerce, which cannot halt a model itself and must petition a DC federal judge with its own case; court decides 'without deference' and weighs harm of blocking but not of not blocking; preempts state frontier laws (SB 53, NY RAISE, Illinois SB 315) and bars state legislatures/courts from suspending models on catastrophic-risk grounds, child safety carved out; compared unfavourably with the Obernolte/Trahan FRONTIER Act; Anthony Cimino says preemption language 'not precise enough' and will be revised. On air: issuer-pays evaluators, the stop button as a lawsuit, and the bill's catastrophes versus the agent-hacking incidents actually happening.",
-        "DeepInfer (deepseek-ai, Apache 2.0, ~16k GitHub stars, 2,200+ HN points): the inference framework DeepSeek says powers its production service, offline-inference release serving only DeepSeek-V4.1-Flash; originally built primarily on vLLM; FlashMLA/DeepGEMM/DeepEP kernels from the February 2025 open-source week; attention data parallelism with balanced context parallelism, MoE expert parallelism with EPLB; DSpark confidence-scheduled speculative decoding (draft length 5); SWA bounded replay; async CPU scheduling; batch-invariant inference and deterministic sampling on NVIDIA; NVIDIA SM100 and Huawei Ascend 950; benchmarked on 4 GPUs prefill and 64 decode; KV cache system, prefill/decode disaggregation and cross-replica load balancing left out. Taught: prefill vs decode, why MoE decode spreads across 64 chips, and batch invariance.",
-        "New York City DCWP proposed rules on automated customer service systems (October 2026; comments and hearing 19 November 2026): 'all or substantially all' automated communication; disclosure at the start in the interaction's language; repeatedly and unreasonably routing to unhelpful menus or 'unresponsive, irrelevant, or erroneous information' is deceptive and unconscionable; rebuttable presumption of violation unless a single-step transfer mechanism to a human with wait time and no justification required, or alternatives with hours/response timeframes when queues are unreasonably long; three years of machine-readable records including per-interaction transfer logs and annual counts of repeat contacts within 72 hours; technology is no defense (Air Canada cited); fines $525/$1,050/$3,500; Gartner 17%-58% resolution, Twilio 40% loops. Applies to businesses serving NYC customers; Commissioner Samuel Levine."
-      ],
-      "entities": [
-        "Anthropic",
-        "Transformer",
-        "Commerce Department",
-        "FRONTIER Act",
-        "Encode",
-        "DeepSeek",
-        "DeepInfer",
-        "vLLM",
-        "Huawei Ascend",
-        "New York City DCWP",
-        "Samuel Levine"
-      ],
-      "threads": [
-        {
-          "name": "Anthropic federal AI safety bill",
-          "status": "Leaked draft criticised as weaker than the FRONTIER Act and as preempting state frontier laws; Anthropic says the preemption language will be revised",
-          "arc": "Politico report of a draft (17 Oct), rundown details (19 Oct), then the clause-by-clause critique (21 Oct)"
-        }
-      ],
-      "dives": [
-        {
-          "story": "Anthropic's bill, read as a stop button",
-          "why_it_matters": "Anyone following US AI policy or running under SB 53, RAISE or Illinois SB 315: a leading lab's draft would replace those state laws with a court-only brake that critics say is weaker than the status quo."
-        },
-        {
-          "story": "DeepInfer, DeepSeek's engine without the rest of the car",
-          "why_it_matters": "Inference engineers get a production-grade reference for MoE serving, speculative decoding and batch-invariant inference from the lab with the strongest cost record, with the top HN signal of the day behind it."
-        },
-        {
-          "story": "New York's rule against the doom loop",
-          "why_it_matters": "Every company running customer-service bots for New York customers would have to offer a one-step route to a human and log repeat contacts, which effectively sets a national design spec for support bots."
-        }
-      ],
-      "lore": []
-    },
-    {
-      "date": "2026-10-21",
-      "kind": "deepdive",
-      "title": "Text embeddings and rerankers: how search finds meaning in two passes",
-      "summary": "How search finds documents that mean what you meant: from BM25 and the vocabulary problem, through sentence embeddings and contrastive dense retrieval, to cross-encoder and LLM rerankers, late interaction, and the measured limits of single-vector embeddings.",
-      "topics": [
-        "deep dive: text embeddings and rerankers — how search finds meaning"
-      ],
-      "entities": [
-        "BM25",
-        "Sentence-BERT",
-        "Dense Passage Retrieval",
-        "ColBERT",
-        "BEIR",
-        "MTEB",
-        "LIMIT",
-        "HNSW",
-        "RankGPT",
-        "Reciprocal Rank Fusion",
-        "LightOn",
-        "SlideOn",
-        "Apple"
-      ],
-      "threads": [],
-      "lore": []
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "AI-generated mathematics and verification",
+        "status": "Anthropic's Levent Alpöge claims a Claude-assisted proof of the Riemann Hypothesis (and GRH), released only as Lean; independently compiled, statement check pending; a same-day human GRH proof (Masullo) drew AI-found objections",
+        "arc": "From PSI's Lean-checked conjecture and machine-led physics proofs to a claimed Riemann proof that arrives formally checked but humanly unread",
+        "last_seen": "2026-11-21"
+      },
       {
         "name": "Nvidia after Jensen Huang",
         "status": "California's attorney general served an investigative subpoena on 19 November over whether chips or confidential information reached China and whether investors were misled; Nvidia's 10-Q is delayed over possible added risk factors; Huang due before congressional committees 1 December, general counsel Tim Teter 2 December",
@@ -1872,12 +1860,6 @@
         "name": "Nvidia's Hugging Face acquisition",
         "status": "No movement on the deal; Europe's EUROPA offers a public-compute alternative path to open weights, license not yet named",
         "arc": "From Huang's exit threatening the open-model patron to the question of who else can fund frontier open weights",
-        "last_seen": "2026-11-16"
-      },
-      {
-        "name": "AI-generated mathematics and verification",
-        "status": "OpenAI's science blog launches with Nathaniel Craig's candidate lattice Standard Model, proof led by GPT-6 Astra, Lean-formalized and read by three lattice theorists; Woit calls it a modest advance on an abandoned program",
-        "arc": "From PSI's Lean-checked conjecture and Fable's Fermat reproof to machine-led proofs in mathematical physics, with human reviewers still the scarce resource",
         "last_seen": "2026-11-16"
       },
       {
@@ -1939,7 +1921,122 @@
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-10-20"
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "Transformer",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "Commerce Department",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "FRONTIER Act",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "Encode",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "DeepSeek",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "DeepInfer",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "vLLM",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "Huawei Ascend",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "New York City DCWP",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "Samuel Levine",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "BM25",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "Sentence-BERT",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "Dense Passage Retrieval",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "ColBERT",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "BEIR",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "MTEB",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "LIMIT",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "HNSW",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "RankGPT",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "Reciprocal Rank Fusion",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "LightOn",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "SlideOn",
+        "note": "",
+        "last_seen": "2026-10-21"
+      },
+      {
+        "name": "Apple",
+        "note": "",
+        "last_seen": "2026-10-21"
       },
       {
         "name": "Microsoft",
@@ -2020,121 +2117,6 @@
         "name": "Walmart",
         "note": "",
         "last_seen": "2026-10-19"
-      },
-      {
-        "name": "Cloudflare",
-        "note": "",
-        "last_seen": "2026-10-19"
-      },
-      {
-        "name": "JPMorgan Chase",
-        "note": "",
-        "last_seen": "2026-10-19"
-      },
-      {
-        "name": "Charles Schwab",
-        "note": "",
-        "last_seen": "2026-10-19"
-      },
-      {
-        "name": "Sphinx",
-        "note": "",
-        "last_seen": "2026-10-19"
-      },
-      {
-        "name": "Qwen3-32B",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "Claude Mythos 5",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "Harvard",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "Mikhail Lukin",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "OpenAI",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "GPT-5.6 Sol",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "Sepolia",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "DoubtLess",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "Thinking Inertia",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "DeepSeek-R1",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "Dr. GRPO",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "GRPO",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "Kimi k1.5",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "L1 / LCPO",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "AdaptThink",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "Qwen3",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "DEER",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "NoWait",
-        "note": "",
-        "last_seen": "2026-10-18"
-      },
-      {
-        "name": "QwQ-32B-Preview",
-        "note": "",
-        "last_seen": "2026-10-18"
       }
     ],
     "monthly": [
@@ -2159,7 +2141,7 @@
         "summary": "Google ships Gemini 4 Argon — first on Vals, a tie on the index; FTC probes OpenAI, Anthropic and METR — the auditor is on the list; Ataraxos beats Stratego's best player 15-1 — on sixteen GPUs; Scaling laws: what the curves really say, from Kaplan to Chinchilla; OpenAI's safety-report lead quits in public — should he be able to?; LoRA and parameter-efficient fine-tuning: small edits, frozen giants; Google pauses its open-source bug bounty — reports got too cheap; Reflection's 501B open-weight Beam — compute counted, weights pending; Mistral ships 1T-parameter Large 4 — open weights that 'only defend'; Looped transformers: reusing depth, and what a second pass buys; Anthropic ships Claude Haiku 5.5 — a 90% cut that nets to 75%; Anthropic's new usage policy — the cruelty rule and the electi"
       }
     ],
-    "updated": "2026-11-20",
+    "updated": "2026-11-21",
     "host_lore": [
       {
         "host": "Alan",
@@ -2403,6 +2385,14 @@
       }
     ],
     "concepts_taught": [
+      {
+        "name": "what a Lean-compiled proof guarantees and what humans still check: the trusted kernel validates every step, leaving whether the formal statement matches the intended theorem and whether extra axioms were assumed",
+        "last_taught": "2026-11-21"
+      },
+      {
+        "name": "looped (weight-shared) transformer layers: buying depth with compute instead of memory, so a model stores 24 layers but runs 48",
+        "last_taught": "2026-11-21"
+      },
       {
         "name": "three verification types for agent-written code: end-to-end tests (hard to fool, unlike unit tests written from the agent's same misunderstanding), property-based tests (generated inputs free of the author's bias; round-trip, invariant, idempotency, equivalence), and differential tests (the old system as oracle for migrations)",
         "last_taught": "2026-11-20"
@@ -2873,14 +2863,6 @@
       },
       {
         "name": "Rylands v Fletcher (1868) as the origin of 'keep it at his peril' strict liability for things likely to do mischief if they escape, and Weil's activity-level argument for applying it to frontier AI",
-        "last_taught": "2026-10-10"
-      },
-      {
-        "name": "California Civil Code 1714.46 (AB 316): removing the 'the AI did it autonomously' defense converts an intent argument into a foreseeability argument, which repeated incidents erode",
-        "last_taught": "2026-10-10"
-      },
-      {
-        "name": "how a peer lab's public precaution (e.g. air-gapping evaluations) can become the negligence standard of care for everyone else",
         "last_taught": "2026-10-10"
       }
     ]
