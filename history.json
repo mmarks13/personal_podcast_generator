@@ -54,6 +54,34 @@
       "lore": []
     },
     {
+      "date": "2026-11-25",
+      "kind": "deepdive",
+      "title": "Staged rollouts: shipping a change without taking everything down",
+      "summary": "Ada and Alan teach how to ship code, configuration, data and model changes without a global outage: canaries against a live control, waves and bake time, two-phase changes that keep rollback safe, the config side doors behind CrowdStrike, Google Cloud and Cloudflare, model-update postmortems from OpenAI and Anthropic, and Anthropic's finding that unlearning's acceptance test can pass a change that only hides knowledge.",
+      "topics": [
+        "deep dive: shipping a change without taking everything down — canaries, staged rollouts, rollback safety, config and model deploys"
+      ],
+      "entities": [
+        "Knight Capital",
+        "Google SRE",
+        "Amazon Web Services",
+        "CrowdStrike",
+        "Google Cloud",
+        "Cloudflare",
+        "OpenAI",
+        "Anthropic",
+        "Claude Ship"
+      ],
+      "threads": [],
+      "lore": [
+        {
+          "host": "Alan",
+          "type": "position",
+          "note": "Alan staked out, against Ada's speculation that cheap changes make evaluation the scarce thing, that most outages were changes that never went near an evaluation (fast content paths, global policy data, generated config), so a smarter gate doesn't help a change that goes around it; left unresolved, with Alan saying to ask him again after somebody's agent ships on a Friday."
+        }
+      ]
+    },
+    {
       "date": "2026-11-21",
       "title": "Anthropic's Alpöge claims a Riemann proof — and posts only Lean",
       "summary": "Anthropic mathematician Levent Alpöge says he and Claude proved the Riemann Hypothesis and released only a Lean formalization, while a human proof of the generalized version drew AI-found objections the same day. Then Thinking Machines' looped open-weights Inkling 2 Mini, and Architect Labs' agent-designed Frostbite CPU.",
@@ -2263,6 +2291,30 @@
         "last_taught": "2026-11-25"
       },
       {
+        "name": "canarying as a partial, time-limited deployment plus evaluation: compare the canary against a concurrent control rather than the fleet or a before/after, because a 20% failure in a 5% canary shows as ~1% in aggregate; few user-facing metrics, metric windows that fit inside the canary, one canary at a time; blue-green as a before/after flip",
+        "last_taught": "2026-11-25"
+      },
+      {
+        "name": "staged production rollout: one-box at most ~10% of a region's traffic with its own alarms, waves from a low-traffic region one zone at a time outward, bake time between waves, automatic rollback on alarm, and deployment windows that exclude nights, weekends and (often) Fridays",
+        "last_taught": "2026-11-25"
+      },
+      {
+        "name": "rollback safety and one-way doors: when new code writes data or speaks a protocol the old code can't read, split the change into a prepare release (read both, write old) and an activate release, bake between them, and rehearse the rollback with mixed versions",
+        "last_taught": "2026-11-25"
+      },
+      {
+        "name": "configuration and data as the side door around the deploy pipeline: CrowdStrike rapid response content, Google Service Control's unflagged code path triggered by globally replicated policy data, Cloudflare's regenerated feature file — treat internally generated config like user input, flag changes off by default, propagate global data incrementally, keep kill switches",
+        "last_taught": "2026-11-25"
+      },
+      {
+        "name": "shipping a model change: behaviour regressions throw no errors, so canary metrics must measure the right thing (OpenAI's sycophancy A/B approval signal), serving fleets on different hardware need continuous production quality evals (Anthropic's 2025 routing and compiler bugs), and floating aliases make the provider's rollout part of yours",
+        "last_taught": "2026-11-25"
+      },
+      {
+        "name": "unlearning as a deployment with a broken acceptance test: forget-set accuracy as canary and general benchmark as control can certify a trigger-like backdoor rather than removal, because genuine removal touches shared recall machinery and would dent the control",
+        "last_taught": "2026-11-25"
+      },
+      {
         "name": "what a Lean-compiled proof guarantees and what humans still check: the trusted kernel validates every step, leaving whether the formal statement matches the intended theorem and whether extra axioms were assumed",
         "last_taught": "2026-11-21"
       },
@@ -2713,30 +2765,6 @@
       {
         "name": "prompt-cache prefix matching in agent loops: caches reuse only the longest unchanged prefix, so per-step pruning of history breaks reuse, batch pruning (e.g. 20:1) preserves it, and caching without matching pruning can cost more than not caching",
         "last_taught": "2026-10-11"
-      },
-      {
-        "name": "a decision model as a language-model body with the vocabulary head replaced by an option-scoring head, and the three published designs: a pointer head scoring each option's hidden state against an answer position, a joint schema head scoring all options of all questions in one pass, and a head initialized from the language-model head's own answer-token rows so it starts as the zero-shot answer",
-        "last_taught": "2026-10-11"
-      },
-      {
-        "name": "the difference between a classifier head with labels fixed at fine-tune time and a shared scorer applied to options supplied at request time, traced from Pointer Networks (attention used to select an input rather than blend inputs) and BERT's multiple-choice head",
-        "last_taught": "2026-10-11"
-      },
-      {
-        "name": "the same text-head-versus-native-head fork in robotics: RT-2 encoding actions as discretized text tokens under a constrained vocabulary versus pi0's separate action expert generating continuous action chunks by flow matching — and why the analogy breaks, since an action chunk must stay coherent and a decision has no downstream to stay coherent with",
-        "last_taught": "2026-10-11"
-      },
-      {
-        "name": "recognition versus production: a decision model can pick the right answer from options far better than it can produce the answer as a chain of independent decisions, because a text model is a decision model run in a loop with its own output fed back in",
-        "last_taught": "2026-10-11"
-      },
-      {
-        "name": "distillation fidelity versus accuracy: calibration error measured against the teacher's labels certifies agreement with the teacher, not correctness",
-        "last_taught": "2026-10-11"
-      },
-      {
-        "name": "activation-probe monitoring cascades: a small detector reads activations the serving model already computes, escalating only above a calibrated threshold to an LLM judge, so coverage of every turn costs a fraction of judge-on-every-turn — bounded by the judge it was trained to agree with",
-        "last_taught": "2026-10-10"
       }
     ]
   }

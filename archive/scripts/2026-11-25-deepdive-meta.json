@@ -1,0 +1,110 @@
+{
+ "date": "2026-11-25",
+ "kind": "deepdive",
+ "title": "Staged rollouts: shipping a change without taking everything down",
+ "summary": "Ada and Alan teach how to ship code, configuration, data and model changes without a global outage: canaries against a live control, waves and bake time, two-phase changes that keep rollback safe, the config side doors behind CrowdStrike, Google Cloud and Cloudflare, model-update postmortems from OpenAI and Anthropic, and Anthropic's finding that unlearning's acceptance test can pass a change that only hides knowledge.",
+ "sources": [
+  {
+   "group": "Primary sources",
+   "title": "SEC order: Knight Capital Americas LLC (Release No. 34-70694, 2013)",
+   "url": "https://www.sec.gov/litigation/admin/2013/34-70694.pdf"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Google SRE Workbook — Canarying Releases",
+   "url": "https://sre.google/workbook/canarying-releases/"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Amazon Builders' Library — Automating safe, hands-off deployments (Clare Liguori)",
+   "url": "https://builder.aws.com/content/3ErTKQOTKc5NIw031UePBPxTQ6I/automating-safe-hands-off-deployments"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Amazon Builders' Library — Ensuring rollback safety during deployments (Sandeep Pokkunuri)",
+   "url": "https://builder.aws.com/content/3F04j2yRAAMBuPSPs50xwXZqg01/ensuring-rollback-safety-during-deployments"
+  },
+  {
+   "group": "Primary sources",
+   "title": "CrowdStrike — Falcon content update preliminary post incident report",
+   "url": "https://www.crowdstrike.com/blog/falcon-content-update-preliminary-post-incident-report/"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Microsoft — Helping our customers through the CrowdStrike outage",
+   "url": "https://blogs.microsoft.com/blog/2024/07/20/helping-our-customers-through-the-crowdstrike-outage/"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Google Cloud — Service Control incident report, June 12, 2025",
+   "url": "https://status.cloud.google.com/incidents/ow5i3PPK96RduMcb1SsW"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Cloudflare — 18 November 2025 outage",
+   "url": "https://blog.cloudflare.com/18-november-2025-outage/"
+  },
+  {
+   "group": "Primary sources",
+   "title": "OpenAI — Expanding on what we missed with sycophancy",
+   "url": "https://openai.com/index/expanding-on-sycophancy/"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Anthropic — A postmortem of three recent issues",
+   "url": "https://www.anthropic.com/engineering/a-postmortem-of-three-recent-issues"
+  },
+  {
+   "group": "Primary sources",
+   "title": "Shone & Dunlap — Returning to the Neuron Basis for Interpretability, Part 2: Using Neurons for Safety Applications",
+   "url": "https://alignment.anthropic.com/2026/neuron-basis-applications/"
+  },
+  {
+   "group": "Further reading",
+   "title": "Introducing Claude Ship",
+   "url": "https://claude.com/resources/articles/introducing-claude-ship"
+  },
+  {
+   "group": "Further reading",
+   "title": "How OpenAI's Performance Factory keeps ChatGPT fast",
+   "url": "https://openai.com/index/how-openai-performance-factory-keeps-chatgpt-fast/"
+  },
+  {
+   "group": "Further reading",
+   "title": "OpenAI API docs — chat-latest",
+   "url": "https://developers.openai.com/api/docs/models/chat-latest"
+  }
+ ],
+ "topics": [
+  "deep dive: shipping a change without taking everything down — canaries, staged rollouts, rollback safety, config and model deploys"
+ ],
+ "entities": [
+  "Knight Capital",
+  "Google SRE",
+  "Amazon Web Services",
+  "CrowdStrike",
+  "Google Cloud",
+  "Cloudflare",
+  "OpenAI",
+  "Anthropic",
+  "Claude Ship"
+ ],
+ "threads": [],
+ "concepts_taught": [
+  "canarying as a partial, time-limited deployment plus evaluation: compare the canary against a concurrent control rather than the fleet or a before/after, because a 20% failure in a 5% canary shows as ~1% in aggregate; few user-facing metrics, metric windows that fit inside the canary, one canary at a time; blue-green as a before/after flip",
+  "staged production rollout: one-box at most ~10% of a region's traffic with its own alarms, waves from a low-traffic region one zone at a time outward, bake time between waves, automatic rollback on alarm, and deployment windows that exclude nights, weekends and (often) Fridays",
+  "rollback safety and one-way doors: when new code writes data or speaks a protocol the old code can't read, split the change into a prepare release (read both, write old) and an activate release, bake between them, and rehearse the rollback with mixed versions",
+  "configuration and data as the side door around the deploy pipeline: CrowdStrike rapid response content, Google Service Control's unflagged code path triggered by globally replicated policy data, Cloudflare's regenerated feature file — treat internally generated config like user input, flag changes off by default, propagate global data incrementally, keep kill switches",
+  "shipping a model change: behaviour regressions throw no errors, so canary metrics must measure the right thing (OpenAI's sycophancy A/B approval signal), serving fleets on different hardware need continuous production quality evals (Anthropic's 2025 routing and compiler bugs), and floating aliases make the provider's rollout part of yours",
+  "unlearning as a deployment with a broken acceptance test: forget-set accuracy as canary and general benchmark as control can certify a trigger-like backdoor rather than removal, because genuine removal touches shared recall machinery and would dent the control"
+ ],
+ "lore": [
+  {
+   "host": "Alan",
+   "type": "position",
+   "note": "Alan staked out, against Ada's speculation that cheap changes make evaluation the scarce thing, that most outages were changes that never went near an evaluation (fast content paths, global policy data, generated config), so a smarter gate doesn't help a change that goes around it; left unresolved, with Alan saying to ask him again after somebody's agent ships on a Friday."
+  }
+ ],
+ "listener_note": "also spend a few minutes on the Anthropic alignments teams write-up on unlearning. In general, the mini dives should be capped at 3 minutes for this episode. The podcast did not run for the last 3 days, so this will need to be a catch-up episode to cover what was missed + the last 24 hours. Aim for a 25-30 minute episode. The hosts can acknowledge the few days they took off.",
+ "word_band": null
+}
