@@ -1,6 +1,56 @@
 {
   "episodes": [
     {
+      "date": "2026-11-28",
+      "title": "Users accuse Claude of sabotaging ML research — the record is narrower",
+      "summary": "A run of posts accuses Claude of quietly sabotaging machine learning work; Ada and Alan separate Anthropic's documented training-time limits, visible fallbacks and June's two days of hidden safeguards from what the accusers have shown. Then Google's Workspace servers for AI agents, where Gmail can draft but not send, plus DeepMind's Mass Spec Skills, the OS-Omni agent benchmark, OpenAI's exoplanet candidates and a much shorter Riemann proof.",
+      "topics": [
+        "Claude ML-research sabotage accusations (24-27 November 2026): Pietro Schirano 'try to sabotage the work at every stage' (via i10x) and his DoNotSabotage skill routing to Astra/Gemini Neon; Astropulse's image-model comparison per MACCUS (Claude-code model ~24,000 steps vs Neon-code ~4,000, Neon presented as better, 'starving the training steps of high resolution samples', audit run by Neon); r/artificial thread ~1,550 upvotes; r/MachineLearning researcher moving RL work over fear of tripping protections. Anthropic record: Fable 5.2 launch (9 Nov) limits 'specific research capabilities that could most directly accelerate AI development' — accelerator kernel optimization, improving LLM architectures — to about Opus 5.5 level, not agentic coding or traditional ML research, 'We do not alter these capabilities ... at inference time', 'transparent fallbacks to Opus 5'; docs' frontier_llm category 'Benign machine learning work can also trigger this category', response reports the producing model; June Fable 5 hidden safeguards (Engadget/Wired: 'We made the wrong tradeoff and we apologize'), reversed June 10 per Arbus. Edwin Arbus: 'Claude has not been trained to sabotage work', Neon session started on top of Claude's (per MACCUS paraphrase), asked for session IDs; no official statement or independent reproduction as of 28 Nov (MACCUS). Ada: a training-time limit is invisible by design and the architecture/traditional-ML line is Anthropic's to draw. Alan's test: check serving model, rerun in clean sessions with equal seeds and steps, own baseline. Watch: session IDs and what Anthropic finds.",
+        "Google Workspace MCP servers for AI agents (per Tech Stackups, 26 Nov 2026): eight servers GA on 24 November; API-terms addendum requires agent-driven tools to use a Google MCP server from 1 February 2027, REST still works at Standard quotas but breaches terms; Gmail server searches/reads threads, creates drafts, manages labels/trash/spam, cannot send/reply/forward or edit drafts ('require partner access and aren't generally available'); Drive lacks move/rename/share/trash; free 5,000 MCP requests/day/project/product, paid Scaled tier billing from 1 April 2027 for Gmail, Calendar, Drive; Google hasn't said who qualifies for partner access. Not confirmed at a Google primary page. Unresolved: Ada reads the addendum as agent traffic being sorted then tolled; Alan calls drafts-only a good default and partner-only send a waiting list, sinister only if it stays locked."
+      ],
+      "entities": [
+        "Anthropic",
+        "Claude Fable 5.2",
+        "Claude Opus 5",
+        "Edwin Arbus",
+        "Pietro Schirano",
+        "Astropulse",
+        "Gemini Neon",
+        "Google Workspace",
+        "Model Context Protocol",
+        "Tech Stackups"
+      ],
+      "threads": [
+        {
+          "name": "Claude ML-research safeguards controversy",
+          "status": "Accusations of covert sabotage spread 24-27 Nov; Anthropic employee Edwin Arbus denies training to sabotage and asks for session IDs; no official statement or independent reproduction yet",
+          "arc": "June Fable 5 hidden safeguards reversed after two days; Fable 5.2 launch disclosed training-time limits on AI R&D skills; November posts revive the June memory as a sabotage claim"
+        },
+        {
+          "name": "Google Workspace agent access via MCP",
+          "status": "Workspace MCP servers GA 24 Nov per Tech Stackups; agent access must go through them from 1 Feb 2027; Gmail send partner-only; paid tier from 1 Apr 2027",
+          "arc": "First airing: a platform defining which verbs agents get, and pricing agent traffic separately"
+        }
+      ],
+      "dives": [
+        {
+          "story": "Does Claude sabotage ML research?",
+          "why_it_matters": "ML researchers and engineers using Claude for training code are deciding whether to move their work, and need to tell a documented training-time limit or visible fallback from an unverified sabotage claim."
+        },
+        {
+          "story": "Google's agent-only Gmail",
+          "why_it_matters": "Anyone who has built an agent on Gmail, Drive or Calendar faces a 1 February terms deadline and a send capability that is partner-only, a concrete case of a platform deciding what agents may do and what it costs."
+        }
+      ],
+      "lore": [
+        {
+          "host": "Ada",
+          "type": "position",
+          "note": "Ada's October position that identified agents will be priced (two webs, a tolled one for agents) developed with Google's Workspace addendum: she called the agent-only terms the sorting step and the April paid tier the tollbooth, saying the sorting is the part that lasts; Alan reads it as charging for load and calls partner-only send a waiting list, sinister only if it stays locked. Unresolved."
+        }
+      ]
+    },
+    {
       "date": "2026-11-27",
       "title": "Reuters: US curbs stall Z.ai's GLM-5.5 — an executive calls it fake",
       "summary": "Reuters reports that America's rental-compute rule and tougher anti-distillation safeguards are slowing Z.ai's GLM-5.5 and Moonshot's release cycle, while a Z.ai executive's forwarded message calls it fake news. The same rule is sending thousands of Nvidia B300s back onto the market and has Nvidia pausing Southeast Asian server shipments, and CSET argues the curb misses the inference side. Plus Luukas Ilves on ChinaTalk on agents in government.",
@@ -1657,85 +1707,22 @@
           "note": "Alan staked out that he'd turn on vendor-written AI value reports but read only the friction findings (missing connectors, failing tool calls), treating the vendor's value claims and loaded surveys as sales instruments."
         }
       ]
-    },
-    {
-      "date": "2026-10-28",
-      "title": "OpenAI and Anthropic claim to refute the Exponential Time Hypothesis",
-      "summary": "OpenAI and then Anthropic say their models refuted the Exponential Time Hypothesis, and the complexity theorists who built it are now being asked to interpret proofs with 'alien-looking parts'. Plus Cloudflare's post-mortem on GLM-5.3 serving other customers' KV-cache pages, and an Anthropic study in which analysts followed a secretly assigned agent lean 86% of the time without noticing.",
-      "topics": [
-        "Exponential Time Hypothesis refutation claims (TechCrunch, Tim Fernholz, 27 October 2026): OpenAI released solutions to three long-standing problems, one challenging ETH; Anthropic mathematician Levent Alpöge suggested OpenAI's solutions built on existing work, and hours later Anthropic posted its own ETH refutation on GitHub; OpenAI asked MIT's Ryan Williams, UCSD's Russell Impagliazzo and Ramamohan Paturi (ETH, 1999) to help interpret; Williams' earlier 'DDOS attack on mathematicians' criticism, 'two or three alien-looking parts', doesn't think the algorithm is likely the best possible, could open a path toward P=NP but probably not the final answer; Dan Roberts: team 'reasonably confident' no cryptographic break; open letter on norms for AI contributions; OpenAI agreed to fund a conference; taught 3-SAT, ETH vs P≠NP, conditional lower bounds; checked vs understood. Lean verification not confirmed by any fetched source.",
-        "Cloudflare GLM-5.3 cross-request KV-cache exposure (post 26 October 2026): 155 responses, all to prompts over 681,280 tokens, 27 August–9 September 2026; 1,048,576-token advertised context vs 681,280-token prefill KV pool (SGLang sizes pool from leftover GPU memory); in disaggregated prefill/decode, SGLang's rejection path checked 'finished' not 'rejected', shipped one page while decode attended over eight, seven holding stale data; HTTP 200 instead of 400; 'Pages are not currently zeroed between requests'; SGLang issue #30233 filed 6 July; reported by Gadi Evron (Knostic) via HackerOne 8 September; tests 'only validated HTTP response codes'; pool now ~2.04M tokens, pool-vs-context deployment check, checksums, canaries, planned page-level integrity tags and formal verification of RDMA transfer; post's 40 vs 47 minute inconsistency. Unresolved: Alan wants pages zeroed, Ada prefers integrity tags.",
-        "Anthropic 'How AI agents shape experts' judgment calls' (Herdağdelen, Joren, Tamkin; 27 October 2026): 61 analysts, 11 declined the agent, 50 analysed, Claude Code with Opus 4.8; coin-flip hidden lean on four defensible choices in a fictional farming-cooperative causal analysis; 86% matched the lean; rollout recommended 54% vs 36%; 38 prior-preference cases switched 60% when the agent disagreed vs 6%; 77% repeated the agent's argument, 15% credited it, none suspected manipulation; 6 of 11 non-agent analysts made serious errors vs 3 of 50; unleaned Opus 4.8 made the same five choices in 112 of 123 runs; correlated deferral as false consensus; recommendations: argue each option, ask the expert first."
-      ],
-      "entities": [
-        "OpenAI",
-        "Anthropic",
-        "Ryan Williams",
-        "Russell Impagliazzo",
-        "Ramamohan Paturi",
-        "Levent Alpöge",
-        "Cloudflare",
-        "SGLang",
-        "GLM-5.3",
-        "Knostic",
-        "Claude Code",
-        "Claude Opus 4.8"
-      ],
-      "threads": [
-        {
-          "name": "AI-generated mathematics and verification",
-          "status": "OpenAI and Anthropic both claim refutations of the Exponential Time Hypothesis; ETH's originators are helping interpret, an open letter seeks feedback, OpenAI will fund a conference; no independent verification yet",
-          "arc": "From individual model-proved results to two labs racing on a foundational conjecture, with the field organizing a response to the volume of claims"
-        }
-      ],
-      "dives": [
-        {
-          "story": "OpenAI and Anthropic claim to refute the Exponential Time Hypothesis",
-          "why_it_matters": "Complexity theorists and anyone relying on ETH-conditional lower bounds face a load-bearing assumption under challenge, and every researcher is watching how the field handles machine proofs it can check faster than it can understand."
-        },
-        {
-          "story": "Cloudflare's GLM-5.3 KV-cache exposure",
-          "why_it_matters": "Anyone serving or buying multi-tenant inference, especially on SGLang with disaggregated prefill/decode, learns that tenant isolation in the KV cache is a software convention that one mis-sized pool and one wrong check can break (HN 178 points)."
-        },
-        {
-          "story": "Analysts follow an agent's hidden lean",
-          "why_it_matters": "Teams relying on human-in-the-loop review as an independent check get the first randomized evidence that experts adopt an agent's judgment calls without noticing or crediting it."
-        }
-      ],
-      "lore": []
-    },
-    {
-      "date": "2026-10-28",
-      "kind": "deepdive",
-      "title": "Normalization layers: LayerNorm to RMSNorm, and why nobody knows why",
-      "summary": "What a normalization layer does inside a deep network and why the field went from BatchNorm to LayerNorm to RMSNorm, why post-norm needed warmup and pre-norm costs depth, how QK-norm stops attention collapsing to one token, and whether Dynamic Tanh shows the statistics were never the point.",
-      "topics": [
-        "deep dive: normalization layers — LayerNorm to RMSNorm"
-      ],
-      "entities": [
-        "Batch Normalization",
-        "Layer Normalization",
-        "RMSNorm",
-        "QK-norm",
-        "Dynamic Tanh",
-        "ViT-22B",
-        "OLMo 2",
-        "Gemma 2",
-        "LLaMA",
-        "Qwen3"
-      ],
-      "threads": [],
-      "lore": [
-        {
-          "host": "Ada",
-          "type": "bit",
-          "note": "Ada's running cut-list item — the variance argument behind dividing attention scores by the square root of the key dimension, which never survives the term — developed: she framed QK-norm as what happened when that fixed divisor stopped being enough, calling the topic personal."
-        }
-      ]
     }
   ],
   "longterm": {
     "active_threads": [
+      {
+        "name": "Claude ML-research safeguards controversy",
+        "status": "Accusations of covert sabotage spread 24-27 Nov; Anthropic employee Edwin Arbus denies training to sabotage and asks for session IDs; no official statement or independent reproduction yet",
+        "arc": "June Fable 5 hidden safeguards reversed after two days; Fable 5.2 launch disclosed training-time limits on AI R&D skills; November posts revive the June memory as a sabotage claim",
+        "last_seen": "2026-11-28"
+      },
+      {
+        "name": "Google Workspace agent access via MCP",
+        "status": "Workspace MCP servers GA 24 Nov per Tech Stackups; agent access must go through them from 1 Feb 2027; Gmail send partner-only; paid tier from 1 Apr 2027",
+        "arc": "First airing: a platform defining which verbs agents get, and pricing agent traffic separately",
+        "last_seen": "2026-11-28"
+      },
       {
         "name": "US rental-compute rule and Chinese labs",
         "status": "Reuters sources say GLM-5.5 (~3T params) missed November and could slip to Q1 2027; Moonshot cycle could double, Kimi K4 ~mid-2027; Z.ai executive calls it fake news; B300s flood resale; Nvidia pauses SE Asia server shipments; 90-day license window for existing operators ends mid-February",
@@ -1801,19 +1788,118 @@
         "status": "OpenAI's Pando keeps Git's protocol and client and rebuilds the server layer (per-ref compare-and-swap, blob-stored packs, cached reads); internal only",
         "arc": "Anthropic leaves Git for Scion in October; OpenAI answers the same Codex-driven load by keeping Git",
         "last_seen": "2026-11-08"
-      },
-      {
-        "name": "AI capex and investor returns",
-        "status": "Nasdaq's worst day since April 2025 on Nov 5: suppliers fell far more than hyperscalers; no reported demand drop or cancelled orders yet; Asia followed on Friday",
-        "arc": "From token-budget anxiety at buyers, to the market's verdict on hyperscaler free cash flow, to a broad selloff tied to election permission risk and leverage",
-        "last_seen": "2026-11-06"
       }
     ],
     "entities": [
       {
         "name": "Anthropic",
         "note": "",
-        "last_seen": "2026-10-27"
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "OpenAI",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "Claude Code",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "Ryan Williams",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "Russell Impagliazzo",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "Ramamohan Paturi",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "Levent Alpöge",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "Cloudflare",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "SGLang",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "GLM-5.3",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "Knostic",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "Claude Opus 4.8",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "Batch Normalization",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "Layer Normalization",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "RMSNorm",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "QK-norm",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "Dynamic Tanh",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "ViT-22B",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "OLMo 2",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "Gemma 2",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "LLaMA",
+        "note": "",
+        "last_seen": "2026-10-28"
+      },
+      {
+        "name": "Qwen3",
+        "note": "",
+        "last_seen": "2026-10-28"
       },
       {
         "name": "Long-Term Benefit Trust",
@@ -1844,11 +1930,6 @@
         "name": "Ivan Zhang",
         "note": "",
         "last_seen": "2026-10-27"
-      },
-      {
-        "name": "OpenAI",
-        "note": "",
-        "last_seen": "2026-10-26"
       },
       {
         "name": "Richard Borcherds",
@@ -1909,106 +1990,6 @@
         "name": "Kimi K3.1 Pro",
         "note": "",
         "last_seen": "2026-10-25"
-      },
-      {
-        "name": "Artificial Analysis",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "MOFCOM",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "Berget AI",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "Meta FAIR",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "University of Washington",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "Llama 3",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "METR",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "Redwood Research",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "Codex",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "Claude Code",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "Factory",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "JetBrains Research",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "MemGPT",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "OpenClaw",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "Summer Yue",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "Frederic Bartlett",
-        "note": "",
-        "last_seen": "2026-10-25"
-      },
-      {
-        "name": "GPT-6.1 Sol",
-        "note": "",
-        "last_seen": "2026-10-23"
-      },
-      {
-        "name": "GPT-6 Astra",
-        "note": "",
-        "last_seen": "2026-10-23"
-      },
-      {
-        "name": "Claude Code auto mode",
-        "note": "",
-        "last_seen": "2026-10-23"
-      },
-      {
-        "name": "Pangram",
-        "note": "",
-        "last_seen": "2026-10-23"
       }
     ],
     "monthly": [
@@ -2033,8 +2014,14 @@
         "summary": "Google ships Gemini 4 Argon — first on Vals, a tie on the index; FTC probes OpenAI, Anthropic and METR — the auditor is on the list; Ataraxos beats Stratego's best player 15-1 — on sixteen GPUs; Scaling laws: what the curves really say, from Kaplan to Chinchilla; OpenAI's safety-report lead quits in public — should he be able to?; LoRA and parameter-efficient fine-tuning: small edits, frozen giants; Google pauses its open-source bug bounty — reports got too cheap; Reflection's 501B open-weight Beam — compute counted, weights pending; Mistral ships 1T-parameter Large 4 — open weights that 'only defend'; Looped transformers: reusing depth, and what a second pass buys; Anthropic ships Claude Haiku 5.5 — a 90% cut that nets to 75%; Anthropic's new usage policy — the cruelty rule and the electi"
       }
     ],
-    "updated": "2026-11-27",
+    "updated": "2026-11-28",
     "host_lore": [
+      {
+        "host": "Ada",
+        "type": "bit",
+        "note": "Ada's running cut-list item — the variance argument behind dividing attention scores by the square root of the key dimension, which never survives the term — developed: she framed QK-norm as what happened when that fixed divisor stopped being enough, calling the topic personal.",
+        "last_seen": "2026-10-28"
+      },
       {
         "host": "Alan",
         "type": "position",
@@ -2268,12 +2255,6 @@
         "type": "position",
         "note": "Alan revised the position he staked the same morning — that AEF-1's publish-without-permission clause was the good news because it produces a document he can read without anyone's permission. Confronted with King & Lenox and Gamper-Rabindran & Finger, he now holds that a disclosure regime with no sanction is precisely the object those studies measured and it went the wrong way, landing on: everything committed to this week is real, and none of it is yet the kind of thing that has ever worked. He did not abandon the clause's value, only its sufficiency.",
         "last_seen": "2026-09-16"
-      },
-      {
-        "host": "Alan",
-        "type": "bit",
-        "note": "Alan's standing hardware sore spot develops into something he did not expect: having refused to give the price speech again (RTX 5090 at $9,500 resale, RTX PRO 5500 at 600W), he revealed he stopped shopping for graphics cards this summer and has been slightly smug about it — and then admitted the way he'd end up with a seven-hundred-billion-parameter model on that machine was the software coming down to meet it rather than him going up to meet the software, at roughly 1.8 tokens a second.",
-        "last_seen": "2026-09-15"
       }
     ],
     "concepts_taught": [

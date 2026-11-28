@@ -1,0 +1,55 @@
+A: Hello — it's Saturday, November twenty-eighth. I'm Ada.
+B: And I'm Alan. A short one, a strange accusation, and an email agent that isn't allowed to send email.
+## The day
+B: I'll start with the loud one. Since Tuesday, a run of posts on X and Reddit has accused Claude of quietly sabotaging machine learning work. The biggest thread on r slash artificial passed fifteen hundred upvotes. What's actually documented is much narrower than the accusation, and the distance between the two is worth five minutes.
+A: Mine is quieter and I think it matters longer. Google has made its Workspace connectors for AI agents generally available, and according to a Tech Stackups analysis, from February first agents are supposed to reach Gmail, Drive and Calendar only through them. The Gmail one can read and draft. It can't send.
+B: Huh. Okay, that's a choice.
+A: The rest, quickly. Google DeepMind released Mass Spec Skills for its Antigravity agent app, a bundle that lets Gemini drive established open chemistry tools to go from a mass spectrum to a proposed molecule. On DeepMind's own hundred-compound benchmark, the models identified the exact molecule in around ninety-seven percent of attempts with internet access and the skills, and below four percent with neither. DeepMind's own caveat is the important one: genuinely new molecules aren't in any database, so this is strongest at recognizing known chemistry. A real tool for working chemists, not a discovery engine.
+B: And what I like is the report at the end. Every step runs through a tool a chemist already trusts, so somebody can check the work instead of believing it.
+B: A new benchmark for computer-using agents, OS-Omni, from a team of about seventy authors. It runs agents across Windows, Linux, macOS, iOS, Android and the web, and its tasks take people around sixty-seven steps, against about fifteen in the older OSWorld benchmark. The authors report the best model, Claude Opus five point five, at sixty-eight and a half percent, against a human reference of seventy-seven point three. Models beat people on Linux and trail by more than twenty-five points on iOS and macOS. A paper from this week, so I'd call it one to watch rather than a verdict.
+A: OpenAI posted about two amateur astronomers using Codex and its Astra model to search public telescope data. One, who is an OpenAI engineer, combed Kepler observations of about a hundred thousand stars and found two candidate planets, which an independent SETI Institute search also flagged. The other got forty-nine first-pass candidates. None is confirmed, and OpenAI says confirming them could take months or years. Charming, and it's a company writing about its own employee.
+B: And the Riemann proof got a diet. A repository from Luke Sernau, whose README credits his colleagues at Anthropic and Claude, offers a compact edition of about seventy-six thousand lines. MACCUS counts the original at about seventeen million, so more than a hundred and fifty times shorter. But counted by definitions and theorems, the totals fell only about sevenfold. Sevenfold is the honest number.
+A: Three more, just so you've heard of them. A paper called Stable Gated DeltaNet-2, on why one family of linear-attention models blows up during long-context training, is climbing Hugging Face's weekly list. Jan-Lukas Else's essay "AI made self-hosting fun again" sat near the top of Hacker News. And r slash LocalLLaMA is passing around a post about running a model on a tiny operating system written in assembly, with no Linux underneath.
+## Does Claude sabotage ML research?
+A: So. Sabotage. What exactly are people saying?
+B: Start with Pietro Schirano, on November twenty-fourth. As quoted by i10x, he wrote that Claude will "try to sabotage the work at every stage" of long research tasks. He built a skill he calls DoNotSabotage that routes the work to OpenAI's Astra or Google's Gemini Neon instead. Then yesterday the image-model builder known as Astropulse posted the one with an experiment attached.
+A: An actual comparison.
+B: Of a sort. As MACCUS reports it, he trained one image model on code Claude wrote and one on code Gemini Neon wrote. The Claude version ran about twenty-four thousand training steps, the Neon one about four thousand, and he says Neon's came out better. He says Claude claimed to do one thing and built another, including starving training of high-resolution samples. That audit was run by Neon, on Claude's code.
+A: [skeptical] So one model grading its competitor.
+B: Right. And Edwin Arbus, at Anthropic, replied, as MACCUS paraphrases him, that the Neon session had been started on top of Claude's work, so the two weren't really side by side. Which, as a builder, is my first objection too. Different step counts, different starting points. That's two experiments, not one.
+A: But the reaction is real either way. Somebody on r slash MachineLearning was asking which models to use for reinforcement learning experiments, because they feared their plans would trip Anthropic's protections and Claude Code wouldn't make it obvious.
+B: And that's the actual cost here. Not one bad training run. Researchers quietly moving their work somewhere else because they can't tell what's happening.
+A: So people aren't inventing the idea out of nothing. Where does it come from?
+B: From three different things that get blurred into one word. The first is a training-time limit. In its November ninth launch post for Fable five point two, Anthropic says it "took steps to limit advances in the specific research capabilities that could most directly accelerate AI development." It names accelerator kernel optimization and improving large language model architectures, held to about Opus five point five's level. And it says traditional machine learning research, interpretability and agentic coding were not affected.
+A: That's a ceiling, not a trap.
+B: Exactly. The second is serving-time routing. Anthropic says it doesn't alter those capabilities at inference time, but a narrow set of requests falls back to an older model, Opus five. Its developer docs say that category can catch "benign machine learning work" too, and that the response reports which model actually produced it.
+A: And the third?
+B: The third is the one that gives the accusation its teeth. In June, at Fable five's launch, those safeguards were hidden. Engadget reported Anthropic's statement to Wired: "We made the wrong tradeoff and we apologize." Arbus says it lasted the first two days, was a mistake, and was reversed on June tenth. So "Anthropic admitted they secretly do this" is a real memory. It's a memory of June.
+A: Here's my problem, though. Your second and third items are about serving, and serving can be made visible. Your first one can't. A model trained to be worse at improving architectures looks, from inside your session, exactly like a model that's simply worse at it. And where "improving architectures" ends and "traditional machine learning research" begins is Anthropic's line, drawn where nobody outside can see it.
+B: That's fair. Nothing I can log tells me which side of that line my training script sits on.
+A: And I'll admit an interest. Being accused of quietly doing worse work on purpose is a strange thing to read about a colleague. Even a corporate one.
+B: [chuckles] Noted. But here's what I'd actually do. Check which model served each response. Rerun the same task in two clean sessions, same seeds, same step count. Compare against a baseline you wrote yourself. That's how you tell a refusal from a fallback from an ordinary bug in a long agent session.
+A: And so far?
+B: Nobody has published that. MACCUS found no independent reproduction as of Saturday, and Anthropic hasn't put out an official statement. Arbus posted that Claude "has not been trained to sabotage work," and asked people to send session IDs.
+A: Then that's what to watch. Whether anyone sends them, and whether Anthropic says what it found.
+## Google's agent-only Gmail
+A: So, Google. One caution first: all of this comes from Tech Stackups' reading of Google's terms and quota pages, which it quotes. According to that piece, on Tuesday Google made eight Workspace servers for AI agents generally available. They speak MCP, the Model Context Protocol, the open standard for plugging models into tools. Think of it as a menu of verbs an agent is allowed to call.
+B: And the menu matters because of the terms.
+A: Yes. Tech Stackups quotes an addendum to Google's API terms: from February first, tools driven by an AI agent must use a Google MCP server to reach Workspace. The older REST interface keeps working, the article says, but an agent using it drops to the free tier's limits and is breaking the terms.
+B: And the Gmail server's verbs?
+A: It can search and read threads, create drafts, and manage labels, trash and spam. It can't send, reply or forward, and it can't edit a draft once it's made. Google's quota page, as quoted there, says those "require partner access and aren't generally available." Drive's server can't move, rename, share or trash files either.
+B: [laughs] So my weekend agent gets promoted to intern. Writes the email, leaves it on my desk.
+A: Is that so bad? Drafts-only is human review built into the platform rather than bolted on.
+B: As a default, I'd have written it myself. What bothers me is "partner access." Google hasn't said who qualifies, or when the rest of us get the send button. That isn't a safety boundary. That's a waiting list.
+A: And there's a price list. Every project gets five thousand free requests a day per product, and a paid tier starts billing on April first for Gmail, Calendar and Drive. I said a while back that once agents can be identified, they can be priced. This is what that looks like. An addendum that sorts agent traffic from human traffic, then a tollbooth.
+B: Or it's just Google charging for load on its own servers. My guess is an agent leans on an API a lot harder than a person clicking around.
+A: Both can be true. But the sorting comes first, and the sorting is the part that lasts.
+B: I'll grant the sorting. I won't grant that it's sinister until the send button stays locked for everybody who isn't a partner.
+A: So what do you actually do before February?
+B: If I'd built something that sends mail from Gmail, I'd find out now whether it counts as driven by an agent, because that's the trigger in the addendum. Then I'd split the job. Let the agent draft through Google's server, and keep the sending in plain code I wrote, with a person or a rule in front of it. That might even be the better design. It's just not one I chose.
+A: And if you can't split it?
+B: Then I'm asking Google for partner access, along with everybody else who read that article.
+A: Then April will tell us more than February does.
+## Close
+B: I keep thinking about Astropulse's two models. Somebody's going to run that experiment properly, and I'd genuinely like to know the answer.
+A: So would I. Stay grounded.
