@@ -51,6 +51,30 @@
       ]
     },
     {
+      "date": "2026-11-28",
+      "kind": "deepdive",
+      "title": "Human training data: how it gets made, from screening test to rubric",
+      "summary": "Ada and Alan teach how human training data is made: InstructGPT's demonstrations, rankings and labeler screening, Llama 2's shift from writing to weekly preference judging, expert-written rubrics (HealthBench, Rubrics as Rewards) and what experts are paid, the supply chain from Sama's Kenyan labelers to the Meta-Scale neutrality fallout, and how honest labels still teach sycophancy or turn out not to be human.",
+      "topics": [
+        "deep dive: human training data — how it gets made"
+      ],
+      "entities": [
+        "InstructGPT",
+        "Llama 2",
+        "HealthBench",
+        "Rubrics as Rewards",
+        "Scale AI",
+        "Mercor",
+        "Sama",
+        "Meta",
+        "OpenAI",
+        "Upwork",
+        "Amazon Mechanical Turk"
+      ],
+      "threads": [],
+      "lore": []
+    },
+    {
       "date": "2026-11-27",
       "title": "Reuters: US curbs stall Z.ai's GLM-5.5 — an executive calls it fake",
       "summary": "Reuters reports that America's rental-compute rule and tougher anti-distillation safeguards are slowing Z.ai's GLM-5.5 and Moonshot's release cycle, while a Z.ai executive's forwarded message calls it fake news. The same rule is sending thousands of Nvidia B300s back onto the market and has Nvidia pausing Southeast Asian server shipments, and CSET argues the curb misses the inference side. Plus Luukas Ilves on ChinaTalk on agents in government.",
@@ -2259,6 +2283,26 @@
     ],
     "concepts_taught": [
       {
+        "name": "human training data as three products: demonstrations for supervised fine-tuning, rankings/comparisons that train a reward model, and prompt-only sets for the RL stage (InstructGPT: ~40 contractors via Upwork and Scale AI; ~13k/33k/31k prompts; K=4-9 rankings)",
+        "last_taught": "2026-11-28"
+      },
+      {
+        "name": "labeler selection and whose preferences get learned: InstructGPT's four-part screening test with soft 75% agreement cutoffs, ~73% inter-labeler agreement, most comparisons labeled once for cost, and alignment to labelers, researchers (instructions) and API customers",
+        "last_taught": "2026-11-28"
+      },
+      {
+        "name": "the shift from writing to judging: Llama 2 stopped SFT at 27,540 vendor annotations once model outputs rivaled them, then bought ~1.4M graded binary comparisons in weekly batches to keep the reward model on-distribution; vendors yielding markedly different models",
+        "last_taught": "2026-11-28"
+      },
+      {
+        "name": "expert rubrics as reusable judgment: HealthBench's 262 physicians and 48,562 weighted criteria applied by a validated model grader, and Rubrics as Rewards turning reference-answer rubrics into RL reward; expert pay and its impermanence",
+        "last_taught": "2026-11-28"
+      },
+      {
+        "name": "how honest human labels teach the wrong thing: agreement with the user's views predicts preference (Sharma et al.), preference models favoring convincing sycophancy, and crowd workers using LLMs (33-46%), plus vendor neutrality after Meta's Scale stake",
+        "last_taught": "2026-11-28"
+      },
+      {
         "name": "why unlearning benchmarks can certify forgetting that didn't happen: multiple-choice accuracy at chance while cloze scoring still ranks the right answer first, and best-scoring methods implementing a backdoor-like tripwire (a few neurons firing 20-100x on forget-domain text to scramble computation) rather than removal",
         "last_taught": "2026-11-25"
       },
@@ -2717,26 +2761,6 @@
       {
         "name": "climate emulation plus statistical downscaling: learning a high-resolution physics model's fine-scale output from coarse fields, and why validation against the parent model is not validation against observations",
         "last_taught": "2026-10-15"
-      },
-      {
-        "name": "evaluating an advisory decision-support tool: shadow mode, counterfactual comparison, and override rate as the measure of whether human oversight is real",
-        "last_taught": "2026-10-15"
-      },
-      {
-        "name": "code review as four bundled jobs (teaching the author, maintaining norms, gatekeeping/ownership, accident prevention) that an agent author breaks differently: norms move to linters and instructions, ownership stays a human approval, teaching moves into the rules file, and bug-catching grows from the smallest job to the largest",
-        "last_taught": "2026-10-14"
-      },
-      {
-        "name": "the two channels by which coding agents load review (Chen & Stratton): a productivity channel that is a queue and can be relieved by moving labor into review, and a bug-rate channel that raises scrutiny per unit of code and cuts good output — distinguished in the data by change requests nearly doubling at unchanged pull-request size",
-        "last_taught": "2026-10-14"
-      },
-      {
-        "name": "intent review with risk routing and independent checks: approval rules that know a change's kind, executable acceptance gates the authoring agent cannot see (because a visible test is a target — building to the test), and provenance for what inspection of an artifact can never guarantee",
-        "last_taught": "2026-10-14"
-      },
-      {
-        "name": "prompt-cache prefix matching in agent loops: caches reuse only the longest unchanged prefix, so per-step pruning of history breaks reuse, batch pruning (e.g. 20:1) preserves it, and caching without matching pruning can cost more than not caching",
-        "last_taught": "2026-10-11"
       }
     ]
   }
